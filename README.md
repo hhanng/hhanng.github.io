@@ -12,7 +12,7 @@ I also manage **social media & content creation for ULUX Nail Spa**, designing c
 | **Portfolio Home** | The main hub of my projects, designs, and study tools. | [View](https://hhanng.github.io/) |
 | **Egg Timer** | A minimalist countdown app with playful animations. | [Live Demo →](https://hhanng.github.io/EGG-TIMER/) |
 | **Study Timer (Matcha Edition)** | A calm Pomodoro-style timer for study sessions, inspired by matcha tones. | [Live Demo →](https://hhanng.github.io/STUDY-TIMER/) |
-| 💅 **ULUX Nail Spa Content** | Social media & marketing projects for a Dallas-based nail spa. | [Instagram →](https://www.instagram.com/uluxnailspa.oaklawn/?hl=en) |
+| **ULUX Nail Spa Content** | Social media & marketing projects for a Dallas-based nail spa. | [Instagram →](https://www.instagram.com/uluxnailspa.oaklawn/?hl=en) |
 
 ---
 
@@ -25,7 +25,7 @@ I also manage **social media & content creation for ULUX Nail Spa**, designing c
 
 ---
 
-## 💻 Tools I Use
+## Tools I Use
 
 > HTML • CSS • JavaScript • Python • Canva • Figma • WordPress • GitHub Pages
 
