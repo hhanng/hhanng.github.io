@@ -35,10 +35,9 @@ I also manage **social media & content creation for ULUX Nail Spa**, designing c
 
 - 🌿 [GitHub Portfolio](https://hhanng.github.io/)
 - 💌 Email: **ngvuhhan07@gmail.com**
-- 💅 [Instagram – ULUX Nail Spa](https://www.instagram.com/uluxnailspa.oaklawn/?hl=en)
 
 ---
 
 ### ☕ "If you're not seeing me coding, I’m probably designing content or thinking about matcha."
 
-© 2025 Han Han Nguyen 🍵
+© 2026 Han Han Nguyen 🍵
