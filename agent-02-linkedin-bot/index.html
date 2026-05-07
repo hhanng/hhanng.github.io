@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LinkedIn Internship Bot — Agent 02</title>
+  <style>
+    :root {
+      --blue: #0A66C2;
+      --blue-dark: #084fa0;
+      --blue-light: #e8f1fb;
+      --gray-bg: #f3f2ef;
+      --gray-border: #dce6f0;
+      --ink: #1d2226;
+      --muted: #56687a;
+      --white: #ffffff;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--gray-bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-link {
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    .topbar-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── Main layout ── */
+    .main {
+      max-width: 820px;
+      width: 100%;
+      margin: 32px auto;
+      padding: 0 16px;
+      flex: 1;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .hero p {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+
+    /* ── Tab nav ── */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid var(--gray-border);
+      margin-bottom: 28px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover { color: var(--blue); }
+
+    .tab-btn.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    /* ── Panels ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--gray-border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--ink);
+    }
+
+    /* ── Form ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--gray-border);
+      border-radius: 8px;
+      font-size: 0.92rem;
+      color: var(--ink);
+      background: var(--white);
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+
+    textarea { resize: vertical; min-height: 120px; }
+
+    /* ── Toggle ── */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #ccc;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle input:checked + .slider { background: var(--blue); }
+    .toggle input:checked + .slider::before { transform: translateX(20px); }
+
+    .toggle-label { font-size: 0.92rem; color: var(--ink); }
+
+    /* ── Generate button ── */
+    .generate-btn {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.15s;
+    }
+
+    .generate-btn:hover { background: var(--blue-dark); }
+    .generate-btn:disabled { background: #a0bcd8; cursor: not-allowed; }
+
+    /* ── Output ── */
+    .output-card {
+      background: var(--white);
+      border: 1px solid var(--gray-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .output-header h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--blue);
+    }
+
+    .copy-btn {
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1.5px solid var(--blue);
+      border-radius: 6px;
+      color: var(--blue);
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: var(--blue);
+      color: white;
+    }
+
+    .copy-btn.copied {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: white;
+    }
+
+    .output-body {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--ink);
+      white-space: pre-wrap;
+    }
+
+    /* Styled list items for queries/companies etc. */
+    .item-list { list-style: none; padding: 0; }
+    .item-list li {
+      padding: 8px 12px;
+      background: var(--blue-light);
+      border-left: 3px solid var(--blue);
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      font-family: "Courier New", monospace;
+      word-break: break-word;
+    }
+    .item-list li.company {
+      background: #f0fff4;
+      border-left-color: #16a34a;
+      font-family: inherit;
+    }
+    .item-list li.hashtag {
+      background: #fdf4ff;
+      border-left-color: #9333ea;
+      font-family: inherit;
+    }
+    .item-list li.tip {
+      background: #fff7ed;
+      border-left-color: #ea580c;
+      font-family: inherit;
+    }
+    .item-list li.skill {
+      background: var(--blue-light);
+      border-left-color: var(--blue);
+      font-family: inherit;
+    }
+    .item-list li.nice {
+      background: #f0fff4;
+      border-left-color: #16a34a;
+      font-family: inherit;
+    }
+    .item-list li.gap {
+      background: #fff1f2;
+      border-left-color: #e11d48;
+      font-family: inherit;
+    }
+
+    /* Fit score bar */
+    .fit-score-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .fit-score-num {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--blue);
+      min-width: 48px;
+    }
+    .fit-bar-outer {
+      flex: 1;
+      height: 10px;
+      background: var(--gray-border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .fit-bar-inner {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--blue);
+      transition: width 0.5s;
+    }
+    .fit-label { font-size: 0.9rem; color: var(--muted); margin-top: 4px; }
+
+    /* Sponsorship badge */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .badge.green { background: #dcfce7; color: #16a34a; }
+    .badge.red { background: #fee2e2; color: #b91c1c; }
+    .badge.yellow { background: #fef9c3; color: #92400e; }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* API key note */
+    .api-note {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: #92400e;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .api-note a { color: var(--blue); }
+
+    .api-key-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .api-key-row input {
+      flex: 1;
+      font-family: "Courier New", monospace;
+      font-size: 0.85rem;
+    }
+    .api-key-row button {
+      padding: 10px 16px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .api-key-row button:hover { background: var(--blue-dark); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-top: 1px solid var(--gray-border);
+      background: var(--white);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .tabs { overflow-x: auto; }
+      .tab-btn { padding: 10px 12px; font-size: 0.82rem; }
+      .hero h1 { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <a class="back-link" href="https://hhanng.github.io/">← All Agents</a>
+    <span class="topbar-title">LinkedIn Internship Bot</span>
+  </div>
+
+  <div class="main">
+
+    <div class="hero">
+      <h1>LinkedIn Internship Search Bot</h1>
+      <p>Search strategy · outreach writer · JD analyzer — powered by Gemini AI</p>
+    </div>
+
+    <!-- API Key input -->
+    <div class="api-note">
+      ⚠️ This tool uses the <strong>Gemini API</strong>. Enter your free key below before generating.
+      Get one at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> — it's free.
+    </div>
+    <div class="api-key-row">
+      <input type="text" id="apiKeyInput" placeholder="Paste your Gemini API key here…" autocomplete="off" />
+      <button onclick="saveKey()">Save Key</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-search', this)">🔍 Search Strategy</button>
+      <button class="tab-btn" onclick="switchTab('tab-outreach', this)">✉️ Outreach Writer</button>
+      <button class="tab-btn" onclick="switchTab('tab-jd', this)">📋 JD Analyzer</button>
+    </div>
+
+    <!-- ── TAB 1: Search Strategy ── -->
+    <div id="tab-search" class="panel active">
+      <div class="card">
+        <h2>Your Profile</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="major">Major / Field of Study</label>
+            <input type="text" id="major" placeholder="e.g. Computer Science" />
+          </div>
+          <div class="form-group">
+            <label for="role">Target Role</label>
+            <select id="role">
+              <option value="SWE Intern">SWE Intern</option>
+              <option value="Data Intern">Data Intern</option>
+              <option value="PM Intern">PM Intern</option>
+              <option value="Research Intern">Research Intern</option>
+              <option value="ML Intern">ML Intern</option>
+              <option value="General CS Intern">General CS Intern</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="skills">Skills (comma-separated)</label>
+            <input type="text" id="skills" placeholder="e.g. Python, React, SQL" />
+          </div>
+          <div class="form-group">
+            <label for="location">Preferred Location (optional)</label>
+            <input type="text" id="location" placeholder="e.g. San Francisco, CA" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Remote Friendly?</label>
+          <div class="toggle-wrap">
+            <label class="toggle">
+              <input type="checkbox" id="remoteToggle" />
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-label" id="remoteLabel">No</span>
+          </div>
+        </div>
+
+        <button class="generate-btn" id="searchBtn" onclick="generateSearch()">Generate Search Strategy</button>
+      </div>
+
+      <div id="search-output"></div>
+    </div>
+
+    <!-- ── TAB 2: Outreach Writer ── -->
+    <div id="tab-outreach" class="panel">
+      <div class="card">
+        <h2>Recruiter & Role Details</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="recruiterName">Recruiter's Name</label>
+            <input type="text" id="recruiterName" placeholder="e.g. Sarah Chen" />
+          </div>
+          <div class="form-group">
+            <label for="companyName">Company Name</label>
+            <input type="text" id="companyName" placeholder="e.g. Google" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="targetRole">Role You Want</label>
+            <input type="text" id="targetRole" placeholder="e.g. SWE Intern Summer 2026" />
+          </div>
+          <div class="form-group">
+            <label for="topSkill">Your Top Skill or Project</label>
+            <input type="text" id="topSkill" placeholder="e.g. Built a full-stack e-commerce app in React + Node" />
+          </div>
+        </div>
+
+        <div class="form-group full" style="margin-bottom:0">
+          <label for="admiration">One Thing You Admire About the Company</label>
+          <input type="text" id="admiration" placeholder="e.g. Their commitment to open-source AI tools" />
+        </div>
+
+        <button class="generate-btn" id="outreachBtn" onclick="generateOutreach()">Write Outreach Messages</button>
+      </div>
+
+      <div id="outreach-output"></div>
+    </div>
+
+    <!-- ── TAB 3: JD Analyzer ── -->
+    <div id="tab-jd" class="panel">
+      <div class="card">
+        <h2>Paste Job Description</h2>
+        <div class="form-group">
+          <label for="jdText">Job Description</label>
+          <textarea id="jdText" rows="10" placeholder="Paste the full internship job description here…"></textarea>
+        </div>
+        <button class="generate-btn" id="jdBtn" onclick="analyzeJD()">Analyze Job Description</button>
+      </div>
+
+      <div id="jd-output"></div>
+    </div>
+
+  </div><!-- /main -->
+
+  <footer>
+    Agent 02 of 97 &nbsp;|&nbsp; Built by Han Han &nbsp;|&nbsp;
+    <a href="https://hhanng.github.io/" style="color:var(--blue);">hhanng.github.io</a>
+  </footer>
+
+  <script>
+    // ── API key ──
+    let GEMINI_API_KEY = localStorage.getItem('gemini_key') || '';
+    if (GEMINI_API_KEY) document.getElementById('apiKeyInput').value = GEMINI_API_KEY;
+
+    function saveKey() {
+      const val = document.getElementById('apiKeyInput').value.trim();
+      if (!val) { alert('Please paste your Gemini API key.'); return; }
+      GEMINI_API_KEY = val;
+      localStorage.setItem('gemini_key', val);
+      alert('API key saved!');
+    }
+
+    // ── Remote toggle label ──
+    document.getElementById('remoteToggle').addEventListener('change', function() {
+      document.getElementById('remoteLabel').textContent = this.checked ? 'Yes' : 'No';
+    });
+
+    // ── Tab switcher ──
+    function switchTab(panelId, btn) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(panelId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // ── Gemini API call ──
+    async function callGemini(prompt) {
+      if (!GEMINI_API_KEY) throw new Error('No API key. Please enter your Gemini API key above.');
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `API error ${res.status}`);
+      }
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    }
+
+    // ── Copy button helper ──
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+
+    function copyBtnHtml(id) {
+      return `<button class="copy-btn" id="copy-${id}" onclick="doCopy('${id}')">Copy</button>`;
+    }
+
+    const copyTargets = {};
+    function doCopy(id) {
+      copyText(copyTargets[id] || '', document.getElementById('copy-' + id));
+    }
+
+    function setLoading(btn, loading) {
+      if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Generating…';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.label;
+      }
+    }
+
+    // ── TAB 1: Search Strategy ──
+    async function generateSearch() {
+      const btn = document.getElementById('searchBtn');
+      btn.dataset.label = btn.dataset.label || 'Generate Search Strategy';
+      setLoading(btn, true);
+
+      const major    = document.getElementById('major').value.trim() || 'Computer Science';
+      const skills   = document.getElementById('skills').value.trim() || 'Not specified';
+      const role     = document.getElementById('role').value;
+      const location = document.getElementById('location').value.trim() || 'Any';
+      const remote   = document.getElementById('remoteToggle').checked ? 'Yes' : 'No';
+
+      const prompt = `You are a career coach helping an international CS sophomore find tech internships on LinkedIn. Given this student profile:
+Major: ${major}, Skills: ${skills}, Target role: ${role}, Location: ${location}, Remote: ${remote}
+Generate:
+1. Five LinkedIn search query strings using Boolean operators that will surface relevant internship postings. Format each on its own line starting with QUERY:
+2. Three specific companies known for hiring international CS interns. Format each starting with COMPANY:
+3. Two LinkedIn hashtags to follow. Format each starting with HASHTAG:
+4. One personalized strategy tip (2-3 sentences). Start with TIP:`;
+
+      try {
+        const text = await callGemini(prompt);
+        renderSearchOutput(text);
+      } catch (e) {
+        document.getElementById('search-output').innerHTML = errorCard(e.message);
+      } finally {
+        setLoading(btn, false);
+      }
+    }
+
+    function renderSearchOutput(text) {
+      const queries   = [];
+      const companies = [];
+      const hashtags  = [];
+      let   tip       = '';
+
+      text.split('\n').forEach(line => {
+        const l = line.trim();
+        if (l.startsWith('QUERY:'))   queries.push(l.replace('QUERY:', '').trim());
+        else if (l.startsWith('COMPANY:'))  companies.push(l.replace('COMPANY:', '').trim());
+        else if (l.startsWith('HASHTAG:')) hashtags.push(l.replace('HASHTAG:', '').trim());
+        else if (l.startsWith('TIP:'))     tip = l.replace('TIP:', '').trim();
+      });
+
+      // fallback: if parsing didn't work, show raw
+      if (!queries.length && !companies.length) {
+        copyTargets['search-raw'] = text;
+        document.getElementById('search-output').innerHTML = `
+          <div class="output-card">
+            <div class="output-header"><h3>Generated Strategy</h3>${copyBtnHtml('search-raw')}</div>
+            <div class="output-body">${escHtml(text)}</div>
+          </div>`;
+        return;
+      }
+
+      const allQueries   = queries.join('\n');
+      const allCompanies = companies.join('\n');
+      const allHashtags  = hashtags.join('\n');
+
+      copyTargets['sq'] = allQueries;
+      copyTargets['sc'] = allCompanies;
+      copyTargets['sh'] = allHashtags;
+      copyTargets['st'] = tip;
+
+      document.getElementById('search-output').innerHTML = `
+        <div class="output-card">
+          <div class="output-header"><h3>🔎 LinkedIn Search Queries</h3>${copyBtnHtml('sq')}</div>
+          <ul class="item-list">${queries.map(q => `<li>${escHtml(q)}</li>`).join('')}</ul>
+        </div>
+        <div class="output-card">
+          <div class="output-header"><h3>🏢 Companies to Target</h3>${copyBtnHtml('sc')}</div>
+          <ul class="item-list">${companies.map(c => `<li class="company">${escHtml(c)}</li>`).join('')}</ul>
+        </div>
+        <div class="output-card">
+          <div class="output-header"><h3>#️⃣ Hashtags to Follow</h3>${copyBtnHtml('sh')}</div>
+          <ul class="item-list">${hashtags.map(h => `<li class="hashtag">${escHtml(h)}</li>`).join('')}</ul>
+        </div>
+        ${tip ? `<div class="output-card">
+          <div class="output-header"><h3>💡 Strategy Tip</h3>${copyBtnHtml('st')}</div>
+          <ul class="item-list"><li class="tip">${escHtml(tip)}</li></ul>
+        </div>` : ''}
+      `;
+    }
+
+    // ── TAB 2: Outreach Writer ──
+    async function generateOutreach() {
+      const btn = document.getElementById('outreachBtn');
+      btn.dataset.label = btn.dataset.label || 'Write Outreach Messages';
+      setLoading(btn, true);
+
+      const name       = document.getElementById('recruiterName').value.trim() || 'the recruiter';
+      const company    = document.getElementById('companyName').value.trim() || 'the company';
+      const role       = document.getElementById('targetRole').value.trim() || 'software engineering internship';
+      const skill      = document.getElementById('topSkill').value.trim() || 'strong problem-solving skills';
+      const admiration = document.getElementById('admiration').value.trim() || 'the company culture';
+
+      const prompt = `Write a LinkedIn connection request note (under 300 characters, no emojis) and a follow-up DM (under 150 words) for an international Vietnamese CS sophomore reaching out about internships.
+Recruiter: ${name} at ${company}
+Role: ${role}
+Admires about company: ${admiration}
+Student's strength: ${skill}
+Make it genuine, specific, and confident but not pushy.
+
+Format your response exactly like this:
+CONNECTION NOTE:
+[the short note under 300 characters]
+
+FOLLOW-UP DM:
+[the longer follow-up message under 150 words]`;
+
+      try {
+        const text = await callGemini(prompt);
+        renderOutreachOutput(text);
+      } catch (e) {
+        document.getElementById('outreach-output').innerHTML = errorCard(e.message);
+      } finally {
+        setLoading(btn, false);
+      }
+    }
+
+    function renderOutreachOutput(text) {
+      let connNote = '';
+      let followUp = '';
+
+      const connMatch = text.match(/CONNECTION NOTE:\s*([\s\S]*?)(?=FOLLOW-UP DM:|$)/i);
+      const followMatch = text.match(/FOLLOW-UP DM:\s*([\s\S]*?)$/i);
+
+      if (connMatch)   connNote = connMatch[1].trim();
+      if (followMatch) followUp = followMatch[1].trim();
+
+      if (!connNote && !followUp) {
+        copyTargets['o-raw'] = text;
+        document.getElementById('outreach-output').innerHTML = `
+          <div class="output-card">
+            <div class="output-header"><h3>Generated Messages</h3>${copyBtnHtml('o-raw')}</div>
+            <div class="output-body">${escHtml(text)}</div>
+          </div>`;
+        return;
+      }
+
+      copyTargets['o-conn'] = connNote;
+      copyTargets['o-follow'] = followUp;
+
+      const charCount = connNote.length;
+      const charColor = charCount > 300 ? '#b91c1c' : '#16a34a';
+
+      document.getElementById('outreach-output').innerHTML = `
+        <div class="output-card">
+          <div class="output-header">
+            <h3>Connection Request Note</h3>
+            ${copyBtnHtml('o-conn')}
+          </div>
+          <div class="output-body">${escHtml(connNote)}</div>
+          <div style="margin-top:10px;font-size:0.8rem;color:${charColor};font-weight:600;">
+            ${charCount} / 300 characters
+          </div>
+        </div>
+        ${followUp ? `<div class="output-card">
+          <div class="output-header"><h3>Follow-Up DM (after connecting)</h3>${copyBtnHtml('o-follow')}</div>
+          <div class="output-body">${escHtml(followUp)}</div>
+        </div>` : ''}
+      `;
+    }
+
+    // ── TAB 3: JD Analyzer ──
+    async function analyzeJD() {
+      const btn = document.getElementById('jdBtn');
+      btn.dataset.label = btn.dataset.label || 'Analyze Job Description';
+      setLoading(btn, true);
+
+      const jd = document.getElementById('jdText').value.trim();
+      if (!jd) { alert('Please paste a job description first.'); setLoading(btn, false); return; }
+
+      const prompt = `Analyze this internship job description and respond in this exact format:
+
+FIT_SCORE: [number 1-10]
+FIT_REASON: [one sentence explaining the score for a Vietnamese international CS sophomore]
+MUST_HAVE: [comma-separated list of must-have skills explicitly required in the JD]
+NICE_TO_HAVE: [comma-separated list of preferred/bonus skills from the JD]
+SKILLS_GAP: [comma-separated list of skills to learn before applying, based on gaps]
+TALKING_POINT: [one specific talking point for an interview based on the JD]
+SPONSORSHIP: [one of: LIKELY_YES / LIKELY_NO / UNCLEAR — based on whether keywords like sponsorship, OPT, CPT, work authorization, visa appear]
+SPONSORSHIP_NOTE: [one sentence explaining why]
+
+Job Description:
+${jd}`;
+
+      try {
+        const text = await callGemini(prompt);
+        renderJDOutput(text, jd);
+      } catch (e) {
+        document.getElementById('jd-output').innerHTML = errorCard(e.message);
+      } finally {
+        setLoading(btn, false);
+      }
+    }
+
+    function renderJDOutput(text, jd) {
+      const get = (key) => {
+        const m = text.match(new RegExp(`${key}:\\s*([^\\n]+)`));
+        return m ? m[1].trim() : '';
+      };
+
+      const score         = parseInt(get('FIT_SCORE')) || 0;
+      const fitReason     = get('FIT_REASON');
+      const mustHave      = get('MUST_HAVE').split(',').map(s => s.trim()).filter(Boolean);
+      const niceToHave    = get('NICE_TO_HAVE').split(',').map(s => s.trim()).filter(Boolean);
+      const skillsGap     = get('SKILLS_GAP').split(',').map(s => s.trim()).filter(Boolean);
+      const talkingPoint  = get('TALKING_POINT');
+      const sponsorship   = get('SPONSORSHIP');
+      const sponsorNote   = get('SPONSORSHIP_NOTE');
+
+      if (!score && !mustHave.length) {
+        copyTargets['jd-raw'] = text;
+        document.getElementById('jd-output').innerHTML = `
+          <div class="output-card">
+            <div class="output-header"><h3>Analysis</h3>${copyBtnHtml('jd-raw')}</div>
+            <div class="output-body">${escHtml(text)}</div>
+          </div>`;
+        return;
+      }
+
+      const barWidth = Math.min(score * 10, 100);
+      const barColor = score >= 7 ? '#22c55e' : score >= 4 ? var_('--blue') : '#ef4444';
+
+      let sponsorBadge = `<span class="badge yellow">Unclear</span>`;
+      if (sponsorship === 'LIKELY_YES')  sponsorBadge = `<span class="badge green">Likely Open to International ✓</span>`;
+      if (sponsorship === 'LIKELY_NO')   sponsorBadge = `<span class="badge red">Likely NOT sponsoring ✗</span>`;
+
+      const allOutput = [
+        `Fit Score: ${score}/10 — ${fitReason}`,
+        `Must-Have: ${mustHave.join(', ')}`,
+        `Nice-to-Have: ${niceToHave.join(', ')}`,
+        `Skills Gap: ${skillsGap.join(', ')}`,
+        `Talking Point: ${talkingPoint}`,
+        `Sponsorship: ${sponsorship} — ${sponsorNote}`
+      ].join('\n\n');
+      copyTargets['jd-all'] = allOutput;
+      copyTargets['jd-gap'] = skillsGap.join(', ');
+      copyTargets['jd-tp']  = talkingPoint;
+
+      document.getElementById('jd-output').innerHTML = `
+        <div class="output-card">
+          <div class="output-header"><h3>Fit Score</h3>${copyBtnHtml('jd-all')}</div>
+          <div class="fit-score-wrap">
+            <div class="fit-score-num">${score}<span style="font-size:1rem;color:var(--muted)">/10</span></div>
+            <div class="fit-bar-outer">
+              <div class="fit-bar-inner" style="width:${barWidth}%;background:${barColor}"></div>
+            </div>
+          </div>
+          <div class="fit-label">${escHtml(fitReason)}</div>
+        </div>
+
+        <div class="output-card">
+          <div class="output-header"><h3>Must-Have Skills</h3></div>
+          <ul class="item-list">${mustHave.map(s => `<li class="skill">${escHtml(s)}</li>`).join('') || '<li class="skill">None listed explicitly</li>'}</ul>
+        </div>
+
+        <div class="output-card">
+          <div class="output-header"><h3>Nice-to-Have Skills</h3></div>
+          <ul class="item-list">${niceToHave.map(s => `<li class="nice">${escHtml(s)}</li>`).join('') || '<li class="nice">None specified</li>'}</ul>
+        </div>
+
+        <div class="output-card">
+          <div class="output-header"><h3>Skills Gap — What to Learn</h3>${copyBtnHtml('jd-gap')}</div>
+          <ul class="item-list">${skillsGap.map(s => `<li class="gap">${escHtml(s)}</li>`).join('') || '<li class="gap">No major gaps identified!</li>'}</ul>
+        </div>
+
+        <div class="output-card">
+          <div class="output-header"><h3>Suggested Interview Talking Point</h3>${copyBtnHtml('jd-tp')}</div>
+          <div class="output-body">${escHtml(talkingPoint)}</div>
+        </div>
+
+        <div class="output-card">
+          <div class="output-header"><h3>International Student / Sponsorship</h3></div>
+          <div style="margin-bottom:8px">${sponsorBadge}</div>
+          <div class="output-body" style="font-size:0.88rem;color:var(--muted)">${escHtml(sponsorNote)}</div>
+        </div>
+      `;
+    }
+
+    // ── Helpers ──
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function var_(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function errorCard(msg) {
+      return `<div class="output-card" style="border-color:#fca5a5">
+        <div class="output-header"><h3 style="color:#b91c1c">Error</h3></div>
+        <div class="output-body" style="color:#b91c1c">${escHtml(msg)}</div>
+      </div>`;
+    }
+  </script>
+
+</body>
+</html>
