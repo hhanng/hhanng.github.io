@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prompt Engineering Coach — Agent 03</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --purple: #6C3483;
+      --purple-light: #8E44AD;
+      --purple-pale: #F5EEF8;
+      --purple-border: #D7BDE2;
+      --bg: #F8F9FA;
+      --white: #FFFFFF;
+      --ink: #1A1A2E;
+      --gray: #6C757D;
+      --gray-light: #F0F0F0;
+      --red: #E74C3C;
+      --amber: #F39C12;
+      --green: #27AE60;
+      --shadow: rgba(108, 52, 131, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Poppins", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      background: var(--purple);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topnav a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .topnav a:hover { color: #fff; }
+    .topnav .badge {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-light) 100%);
+      color: white;
+      text-align: center;
+      padding: 48px 24px 40px;
+    }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+    .hero p  { font-size: 1rem; opacity: 0.88; max-width: 560px; margin: 0 auto; }
+
+    /* ── TABS ── */
+    .tab-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      background: var(--white);
+      border-bottom: 2px solid var(--purple-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 16px 36px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .tab-btn:hover  { color: var(--purple); }
+    .tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── SHARED FORM STYLES ── */
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--purple);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    textarea, select {
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.95rem;
+      border: 1.5px solid var(--purple-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--ink);
+      background: var(--white);
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+    textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+    textarea { min-height: 130px; }
+
+    .form-row { margin-bottom: 20px; }
+
+    .btn-primary {
+      background: var(--purple);
+      color: white;
+      border: none;
+      padding: 13px 32px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover  { background: var(--purple-light); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btn-copy {
+      background: var(--purple-pale);
+      color: var(--purple);
+      border: 1.5px solid var(--purple-border);
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-copy:hover { background: var(--purple-border); }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-msg {
+      background: #FDEDEC;
+      border: 1px solid #F5B7B1;
+      color: #922B21;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      margin-top: 24px;
+    }
+
+    /* ── TAB 1: EVALUATOR ── */
+    .scores-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 28px 32px;
+      box-shadow: 0 4px 20px var(--shadow);
+      margin-top: 28px;
+      border: 1px solid var(--purple-border);
+    }
+    .scores-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--purple);
+      margin-bottom: 24px;
+    }
+
+    .score-row {
+      margin-bottom: 18px;
+    }
+    .score-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .score-label span { font-size: 0.88rem; font-weight: 600; }
+    .score-label .score-val { font-weight: 700; font-size: 0.95rem; }
+
+    .bar-track {
+      background: var(--gray-light);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      width: 0;
+      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .bar-fill.red   { background: var(--red); }
+    .bar-fill.amber { background: var(--amber); }
+    .bar-fill.green { background: var(--green); }
+
+    .score-tip {
+      font-size: 0.82rem;
+      color: var(--gray);
+      margin-top: 5px;
+    }
+
+    .overall-row {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--purple-border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .overall-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .overall-circle .big { font-size: 1.4rem; font-weight: 700; line-height: 1; }
+    .overall-circle .small { font-size: 0.65rem; opacity: 0.8; }
+
+    .top-fix {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .top-fix strong { color: var(--purple); display: block; margin-bottom: 4px; font-size: 0.82rem; letter-spacing: 0.3px; }
+
+    /* ── TAB 2: IMPROVER ── */
+    .checkboxes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--purple);
+      flex-shrink: 0;
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 28px;
+    }
+    .compare-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid var(--purple-border);
+      box-shadow: 0 3px 12px var(--shadow);
+    }
+    .compare-card.improved {
+      border-color: var(--purple);
+      background: var(--purple-pale);
+    }
+    .compare-card h4 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .compare-card.original h4 { color: var(--gray); }
+    .compare-card.improved  h4 { color: var(--purple); }
+    .compare-card.original .compare-text {
+      background: var(--gray-light);
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #444;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .compare-card.improved .compare-text {
+      background: white;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--ink);
+      white-space: pre-wrap;
+      word-break: break-word;
+      border: 1px solid var(--purple-border);
+    }
+    .copy-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .changes-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 20px 24px;
+      border: 1px solid var(--purple-border);
+      box-shadow: 0 3px 12px var(--shadow);
+      margin-top: 20px;
+    }
+    .changes-card h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--purple);
+      letter-spacing: 0.3px;
+      margin-bottom: 12px;
+    }
+    .changes-card ul {
+      padding-left: 20px;
+    }
+    .changes-card li {
+      font-size: 0.88rem;
+      color: var(--ink);
+      margin-bottom: 7px;
+      line-height: 1.5;
+    }
+    .changes-card li::marker { color: var(--purple); }
+
+    /* ── TAB 3: TECHNIQUES ── */
+    .techniques-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .tech-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 22px;
+      border: 1px solid var(--purple-border);
+      box-shadow: 0 3px 12px var(--shadow);
+    }
+
+    .tech-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--purple);
+      margin-bottom: 4px;
+    }
+    .tech-desc {
+      font-size: 0.83rem;
+      color: var(--gray);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .example-block {
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+    .example-block.weak {
+      background: #FDF2F2;
+      border-left: 3px solid var(--red);
+    }
+    .example-block.strong {
+      background: #EAFAF1;
+      border-left: 3px solid var(--green);
+    }
+    .example-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .example-block.weak   .example-label { color: var(--red); }
+    .example-block.strong .example-label { color: var(--green); }
+    .example-text { color: var(--ink); }
+
+    .btn-try {
+      background: none;
+      border: 1.5px solid var(--purple);
+      color: var(--purple);
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      margin-top: 4px;
+    }
+    .btn-try:hover { background: var(--purple); color: white; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.82rem;
+      color: var(--gray);
+      border-top: 1px solid var(--purple-border);
+      background: var(--white);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .tab-btn { padding: 14px 18px; font-size: 0.85rem; }
+      .compare-grid { grid-template-columns: 1fr; }
+      .techniques-grid { grid-template-columns: 1fr; }
+      .checkboxes { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 1.5rem; }
+      main { padding: 24px 16px; }
+      .scores-card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a href="https://hhanng.github.io/">← All Agents</a>
+  <span class="badge">Agent 03 of 97</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>🧠 Prompt Engineering Coach</h1>
+  <p>Evaluate your prompts, get them rewritten by AI, and learn the 8 core techniques that make the difference.</p>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('evaluator', this)">Evaluator</button>
+  <button class="tab-btn" onclick="switchTab('improver', this)">Improver</button>
+  <button class="tab-btn" onclick="switchTab('techniques', this)">Techniques</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<main>
+
+  <!-- ═══════════════════════════════════════════════
+       TAB 1 — EVALUATOR
+  ══════════════════════════════════════════════════ -->
+  <div id="tab-evaluator" class="tab-panel active">
+
+    <div class="form-row">
+      <label for="eval-prompt">Your prompt</label>
+      <textarea id="eval-prompt" placeholder="Paste any prompt you've written here — the AI will score it across 5 dimensions and tell you exactly how to improve it."></textarea>
+    </div>
+
+    <div class="form-row">
+      <label for="eval-usecase">What is this prompt for?</label>
+      <select id="eval-usecase">
+        <option value="Coding help">Coding help</option>
+        <option value="Creative writing">Creative writing</option>
+        <option value="Data analysis">Data analysis</option>
+        <option value="Chatbot / agent">Chatbot / agent</option>
+        <option value="Study help">Study help</option>
+        <option value="General question">General question</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <button class="btn-primary" onclick="evaluatePrompt()" id="eval-btn">
+      <span id="eval-btn-text">Evaluate Prompt</span>
+      <span id="eval-spinner" style="display:none;" class="spinner"></span>
+    </button>
+
+    <div id="eval-error" style="display:none;" class="error-msg"></div>
+
+    <!-- SCORES OUTPUT -->
+    <div id="scores-output" style="display:none;" class="scores-card">
+      <h3>📊 Evaluation Results</h3>
+
+      <div class="score-row" id="sr-clarity">
+        <div class="score-label">
+          <span>1. Clarity</span>
+          <span class="score-val" id="sv-clarity">—</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="bf-clarity"></div></div>
+        <div class="score-tip" id="tip-clarity"></div>
+      </div>
+
+      <div class="score-row" id="sr-specificity">
+        <div class="score-label">
+          <span>2. Specificity</span>
+          <span class="score-val" id="sv-specificity">—</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="bf-specificity"></div></div>
+        <div class="score-tip" id="tip-specificity"></div>
+      </div>
+
+      <div class="score-row" id="sr-context">
+        <div class="score-label">
+          <span>3. Context</span>
+          <span class="score-val" id="sv-context">—</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="bf-context"></div></div>
+        <div class="score-tip" id="tip-context"></div>
+      </div>
+
+      <div class="score-row" id="sr-outputFormat">
+        <div class="score-label">
+          <span>4. Output Format</span>
+          <span class="score-val" id="sv-outputFormat">—</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="bf-outputFormat"></div></div>
+        <div class="score-tip" id="tip-outputFormat"></div>
+      </div>
+
+      <div class="score-row" id="sr-examples">
+        <div class="score-label">
+          <span>5. Examples</span>
+          <span class="score-val" id="sv-examples">—</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="bf-examples"></div></div>
+        <div class="score-tip" id="tip-examples"></div>
+      </div>
+
+      <div class="overall-row">
+        <div class="overall-circle">
+          <span class="big" id="overall-score">—</span>
+          <span class="small">/ 10</span>
+        </div>
+        <div class="top-fix">
+          <strong>⚡ Most important fix</strong>
+          <span id="top-fix-text"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       TAB 2 — IMPROVER
+  ══════════════════════════════════════════════════ -->
+  <div id="tab-improver" class="tab-panel">
+
+    <div class="form-row">
+      <label for="imp-prompt">Your rough prompt</label>
+      <textarea id="imp-prompt" placeholder="Paste your basic or rough prompt here — the AI will rewrite it into a professional, well-structured version using the techniques you choose below."></textarea>
+    </div>
+
+    <div class="form-row">
+      <label for="imp-usecase">What is this prompt for?</label>
+      <select id="imp-usecase">
+        <option value="Coding help">Coding help</option>
+        <option value="Creative writing">Creative writing</option>
+        <option value="Data analysis">Data analysis</option>
+        <option value="Chatbot / agent">Chatbot / agent</option>
+        <option value="Study help">Study help</option>
+        <option value="General question">General question</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>Techniques to apply</label>
+      <div class="checkboxes">
+        <label class="checkbox-item"><input type="checkbox" id="t-role" checked> Add a role / persona</label>
+        <label class="checkbox-item"><input type="checkbox" id="t-format" checked> Specify output format</label>
+        <label class="checkbox-item"><input type="checkbox" id="t-cot" checked> Add chain-of-thought</label>
+        <label class="checkbox-item"><input type="checkbox" id="t-fewshot"> Add few-shot examples</label>
+        <label class="checkbox-item"><input type="checkbox" id="t-negative"> Add negative examples</label>
+        <label class="checkbox-item"><input type="checkbox" id="t-constraints"> Add constraints</label>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="improvePrompt()" id="imp-btn">
+      <span id="imp-btn-text">Improve Prompt</span>
+      <span id="imp-spinner" style="display:none;" class="spinner"></span>
+    </button>
+
+    <div id="imp-error" style="display:none;" class="error-msg"></div>
+
+    <div id="imp-output" style="display:none;">
+      <div class="compare-grid">
+        <div class="compare-card original">
+          <h4>Your original</h4>
+          <div class="compare-text" id="imp-original-text"></div>
+        </div>
+        <div class="compare-card improved">
+          <h4>✨ Improved version</h4>
+          <div class="compare-text" id="imp-improved-text"></div>
+          <div class="copy-row">
+            <button class="btn-copy" onclick="copyImproved()">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="changes-card">
+        <h4>📋 What changed & why</h4>
+        <ul id="changes-list"></ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       TAB 3 — TECHNIQUES LIBRARY
+  ══════════════════════════════════════════════════ -->
+  <div id="tab-techniques" class="tab-panel">
+
+    <div class="techniques-grid" id="techniques-grid"></div>
+
+  </div>
+
+</main>
+
+<footer>Agent 03 of 97 &nbsp;|&nbsp; Built by Han Han &nbsp;|&nbsp; <a href="https://hhanng.github.io/" style="color:var(--purple);text-decoration:none;">hhanng.github.io</a></footer>
+
+<script>
+// ──────────────────────────────────────────────────────
+//  CONFIG
+// ──────────────────────────────────────────────────────
+const GEMINI_API_KEY = 'YOUR_KEY_HERE';
+// Get your free key at: https://aistudio.google.com
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+
+// ──────────────────────────────────────────────────────
+//  TAB SWITCHING
+// ──────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ──────────────────────────────────────────────────────
+//  GEMINI HELPER
+// ──────────────────────────────────────────────────────
+async function callGemini(promptText) {
+  const res = await fetch(GEMINI_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: promptText }] }],
+      generationConfig: { temperature: 0.4, maxOutputTokens: 1024 }
+    })
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+}
+
+function parseJSON(raw) {
+  try { return JSON.parse(raw); } catch {}
+  // strip markdown fences
+  const stripped = raw.replace(/^```(?:json)?/m, '').replace(/```$/m, '').trim();
+  try { return JSON.parse(stripped); } catch(e) {
+    throw new Error('Could not parse AI response as JSON. Raw: ' + raw.slice(0, 300));
+  }
+}
+
+function setLoading(btnId, spinnerId, textId, loading, defaultText) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  document.getElementById(spinnerId).style.display = loading ? 'inline-block' : 'none';
+  document.getElementById(textId).textContent = loading ? 'Thinking…' : defaultText;
+}
+
+// ──────────────────────────────────────────────────────
+//  SCORE BAR HELPERS
+// ──────────────────────────────────────────────────────
+function scoreColor(s) {
+  if (s <= 4) return 'red';
+  if (s <= 7) return 'amber';
+  return 'green';
+}
+
+function renderBar(dim, score, tip) {
+  const el = document.getElementById('bf-' + dim);
+  const sv = document.getElementById('sv-' + dim);
+  const tp = document.getElementById('tip-' + dim);
+  sv.textContent = score + '/10';
+  sv.style.color = score <= 4 ? 'var(--red)' : score <= 7 ? 'var(--amber)' : 'var(--green)';
+  tp.textContent = '💡 ' + tip;
+  el.className = 'bar-fill ' + scoreColor(score);
+  // trigger animation
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { el.style.width = (score * 10) + '%'; });
+  });
+}
+
+// ──────────────────────────────────────────────────────
+//  TAB 1 — EVALUATE
+// ──────────────────────────────────────────────────────
+async function evaluatePrompt() {
+  const userPrompt = document.getElementById('eval-prompt').value.trim();
+  const useCase    = document.getElementById('eval-usecase').value;
+  const errEl      = document.getElementById('eval-error');
+  const outEl      = document.getElementById('scores-output');
+
+  errEl.style.display = 'none';
+  outEl.style.display = 'none';
+
+  if (!userPrompt) { errEl.textContent = 'Please paste a prompt first.'; errEl.style.display = 'block'; return; }
+
+  setLoading('eval-btn', 'eval-spinner', 'eval-btn-text', true, 'Evaluate Prompt');
+
+  const geminiPrompt = `You are a prompt engineering expert. Evaluate this prompt for a ${useCase} task.
+PROMPT TO EVALUATE:
+${userPrompt}
+
+Return your evaluation as JSON only, no extra text:
+{
+  "clarity": { "score": 0, "tip": "one-line specific tip" },
+  "specificity": { "score": 0, "tip": "one-line specific tip" },
+  "context": { "score": 0, "tip": "one-line specific tip" },
+  "outputFormat": { "score": 0, "tip": "one-line specific tip" },
+  "examples": { "score": 0, "tip": "one-line specific tip" },
+  "topFix": "The single most important improvement in 2-3 sentences"
+}
+Scores must be integers 0-10.`;
+
+  try {
+    const raw  = await callGemini(geminiPrompt);
+    const data = parseJSON(raw);
+
+    const dims = ['clarity', 'specificity', 'context', 'outputFormat', 'examples'];
+    dims.forEach(d => renderBar(d, data[d].score, data[d].tip));
+
+    const avg = (dims.reduce((s, d) => s + data[d].score, 0) / dims.length).toFixed(1);
+    document.getElementById('overall-score').textContent = avg;
+    document.getElementById('top-fix-text').textContent  = data.topFix;
+
+    outEl.style.display = 'block';
+  } catch (e) {
+    errEl.textContent = '⚠️ ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    setLoading('eval-btn', 'eval-spinner', 'eval-btn-text', false, 'Evaluate Prompt');
+  }
+}
+
+// ──────────────────────────────────────────────────────
+//  TAB 2 — IMPROVE
+// ──────────────────────────────────────────────────────
+async function improvePrompt() {
+  const userPrompt = document.getElementById('imp-prompt').value.trim();
+  const useCase    = document.getElementById('imp-usecase').value;
+  const errEl      = document.getElementById('imp-error');
+  const outEl      = document.getElementById('imp-output');
+
+  errEl.style.display = 'none';
+  outEl.style.display = 'none';
+
+  if (!userPrompt) { errEl.textContent = 'Please paste a prompt first.'; errEl.style.display = 'block'; return; }
+
+  const techniques = [];
+  if (document.getElementById('t-role').checked)      techniques.push('Add a role/persona (e.g., "You are an expert...")');
+  if (document.getElementById('t-format').checked)    techniques.push('Specify output format (e.g., bullet list, JSON, numbered steps)');
+  if (document.getElementById('t-cot').checked)       techniques.push('Add chain-of-thought instruction (e.g., "Think step by step")');
+  if (document.getElementById('t-fewshot').checked)   techniques.push('Add 1-2 few-shot examples showing desired input/output');
+  if (document.getElementById('t-negative').checked)  techniques.push('Add negative examples showing what NOT to do');
+  if (document.getElementById('t-constraints').checked) techniques.push('Add constraints (word count, tone, reading level)');
+
+  setLoading('imp-btn', 'imp-spinner', 'imp-btn-text', true, 'Improve Prompt');
+
+  const geminiPrompt = `You are a prompt engineering expert. Rewrite this rough prompt into a professional, effective prompt using these techniques: ${techniques.join('; ')}.
+Use case: ${useCase}
+
+ORIGINAL PROMPT:
+${userPrompt}
+
+Return as JSON only, no extra text:
+{
+  "improved": "the full improved prompt text",
+  "changes": ["change 1 explained simply", "change 2 explained simply"]
+}`;
+
+  try {
+    const raw  = await callGemini(geminiPrompt);
+    const data = parseJSON(raw);
+
+    document.getElementById('imp-original-text').textContent = userPrompt;
+    document.getElementById('imp-improved-text').textContent = data.improved;
+
+    const list = document.getElementById('changes-list');
+    list.innerHTML = '';
+    (data.changes || []).forEach(c => {
+      const li = document.createElement('li');
+      li.textContent = c;
+      list.appendChild(li);
+    });
+
+    outEl.style.display = 'block';
+  } catch (e) {
+    errEl.textContent = '⚠️ ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    setLoading('imp-btn', 'imp-spinner', 'imp-btn-text', false, 'Improve Prompt');
+  }
+}
+
+function copyImproved() {
+  const text = document.getElementById('imp-improved-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+// ──────────────────────────────────────────────────────
+//  TAB 3 — TECHNIQUES (static data)
+// ──────────────────────────────────────────────────────
+const TECHNIQUES = [
+  {
+    name: 'Role Assignment',
+    desc: '"You are a…" gives the AI a persona and expertise frame, sharpening the tone and depth of its response.',
+    weak: 'Explain recursion.',
+    strong: 'You are a patient computer science tutor teaching a complete beginner. Explain recursion using a simple real-world analogy, then show a short Python example with comments.'
+  },
+  {
+    name: 'Output Format',
+    desc: 'Tell the AI exactly how to structure the answer — bullets, JSON, table, numbered steps — so you can use it immediately.',
+    weak: 'Give me ideas for my app.',
+    strong: 'List 5 feature ideas for a habit-tracking mobile app. Format as a numbered list. Each item: feature name (bold), one-sentence description, and effort level (Low/Medium/High).'
+  },
+  {
+    name: 'Chain of Thought',
+    desc: '"Think step by step" forces the model to reason before concluding, dramatically reducing errors on logic and math tasks.',
+    weak: 'What is 17% of 340?',
+    strong: 'What is 17% of 340? Think step by step, showing each calculation before giving the final answer.'
+  },
+  {
+    name: 'Few-Shot Examples',
+    desc: 'Showing 1–2 examples of the exact input→output pattern you want teaches the AI your format without a long explanation.',
+    weak: 'Translate these phrases to formal English.',
+    strong: 'Translate each phrase to formal business English.\nExample: "gonna fix it ASAP" → "I will address this at the earliest opportunity."\nNow translate: "can you check this real quick?" and "no worries, my bad".'
+  },
+  {
+    name: 'Negative Examples',
+    desc: 'Telling the AI what NOT to do is often clearer than describing what you want — it eliminates the most common failure modes.',
+    weak: 'Write a product description for my app.',
+    strong: 'Write a 3-sentence product description for a to-do list app aimed at students. Do NOT use buzzwords like "revolutionary" or "game-changing". Do NOT start with "Are you tired of…".'
+  },
+  {
+    name: 'Context Setting',
+    desc: 'Give the AI background it cannot guess: your audience, your constraints, what you\'ve already tried.',
+    weak: 'Help me write an email.',
+    strong: 'I\'m a junior developer emailing my manager to ask for a deadline extension. The original deadline is Friday; I need until Monday. My manager prefers direct, concise emails. Draft a 3-sentence email.'
+  },
+  {
+    name: 'Constraints',
+    desc: 'Set hard limits on length, reading level, tone, or scope to get a response that fits your exact needs without editing.',
+    weak: 'Summarize this article.',
+    strong: 'Summarize the following article in exactly 3 bullet points, each under 20 words. Use plain language a 10th-grader can understand. Do not include any statistics.'
+  },
+  {
+    name: 'Iterative Refinement',
+    desc: 'The first answer is never final. Use targeted follow-ups to push the AI toward exactly what you need.',
+    weak: '(User accepts mediocre output and moves on)',
+    strong: '"Good start, but make the tone more casual and cut it to 100 words." Then: "Replace the last paragraph — it repeats the intro. Add a specific example instead."'
+  }
+];
+
+function buildTechniqueCards() {
+  const grid = document.getElementById('techniques-grid');
+  TECHNIQUES.forEach((t, i) => {
+    const card = document.createElement('div');
+    card.className = 'tech-card';
+    card.innerHTML = `
+      <h3>${i + 1}. ${t.name}</h3>
+      <p class="tech-desc">${t.desc}</p>
+      <div class="example-block weak">
+        <div class="example-label">Weak prompt</div>
+        <div class="example-text">${escHtml(t.weak)}</div>
+      </div>
+      <div class="example-block strong">
+        <div class="example-label">Strong prompt</div>
+        <div class="example-text">${escHtml(t.strong)}</div>
+      </div>
+      <button class="btn-try" onclick="tryInEvaluator(${i})">Try in Evaluator →</button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function tryInEvaluator(i) {
+  document.getElementById('eval-prompt').value = TECHNIQUES[i].weak;
+  // switch to evaluator tab
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-evaluator').classList.add('active');
+  document.querySelectorAll('.tab-btn')[0].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ──────────────────────────────────────────────────────
+//  INIT
+// ──────────────────────────────────────────────────────
+buildTechniqueCards();
+</script>
+
+</body>
+</html>
