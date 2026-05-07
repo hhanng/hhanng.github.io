@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ender's Game Flashcards | Agent 01</title>
+  <style>
+    :root {
+      --navy: #0F3460;
+      --navy-dark: #0a2444;
+      --navy-mid: #1a4a7a;
+      --gold: #E8B84B;
+      --gold-dark: #c99a30;
+      --gold-light: #f5d07a;
+      --white: #ffffff;
+      --off-white: #f0f4fa;
+      --text-light: #c8d8f0;
+      --gray: #8a9bb5;
+      --card-radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0a1f3d 0%, #0F3460 50%, #1a2a4a 100%);
+      min-height: 100vh;
+      color: var(--white);
+      padding-bottom: 60px;
+    }
+
+    /* ── TOP NAV ── */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: rgba(10,20,50,0.6);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(232,184,75,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .back-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 0.75; }
+
+    .nav-title {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      font-weight: 400;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 36px 20px 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.6rem, 5vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .hero h1 span { color: var(--gold); }
+
+    .hero p {
+      margin-top: 8px;
+      color: var(--text-light);
+      font-size: 0.95rem;
+    }
+
+    /* ── MODE TOGGLE ── */
+    .mode-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px auto 0;
+    }
+
+    .mode-btn {
+      padding: 10px 28px;
+      border-radius: 30px;
+      border: 2px solid var(--gold);
+      background: transparent;
+      color: var(--gold);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--gold);
+      color: var(--navy-dark);
+    }
+
+    .mode-btn:hover:not(.active) {
+      background: rgba(232,184,75,0.15);
+    }
+
+    /* ── MAIN WRAPPER ── */
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* ── MODE PANELS ── */
+    .mode-panel { display: none; }
+    .mode-panel.active { display: block; }
+
+    /* ── CATEGORY TABS ── */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 28px 0 16px;
+    }
+
+    .tab {
+      padding: 7px 18px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(232,184,75,0.4);
+      background: transparent;
+      color: var(--text-light);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tab.active {
+      background: var(--gold);
+      color: var(--navy-dark);
+      border-color: var(--gold);
+    }
+
+    .tab:hover:not(.active) {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* ── CARD COUNTER + CONTROLS ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .counter {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .shuffle-btn {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(232,184,75,0.5);
+      background: transparent;
+      color: var(--gold);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .shuffle-btn:hover {
+      background: rgba(232,184,75,0.15);
+    }
+
+    /* ── 3D FLIP CARD ── */
+    .card-scene {
+      width: 100%;
+      perspective: 1000px;
+      margin-bottom: 28px;
+      cursor: pointer;
+    }
+
+    .card-3d {
+      position: relative;
+      width: 100%;
+      min-height: 260px;
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card-scene.flipped .card-3d {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      min-height: 260px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: var(--card-radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 28px;
+      text-align: center;
+    }
+
+    /* Static height anchor so the scene doesn't collapse */
+    .card-scene { min-height: 260px; }
+
+    .card-front {
+      background: linear-gradient(145deg, #1a4a7a, #0F3460);
+      border: 2px solid rgba(232,184,75,0.35);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .card-back {
+      background: linear-gradient(145deg, #2a1a0a, #1a1200);
+      background: linear-gradient(145deg, #3a2800, #1c1400);
+      border: 2px solid var(--gold);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      transform: rotateY(180deg);
+    }
+
+    .card-category-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+    }
+
+    .badge-character { background: rgba(100,180,255,0.25); color: #8ad4ff; }
+    .badge-theme     { background: rgba(160,100,255,0.25); color: #c4a0ff; }
+    .badge-plot      { background: rgba(80,200,140,0.25); color: #80e8b4; }
+    .badge-vocab     { background: rgba(255,160,80,0.25); color: #ffb870; }
+
+    .card-front .question {
+      font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--white);
+    }
+
+    .flip-hint {
+      margin-top: 18px;
+      font-size: 0.75rem;
+      color: rgba(200,216,240,0.5);
+      font-style: italic;
+    }
+
+    .card-back .answer {
+      font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+      line-height: 1.65;
+      color: #f5e8c0;
+    }
+
+    .card-back .answer-label {
+      font-size: 0.7rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    /* ── NAV BUTTONS ── */
+    .nav-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .nav-btn {
+      padding: 12px 32px;
+      border-radius: 30px;
+      border: 2px solid var(--gold);
+      background: transparent;
+      color: var(--gold);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 110px;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: var(--gold);
+      color: var(--navy-dark);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    /* ── AI GENERATE MODE ── */
+    #ai-panel {
+      padding-top: 28px;
+    }
+
+    .ai-intro {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .ai-intro h2 {
+      font-size: 1.4rem;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .ai-intro p {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .ai-form {
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(232,184,75,0.25);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .ai-form label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .ai-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(232,184,75,0.35);
+      background: rgba(255,255,255,0.08);
+      color: var(--white);
+      font-size: 0.95rem;
+      font-family: inherit;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .ai-input:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    .ai-input::placeholder { color: rgba(200,216,240,0.4); }
+
+    .ai-key-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .ai-key-row .ai-input {
+      flex: 1;
+      min-width: 180px;
+      margin-bottom: 0;
+    }
+
+    .key-hint {
+      font-size: 0.75rem;
+      color: var(--gray);
+      margin-top: 4px;
+    }
+
+    .key-hint a { color: var(--gold-light); text-decoration: none; }
+    .key-hint a:hover { text-decoration: underline; }
+
+    .generate-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      border: none;
+      background: var(--gold);
+      color: var(--navy-dark);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+
+    .generate-btn:hover { background: var(--gold-dark); }
+    .generate-btn:active { transform: scale(0.98); }
+    .generate-btn:disabled { opacity: 0.5; cursor: default; }
+
+    .ai-status {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-light);
+      margin-bottom: 16px;
+      min-height: 20px;
+    }
+
+    .ai-status.error { color: #ff8a8a; }
+    .ai-status.success { color: #7eff9a; }
+
+    /* AI generated cards use same flip UI */
+    .ai-cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── STARS BG DECORATION ── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.35) 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 85%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.35) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,0.2) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    main, .top-nav, .hero { position: relative; z-index: 1; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 30px 16px 16px;
+      font-size: 0.78rem;
+      color: rgba(200,216,240,0.45);
+    }
+
+    footer a { color: var(--gold); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      .card-face { padding: 24px 18px; }
+      .mode-btn { padding: 9px 18px; font-size: 0.82rem; }
+      .nav-btn { padding: 11px 22px; min-width: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAV -->
+  <nav class="top-nav">
+    <a href="https://hhanng.github.io/" class="back-link">← Portfolio</a>
+    <span class="nav-title">Ender's Game Flashcards</span>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1><span>Ender's Game</span><br>Smart Flashcards</h1>
+    <p>40 cards • 4 categories • AI-powered generation</p>
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="switchMode('study')">📚 Study Mode</button>
+      <button class="mode-btn" onclick="switchMode('ai')">✨ AI Generate</button>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ══════════════ STUDY MODE ══════════════ -->
+    <div id="study-panel" class="mode-panel active">
+
+      <!-- Category Filter Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="filterCategory('all', this)">All (40)</button>
+        <button class="tab" onclick="filterCategory('character', this)">Characters</button>
+        <button class="tab" onclick="filterCategory('theme', this)">Themes</button>
+        <button class="tab" onclick="filterCategory('plot', this)">Plot</button>
+        <button class="tab" onclick="filterCategory('vocab', this)">Vocab</button>
+      </div>
+
+      <!-- Controls Row -->
+      <div class="controls">
+        <span class="counter" id="counter">Card 1 of 40</span>
+        <button class="shuffle-btn" onclick="shuffleCards()">🔀 Shuffle</button>
+      </div>
+
+      <!-- The Flip Card -->
+      <div class="card-scene" id="card-scene" onclick="flipCard()">
+        <div class="card-3d" id="card-3d">
+          <div class="card-face card-front" id="card-front">
+            <span class="card-category-badge" id="badge"></span>
+            <div class="question" id="front-text"></div>
+            <div class="flip-hint">tap to reveal answer</div>
+          </div>
+          <div class="card-face card-back" id="card-back">
+            <div class="answer-label">Answer</div>
+            <div class="answer" id="back-text"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="nav-buttons">
+        <button class="nav-btn" id="prev-btn" onclick="prevCard()">← Prev</button>
+        <button class="nav-btn" id="next-btn" onclick="nextCard()">Next →</button>
+      </div>
+
+    </div><!-- /study-panel -->
+
+
+    <!-- ══════════════ AI GENERATE MODE ══════════════ -->
+    <div id="ai-panel" class="mode-panel">
+
+      <div class="ai-intro">
+        <h2>✨ AI Flashcard Generator</h2>
+        <p>Type any topic from <em>Ender's Game</em> and Gemini will create<br>5 custom flashcards just for you.</p>
+      </div>
+
+      <div class="ai-form">
+        <label>Topic from Ender's Game</label>
+        <input
+          type="text"
+          class="ai-input"
+          id="topic-input"
+          placeholder="e.g. the giant's drink game, Battle School rules…"
+          onkeydown="if(event.key==='Enter') generateCards()"
+        />
+
+        <label>Gemini API Key</label>
+        <div class="ai-key-row">
+          <input
+            type="password"
+            class="ai-input"
+            id="api-key-input"
+            placeholder="Paste your API key here"
+          />
+        </div>
+        <div class="key-hint">
+          Get a free key at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>
+        </div>
+
+        <br>
+        <button class="generate-btn" id="gen-btn" onclick="generateCards()">
+          Generate 5 Flashcards
+        </button>
+      </div>
+
+      <div class="ai-status" id="ai-status"></div>
+
+      <div class="ai-cards-grid" id="ai-cards-grid"></div>
+
+    </div><!-- /ai-panel -->
+
+  </main>
+
+  <footer>
+    Agent 01 of 97 &nbsp;|&nbsp; Built by <a href="https://hhanng.github.io/">Han Han</a> &nbsp;|&nbsp; <a href="https://hhanng.github.io/">hhanng.github.io</a>
+  </footer>
+
+
+  <script>
+    // ─────────────────────────────────────────────
+    // Get your free key at: aistudio.google.com
+    const GEMINI_API_KEY = 'YOUR_KEY_HERE';
+    // ─────────────────────────────────────────────
+
+    // ══════════════ FLASHCARD DATA ══════════════
+
+    const ALL_CARDS = [
+
+      // ── CHARACTERS (10) ──
+      {
+        category: 'character',
+        front: "Who is Ender Wiggin and why is he so special?",
+        back: "Andrew 'Ender' Wiggin is the story's hero — a third child in a world with strict birth limits. He was born because the government believed he could combine Peter's toughness and Valentine's empathy to become the perfect military commander needed to fight the alien Formics."
+      },
+      {
+        category: 'character',
+        front: "What role does Valentine Wiggin play in Ender's life?",
+        back: "Valentine is Ender's older sister and the only person in his family who truly loves him. She represents warmth and humanity for Ender. When he is about to give up, Valentine is sent to Eros by Graff to re-motivate him — showing how powerful her influence over Ender really is."
+      },
+      {
+        category: 'character',
+        front: "Why is Peter Wiggin such a frightening character?",
+        back: "Peter is Ender's brilliant but cruel older brother. He was rejected from military training for being too aggressive. On Earth, he secretly becomes the political writer 'Locke' and eventually rises to rule the world — proving that his ruthlessness can be used for power."
+      },
+      {
+        category: 'character',
+        front: "Who is Colonel Hyrum Graff and what is his philosophy?",
+        back: "Graff is the head of Battle School and Ender's main overseer. He believes the only way to train a true commander is through extreme isolation and pressure. He deliberately engineers situations where Ender suffers, convinced that hardship is the only path to genius."
+      },
+      {
+        category: 'character',
+        front: "Who is Mazer Rackham and why does Ender need him?",
+        back: "Mazer Rackham is the legendary pilot who defeated the Formics in the Second Invasion by recognizing that the aliens shared one collective mind. Kept alive through near-light-speed travel, he returns to be Ender's personal trainer for the final battle — the only person who truly understands the enemy."
+      },
+      {
+        category: 'character',
+        front: "Who is Bean, and how does he compare to Ender?",
+        back: "Bean is the smallest soldier in Ender's Dragon Army, and arguably the only student at Battle School who rivals Ender intellectually. He is perceptive enough to realize the 'practice simulations' at Command School are actually real battles. Bean serves as Ender's most trusted lieutenant."
+      },
+      {
+        category: 'character',
+        front: "What is Petra Arkanian's role in Ender's story?",
+        back: "Petra is one of the few girls at Battle School and becomes Ender's close friend and teacher. She helps him learn the zero-gravity battle room early on. Later, she is one of Ender's key commanders during the final battles against the Formics at Command School."
+      },
+      {
+        category: 'character',
+        front: "Who is Bonzo Madrid and what is his conflict with Ender?",
+        back: "Bonzo is the arrogant commander of Salamander Army who sees Ender as a threat to his pride. His hatred of Ender grows to the point where he attacks him in the showers. Ender is forced to fight back with lethal force — though he does not learn Bonzo died until much later."
+      },
+      {
+        category: 'character',
+        front: "What is the significance of Dink Meeker?",
+        back: "Dink is a Battle School student who befriends Ender and is one of the first to tell him the truth: the teachers are manipulating all the students. He refuses to become a commander because he sees the system as corrupt, but remains one of Ender's most loyal supporters."
+      },
+      {
+        category: 'character',
+        front: "Who is the Hive Queen?",
+        back: "The Hive Queen is the collective consciousness of the Formic species. After Ender unknowingly destroys her entire civilization, a surviving queen's cocoon communicates with him telepathically through the Mind Game. Ender eventually becomes her 'Speaker' and dedicates his life to finding her a new home."
+      },
+
+      // ── THEMES (10) ──
+      {
+        category: 'theme',
+        front: "How does isolation function as a theme in Ender's Game?",
+        back: "Isolation is both a weapon and a wound in the novel. Graff deliberately keeps Ender separated from friends so that he relies only on himself. This isolation makes Ender a stronger leader but also causes deep loneliness and psychological damage that follows him his entire life."
+      },
+      {
+        category: 'theme',
+        front: "What does the novel say about empathy vs. violence?",
+        back: "Ender's greatest strength is that he truly understands his enemies — including the bullies who attack him. The novel argues that empathy and destruction are two sides of the same coin: to defeat an enemy perfectly, you must understand them so well that you almost become them."
+      },
+      {
+        category: 'theme',
+        front: "What is the theme of moral ambiguity in Ender's Game?",
+        back: "The book constantly blurs right and wrong. Ender kills two boys (Stilson and Bonzo) in self-defense but feels guilt forever. The adults lie to Ender to 'protect' humanity. The Formics, painted as monsters, turn out to be a misunderstood species. No one in the story is purely good or evil."
+      },
+      {
+        category: 'theme',
+        front: "How does the theme of manipulation appear in the novel?",
+        back: "Nearly every adult in Ender's life manipulates him for their own goals — Graff engineers his isolation, Valentine is used to re-motivate him, and the final 'simulations' are really live battles he fights without knowing. The novel questions whether good ends can justify manipulating an innocent child."
+      },
+      {
+        category: 'theme',
+        front: "What does the book say about childhood and innocence?",
+        back: "Ender's Game argues that childhood innocence is fragile and often stolen by those in power. Ender is a child forced into an adult world of warfare and politics. His loss of innocence — especially after the genocide — is the emotional core of the story."
+      },
+      {
+        category: 'theme',
+        front: "What is the theme of identity in Ender's Game?",
+        back: "Ender constantly fears becoming Peter — violent and cruel. He struggles with who he really is: a killer or a compassionate person? The Mind Game's 'mirror' showing Peter's face instead of Ender's reflects this crisis. By the end, Ender accepts both sides of himself and chooses a path of healing."
+      },
+      {
+        category: 'theme',
+        front: "How does leadership develop as a theme?",
+        back: "Ender learns that true leadership is not about dominance but about understanding your team. He wins battles by caring for his soldiers personally, promoting based on skill not seniority, and thinking creatively under pressure. His leadership style contrasts sharply with bullies like Bonzo."
+      },
+      {
+        category: 'theme',
+        front: "What role does game-play and simulation play as a theme?",
+        back: "Games appear everywhere — Battle Room, the Mind Game, and the final 'simulations.' The novel questions where games end and reality begins. This blurring is crucial: Ender commits genocide thinking it is a test. Games are shown to be a form of control, training, and ultimately deception."
+      },
+      {
+        category: 'theme',
+        front: "What is the theme of xenophobia in Ender's Game?",
+        back: "Humanity's fear of the Formics drives the entire war. The word 'buggers' is used as a slur to dehumanize the aliens. By the end, Ender discovers the Formics meant no harm in future invasions and tried to communicate. The novel is a warning about how fear of the 'other' can lead to genocide."
+      },
+      {
+        category: 'theme',
+        front: "How does the theme of sacrifice appear in the novel?",
+        back: "Multiple characters sacrifice for the greater good — Ender sacrifices his childhood and mental health, soldiers die in the final battle, and the Formics ultimately sacrifice their species. The novel questions whether such sacrifices are justified and who gets to make that decision for others."
+      },
+
+      // ── PLOT (10) ──
+      {
+        category: 'plot',
+        front: "What is Battle School and how does it work?",
+        back: "Battle School is an orbiting military academy where Earth's most gifted children are trained to fight the Formics. Students are organized into armies and compete in a zero-gravity battle room where they must freeze opponents' suits. Performance in these battles determines rankings and promotions."
+      },
+      {
+        category: 'plot',
+        front: "What happens in the battle room that makes Ender famous?",
+        back: "After Dragon Army is formed, Ender is constantly given unfair conditions: uneven odds, two battles per day, and battles with armies teamed against him. Instead of following standard tactics, Ender invents creative formations and strategies that win every single battle, earning him legendary status."
+      },
+      {
+        category: 'plot',
+        front: "What is the Mind Game (also called the Fantasy Game)?",
+        back: "The Mind Game is a computer simulation that adapts to the player's psychology. Ender gets stuck at a room where a giant offers two drinks — one always kills him. When Ender attacks the giant out of frustration, he wins and enters Fairyland. The teachers watch this game to understand Ender's mind and emotional state."
+      },
+      {
+        category: 'plot',
+        front: "What happens in the giant's drink game, and what does it reveal?",
+        back: "In the Mind Game, a giant offers Ender two drinks promising one is safe, but both kill him. After many deaths, Ender kills the giant in rage — and is horrified by his own violent impulse. This moment mirrors Ender's fear that he is becoming like Peter, and shows the teachers how far Ender will push himself when trapped."
+      },
+      {
+        category: 'plot',
+        front: "Why is the Third Invasion's final battle fought by children?",
+        back: "The International Fleet believes children are more adaptable, creative thinkers with faster reflexes and no ingrained military habits. They are also more obedient — unaware of the moral weight of real war. Ender and his fellow commanders are chosen because they are the best the simulation training program could produce."
+      },
+      {
+        category: 'plot',
+        front: "What really happens during Ender's 'final exam' at Command School?",
+        back: "Ender believes he is taking a simulation exam. In reality, he is commanding the actual human fleet attacking the Formic home world. When Ender fires the Molecular Disruption Device (the 'Little Doctor') in a desperate, suicidal move, he wipes out the entire planet — committing actual genocide, not a simulated one."
+      },
+      {
+        category: 'plot',
+        front: "How do the Formic wars lead to the events of the novel?",
+        back: "The Formics attacked Earth twice. During the Second Invasion, Mazer Rackham discovered the Formics shared a hive mind and killed the queen, ending the attack. Fearing a Third Invasion, humanity built Battle School to find a commander who could lead the counter-attack before the Formics reached Earth again."
+      },
+      {
+        category: 'plot',
+        front: "What is the significance of Ender finding the Formic cocoon?",
+        back: "After the war, on a colony world, Ender discovers a cocoon left by the Hive Queen — who communicated with him through the Mind Game. She had built a replica of Fairyland to show she meant no harm. Ender takes the cocoon, vowing to find it a new home, and writes The Hive Queen — the first act of 'Speaking for the Dead.'"
+      },
+      {
+        category: 'plot',
+        front: "What are the political events happening on Earth during the novel?",
+        back: "While Ender is in space, Peter and Valentine use fake online identities — 'Locke' and 'Demosthenes' — to influence world politics. Peter eventually becomes Hegemon (ruler of Earth). This subplot shows that the real-world power struggle on Earth mirrors the life-or-death battle happening in space."
+      },
+      {
+        category: 'plot',
+        front: "How does the novel end for Ender?",
+        back: "After learning he committed genocide, a broken Ender cannot return to Earth (Peter's political enemy). He becomes the first governor of a Formic colony world. When he finds the cocoon, he writes The Hive Queen under the pen name 'Speaker for the Dead,' beginning a new role as a voice for lost civilizations rather than their destroyer."
+      },
+
+      // ── VOCABULARY (10) ──
+      {
+        category: 'vocab',
+        front: "What does 'formicary' mean, and how does it relate to the story?",
+        back: "A formicary is an ant colony or ant nest. The Formic aliens are named after this word because they, like ants, operate as a hive with a queen at the center. The term hints at the Formics' collective mind structure, which is the key to both their strength and their ultimate vulnerability."
+      },
+      {
+        category: 'vocab',
+        front: "What is an ansible?",
+        back: "An ansible is a device that allows faster-than-light communication across vast distances of space. In Ender's Game, it is how military commanders on Earth can give real-time orders to fleets thousands of light-years away. The concept was borrowed from author Ursula K. Le Guin's science fiction universe."
+      },
+      {
+        category: 'vocab',
+        front: "What does 'buggers' mean in the context of Ender's Game?",
+        back: "Buggers is the slang term humanity uses for the Formic aliens — a dehumanizing slur that makes it easier to hate and kill them without guilt. The word reflects humanity's xenophobia. By the end of the novel, Ender rejects this word as he begins to understand and mourn the Formics as a people."
+      },
+      {
+        category: 'vocab',
+        front: "What is a 'launchie' at Battle School?",
+        back: "A 'launchie' is the nickname for a new student who has just arrived ('launched') at Battle School. They are the youngest and least experienced soldiers. Ender starts as a launchie, which makes him a target for older students. The term establishes the school's rigid social hierarchy."
+      },
+      {
+        category: 'vocab',
+        front: "What does 'null gravity' (or zero-g) mean and why does it matter?",
+        back: "Null gravity, or zero-gravity, means there is no gravitational pull, so nothing has a clear 'up' or 'down.' The Battle Room is zero-g. Ender's key insight is that 'the enemy's gate is down' — reorienting his mind so the enemy is always 'below' him, giving his soldiers a psychological edge in combat."
+      },
+      {
+        category: 'vocab',
+        front: "What is the 'Molecular Disruption Device' (MD Device)?",
+        back: "The Molecular Disruption Device — nicknamed the 'Little Doctor' — is the weapon Ender uses to destroy the Formic home world. It disrupts the bonds between molecules, causing a chain reaction that annihilates matter in a rapidly expanding sphere. Ender fires it thinking it is part of a simulation."
+      },
+      {
+        category: 'vocab',
+        front: "What does 'hegemon' mean?",
+        back: "A hegemon is a leader who holds supreme authority over multiple nations or peoples. In Ender's Game, the Hegemon is the ruler of Earth's unified government. After the Formic War, Peter Wiggin schemes his way into this position, becoming the most powerful person on the planet through political manipulation."
+      },
+      {
+        category: 'vocab',
+        front: "What is 'toon' in Battle School terminology?",
+        back: "A toon is a squad within an army — a small unit of soldiers. Battle School armies are divided into toons, each led by a toon leader. Ender reorganizes Dragon Army by giving his toon leaders more independence and creative freedom, which becomes one of his key tactical advantages."
+      },
+      {
+        category: 'vocab',
+        front: "What does 'Speaker for the Dead' mean?",
+        back: "A Speaker for the Dead is a person who tells the complete, honest truth about a person's life after they die — both the good and the bad — so their true self is remembered rather than a sanitized version. Ender becomes the first Speaker, writing about the Hive Queen to preserve the Formics' true story."
+      },
+      {
+        category: 'vocab',
+        front: "What is a 'third' and why is it significant in the novel?",
+        back: "In the world of Ender's Game, population laws limit families to two children. A 'third' child is illegal without government permission and is mocked and bullied. Ender is a Third — his parents were authorized to have a third child specifically because the government hoped he would be the perfect military commander."
+      }
+
+    ];
+
+    // ══════════════ STATE ══════════════
+    let filteredCards = [...ALL_CARDS];
+    let currentIndex  = 0;
+    let currentMode   = 'study';
+
+    // ══════════════ RENDERING ══════════════
+    function renderCard() {
+      const card = filteredCards[currentIndex];
+      const scene = document.getElementById('card-scene');
+
+      // Remove flip before updating content
+      scene.classList.remove('flipped');
+
+      // Small delay so the unflip finishes before text changes
+      setTimeout(() => {
+        const badgeEl = document.getElementById('badge');
+        badgeEl.textContent = card.category.charAt(0).toUpperCase() + card.category.slice(1);
+        badgeEl.className = 'card-category-badge badge-' + card.category;
+        document.getElementById('front-text').textContent = card.front;
+        document.getElementById('back-text').textContent  = card.back;
+        document.getElementById('counter').textContent    =
+          `Card ${currentIndex + 1} of ${filteredCards.length}`;
+        document.getElementById('prev-btn').disabled = currentIndex === 0;
+        document.getElementById('next-btn').disabled = currentIndex === filteredCards.length - 1;
+      }, 120);
+    }
+
+    function flipCard() {
+      document.getElementById('card-scene').classList.toggle('flipped');
+    }
+
+    function nextCard() {
+      if (currentIndex < filteredCards.length - 1) {
+        currentIndex++;
+        renderCard();
+      }
+    }
+
+    function prevCard() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderCard();
+      }
+    }
+
+    function shuffleCards() {
+      for (let i = filteredCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [filteredCards[i], filteredCards[j]] = [filteredCards[j], filteredCards[i]];
+      }
+      currentIndex = 0;
+      renderCard();
+    }
+
+    function filterCategory(cat, btn) {
+      // Update tab UI
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+
+      filteredCards = cat === 'all'
+        ? [...ALL_CARDS]
+        : ALL_CARDS.filter(c => c.category === cat);
+
+      currentIndex = 0;
+      renderCard();
+    }
+
+    // ══════════════ MODE SWITCH ══════════════
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('study-panel').classList.toggle('active', mode === 'study');
+      document.getElementById('ai-panel').classList.toggle('active', mode === 'ai');
+      document.querySelectorAll('.mode-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', (i === 0 && mode === 'study') || (i === 1 && mode === 'ai'));
+      });
+    }
+
+    // ══════════════ AI GENERATION ══════════════
+    async function generateCards() {
+      const topic  = document.getElementById('topic-input').value.trim();
+      const rawKey = document.getElementById('api-key-input').value.trim();
+      // Use inline key if field is blank
+      const apiKey = rawKey || GEMINI_API_KEY;
+
+      const status = document.getElementById('ai-status');
+      const grid   = document.getElementById('ai-cards-grid');
+      const btn    = document.getElementById('gen-btn');
+
+      if (!topic) {
+        status.textContent = 'Please enter a topic first.';
+        status.className   = 'ai-status error';
+        return;
+      }
+      if (!apiKey || apiKey === 'YOUR_KEY_HERE') {
+        status.textContent = 'Please paste your Gemini API key above.';
+        status.className   = 'ai-status error';
+        return;
+      }
+
+      btn.disabled       = true;
+      status.textContent = '⏳ Generating flashcards…';
+      status.className   = 'ai-status';
+      grid.innerHTML     = '';
+
+      const prompt = `You are a study assistant for 9th graders reading Ender's Game by Orson Scott Card.
+Generate exactly 5 flashcards about: ${topic}
+Return ONLY a JSON array with this exact structure, no extra text:
+[{"front": "question or term", "back": "clear 9th-grade explanation, 2-3 sentences max"}]`;
+
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
+          }
+        );
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error?.message || `API error ${res.status}`);
+        }
+
+        const data = await res.json();
+        const raw  = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+        // Extract JSON array robustly
+        const match = raw.match(/\[[\s\S]*\]/);
+        if (!match) throw new Error('No JSON array found in response.');
+        const cards = JSON.parse(match[0]);
+
+        if (!Array.isArray(cards) || cards.length === 0) {
+          throw new Error('Unexpected response format.');
+        }
+
+        status.textContent = `✅ Generated ${cards.length} flashcards about "${topic}"`;
+        status.className   = 'ai-status success';
+
+        cards.forEach((card, i) => {
+          const scene = document.createElement('div');
+          scene.className = 'card-scene';
+          scene.onclick   = () => scene.classList.toggle('flipped');
+
+          scene.innerHTML = `
+            <div class="card-3d">
+              <div class="card-face card-front">
+                <span class="card-category-badge badge-vocab">AI · ${i + 1}/5</span>
+                <div class="question">${escHtml(card.front)}</div>
+                <div class="flip-hint">tap to reveal answer</div>
+              </div>
+              <div class="card-face card-back">
+                <div class="answer-label">Answer</div>
+                <div class="answer">${escHtml(card.back)}</div>
+              </div>
+            </div>`;
+
+          grid.appendChild(scene);
+        });
+
+      } catch (err) {
+        status.textContent = '❌ ' + err.message;
+        status.className   = 'ai-status error';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function escHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ══════════════ INIT ══════════════
+    renderCard();
+  </script>
+</body>
+</html>
