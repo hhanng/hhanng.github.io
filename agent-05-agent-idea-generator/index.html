@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Agent Idea Generator — Agent 05</title>
+  <style>
+    :root {
+      --bg:      #0f0f0f;
+      --card:    #1a1a1a;
+      --card2:   #222222;
+      --border:  #2a2a2a;
+      --accent:  #00dc82;
+      --accent2: #00b86a;
+      --text:    #f0f0f0;
+      --muted:   #888;
+      --red:     #ff5f5f;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    header a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.15s;
+    }
+    header a:hover { color: var(--accent); }
+    .header-title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-title .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .badge {
+      background: rgba(0,220,130,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(0,220,130,0.25);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+
+    .hero { text-align: center; margin-bottom: 36px; }
+    .hero h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p { color: var(--muted); font-size: 1rem; }
+
+    /* ── API KEY ── */
+    .apikey-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+    }
+    .apikey-row label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .apikey-row input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: monospace;
+      font-size: 0.88rem;
+    }
+    .apikey-row input::placeholder { color: #555; }
+    .key-status {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .key-status.ok  { background: rgba(0,220,130,0.15); color: var(--accent); }
+    .key-status.missing { background: rgba(255,95,95,0.15); color: var(--red); }
+
+    /* ── FORM ── */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    select, textarea {
+      background: var(--card2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    select:focus, textarea:focus { border-color: var(--accent); }
+    select option { background: #1a1a1a; }
+    textarea {
+      resize: vertical;
+      min-height: 72px;
+      line-height: 1.5;
+      width: 100%;
+    }
+    .form-full { grid-column: 1 / -1; }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #0f0f0f;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 6px;
+    }
+    .btn-primary:hover   { background: var(--accent2); }
+    .btn-primary:active  { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2.5px solid rgba(0,0,0,0.25);
+      border-top-color: #0f0f0f;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESULTS HEADER ── */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .results-header h2 { font-size: 1.05rem; font-weight: 700; }
+    .btn-regen {
+      background: var(--card);
+      color: var(--accent);
+      border: 1px solid rgba(0,220,130,0.3);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-regen:hover { background: rgba(0,220,130,0.08); border-color: var(--accent); }
+
+    /* ── IDEA CARDS ── */
+    .ideas-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .idea-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.4s ease forwards;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .idea-num {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .idea-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .idea-desc {
+      color: #bbb;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+    .idea-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .meta-pill {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      line-height: 1.4;
+    }
+    .meta-pill .pill-label {
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .meta-pill .pill-val { color: var(--text); }
+
+    .idea-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-sm {
+      padding: 7px 14px;
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .btn-save {
+      background: rgba(0,220,130,0.1);
+      color: var(--accent);
+      border: 1px solid rgba(0,220,130,0.25);
+    }
+    .btn-save:hover { background: rgba(0,220,130,0.18); }
+    .btn-save.saved {
+      background: rgba(0,220,130,0.06);
+      color: var(--muted);
+      border-color: var(--border);
+      cursor: default;
+    }
+    .btn-copy {
+      background: var(--card2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-copy:hover { color: var(--text); border-color: #444; }
+
+    /* ── ERROR ── */
+    .error-box {
+      background: rgba(255,95,95,0.1);
+      border: 1px solid rgba(255,95,95,0.3);
+      color: var(--red);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* ── SAVED PANEL ── */
+    .saved-section {
+      margin-top: 8px;
+    }
+    .saved-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .saved-header h2 { font-size: 1.05rem; font-weight: 700; }
+    .btn-clear-saved {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-clear-saved:hover { border-color: var(--red); color: var(--red); }
+
+    .saved-empty {
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding: 16px 0;
+    }
+    .saved-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .saved-item-text { flex: 1; }
+    .saved-item-title { font-size: 0.92rem; font-weight: 600; margin-bottom: 3px; }
+    .saved-item-desc  { font-size: 0.8rem; color: var(--muted); }
+    .btn-remove {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px 4px;
+      line-height: 1;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-remove:hover { color: var(--red); }
+
+    /* ── FOOTER ── */
+    .page-footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+    .page-footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .idea-actions { flex-direction: column; }
+      .btn-sm { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <a href="https://hhanng.github.io/">← All Agents</a>
+    <div class="header-title">
+      <span class="dot"></span>
+      AI Agent Idea Generator
+    </div>
+  </div>
+  <span class="badge">Agent 05 of 97</span>
+</header>
+
+<main>
+
+  <div class="hero">
+    <h1>Discover Your Next <span>AI Agent</span> Idea</h1>
+    <p>Pick a category and difficulty — Gemini generates 5 creative project ideas instantly.</p>
+  </div>
+
+  <!-- API KEY -->
+  <div class="apikey-row">
+    <label>🔑 Gemini Key</label>
+    <input type="password" id="api-key" placeholder="Enter your Gemini API key (aistudio.google.com)" oninput="onKeyInput()" />
+    <span class="key-status missing" id="key-status">No key</span>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-card">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="category">
+          <option>Productivity</option>
+          <option>Education</option>
+          <option>Games &amp; Fun</option>
+          <option>Health &amp; Fitness</option>
+          <option>Language Learning</option>
+          <option>Creative Arts</option>
+          <option>Finance</option>
+          <option>Career</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Difficulty</label>
+        <select id="difficulty">
+          <option>Beginner (HTML+JS only)</option>
+          <option>Intermediate (with backend)</option>
+          <option>Advanced (full-stack)</option>
+        </select>
+      </div>
+      <div class="form-group form-full">
+        <label>What problem should it solve? <span style="color:#555;font-weight:400;text-transform:none;">(optional)</span></label>
+        <textarea id="description" placeholder="e.g. Help me remember to drink water, make studying less boring…"></textarea>
+      </div>
+    </div>
+    <button class="btn-primary" id="gen-btn" onclick="generateIdeas()">
+      <span id="gen-text">✨ Generate Ideas</span>
+      <span class="spinner" id="spinner"></span>
+    </button>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-box" id="error-box" style="display:none;"></div>
+
+  <!-- RESULTS -->
+  <div id="results-section" style="display:none;">
+    <div class="results-header">
+      <h2>💡 5 Ideas for You</h2>
+      <button class="btn-regen" id="regen-btn" onclick="generateIdeas()">↻ Regenerate</button>
+    </div>
+    <div class="ideas-grid" id="ideas-grid"></div>
+  </div>
+
+  <!-- SAVED IDEAS -->
+  <div class="saved-section" id="saved-section" style="display:none;">
+    <div class="saved-header">
+      <h2>🔖 Saved Ideas</h2>
+      <button class="btn-clear-saved" onclick="clearSaved()">Clear all</button>
+    </div>
+    <div id="saved-list"></div>
+  </div>
+
+</main>
+
+<div class="page-footer">
+  Agent 05 of 97 &nbsp;|&nbsp; Built by Han Han &nbsp;|&nbsp;
+  <a href="https://hhanng.github.io/" target="_blank">hhanng.github.io</a>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+//  CONSTANTS
+// ──────────────────────────────────────────────
+const SAVED_KEY   = 'agent05-saved-ideas';
+const APIKEY_KEY  = 'agent05-gemini-key';
+const GEMINI_URL  = key =>
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+
+// ──────────────────────────────────────────────
+//  API KEY PERSISTENCE
+// ──────────────────────────────────────────────
+(function initKey() {
+  const stored = localStorage.getItem(APIKEY_KEY);
+  if (stored) {
+    document.getElementById('api-key').value = stored;
+    setKeyStatus(true);
+  }
+})();
+
+function onKeyInput() {
+  const key = document.getElementById('api-key').value.trim();
+  if (key) localStorage.setItem(APIKEY_KEY, key);
+  else localStorage.removeItem(APIKEY_KEY);
+  setKeyStatus(!!key);
+}
+
+function setKeyStatus(ok) {
+  const el = document.getElementById('key-status');
+  el.textContent = ok ? 'Ready' : 'No key';
+  el.className   = 'key-status ' + (ok ? 'ok' : 'missing');
+}
+
+function getKey() {
+  return document.getElementById('api-key').value.trim();
+}
+
+// ──────────────────────────────────────────────
+//  GENERATE
+// ──────────────────────────────────────────────
+let lastIdeas = [];
+
+async function generateIdeas() {
+  const key         = getKey();
+  const category    = document.getElementById('category').value;
+  const difficulty  = document.getElementById('difficulty').value;
+  const description = document.getElementById('description').value.trim();
+
+  const errBox = document.getElementById('error-box');
+  errBox.style.display = 'none';
+
+  if (!key) {
+    errBox.textContent = '⚠ Please enter your Gemini API key above. Get one free at aistudio.google.com';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  setLoading(true);
+
+  const prompt = `Generate exactly 5 creative AI agent/app ideas for the '${category}' category at '${difficulty}' difficulty level. ${description ? 'Additional context: ' + description : ''}
+
+For each idea, respond in this exact JSON format:
+[
+  {
+    "title": "Agent name",
+    "description": "One sentence what it does",
+    "keyFeature": "The coolest feature",
+    "techStack": "HTML + JS + Gemini API"
+  }
+]
+Return only the JSON array, no markdown.`;
+
+  try {
+    const res = await fetch(GEMINI_URL(key), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.9, maxOutputTokens: 1200 }
+      })
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Gemini API error ${res.status}: ${body.slice(0, 250)}`);
+    }
+
+    const data = await res.json();
+    let raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+
+    // strip markdown fences
+    raw = raw.replace(/^```(?:json)?/m, '').replace(/```$/m, '').trim();
+
+    const ideas = JSON.parse(raw);
+    if (!Array.isArray(ideas) || ideas.length === 0) throw new Error('Unexpected response format.');
+
+    lastIdeas = ideas;
+    renderIdeas(ideas, category, difficulty);
+
+  } catch (e) {
+    errBox.textContent = '⚠ ' + e.message;
+    errBox.style.display = 'block';
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setLoading(on) {
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = on;
+  document.getElementById('spinner').style.display  = on ? 'inline-block' : 'none';
+  document.getElementById('gen-text').textContent   = on ? 'Generating…' : '✨ Generate Ideas';
+  if (document.getElementById('regen-btn'))
+    document.getElementById('regen-btn').disabled = on;
+}
+
+// ──────────────────────────────────────────────
+//  RENDER IDEAS
+// ──────────────────────────────────────────────
+function renderIdeas(ideas, category, difficulty) {
+  const grid = document.getElementById('ideas-grid');
+  grid.innerHTML = '';
+
+  const saved = getSaved();
+
+  ideas.forEach((idea, i) => {
+    const isSaved = saved.some(s => s.title === idea.title);
+    const card = document.createElement('div');
+    card.className = 'idea-card';
+    card.style.animationDelay = (i * 0.08) + 's';
+    card.dataset.index = i;
+
+    card.innerHTML = `
+      <div class="idea-num">Idea ${i + 1}</div>
+      <div class="idea-title">${esc(idea.title)}</div>
+      <div class="idea-desc">${esc(idea.description)}</div>
+      <div class="idea-meta">
+        <div class="meta-pill"><span class="pill-label">⚡ Key feature</span> <span class="pill-val">${esc(idea.keyFeature)}</span></div>
+        <div class="meta-pill"><span class="pill-label">🛠 Stack</span> <span class="pill-val">${esc(idea.techStack)}</span></div>
+      </div>
+      <div class="idea-actions">
+        <button class="btn-sm btn-save ${isSaved ? 'saved' : ''}"
+                id="save-btn-${i}"
+                onclick="saveIdea(${i})"
+                ${isSaved ? 'disabled' : ''}>
+          ${isSaved ? '✓ Saved' : '🔖 Save Idea'}
+        </button>
+        <button class="btn-sm btn-copy" onclick="copyPrompt(${i}, this)">📋 Copy Claude Prompt</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  document.getElementById('results-section').style.display = 'block';
+  document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ──────────────────────────────────────────────
+//  SAVE / SAVED PANEL
+// ──────────────────────────────────────────────
+function getSaved() {
+  try { return JSON.parse(localStorage.getItem(SAVED_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveIdea(index) {
+  const idea = lastIdeas[index];
+  if (!idea) return;
+  let saved = getSaved();
+  if (saved.some(s => s.title === idea.title)) return;
+  saved.unshift({ ...idea, savedAt: new Date().toISOString() });
+  localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+
+  const btn = document.getElementById('save-btn-' + index);
+  if (btn) {
+    btn.textContent = '✓ Saved';
+    btn.classList.add('saved');
+    btn.disabled = true;
+  }
+  renderSaved();
+}
+
+function clearSaved() {
+  localStorage.removeItem(SAVED_KEY);
+  renderSaved();
+}
+
+function removeSaved(title) {
+  let saved = getSaved().filter(s => s.title !== title);
+  localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+  renderSaved();
+  // un-mark any visible save button
+  lastIdeas.forEach((idea, i) => {
+    if (idea.title === title) {
+      const btn = document.getElementById('save-btn-' + i);
+      if (btn) { btn.textContent = '🔖 Save Idea'; btn.classList.remove('saved'); btn.disabled = false; }
+    }
+  });
+}
+
+function renderSaved() {
+  const saved   = getSaved();
+  const section = document.getElementById('saved-section');
+  const list    = document.getElementById('saved-list');
+
+  if (saved.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  list.innerHTML = '';
+  saved.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'saved-item';
+    div.innerHTML = `
+      <div class="saved-item-text">
+        <div class="saved-item-title">${esc(item.title)}</div>
+        <div class="saved-item-desc">${esc(item.description)}</div>
+      </div>
+      <button class="btn-remove" onclick="removeSaved(${JSON.stringify(esc(item.title))})" title="Remove">✕</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ──────────────────────────────────────────────
+//  COPY CLAUDE PROMPT
+// ──────────────────────────────────────────────
+function copyPrompt(index, btn) {
+  const idea = lastIdeas[index];
+  if (!idea) return;
+  const category   = document.getElementById('category').value;
+  const difficulty = document.getElementById('difficulty').value;
+
+  const claudePrompt =
+`Build a single-file HTML app called "${idea.title}".
+
+## What it does
+${idea.description}
+
+## Key feature
+${idea.keyFeature}
+
+## Tech stack
+${idea.techStack}
+
+## Requirements
+- Category: ${category}
+- Difficulty: ${difficulty}
+- Single index.html, all CSS and JS inline
+- Dark theme, mobile responsive
+- Use the Gemini API (gemini-2.0-flash) for AI features
+- API key loaded from localStorage
+
+Build it now.`;
+
+  navigator.clipboard.writeText(claudePrompt).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 2200);
+  });
+}
+
+// ──────────────────────────────────────────────
+//  UTILS
+// ──────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// ── INIT
+renderSaved();
+</script>
+
+</body>
+</html>
