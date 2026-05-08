@@ -10,18 +10,17 @@
 
   <style>
     :root {
-      --bg:        #0d1117;
-      --surface:   #161b22;
-      --surface2:  #21262d;
-      --border:    #30363d;
-      --text:      #e6edf3;
-      --text-muted:#8b949e;
-      --accent:    #58a6ff;
-      --accent-dim:#1f3d5c;
-      --green:     #3fb950;
-      --red:       #f85149;
-      --amber:     #d29922;
-      --mono:      "Courier New", "Cascadia Code", "Fira Code", ui-monospace, monospace;
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --surface2: #21262d;
+      --border:   #30363d;
+      --text:     #e6edf3;
+      --muted:    #8b949e;
+      --accent:   #58a6ff;
+      --accent-bg:#1f3d5c;
+      --green:    #3fb950;
+      --red:      #f85149;
+      --mono:     "Courier New", ui-monospace, monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,163 +34,124 @@
       flex-direction: column;
     }
 
-    /* ── TOP NAV ── */
-    .topnav {
+    /* ── NAV ── */
+    nav {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 10px 24px;
+      padding: 11px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 50;
     }
-    .topnav a {
-      color: var(--text-muted);
+    nav a {
+      color: var(--muted);
       text-decoration: none;
       font-size: 0.88rem;
-      transition: color 0.2s;
+      transition: color 0.15s;
     }
-    .topnav a:hover { color: var(--accent); }
-    .topnav .title {
+    nav a:hover { color: var(--accent); }
+    .nav-title {
       font-size: 0.95rem;
       font-weight: 600;
-      color: var(--text);
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .topnav .title .dot {
-      width: 8px; height: 8px;
+    .live-dot {
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: var(--green);
-      animation: pulse 2s infinite;
+      animation: blink 2s infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.4; }
-    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
     .badge {
-      background: var(--accent-dim);
+      background: var(--accent-bg);
       color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 600;
       padding: 3px 10px;
       border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.3px;
     }
 
     /* ── LAYOUT ── */
     .layout {
       display: grid;
-      grid-template-columns: 1fr 340px;
-      grid-template-rows: 1fr;
-      gap: 0;
-      flex: 1;
-      height: calc(100vh - 46px);
-    }
-
-    /* ── MAIN PANEL ── */
-    .main-panel {
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid var(--border);
-      overflow: hidden;
-    }
-
-    /* ── SPLIT (left / right inside main) ── */
-    .workspace {
-      display: grid;
       grid-template-columns: 1fr 1fr;
       flex: 1;
-      overflow: hidden;
+      gap: 0;
     }
 
-    /* ── INPUT COLUMN ── */
-    .input-col {
+    /* ── LEFT COLUMN ── */
+    .left-col {
+      border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      border-right: 1px solid var(--border);
+      padding: 20px;
+      gap: 18px;
       overflow-y: auto;
     }
 
-    .col-header {
-      padding: 12px 16px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      font-size: 0.78rem;
+    .section-label {
+      font-size: 0.72rem;
       font-weight: 600;
-      color: var(--text-muted);
+      text-transform: uppercase;
       letter-spacing: 0.8px;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
+      color: var(--muted);
+      margin-bottom: 8px;
     }
 
-    .char-counter {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-family: var(--mono);
+    /* PROMPT TEXTAREA */
+    .prompt-wrap {
+      position: relative;
     }
-
-    textarea#prompt-input {
-      flex: 1;
+    textarea#prompt {
       width: 100%;
-      min-height: 220px;
-      background: var(--bg);
-      color: var(--text);
-      border: none;
-      padding: 16px;
-      font-family: var(--mono);
-      font-size: 0.9rem;
-      line-height: 1.65;
-      resize: none;
-      outline: none;
-    }
-    textarea#prompt-input::placeholder { color: var(--text-muted); }
-
-    /* ── CONTROLS ── */
-    .controls {
-      padding: 16px;
+      min-height: 160px;
       background: var(--surface);
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      flex-shrink: 0;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
     }
-
-    .ctrl-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .ctrl-group label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 7px;
-    }
-    .ctrl-group label .val {
-      color: var(--accent);
+    textarea#prompt:focus { border-color: var(--accent); }
+    textarea#prompt::placeholder { color: var(--muted); }
+    .char-counter {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      font-size: 0.72rem;
+      color: var(--muted);
       font-family: var(--mono);
-      text-transform: none;
-      letter-spacing: 0;
-      font-size: 0.82rem;
+      pointer-events: none;
     }
+
+    /* SLIDERS */
+    .slider-group { display: flex; flex-direction: column; gap: 6px; }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slider-label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      white-space: nowrap;
+      min-width: 220px;
+    }
+    .slider-label span { color: var(--accent); font-family: var(--mono); }
 
     input[type="range"] {
       -webkit-appearance: none;
-      width: 100%;
+      flex: 1;
       height: 4px;
       background: var(--border);
       border-radius: 99px;
@@ -200,638 +160,473 @@
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
+      width: 14px; height: 14px;
       border-radius: 50%;
       background: var(--accent);
       cursor: pointer;
       transition: transform 0.1s;
     }
-    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.3); }
     input[type="range"]::-moz-range-thumb {
       width: 14px; height: 14px;
       border-radius: 50%;
       background: var(--accent);
       border: none;
-      cursor: pointer;
     }
 
-    select {
-      width: 100%;
-      background: var(--surface2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-family: inherit;
-      font-size: 0.88rem;
-      cursor: pointer;
-      outline: none;
-    }
-    select:focus { border-color: var(--accent); }
-    select option:disabled { color: var(--text-muted); }
-
+    /* RUN BUTTON */
     .run-btn {
       width: 100%;
-      padding: 12px;
+      padding: 13px;
       background: var(--accent);
       color: #0d1117;
       border: none;
       border-radius: 8px;
       font-family: inherit;
-      font-size: 0.95rem;
+      font-size: 0.97rem;
       font-weight: 700;
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      transition: opacity 0.15s, transform 0.1s;
     }
     .run-btn:hover   { opacity: 0.88; }
     .run-btn:active  { transform: scale(0.98); }
-    .run-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .spinner {
-      display: inline-block;
       width: 14px; height: 14px;
-      border: 2px solid rgba(0,0,0,0.3);
+      border: 2px solid rgba(0,0,0,0.25);
       border-top-color: #0d1117;
       border-radius: 50%;
       animation: spin 0.65s linear infinite;
+      display: none;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── TEMPLATES ── */
-    .templates {
-      padding: 14px 16px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .templates-label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
-      margin-bottom: 10px;
-    }
-    .templates-row {
+    /* TEMPLATES */
+    .chips {
       display: flex;
       flex-wrap: wrap;
       gap: 7px;
     }
-    .tpl-btn {
+    .chip {
       background: var(--surface2);
-      color: var(--text-muted);
+      color: var(--muted);
       border: 1px solid var(--border);
-      padding: 5px 11px;
-      border-radius: 6px;
-      font-family: inherit;
+      padding: 5px 12px;
+      border-radius: 20px;
       font-size: 0.78rem;
       cursor: pointer;
       transition: border-color 0.15s, color 0.15s, background 0.15s;
       white-space: nowrap;
     }
-    .tpl-btn:hover {
+    .chip:hover {
       border-color: var(--accent);
       color: var(--accent);
-      background: var(--accent-dim);
+      background: var(--accent-bg);
     }
 
-    /* ── OUTPUT COLUMN ── */
-    .output-col {
+    /* ── RIGHT COLUMN ── */
+    .right-col {
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-    }
-
-    .meta-bar {
-      padding: 10px 16px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      gap: 20px;
-      flex-shrink: 0;
-    }
-    .meta-item {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .meta-item .meta-val {
-      color: var(--accent);
-      font-family: var(--mono);
-      font-weight: 600;
-    }
-
-    #response-area {
-      flex: 1;
-      background: var(--bg);
-      padding: 16px;
-      font-family: var(--mono);
-      font-size: 0.88rem;
-      line-height: 1.7;
-      color: var(--text);
+      padding: 20px;
+      gap: 14px;
       overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
     }
 
-    .placeholder-msg {
-      color: var(--text-muted);
-      font-style: italic;
-      font-family: var(--mono);
-    }
-
-    .output-footer {
-      padding: 10px 16px;
+    /* HISTORY */
+    .history-section { display: flex; flex-direction: column; gap: 6px; }
+    .history-list { display: flex; flex-direction: column; gap: 5px; }
+    .hist-empty { font-size: 0.8rem; color: var(--muted); font-style: italic; }
+    .hist-item {
       background: var(--surface);
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-    .icon-btn {
-      background: var(--surface2);
-      color: var(--text-muted);
       border: 1px solid var(--border);
-      padding: 6px 14px;
       border-radius: 6px;
-      font-family: inherit;
-      font-size: 0.8rem;
+      padding: 8px 12px;
       cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-    }
-    .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* ── HISTORY SIDEBAR ── */
-    .sidebar {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background: var(--surface);
-    }
-    .sidebar-header {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
+      transition: border-color 0.15s, background 0.15s;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-shrink: 0;
+      gap: 8px;
     }
-    .clear-hist {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-    .clear-hist:hover { color: var(--red); }
-
-    .history-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px;
-    }
-    .history-empty {
-      padding: 20px 12px;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .hist-item {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      margin-bottom: 8px;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .hist-item:hover { border-color: var(--accent); background: var(--accent-dim); }
-    .hist-item .hist-preview {
-      font-size: 0.82rem;
+    .hist-item:hover { border-color: var(--accent); background: var(--accent-bg); }
+    .hist-text {
+      font-size: 0.8rem;
       color: var(--text);
       font-family: var(--mono);
-      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 5px;
+      white-space: nowrap;
+      flex: 1;
     }
-    .hist-item .hist-meta {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      display: flex;
-      gap: 10px;
-    }
+    .hist-time { font-size: 0.72rem; color: var(--muted); flex-shrink: 0; }
 
-    /* ── SIDEBAR BOTTOM INFO ── */
-    .sidebar-footer {
-      padding: 14px 16px;
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .info-block {
-      background: var(--surface2);
+    /* RESPONSE */
+    .response-section { display: flex; flex-direction: column; flex: 1; gap: 6px; }
+    #response-out {
+      flex: 1;
+      min-height: 220px;
+      background: var(--surface);
+      color: var(--text);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 12px;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-    .info-block a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .info-block a:hover { text-decoration: underline; }
-
-    /* ── ERROR ── */
-    .error-banner {
-      background: rgba(248,81,73,0.12);
-      border: 1px solid rgba(248,81,73,0.4);
-      color: #f85149;
-      padding: 12px 16px;
+      padding: 14px;
+      font-family: var(--mono);
       font-size: 0.88rem;
+      line-height: 1.7;
+      resize: vertical;
+      outline: none;
+      white-space: pre-wrap;
+      overflow-y: auto;
+    }
+
+    /* META BAR */
+    .meta-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .meta-item span {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-weight: 600;
+    }
+
+    /* COPY BUTTON */
+    .copy-btn {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      align-self: flex-start;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ERROR */
+    .error-box {
+      background: rgba(248,81,73,0.1);
+      border: 1px solid rgba(248,81,73,0.35);
+      color: var(--red);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 0.85rem;
       font-family: var(--mono);
       line-height: 1.6;
     }
 
     /* ── FOOTER ── */
     footer {
-      text-align: center;
-      padding: 12px;
-      font-size: 0.78rem;
-      color: var(--text-muted);
       border-top: 1px solid var(--border);
       background: var(--surface);
+      text-align: center;
+      padding: 10px;
+      font-size: 0.78rem;
+      color: var(--muted);
     }
     footer a { color: var(--accent); text-decoration: none; }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 900px) {
-      .layout { grid-template-columns: 1fr; grid-template-rows: auto; height: auto; }
-      .workspace { grid-template-columns: 1fr; height: auto; }
-      .main-panel { border-right: none; border-bottom: 1px solid var(--border); }
-      .input-col  { min-height: 300px; }
-      .output-col { min-height: 300px; }
-      .sidebar    { min-height: 200px; }
-      .layout, .workspace, .main-panel, .input-col, .output-col { height: auto; overflow: visible; }
-      #response-area { min-height: 200px; }
+    /* ── MOBILE ── */
+    @media (max-width: 720px) {
+      .layout { grid-template-columns: 1fr; }
+      .left-col { border-right: none; border-bottom: 1px solid var(--border); }
+      .slider-label { min-width: auto; }
     }
   </style>
 </head>
 <body>
 
-<!-- TOP NAV -->
-<nav class="topnav">
+<nav>
   <a href="https://hhanng.github.io/">← All Agents</a>
-  <div class="title"><span class="dot"></span> Gemini API Playground</div>
+  <div class="nav-title"><span class="live-dot"></span> Gemini API Playground</div>
   <span class="badge">Agent 04 of 97</span>
 </nav>
 
 <div class="layout">
 
-  <!-- ═══════════════════════════════════════════════════════
-       MAIN PANEL (input + output)
-  ════════════════════════════════════════════════════════ -->
-  <div class="main-panel">
+  <!-- ════════════════════════ LEFT COLUMN ═══════════════════════ -->
+  <div class="left-col">
 
-    <!-- TEMPLATES BAR -->
-    <div class="templates">
-      <div class="templates-label">Starter templates</div>
-      <div class="templates-row" id="templates-row"></div>
+    <!-- PROMPT -->
+    <div>
+      <div class="section-label">Prompt</div>
+      <div class="prompt-wrap">
+        <textarea id="prompt" rows="6" placeholder="Type your prompt here, or pick a starter template below…" oninput="onInput()"></textarea>
+        <div class="char-counter"><span id="char-count">0</span> chars</div>
+      </div>
     </div>
 
-    <div class="workspace">
-
-      <!-- INPUT COLUMN -->
-      <div class="input-col">
-        <div class="col-header">
-          <span>Prompt</span>
-          <span class="char-counter"><span id="char-count">0</span> chars</span>
-        </div>
-
-        <textarea id="prompt-input" placeholder="Type your prompt here — or click a starter template above…" oninput="onPromptInput()"></textarea>
-
-        <div class="controls">
-          <div class="ctrl-row">
-            <div class="ctrl-group">
-              <label>Temperature <span class="val" id="temp-label">0.7</span></label>
-              <input type="range" id="temp-slider" min="0" max="1" step="0.1" value="0.7"
-                     oninput="document.getElementById('temp-label').textContent = this.value" />
-            </div>
-            <div class="ctrl-group">
-              <label>Max tokens <span class="val" id="tokens-label">1024</span></label>
-              <input type="range" id="tokens-slider" min="100" max="2000" step="100" value="1024"
-                     oninput="document.getElementById('tokens-label').textContent = this.value" />
-            </div>
-          </div>
-
-          <div class="ctrl-group">
-            <label>Model</label>
-            <select id="model-select">
-              <option value="gemini-pro">gemini-pro</option>
-              <option value="gemini-pro-vision" disabled>gemini-pro-vision (text only for now)</option>
-            </select>
-          </div>
-
-          <button class="run-btn" id="run-btn" onclick="runPrompt()">
-            <span id="run-btn-text">▶ Run Prompt</span>
-            <span id="run-spinner" style="display:none;" class="spinner"></span>
-          </button>
-        </div>
+    <!-- SLIDERS -->
+    <div class="slider-group">
+      <div class="section-label">Parameters</div>
+      <div class="slider-row">
+        <div class="slider-label">Temperature: <span id="temp-val">0.7</span> — <span id="temp-desc" style="font-family:inherit;color:var(--muted);">balanced</span></div>
       </div>
-
-      <!-- OUTPUT COLUMN -->
-      <div class="output-col">
-        <div class="col-header">
-          <span>Response</span>
-        </div>
-
-        <!-- META BAR -->
-        <div class="meta-bar">
-          <div class="meta-item">Model <span class="meta-val" id="meta-model">—</span></div>
-          <div class="meta-item">Time <span class="meta-val" id="meta-time">—</span></div>
-          <div class="meta-item">Input tokens <span class="meta-val" id="meta-in">—</span></div>
-          <div class="meta-item">Output tokens <span class="meta-val" id="meta-out">—</span></div>
-        </div>
-
-        <div id="response-area">
-          <span class="placeholder-msg">// Response will appear here after you run a prompt</span>
-        </div>
-
-        <div class="output-footer">
-          <button class="icon-btn" onclick="clearOutput()">Clear</button>
-          <button class="icon-btn" onclick="copyResponse()">Copy</button>
-        </div>
+      <div class="slider-row">
+        <input type="range" id="temp" min="0" max="1" step="0.1" value="0.7" oninput="onTempChange(this.value)" />
       </div>
-
+      <div class="slider-row" style="margin-top:10px;">
+        <div class="slider-label">Max tokens: <span id="tokens-val">1024</span></div>
+      </div>
+      <div class="slider-row">
+        <input type="range" id="tokens" min="100" max="2000" step="100" value="1024"
+               oninput="document.getElementById('tokens-val').textContent = this.value" />
+      </div>
     </div>
+
+    <!-- RUN BUTTON -->
+    <button class="run-btn" id="run-btn" onclick="runPrompt()">
+      <span id="run-text">▶  Run Prompt</span>
+      <span class="spinner" id="spinner"></span>
+    </button>
+
+    <!-- TEMPLATES -->
+    <div>
+      <div class="section-label">Starter templates</div>
+      <div class="chips" id="chips"></div>
+    </div>
+
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════
-       SIDEBAR — prompt history
-  ════════════════════════════════════════════════════════ -->
-  <div class="sidebar">
-    <div class="sidebar-header">
-      Prompt History
-      <a class="clear-hist" onclick="clearHistory()">Clear all</a>
-    </div>
+  <!-- ════════════════════════ RIGHT COLUMN ══════════════════════ -->
+  <div class="right-col">
 
-    <div class="history-list" id="history-list">
-      <div class="history-empty">No history yet.<br>Run a prompt to get started.</div>
-    </div>
-
-    <div class="sidebar-footer">
-      <div class="info-block">
-        🔑 Add your key in the &lt;script&gt; section.<br>
-        Get a free key at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>.<br><br>
-        History is saved in <code>localStorage</code> — stays across reloads.
+    <!-- HISTORY -->
+    <div class="history-section">
+      <div class="section-label">Prompt history (last 5)</div>
+      <div class="history-list" id="history-list">
+        <span class="hist-empty">No history yet — run your first prompt.</span>
       </div>
     </div>
+
+    <!-- RESPONSE -->
+    <div class="response-section">
+      <div class="section-label">Response</div>
+      <div id="response-out" style="color:var(--muted);font-style:italic;">// Output will appear here…</div>
+      <div class="meta-bar" id="meta-bar">
+        <div class="meta-item">Model <span id="meta-model">—</span></div>
+        <div class="meta-item">Time <span id="meta-time">—</span></div>
+      </div>
+      <button class="copy-btn" onclick="copyResponse()">Copy response</button>
+    </div>
+
   </div>
 
 </div>
 
 <footer>
   Agent 04 of 97 &nbsp;|&nbsp; Built by Han Han &nbsp;|&nbsp;
-  <a href="https://hhanng.github.io/">hhanng.github.io</a>
+  <a href="https://hhanng.github.io/" target="_blank">hhanng.github.io</a>
 </footer>
 
 <script>
-// ──────────────────────────────────────────────────────
-//  CONFIG
-// ──────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
+//  CONFIG  — replace with your free key from aistudio.google.com
+// ──────────────────────────────────────────────────
 const GEMINI_API_KEY = 'YOUR_KEY_HERE';
-// Get your free key at: https://aistudio.google.com
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
-function geminiURL(model) {
-  return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-}
-
-// ──────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
 //  TEMPLATES
-// ──────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
 const TEMPLATES = [
-  'Explain this like I\'m a beginner:',
-  'Write a Python function that:',
-  'Give me 5 ideas for:',
-  'Summarize this text:',
-  'Debug this code:',
-  'Translate this to Vietnamese:',
+  "Explain this like I'm a beginner: ",
+  "Write a Python function that: ",
+  "Give me 5 creative ideas for: ",
+  "Summarize this in 3 bullet points: ",
+  "Debug this code and explain the fix: ",
+  "Translate this to Vietnamese: ",
 ];
 
-function buildTemplates() {
-  const row = document.getElementById('templates-row');
+(function buildChips() {
+  const row = document.getElementById('chips');
   TEMPLATES.forEach(t => {
     const btn = document.createElement('button');
-    btn.className = 'tpl-btn';
-    btn.textContent = t;
+    btn.className = 'chip';
+    btn.textContent = t.trim().replace(/:?\s*$/, '');
     btn.onclick = () => {
-      document.getElementById('prompt-input').value = t + ' ';
-      onPromptInput();
-      document.getElementById('prompt-input').focus();
+      document.getElementById('prompt').value = t;
+      onInput();
+      document.getElementById('prompt').focus();
     };
     row.appendChild(btn);
   });
-}
+})();
 
-// ──────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
 //  CHAR COUNTER
-// ──────────────────────────────────────────────────────
-function onPromptInput() {
-  const len = document.getElementById('prompt-input').value.length;
-  const el  = document.getElementById('char-count');
-  el.textContent = len.toLocaleString();
-  el.style.color = len > 8000 ? 'var(--amber)' : '';
+// ──────────────────────────────────────────────────
+function onInput() {
+  const n = document.getElementById('prompt').value.length;
+  document.getElementById('char-count').textContent = n.toLocaleString();
 }
 
-// ──────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
+//  TEMPERATURE LABEL
+// ──────────────────────────────────────────────────
+function onTempChange(v) {
+  document.getElementById('temp-val').textContent = v;
+  const n = parseFloat(v);
+  const desc = n <= 0.2 ? 'precise / deterministic'
+             : n <= 0.5 ? 'focused'
+             : n <= 0.7 ? 'balanced'
+             : n <= 0.9 ? 'creative'
+             : 'highly random';
+  document.getElementById('temp-desc').textContent = desc;
+}
+
+// ──────────────────────────────────────────────────
 //  RUN PROMPT
-// ──────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
 async function runPrompt() {
-  const prompt  = document.getElementById('prompt-input').value.trim();
-  const model   = document.getElementById('model-select').value;
-  const temp    = parseFloat(document.getElementById('temp-slider').value);
-  const maxTok  = parseInt(document.getElementById('tokens-slider').value, 10);
-  const respEl  = document.getElementById('response-area');
+  const prompt   = document.getElementById('prompt').value.trim();
+  const temp     = parseFloat(document.getElementById('temp').value);
+  const maxTok   = parseInt(document.getElementById('tokens').value, 10);
+  const respEl   = document.getElementById('response-out');
 
   if (!prompt) {
-    respEl.innerHTML = '<span class="error-banner">⚠ Please enter a prompt first.</span>';
+    showError('Please enter a prompt first.');
     return;
   }
 
   setLoading(true);
-  respEl.innerHTML = '<span class="placeholder-msg">// Calling Gemini API…</span>';
-  resetMeta();
+  respEl.style.color = 'var(--muted)';
+  respEl.style.fontStyle = 'italic';
+  respEl.textContent = '// Calling Gemini Pro…';
+  document.getElementById('meta-model').textContent = '—';
+  document.getElementById('meta-time').textContent  = '—';
 
-  const t0 = Date.now();
+  const t0 = performance.now();
 
   try {
-    const res = await fetch(geminiURL(model), {
+    const res = await fetch(GEMINI_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: temp,
-          maxOutputTokens: maxTok,
-        }
+        generationConfig: { temperature: temp, maxOutputTokens: maxTok }
       })
     });
 
-    const elapsed = Date.now() - t0;
+    const elapsed = Math.round(performance.now() - t0);
 
     if (!res.ok) {
-      const errBody = await res.text();
-      throw new Error(`HTTP ${res.status}: ${errBody.slice(0, 300)}`);
+      const body = await res.text();
+      throw new Error(`HTTP ${res.status} — ${body.slice(0, 250)}`);
     }
 
     const data = await res.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '(empty response)';
 
-    // metadata
-    const usage   = data.usageMetadata ?? {};
-    const inTok   = usage.promptTokenCount     ?? '—';
-    const outTok  = usage.candidatesTokenCount ?? '—';
-
-    document.getElementById('meta-model').textContent = model;
-    document.getElementById('meta-time').textContent  = elapsed + ' ms';
-    document.getElementById('meta-in').textContent    = inTok;
-    document.getElementById('meta-out').textContent   = outTok;
-
+    respEl.style.color = 'var(--text)';
+    respEl.style.fontStyle = 'normal';
     respEl.textContent = text;
 
-    saveHistory(prompt, model, elapsed, outTok);
+    document.getElementById('meta-model').textContent = 'gemini-pro';
+    document.getElementById('meta-time').textContent  = elapsed + ' ms';
+
+    saveHistory(prompt);
     renderHistory();
 
-  } catch (e) {
-    const elapsed = Date.now() - t0;
-    document.getElementById('meta-time').textContent = elapsed + ' ms';
-    respEl.innerHTML = `<span class="error-banner">⚠ Error: ${escHtml(e.message)}</span>`;
+  } catch (err) {
+    showError(err.message);
   } finally {
     setLoading(false);
   }
 }
 
 function setLoading(on) {
-  const btn = document.getElementById('run-btn');
-  btn.disabled = on;
-  document.getElementById('run-spinner').style.display  = on ? 'inline-block' : 'none';
-  document.getElementById('run-btn-text').textContent   = on ? 'Running…' : '▶ Run Prompt';
+  document.getElementById('run-btn').disabled   = on;
+  document.getElementById('spinner').style.display  = on ? 'inline-block' : 'none';
+  document.getElementById('run-text').textContent   = on ? 'Running…' : '▶  Run Prompt';
 }
 
-function resetMeta() {
-  ['meta-model','meta-time','meta-in','meta-out'].forEach(id => {
-    document.getElementById(id).textContent = '—';
-  });
+function showError(msg) {
+  const el = document.getElementById('response-out');
+  el.innerHTML = `<div class="error-box">⚠ ${escHtml(msg)}</div>`;
+  el.style.color = '';
+  el.style.fontStyle = '';
 }
 
-// ──────────────────────────────────────────────────────
-//  OUTPUT ACTIONS
-// ──────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
+//  COPY
+// ──────────────────────────────────────────────────
 function copyResponse() {
-  const text = document.getElementById('response-area').textContent;
-  if (!text.trim() || text.includes('Response will appear')) return;
+  const text = document.getElementById('response-out').textContent.trim();
+  if (!text || text === '// Output will appear here…' || text.startsWith('//')) return;
   navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.icon-btn:last-child');
+    const btn = document.querySelector('.copy-btn');
     btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+    setTimeout(() => { btn.textContent = 'Copy response'; }, 2000);
   });
 }
 
-function clearOutput() {
-  document.getElementById('response-area').innerHTML =
-    '<span class="placeholder-msg">// Response will appear here after you run a prompt</span>';
-  resetMeta();
-}
-
-// ──────────────────────────────────────────────────────
-//  PROMPT HISTORY (localStorage)
-// ──────────────────────────────────────────────────────
-const HIST_KEY = 'gemini-playground-history-v1';
-const MAX_HIST = 5;
+// ──────────────────────────────────────────────────
+//  PROMPT HISTORY
+// ──────────────────────────────────────────────────
+const HIST_KEY = 'gp-history-v1';
 
 function loadHistory() {
   try { return JSON.parse(localStorage.getItem(HIST_KEY)) || []; }
   catch { return []; }
 }
 
-function saveHistory(prompt, model, ms, tokens) {
-  let hist = loadHistory();
-  hist.unshift({
-    prompt,
-    model,
-    ms,
-    tokens,
-    ts: new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
-  });
-  if (hist.length > MAX_HIST) hist = hist.slice(0, MAX_HIST);
-  localStorage.setItem(HIST_KEY, JSON.stringify(hist));
-}
-
-function clearHistory() {
-  localStorage.removeItem(HIST_KEY);
-  renderHistory();
+function saveHistory(prompt) {
+  let h = loadHistory().filter(x => x.text !== prompt);
+  h.unshift({ text: prompt, ts: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+  if (h.length > 5) h = h.slice(0, 5);
+  localStorage.setItem(HIST_KEY, JSON.stringify(h));
 }
 
 function renderHistory() {
-  const hist = loadHistory();
-  const el   = document.getElementById('history-list');
+  const h  = loadHistory();
+  const el = document.getElementById('history-list');
 
-  if (hist.length === 0) {
-    el.innerHTML = '<div class="history-empty">No history yet.<br>Run a prompt to get started.</div>';
+  if (h.length === 0) {
+    el.innerHTML = '<span class="hist-empty">No history yet — run your first prompt.</span>';
     return;
   }
 
   el.innerHTML = '';
-  hist.forEach((h, i) => {
-    const item = document.createElement('div');
-    item.className = 'hist-item';
-    item.innerHTML = `
-      <div class="hist-preview">${escHtml(h.prompt.slice(0, 80))}${h.prompt.length > 80 ? '…' : ''}</div>
-      <div class="hist-meta">
-        <span>${h.model}</span>
-        <span>${h.ms} ms</span>
-        <span>${h.ts}</span>
-      </div>
+  h.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'hist-item';
+    div.title = item.text;
+    div.innerHTML = `
+      <span class="hist-text">${escHtml(item.text)}</span>
+      <span class="hist-time">${item.ts}</span>
     `;
-    item.onclick = () => {
-      document.getElementById('prompt-input').value = h.prompt;
-      onPromptInput();
-      document.getElementById('prompt-input').focus();
+    div.onclick = () => {
+      document.getElementById('prompt').value = item.text;
+      onInput();
+      document.getElementById('prompt').focus();
     };
-    el.appendChild(item);
+    el.appendChild(div);
   });
 }
 
-// ──────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
 //  UTILS
-// ──────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
 function escHtml(s) {
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ──────────────────────────────────────────────────────
-//  INIT
-// ──────────────────────────────────────────────────────
-buildTemplates();
+// ── INIT
 renderHistory();
 </script>
 
