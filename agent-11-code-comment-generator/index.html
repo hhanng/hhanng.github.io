@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Comment Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --card: #1a1a1a;
+      --border: #2a2a2a;
+      --accent: #10b981;
+      --accent-dark: #059669;
+      --accent-dim: rgba(16,185,129,0.15);
+      --text: #e5e5e5;
+      --muted: #888;
+      --danger: #ef4444;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 60px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #10b981, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+    .badge-agent {
+      display: inline-block;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], input[type="password"], select, textarea {
+      width: 100%;
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+    select option { background: #1a1a1a; }
+
+    textarea#codeInput {
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      min-height: 240px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .settings-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 640px) {
+      .settings-row { grid-template-columns: 1fr; }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      width: 100%;
+      font-size: 1rem;
+      padding: 14px;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: #222;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: #2a2a2a; border-color: var(--accent); color: var(--accent); }
+
+    .btn-explain {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      width: 100%;
+      margin-top: 12px;
+    }
+    .btn-explain:hover { background: var(--accent-dim); }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .btn-row .btn { flex: 1; min-width: 140px; }
+
+    #spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-msg {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* Output panel */
+    #outputPanel { display: none; }
+
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .output-header h2 { font-size: 1.1rem; }
+
+    .comment-badge {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* Diff view */
+    .diff-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 640px) {
+      .diff-container { grid-template-columns: 1fr; }
+      .diff-panel.hide-mobile { display: none; }
+      .diff-panel.show-mobile { display: block; }
+    }
+
+    .diff-panel {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .diff-panel-header {
+      background: #111;
+      padding: 8px 14px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .diff-panel-header .panel-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .dot-original { background: #888; }
+    .dot-commented { background: var(--accent); }
+
+    .diff-panel pre {
+      margin: 0;
+      max-height: 420px;
+      overflow: auto;
+      font-size: 0.78rem;
+      line-height: 1.6;
+    }
+    .diff-panel pre code {
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      white-space: pre;
+    }
+
+    /* Mobile toggle */
+    .mobile-toggle {
+      display: none;
+      gap: 0;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    @media (max-width: 640px) { .mobile-toggle { display: flex; } }
+    .toggle-btn {
+      flex: 1;
+      padding: 9px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: none;
+      background: #111;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .toggle-btn.active { background: var(--accent); color: #000; }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 16px;
+    }
+    .stat-item { text-align: center; }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 3px;
+    }
+    .stats-divider {
+      width: 1px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    /* Explain box */
+    .explain-box {
+      display: none;
+      background: #111;
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #ccc;
+    }
+    .explain-box strong { color: var(--accent); }
+
+    /* History */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .history-item {
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .history-item:hover { border-color: var(--accent); }
+    .history-item-info { flex: 1; min-width: 0; }
+    .history-item-lang {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .history-item-preview {
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .history-item-date {
+      font-size: 0.7rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .history-empty {
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 16px;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+    }
+
+    /* API key area */
+    .api-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .api-row > div:first-child { flex: 1; }
+    .api-row .btn { white-space: nowrap; padding: 10px 16px; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge-agent">AGENT #11 OF 97</div>
+    <h1>Code Comment Generator</h1>
+    <p>Paste any code — get it back fully commented with Gemini AI</p>
+  </header>
+
+  <!-- API Key -->
+  <div class="card">
+    <div class="api-row">
+      <div>
+        <label for="apiKey">Gemini API Key</label>
+        <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" />
+      </div>
+      <button class="btn btn-secondary" onclick="saveApiKey()">Save</button>
+    </div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:8px;">
+      Stored in localStorage. Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent);">aistudio.google.com</a>
+    </p>
+  </div>
+
+  <!-- Input -->
+  <div class="card">
+    <label for="codeInput">Your Code</label>
+    <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
+
+    <div class="settings-row" style="margin-top:14px;">
+      <div>
+        <label for="langSelect">Language</label>
+        <select id="langSelect">
+          <option>Python</option>
+          <option>JavaScript</option>
+          <option>TypeScript</option>
+          <option>Java</option>
+          <option>C++</option>
+          <option>Go</option>
+          <option>Rust</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label for="styleSelect">Comment Style</label>
+        <select id="styleSelect">
+          <option value="inline comments">Inline comments</option>
+          <option value="JSDoc / Docstrings">JSDoc / Docstrings</option>
+          <option value="both inline and docstring">Both inline + docstrings</option>
+          <option value="minimal (functions only)">Minimal (functions only)</option>
+        </select>
+      </div>
+      <div>
+        <label for="toneSelect">Tone</label>
+        <select id="toneSelect">
+          <option value="Professional">Professional</option>
+          <option value="Beginner-friendly (explain everything)">Beginner-friendly</option>
+          <option value="Concise">Concise</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="addBtn" onclick="addComments()">
+      <div id="spinner"></div>
+      <span id="btnText">Add Comments</span>
+    </button>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <!-- Output Panel -->
+  <div id="outputPanel">
+    <div class="card">
+      <div class="output-header">
+        <h2>Result</h2>
+        <span class="comment-badge" id="commentBadge">0 comments added</span>
+      </div>
+
+      <!-- Mobile toggle -->
+      <div class="mobile-toggle">
+        <button class="toggle-btn active" id="toggleOrigBtn" onclick="showPanel('original')">Original</button>
+        <button class="toggle-btn" id="toggleComBtn" onclick="showPanel('commented')">Commented</button>
+      </div>
+
+      <div class="diff-container">
+        <div class="diff-panel" id="panelOriginal">
+          <div class="diff-panel-header">
+            <span><span class="panel-dot dot-original"></span>Original</span>
+          </div>
+          <pre><code id="originalCode" class="hljs"></code></pre>
+        </div>
+        <div class="diff-panel" id="panelCommented">
+          <div class="diff-panel-header">
+            <span><span class="panel-dot dot-commented"></span>Commented</span>
+          </div>
+          <pre><code id="commentedCode" class="hljs"></code></pre>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value" id="statFunctions">0</div>
+          <div class="stat-label">Functions Documented</div>
+        </div>
+        <div class="stats-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value" id="statInline">0</div>
+          <div class="stat-label">Inline Comments</div>
+        </div>
+        <div class="stats-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value" id="statLines">0</div>
+          <div class="stat-label">Total Lines</div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="copyCommented()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy commented code
+        </button>
+        <button class="btn btn-secondary" onclick="downloadFile()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download as file
+        </button>
+      </div>
+
+      <button class="btn btn-explain" id="explainBtn" onclick="explainCode()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Explain this code
+      </button>
+
+      <div class="explain-box" id="explainBox"></div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <div class="section-title">Recent History</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────
+  let lastCommentedCode = '';
+  let lastLanguage = 'Python';
+  let mobileView = 'original';
+
+  const EXT_MAP = {
+    Python: 'py', JavaScript: 'js', TypeScript: 'ts',
+    Java: 'java', 'C++': 'cpp', Go: 'go', Rust: 'rs', Other: 'txt'
+  };
+
+  const HLJS_LANG = {
+    Python: 'python', JavaScript: 'javascript', TypeScript: 'typescript',
+    Java: 'java', 'C++': 'cpp', Go: 'go', Rust: 'rust', Other: 'plaintext'
+  };
+
+  // ── Init ───────────────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('gemini_api_key');
+    if (saved) document.getElementById('apiKey').value = saved;
+    renderHistory();
+  });
+
+  function saveApiKey() {
+    const key = document.getElementById('apiKey').value.trim();
+    if (key) {
+      localStorage.setItem('gemini_api_key', key);
+      showToast('API key saved!');
+    }
+  }
+
+  // ── Main action ────────────────────────────────────────────────────
+  async function addComments() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const code = document.getElementById('codeInput').value.trim();
+    const language = document.getElementById('langSelect').value;
+    const commentStyle = document.getElementById('styleSelect').value;
+    const tone = document.getElementById('toneSelect').value;
+
+    if (!apiKey) return showError('Please enter your Gemini API key.');
+    if (!code) return showError('Please paste some code first.');
+
+    setLoading(true);
+    hideError();
+
+    const prompt = `Add ${commentStyle} comments to this ${language} code. Tone: ${tone}.
+
+Rules:
+- For inline comments: add a comment above or beside each meaningful line explaining WHAT it does and WHY
+- For docstrings: add proper ${language} docstrings to every function/class with params and return description
+- Do NOT change any existing logic, only add comments
+- Keep comments accurate and useful, not obvious (don't write '// add 1 to x' for 'x += 1')
+- If beginner-friendly tone: explain concepts a student might not know
+
+Code:
+${code}
+
+Respond in this exact JSON format:
+{
+  "commentedCode": "full code with comments added",
+  "stats": {
+    "functionsDocumented": 3,
+    "inlineCommentsAdded": 12,
+    "summary": "One sentence of what this code does"
+  }
+}
+
+Return only the JSON, no markdown.`;
+
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.3 }
+          })
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error?.message || `API error ${res.status}`);
+      }
+
+      const data = await res.json();
+      let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      // Strip markdown code fences if present
+      raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        // Try to extract JSON object
+        const match = raw.match(/\{[\s\S]*\}/);
+        if (match) parsed = JSON.parse(match[0]);
+        else throw new Error('Could not parse Gemini response as JSON.');
+      }
+
+      const commented = parsed.commentedCode || '';
+      const stats = parsed.stats || {};
+      const originalLines = code.split('\n').length;
+      const commentedLines = commented.split('\n').length;
+
+      lastCommentedCode = commented;
+      lastLanguage = language;
+
+      // Render diff
+      const hljsLang = HLJS_LANG[language] || 'plaintext';
+      renderCode('originalCode', code, hljsLang);
+      renderCode('commentedCode', commented, hljsLang);
+
+      // Badge
+      const added = stats.inlineCommentsAdded || (commentedLines - originalLines);
+      document.getElementById('commentBadge').textContent = `+${added} comments added`;
+
+      // Stats
+      document.getElementById('statFunctions').textContent = stats.functionsDocumented ?? '—';
+      document.getElementById('statInline').textContent = stats.inlineCommentsAdded ?? added;
+      document.getElementById('statLines').textContent = commentedLines;
+
+      // Hide explain box
+      document.getElementById('explainBox').style.display = 'none';
+
+      // Show output
+      document.getElementById('outputPanel').style.display = 'block';
+      document.getElementById('outputPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Reset mobile view
+      showPanel('original');
+
+      // Save to history
+      saveHistory({ code, commented, language, commentStyle, tone, stats, date: new Date().toISOString() });
+
+    } catch (err) {
+      showError(err.message || 'Something went wrong. Check your API key and try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ── Explain ────────────────────────────────────────────────────────
+  async function explainCode() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const code = document.getElementById('codeInput').value.trim();
+    const language = document.getElementById('langSelect').value;
+
+    if (!apiKey || !code) return;
+
+    const btn = document.getElementById('explainBtn');
+    btn.textContent = 'Explaining…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `Explain in plain English what this ${language} code does. Write 2-3 concise sentences max. No code blocks.\n\n${code}` }] }],
+            generationConfig: { temperature: 0.4 }
+          })
+        }
+      );
+      const data = await res.json();
+      const explanation = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Could not generate explanation.';
+
+      const box = document.getElementById('explainBox');
+      box.innerHTML = `<strong>What this code does:</strong> ${escapeHtml(explanation)}`;
+      box.style.display = 'block';
+    } catch {
+      showError('Could not explain the code. Try again.');
+    } finally {
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Explain this code`;
+      btn.disabled = false;
+    }
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────
+  function renderCode(elId, code, lang) {
+    const el = document.getElementById(elId);
+    el.textContent = code;
+    el.className = `hljs language-${lang}`;
+    hljs.highlightElement(el);
+  }
+
+  function copyCommented() {
+    if (!lastCommentedCode) return;
+    navigator.clipboard.writeText(lastCommentedCode).then(() => showToast('Copied!'));
+  }
+
+  function downloadFile() {
+    if (!lastCommentedCode) return;
+    const ext = EXT_MAP[lastLanguage] || 'txt';
+    const blob = new Blob([lastCommentedCode], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `commented_code.${ext}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function showPanel(panel) {
+    mobileView = panel;
+    const orig = document.getElementById('panelOriginal');
+    const com = document.getElementById('panelCommented');
+    const tOrig = document.getElementById('toggleOrigBtn');
+    const tCom = document.getElementById('toggleComBtn');
+
+    if (window.innerWidth <= 640) {
+      if (panel === 'original') {
+        orig.classList.remove('hide-mobile'); orig.classList.add('show-mobile');
+        com.classList.add('hide-mobile'); com.classList.remove('show-mobile');
+        tOrig.classList.add('active'); tCom.classList.remove('active');
+      } else {
+        com.classList.remove('hide-mobile'); com.classList.add('show-mobile');
+        orig.classList.add('hide-mobile'); orig.classList.remove('show-mobile');
+        tCom.classList.add('active'); tOrig.classList.remove('active');
+      }
+    }
+  }
+
+  function setLoading(on) {
+    document.getElementById('addBtn').disabled = on;
+    document.getElementById('spinner').style.display = on ? 'block' : 'none';
+    document.getElementById('btnText').textContent = on ? 'Generating…' : 'Add Comments';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function hideError() {
+    document.getElementById('errorMsg').style.display = 'none';
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    Object.assign(t.style, {
+      position:'fixed', bottom:'24px', right:'24px', background:'#10b981',
+      color:'#000', padding:'10px 18px', borderRadius:'8px', fontWeight:'600',
+      fontSize:'0.85rem', zIndex:'9999', boxShadow:'0 4px 12px rgba(0,0,0,0.4)'
+    });
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2200);
+  }
+
+  // ── History ────────────────────────────────────────────────────────
+  function saveHistory(entry) {
+    let hist = JSON.parse(localStorage.getItem('ccg_history') || '[]');
+    hist.unshift(entry);
+    hist = hist.slice(0, 3);
+    localStorage.setItem('ccg_history', JSON.stringify(hist));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('historyList');
+    const hist = JSON.parse(localStorage.getItem('ccg_history') || '[]');
+
+    if (!hist.length) {
+      list.innerHTML = '<div class="history-empty">No history yet — add some comments!</div>';
+      return;
+    }
+
+    list.innerHTML = hist.map((h, i) => {
+      const date = new Date(h.date);
+      const dateStr = date.toLocaleDateString(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      const preview = h.code.replace(/\n/g, ' ').slice(0, 60);
+      return `<div class="history-item" onclick="loadHistory(${i})" title="Click to reload">
+        <div class="history-item-info">
+          <div class="history-item-lang">${escapeHtml(h.language)} · ${escapeHtml(h.commentStyle)}</div>
+          <div class="history-item-preview">${escapeHtml(preview)}…</div>
+        </div>
+        <div class="history-item-date">${dateStr}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function loadHistory(i) {
+    const hist = JSON.parse(localStorage.getItem('ccg_history') || '[]');
+    const h = hist[i];
+    if (!h) return;
+
+    document.getElementById('codeInput').value = h.code;
+    document.getElementById('langSelect').value = h.language;
+    document.getElementById('styleSelect').value = h.commentStyle;
+    document.getElementById('toneSelect').value = h.tone;
+
+    lastCommentedCode = h.commented;
+    lastLanguage = h.language;
+
+    const hljsLang = HLJS_LANG[h.language] || 'plaintext';
+    renderCode('originalCode', h.code, hljsLang);
+    renderCode('commentedCode', h.commented, hljsLang);
+
+    const stats = h.stats || {};
+    const added = stats.inlineCommentsAdded || 0;
+    document.getElementById('commentBadge').textContent = `+${added} comments added`;
+    document.getElementById('statFunctions').textContent = stats.functionsDocumented ?? '—';
+    document.getElementById('statInline').textContent = stats.inlineCommentsAdded ?? added;
+    document.getElementById('statLines').textContent = h.commented.split('\n').length;
+
+    document.getElementById('explainBox').style.display = 'none';
+    document.getElementById('outputPanel').style.display = 'block';
+    document.getElementById('outputPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showPanel('original');
+  }
+</script>
+</body>
+</html>

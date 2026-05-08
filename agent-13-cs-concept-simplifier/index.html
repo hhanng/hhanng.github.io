@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS Concept Simplifier — Agent #13</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --card: #1a1a1a;
+    --card2: #222;
+    --border: #2a2a2a;
+    --blue: #3b82f6;
+    --blue-light: #60a5fa;
+    --blue-dim: #1e3a5f;
+    --text: #e5e5e5;
+    --muted: #888;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --purple: #a78bfa;
+    --red: #ef4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #001529 0%, #0f0f0f 65%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 20px 22px;
+    text-align: center;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--blue-dim);
+    color: var(--blue-light);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 10px;
+  }
+  header h1 {
+    font-size: clamp(1.7rem, 5vw, 2.7rem);
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--blue-light), #93c5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header p { color: var(--muted); margin-top: 6px; font-size: 0.95rem; }
+
+  /* ── API bar ── */
+  .api-bar {
+    max-width: 820px;
+    margin: 18px auto 0;
+    padding: 0 20px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .api-bar input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .api-bar input:focus { border-color: var(--blue); }
+  .api-bar .key-label { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+  .key-saved { font-size: 0.75rem; color: var(--green); white-space: nowrap; }
+
+  /* ── Main ── */
+  main { max-width: 820px; margin: 0 auto; padding: 24px 20px 0; }
+
+  /* ── Search row ── */
+  .search-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .search-row input[type="text"] {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-row input[type="text"]::placeholder { color: var(--muted); }
+  .search-row input[type="text"]:focus { border-color: var(--blue); }
+
+  .btn-primary {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: var(--blue-light); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  /* ── Chips ── */
+  .chips-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+  .chip {
+    padding: 5px 13px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover { border-color: var(--blue); color: var(--blue-light); }
+  .chip.history-chip {
+    border-color: var(--blue-dim);
+    color: var(--blue-light);
+    background: rgba(59,130,246,0.07);
+  }
+
+  /* ── Controls ── */
+  .controls-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  select {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  select:focus { border-color: var(--blue); }
+  .ctrl-label { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+  /* ── Loader ── */
+  .loader { display: none; text-align: center; padding: 44px; color: var(--muted); }
+  .loader.visible { display: block; }
+  .spinner {
+    width: 38px; height: 38px;
+    border: 3px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    animation: spin 0.75s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Error ── */
+  .error-box {
+    background: #450a0a; border: 1px solid var(--red);
+    border-radius: 10px; padding: 14px 18px;
+    color: #fca5a5; font-size: 0.9rem;
+    margin-bottom: 16px; display: none;
+  }
+  .error-box.visible { display: block; }
+
+  /* ── Result cards ── */
+  #results { margin-top: 4px; }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 14px;
+    animation: fadeUp 0.4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .result-card:nth-child(2) { animation-delay: 0.05s; }
+  .result-card:nth-child(3) { animation-delay: 0.10s; }
+  .result-card:nth-child(4) { animation-delay: 0.15s; }
+  .result-card:nth-child(5) { animation-delay: 0.20s; }
+  .result-card:nth-child(6) { animation-delay: 0.25s; }
+  .result-card:nth-child(7) { animation-delay: 0.30s; }
+
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .card-icon {
+    width: 32px; height: 32px;
+    background: var(--blue-dim);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .card-title {
+    font-size: 0.78rem; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: var(--blue-light);
+  }
+
+  /* One sentence */
+  .one-sentence {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.45;
+    background: linear-gradient(90deg, #fff, #93c5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Analogy */
+  .analogy-text {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: #d1d5db;
+  }
+  .analogy-art {
+    margin-top: 12px;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.82rem;
+    color: #93c5fd;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+
+  /* Bullet list */
+  .bullet-list { list-style: none; padding: 0; }
+  .bullet-list li {
+    display: flex; gap: 10px; align-items: flex-start;
+    margin-bottom: 9px; font-size: 0.92rem; line-height: 1.55;
+  }
+  .bullet-list li::before {
+    content: '→';
+    color: var(--blue);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Real example */
+  .example-box {
+    background: #0d1a2d;
+    border-left: 3px solid var(--blue);
+    padding: 13px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.93rem;
+    line-height: 1.6;
+    color: #bfdbfe;
+  }
+
+  /* Code */
+  .code-wrap pre { margin: 0; border-radius: 10px; max-height: 340px; overflow-y: auto; }
+  .code-wrap pre code { font-size: 0.82rem; }
+
+  /* Don't confuse */
+  .confuse-items { display: flex; flex-direction: column; gap: 10px; }
+  .confuse-item {
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .confuse-concept {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--yellow);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .confuse-diff { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+
+  /* Why it matters */
+  .matters-box {
+    background: #0a1a0a;
+    border-left: 3px solid var(--green);
+    padding: 13px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.93rem;
+    line-height: 1.6;
+    color: #86efac;
+  }
+
+  /* ── Bottom actions ── */
+  .bottom-actions {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-top: 18px; margin-bottom: 8px;
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--blue-light);
+    border: 1px solid var(--blue);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 0.85rem; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: var(--blue); color: #fff; }
+  .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Deeper section ── */
+  #deeper-section {
+    margin-top: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    animation: fadeUp 0.4s ease both;
+    display: none;
+  }
+  .deeper-title {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--purple);
+    margin-bottom: 14px;
+  }
+  .deeper-content { font-size: 0.92rem; line-height: 1.7; color: #d1d5db; white-space: pre-wrap; }
+
+  /* ── History section ── */
+  #history-section { margin-bottom: 14px; display: none; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--blue); color: #fff;
+    padding: 10px 22px; border-radius: 99px;
+    font-size: 0.88rem; font-weight: 600;
+    transition: transform 0.3s ease; z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Mobile ── */
+  @media (max-width: 600px) {
+    .search-row { flex-direction: column; }
+    .controls-bar { flex-direction: column; align-items: stretch; }
+    .btn-primary { width: 100%; text-align: center; }
+    .one-sentence { font-size: 1.05rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Agent #13 of 97</div>
+  <h1>CS Concept Simplifier</h1>
+  <p>Any concept, explained so it actually makes sense.</p>
+
+  <div class="api-bar">
+    <span class="key-label">Gemini API Key</span>
+    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
+    <span class="key-saved" id="keySaved" style="display:none">✓ Saved</span>
+  </div>
+</header>
+
+<main>
+  <!-- History -->
+  <div id="history-section">
+    <div class="chips-label">Recent</div>
+    <div class="chips" id="historyChips"></div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-row">
+    <input type="text" id="conceptInput" placeholder="Type a CS concept… e.g. recursion, REST API, pointers" autocomplete="off">
+    <button class="btn-primary" id="simplifyBtn" onclick="simplify()">✨ Simplify It</button>
+  </div>
+
+  <!-- Quick picks -->
+  <div class="chips-label">Quick picks</div>
+  <div class="chips" id="quickChips"></div>
+
+  <!-- Controls -->
+  <div class="controls-bar">
+    <span class="ctrl-label">Explain to:</span>
+    <select id="audienceSelect">
+      <option value="a 5-year-old">A 5-year-old</option>
+      <option value="a 10-year-old">A 10-year-old</option>
+      <option value="a high schooler" selected>A high schooler</option>
+      <option value="a CS student">A CS student</option>
+      <option value="a non-tech friend">A non-tech friend</option>
+      <option value="my grandma">My grandma</option>
+    </select>
+    <span class="ctrl-label">Code in:</span>
+    <select id="langSelect">
+      <option value="Python">Python</option>
+      <option value="JavaScript">JavaScript</option>
+      <option value="Java">Java</option>
+    </select>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <div>Breaking it down for you…</div>
+  </div>
+
+  <div id="results"></div>
+
+  <div class="bottom-actions" id="bottomActions" style="display:none">
+    <button class="btn-secondary" id="redoBtn" onclick="simplify(true)">🔄 Explain Differently</button>
+    <button class="btn-secondary" id="deeperBtn" onclick="goDeeper()">🔬 Go Deeper</button>
+  </div>
+
+  <div id="deeper-section">
+    <div class="deeper-title">🔬 Technical Deep Dive</div>
+    <div class="loader" id="deeperLoader" style="display:none">
+      <div class="spinner"></div>
+      <div>Going deeper…</div>
+    </div>
+    <div class="deeper-content" id="deeperContent"></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Constants ──
+const QUICK_PICKS = [
+  'Recursion','OOP','APIs','Databases','Big O','Git','Pointers','Threads',
+  'Hashing','Trees','Stacks','Queues','Inheritance','Polymorphism',
+  'Closures','Async/Await','TCP/IP','MVC','Design Patterns','Memory Management'
+];
+
+// ── State ──
+let lastConcept = '';
+let lastData = null;
+
+// ── API key ──
+const apiInput = document.getElementById('apiKey');
+const keySaved = document.getElementById('keySaved');
+const savedKey = localStorage.getItem('gemini_api_key');
+if (savedKey) { apiInput.value = savedKey; keySaved.style.display = 'inline'; }
+apiInput.addEventListener('input', () => {
+  localStorage.setItem('gemini_api_key', apiInput.value.trim());
+  keySaved.style.display = apiInput.value.trim() ? 'inline' : 'none';
+});
+
+// ── Enter key ──
+document.getElementById('conceptInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') simplify();
+});
+
+// ── Quick pick chips ──
+const qc = document.getElementById('quickChips');
+QUICK_PICKS.forEach(c => {
+  const btn = document.createElement('button');
+  btn.className = 'chip';
+  btn.textContent = c;
+  btn.onclick = () => { document.getElementById('conceptInput').value = c; simplify(); };
+  qc.appendChild(btn);
+});
+
+// ── History ──
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('cs_history') || '[]'); } catch { return []; }
+}
+function saveHistory(concept) {
+  let h = getHistory().filter(c => c.toLowerCase() !== concept.toLowerCase());
+  h.unshift(concept);
+  h = h.slice(0, 8);
+  localStorage.setItem('cs_history', JSON.stringify(h));
+  renderHistory();
+}
+function renderHistory() {
+  const h = getHistory();
+  const sec = document.getElementById('history-section');
+  const chips = document.getElementById('historyChips');
+  sec.style.display = h.length ? 'block' : 'none';
+  chips.innerHTML = '';
+  h.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'chip history-chip';
+    btn.textContent = c;
+    btn.onclick = () => { document.getElementById('conceptInput').value = c; simplify(); };
+    chips.appendChild(btn);
+  });
+}
+renderHistory();
+
+// ── Gemini call ──
+async function callGemini(prompt) {
+  const key = apiInput.value.trim();
+  if (!key) throw new Error('Please enter your Gemini API key at the top.');
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function extractJSON(text) {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('Could not parse response. Try again.');
+  return JSON.parse(match[0]);
+}
+
+// ── Main simplify ──
+async function simplify(forceNew = false) {
+  const concept = document.getElementById('conceptInput').value.trim();
+  if (!concept) { showError('Please type or pick a concept first.'); return; }
+
+  showError('');
+  setLoading(true);
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('bottomActions').style.display = 'none';
+  document.getElementById('deeper-section').style.display = 'none';
+
+  const audience = document.getElementById('audienceSelect').value;
+  const lang = document.getElementById('langSelect').value;
+  lastConcept = concept;
+
+  const freshHint = forceNew ? ' Use a completely different analogy than before.' : '';
+  const prompt = `Explain the CS concept '${concept}' to ${audience}. Provide a ${lang} code demo.${freshHint}
+
+Make it genuinely simple and memorable. Use relatable, fun analogies.
+
+Respond in this exact JSON format:
+{
+  "concept": "${concept}",
+  "oneSentence": "The simplest possible definition",
+  "analogy": "A vivid real-world analogy",
+  "analogyArt": "2-5 lines of ASCII art or emoji diagram illustrating the analogy",
+  "howItWorks": ["Point 1", "Point 2", "Point 3", "Point 4"],
+  "realExample": "A concrete everyday scenario where this appears",
+  "codeDemo": "shortest possible ${lang} code showing this concept, with comments",
+  "dontConfuseWith": [
+    { "concept": "Related concept", "difference": "One-line distinction" }
+  ],
+  "whyItMatters": "Practical reason a developer needs to know this"
+}
+
+Return only the JSON, no markdown.`;
+
+  try {
+    const raw = await callGemini(prompt);
+    const d = extractJSON(raw);
+    lastData = d;
+    saveHistory(d.concept || concept);
+    renderResults(d, lang);
+    document.getElementById('bottomActions').style.display = 'flex';
+  } catch (e) {
+    showError(e.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ── Render ──
+function renderResults(d, lang) {
+  const langClass = { Python: 'python', JavaScript: 'javascript', Java: 'java' }[lang] || 'plaintext';
+  const container = document.getElementById('results');
+
+  const confuseHTML = (d.dontConfuseWith || []).map(item => `
+    <div class="confuse-item">
+      <span class="confuse-concept">⚠ ${esc(item.concept)}</span>
+      <span class="confuse-diff">${esc(item.difference)}</span>
+    </div>`).join('');
+
+  container.innerHTML = `
+    <!-- 1. One sentence -->
+    <div class="result-card">
+      <div class="card-header">
+        <div class="card-icon">💬</div>
+        <div class="card-title">In one sentence</div>
+      </div>
+      <div class="one-sentence">${esc(d.oneSentence)}</div>
+    </div>
+
+    <!-- 2. Analogy -->
+    <div class="result-card">
+      <div class="card-header">
+        <div class="card-icon">🧠</div>
+        <div class="card-title">The analogy</div>
+      </div>
+      <div class="analogy-text">${esc(d.analogy)}</div>
+      ${d.analogyArt ? `<div class="analogy-art">${esc(d.analogyArt)}</div>` : ''}
+    </div>
+
+    <!-- 3. How it works -->
+    <div class="result-card">
+      <div class="card-header">
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">How it actually works</div>
+      </div>
+      <ul class="bullet-list">
+        ${(d.howItWorks || []).map(p => `<li>${esc(p)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <!-- 4. Real example -->
+    <div class="result-card">
+      <div class="card-header">
+        <div class="card-icon">🌍</div>
+        <div class="card-title">Real example</div>
+      </div>
+      <div class="example-box">${esc(d.realExample)}</div>
+    </div>
+
+    <!-- 5. Code demo -->
+    <div class="result-card">
+      <div class="card-header">
+        <div class="card-icon">💻</div>
+        <div class="card-title">Mini code demo — ${esc(lang)}</div>
+      </div>
+      <div class="code-wrap">
+        <pre><code class="language-${langClass}">${esc(d.codeDemo)}</code></pre>
+      </div>
+    </div>
+
+    <!-- 6. Don't confuse with -->
+    ${confuseHTML ? `<div class="result-card">
+      <div class="card-header">
+        <div class="card-icon">🔀</div>
+        <div class="card-title">Don't confuse it with</div>
+      </div>
+      <div class="confuse-items">${confuseHTML}</div>
+    </div>` : ''}
+
+    <!-- 7. Why it matters -->
+    <div class="result-card">
+      <div class="card-header">
+        <div class="card-icon">🚀</div>
+        <div class="card-title">Why it matters</div>
+      </div>
+      <div class="matters-box">${esc(d.whyItMatters)}</div>
+    </div>
+  `;
+
+  document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+}
+
+// ── Go deeper ──
+async function goDeeper() {
+  if (!lastConcept) return;
+  const sec = document.getElementById('deeper-section');
+  const content = document.getElementById('deeperContent');
+  const deepLoader = document.getElementById('deeperLoader');
+  sec.style.display = 'block';
+  deepLoader.style.display = 'block';
+  content.textContent = '';
+  document.getElementById('deeperBtn').disabled = true;
+
+  const audience = document.getElementById('audienceSelect').value;
+  const prompt = `Give a more technical explanation of the CS concept '${lastConcept}' for someone who now understands the basics and wants to go deeper. Target: ${audience} moving to intermediate level.
+
+Include:
+- How it works under the hood
+- Important edge cases or gotchas
+- Performance implications
+- Where it's used in real systems
+
+Write in clear, engaging prose (3-5 paragraphs). No JSON needed — just write naturally.`;
+
+  try {
+    const text = await callGemini(prompt);
+    content.textContent = text;
+  } catch (e) {
+    content.textContent = 'Error: ' + e.message;
+  } finally {
+    deepLoader.style.display = 'none';
+    document.getElementById('deeperBtn').disabled = false;
+  }
+}
+
+// ── Helpers ──
+function esc(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+function setLoading(on) {
+  document.getElementById('loader').classList.toggle('visible', on);
+  document.getElementById('simplifyBtn').disabled = on;
+}
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = msg;
+  box.classList.toggle('visible', !!msg);
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Review Bot</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --card: #1a1a1a;
+      --card2: #222;
+      --border: #2e2e2e;
+      --accent: #7c3aed;
+      --accent-dim: #5b21b6;
+      --text: #e5e5e5;
+      --text-muted: #888;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --purple: #a78bfa;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    header .logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    header h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    header span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--card2);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-left: auto;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+    }
+
+    /* API Key */
+    .api-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .api-bar label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .api-bar input {
+      flex: 1;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.85rem;
+      padding: 0.4rem 0.75rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .api-bar input:focus { border-color: var(--accent); }
+
+    .api-bar .save-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .api-bar .save-btn:hover { background: var(--accent-dim); }
+
+    /* Code editor */
+    .editor-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .editor-header {
+      background: var(--card2);
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.r { background: #ff5f57; }
+    .dot.y { background: #febc2e; }
+    .dot.g { background: #28c840; }
+
+    .editor-header span {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-left: 0.5rem;
+    }
+
+    .editor-body {
+      display: flex;
+      min-height: 240px;
+    }
+
+    .line-numbers {
+      background: var(--card2);
+      border-right: 1px solid var(--border);
+      padding: 1rem 0.6rem 1rem 0.8rem;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      user-select: none;
+      text-align: right;
+      min-width: 40px;
+      line-height: 1.55;
+    }
+
+    #codeInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      padding: 1rem;
+      resize: none;
+      outline: none;
+      width: 100%;
+      min-height: 240px;
+      tab-size: 2;
+    }
+
+    /* Settings bar */
+    .settings-bar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .settings-bar select {
+      flex: 1;
+      min-width: 160px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.85rem;
+      padding: 0.6rem 0.9rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .settings-bar select:focus { border-color: var(--accent); }
+
+    .review-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .review-btn:hover { background: var(--accent-dim); }
+    .review-btn:active { transform: scale(0.98); }
+    .review-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Results */
+    #results { display: none; }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Score card */
+    .score-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .score-number {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .score-label { font-size: 0.85rem; color: var(--text-muted); }
+
+    .score-bar-wrap {
+      flex: 1;
+      background: var(--card2);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+    }
+
+    .score-bar {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.8s ease;
+    }
+
+    /* Result cards */
+    .result-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid;
+    }
+
+    .result-card.green { border-left-color: var(--green); }
+    .result-card.red { border-left-color: var(--red); }
+    .result-card.purple { border-left-color: var(--purple); }
+    .result-card.blue { border-left-color: var(--blue); }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .result-card.green .card-title { color: var(--green); }
+    .result-card.red .card-title { color: var(--red); }
+    .result-card.purple .card-title { color: var(--purple); }
+    .result-card.blue .card-title { color: var(--blue); }
+
+    ul.good-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    ul.good-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    ul.good-list li::before {
+      content: '✓';
+      color: var(--green);
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    /* Issues */
+    .issue-item {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .severity-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-high { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+    .badge-medium { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+    .badge-low { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+
+    .issue-info { flex: 1; }
+    .issue-desc { font-size: 0.88rem; margin-bottom: 0.25rem; }
+    .issue-line { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; }
+
+    .fix-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .fix-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Improved code */
+    .code-block-wrap {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-block-wrap pre {
+      margin: 0;
+      border-radius: 8px;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .code-block-wrap pre code {
+      font-size: 0.82rem;
+      font-family: 'Fira Code', 'Courier New', monospace;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.7rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      z-index: 2;
+    }
+
+    .copy-btn:hover { border-color: var(--purple); color: var(--purple); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+    /* Learning tip */
+    .tip-concept {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: 0.4rem;
+    }
+
+    .tip-text { font-size: 0.9rem; color: var(--text-muted); }
+
+    /* Fix modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: var(--text); }
+
+    /* History */
+    .history-section { margin-top: 2rem; }
+
+    .history-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .history-item:hover { border-color: var(--accent); }
+
+    .history-score {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .history-info { flex: 1; min-width: 0; }
+
+    .history-meta {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .history-time {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+    }
+
+    .history-snippet {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      font-family: monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Error toast */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: #1e1e1e;
+      border: 1px solid var(--red);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text);
+      z-index: 200;
+      max-width: 340px;
+      animation: slideIn 0.25s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .settings-bar { flex-direction: column; }
+      .review-btn { width: 100%; justify-content: center; }
+      .issue-item { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🤖</div>
+  <h1>Code Review Bot</h1>
+  <span>Agent #07 · 100 AI Agents</span>
+</header>
+
+<div class="container">
+
+  <!-- API Key -->
+  <div class="api-bar">
+    <label>🔑 Gemini API Key</label>
+    <input type="password" id="apiKey" placeholder="AIza..." />
+    <button class="save-btn" onclick="saveKey()">Save</button>
+  </div>
+
+  <!-- Code Editor -->
+  <div class="editor-card">
+    <div class="editor-header">
+      <div class="dot r"></div>
+      <div class="dot y"></div>
+      <div class="dot g"></div>
+      <span>Paste your code here</span>
+    </div>
+    <div class="editor-body">
+      <div class="line-numbers" id="lineNumbers">1</div>
+      <textarea id="codeInput" spellcheck="false" placeholder="// Paste any code snippet here...&#10;function greet(name) {&#10;  console.log('Hello ' + name)&#10;}"></textarea>
+    </div>
+  </div>
+
+  <!-- Settings + Button -->
+  <div class="settings-bar">
+    <select id="language">
+      <option>JavaScript</option>
+      <option>Python</option>
+      <option>Java</option>
+      <option>C++</option>
+      <option>TypeScript</option>
+      <option>HTML/CSS</option>
+      <option>SQL</option>
+      <option>Other</option>
+    </select>
+    <select id="focus">
+      <option>General Review</option>
+      <option>Performance</option>
+      <option>Security</option>
+      <option>Readability</option>
+      <option>Best Practices</option>
+      <option>Beginner Feedback</option>
+    </select>
+    <button class="review-btn" id="reviewBtn" onclick="reviewCode()">
+      <div class="spinner" id="spinner"></div>
+      <span id="btnText">Review My Code</span>
+    </button>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+
+    <!-- Score -->
+    <div class="score-card" id="scoreCard">
+      <div class="section-title">Overall Score</div>
+      <div class="score-row">
+        <div class="score-number" id="scoreNum">—</div>
+        <div>
+          <div class="score-label" id="scoreLabel">out of 10</div>
+          <div id="scoreTag" style="font-size:0.8rem; margin-top:4px;"></div>
+        </div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" id="scoreBar" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What's Good -->
+    <div class="result-card green" id="goodCard">
+      <div class="card-title">✓ What's Good</div>
+      <ul class="good-list" id="goodList"></ul>
+    </div>
+
+    <!-- Issues -->
+    <div class="result-card red" id="issuesCard">
+      <div class="card-title">⚠ Issues Found</div>
+      <div id="issuesList"></div>
+    </div>
+
+    <!-- Improved Code -->
+    <div class="result-card purple" id="improvedCard">
+      <div class="card-title">✦ Suggested Improvements</div>
+      <div class="code-block-wrap">
+        <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy</button>
+        <pre><code id="improvedCode" class="language-javascript"></code></pre>
+      </div>
+    </div>
+
+    <!-- Learning Tip -->
+    <div class="result-card blue" id="tipCard">
+      <div class="card-title">💡 Learning Tip</div>
+      <div class="tip-concept" id="tipConcept"></div>
+      <div class="tip-text" id="tipText"></div>
+    </div>
+
+  </div>
+
+  <!-- History -->
+  <div class="history-section" id="historySection" style="display:none;">
+    <div class="section-title">Recent Reviews</div>
+    <div id="historyList"></div>
+  </div>
+
+</div>
+
+<!-- Fix Modal -->
+<div class="modal-overlay" id="fixModal" style="display:none;" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">
+      <span>🔧 Fix for This Issue</span>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+  // ── State ────────────────────────────────────────────────────
+  let lastImprovedCode = '';
+  const HISTORY_KEY = 'crb_history';
+
+  // ── Init ─────────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('crb_api_key');
+    if (saved) document.getElementById('apiKey').value = saved;
+    updateLineNumbers();
+    renderHistory();
+  });
+
+  // ── API Key ──────────────────────────────────────────────────
+  function saveKey() {
+    const key = document.getElementById('apiKey').value.trim();
+    localStorage.setItem('crb_api_key', key);
+    showToast('API key saved ✓', 'green');
+  }
+
+  // ── Line numbers ─────────────────────────────────────────────
+  const codeInput = document.getElementById('codeInput');
+  const lineNumbers = document.getElementById('lineNumbers');
+
+  function updateLineNumbers() {
+    const lines = codeInput.value.split('\n').length;
+    lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
+  }
+
+  codeInput.addEventListener('input', updateLineNumbers);
+  codeInput.addEventListener('scroll', () => {
+    lineNumbers.scrollTop = codeInput.scrollTop;
+  });
+  codeInput.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = codeInput.selectionStart;
+      codeInput.value = codeInput.value.slice(0, s) + '  ' + codeInput.value.slice(codeInput.selectionEnd);
+      codeInput.selectionStart = codeInput.selectionEnd = s + 2;
+      updateLineNumbers();
+    }
+  });
+
+  // ── Review ───────────────────────────────────────────────────
+  async function reviewCode() {
+    const key = localStorage.getItem('crb_api_key') || document.getElementById('apiKey').value.trim();
+    const code = codeInput.value.trim();
+    const language = document.getElementById('language').value;
+    const focus = document.getElementById('focus').value;
+
+    if (!key) { showToast('Please enter your Gemini API key first'); return; }
+    if (!code) { showToast('Please paste some code to review'); return; }
+
+    setLoading(true);
+
+    const prompt = `You are a senior developer reviewing ${language} code. Focus: ${focus}.
+
+Code to review:
+${code}
+
+Respond in this exact JSON format:
+{
+  "score": 7,
+  "whatsGood": ["Thing 1", "Thing 2"],
+  "issues": [
+    { "severity": "High", "issue": "Description", "line": "approximate line or function name" }
+  ],
+  "improvedCode": "// full improved version of the code",
+  "learningTip": { "concept": "Concept name", "tip": "What to learn and why" }
+}
+
+Return only the JSON, no markdown.`;
+
+    try {
+      const data = await callGemini(key, prompt);
+      renderResults(data, language);
+      saveToHistory(data, language, focus, code);
+    } catch (e) {
+      showToast('Error: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function callGemini(key, prompt) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+    const body = { contents: [{ parts: [{ text: prompt }] }] };
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${res.status}`);
+    }
+    const json = await res.json();
+    let text = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(text);
+  }
+
+  // ── Render Results ───────────────────────────────────────────
+  function renderResults(data, language) {
+    document.getElementById('results').style.display = 'block';
+
+    // Score
+    const score = data.score || 0;
+    const numEl = document.getElementById('scoreNum');
+    const barEl = document.getElementById('scoreBar');
+    const tagEl = document.getElementById('scoreTag');
+
+    numEl.textContent = score + '/10';
+    const pct = (score / 10) * 100;
+    barEl.style.width = pct + '%';
+
+    let color, tag;
+    if (score >= 8) { color = '#22c55e'; tag = 'Excellent code!'; }
+    else if (score >= 5) { color = '#f59e0b'; tag = 'Decent — some improvements needed'; }
+    else { color = '#ef4444'; tag = 'Needs significant work'; }
+
+    numEl.style.color = color;
+    barEl.style.background = color;
+    tagEl.textContent = tag;
+    tagEl.style.color = color;
+
+    // What's good
+    const goodList = document.getElementById('goodList');
+    goodList.innerHTML = (data.whatsGood || []).map(g =>
+      `<li>${escHtml(g)}</li>`
+    ).join('');
+
+    // Issues
+    const issuesList = document.getElementById('issuesList');
+    issuesList.innerHTML = (data.issues || []).map((iss, i) => {
+      const badgeClass = { High: 'badge-high', Medium: 'badge-medium', Low: 'badge-low' }[iss.severity] || 'badge-low';
+      return `
+        <div class="issue-item">
+          <span class="severity-badge ${badgeClass}">${escHtml(iss.severity)}</span>
+          <div class="issue-info">
+            <div class="issue-desc">${escHtml(iss.issue)}</div>
+            <div class="issue-line">📍 ${escHtml(iss.line || '')}</div>
+          </div>
+          <button class="fix-btn" onclick="fixIssue(${i})">Fix this →</button>
+        </div>`;
+    }).join('');
+    window._issues = data.issues;
+    window._currentCode = codeInput.value;
+    window._currentLang = language;
+
+    // Improved code
+    lastImprovedCode = data.improvedCode || '';
+    const codeEl = document.getElementById('improvedCode');
+    codeEl.textContent = lastImprovedCode;
+    // Determine highlight language
+    const langMap = {
+      JavaScript: 'javascript', TypeScript: 'typescript', Python: 'python',
+      Java: 'java', 'C++': 'cpp', 'HTML/CSS': 'html', SQL: 'sql'
+    };
+    const hlLang = langMap[language] || 'plaintext';
+    codeEl.className = `language-${hlLang}`;
+    hljs.highlightElement(codeEl);
+
+    // Learning tip
+    document.getElementById('tipConcept').textContent = data.learningTip?.concept || '';
+    document.getElementById('tipText').textContent = data.learningTip?.tip || '';
+
+    // Scroll to results
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Fix issue ─────────────────────────────────────────────────
+  async function fixIssue(idx) {
+    const key = localStorage.getItem('crb_api_key') || document.getElementById('apiKey').value.trim();
+    if (!key) { showToast('Please enter your Gemini API key first'); return; }
+
+    const issue = window._issues[idx];
+    const code = window._currentCode;
+    const lang = window._currentLang;
+
+    const modal = document.getElementById('fixModal');
+    const content = document.getElementById('modalContent');
+    content.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem;">Generating fix…</div>';
+    modal.style.display = 'flex';
+
+    const prompt = `You are a senior ${lang} developer. Here is an issue in some code:
+
+Issue: ${issue.issue}
+Severity: ${issue.severity}
+Location: ${issue.line}
+
+Original code:
+${code}
+
+Provide a concise fix. Respond ONLY in this JSON format:
+{
+  "explanation": "Brief explanation of why this is a problem",
+  "fixedCode": "// just the relevant fixed snippet, not the whole file",
+  "howToApply": "One sentence on how to apply this fix"
+}
+Return only JSON, no markdown.`;
+
+    try {
+      const data = await callGemini(key, prompt);
+      const fixedCodeEl = document.createElement('code');
+      fixedCodeEl.textContent = data.fixedCode || '';
+      fixedCodeEl.className = `language-${getLangClass(lang)}`;
+
+      content.innerHTML = `
+        <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1rem;">${escHtml(data.explanation || '')}</p>
+        <div class="code-block-wrap" style="margin-bottom:1rem;">
+          <pre style="border-radius:8px; margin:0;"><code class="language-${getLangClass(lang)}">${escHtml(data.fixedCode || '')}</code></pre>
+        </div>
+        <p style="font-size:0.82rem; color:var(--blue);">📌 ${escHtml(data.howToApply || '')}</p>`;
+
+      content.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+    } catch (e) {
+      content.innerHTML = `<div style="color:var(--red);">Error: ${escHtml(e.message)}</div>`;
+    }
+  }
+
+  function getLangClass(lang) {
+    const m = { JavaScript:'javascript', TypeScript:'typescript', Python:'python', Java:'java', 'C++':'cpp', 'HTML/CSS':'html', SQL:'sql' };
+    return m[lang] || 'plaintext';
+  }
+
+  function closeModal(e) {
+    if (e.target.id === 'fixModal') closeModalDirect();
+  }
+
+  function closeModalDirect() {
+    document.getElementById('fixModal').style.display = 'none';
+  }
+
+  // ── Copy improved code ────────────────────────────────────────
+  function copyCode() {
+    if (!lastImprovedCode) return;
+    navigator.clipboard.writeText(lastImprovedCode).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── History ──────────────────────────────────────────────────
+  function saveToHistory(data, language, focus, code) {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    history.unshift({
+      score: data.score,
+      language,
+      focus,
+      snippet: code.slice(0, 80),
+      time: Date.now(),
+      data,
+      code
+    });
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 3)));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    const section = document.getElementById('historySection');
+    const list = document.getElementById('historyList');
+
+    if (!history.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+
+    list.innerHTML = history.map((h, i) => {
+      const score = h.score || 0;
+      let color;
+      if (score >= 8) color = '#22c55e';
+      else if (score >= 5) color = '#f59e0b';
+      else color = '#ef4444';
+
+      const date = new Date(h.time);
+      const ago = timeAgo(h.time);
+
+      return `
+        <div class="history-item" onclick="loadHistory(${i})">
+          <div class="history-score" style="background:${color}22; color:${color};">${score}</div>
+          <div class="history-info">
+            <div class="history-meta">${escHtml(h.language)} · ${escHtml(h.focus)}</div>
+            <div class="history-snippet">${escHtml(h.snippet)}</div>
+          </div>
+          <div class="history-time">${ago}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function loadHistory(i) {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    const h = history[i];
+    if (!h) return;
+    codeInput.value = h.code;
+    updateLineNumbers();
+    document.getElementById('language').value = h.language;
+    document.getElementById('focus').value = h.focus;
+    renderResults(h.data, h.language);
+  }
+
+  function timeAgo(ts) {
+    const diff = Date.now() - ts;
+    if (diff < 60000) return 'just now';
+    if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+    return Math.floor(diff / 86400000) + 'd ago';
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────
+  function setLoading(on) {
+    const btn = document.getElementById('reviewBtn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    btn.disabled = on;
+    spinner.style.display = on ? 'block' : 'none';
+    btnText.textContent = on ? 'Reviewing…' : 'Review My Code';
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  let toastTimer;
+  function showToast(msg, type = 'red') {
+    clearTimeout(toastTimer);
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.style.borderColor = type === 'green' ? 'var(--green)' : 'var(--red)';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    toastTimer = setTimeout(() => t.remove(), 3500);
+  }
+</script>
+</body>
+</html>

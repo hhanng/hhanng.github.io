@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algorithm Explainer — Agent #12</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --card: #1a1a1a;
+    --card2: #222;
+    --border: #2a2a2a;
+    --violet: #8b5cf6;
+    --violet-light: #a78bfa;
+    --violet-dim: #4c1d95;
+    --text: #e5e5e5;
+    --muted: #888;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #13001f 0%, #0f0f0f 60%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 20px 20px;
+    text-align: center;
+  }
+  header .badge {
+    display: inline-block;
+    background: var(--violet-dim);
+    color: var(--violet-light);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 10px;
+  }
+  header h1 {
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--violet-light), #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header p {
+    color: var(--muted);
+    margin-top: 6px;
+    font-size: 0.95rem;
+  }
+
+  /* ── API Key ── */
+  .api-bar {
+    max-width: 800px;
+    margin: 20px auto 0;
+    padding: 0 20px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .api-bar input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .api-bar input:focus { border-color: var(--violet); }
+  .api-bar .key-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .key-saved {
+    font-size: 0.75rem;
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  /* ── Main container ── */
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px 20px 0;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 9px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--violet);
+    color: #fff;
+  }
+
+  /* ── Tab panels ── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Input card ── */
+  .input-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  select, textarea, input[type="text"] {
+    width: 100%;
+    background: #111;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  select:focus, textarea:focus, input[type="text"]:focus {
+    border-color: var(--violet);
+  }
+  textarea { resize: vertical; min-height: 120px; }
+
+  .or-divider {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin: 10px 0;
+    position: relative;
+  }
+  .or-divider::before, .or-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 42%;
+    height: 1px;
+    background: var(--border);
+  }
+  .or-divider::before { left: 0; }
+  .or-divider::after { right: 0; }
+
+  /* ── Pills ── */
+  .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .pill {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .pill.active {
+    background: var(--violet);
+    border-color: var(--violet);
+    color: #fff;
+  }
+  .pill:hover:not(.active) {
+    border-color: var(--violet);
+    color: var(--violet-light);
+  }
+
+  /* ── Controls row ── */
+  .controls-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .controls-row > * { flex: 1; min-width: 120px; }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    background: var(--violet);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+  .btn-primary:hover { background: var(--violet-light); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--violet-light);
+    border: 1px solid var(--violet);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: var(--violet); color: #fff; }
+
+  /* ── Loading ── */
+  .loader {
+    display: none;
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+  }
+  .loader.visible { display: block; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--violet);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Results ── */
+  #results { margin-top: 24px; }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .result-card:nth-child(2) { animation-delay: 0.06s; }
+  .result-card:nth-child(3) { animation-delay: 0.12s; }
+  .result-card:nth-child(4) { animation-delay: 0.18s; }
+  .result-card:nth-child(5) { animation-delay: 0.24s; }
+  .result-card:nth-child(6) { animation-delay: 0.30s; }
+  .result-card:nth-child(7) { animation-delay: 0.36s; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .card-icon {
+    width: 32px; height: 32px;
+    background: var(--violet-dim);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--violet-light);
+  }
+
+  .one-liner {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .analogy-box {
+    background: #1e1230;
+    border-left: 3px solid var(--violet);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.92rem;
+    color: #c4b5fd;
+    font-style: italic;
+  }
+
+  /* Steps */
+  .steps ol { padding-left: 0; list-style: none; counter-reset: step; }
+  .steps ol li {
+    counter-increment: step;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .steps ol li::before {
+    content: counter(step);
+    background: var(--violet);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Visual trace */
+  .trace-box {
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #a3e635;
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+
+  /* Complexity table */
+  .complexity-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  .complexity-table th {
+    background: #111;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .complexity-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .complexity-table tr:last-child td { border-bottom: none; }
+  .complexity-table code {
+    background: #111;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: #a78bfa;
+    font-family: 'Cascadia Code', monospace;
+  }
+  .complexity-table .muted { color: var(--muted); font-size: 0.82rem; }
+
+  /* Code block */
+  .code-wrap pre {
+    margin: 0;
+    border-radius: 10px;
+    max-height: 380px;
+    overflow-y: auto;
+  }
+  .code-wrap pre code { font-size: 0.82rem; }
+
+  /* When to use / mistakes */
+  .list-items { list-style: none; padding: 0; }
+  .list-items li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .list-items li .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+  .dot-green { background: var(--green); }
+  .dot-red   { background: var(--red); }
+
+  /* ── Bottom actions ── */
+  .bottom-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  /* ── Quiz ── */
+  #quiz-section {
+    margin-top: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .quiz-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--violet-light);
+    margin-bottom: 16px;
+  }
+  .quiz-question {
+    margin-bottom: 20px;
+  }
+  .quiz-q-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .quiz-option {
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    text-align: left;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .quiz-option:hover:not(:disabled) { border-color: var(--violet); }
+  .quiz-option.correct { background: #14532d; border-color: var(--green); color: #86efac; }
+  .quiz-option.wrong   { background: #450a0a; border-color: var(--red);   color: #fca5a5; }
+  .quiz-option:disabled { cursor: default; }
+  .quiz-explanation {
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    display: none;
+    line-height: 1.5;
+  }
+  .quiz-explanation.visible { display: block; }
+
+  /* ── Share toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--violet);
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 99px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: transform 0.3s ease;
+    z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Error ── */
+  .error-box {
+    background: #450a0a;
+    border: 1px solid var(--red);
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: #fca5a5;
+    font-size: 0.9rem;
+    margin-top: 16px;
+    display: none;
+  }
+  .error-box.visible { display: block; }
+
+  /* ── Mobile ── */
+  @media (max-width: 600px) {
+    .controls-row { flex-direction: column; }
+    .pill { font-size: 0.78rem; padding: 5px 11px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Agent #12 of 97</div>
+  <h1>Algorithm Explainer</h1>
+  <p>Understand any algorithm — analogies, visual traces, Big O, and a mini quiz.</p>
+
+  <div class="api-bar">
+    <span class="key-label">Gemini API Key</span>
+    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
+    <span class="key-saved" id="keySaved" style="display:none">✓ Saved</span>
+  </div>
+</header>
+
+<main>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('name')">By Name</button>
+    <button class="tab-btn" onclick="switchTab('code')">Paste Code</button>
+  </div>
+
+  <!-- Tab: By Name -->
+  <div id="tab-name" class="tab-panel active">
+    <div class="input-card">
+      <label>Choose an algorithm</label>
+      <select id="algoSelect">
+        <option value="">— Select a common algorithm —</option>
+        <optgroup label="Sorting">
+          <option>Bubble Sort</option>
+          <option>Selection Sort</option>
+          <option>Insertion Sort</option>
+          <option>Merge Sort</option>
+          <option>Quick Sort</option>
+          <option>Heap Sort</option>
+          <option>Counting Sort</option>
+          <option>Radix Sort</option>
+        </optgroup>
+        <optgroup label="Searching">
+          <option>Linear Search</option>
+          <option>Binary Search</option>
+          <option>Jump Search</option>
+          <option>Interpolation Search</option>
+        </optgroup>
+        <optgroup label="Graph Algorithms">
+          <option>Depth-First Search (DFS)</option>
+          <option>Breadth-First Search (BFS)</option>
+          <option>Dijkstra's Shortest Path</option>
+          <option>Bellman-Ford Algorithm</option>
+          <option>A* Search Algorithm</option>
+          <option>Floyd-Warshall Algorithm</option>
+          <option>Kruskal's Algorithm</option>
+          <option>Prim's Algorithm</option>
+          <option>Topological Sort</option>
+        </optgroup>
+        <optgroup label="Dynamic Programming">
+          <option>Dynamic Programming</option>
+          <option>Fibonacci Sequence</option>
+          <option>Knapsack Problem</option>
+          <option>Longest Common Subsequence</option>
+          <option>Longest Increasing Subsequence</option>
+          <option>Coin Change Problem</option>
+        </optgroup>
+        <optgroup label="Data Structures">
+          <option>Hash Tables</option>
+          <option>Binary Search Tree</option>
+          <option>AVL Tree</option>
+        </optgroup>
+        <optgroup label="Other">
+          <option>Recursion</option>
+          <option>Two Pointers Technique</option>
+          <option>Sliding Window</option>
+          <option>Divide and Conquer</option>
+          <option>Greedy Algorithm</option>
+          <option>Backtracking</option>
+        </optgroup>
+      </select>
+
+      <div class="or-divider">or type any algorithm</div>
+
+      <input type="text" id="algoCustom" placeholder="e.g. Boyer-Moore, Tarjan's SCC, Aho-Corasick…">
+    </div>
+  </div>
+
+  <!-- Tab: Paste Code -->
+  <div id="tab-code" class="tab-panel">
+    <div class="input-card">
+      <label>Paste your code</label>
+      <textarea id="codeInput" placeholder="Paste any algorithm implementation here and I'll identify + explain it…"></textarea>
+    </div>
+  </div>
+
+  <!-- Audience + Language + Action -->
+  <div class="input-card">
+    <div style="margin-bottom:14px">
+      <label>Audience level</label>
+      <div class="pill-group" id="audiencePills">
+        <button class="pill" onclick="setPill('audience', this, 'Middle School')">Middle School</button>
+        <button class="pill active" onclick="setPill('audience', this, 'High School')">High School</button>
+        <button class="pill" onclick="setPill('audience', this, 'CS Student')">CS Student</button>
+        <button class="pill" onclick="setPill('audience', this, 'Interview Prep')">Interview Prep</button>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <div>
+        <label>Code language</label>
+        <select id="langSelect">
+          <option value="Python">Python</option>
+          <option value="JavaScript">JavaScript</option>
+          <option value="Java">Java</option>
+          <option value="C++">C++</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="btn-primary" id="explainBtn" onclick="explainAlgorithm()">⚡ Explain It</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <div>Thinking through the algorithm…</div>
+  </div>
+
+  <!-- Results -->
+  <div id="results"></div>
+  <div id="quiz-section" style="display:none"></div>
+
+  <div class="bottom-actions" id="bottomActions" style="display:none">
+    <button class="btn-secondary" onclick="generateQuiz()">🧠 Quiz Me</button>
+    <button class="btn-secondary" onclick="shareResult()">📤 Share</button>
+  </div>
+</main>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+// ── State ──
+let currentTab = 'name';
+let audience = 'High School';
+let lastData = null;
+let lastAlgoName = '';
+
+// ── API Key persistence ──
+const apiInput = document.getElementById('apiKey');
+const keySaved = document.getElementById('keySaved');
+const stored = localStorage.getItem('gemini_api_key');
+if (stored) { apiInput.value = stored; keySaved.style.display = 'inline'; }
+apiInput.addEventListener('input', () => {
+  localStorage.setItem('gemini_api_key', apiInput.value.trim());
+  keySaved.style.display = apiInput.value.trim() ? 'inline' : 'none';
+});
+
+// ── Tab switching ──
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0) === (tab === 'name')));
+  document.getElementById('tab-name').classList.toggle('active', tab === 'name');
+  document.getElementById('tab-code').classList.toggle('active', tab === 'code');
+}
+
+// ── Pill selection ──
+function setPill(group, el, value) {
+  el.closest('.pill-group').querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  if (group === 'audience') audience = value;
+}
+
+// ── Gemini API call ──
+async function callGemini(prompt) {
+  const key = apiInput.value.trim();
+  if (!key) throw new Error('Please enter your Gemini API key at the top.');
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function extractJSON(text) {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('Could not parse JSON from response.');
+  return JSON.parse(match[0]);
+}
+
+// ── Main explain ──
+async function explainAlgorithm() {
+  showError('');
+  let algoName = '';
+
+  if (currentTab === 'name') {
+    const sel = document.getElementById('algoSelect').value;
+    const custom = document.getElementById('algoCustom').value.trim();
+    algoName = custom || sel;
+    if (!algoName) { showError('Please select or type an algorithm name.'); return; }
+  } else {
+    const code = document.getElementById('codeInput').value.trim();
+    if (!code) { showError('Please paste some code to analyze.'); return; }
+    algoName = `the algorithm implemented in this code:\n\`\`\`\n${code}\n\`\`\``;
+  }
+
+  const lang = document.getElementById('langSelect').value;
+  lastAlgoName = currentTab === 'name' ? algoName : 'the algorithm';
+
+  const prompt = `Explain the ${algoName} algorithm to a ${audience} student. Provide a code example in ${lang}.
+
+Respond in this exact JSON format:
+{
+  "name": "Algorithm name",
+  "oneLiner": "One sentence definition",
+  "analogy": "Real-world analogy that makes it click",
+  "steps": ["Step 1", "Step 2", "Step 3", "Step 4", "Step 5"],
+  "visualTrace": "ASCII text showing algorithm working on a small example like [5,3,8,1]",
+  "complexity": {
+    "time": { "best": "O(1)", "average": "O(n)", "worst": "O(n²)", "meaning": "Plain English what this means" },
+    "space": { "value": "O(n)", "meaning": "Plain English" }
+  },
+  "codeExample": "clean ${lang} implementation with comments",
+  "whenToUse": ["Scenario 1", "Scenario 2", "Scenario 3"],
+  "commonMistakes": ["Mistake 1", "Mistake 2"]
+}
+
+Return only the JSON, no markdown.`;
+
+  setLoading(true);
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('bottomActions').style.display = 'none';
+
+  try {
+    const raw = await callGemini(prompt);
+    const d = extractJSON(raw);
+    lastData = d;
+    lastAlgoName = d.name || lastAlgoName;
+    renderResults(d, lang);
+    document.getElementById('bottomActions').style.display = 'flex';
+  } catch (e) {
+    showError(e.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ── Render results ──
+function renderResults(d, lang) {
+  const results = document.getElementById('results');
+
+  const langClass = { Python: 'python', JavaScript: 'javascript', Java: 'java', 'C++': 'cpp' }[lang] || 'plaintext';
+
+  results.innerHTML = `
+    <!-- 1. What it is -->
+    <div class="result-card" style="animation-delay:0s">
+      <div class="card-header">
+        <div class="card-icon">💡</div>
+        <div class="card-title">What it is</div>
+      </div>
+      <div class="one-liner">${esc(d.oneLiner)}</div>
+      <div class="analogy-box">🔍 Think of it like: ${esc(d.analogy)}</div>
+    </div>
+
+    <!-- 2. How it works -->
+    <div class="result-card" style="animation-delay:0.06s">
+      <div class="card-header">
+        <div class="card-icon">🔢</div>
+        <div class="card-title">How it works</div>
+      </div>
+      <div class="steps">
+        <ol>${d.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+      </div>
+    </div>
+
+    <!-- 3. Visual trace -->
+    <div class="result-card" style="animation-delay:0.12s">
+      <div class="card-header">
+        <div class="card-icon">🖥️</div>
+        <div class="card-title">Visual trace</div>
+      </div>
+      <div class="trace-box">${esc(d.visualTrace)}</div>
+    </div>
+
+    <!-- 4. Complexity -->
+    <div class="result-card" style="animation-delay:0.18s">
+      <div class="card-header">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Complexity</div>
+      </div>
+      <table class="complexity-table">
+        <thead><tr><th>Type</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Time</td>
+            <td><code>${esc(d.complexity?.time?.best || '—')}</code></td>
+            <td><code>${esc(d.complexity?.time?.average || '—')}</code></td>
+            <td><code>${esc(d.complexity?.time?.worst || '—')}</code></td>
+            <td><code>${esc(d.complexity?.space?.value || '—')}</code></td>
+          </tr>
+          <tr>
+            <td colspan="5" class="muted" style="padding-top:4px">
+              ⏱ ${esc(d.complexity?.time?.meaning || '')}
+              ${d.complexity?.space?.meaning ? `<br>💾 ${esc(d.complexity.space.meaning)}` : ''}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 5. Code example -->
+    <div class="result-card" style="animation-delay:0.24s">
+      <div class="card-header">
+        <div class="card-icon">💻</div>
+        <div class="card-title">Code example — ${esc(lang)}</div>
+      </div>
+      <div class="code-wrap">
+        <pre><code class="language-${langClass}" id="codeBlock">${esc(d.codeExample)}</code></pre>
+      </div>
+    </div>
+
+    <!-- 6. When to use -->
+    <div class="result-card" style="animation-delay:0.30s">
+      <div class="card-header">
+        <div class="card-icon">✅</div>
+        <div class="card-title">When to use it</div>
+      </div>
+      <ul class="list-items">
+        ${d.whenToUse.map(s => `<li><span class="dot dot-green"></span>${esc(s)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <!-- 7. Common mistakes -->
+    <div class="result-card" style="animation-delay:0.36s">
+      <div class="card-header">
+        <div class="card-icon">⚠️</div>
+        <div class="card-title">Common mistakes</div>
+      </div>
+      <ul class="list-items">
+        ${d.commonMistakes.map(s => `<li><span class="dot dot-red"></span>${esc(s)}</li>`).join('')}
+      </ul>
+    </div>
+  `;
+
+  // Apply highlight.js
+  document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+}
+
+// ── Quiz ──
+async function generateQuiz() {
+  const section = document.getElementById('quiz-section');
+  section.style.display = 'block';
+  section.innerHTML = `<div class="quiz-title">🧠 Quiz Mode</div><div class="loader visible"><div class="spinner"></div><div>Generating questions…</div></div>`;
+
+  const prompt = `Generate 3 multiple choice questions about the ${lastAlgoName} algorithm for a ${audience} student.
+Return JSON: { "questions": [{ "q": "question", "options": ["A","B","C","D"], "answer": "A", "explanation": "why" }] }
+Return only the JSON, no markdown.`;
+
+  try {
+    const raw = await callGemini(prompt);
+    const d = extractJSON(raw);
+    renderQuiz(d.questions, section);
+  } catch (e) {
+    section.innerHTML = `<div class="quiz-title">🧠 Quiz Mode</div><div class="error-box visible">${esc(e.message)}</div>`;
+  }
+}
+
+function renderQuiz(questions, section) {
+  section.innerHTML = `<div class="quiz-title">🧠 Quiz Mode — ${esc(lastAlgoName)}</div>` +
+    questions.map((q, qi) => `
+      <div class="quiz-question" id="qq${qi}">
+        <div class="quiz-q-text">${qi + 1}. ${esc(q.q)}</div>
+        <div class="quiz-options">
+          ${q.options.map((opt, oi) => {
+            const letter = 'ABCD'[oi];
+            return `<button class="quiz-option" onclick="answerQuiz(${qi}, '${letter}', '${esc(q.answer)}', '${escAttr(q.explanation)}', this)">
+              <strong>${letter}.</strong> ${esc(opt)}
+            </button>`;
+          }).join('')}
+        </div>
+        <div class="quiz-explanation" id="qexp${qi}"></div>
+      </div>
+    `).join('');
+}
+
+function answerQuiz(qi, chosen, correct, explanation, btn) {
+  const container = document.getElementById(`qq${qi}`);
+  container.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+  btn.classList.add(chosen === correct ? 'correct' : 'wrong');
+  if (chosen !== correct) {
+    container.querySelectorAll('.quiz-option').forEach(b => {
+      if (b.textContent.trim().startsWith(correct + '.')) b.classList.add('correct');
+    });
+  }
+  const exp = document.getElementById(`qexp${qi}`);
+  exp.textContent = explanation;
+  exp.classList.add('visible');
+}
+
+// ── Share ──
+function shareResult() {
+  if (!lastData) return;
+  const d = lastData;
+  const text = `📘 Algorithm: ${d.name}
+
+💡 ${d.oneLiner}
+
+🔍 Analogy: ${d.analogy}
+
+📊 Complexity:
+  Time  — Best: ${d.complexity?.time?.best}, Avg: ${d.complexity?.time?.average}, Worst: ${d.complexity?.time?.worst}
+  Space — ${d.complexity?.space?.value}
+
+✅ Best for:
+${d.whenToUse.map(s => '• ' + s).join('\n')}
+
+⚠️ Watch out for:
+${d.commonMistakes.map(s => '• ' + s).join('\n')}
+
+Generated with Algorithm Explainer → https://hhanng.github.io/agent-12-algorithm-explainer/`;
+
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!')).catch(() => showToast('Copy failed'));
+}
+
+// ── Helpers ──
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  if (!s) return '';
+  return String(s).replace(/'/g, "\\'").replace(/\n/g, ' ');
+}
+function setLoading(on) {
+  document.getElementById('loader').classList.toggle('visible', on);
+  document.getElementById('explainBtn').disabled = on;
+}
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = msg;
+  box.classList.toggle('visible', !!msg);
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+</script>
+</body>
+</html>

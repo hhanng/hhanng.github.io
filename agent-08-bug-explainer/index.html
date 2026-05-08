@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bug Explainer — Fix Code Bugs in Plain English</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --card: #1a1a1a;
+      --card2: #222;
+      --border: #2a2a2a;
+      --amber: #f59e0b;
+      --amber-dim: #d97706;
+      --blue: #3b82f6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 24px 16px 60px;
+    }
+
+    /* ─── Header ─── */
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    header .badge {
+      display: inline-block;
+      background: #1a1a1a;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    header h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    header h1 span { color: var(--amber); }
+    header p {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 15px;
+    }
+
+    /* ─── Main container ─── */
+    .container { max-width: 960px; margin: 0 auto; }
+
+    /* ─── API Key ─── */
+    .api-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+    }
+    .api-row label {
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    .api-row input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      min-width: 0;
+    }
+    .api-row input::placeholder { color: #555; }
+    .api-save-btn {
+      background: var(--amber);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .api-save-btn:hover { background: var(--amber-dim); }
+    .api-status {
+      font-size: 11px;
+      color: var(--green);
+      white-space: nowrap;
+      display: none;
+    }
+
+    /* ─── Input panels ─── */
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 640px) {
+      .panels { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: #1f1f1f;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-header .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #febc2e; }
+    .dot-green { background: #28c840; }
+    .panel-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      margin-left: 4px;
+    }
+    textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 14px;
+      resize: vertical;
+      min-height: 180px;
+    }
+    textarea::placeholder { color: #444; }
+
+    /* ─── Controls row ─── */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .select-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 140px;
+    }
+    .select-wrap label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    select {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      padding: 9px 12px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    select:focus { border-color: var(--amber); }
+
+    /* ─── Explain button ─── */
+    #explainBtn {
+      width: 100%;
+      background: var(--amber);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    #explainBtn:hover:not(:disabled) { background: var(--amber-dim); transform: translateY(-1px); }
+    #explainBtn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ─── Spinner ─── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 3px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Results ─── */
+    #results { display: none; }
+    .results-grid {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .result-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      border-top: 3px solid transparent;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .result-card.visible { opacity: 1; transform: translateY(0); }
+
+    .card-amber { border-top-color: var(--amber); }
+    .card-blue  { border-top-color: var(--blue); }
+    .card-green { border-top-color: var(--green); }
+    .card-purple{ border-top-color: var(--purple); }
+
+    .card-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .label-amber { color: var(--amber); }
+    .label-blue  { color: var(--blue); }
+    .label-green { color: var(--green); }
+    .label-purple{ color: var(--purple); }
+
+    /* Card 1 */
+    .one-liner {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #fff;
+    }
+
+    /* Card 2 */
+    .why-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .analogy-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(59,130,246,0.25);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+    }
+
+    /* Card 3 — Diff */
+    .fix-explanation {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+    .diff-view {
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    .diff-header {
+      background: #141414;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      letter-spacing: 0.5px;
+    }
+    .diff-line {
+      display: flex;
+      align-items: flex-start;
+      padding: 4px 12px;
+      line-height: 1.6;
+    }
+    .diff-line.removed {
+      background: rgba(239,68,68,0.1);
+      border-left: 3px solid var(--red);
+    }
+    .diff-line.added {
+      background: rgba(34,197,94,0.1);
+      border-left: 3px solid var(--green);
+    }
+    .diff-sign {
+      width: 18px;
+      flex-shrink: 0;
+      font-weight: 700;
+      user-select: none;
+    }
+    .diff-line.removed .diff-sign { color: var(--red); }
+    .diff-line.added .diff-sign { color: var(--green); }
+    .diff-code {
+      flex: 1;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .diff-line.removed .diff-code { color: #fca5a5; }
+    .diff-line.added .diff-code { color: #86efac; }
+
+    .copy-btn {
+      background: rgba(34,197,94,0.15);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: var(--green);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .copy-btn:hover { background: rgba(34,197,94,0.25); }
+    .copy-btn.copied { color: #fff; background: var(--green); border-color: var(--green); }
+
+    /* Card 4 */
+    .warning-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .warning-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .warning-icon {
+      width: 22px; height: 22px;
+      background: rgba(168,85,247,0.15);
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: var(--purple);
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    /* ─── Follow-up ─── */
+    #followupSection { margin-bottom: 24px; }
+    #followupToggle {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    #followupToggle:hover { border-color: var(--amber); color: var(--amber); }
+
+    #followupChat { display: none; }
+    .chat-messages {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .msg {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 85%;
+    }
+    .msg.user {
+      background: rgba(245,158,11,0.15);
+      border: 1px solid rgba(245,158,11,0.2);
+      color: var(--text);
+      align-self: flex-end;
+    }
+    .msg.ai {
+      background: #222;
+      border: 1px solid var(--border);
+      color: var(--text);
+      align-self: flex-start;
+    }
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    #followupInput {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #followupInput:focus { border-color: var(--amber); }
+    #followupInput::placeholder { color: #555; }
+    #sendFollowup {
+      background: var(--amber);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    #sendFollowup:hover:not(:disabled) { background: var(--amber-dim); }
+    #sendFollowup:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ─── Bug History ─── */
+    #historySection {
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      margin-top: 8px;
+    }
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .history-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    #clearHistory {
+      background: transparent;
+      border: none;
+      color: #555;
+      font-size: 12px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    #clearHistory:hover { color: var(--red); }
+    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .history-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .history-item:hover { border-color: var(--amber); }
+    .history-item-info { flex: 1; min-width: 0; }
+    .history-item-summary {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .history-item-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .history-badge {
+      background: #1f1f1f;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .no-history { color: var(--muted); font-size: 13px; text-align: center; padding: 20px; }
+
+    /* ─── Error toast ─── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #2a0a0a;
+      border: 1px solid var(--red);
+      color: #fca5a5;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: transform 0.3s ease;
+      z-index: 999;
+      max-width: 90vw;
+      text-align: center;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="badge">Agent #8 of 97 · 100 AI Agents Challenge</div>
+    <h1>Bug <span>Explainer</span></h1>
+    <p>Paste broken code &amp; an error — get a plain-English fix, tailored to your level.</p>
+  </header>
+
+  <!-- API Key -->
+  <div class="api-row">
+    <label>🔑 Gemini API Key</label>
+    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" />
+    <button class="api-save-btn" onclick="saveApiKey()">Save</button>
+    <span class="api-status" id="apiStatus">✓ Saved</span>
+  </div>
+
+  <!-- Code + Error panels -->
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+        <span class="panel-title">Your buggy code</span>
+      </div>
+      <textarea id="buggyCode" placeholder="# Paste your broken code here...&#10;&#10;def greet(name):&#10;    print('Hello, ' + name)&#10;&#10;greet()  # Forgot the argument!"></textarea>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+        <span class="panel-title">Error message / traceback</span>
+      </div>
+      <textarea id="errorMsg" placeholder="Paste the error or traceback here...&#10;&#10;TypeError: greet() missing 1 required positional&#10;argument: 'name'"></textarea>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="select-wrap">
+      <label>Language</label>
+      <select id="language">
+        <option>Python</option>
+        <option>JavaScript</option>
+        <option>Java</option>
+        <option>C++</option>
+        <option>TypeScript</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="select-wrap">
+      <label>Experience Level</label>
+      <select id="experience">
+        <option>Complete Beginner</option>
+        <option>Learning (&lt; 1 year)</option>
+        <option>Intermediate</option>
+        <option>Advanced</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Explain button -->
+  <button id="explainBtn" onclick="explainBug()">
+    <div class="spinner" id="spinner"></div>
+    <span id="btnText">🔍 Explain This Bug</span>
+  </button>
+
+  <!-- Results -->
+  <div id="results">
+
+    <div class="results-grid" id="cardsGrid">
+
+      <!-- Card 1: One-liner -->
+      <div class="result-card card-amber" id="card1">
+        <div class="card-label label-amber">⚡ The bug in one sentence</div>
+        <div class="one-liner" id="oneLiner"></div>
+      </div>
+
+      <!-- Card 2: Why it happens -->
+      <div class="result-card card-blue" id="card2">
+        <div class="card-label label-blue">🧠 Why this happens</div>
+        <div id="analogyTag" class="analogy-tag" style="display:none;">💡 Real-world analogy</div>
+        <div class="why-text" id="whyText"></div>
+      </div>
+
+      <!-- Card 3: The fix -->
+      <div class="result-card card-green" id="card3">
+        <div class="card-label label-green">🔧 The fix</div>
+        <div class="fix-explanation" id="fixExplanation"></div>
+        <div class="diff-view">
+          <div class="diff-header">diff — old vs fixed</div>
+          <div id="diffLines"></div>
+        </div>
+        <button class="copy-btn" id="copyBtn" onclick="copyFixed()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy fixed code
+        </button>
+      </div>
+
+      <!-- Card 4: Spot it next time -->
+      <div class="result-card card-purple" id="card4">
+        <div class="card-label label-purple">👁 How to spot this next time</div>
+        <ul class="warning-list" id="warningList"></ul>
+      </div>
+
+    </div>
+
+    <!-- Follow-up -->
+    <div id="followupSection">
+      <button id="followupToggle" onclick="toggleFollowup()">
+        💬 Ask a follow-up question
+      </button>
+      <div id="followupChat">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="followupInput" placeholder="e.g. Can you show me another example?" onkeydown="if(event.key==='Enter')sendFollowup()" />
+          <button id="sendFollowup" onclick="sendFollowup()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div id="historySection">
+      <div class="history-header">
+        <span class="history-title">📋 Recent bugs</span>
+        <button id="clearHistory" onclick="clearHistory()">Clear all</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+  </div><!-- /#results -->
+
+</div><!-- /.container -->
+
+<div id="toast"></div>
+
+<script>
+  // ─── State ───────────────────────────────────────────────
+  let lastResult = null;
+  let lastContext = {};
+  let chatHistory = [];
+
+  // ─── Init ────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('gemini_api_key');
+    if (saved) {
+      document.getElementById('apiKey').value = saved;
+      document.getElementById('apiStatus').style.display = 'inline';
+    }
+    renderHistory();
+  });
+
+  // ─── API Key ─────────────────────────────────────────────
+  function saveApiKey() {
+    const key = document.getElementById('apiKey').value.trim();
+    if (!key) return showToast('Please enter an API key');
+    localStorage.setItem('gemini_api_key', key);
+    const s = document.getElementById('apiStatus');
+    s.style.display = 'inline';
+    s.textContent = '✓ Saved';
+    setTimeout(() => { s.style.display = 'none'; }, 2000);
+  }
+
+  // ─── Main explain ─────────────────────────────────────────
+  async function explainBug() {
+    const apiKey = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
+    const buggyCode = document.getElementById('buggyCode').value.trim();
+    const errorMsg = document.getElementById('errorMsg').value.trim();
+    const language = document.getElementById('language').value;
+    const experience = document.getElementById('experience').value;
+
+    if (!apiKey) return showToast('Please enter your Gemini API key first');
+    if (!buggyCode) return showToast('Please paste your buggy code');
+
+    setLoading(true);
+
+    const prompt = `I am a ${experience} programmer writing ${language}. My code has a bug.
+
+Buggy code:
+${buggyCode}
+
+Error message:
+${errorMsg || '(no error message provided)'}
+
+Explain this bug to me at a ${experience} level. Use simple analogies if I am a beginner. Respond in this exact JSON format:
+{
+  "oneLiner": "The bug in one sentence",
+  "whyItHappens": "Explanation with analogy if beginner (3-4 sentences)",
+  "fix": {
+    "explanation": "What to change and why",
+    "oldCode": "the broken line(s)",
+    "newCode": "the fixed line(s)",
+    "fullFixed": "full corrected code"
+  },
+  "spotItNextTime": ["Warning sign 1", "Warning sign 2"]
+}
+
+Return only the JSON, no markdown.`;
+
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || 'API error');
+
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const json = extractJSON(rawText);
+      if (!json) throw new Error('Could not parse AI response as JSON');
+
+      lastResult = json;
+      lastContext = { buggyCode, errorMsg, language, experience };
+      chatHistory = [];
+
+      renderResults(json, experience);
+      saveToHistory(json, language, experience);
+      renderHistory();
+
+    } catch (err) {
+      showToast('Error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ─── Render results ───────────────────────────────────────
+  function renderResults(r, experience) {
+    // Card 1
+    document.getElementById('oneLiner').textContent = r.oneLiner || '';
+
+    // Card 2
+    const isBeginner = experience.includes('Beginner') || experience.includes('Learning');
+    const analogyTag = document.getElementById('analogyTag');
+    analogyTag.style.display = isBeginner ? 'inline-flex' : 'none';
+    document.getElementById('whyText').textContent = r.whyItHappens || '';
+
+    // Card 3
+    document.getElementById('fixExplanation').textContent = r.fix?.explanation || '';
+    renderDiff(r.fix?.oldCode || '', r.fix?.newCode || '');
+
+    // Card 4
+    const ul = document.getElementById('warningList');
+    ul.innerHTML = '';
+    (r.spotItNextTime || []).forEach((w, i) => {
+      const li = document.createElement('li');
+      li.className = 'warning-item';
+      li.innerHTML = `<div class="warning-icon">${i + 1}</div><span>${escapeHtml(w)}</span>`;
+      ul.appendChild(li);
+    });
+
+    // Show results
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('followupChat').style.display = 'none';
+    document.getElementById('followupToggle').textContent = '💬 Ask a follow-up question';
+
+    // Animate cards
+    ['card1','card2','card3','card4'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.classList.remove('visible');
+      setTimeout(() => el.classList.add('visible'), i * 100);
+    });
+
+    setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }
+
+  function renderDiff(oldCode, newCode) {
+    const container = document.getElementById('diffLines');
+    container.innerHTML = '';
+
+    const oldLines = oldCode.split('\n');
+    const newLines = newCode.split('\n');
+
+    oldLines.forEach(line => {
+      const d = document.createElement('div');
+      d.className = 'diff-line removed';
+      d.innerHTML = `<span class="diff-sign">-</span><span class="diff-code">${escapeHtml(line)}</span>`;
+      container.appendChild(d);
+    });
+    newLines.forEach(line => {
+      const d = document.createElement('div');
+      d.className = 'diff-line added';
+      d.innerHTML = `<span class="diff-sign">+</span><span class="diff-code">${escapeHtml(line)}</span>`;
+      container.appendChild(d);
+    });
+  }
+
+  function copyFixed() {
+    const code = lastResult?.fix?.fullFixed || lastResult?.fix?.newCode || '';
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.classList.add('copied');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy fixed code`;
+      }, 2000);
+    });
+  }
+
+  // ─── Follow-up chat ───────────────────────────────────────
+  function toggleFollowup() {
+    const chat = document.getElementById('followupChat');
+    const btn = document.getElementById('followupToggle');
+    const visible = chat.style.display !== 'none';
+    chat.style.display = visible ? 'none' : 'block';
+    btn.textContent = visible ? '💬 Ask a follow-up question' : '✕ Close follow-up';
+    if (!visible && document.getElementById('chatMessages').children.length === 0) {
+      addChatMsg('ai', `I've explained the bug in your ${lastContext.language} code. What would you like to know more about?`);
+    }
+  }
+
+  async function sendFollowup() {
+    const input = document.getElementById('followupInput');
+    const question = input.value.trim();
+    if (!question) return;
+    const apiKey = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
+    if (!apiKey) return showToast('API key required');
+
+    input.value = '';
+    addChatMsg('user', question);
+    document.getElementById('sendFollowup').disabled = true;
+
+    chatHistory.push({ role: 'user', parts: [{ text: question }] });
+
+    const systemContext = `Context: The user is a ${lastContext.experience} programmer in ${lastContext.language}.
+Their bug was: ${lastResult?.oneLiner}.
+The fix was: ${lastResult?.fix?.explanation}
+Now answer their follow-up question clearly and concisely.`;
+
+    const messages = [
+      { role: 'user', parts: [{ text: systemContext + '\n\nUser follow-up: ' + question }] }
+    ];
+
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: messages })
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || 'API error');
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
+      addChatMsg('ai', reply);
+      chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+    } catch (err) {
+      addChatMsg('ai', 'Error: ' + err.message);
+    } finally {
+      document.getElementById('sendFollowup').disabled = false;
+    }
+  }
+
+  function addChatMsg(role, text) {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.textContent = text;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // ─── History ──────────────────────────────────────────────
+  function saveToHistory(result, language, experience) {
+    let history = getHistory();
+    history.unshift({
+      oneLiner: result.oneLiner,
+      language,
+      experience,
+      ts: Date.now(),
+      result,
+      code: lastContext.buggyCode,
+      errorMsg: lastContext.errorMsg
+    });
+    history = history.slice(0, 5);
+    localStorage.setItem('bug_history', JSON.stringify(history));
+  }
+
+  function getHistory() {
+    try { return JSON.parse(localStorage.getItem('bug_history') || '[]'); } catch { return []; }
+  }
+
+  function renderHistory() {
+    const history = getHistory();
+    const list = document.getElementById('historyList');
+    if (history.length === 0) {
+      list.innerHTML = '<div class="no-history">No bugs explained yet</div>';
+      return;
+    }
+    list.innerHTML = '';
+    history.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      const age = timeAgo(item.ts);
+      div.innerHTML = `
+        <div class="history-item-info">
+          <div class="history-item-summary">${escapeHtml(item.oneLiner || 'Bug ' + (i+1))}</div>
+          <div class="history-item-meta">${age}</div>
+        </div>
+        <span class="history-badge">${escapeHtml(item.language)}</span>`;
+      div.onclick = () => {
+        document.getElementById('buggyCode').value = item.code || '';
+        document.getElementById('errorMsg').value = item.errorMsg || '';
+        lastResult = item.result;
+        lastContext = { buggyCode: item.code, errorMsg: item.errorMsg, language: item.language, experience: item.experience };
+        renderResults(item.result, item.experience);
+      };
+      list.appendChild(div);
+    });
+  }
+
+  function clearHistory() {
+    localStorage.removeItem('bug_history');
+    renderHistory();
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────
+  function setLoading(on) {
+    const btn = document.getElementById('explainBtn');
+    const spinner = document.getElementById('spinner');
+    const text = document.getElementById('btnText');
+    btn.disabled = on;
+    spinner.style.display = on ? 'block' : 'none';
+    text.textContent = on ? 'Analyzing bug...' : '🔍 Explain This Bug';
+  }
+
+  function extractJSON(text) {
+    // Try direct parse
+    try { return JSON.parse(text.trim()); } catch {}
+    // Try to find JSON block
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) { try { return JSON.parse(match[0]); } catch {} }
+    return null;
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function timeAgo(ts) {
+    const secs = Math.floor((Date.now() - ts) / 1000);
+    if (secs < 60) return 'just now';
+    if (secs < 3600) return Math.floor(secs/60) + 'm ago';
+    if (secs < 86400) return Math.floor(secs/3600) + 'h ago';
+    return Math.floor(secs/86400) + 'd ago';
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  }
+</script>
+</body>
+</html>
