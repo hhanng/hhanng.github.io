@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gemini API Playground — Agent 04</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --surface2:  #21262d;
+      --border:    #30363d;
+      --text:      #e6edf3;
+      --text-muted:#8b949e;
+      --accent:    #58a6ff;
+      --accent-dim:#1f3d5c;
+      --green:     #3fb950;
+      --red:       #f85149;
+      --amber:     #d29922;
+      --mono:      "Courier New", "Cascadia Code", "Fira Code", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topnav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s;
+    }
+    .topnav a:hover { color: var(--accent); }
+    .topnav .title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .topnav .title .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+    .badge {
+      background: var(--accent-dim);
+      color: var(--accent);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      grid-template-rows: 1fr;
+      gap: 0;
+      flex: 1;
+      height: calc(100vh - 46px);
+    }
+
+    /* ── MAIN PANEL ── */
+    .main-panel {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    /* ── SPLIT (left / right inside main) ── */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── INPUT COLUMN ── */
+    .input-col {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+    }
+
+    .col-header {
+      padding: 12px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .char-counter {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+
+    textarea#prompt-input {
+      flex: 1;
+      width: 100%;
+      min-height: 220px;
+      background: var(--bg);
+      color: var(--text);
+      border: none;
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      line-height: 1.65;
+      resize: none;
+      outline: none;
+    }
+    textarea#prompt-input::placeholder { color: var(--text-muted); }
+
+    /* ── CONTROLS ── */
+    .controls {
+      padding: 16px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .ctrl-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .ctrl-group label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 7px;
+    }
+    .ctrl-group label .val {
+      color: var(--accent);
+      font-family: var(--mono);
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.82rem;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+    input[type="range"]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+    }
+
+    select {
+      width: 100%;
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      cursor: pointer;
+      outline: none;
+    }
+    select:focus { border-color: var(--accent); }
+    select option:disabled { color: var(--text-muted); }
+
+    .run-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .run-btn:hover   { opacity: 0.88; }
+    .run-btn:active  { transform: scale(0.98); }
+    .run-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #0d1117;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── TEMPLATES ── */
+    .templates {
+      padding: 14px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .templates-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 10px;
+    }
+    .templates-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+    .tpl-btn {
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .tpl-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    /* ── OUTPUT COLUMN ── */
+    .output-col {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .meta-bar {
+      padding: 10px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+    .meta-item {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .meta-item .meta-val {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-weight: 600;
+    }
+
+    #response-area {
+      flex: 1;
+      background: var(--bg);
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--text);
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .placeholder-msg {
+      color: var(--text-muted);
+      font-style: italic;
+      font-family: var(--mono);
+    }
+
+    .output-footer {
+      padding: 10px 16px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .icon-btn {
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── HISTORY SIDEBAR ── */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .sidebar-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .clear-hist {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .clear-hist:hover { color: var(--red); }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+    .history-empty {
+      padding: 20px 12px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .hist-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .hist-item:hover { border-color: var(--accent); background: var(--accent-dim); }
+    .hist-item .hist-preview {
+      font-size: 0.82rem;
+      color: var(--text);
+      font-family: var(--mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 5px;
+    }
+    .hist-item .hist-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 10px;
+    }
+
+    /* ── SIDEBAR BOTTOM INFO ── */
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .info-block {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .info-block a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .info-block a:hover { text-decoration: underline; }
+
+    /* ── ERROR ── */
+    .error-banner {
+      background: rgba(248,81,73,0.12);
+      border: 1px solid rgba(248,81,73,0.4);
+      color: #f85149;
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      font-family: var(--mono);
+      line-height: 1.6;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 12px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; grid-template-rows: auto; height: auto; }
+      .workspace { grid-template-columns: 1fr; height: auto; }
+      .main-panel { border-right: none; border-bottom: 1px solid var(--border); }
+      .input-col  { min-height: 300px; }
+      .output-col { min-height: 300px; }
+      .sidebar    { min-height: 200px; }
+      .layout, .workspace, .main-panel, .input-col, .output-col { height: auto; overflow: visible; }
+      #response-area { min-height: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a href="https://hhanng.github.io/">← All Agents</a>
+  <div class="title"><span class="dot"></span> Gemini API Playground</div>
+  <span class="badge">Agent 04 of 97</span>
+</nav>
+
+<div class="layout">
+
+  <!-- ═══════════════════════════════════════════════════════
+       MAIN PANEL (input + output)
+  ════════════════════════════════════════════════════════ -->
+  <div class="main-panel">
+
+    <!-- TEMPLATES BAR -->
+    <div class="templates">
+      <div class="templates-label">Starter templates</div>
+      <div class="templates-row" id="templates-row"></div>
+    </div>
+
+    <div class="workspace">
+
+      <!-- INPUT COLUMN -->
+      <div class="input-col">
+        <div class="col-header">
+          <span>Prompt</span>
+          <span class="char-counter"><span id="char-count">0</span> chars</span>
+        </div>
+
+        <textarea id="prompt-input" placeholder="Type your prompt here — or click a starter template above…" oninput="onPromptInput()"></textarea>
+
+        <div class="controls">
+          <div class="ctrl-row">
+            <div class="ctrl-group">
+              <label>Temperature <span class="val" id="temp-label">0.7</span></label>
+              <input type="range" id="temp-slider" min="0" max="1" step="0.1" value="0.7"
+                     oninput="document.getElementById('temp-label').textContent = this.value" />
+            </div>
+            <div class="ctrl-group">
+              <label>Max tokens <span class="val" id="tokens-label">1024</span></label>
+              <input type="range" id="tokens-slider" min="100" max="2000" step="100" value="1024"
+                     oninput="document.getElementById('tokens-label').textContent = this.value" />
+            </div>
+          </div>
+
+          <div class="ctrl-group">
+            <label>Model</label>
+            <select id="model-select">
+              <option value="gemini-pro">gemini-pro</option>
+              <option value="gemini-pro-vision" disabled>gemini-pro-vision (text only for now)</option>
+            </select>
+          </div>
+
+          <button class="run-btn" id="run-btn" onclick="runPrompt()">
+            <span id="run-btn-text">▶ Run Prompt</span>
+            <span id="run-spinner" style="display:none;" class="spinner"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- OUTPUT COLUMN -->
+      <div class="output-col">
+        <div class="col-header">
+          <span>Response</span>
+        </div>
+
+        <!-- META BAR -->
+        <div class="meta-bar">
+          <div class="meta-item">Model <span class="meta-val" id="meta-model">—</span></div>
+          <div class="meta-item">Time <span class="meta-val" id="meta-time">—</span></div>
+          <div class="meta-item">Input tokens <span class="meta-val" id="meta-in">—</span></div>
+          <div class="meta-item">Output tokens <span class="meta-val" id="meta-out">—</span></div>
+        </div>
+
+        <div id="response-area">
+          <span class="placeholder-msg">// Response will appear here after you run a prompt</span>
+        </div>
+
+        <div class="output-footer">
+          <button class="icon-btn" onclick="clearOutput()">Clear</button>
+          <button class="icon-btn" onclick="copyResponse()">Copy</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SIDEBAR — prompt history
+  ════════════════════════════════════════════════════════ -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      Prompt History
+      <a class="clear-hist" onclick="clearHistory()">Clear all</a>
+    </div>
+
+    <div class="history-list" id="history-list">
+      <div class="history-empty">No history yet.<br>Run a prompt to get started.</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="info-block">
+        🔑 Add your key in the &lt;script&gt; section.<br>
+        Get a free key at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>.<br><br>
+        History is saved in <code>localStorage</code> — stays across reloads.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Agent 04 of 97 &nbsp;|&nbsp; Built by Han Han &nbsp;|&nbsp;
+  <a href="https://hhanng.github.io/">hhanng.github.io</a>
+</footer>
+
+<script>
+// ──────────────────────────────────────────────────────
+//  CONFIG
+// ──────────────────────────────────────────────────────
+const GEMINI_API_KEY = 'YOUR_KEY_HERE';
+// Get your free key at: https://aistudio.google.com
+
+function geminiURL(model) {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+}
+
+// ──────────────────────────────────────────────────────
+//  TEMPLATES
+// ──────────────────────────────────────────────────────
+const TEMPLATES = [
+  'Explain this like I\'m a beginner:',
+  'Write a Python function that:',
+  'Give me 5 ideas for:',
+  'Summarize this text:',
+  'Debug this code:',
+  'Translate this to Vietnamese:',
+];
+
+function buildTemplates() {
+  const row = document.getElementById('templates-row');
+  TEMPLATES.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tpl-btn';
+    btn.textContent = t;
+    btn.onclick = () => {
+      document.getElementById('prompt-input').value = t + ' ';
+      onPromptInput();
+      document.getElementById('prompt-input').focus();
+    };
+    row.appendChild(btn);
+  });
+}
+
+// ──────────────────────────────────────────────────────
+//  CHAR COUNTER
+// ──────────────────────────────────────────────────────
+function onPromptInput() {
+  const len = document.getElementById('prompt-input').value.length;
+  const el  = document.getElementById('char-count');
+  el.textContent = len.toLocaleString();
+  el.style.color = len > 8000 ? 'var(--amber)' : '';
+}
+
+// ──────────────────────────────────────────────────────
+//  RUN PROMPT
+// ──────────────────────────────────────────────────────
+async function runPrompt() {
+  const prompt  = document.getElementById('prompt-input').value.trim();
+  const model   = document.getElementById('model-select').value;
+  const temp    = parseFloat(document.getElementById('temp-slider').value);
+  const maxTok  = parseInt(document.getElementById('tokens-slider').value, 10);
+  const respEl  = document.getElementById('response-area');
+
+  if (!prompt) {
+    respEl.innerHTML = '<span class="error-banner">⚠ Please enter a prompt first.</span>';
+    return;
+  }
+
+  setLoading(true);
+  respEl.innerHTML = '<span class="placeholder-msg">// Calling Gemini API…</span>';
+  resetMeta();
+
+  const t0 = Date.now();
+
+  try {
+    const res = await fetch(geminiURL(model), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: temp,
+          maxOutputTokens: maxTok,
+        }
+      })
+    });
+
+    const elapsed = Date.now() - t0;
+
+    if (!res.ok) {
+      const errBody = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errBody.slice(0, 300)}`);
+    }
+
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '(empty response)';
+
+    // metadata
+    const usage   = data.usageMetadata ?? {};
+    const inTok   = usage.promptTokenCount     ?? '—';
+    const outTok  = usage.candidatesTokenCount ?? '—';
+
+    document.getElementById('meta-model').textContent = model;
+    document.getElementById('meta-time').textContent  = elapsed + ' ms';
+    document.getElementById('meta-in').textContent    = inTok;
+    document.getElementById('meta-out').textContent   = outTok;
+
+    respEl.textContent = text;
+
+    saveHistory(prompt, model, elapsed, outTok);
+    renderHistory();
+
+  } catch (e) {
+    const elapsed = Date.now() - t0;
+    document.getElementById('meta-time').textContent = elapsed + ' ms';
+    respEl.innerHTML = `<span class="error-banner">⚠ Error: ${escHtml(e.message)}</span>`;
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setLoading(on) {
+  const btn = document.getElementById('run-btn');
+  btn.disabled = on;
+  document.getElementById('run-spinner').style.display  = on ? 'inline-block' : 'none';
+  document.getElementById('run-btn-text').textContent   = on ? 'Running…' : '▶ Run Prompt';
+}
+
+function resetMeta() {
+  ['meta-model','meta-time','meta-in','meta-out'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+  });
+}
+
+// ──────────────────────────────────────────────────────
+//  OUTPUT ACTIONS
+// ──────────────────────────────────────────────────────
+function copyResponse() {
+  const text = document.getElementById('response-area').textContent;
+  if (!text.trim() || text.includes('Response will appear')) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.icon-btn:last-child');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+function clearOutput() {
+  document.getElementById('response-area').innerHTML =
+    '<span class="placeholder-msg">// Response will appear here after you run a prompt</span>';
+  resetMeta();
+}
+
+// ──────────────────────────────────────────────────────
+//  PROMPT HISTORY (localStorage)
+// ──────────────────────────────────────────────────────
+const HIST_KEY = 'gemini-playground-history-v1';
+const MAX_HIST = 5;
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HIST_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveHistory(prompt, model, ms, tokens) {
+  let hist = loadHistory();
+  hist.unshift({
+    prompt,
+    model,
+    ms,
+    tokens,
+    ts: new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
+  });
+  if (hist.length > MAX_HIST) hist = hist.slice(0, MAX_HIST);
+  localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+}
+
+function clearHistory() {
+  localStorage.removeItem(HIST_KEY);
+  renderHistory();
+}
+
+function renderHistory() {
+  const hist = loadHistory();
+  const el   = document.getElementById('history-list');
+
+  if (hist.length === 0) {
+    el.innerHTML = '<div class="history-empty">No history yet.<br>Run a prompt to get started.</div>';
+    return;
+  }
+
+  el.innerHTML = '';
+  hist.forEach((h, i) => {
+    const item = document.createElement('div');
+    item.className = 'hist-item';
+    item.innerHTML = `
+      <div class="hist-preview">${escHtml(h.prompt.slice(0, 80))}${h.prompt.length > 80 ? '…' : ''}</div>
+      <div class="hist-meta">
+        <span>${h.model}</span>
+        <span>${h.ms} ms</span>
+        <span>${h.ts}</span>
+      </div>
+    `;
+    item.onclick = () => {
+      document.getElementById('prompt-input').value = h.prompt;
+      onPromptInput();
+      document.getElementById('prompt-input').focus();
+    };
+    el.appendChild(item);
+  });
+}
+
+// ──────────────────────────────────────────────────────
+//  UTILS
+// ──────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+}
+
+// ──────────────────────────────────────────────────────
+//  INIT
+// ──────────────────────────────────────────────────────
+buildTemplates();
+renderHistory();
+</script>
+
+</body>
+</html>
