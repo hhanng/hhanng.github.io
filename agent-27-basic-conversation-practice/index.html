@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basic English Conversation Practice | Luyện Tiếng Anh Cơ Bản</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f7f5;
+    --accent: #f0eeea;
+    --accent2: #d8d4cc;
+    --text: #1a1a1a;
+    --text-dark: #111111;
+    --text-light: #888880;
+    --white: #ffffff;
+    --bubble-ai: #f5f4f0;
+    --bubble-user: #1a1a1a;
+    --bubble-user-text: #ffffff;
+    --amber: #fdf6ec;
+    --amber-border: #e8c97a;
+    --green: #edf7f0;
+    --green-text: #1a6636;
+    --shadow: rgba(0,0,0,0.07);
+    --radius: 16px;
+  }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  /* ─── API KEY BAR ─── */
+  #api-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--accent2);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  #api-bar label { font-size: 14px; font-weight: 600; white-space: nowrap; }
+  #api-key-input {
+    flex: 1; min-width: 180px;
+    border: 2px solid var(--accent2);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 14px;
+    background: var(--white);
+    color: var(--text-dark);
+    font-family: monospace;
+  }
+  #save-key-btn {
+    background: var(--text);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  #save-key-btn:hover { background: var(--text-dark); }
+  #key-status { font-size: 13px; color: var(--green-text); font-weight: 600; }
+
+  /* ─── HOME SCREEN ─── */
+  #home-screen {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 32px 16px 48px;
+  }
+
+  .app-title {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .app-title h1 {
+    font-size: 2rem;
+    color: var(--text-dark);
+    line-height: 1.2;
+  }
+  .app-title .vi { font-size: 1.2rem; color: var(--text-light); font-style: italic; }
+  .app-title .subtitle { font-size: 1rem; color: var(--text-light); margin-top: 6px; }
+
+  .section-label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .section-label .vi { font-weight: 400; color: var(--text-light); font-style: italic; }
+
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .scenario-btn {
+    background: var(--white);
+    border: 1.5px solid var(--accent2);
+    border-radius: var(--radius);
+    padding: 20px 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+    box-shadow: 0 1px 4px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .scenario-btn:hover {
+    background: var(--accent);
+    border-color: var(--text);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px var(--shadow);
+  }
+  .scenario-btn .icon { font-size: 2.4rem; }
+  .scenario-btn .en { font-size: 1rem; font-weight: 700; color: var(--text-dark); }
+  .scenario-btn .vi { font-size: 0.85rem; color: var(--text-light); font-style: italic; }
+
+  .free-chat-btn {
+    width: 100%;
+    background: var(--text);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    padding: 18px 24px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.18s;
+    box-shadow: 0 3px 12px var(--shadow);
+    margin-bottom: 28px;
+  }
+  .free-chat-btn:hover { background: var(--text-dark); transform: translateY(-2px); }
+  .free-chat-btn .vi { font-weight: 400; font-style: italic; opacity: 0.85; }
+
+  .progress-banner {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    border: 1.5px solid var(--accent2);
+  }
+  .progress-banner strong { color: var(--text-dark); }
+
+  /* ─── CONVERSATION SCREEN ─── */
+  #chat-screen {
+    display: none;
+    height: 100vh;
+    flex-direction: column;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* Top bar */
+  .chat-topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--accent2);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    background: var(--white);
+    border: 2px solid var(--accent2);
+    border-radius: 10px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .back-btn:hover { background: var(--accent2); }
+  .chat-scenario-title {
+    flex: 1;
+    text-align: center;
+  }
+  .chat-scenario-title .en { font-size: 1rem; font-weight: 700; color: var(--text-dark); }
+  .chat-scenario-title .vi { font-size: 0.8rem; color: var(--text-light); font-style: italic; }
+  .end-session-btn {
+    background: #dc3545;
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .end-session-btn:hover { background: #b02a37; }
+
+  /* Main layout */
+  .chat-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Side panel */
+  .side-panel {
+    width: 240px;
+    background: var(--bg);
+    border-right: 1px solid var(--accent2);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+    padding: 14px;
+    gap: 16px;
+  }
+  .side-section h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1.5px solid var(--accent2);
+  }
+  .side-section h3 .vi { font-weight: 400; font-style: italic; color: var(--text-light); }
+  .phrase-item {
+    background: var(--accent);
+    border-radius: 8px;
+    padding: 7px 10px;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+  }
+  .phrase-item .ph-en { font-weight: 600; color: var(--text-dark); }
+  .phrase-item .ph-vi { font-style: italic; color: var(--text-light); font-size: 0.8rem; }
+  .word-tag {
+    display: inline-block;
+    background: var(--accent);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.82rem;
+    color: var(--text-dark);
+    margin: 3px 2px;
+    font-weight: 600;
+  }
+  #toggle-panel-btn {
+    display: none;
+    position: fixed;
+    bottom: 100px;
+    right: 12px;
+    background: var(--text);
+    color: var(--white);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 200;
+    box-shadow: 0 3px 10px var(--shadow);
+  }
+
+  /* Chat area */
+  .chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Bubbles */
+  .msg-row { display: flex; gap: 8px; }
+  .msg-row.ai { justify-content: flex-start; }
+  .msg-row.user { justify-content: flex-end; }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 1.5px solid var(--accent2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .bubble-wrap { max-width: 72%; display: flex; flex-direction: column; gap: 4px; }
+  .msg-row.user .bubble-wrap { align-items: flex-end; }
+
+  .bubble {
+    border-radius: 18px;
+    padding: 12px 16px;
+    font-size: 1rem;
+    line-height: 1.5;
+    position: relative;
+  }
+  .msg-row.ai .bubble {
+    background: var(--bubble-ai);
+    border: 1.5px solid var(--accent2);
+    border-top-left-radius: 4px;
+  }
+  .msg-row.user .bubble {
+    background: var(--bubble-user);
+    color: var(--bubble-user-text);
+    border: 1.5px solid var(--bubble-user);
+    border-top-right-radius: 4px;
+  }
+
+  .bubble-en { color: var(--text-dark); font-weight: 500; }
+  .bubble-vi {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--text-light);
+    margin-top: 5px;
+    border-top: 1px dashed var(--accent2);
+    padding-top: 4px;
+  }
+
+  .correction-note {
+    background: var(--amber);
+    border: 1.5px solid var(--amber-border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    color: #7d5800;
+    margin-top: 4px;
+  }
+  .correction-note strong { color: #5a3e00; }
+
+  .encouragement-note {
+    background: var(--green);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    color: var(--green-text);
+    font-weight: 600;
+    text-align: center;
+    width: 100%;
+  }
+
+  .listen-btn {
+    background: none;
+    border: 1.5px solid var(--accent2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.8rem;
+    color: var(--text);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    transition: background 0.15s;
+  }
+  .listen-btn:hover { background: var(--accent); }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    gap: 5px;
+    padding: 12px 16px;
+    background: var(--bubble-ai);
+    border: 1.5px solid var(--accent2);
+    border-radius: 18px;
+    border-top-left-radius: 4px;
+    width: fit-content;
+  }
+  .typing-dot {
+    width: 8px; height: 8px;
+    background: var(--text-light);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-8px); opacity: 1; }
+  }
+
+  /* Input area */
+  .input-area {
+    background: var(--white);
+    border-top: 1px solid var(--accent2);
+    padding: 12px 14px;
+    flex-shrink: 0;
+  }
+
+  .input-top {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  #user-input {
+    flex: 1;
+    border: 1.5px solid var(--accent2);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 1rem;
+    background: var(--bg);
+    color: var(--text-dark);
+    resize: none;
+    font-family: inherit;
+    min-height: 48px;
+    max-height: 120px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  #user-input:focus { border-color: var(--text); }
+
+  .send-btn {
+    background: var(--text);
+    color: var(--white);
+    border: none;
+    border-radius: 12px;
+    padding: 0 18px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    min-width: 50px;
+  }
+  .send-btn:hover { background: var(--text-dark); }
+  .send-btn:disabled { background: var(--text-light); cursor: not-allowed; }
+
+  .input-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    background: var(--bg);
+    border: 1.5px solid var(--accent2);
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s;
+  }
+  .action-btn:hover { background: var(--accent); border-color: var(--text); }
+  .action-btn.active { background: #111; color: var(--white); border-color: #111; }
+  .action-btn .vi { font-weight: 400; font-style: italic; opacity: 0.8; }
+
+  /* Suggestions overlay */
+  #suggestions-panel {
+    background: var(--white);
+    border: 1.5px solid var(--accent2);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 8px;
+    display: none;
+  }
+  #suggestions-panel h4 {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .suggestion-item {
+    background: var(--bg);
+    border: 1.5px solid var(--accent2);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 7px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .suggestion-item:hover { background: var(--accent); border-color: var(--text); }
+  .suggestion-item .s-en { font-weight: 700; color: var(--text-dark); }
+  .suggestion-item .s-vi { font-size: 0.85rem; font-style: italic; color: var(--text-light); }
+
+  /* Summary screen */
+  #summary-screen {
+    display: none;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 32px 16px;
+    text-align: center;
+  }
+  .summary-card {
+    background: var(--white);
+    border: 1.5px solid var(--accent2);
+    border-radius: 20px;
+    padding: 28px 24px;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .summary-card h2 { font-size: 1.6rem; color: var(--text-dark); margin-bottom: 6px; }
+  .summary-card .vi { font-style: italic; color: var(--text-light); font-size: 1rem; margin-bottom: 20px; }
+  .summary-stat {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    background: var(--bg);
+    border: 1.5px solid var(--accent2);
+    border-radius: 12px;
+    padding: 14px 20px;
+    text-align: center;
+    min-width: 100px;
+  }
+  .stat-box .num { font-size: 2rem; font-weight: 700; color: var(--text-dark); }
+  .stat-box .lbl { font-size: 0.8rem; color: var(--text-light); }
+  .feedback-box {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    text-align: left;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    border: 1.5px solid var(--accent2);
+  }
+  .feedback-box .label { font-weight: 700; margin-bottom: 4px; }
+  .summary-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .summary-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 22px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .summary-btn.primary { background: var(--text); color: var(--white); }
+  .summary-btn.primary:hover { background: var(--text-dark); }
+  .summary-btn.secondary { background: var(--bg); color: var(--text-dark); border: 1.5px solid var(--accent2); }
+  .summary-btn.secondary:hover { background: var(--accent); border-color: var(--text); }
+
+  /* Responsive */
+  @media (max-width: 680px) {
+    .side-panel { display: none; width: 0; padding: 0; border: none; }
+    .side-panel.open {
+      display: flex;
+      position: fixed;
+      top: 0; left: 0;
+      width: 260px;
+      height: 100vh;
+      z-index: 300;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+      padding: 14px;
+    }
+    #toggle-panel-btn { display: flex; align-items: center; justify-content: center; }
+    .app-title h1 { font-size: 1.5rem; }
+    .scenario-grid { grid-template-columns: repeat(2, 1fr); }
+    .bubble-wrap { max-width: 88%; }
+  }
+
+  /* Utility */
+  .hidden { display: none !important; }
+  .emoji-big { font-size: 2rem; }
+</style>
+</head>
+<body>
+
+<!-- API KEY BAR -->
+<div id="api-bar">
+  <label for="api-key-input">🔑 Gemini API Key:</label>
+  <input type="password" id="api-key-input" placeholder="Paste your Gemini API key here..." autocomplete="off">
+  <button id="save-key-btn" onclick="saveApiKey()">Save / Lưu</button>
+  <span id="key-status"></span>
+  <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:13px;color:var(--text);margin-left:4px;">Get key / Lấy key →</a>
+</div>
+
+<!-- HOME SCREEN -->
+<div id="home-screen">
+  <div class="app-title">
+    <div style="font-size:3rem;margin-bottom:8px;">🌟</div>
+    <h1>Basic English Conversation Practice</h1>
+    <div class="vi">Luyện Tiếng Anh Cơ Bản Qua Hội Thoại</div>
+    <div class="subtitle">Choose a scenario to start / Chọn chủ đề để bắt đầu</div>
+  </div>
+
+  <div class="section-label">Pick a scenario / <span class="vi">Chọn tình huống</span></div>
+
+  <div class="scenario-grid">
+    <button class="scenario-btn" onclick="startScenario('neighbor')">
+      <span class="icon">🏡</span>
+      <span class="en">Talking to a Neighbor</span>
+      <span class="vi">Nói chuyện với hàng xóm</span>
+    </button>
+    <button class="scenario-btn" onclick="startScenario('restaurant')">
+      <span class="icon">🍽️</span>
+      <span class="en">At a Restaurant</span>
+      <span class="vi">Tại nhà hàng</span>
+    </button>
+    <button class="scenario-btn" onclick="startScenario('phone')">
+      <span class="icon">📞</span>
+      <span class="en">Making a Phone Call</span>
+      <span class="vi">Gọi điện thoại</span>
+    </button>
+    <button class="scenario-btn" onclick="startScenario('intro')">
+      <span class="icon">👋</span>
+      <span class="en">Introducing Yourself</span>
+      <span class="vi">Tự giới thiệu bản thân</span>
+    </button>
+    <button class="scenario-btn" onclick="startScenario('directions')">
+      <span class="icon">🗺️</span>
+      <span class="en">Asking for Directions</span>
+      <span class="vi">Hỏi đường</span>
+    </button>
+    <button class="scenario-btn" onclick="startScenario('store')">
+      <span class="icon">🛍️</span>
+      <span class="en">At a Store</span>
+      <span class="vi">Tại cửa hàng</span>
+    </button>
+  </div>
+
+  <button class="free-chat-btn" onclick="startScenario('free')">
+    <span>💬 Free Chat</span>
+    <span class="vi">/ Trò chuyện tự do</span>
+  </button>
+
+  <div class="progress-banner" id="progress-banner">
+    📊 Total sessions: <strong id="total-sessions">0</strong> &nbsp;|&nbsp;
+    Words learned: <strong id="total-words">0</strong>
+    <br><span style="font-style:italic;font-size:0.85rem;color:var(--text-light)">Tổng số buổi học · Tổng từ đã học</span>
+  </div>
+</div>
+
+<!-- CHAT SCREEN -->
+<div id="chat-screen">
+  <!-- Top bar -->
+  <div class="chat-topbar">
+    <button class="back-btn" onclick="goHome()">← Home / Trang chủ</button>
+    <div class="chat-scenario-title">
+      <div class="en" id="topbar-en"></div>
+      <div class="vi" id="topbar-vi"></div>
+    </div>
+    <button class="end-session-btn" onclick="endSession()">End / Kết thúc 🏁</button>
+  </div>
+
+  <div class="chat-body">
+    <!-- Side panel -->
+    <div class="side-panel" id="side-panel">
+      <div class="side-section">
+        <h3>💡 Useful Phrases <span class="vi">/ Câu hữu ích</span></h3>
+        <div id="phrases-list"></div>
+      </div>
+      <div class="side-section">
+        <h3>📖 Words Learned <span class="vi">/ Từ đã học</span></h3>
+        <div id="words-list"></div>
+      </div>
+    </div>
+
+    <!-- Chat main -->
+    <div class="chat-main">
+      <div id="messages"></div>
+
+      <!-- Suggestions panel -->
+      <div id="suggestions-panel">
+        <h4>💡 Pick a response / Chọn câu trả lời:</h4>
+        <div id="suggestions-list"></div>
+        <button onclick="closeSuggestions()" style="font-size:0.8rem;color:var(--text-light);background:none;border:none;cursor:pointer;margin-top:4px;">✕ Close / Đóng</button>
+      </div>
+
+      <!-- Input -->
+      <div class="input-area">
+        <div class="input-top">
+          <textarea id="user-input" placeholder="Type in English or Vietnamese... / Gõ tiếng Anh hoặc tiếng Việt..." rows="1"
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+        <div class="input-actions">
+          <button class="action-btn" id="speak-btn" onclick="toggleSpeech()">🎤 Speak / Nói</button>
+          <button class="action-btn" onclick="getHelp()">🙋 I don't know <span class="vi">/ Không biết nói gì</span></button>
+          <button class="action-btn" onclick="translateMessage()">🌐 Translate <span class="vi">/ Dịch</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile panel toggle -->
+<button id="toggle-panel-btn" onclick="togglePanel()" title="Phrases & Words">📚</button>
+
+<!-- SUMMARY SCREEN -->
+<div id="summary-screen">
+  <div class="summary-card">
+    <div style="font-size:3rem;margin-bottom:8px;">🎉</div>
+    <h2>Session Complete!</h2>
+    <div class="vi">Buổi học hoàn thành!</div>
+    <div class="summary-stat">
+      <div class="stat-box">
+        <div class="num" id="sum-exchanges">0</div>
+        <div class="lbl">Exchanges / Lượt trao đổi</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="sum-words">0</div>
+        <div class="lbl">Words / Từ mới</div>
+      </div>
+    </div>
+    <div class="feedback-box">
+      <div class="label">✅ Well done / Điểm tốt:</div>
+      <div id="sum-good"></div>
+    </div>
+    <div class="feedback-box">
+      <div class="label">📌 To improve / Cần cải thiện:</div>
+      <div id="sum-improve"></div>
+    </div>
+    <div class="summary-btns">
+      <button class="summary-btn primary" onclick="practiceAgain()">🔄 Practice Again / Luyện tập lại</button>
+      <button class="summary-btn secondary" onclick="goHome()">📋 New Topic / Chọn chủ đề mới</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let apiKey = '';
+let currentScenario = null;
+let conversationHistory = [];
+let exchangeCount = 0;
+let sessionWords = [];
+let lastAiMessage = '';
+let recognition = null;
+let isRecording = false;
+
+const SCENARIOS = {
+  neighbor: {
+    en: 'Talking to a Neighbor',
+    vi: 'Nói chuyện với hàng xóm',
+    icon: '🏡',
+    role: 'friendly neighbor',
+    scenario: 'you are chatting casually outside your house, talking about the weather, the neighborhood, or small everyday things',
+    phrases: [
+      { en: 'Hi! How are you?', vi: 'Chào! Bạn có khỏe không?' },
+      { en: 'Nice weather today!', vi: 'Thời tiết đẹp quá!' },
+      { en: 'See you later!', vi: 'Hẹn gặp lại!' },
+      { en: 'Have a good day!', vi: 'Chúc một ngày tốt lành!' },
+      { en: 'I live next door.', vi: 'Tôi sống ở nhà bên cạnh.' }
+    ]
+  },
+  restaurant: {
+    en: 'At a Restaurant',
+    vi: 'Tại nhà hàng',
+    icon: '🍽️',
+    role: 'friendly waiter',
+    scenario: 'the customer is ordering food at a casual American restaurant',
+    phrases: [
+      { en: 'I would like a menu, please.', vi: 'Cho tôi xem thực đơn, làm ơn.' },
+      { en: 'I want to order...', vi: 'Tôi muốn gọi...' },
+      { en: 'How much is this?', vi: 'Cái này bao nhiêu tiền?' },
+      { en: 'The bill, please.', vi: 'Cho tôi tính tiền.' },
+      { en: 'It is delicious!', vi: 'Thật ngon!' }
+    ]
+  },
+  phone: {
+    en: 'Making a Phone Call',
+    vi: 'Gọi điện thoại',
+    icon: '📞',
+    role: 'person on the phone',
+    scenario: 'the user is making a simple phone call, maybe to make an appointment or ask a question',
+    phrases: [
+      { en: 'Hello, is this...?', vi: 'Xin chào, có phải... không?' },
+      { en: 'Can I speak to...?', vi: 'Cho tôi nói chuyện với...?' },
+      { en: 'Can you repeat that, please?', vi: 'Bạn có thể nhắc lại không?' },
+      { en: 'I will call back later.', vi: 'Tôi sẽ gọi lại sau.' },
+      { en: 'Thank you. Goodbye!', vi: 'Cảm ơn. Tạm biệt!' }
+    ]
+  },
+  intro: {
+    en: 'Introducing Yourself',
+    vi: 'Tự giới thiệu bản thân',
+    icon: '👋',
+    role: 'new American friend',
+    scenario: 'two people are meeting for the first time and introducing themselves',
+    phrases: [
+      { en: 'My name is...', vi: 'Tên tôi là...' },
+      { en: 'I am from Vietnam.', vi: 'Tôi đến từ Việt Nam.' },
+      { en: 'Nice to meet you!', vi: 'Rất vui được gặp bạn!' },
+      { en: 'I am learning English.', vi: 'Tôi đang học tiếng Anh.' },
+      { en: 'What is your name?', vi: 'Tên bạn là gì?' }
+    ]
+  },
+  directions: {
+    en: 'Asking for Directions',
+    vi: 'Hỏi đường',
+    icon: '🗺️',
+    role: 'helpful local person',
+    scenario: 'the user is lost and asking a local for directions to a place',
+    phrases: [
+      { en: 'Excuse me, where is...?', vi: 'Xin lỗi, ... ở đâu?' },
+      { en: 'How do I get to...?', vi: 'Làm sao để đến...?' },
+      { en: 'Is it far?', vi: 'Có xa không?' },
+      { en: 'Turn left / Turn right.', vi: 'Rẽ trái / Rẽ phải.' },
+      { en: 'Thank you very much!', vi: 'Cảm ơn rất nhiều!' }
+    ]
+  },
+  store: {
+    en: 'At a Store',
+    vi: 'Tại cửa hàng',
+    icon: '🛍️',
+    role: 'store assistant',
+    scenario: 'the user is shopping at an American store and needs help finding things or buying items',
+    phrases: [
+      { en: 'Do you have...?', vi: 'Bạn có... không?' },
+      { en: 'Where is the...?', vi: '... ở đâu?' },
+      { en: 'How much does this cost?', vi: 'Cái này giá bao nhiêu?' },
+      { en: 'I will take this one.', vi: 'Tôi lấy cái này.' },
+      { en: 'Can I pay by card?', vi: 'Tôi có thể trả bằng thẻ không?' }
+    ]
+  },
+  free: {
+    en: 'Free Chat',
+    vi: 'Trò chuyện tự do',
+    icon: '💬',
+    role: 'friendly American person',
+    scenario: 'a casual friendly conversation about anything the learner wants to talk about',
+    phrases: [
+      { en: 'What do you like to do?', vi: 'Bạn thích làm gì?' },
+      { en: 'I like...', vi: 'Tôi thích...' },
+      { en: 'That is interesting!', vi: 'Thú vị quá!' },
+      { en: 'Tell me more.', vi: 'Kể cho tôi nghe thêm đi.' },
+      { en: 'Really? Me too!', vi: 'Thật sao? Tôi cũng vậy!' }
+    ]
+  }
+};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  apiKey = localStorage.getItem('gemini_api_key') || '';
+  if (apiKey) {
+    document.getElementById('api-key-input').value = apiKey;
+    document.getElementById('key-status').textContent = '✓ Key saved / Đã lưu';
+  }
+  updateProgressBanner();
+};
+
+function saveApiKey() {
+  apiKey = document.getElementById('api-key-input').value.trim();
+  localStorage.setItem('gemini_api_key', apiKey);
+  const s = document.getElementById('key-status');
+  s.textContent = apiKey ? '✓ Saved! / Đã lưu!' : '✗ Empty / Trống';
+  setTimeout(() => { s.textContent = apiKey ? '✓ Key saved / Đã lưu' : ''; }, 2000);
+}
+
+function updateProgressBanner() {
+  document.getElementById('total-sessions').textContent = localStorage.getItem('total_sessions') || 0;
+  document.getElementById('total-words').textContent = localStorage.getItem('total_words') || 0;
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+function startScenario(id) {
+  if (!apiKey) {
+    alert('Please enter your Gemini API key first!\n\nVui lòng nhập Gemini API key trước!');
+    document.getElementById('api-key-input').focus();
+    return;
+  }
+  currentScenario = SCENARIOS[id];
+  currentScenario.id = id;
+  conversationHistory = [];
+  exchangeCount = 0;
+  sessionWords = [];
+  lastAiMessage = '';
+
+  // Set up UI
+  document.getElementById('topbar-en').textContent = currentScenario.icon + ' ' + currentScenario.en;
+  document.getElementById('topbar-vi').textContent = currentScenario.vi;
+  document.getElementById('messages').innerHTML = '';
+  document.getElementById('user-input').value = '';
+  closeSuggestions();
+
+  // Fill phrases
+  const phrasesList = document.getElementById('phrases-list');
+  phrasesList.innerHTML = '';
+  currentScenario.phrases.forEach(p => {
+    phrasesList.innerHTML += `<div class="phrase-item"><div class="ph-en">${p.en}</div><div class="ph-vi">${p.vi}</div></div>`;
+  });
+  document.getElementById('words-list').innerHTML = '<span style="font-size:0.85rem;color:var(--text-light);font-style:italic">Words will appear here...<br>Từ mới sẽ hiện ở đây...</span>';
+
+  // Show chat
+  show('home-screen', false);
+  show('summary-screen', false);
+  document.getElementById('chat-screen').style.display = 'flex';
+
+  // First AI message
+  sendAiOpener();
+}
+
+function goHome() {
+  stopSpeech();
+  document.getElementById('chat-screen').style.display = 'none';
+  show('summary-screen', false);
+  show('home-screen', true);
+  updateProgressBanner();
+}
+
+function show(id, visible) {
+  const el = document.getElementById(id);
+  if (visible) el.style.display = 'block';
+  else el.style.display = 'none';
+}
+
+// ─── MESSAGING ────────────────────────────────────────────────────────────────
+async function sendAiOpener() {
+  const openers = {
+    neighbor: "Hi there! Beautiful day, isn't it? I'm your neighbor!",
+    restaurant: "Welcome! My name is Tom. I'm your waiter today. Are you ready to order?",
+    phone: "Hello? Who is this?",
+    intro: "Hi! I don't think we've met before. I'm Mike! What's your name?",
+    directions: "Hi there! Can I help you? You look a little lost!",
+    store: "Hi! Welcome to the store! Can I help you find something today?",
+    free: "Hey there! How are you doing today? Nice to meet you!"
+  };
+  const opener = openers[currentScenario.id];
+
+  // Simulate AI response format
+  const viMap = {
+    neighbor: "Chào! Hôm nay đẹp trời quá, phải không? Tôi là hàng xóm của bạn!",
+    restaurant: "Chào mừng! Tên tôi là Tom. Hôm nay tôi là người phục vụ của bạn. Bạn đã sẵn sàng gọi món chưa?",
+    phone: "Xin chào? Ai đó vậy?",
+    intro: "Chào! Tôi nghĩ chúng ta chưa gặp nhau. Tôi là Mike! Tên bạn là gì?",
+    directions: "Chào! Tôi có thể giúp gì cho bạn không? Bạn trông có vẻ hơi lạ đường!",
+    store: "Chào! Chào mừng đến cửa hàng! Tôi có thể giúp bạn tìm gì không?",
+    free: "Ê! Bạn khỏe không? Rất vui được gặp bạn!"
+  };
+
+  addAiMessage(opener, viMap[currentScenario.id], null);
+  lastAiMessage = opener;
+  conversationHistory.push({ role: 'model', parts: [{ text: opener + '\nVI: ' + viMap[currentScenario.id] }] });
+}
+
+async function sendMessage() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  autoResize(input);
+  closeSuggestions();
+
+  addUserMessage(text);
+  conversationHistory.push({ role: 'user', parts: [{ text }] });
+  exchangeCount++;
+
+  // Show typing
+  const typingId = addTyping();
+
+  try {
+    const response = await callGemini(text);
+    removeTyping(typingId);
+    parseAndDisplayAiResponse(response);
+
+    // Encouragement every 3 exchanges
+    if (exchangeCount % 3 === 0) {
+      setTimeout(() => addEncouragement(), 600);
+    }
+  } catch (e) {
+    removeTyping(typingId);
+    addErrorMessage(e.message);
+  }
+}
+
+async function callGemini(userText) {
+  const sys = `You are a friendly American ${currentScenario.role} having a casual conversation with a Vietnamese adult who is a complete beginner in English.
+
+Rules:
+- Use ONLY very simple A1/A2 English. Short sentences, common words only.
+- After EVERY message you say, add a Vietnamese translation on a new line starting with 'VI:'
+- If the user makes a grammar mistake, add a gentle correction starting with 'CORRECTION:' in English then a Vietnamese explanation
+- Keep responses short — max 2 sentences
+- Be warm, patient, and encouraging
+- Stay in character as ${currentScenario.role} in the scenario: ${currentScenario.scenario}`;
+
+  const contents = [
+    { role: 'user', parts: [{ text: sys + '\n\nLet\'s start the conversation!' }] },
+    { role: 'model', parts: [{ text: 'Of course! I\'m ready to help.' }] },
+    ...conversationHistory
+  ];
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents })
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || 'API error ' + res.status);
+  }
+
+  const data = await res.json();
+  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return raw;
+}
+
+function parseAndDisplayAiResponse(raw) {
+  // Split out VI: and CORRECTION:
+  let english = raw;
+  let vietnamese = '';
+  let correction = '';
+
+  // Extract VI:
+  const viMatch = raw.match(/\nVI:\s*(.+?)(?=\nCORRECTION:|$)/s);
+  if (viMatch) {
+    vietnamese = viMatch[1].trim();
+    english = raw.substring(0, raw.indexOf('\nVI:')).trim();
+  }
+
+  // Extract CORRECTION:
+  const corrMatch = raw.match(/CORRECTION:\s*(.+)/s);
+  if (corrMatch) {
+    correction = corrMatch[1].trim();
+    if (!viMatch) {
+      english = raw.substring(0, raw.indexOf('CORRECTION:')).trim();
+    }
+  }
+
+  if (!english) english = raw.trim();
+
+  addAiMessage(english, vietnamese, correction);
+  lastAiMessage = english;
+  conversationHistory.push({ role: 'model', parts: [{ text: raw }] });
+
+  // Extract potential new words (simple: grab nouns/adjectives from English)
+  extractWords(english);
+}
+
+function extractWords(text) {
+  const words = text.match(/\b[a-zA-Z]{4,}\b/g) || [];
+  const skipWords = new Set(['that','this','with','from','they','have','been','will','your','what','when','where','there','here','just','like','very','also','into','over','then','than','much','some','only','more','well','good','great','nice','sure','okay','need','want','know']);
+  words.forEach(w => {
+    const lower = w.toLowerCase();
+    if (!skipWords.has(lower) && !sessionWords.includes(lower) && lower.length > 3) {
+      sessionWords.push(lower);
+      updateWordsList();
+    }
+  });
+}
+
+function updateWordsList() {
+  const el = document.getElementById('words-list');
+  if (sessionWords.length === 0) {
+    el.innerHTML = '<span style="font-size:0.85rem;color:var(--text-light);font-style:italic">Words will appear here...<br>Từ mới sẽ hiện ở đây...</span>';
+  } else {
+    el.innerHTML = sessionWords.map(w => `<span class="word-tag">${w}</span>`).join('');
+  }
+}
+
+// ─── MESSAGE RENDERING ────────────────────────────────────────────────────────
+function addAiMessage(english, vietnamese, correction) {
+  const messages = document.getElementById('messages');
+  const id = 'msg-' + Date.now();
+  const viPart = vietnamese ? `<div class="bubble-vi">🇻🇳 ${escHtml(vietnamese)}</div>` : '';
+  const listenId = 'listen-' + Date.now();
+
+  const div = document.createElement('div');
+  div.className = 'msg-row ai';
+  div.innerHTML = `
+    <div class="avatar">${currentScenario.icon}</div>
+    <div class="bubble-wrap">
+      <div class="bubble" id="${id}">
+        <div class="bubble-en">${escHtml(english)}</div>
+        ${viPart}
+      </div>
+      <button class="listen-btn" id="${listenId}" onclick="speakText(${JSON.stringify(english)}, '${listenId}')">
+        🔊 Listen / Nghe
+      </button>
+      ${correction ? `<div class="correction-note">✏️ <strong>Correction / Sửa lỗi:</strong> ${escHtml(correction)}</div>` : ''}
+    </div>`;
+  messages.appendChild(div);
+  scrollToBottom();
+}
+
+function addUserMessage(text) {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg-row user';
+  div.innerHTML = `
+    <div class="bubble-wrap">
+      <div class="bubble">${escHtml(text)}</div>
+    </div>
+    <div class="avatar">👤</div>`;
+  messages.appendChild(div);
+  scrollToBottom();
+}
+
+function addEncouragement() {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg-row';
+  div.innerHTML = `<div class="encouragement-note">🌟 You're doing great! Keep it up! / Bạn làm rất tốt! Tiếp tục nhé! 🌟</div>`;
+  messages.appendChild(div);
+  scrollToBottom();
+}
+
+function addErrorMessage(msg) {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg-row ai';
+  div.innerHTML = `<div class="bubble" style="background:#ffeaea;border-color:#f5c6cb;color:#721c24">
+    ⚠️ Error: ${escHtml(msg)}<br><small>Check your API key and try again. / Kiểm tra API key và thử lại.</small>
+  </div>`;
+  messages.appendChild(div);
+  scrollToBottom();
+}
+
+let typingCounter = 0;
+function addTyping() {
+  const id = 'typing-' + (++typingCounter);
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg-row ai';
+  div.id = id;
+  div.innerHTML = `
+    <div class="avatar">${currentScenario.icon}</div>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>`;
+  messages.appendChild(div);
+  scrollToBottom();
+  return id;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function scrollToBottom() {
+  const m = document.getElementById('messages');
+  m.scrollTop = m.scrollHeight;
+}
+
+// ─── HELP / SUGGESTIONS ───────────────────────────────────────────────────────
+async function getHelp() {
+  const panel = document.getElementById('suggestions-panel');
+  const list = document.getElementById('suggestions-list');
+  panel.style.display = 'block';
+  list.innerHTML = '<div style="color:var(--text-light);font-size:0.9rem;padding:8px 0;">Loading suggestions... / Đang tải gợi ý...</div>';
+
+  try {
+    const prompt = `The conversation so far is about ${currentScenario.en}. The AI (playing ${currentScenario.role}) just said: "${lastAiMessage}".
+Suggest 3 very simple English responses a beginner could say.
+Return ONLY valid JSON with no markdown: { "suggestions": [{ "english": "Sure!", "vietnamese": "Được chứ!" }] }`;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }] })
+      }
+    );
+    const data = await res.json();
+    let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    raw = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const parsed = JSON.parse(raw);
+    const suggestions = parsed.suggestions || [];
+
+    list.innerHTML = '';
+    suggestions.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'suggestion-item';
+      div.innerHTML = `<div class="s-en">💬 ${escHtml(s.english)}</div><div class="s-vi">${escHtml(s.vietnamese)}</div>`;
+      div.onclick = () => useSuggestion(s.english);
+      list.appendChild(div);
+    });
+  } catch (e) {
+    list.innerHTML = `<div style="color:#721c24;font-size:0.9rem;">Could not load suggestions. / Không tải được gợi ý.<br><small>${e.message}</small></div>`;
+  }
+}
+
+function useSuggestion(text) {
+  document.getElementById('user-input').value = text;
+  closeSuggestions();
+  sendMessage();
+}
+
+function closeSuggestions() {
+  document.getElementById('suggestions-panel').style.display = 'none';
+}
+
+// ─── TRANSLATE ────────────────────────────────────────────────────────────────
+async function translateMessage() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) {
+    alert('Please type something in Vietnamese first.\n\nVui lòng gõ tiếng Việt vào ô nhập liệu.');
+    return;
+  }
+
+  const btn = document.querySelector('[onclick="translateMessage()"]');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '⏳ Translating...';
+  btn.disabled = true;
+
+  try {
+    const prompt = `Translate this Vietnamese text to simple A1/A2 English (very simple words): "${text}". Return ONLY the English translation, nothing else.`;
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }] })
+      }
+    );
+    const data = await res.json();
+    const translated = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || text;
+    input.value = translated;
+    autoResize(input);
+  } catch (e) {
+    alert('Translation failed: ' + e.message);
+  } finally {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
+}
+
+// ─── SPEECH ───────────────────────────────────────────────────────────────────
+function toggleSpeech() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Your browser does not support voice input.\n\nTrình duyệt không hỗ trợ nhập liệu giọng nói.\n\nTry Chrome! / Thử dùng Chrome!');
+    return;
+  }
+  if (isRecording) {
+    stopSpeech();
+  } else {
+    startSpeech();
+  }
+}
+
+function startSpeech() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    const btn = document.getElementById('speak-btn');
+    btn.classList.add('active');
+    btn.innerHTML = '🔴 Listening... / Đang nghe...';
+  };
+
+  recognition.onresult = (e) => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+    document.getElementById('user-input').value = transcript;
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    const btn = document.getElementById('speak-btn');
+    btn.classList.remove('active');
+    btn.innerHTML = '🎤 Speak / Nói';
+  };
+
+  recognition.onerror = () => {
+    isRecording = false;
+    document.getElementById('speak-btn').classList.remove('active');
+    document.getElementById('speak-btn').innerHTML = '🎤 Speak / Nói';
+  };
+
+  recognition.start();
+}
+
+function stopSpeech() {
+  if (recognition) recognition.stop();
+}
+
+function speakText(text, btnId) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'en-US';
+  utt.rate = 0.85;
+
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.textContent = '🔊 Playing... / Đang phát...'; btn.disabled = true; }
+  utt.onend = () => {
+    if (btn) { btn.innerHTML = '🔊 Listen / Nghe'; btn.disabled = false; }
+  };
+  window.speechSynthesis.speak(utt);
+}
+
+// ─── END SESSION ──────────────────────────────────────────────────────────────
+async function endSession() {
+  // Save stats
+  const prevSessions = parseInt(localStorage.getItem('total_sessions') || '0');
+  const prevWords = parseInt(localStorage.getItem('total_words') || '0');
+  localStorage.setItem('total_sessions', prevSessions + 1);
+  localStorage.setItem('total_words', prevWords + sessionWords.length);
+
+  // Generate summary feedback
+  let good = 'You tried your best! Keep practicing every day.';
+  let goodVi = 'Bạn đã cố gắng hết sức! Hãy tiếp tục luyện tập mỗi ngày.';
+  let improve = 'Try to use more English words next time.';
+  let improveVi = 'Hãy thử dùng nhiều từ tiếng Anh hơn lần sau.';
+
+  try {
+    const prompt = `A Vietnamese beginner had ${exchangeCount} exchanges in an English conversation about "${currentScenario.en}".
+Give 1 encouraging thing they did well and 1 simple tip to improve.
+Return JSON: { "good": "...", "goodVi": "...", "improve": "...", "improveVi": "..." }`;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }] })
+      }
+    );
+    const data = await res.json();
+    let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    raw = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const parsed = JSON.parse(raw);
+    if (parsed.good) { good = parsed.good; goodVi = parsed.goodVi || goodVi; }
+    if (parsed.improve) { improve = parsed.improve; improveVi = parsed.improveVi || improveVi; }
+  } catch (_) {}
+
+  document.getElementById('sum-exchanges').textContent = exchangeCount;
+  document.getElementById('sum-words').textContent = sessionWords.length;
+  document.getElementById('sum-good').innerHTML = `${escHtml(good)}<br><em style="color:var(--text-light)">${escHtml(goodVi)}</em>`;
+  document.getElementById('sum-improve').innerHTML = `${escHtml(improve)}<br><em style="color:var(--text-light)">${escHtml(improveVi)}</em>`;
+
+  document.getElementById('chat-screen').style.display = 'none';
+  show('summary-screen', true);
+}
+
+function practiceAgain() {
+  show('summary-screen', false);
+  startScenario(currentScenario.id);
+}
+
+// ─── PANEL TOGGLE ─────────────────────────────────────────────────────────────
+function togglePanel() {
+  document.getElementById('side-panel').classList.toggle('open');
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+</script>
+</body>
+</html>
