@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Interview Prep Bot</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --card: #1a1a1a;
+    --card2: #222222;
+    --border: #2a2a2a;
+    --blue: #3b82f6;
+    --blue-dark: #2563eb;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .header-logo { display: flex; align-items: center; gap: 10px; }
+  .header-logo .icon {
+    width: 36px; height: 36px; background: var(--blue);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .header-logo h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+  .header-logo span { font-size: 0.75rem; color: var(--muted); display: block; }
+
+  /* API Key bar */
+  .api-bar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .api-bar label { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  .api-bar input {
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px; padding: 6px 10px;
+    font-size: 0.8rem; width: 220px; outline: none;
+  }
+  .api-bar input:focus { border-color: var(--blue); }
+  .api-saved { font-size: 0.75rem; color: var(--green); }
+
+  /* Cards */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+  }
+  .card + .card { margin-top: 16px; }
+
+  /* Screens */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Setup */
+  .setup-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+  .setup-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  .form-group label { font-size: 0.8rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .form-group select, .form-group input[type="text"] {
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px; padding: 10px 12px;
+    font-size: 0.9rem; outline: none; font-family: var(--font);
+    appearance: none; -webkit-appearance: none;
+  }
+  .form-group select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .form-group select:focus, .form-group input[type="text"]:focus { border-color: var(--blue); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: 0.85rem;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .tab-btn:hover { border-color: var(--blue); color: var(--text); }
+  .tab-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600; }
+
+  /* Buttons */
+  .btn {
+    padding: 11px 22px; border-radius: 8px; border: none;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; font-family: var(--font);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--blue); color: var(--text); }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { background: #16a34a; }
+
+  .start-row { margin-top: 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  /* Progress bar */
+  .progress-bar-wrap { margin-bottom: 24px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width 0.4s; }
+
+  /* Question card */
+  .q-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .q-badge {
+    padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .badge-coding { background: #1e3a5f; color: #60a5fa; }
+  .badge-system { background: #1a2e1a; color: #4ade80; }
+  .badge-behavioral { background: #2d1a1a; color: #f87171; }
+  .badge-mixed { background: #2a1f0f; color: #fbbf24; }
+
+  .q-timer { margin-left: auto; font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .q-timer span { color: var(--yellow); font-weight: 600; }
+
+  .q-text { font-size: 1rem; line-height: 1.7; margin-bottom: 6px; }
+  .q-hint { font-size: 0.82rem; color: var(--muted); margin-bottom: 16px; font-style: italic; }
+  .q-context { font-size: 0.78rem; color: var(--blue); }
+
+  /* Textarea / code editor */
+  .answer-wrap { position: relative; margin-top: 16px; }
+  .lang-select-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .lang-select-row label { font-size: 0.78rem; color: var(--muted); }
+  .lang-select-row select {
+    background: var(--card2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 4px 28px 4px 8px; font-size: 0.8rem; outline: none;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center;
+  }
+
+  textarea {
+    width: 100%; background: #111; border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px; padding: 14px;
+    font-size: 0.9rem; resize: vertical; outline: none;
+    font-family: var(--font); line-height: 1.6;
+    min-height: 160px;
+  }
+  textarea.code-editor { font-family: var(--mono); font-size: 0.85rem; min-height: 220px; }
+  textarea:focus { border-color: var(--blue); }
+
+  /* STAR reminder */
+  .star-reminder {
+    background: #0d1f2d; border: 1px solid #1e3a5f;
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 10px;
+    font-size: 0.82rem; display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .star-item { display: flex; flex-direction: column; }
+  .star-letter { font-weight: 700; color: var(--blue); }
+  .star-word { color: var(--muted); font-size: 0.76rem; }
+
+  /* System design hints */
+  .hint-panel {
+    background: #0a1a0a; border: 1px solid #1a2e1a;
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 10px;
+    font-size: 0.82rem;
+  }
+  .hint-panel .hint-title { color: var(--green); font-weight: 600; margin-bottom: 6px; }
+  .hint-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .hint-chip {
+    background: #1a2e1a; color: #4ade80; border-radius: 4px;
+    padding: 2px 8px; font-size: 0.75rem;
+  }
+
+  /* Feedback */
+  .feedback-card { border-radius: 12px; padding: 20px; margin-top: 16px; }
+  .feedback-score { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .score-circle {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 800; flex-shrink: 0;
+  }
+  .score-high { background: #14532d; color: #4ade80; }
+  .score-mid { background: #422006; color: #fbbf24; }
+  .score-low { background: #450a0a; color: #f87171; }
+
+  .score-label { font-size: 0.85rem; color: var(--muted); }
+  .score-label strong { display: block; color: var(--text); font-size: 1rem; }
+
+  .feedback-section { margin-bottom: 14px; }
+  .feedback-section-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .feedback-section-title.green { color: var(--green); }
+  .feedback-section-title.red { color: var(--red); }
+  .feedback-section-title.blue { color: var(--blue); }
+  .feedback-section-title.yellow { color: var(--yellow); }
+
+  .feedback-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .feedback-list li { font-size: 0.88rem; padding: 6px 10px; border-radius: 6px; }
+  .feedback-list.good li { background: #052e16; color: #86efac; }
+  .feedback-list.bad li { background: #2d0a0a; color: #fca5a5; }
+
+  .model-answer-box {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; font-size: 0.87rem;
+    line-height: 1.65; color: var(--text);
+  }
+  .tip-box {
+    background: #0d1f2d; border: 1px solid #1e3a5f;
+    border-radius: 8px; padding: 10px 14px; font-size: 0.84rem; color: #93c5fd;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .tip-box .tip-icon { flex-shrink: 0; margin-top: 1px; }
+
+  /* Final report */
+  .grade-hero {
+    text-align: center; padding: 28px 0 20px;
+    border-bottom: 1px solid var(--border); margin-bottom: 24px;
+  }
+  .grade-circle {
+    width: 80px; height: 80px; border-radius: 50%;
+    margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; font-weight: 900; border: 3px solid;
+  }
+  .grade-A { border-color: var(--green); color: var(--green); background: #052e16; }
+  .grade-B { border-color: #60a5fa; color: #60a5fa; background: #0c1e3a; }
+  .grade-C { border-color: var(--yellow); color: var(--yellow); background: #1f1200; }
+  .grade-D { border-color: var(--red); color: var(--red); background: #1a0000; }
+
+  .grade-hero p { color: var(--muted); font-size: 0.9rem; max-width: 480px; margin: 0 auto; }
+
+  .report-section { margin-bottom: 20px; }
+  .report-section h3 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 10px; }
+  .report-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .report-list li { padding: 8px 12px; border-radius: 8px; font-size: 0.88rem; }
+  .report-list.strengths li { background: #052e16; color: #86efac; }
+  .report-list.improvements li { background: #2d0a0a; color: #fca5a5; }
+
+  .resource-card {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+  }
+  .resource-card .topic { font-weight: 600; color: var(--blue); font-size: 0.88rem; }
+  .resource-card .suggestion { font-size: 0.84rem; color: var(--muted); margin-top: 3px; }
+
+  .scores-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .score-pill {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px; font-size: 0.8rem;
+  }
+  .score-pill span { font-weight: 700; }
+
+  .report-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+
+  /* Loading */
+  .loading-wrap { text-align: center; padding: 32px 0; }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border);
+    border-top-color: var(--blue); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-wrap p { color: var(--muted); font-size: 0.9rem; }
+
+  /* Question bank */
+  .qbank-toggle {
+    margin-top: 24px; text-align: center;
+  }
+  .qbank-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .qbank-item {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; font-size: 0.85rem;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .qbank-item .qb-num { color: var(--blue); font-weight: 700; flex-shrink: 0; }
+  .qbank-item .qb-type { font-size: 0.72rem; color: var(--muted); }
+
+  /* Error */
+  .error-box {
+    background: #2d0a0a; border: 1px solid #7f1d1d;
+    border-radius: 8px; padding: 12px 14px; font-size: 0.85rem; color: #fca5a5;
+    margin-bottom: 12px;
+  }
+
+  /* Utilities */
+  .hidden { display: none !important; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .flex-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .sep { border-top: 1px solid var(--border); margin: 20px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-logo">
+      <div class="icon">🎯</div>
+      <div>
+        <h1>Tech Interview Prep Bot</h1>
+        <span>AI-powered mock interviews · Agent #20</span>
+      </div>
+    </div>
+    <div class="api-bar">
+      <label for="apiKeyInput">Gemini API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="AIza..." autocomplete="off">
+      <span class="api-saved hidden" id="apiSavedMsg">✓ Saved</span>
+    </div>
+  </header>
+
+  <!-- SCREEN: Setup -->
+  <div class="screen active" id="screenSetup">
+    <div class="card">
+      <div class="setup-title">Set up your interview</div>
+      <div class="setup-sub">Configure your mock interview below. 5 questions, instant AI feedback after each.</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Role</label>
+          <select id="setupRole">
+            <option>Software Engineer Intern</option>
+            <option>SWE New Grad</option>
+            <option>Frontend Engineer</option>
+            <option>Backend Engineer</option>
+            <option>Data Science Intern</option>
+            <option>ML Engineer</option>
+            <option>Full Stack</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Company type</label>
+          <select id="setupCompany">
+            <option>FAANG / Big Tech</option>
+            <option>Mid-size startup</option>
+            <option>Small startup</option>
+            <option>Any</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Difficulty</label>
+          <select id="setupDifficulty">
+            <option>Entry level</option>
+            <option>Internship</option>
+            <option>Junior</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tech stack (optional)</label>
+          <input type="text" id="setupStack" placeholder="e.g. Python, React, Node.js">
+        </div>
+        <div class="form-group full">
+          <label>Interview type</label>
+          <div class="tabs" id="interviewTypeTabs">
+            <button class="tab-btn active" data-type="Coding (DSA)">Coding (DSA)</button>
+            <button class="tab-btn" data-type="System Design">System Design</button>
+            <button class="tab-btn" data-type="Behavioral (STAR)">Behavioral (STAR)</button>
+            <button class="tab-btn" data-type="Mixed">Mixed</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="setupError" class="error-box hidden"></div>
+
+      <div class="start-row">
+        <button class="btn btn-primary" id="startBtn">
+          <span>🚀</span> Start Interview
+        </button>
+        <span style="font-size:0.8rem;color:var(--muted)">5 questions · AI feedback after each</span>
+      </div>
+    </div>
+
+    <!-- Question Bank -->
+    <div class="qbank-toggle">
+      <button class="btn btn-ghost" id="qbankToggleBtn" onclick="toggleQBank()">📚 View Question History (<span id="qbankCount">0</span>)</button>
+    </div>
+    <div class="qbank-list hidden" id="qbankList"></div>
+  </div>
+
+  <!-- SCREEN: Interview -->
+  <div class="screen" id="screenInterview">
+    <div class="progress-bar-wrap">
+      <div class="progress-label">
+        <span id="progressLabel">Question 1 of 5</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+
+    <!-- Loading questions -->
+    <div class="card" id="loadingQuestions">
+      <div class="loading-wrap">
+        <div class="spinner"></div>
+        <p>Generating your interview questions…</p>
+      </div>
+    </div>
+
+    <!-- Question -->
+    <div class="card hidden" id="questionCard">
+      <div class="q-meta">
+        <span class="q-badge" id="qBadge">Coding</span>
+        <span style="font-size:0.82rem;color:var(--muted)" id="qContext"></span>
+        <div class="q-timer">⏱ <span id="timerDisplay">0:00</span></div>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="q-hint" id="qHint"></div>
+
+      <!-- Coding: language selector + code textarea -->
+      <div id="codingUI" class="answer-wrap hidden">
+        <div class="lang-select-row">
+          <label>Language:</label>
+          <select id="langSelect">
+            <option>Python</option><option>JavaScript</option><option>Java</option>
+            <option>C++</option><option>Go</option><option>TypeScript</option><option>Other</option>
+          </select>
+        </div>
+        <textarea id="codeAnswer" class="code-editor" placeholder="// Write your solution here...
+// Think through edge cases, time & space complexity"></textarea>
+      </div>
+
+      <!-- Behavioral: STAR reminder + textarea -->
+      <div id="behavioralUI" class="answer-wrap hidden">
+        <div class="star-reminder">
+          <div class="star-item"><span class="star-letter">S</span><span class="star-word">Situation</span></div>
+          <div class="star-item"><span class="star-letter">T</span><span class="star-word">Task</span></div>
+          <div class="star-item"><span class="star-letter">A</span><span class="star-word">Action</span></div>
+          <div class="star-item"><span class="star-letter">R</span><span class="star-word">Result</span></div>
+          <span style="font-size:0.78rem;color:var(--muted);align-self:center;margin-left:auto">Structure your answer using STAR method</span>
+        </div>
+        <textarea id="behavAnswer" placeholder="Describe a specific situation..."></textarea>
+      </div>
+
+      <!-- System Design: hint panel + textarea -->
+      <div id="systemUI" class="answer-wrap hidden">
+        <div class="hint-panel">
+          <div class="hint-title">💡 Components to consider</div>
+          <div class="hint-chips">
+            <span class="hint-chip">Requirements</span>
+            <span class="hint-chip">Scale estimates</span>
+            <span class="hint-chip">API design</span>
+            <span class="hint-chip">Data model</span>
+            <span class="hint-chip">High-level design</span>
+            <span class="hint-chip">Database choice</span>
+            <span class="hint-chip">Caching</span>
+            <span class="hint-chip">Load balancing</span>
+            <span class="hint-chip">Trade-offs</span>
+          </div>
+        </div>
+        <textarea id="systemAnswer" placeholder="Walk through your system design approach..."></textarea>
+      </div>
+
+      <div id="answerError" class="error-box hidden mt-12"></div>
+
+      <div class="flex-row mt-16">
+        <button class="btn btn-primary" id="submitAnswerBtn">Submit Answer →</button>
+        <span style="font-size:0.8rem;color:var(--muted)" id="submitHint">AI will evaluate your answer</span>
+      </div>
+    </div>
+
+    <!-- Evaluating -->
+    <div class="card hidden" id="evaluatingCard">
+      <div class="loading-wrap">
+        <div class="spinner"></div>
+        <p>Evaluating your answer…</p>
+      </div>
+    </div>
+
+    <!-- Feedback -->
+    <div class="card hidden" id="feedbackCard">
+      <div style="font-size:0.9rem;font-weight:600;color:var(--muted);margin-bottom:12px">Feedback</div>
+
+      <div class="feedback-score">
+        <div class="score-circle" id="fbScoreCircle">7</div>
+        <div class="score-label"><strong id="fbScoreLabel">Good Answer</strong>Score: <span id="fbScoreNum">7</span>/10</div>
+      </div>
+
+      <div class="feedback-section">
+        <div class="feedback-section-title green">✓ What was good</div>
+        <ul class="feedback-list good" id="fbGoodList"></ul>
+      </div>
+
+      <div class="feedback-section">
+        <div class="feedback-section-title red">✗ What was missing</div>
+        <ul class="feedback-list bad" id="fbBadList"></ul>
+      </div>
+
+      <div class="feedback-section">
+        <div class="feedback-section-title blue">📋 Model answer</div>
+        <div class="model-answer-box" id="fbModelAnswer"></div>
+      </div>
+
+      <div class="feedback-section">
+        <div class="feedback-section-title yellow">💡 Tip</div>
+        <div class="tip-box"><span class="tip-icon">→</span><span id="fbTip"></span></div>
+      </div>
+
+      <button class="btn btn-green mt-12" id="nextBtn">Got it, next question →</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: Report -->
+  <div class="screen" id="screenReport">
+    <div class="card">
+      <div class="grade-hero">
+        <div class="grade-circle" id="reportGradeCircle">B+</div>
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:8px">Interview Complete!</div>
+        <p id="reportSummary"></p>
+      </div>
+
+      <div class="scores-row" id="reportScores"></div>
+
+      <div id="reportLoading" class="loading-wrap hidden">
+        <div class="spinner"></div>
+        <p>Generating your performance report…</p>
+      </div>
+
+      <div id="reportContent">
+        <div class="report-section">
+          <h3>Strengths</h3>
+          <ul class="report-list strengths" id="reportStrengths"></ul>
+        </div>
+        <div class="sep"></div>
+        <div class="report-section">
+          <h3>Areas to improve</h3>
+          <ul class="report-list improvements" id="reportImprovements"></ul>
+        </div>
+        <div class="sep"></div>
+        <div class="report-section">
+          <h3>📚 Top resources to study</h3>
+          <div id="reportResources"></div>
+        </div>
+      </div>
+
+      <div class="report-actions">
+        <button class="btn btn-primary" onclick="saveReport()">⬇ Save Report (.txt)</button>
+        <button class="btn btn-ghost" onclick="newInterview()">↩ New Interview</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── State ─────────────────────────────────────────────────────────────────
+let apiKey = '';
+let sessionConfig = {};
+let questions = [];
+let currentQ = 0;
+let scores = [];
+let feedbacks = [];
+let timerInterval = null;
+let timerSeconds = 0;
+let questionTimings = [];
+let interviewType = 'Coding (DSA)';
+let reportData = null;
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('gemini_api_key');
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved;
+    apiKey = saved;
+    document.getElementById('apiSavedMsg').classList.remove('hidden');
+  }
+  updateQBankCount();
+});
+
+document.getElementById('apiKeyInput').addEventListener('change', e => {
+  apiKey = e.target.value.trim();
+  if (apiKey) {
+    localStorage.setItem('gemini_api_key', apiKey);
+    document.getElementById('apiSavedMsg').classList.remove('hidden');
+  }
+});
+
+// Interview type tabs
+document.getElementById('interviewTypeTabs').addEventListener('click', e => {
+  if (!e.target.classList.contains('tab-btn')) return;
+  document.querySelectorAll('#interviewTypeTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  interviewType = e.target.dataset.type;
+});
+
+// ─── Gemini API ─────────────────────────────────────────────────────────────
+async function callGemini(prompt) {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+      })
+    }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API error ${res.status}`);
+  }
+  const data = await res.json();
+  let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  // Strip markdown fences
+  text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  return JSON.parse(text);
+}
+
+// ─── Start interview ─────────────────────────────────────────────────────────
+document.getElementById('startBtn').addEventListener('click', async () => {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) { showSetupError('Please enter your Gemini API key first.'); return; }
+  apiKey = key;
+  localStorage.setItem('gemini_api_key', key);
+  document.getElementById('apiSavedMsg').classList.remove('hidden');
+
+  sessionConfig = {
+    role: document.getElementById('setupRole').value,
+    company: document.getElementById('setupCompany').value,
+    difficulty: document.getElementById('setupDifficulty').value,
+    stack: document.getElementById('setupStack').value.trim(),
+    type: interviewType
+  };
+
+  hideSetupError();
+  showScreen('screenInterview');
+  document.getElementById('loadingQuestions').classList.remove('hidden');
+  document.getElementById('questionCard').classList.add('hidden');
+
+  try {
+    const prompt = buildQuestionsPrompt(sessionConfig);
+    const data = await callGemini(prompt);
+    questions = data.questions || [];
+    if (!questions.length) throw new Error('No questions returned');
+
+    // Save to question bank
+    saveToQBank(questions, sessionConfig);
+
+    currentQ = 0;
+    scores = [];
+    feedbacks = [];
+    questionTimings = [];
+    document.getElementById('loadingQuestions').classList.add('hidden');
+    showQuestion();
+  } catch (err) {
+    document.getElementById('loadingQuestions').classList.add('hidden');
+    showScreen('screenSetup');
+    showSetupError('Failed to generate questions: ' + err.message);
+  }
+});
+
+function buildQuestionsPrompt(c) {
+  return `Generate 5 ${c.type} interview questions for a ${c.role} position at a ${c.company} company. Level: ${c.difficulty}.${c.stack ? ' Tech stack: ' + c.stack : ''}
+
+Make them realistic — the kind actually asked in interviews.
+
+Return JSON:
+{
+  "questions": [
+    {
+      "type": "coding",
+      "question": "Full question text",
+      "hint": "Optional hint or clarification",
+      "context": "What concept this tests"
+    }
+  ]
+}
+Return only JSON, no markdown.`;
+}
+
+// ─── Show question ──────────────────────────────────────────────────────────
+function showQuestion() {
+  const q = questions[currentQ];
+  updateProgress();
+
+  document.getElementById('questionCard').classList.remove('hidden');
+  document.getElementById('feedbackCard').classList.add('hidden');
+  document.getElementById('evaluatingCard').classList.add('hidden');
+  document.getElementById('answerError').classList.add('hidden');
+
+  const type = (q.type || sessionConfig.type || '').toLowerCase();
+  const badge = document.getElementById('qBadge');
+  if (type.includes('coding') || type.includes('dsa')) {
+    badge.textContent = 'Coding';
+    badge.className = 'q-badge badge-coding';
+    show('codingUI'); hide('behavioralUI'); hide('systemUI');
+    document.getElementById('codeAnswer').value = '';
+  } else if (type.includes('behavioral') || type.includes('star')) {
+    badge.textContent = 'Behavioral';
+    badge.className = 'q-badge badge-behavioral';
+    hide('codingUI'); show('behavioralUI'); hide('systemUI');
+    document.getElementById('behavAnswer').value = '';
+  } else if (type.includes('system')) {
+    badge.textContent = 'System Design';
+    badge.className = 'q-badge badge-system';
+    hide('codingUI'); hide('behavioralUI'); show('systemUI');
+    document.getElementById('systemAnswer').value = '';
+  } else {
+    // Mixed: detect based on index
+    const idx = currentQ % 3;
+    if (idx === 0) {
+      badge.textContent = 'Coding'; badge.className = 'q-badge badge-coding';
+      show('codingUI'); hide('behavioralUI'); hide('systemUI');
+      document.getElementById('codeAnswer').value = '';
+    } else if (idx === 1) {
+      badge.textContent = 'System Design'; badge.className = 'q-badge badge-system';
+      hide('codingUI'); hide('behavioralUI'); show('systemUI');
+      document.getElementById('systemAnswer').value = '';
+    } else {
+      badge.textContent = 'Behavioral'; badge.className = 'q-badge badge-behavioral';
+      hide('codingUI'); show('behavioralUI'); hide('systemUI');
+      document.getElementById('behavAnswer').value = '';
+    }
+  }
+
+  document.getElementById('qText').textContent = q.question;
+  document.getElementById('qHint').textContent = q.hint || '';
+  document.getElementById('qContext').textContent = q.context ? `Concept: ${q.context}` : '';
+
+  startTimer();
+}
+
+function updateProgress() {
+  const pct = Math.round((currentQ / 5) * 100);
+  document.getElementById('progressLabel').textContent = `Question ${currentQ + 1} of 5`;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ─── Timer ──────────────────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(timerInterval);
+  timerSeconds = 0;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  questionTimings.push(timerSeconds);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds / 60);
+  const s = timerSeconds % 60;
+  document.getElementById('timerDisplay').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// ─── Submit answer ───────────────────────────────────────────────────────────
+document.getElementById('submitAnswerBtn').addEventListener('click', async () => {
+  const q = questions[currentQ];
+  const type = (q.type || sessionConfig.type || '').toLowerCase();
+  let answer = '';
+  let uiType = '';
+
+  if (document.getElementById('codingUI').classList.contains('hidden') === false) {
+    answer = document.getElementById('codeAnswer').value.trim();
+    uiType = 'coding';
+  } else if (document.getElementById('behavioralUI').classList.contains('hidden') === false) {
+    answer = document.getElementById('behavAnswer').value.trim();
+    uiType = 'behavioral';
+  } else {
+    answer = document.getElementById('systemAnswer').value.trim();
+    uiType = 'system design';
+  }
+
+  if (!answer) {
+    document.getElementById('answerError').textContent = 'Please write your answer before submitting.';
+    document.getElementById('answerError').classList.remove('hidden');
+    return;
+  }
+
+  stopTimer();
+  document.getElementById('questionCard').classList.add('hidden');
+  document.getElementById('evaluatingCard').classList.remove('hidden');
+
+  try {
+    const prompt = buildEvalPrompt(q.question, answer, uiType);
+    const fb = await callGemini(prompt);
+    feedbacks.push(fb);
+    scores.push(fb.score || 5);
+    showFeedback(fb);
+  } catch (err) {
+    document.getElementById('evaluatingCard').classList.add('hidden');
+    document.getElementById('questionCard').classList.remove('hidden');
+    document.getElementById('answerError').textContent = 'Evaluation failed: ' + err.message;
+    document.getElementById('answerError').classList.remove('hidden');
+    startTimer();
+  }
+});
+
+function buildEvalPrompt(question, answer, interviewTypeStr) {
+  return `You are a senior engineer interviewing a ${sessionConfig.role} candidate at ${sessionConfig.company}.
+
+Question: ${question}
+Candidate's answer: ${answer}
+Interview type: ${interviewTypeStr}
+
+Evaluate this answer honestly. Return JSON:
+{
+  "score": 7,
+  "whatWasGood": ["Point 1", "Point 2"],
+  "whatWasMissing": ["Missing point 1", "Missing point 2"],
+  "modelAnswer": "What an ideal answer would include (3-5 sentences)",
+  "tip": "One specific tip to improve this answer type"
+}
+Return only JSON, no markdown.`;
+}
+
+// ─── Show feedback ───────────────────────────────────────────────────────────
+function showFeedback(fb) {
+  document.getElementById('evaluatingCard').classList.add('hidden');
+  document.getElementById('feedbackCard').classList.remove('hidden');
+
+  const score = fb.score || 5;
+  const circle = document.getElementById('fbScoreCircle');
+  circle.textContent = score;
+  circle.className = 'score-circle ' + (score >= 8 ? 'score-high' : score >= 5 ? 'score-mid' : 'score-low');
+
+  document.getElementById('fbScoreNum').textContent = score;
+  document.getElementById('fbScoreLabel').textContent = score >= 8 ? 'Strong Answer' : score >= 6 ? 'Good Answer' : score >= 4 ? 'Needs Work' : 'Weak Answer';
+
+  const goodList = document.getElementById('fbGoodList');
+  goodList.innerHTML = (fb.whatWasGood || []).map(p => `<li>${escHtml(p)}</li>`).join('');
+
+  const badList = document.getElementById('fbBadList');
+  badList.innerHTML = (fb.whatWasMissing || []).map(p => `<li>${escHtml(p)}</li>`).join('');
+
+  document.getElementById('fbModelAnswer').textContent = fb.modelAnswer || '';
+  document.getElementById('fbTip').textContent = fb.tip || '';
+
+  const isLast = currentQ === 4;
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.textContent = isLast ? 'See final report →' : 'Got it, next question →';
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  currentQ++;
+  if (currentQ >= 5) {
+    showReport();
+  } else {
+    document.getElementById('feedbackCard').classList.add('hidden');
+    showQuestion();
+  }
+});
+
+// ─── Final report ────────────────────────────────────────────────────────────
+async function showReport() {
+  showScreen('screenReport');
+  document.getElementById('reportLoading').classList.remove('hidden');
+  document.getElementById('reportContent').style.visibility = 'hidden';
+
+  // Show scores
+  const scoresRow = document.getElementById('reportScores');
+  scoresRow.innerHTML = scores.map((s, i) => `
+    <div class="score-pill">Q${i+1}: <span style="color:${s>=8?'#4ade80':s>=5?'#fbbf24':'#f87171'}">${s}</span>/10</div>
+  `).join('');
+
+  const strengths = feedbacks.flatMap(f => f.whatWasGood || []).slice(0, 4).join('; ');
+  const weaknesses = feedbacks.flatMap(f => f.whatWasMissing || []).slice(0, 4).join('; ');
+
+  const prompt = `Summarize a tech interview performance. Role: ${sessionConfig.role}. Scores: ${scores.join(', ')} out of 10.
+Strong areas: ${strengths}. Weak areas: ${weaknesses}.
+Return JSON:
+{
+  "grade": "B+",
+  "summary": "2-sentence overall assessment",
+  "strengths": ["Strength 1", "Strength 2"],
+  "improvements": ["Area 1", "Area 2", "Area 3"],
+  "resources": [
+    { "topic": "Topic name", "suggestion": "What to study and where" }
+  ]
+}
+Return only JSON, no markdown.`;
+
+  try {
+    reportData = await callGemini(prompt);
+  } catch (err) {
+    reportData = {
+      grade: scoreToGrade(avg(scores)),
+      summary: 'Interview complete. Review your per-question feedback above.',
+      strengths: ['Attempted all questions'],
+      improvements: ['Review model answers provided'],
+      resources: [{ topic: 'Data Structures', suggestion: 'LeetCode, Neetcode.io' }]
+    };
+  }
+
+  document.getElementById('reportLoading').classList.add('hidden');
+  document.getElementById('reportContent').style.visibility = 'visible';
+
+  const grade = reportData.grade || scoreToGrade(avg(scores));
+  const gc = document.getElementById('reportGradeCircle');
+  gc.textContent = grade;
+  const letter = grade[0];
+  gc.className = 'grade-circle grade-' + (letter === 'A' ? 'A' : letter === 'B' ? 'B' : letter === 'C' ? 'C' : 'D');
+
+  document.getElementById('reportSummary').textContent = reportData.summary || '';
+  document.getElementById('reportStrengths').innerHTML = (reportData.strengths || []).map(s => `<li>${escHtml(s)}</li>`).join('');
+  document.getElementById('reportImprovements').innerHTML = (reportData.improvements || []).map(s => `<li>${escHtml(s)}</li>`).join('');
+  document.getElementById('reportResources').innerHTML = (reportData.resources || []).map(r => `
+    <div class="resource-card">
+      <div class="topic">📖 ${escHtml(r.topic)}</div>
+      <div class="suggestion">${escHtml(r.suggestion)}</div>
+    </div>
+  `).join('');
+}
+
+function scoreToGrade(avg) {
+  if (avg >= 9) return 'A+';
+  if (avg >= 8) return 'A';
+  if (avg >= 7) return 'B+';
+  if (avg >= 6) return 'B';
+  if (avg >= 5) return 'C+';
+  if (avg >= 4) return 'C';
+  return 'D';
+}
+
+function avg(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0; }
+
+// ─── Save report ─────────────────────────────────────────────────────────────
+function saveReport() {
+  const lines = [
+    '=== TECH INTERVIEW PREP REPORT ===',
+    '',
+    `Role: ${sessionConfig.role}`,
+    `Company: ${sessionConfig.company}`,
+    `Interview type: ${sessionConfig.type}`,
+    `Difficulty: ${sessionConfig.difficulty}`,
+    `Date: ${new Date().toLocaleDateString()}`,
+    '',
+    `Overall Grade: ${reportData?.grade || scoreToGrade(avg(scores))}`,
+    `Scores: ${scores.map((s, i) => `Q${i+1}: ${s}/10`).join(' | ')}`,
+    `Average: ${avg(scores).toFixed(1)}/10`,
+    '',
+    '--- Summary ---',
+    reportData?.summary || '',
+    '',
+    '--- Strengths ---',
+    ...(reportData?.strengths || []).map(s => '• ' + s),
+    '',
+    '--- Areas to Improve ---',
+    ...(reportData?.improvements || []).map(s => '• ' + s),
+    '',
+    '--- Recommended Resources ---',
+    ...(reportData?.resources || []).map(r => `• ${r.topic}: ${r.suggestion}`),
+    '',
+    '--- Per-Question Details ---',
+    ...questions.map((q, i) => [
+      '',
+      `Q${i+1}: ${q.question}`,
+      `Score: ${scores[i]}/10`,
+      `Good: ${(feedbacks[i]?.whatWasGood || []).join('; ')}`,
+      `Missing: ${(feedbacks[i]?.whatWasMissing || []).join('; ')}`,
+      `Model Answer: ${feedbacks[i]?.modelAnswer || ''}`,
+    ]).flat(),
+    '',
+    '=== END OF REPORT ===',
+  ];
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `interview-report-${Date.now()}.txt`;
+  a.click();
+}
+
+function newInterview() { showScreen('screenSetup'); updateQBankCount(); }
+
+// ─── Question Bank ───────────────────────────────────────────────────────────
+function saveToQBank(qs, config) {
+  const bank = JSON.parse(localStorage.getItem('qbank') || '[]');
+  qs.forEach(q => bank.unshift({ ...q, role: config.role, type: config.type, ts: Date.now() }));
+  localStorage.setItem('qbank', JSON.stringify(bank.slice(0, 200)));
+}
+
+function updateQBankCount() {
+  const bank = JSON.parse(localStorage.getItem('qbank') || '[]');
+  document.getElementById('qbankCount').textContent = bank.length;
+}
+
+function toggleQBank() {
+  const list = document.getElementById('qbankList');
+  if (!list.classList.contains('hidden')) {
+    list.classList.add('hidden'); return;
+  }
+  const bank = JSON.parse(localStorage.getItem('qbank') || '[]');
+  if (!bank.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:0.85rem;padding:12px">No questions yet. Complete an interview to populate this.</div>';
+  } else {
+    list.innerHTML = bank.slice(0, 30).map((q, i) => `
+      <div class="qbank-item">
+        <span class="qb-num">#${i+1}</span>
+        <div>
+          <div>${escHtml(q.question)}</div>
+          <div class="qb-type">${q.role} · ${q.type}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+  list.classList.remove('hidden');
+}
+
+// ─── Utilities ───────────────────────────────────────────────────────────────
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showSetupError(msg) {
+  const el = document.getElementById('setupError');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+function hideSetupError() { document.getElementById('setupError').classList.add('hidden'); }
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
