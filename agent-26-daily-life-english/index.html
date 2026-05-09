@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Life English Learner / Học Tiếng Anh Hàng Ngày</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #fdfbee;
+    color: #886800;
+    min-height: 100vh;
+    font-size: 18px;
+  }
+
+  /* ── Header ── */
+  .app-header {
+    background: #f4e8a0;
+    border-bottom: 3px solid #d4b800;
+    padding: 20px 24px;
+    text-align: center;
+  }
+  .app-header h1 { font-size: 2rem; color: #886800; line-height: 1.2; }
+  .app-header .subtitle { font-size: 1.1rem; color: #a07800; margin-top: 4px; }
+
+  /* ── API key bar ── */
+  .api-bar {
+    background: #fffde8;
+    border-bottom: 2px solid #f4e8a0;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .api-bar label { font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
+  .api-bar input {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 12px;
+    border: 2px solid #d4b800;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fff;
+    color: #444;
+  }
+  .api-bar .save-btn {
+    background: #886800;
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .api-bar .save-btn:hover { background: #a07800; }
+  .api-status { font-size: 0.85rem; color: #5a7a00; }
+
+  /* ── Screens ── */
+  .screen { display: none; padding: 24px; max-width: 900px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  /* ── Home grid ── */
+  .situations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 20px;
+    margin-top: 28px;
+  }
+  .situation-card {
+    background: #fff;
+    border: 3px solid #f4e8a0;
+    border-radius: 16px;
+    padding: 28px 16px 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  .situation-card:hover {
+    transform: translateY(-4px);
+    border-color: #d4b800;
+    box-shadow: 0 6px 20px rgba(136,104,0,0.18);
+  }
+  .situation-card .icon { font-size: 2.8rem; margin-bottom: 12px; }
+  .situation-card .en-title { font-size: 1.1rem; font-weight: 700; color: #886800; }
+  .situation-card .vi-title { font-size: 0.9rem; color: #a07800; margin-top: 4px; }
+
+  /* ── Section header ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .section-header h2 { font-size: 1.7rem; color: #886800; line-height: 1.3; }
+  .section-header .vi-name { font-size: 1rem; color: #a07800; }
+  .back-btn {
+    background: #f4e8a0;
+    border: 2px solid #d4b800;
+    color: #886800;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .back-btn:hover { background: #ead880; }
+
+  /* ── Loading ── */
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .loading .spinner {
+    width: 56px; height: 56px;
+    border: 6px solid #f4e8a0;
+    border-top-color: #886800;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { font-size: 1.2rem; color: #886800; }
+  .loading .vi { color: #a07800; font-size: 1rem; margin-top: 6px; }
+
+  /* ── Lesson sections ── */
+  .lesson-section {
+    background: #fff;
+    border: 2px solid #f4e8a0;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+  .lesson-section h3 {
+    font-size: 1.25rem;
+    color: #886800;
+    border-bottom: 2px solid #f4e8a0;
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+  }
+
+  /* ── Phrase cards ── */
+  .phrase-cards { display: flex; flex-direction: column; gap: 14px; }
+  .phrase-card {
+    background: #fffde8;
+    border: 2px solid #f4e8a0;
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .phrase-card .en { font-size: 1.35rem; font-weight: 700; color: #5a3e00; }
+  .phrase-card .vi { font-size: 1.05rem; color: #886800; margin-top: 5px; }
+  .phrase-card .pronunciation { font-size: 0.9rem; color: #a07800; font-style: italic; margin-top: 3px; }
+  .phrase-card .btns { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+  .listen-btn, .practice-btn, .check-btn, .play-btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s;
+  }
+  .listen-btn { background: #886800; color: #fff; }
+  .listen-btn:hover { opacity: 0.85; }
+  .practice-btn { background: #f4e8a0; color: #886800; border: 2px solid #d4b800; }
+  .practice-btn:hover { background: #ead880; }
+
+  /* ── Practice mini-area ── */
+  .practice-area {
+    margin-top: 12px;
+    display: none;
+  }
+  .practice-area .prompt { font-size: 1.05rem; color: #a07800; margin-bottom: 8px; }
+  .practice-area input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #d4b800;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    color: #5a3e00;
+    background: #fff;
+  }
+  .practice-area .feedback { margin-top: 6px; font-weight: 700; font-size: 0.95rem; }
+  .practice-area .check-mini {
+    margin-top: 8px;
+    background: #886800;
+    color: #fff;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .practice-area .check-mini:hover { opacity: 0.85; }
+
+  /* ── Conversation ── */
+  .conversation { display: flex; flex-direction: column; gap: 12px; }
+  .convo-line {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 10px;
+    align-items: start;
+  }
+  .convo-speaker {
+    font-weight: 700;
+    color: #fff;
+    background: #886800;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+  .convo-text .en { font-size: 1.05rem; color: #5a3e00; font-weight: 600; }
+  .convo-text .vi { font-size: 0.9rem; color: #a07800; margin-top: 2px; }
+
+  .play-btn {
+    margin-top: 16px;
+    background: #d4b800;
+    color: #fff;
+    padding: 10px 22px;
+    font-size: 1rem;
+  }
+  .play-btn:hover { opacity: 0.85; }
+
+  /* ── Vocab flip cards ── */
+  .vocab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+  }
+  .flip-card {
+    height: 100px;
+    perspective: 600px;
+    cursor: pointer;
+  }
+  .flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.4s;
+  }
+  .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    backface-visibility: hidden;
+  }
+  .flip-front {
+    background: #f4e8a0;
+    border: 2px solid #d4b800;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #5a3e00;
+  }
+  .flip-back {
+    background: #886800;
+    color: #fff;
+    font-size: 1.05rem;
+    transform: rotateY(180deg);
+  }
+  .flip-hint { font-size: 0.72rem; color: #a07800; margin-top: 4px; }
+  .flip-back .flip-hint { color: #f4e8a0; }
+
+  /* ── Fill-in-blank ── */
+  .practice-questions { display: flex; flex-direction: column; gap: 18px; }
+  .practice-q {
+    background: #fffde8;
+    border: 2px solid #f4e8a0;
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .practice-q .vi-hint { font-size: 0.95rem; color: #a07800; margin-bottom: 8px; }
+  .practice-q .sentence-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #5a3e00;
+  }
+  .practice-q input.blank {
+    width: 130px;
+    border: none;
+    border-bottom: 3px solid #d4b800;
+    background: transparent;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #886800;
+    text-align: center;
+    outline: none;
+  }
+  .practice-q .result { margin-top: 8px; font-weight: 700; font-size: 1rem; display: none; }
+
+  .check-btn {
+    background: #886800;
+    color: #fff;
+    padding: 10px 24px;
+    font-size: 1rem;
+    margin-top: 16px;
+  }
+  .check-btn:hover { opacity: 0.85; }
+
+  /* ── Home heading ── */
+  .home-heading { text-align: center; margin-bottom: 4px; }
+  .home-heading h2 { font-size: 1.5rem; color: #886800; }
+  .home-heading p { color: #a07800; font-size: 1rem; margin-top: 4px; }
+
+  /* ── Error ── */
+  .error-box {
+    background: #fff0f0;
+    border: 2px solid #e88;
+    border-radius: 10px;
+    padding: 18px;
+    color: #a00;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 500px) {
+    .app-header h1 { font-size: 1.4rem; }
+    .situations-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .situation-card { padding: 18px 10px 14px; }
+    .situation-card .icon { font-size: 2rem; }
+    .convo-line { grid-template-columns: 70px 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── App Header ── -->
+<div class="app-header">
+  <h1>🌟 Daily Life English Learner</h1>
+  <div class="subtitle">Học Tiếng Anh Cho Cuộc Sống Hàng Ngày</div>
+</div>
+
+<!-- ── API Key Bar ── -->
+<div class="api-bar">
+  <label>🔑 Gemini API Key:</label>
+  <input type="password" id="apiKeyInput" placeholder="Paste your Gemini API key here / Dán API key vào đây">
+  <button class="save-btn" onclick="saveApiKey()">Save / Lưu</button>
+  <span class="api-status" id="apiStatus"></span>
+</div>
+
+<!-- ── Home Screen ── -->
+<div class="screen active" id="homeScreen">
+  <div style="max-width:900px;margin:0 auto;">
+    <div class="home-heading">
+      <h2>Choose a situation / Chọn tình huống</h2>
+      <p>Click a card to start learning / Nhấn vào thẻ để bắt đầu học</p>
+    </div>
+    <div class="situations-grid" id="situationsGrid"></div>
+  </div>
+</div>
+
+<!-- ── Lesson Screen ── -->
+<div class="screen" id="lessonScreen">
+  <div class="section-header">
+    <button class="back-btn" onclick="goHome()">← Back / Quay lại</button>
+    <div>
+      <h2 id="lessonTitle">Lesson</h2>
+      <div class="vi-name" id="lessonTitleVi"></div>
+    </div>
+  </div>
+  <div id="lessonBody"></div>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────
+const SITUATIONS = [
+  { id: 'grocery',   icon: '🛒', en: 'At the grocery store',    vi: 'Tại siêu thị' },
+  { id: 'doctor',    icon: '🏥', en: 'At the doctor\'s office', vi: 'Tại phòng khám' },
+  { id: 'neighbors', icon: '👋', en: 'Talking to neighbors',     vi: 'Nói chuyện với hàng xóm' },
+  { id: 'bank',      icon: '🏦', en: 'At the bank',              vi: 'Tại ngân hàng' },
+  { id: 'food',      icon: '🍜', en: 'Ordering food',            vi: 'Gọi đồ ăn' },
+  { id: 'phone',     icon: '📞', en: 'On the phone',             vi: 'Nói chuyện qua điện thoại' },
+  { id: 'school',    icon: '🏫', en: 'At school pickup',         vi: 'Đón con ở trường' },
+  { id: 'emergency', icon: '🚨', en: 'In an emergency',          vi: 'Trong trường hợp khẩn cấp' },
+];
+
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+// ── API Key ───────────────────────────────────────────────────
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) { alert('Please enter your API key / Vui lòng nhập API key'); return; }
+  localStorage.setItem('geminiApiKey', key);
+  document.getElementById('apiStatus').textContent = '✓ Saved / Đã lưu';
+}
+
+function getApiKey() {
+  return localStorage.getItem('geminiApiKey') || '';
+}
+
+window.addEventListener('load', () => {
+  const saved = getApiKey();
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved;
+    document.getElementById('apiStatus').textContent = '✓ Saved / Đã lưu';
+  }
+  renderSituations();
+});
+
+// ── Home ─────────────────────────────────────────────────────
+function renderSituations() {
+  const grid = document.getElementById('situationsGrid');
+  grid.innerHTML = SITUATIONS.map(s => `
+    <div class="situation-card" onclick="openSituation('${s.id}')">
+      <div class="icon">${s.icon}</div>
+      <div class="en-title">${s.en}</div>
+      <div class="vi-title">${s.vi}</div>
+    </div>
+  `).join('');
+}
+
+function goHome() {
+  document.getElementById('homeScreen').classList.add('active');
+  document.getElementById('lessonScreen').classList.remove('active');
+  window.speechSynthesis.cancel();
+}
+
+// ── Gemini call ───────────────────────────────────────────────
+async function fetchLesson(situation) {
+  const key = getApiKey();
+  if (!key) throw new Error('No API key / Chưa có API key');
+
+  const prompt = `Create an English lesson for a Vietnamese adult who knows almost no English. Topic: '${situation}'.
+
+Make everything very simple — A1/A2 level English only. Focus on practical, real phrases they would actually use.
+
+Return JSON:
+{
+  "keyPhrases": [
+    {
+      "english": "Excuse me, where is the milk?",
+      "vietnamese": "Xin lỗi, sữa ở đâu ạ?",
+      "pronunciation": "Ek-SKYOOZ mee, WAIR iz thuh MILK"
+    }
+  ],
+  "conversation": [
+    { "speaker": "You", "english": "Hello, I need help.", "vietnamese": "Xin chào, tôi cần giúp đỡ." },
+    { "speaker": "Staff", "english": "Of course! What do you need?", "vietnamese": "Tất nhiên! Bạn cần gì?" }
+  ],
+  "vocabulary": [
+    { "english": "cashier", "vietnamese": "thu ngân" }
+  ],
+  "practice": [
+    { "sentence": "___ me, where is the bathroom?", "answer": "Excuse", "vietnamese": "Xin lỗi, nhà vệ sinh ở đâu?" }
+  ]
+}
+Return only JSON, no markdown.`;
+
+  const res = await fetch(`${GEMINI_URL}?key=${key}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7 }
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${res.status}`);
+  }
+
+  const data = await res.json();
+  let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  raw = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  return JSON.parse(raw);
+}
+
+// ── Open situation ────────────────────────────────────────────
+async function openSituation(id) {
+  const sit = SITUATIONS.find(s => s.id === id);
+  document.getElementById('homeScreen').classList.remove('active');
+  document.getElementById('lessonScreen').classList.add('active');
+  document.getElementById('lessonTitle').textContent = sit.en;
+  document.getElementById('lessonTitleVi').textContent = sit.vi;
+
+  const body = document.getElementById('lessonBody');
+  body.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading lesson… / Đang tải bài học…</p>
+      <p class="vi">Gemini AI is preparing your lesson</p>
+    </div>`;
+
+  try {
+    const lesson = await fetchLesson(`${sit.en} / ${sit.vi}`);
+    renderLesson(lesson, sit);
+  } catch(e) {
+    body.innerHTML = `<div class="error-box">
+      ❌ Error: ${e.message}<br><br>
+      Please check your Gemini API key and try again.<br>
+      Vui lòng kiểm tra API key và thử lại.
+    </div>`;
+  }
+}
+
+// ── Render lesson ─────────────────────────────────────────────
+function renderLesson(lesson, sit) {
+  const body = document.getElementById('lessonBody');
+  const phrases = (lesson.keyPhrases || []).slice(0, 8);
+  const convo   = (lesson.conversation || []).slice(0, 6);
+  const vocab   = (lesson.vocabulary || []).slice(0, 6);
+  const practice= (lesson.practice || []).slice(0, 3);
+
+  // Section 1: Key phrases
+  const phrasesHTML = phrases.map((p, i) => `
+    <div class="phrase-card" id="phrase-${i}">
+      <div class="en" id="phrase-en-${i}">${esc(p.english)}</div>
+      <div class="vi">${esc(p.vietnamese)}</div>
+      <div class="pronunciation">🔤 ${esc(p.pronunciation)}</div>
+      <div class="btns">
+        <button class="listen-btn" onclick="speakText('${esc2js(p.english)}')">🔊 Listen / Nghe</button>
+        <button class="practice-btn" onclick="togglePractice(${i})">✏️ Practice / Luyện</button>
+      </div>
+      <div class="practice-area" id="practice-area-${i}">
+        <div class="prompt">Type the English phrase: / Gõ câu tiếng Anh:</div>
+        <input type="text" id="practice-input-${i}" placeholder="Type here…" onkeydown="if(event.key==='Enter')checkPractice(${i},'${esc2js(p.english)}')">
+        <button class="check-mini" onclick="checkPractice(${i},'${esc2js(p.english)}')">Check / Kiểm tra</button>
+        <div class="feedback" id="practice-feedback-${i}"></div>
+      </div>
+    </div>
+  `).join('');
+
+  // Section 2: Conversation
+  const convoHTML = convo.map((line, i) => `
+    <div class="convo-line">
+      <div class="convo-speaker">${esc(line.speaker)}</div>
+      <div class="convo-text">
+        <div class="en">${esc(line.english)}</div>
+        <div class="vi">${esc(line.vietnamese)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Section 3: Vocabulary
+  const vocabHTML = vocab.map((v, i) => `
+    <div class="flip-card" id="flip-${i}" onclick="flipCard(${i})">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <span>${esc(v.english)}</span>
+          <span class="flip-hint">Click to flip / Nhấn để lật</span>
+        </div>
+        <div class="flip-back">
+          <span>${esc(v.vietnamese)}</span>
+          <span class="flip-hint">Click to flip back</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Section 4: Fill-in-blank
+  const practiceHTML = practice.map((q, i) => {
+    const parts = q.sentence.split('___');
+    return `
+      <div class="practice-q" id="pq-${i}">
+        <div class="vi-hint">🇻🇳 ${esc(q.vietnamese)}</div>
+        <div class="sentence-area">
+          <span>${esc(parts[0])}</span>
+          <input class="blank" type="text" id="blank-${i}" placeholder="???">
+          <span>${esc(parts[1] || '')}</span>
+        </div>
+        <div class="result" id="result-${i}"></div>
+      </div>
+    `;
+  }).join('');
+
+  // Store convo for play button
+  window._currentConvo = convo;
+
+  body.innerHTML = `
+    <!-- Section 1 -->
+    <div class="lesson-section">
+      <h3>💬 Key phrases / Câu hay dùng</h3>
+      <div class="phrase-cards">${phrasesHTML}</div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="lesson-section">
+      <h3>🗣️ Sample conversation / Hội thoại mẫu</h3>
+      <div class="conversation">${convoHTML}</div>
+      <button class="play-btn listen-btn" onclick="playConversation()">▶ Play full conversation / Nghe cả đoạn hội thoại</button>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="lesson-section">
+      <h3>📖 Important words / Từ quan trọng</h3>
+      <div class="vocab-grid">${vocabHTML}</div>
+    </div>
+
+    <!-- Section 4 -->
+    <div class="lesson-section">
+      <h3>✏️ Quick practice / Luyện tập nhanh</h3>
+      <div class="practice-questions">${practiceHTML}</div>
+      <button class="check-btn" onclick="checkAllBlanks(${JSON.stringify(practice).replace(/"/g,'&quot;')})">
+        Check answers / Kiểm tra đáp án
+      </button>
+    </div>
+
+    <div style="text-align:center;margin-top:10px;margin-bottom:40px;">
+      <button class="back-btn" style="font-size:1.1rem;padding:12px 28px;" onclick="goHome()">
+        ← Back to situations / Quay lại danh sách
+      </button>
+    </div>
+  `;
+}
+
+// ── Speech ────────────────────────────────────────────────────
+function speakText(text) {
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'en-US';
+  utt.rate = 0.85;
+  window.speechSynthesis.speak(utt);
+}
+
+async function playConversation() {
+  const lines = window._currentConvo || [];
+  window.speechSynthesis.cancel();
+  for (let i = 0; i < lines.length; i++) {
+    await speakLine(lines[i].english);
+    await pause(600);
+  }
+}
+
+function speakLine(text) {
+  return new Promise(resolve => {
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'en-US';
+    utt.rate = 0.85;
+    utt.onend = resolve;
+    utt.onerror = resolve;
+    window.speechSynthesis.speak(utt);
+  });
+}
+
+function pause(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Practice (phrase) ─────────────────────────────────────────
+function togglePractice(i) {
+  const area = document.getElementById(`practice-area-${i}`);
+  const isVisible = area.style.display === 'block';
+  area.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) {
+    document.getElementById(`phrase-en-${i}`).style.visibility = 'hidden';
+    document.getElementById(`practice-input-${i}`).value = '';
+    document.getElementById(`practice-feedback-${i}`).textContent = '';
+  } else {
+    document.getElementById(`phrase-en-${i}`).style.visibility = 'visible';
+  }
+}
+
+function checkPractice(i, answer) {
+  const input = document.getElementById(`practice-input-${i}`).value.trim();
+  const fb = document.getElementById(`practice-feedback-${i}`);
+  if (input.toLowerCase() === answer.toLowerCase()) {
+    fb.textContent = '✅ Correct! / Đúng rồi!';
+    fb.style.color = '#2a7a00';
+  } else {
+    fb.textContent = `❌ Answer: "${answer}"`;
+    fb.style.color = '#a00';
+  }
+}
+
+// ── Vocab flip ────────────────────────────────────────────────
+function flipCard(i) {
+  document.getElementById(`flip-${i}`).classList.toggle('flipped');
+}
+
+// ── Fill-in-blank ─────────────────────────────────────────────
+function checkAllBlanks(practiceArr) {
+  practiceArr.forEach((q, i) => {
+    const input = document.getElementById(`blank-${i}`);
+    const result = document.getElementById(`result-${i}`);
+    if (!input) return;
+    const val = input.value.trim();
+    result.style.display = 'block';
+    if (val.toLowerCase() === q.answer.toLowerCase()) {
+      result.textContent = '✅ Correct! / Đúng!';
+      result.style.color = '#2a7a00';
+      input.style.borderBottomColor = '#2a7a00';
+    } else {
+      result.textContent = `❌ Answer: "${q.answer}"`;
+      result.style.color = '#a00';
+      input.style.borderBottomColor = '#a00';
+    }
+  });
+}
+
+// ── Utils ─────────────────────────────────────────────────────
+function esc(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function esc2js(s) {
+  if (!s) return '';
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+</script>
+</body>
+</html>
