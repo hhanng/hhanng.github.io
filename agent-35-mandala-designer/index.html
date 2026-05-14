@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandala Pattern Designer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f8f0fb;
+    color: #703898;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, #703898, #9b5ec7);
+    color: white;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 2px 12px rgba(112,56,152,0.3);
+  }
+
+  header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  header p { font-size: 0.8rem; opacity: 0.85; }
+
+  .api-key-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .api-key-row label { font-size: 0.75rem; color: rgba(255,255,255,0.85); }
+
+  .api-key-row input {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.15);
+    color: white;
+    font-size: 0.75rem;
+    width: 220px;
+  }
+
+  .api-key-row input::placeholder { color: rgba(255,255,255,0.5); }
+
+  .layout {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+
+  .canvas-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 300px;
+  }
+
+  #mandalaCanvas {
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(112,56,152,0.2);
+    background: white;
+    cursor: crosshair;
+    max-width: 100%;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary {
+    background: #703898;
+    color: white;
+    box-shadow: 0 2px 8px rgba(112,56,152,0.3);
+  }
+
+  .btn-secondary {
+    background: #eeddf5;
+    color: #703898;
+    border: 1px solid #d4b8d8;
+  }
+
+  .btn-accent {
+    background: linear-gradient(135deg, #ff7eb3, #ff758c);
+    color: white;
+    box-shadow: 0 2px 8px rgba(255,126,179,0.35);
+  }
+
+  .btn-animate { background: #9b5ec7; color: white; }
+  .btn-animate.active { background: #e03e7e; }
+
+  .controls-panel {
+    width: 300px;
+    min-width: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .panel {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 2px 12px rgba(112,56,152,0.1);
+    border: 1px solid #eeddf5;
+  }
+
+  .panel h3 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #9b5ec7;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+
+  .control-row label {
+    font-size: 0.78rem;
+    color: #703898;
+    min-width: 90px;
+    font-weight: 500;
+  }
+
+  .control-row input[type="range"] {
+    flex: 1;
+    accent-color: #703898;
+    cursor: pointer;
+  }
+
+  .control-row .val {
+    font-size: 0.75rem;
+    color: #9b5ec7;
+    min-width: 26px;
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .control-row select {
+    flex: 1;
+    padding: 5px 8px;
+    border-radius: 8px;
+    border: 1px solid #d4b8d8;
+    background: #f8f0fb;
+    color: #703898;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+
+  .control-row input[type="color"] {
+    width: 36px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid #d4b8d8;
+    cursor: pointer;
+    padding: 2px;
+  }
+
+  .mood-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .mood-btn {
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid #d4b8d8;
+    background: #f8f0fb;
+    color: #703898;
+    font-size: 0.72rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+
+  .mood-btn:hover {
+    background: #703898;
+    color: white;
+    border-color: #703898;
+  }
+
+  .palette-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .palette-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 10px;
+    background: #f8f0fb;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .palette-item:hover { border-color: #703898; }
+
+  .palette-swatches {
+    display: flex;
+    gap: 3px;
+  }
+
+  .swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+
+  .palette-info { flex: 1; }
+  .palette-name { font-size: 0.72rem; font-weight: 700; color: #703898; }
+  .palette-desc { font-size: 0.65rem; color: #9b5ec7; }
+
+  .ai-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid #d4b8d8;
+    background: #f8f0fb;
+    color: #703898;
+    font-size: 0.78rem;
+    margin-bottom: 8px;
+    resize: none;
+    font-family: inherit;
+  }
+
+  .ai-input:focus { outline: none; border-color: #703898; }
+
+  .ai-output {
+    font-size: 0.75rem;
+    color: #703898;
+    background: #f8f0fb;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 8px;
+    line-height: 1.5;
+    display: none;
+    border: 1px solid #d4b8d8;
+    font-style: italic;
+  }
+
+  .gallery-strip {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .gallery-thumb {
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+    object-fit: cover;
+  }
+
+  .gallery-thumb:hover { border-color: #703898; transform: scale(1.05); }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .color-mode-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .cm-btn {
+    padding: 4px 9px;
+    border-radius: 16px;
+    border: 1px solid #d4b8d8;
+    background: #f8f0fb;
+    color: #703898;
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+
+  .cm-btn.active {
+    background: #703898;
+    color: white;
+    border-color: #703898;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 700px) {
+    .layout { flex-direction: column; }
+    .controls-panel { width: 100%; }
+    #mandalaCanvas { width: 100%; height: auto; }
+  }
+
+  .tag { font-size: 0.65rem; color: #9b5ec7; opacity: 0.7; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>✦ Mandala Pattern Designer</h1>
+    <p>Agent #35 · Art &amp; Creative · 100 AI Agents Challenge</p>
+  </div>
+  <div class="api-key-row">
+    <label>Gemini API Key</label>
+    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- Canvas -->
+  <div class="canvas-area">
+    <canvas id="mandalaCanvas" width="500" height="500"></canvas>
+
+    <div class="action-buttons">
+      <button class="btn btn-primary" onclick="randomize()">⚄ Randomize</button>
+      <button class="btn btn-animate" id="animBtn" onclick="toggleAnimate()">▶ Animate</button>
+      <button class="btn btn-secondary" onclick="downloadPNG()">⬇ PNG</button>
+      <button class="btn btn-secondary" onclick="downloadSVG()">⬇ SVG</button>
+      <button class="btn btn-secondary" onclick="shareURL()">⬗ Share</button>
+    </div>
+
+    <!-- Gallery -->
+    <div class="panel" style="width:100%">
+      <h3>Gallery — Last 8</h3>
+      <div class="gallery-strip" id="galleryStrip"></div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-panel">
+
+    <!-- Pattern Controls -->
+    <div class="panel">
+      <h3>Pattern</h3>
+
+      <div class="control-row">
+        <label>Symmetry</label>
+        <input type="range" id="symmetry" min="4" max="16" step="1" value="8" oninput="sliderChange('symmetry')">
+        <span class="val" id="symmetry-val">8</span>
+      </div>
+
+      <div class="control-row">
+        <label>Layers</label>
+        <input type="range" id="layers" min="1" max="6" step="1" value="4" oninput="sliderChange('layers')">
+        <span class="val" id="layers-val">4</span>
+      </div>
+
+      <div class="control-row">
+        <label>Complexity</label>
+        <input type="range" id="complexity" min="1" max="5" step="1" value="3" oninput="sliderChange('complexity')">
+        <span class="val" id="complexity-val">3</span>
+      </div>
+
+      <div class="control-row">
+        <label>Petal Shape</label>
+        <select id="petalShape" onchange="draw()">
+          <option>Circle</option>
+          <option>Teardrop</option>
+          <option>Diamond</option>
+          <option>Star</option>
+          <option>Wave</option>
+          <option>Triangle</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <label>Inner Pattern</label>
+        <select id="innerPattern" onchange="draw()">
+          <option>Dot</option>
+          <option>Flower</option>
+          <option>Star</option>
+          <option>Spiral</option>
+          <option>Empty</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <label>Line Thickness</label>
+        <input type="range" id="lineThick" min="1" max="5" step="0.5" value="1.5" oninput="sliderChange('lineThick')">
+        <span class="val" id="lineThick-val">1.5</span>
+      </div>
+
+      <div class="control-row">
+        <label>Fill Opacity</label>
+        <input type="range" id="fillOpacity" min="0" max="100" step="5" value="60" oninput="sliderChange('fillOpacity')">
+        <span class="val" id="fillOpacity-val">60%</span>
+      </div>
+    </div>
+
+    <!-- Color Controls -->
+    <div class="panel">
+      <h3>Color</h3>
+
+      <div class="color-mode-row">
+        <button class="cm-btn active" onclick="setColorMode('Monochrome',this)">Mono</button>
+        <button class="cm-btn" onclick="setColorMode('Complementary',this)">Comp</button>
+        <button class="cm-btn" onclick="setColorMode('Triadic',this)">Triadic</button>
+        <button class="cm-btn" onclick="setColorMode('Rainbow',this)">Rainbow</button>
+        <button class="cm-btn" onclick="setColorMode('Custom',this)">Custom</button>
+      </div>
+
+      <div class="control-row">
+        <label>Primary</label>
+        <input type="color" id="primaryColor" value="#703898" oninput="draw()">
+      </div>
+
+      <div class="control-row" id="secondaryRow">
+        <label>Secondary</label>
+        <input type="color" id="secondaryColor" value="#ff7eb3" oninput="draw()">
+      </div>
+
+      <div class="control-row">
+        <label>Background</label>
+        <select id="bgMode" onchange="bgModeChange()">
+          <option value="white">White</option>
+          <option value="black">Black</option>
+          <option value="custom">Custom</option>
+        </select>
+        <input type="color" id="bgColor" value="#ffffff" oninput="draw()" class="hidden">
+      </div>
+
+      <button class="btn btn-secondary" style="width:100%;margin-top:4px" onclick="suggestPalette()">
+        ✦ Suggest Palette
+      </button>
+
+      <div class="palette-suggestions" id="paletteSuggestions"></div>
+    </div>
+
+    <!-- Mood Presets -->
+    <div class="panel">
+      <h3>Mood Presets</h3>
+      <div class="mood-presets">
+        <button class="mood-btn" onclick="applyMood('zen')">☯ Zen</button>
+        <button class="mood-btn" onclick="applyMood('cosmic')">✦ Cosmic</button>
+        <button class="mood-btn" onclick="applyMood('floral')">✿ Floral</button>
+        <button class="mood-btn" onclick="applyMood('ocean')">≋ Ocean</button>
+        <button class="mood-btn" onclick="applyMood('sunset')">◐ Sunset</button>
+        <button class="mood-btn" onclick="applyMood('forest')">♧ Forest</button>
+        <button class="mood-btn" onclick="applyMood('candy')">✿ Candy</button>
+        <button class="mood-btn" onclick="applyMood('neon')">⚡ Neon</button>
+      </div>
+    </div>
+
+    <!-- AI Panel -->
+    <div class="panel">
+      <h3>AI Studio</h3>
+
+      <textarea class="ai-input" id="moodInput" rows="2" placeholder="Describe a mood or theme… e.g. calm ocean sunset"></textarea>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" style="flex:1" onclick="generateForMood()">✦ Generate</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="interpretMandala()">? Interpret</button>
+      </div>
+
+      <div class="ai-output" id="aiOutput"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────
+const canvas = document.getElementById('mandalaCanvas');
+const ctx = canvas.getContext('2d');
+let animating = false, animFrame = null, rotation = 0;
+let colorMode = 'Monochrome';
+
+function getSettings() {
+  const bgM = document.getElementById('bgMode').value;
+  let bg = bgM === 'white' ? '#ffffff' : bgM === 'black' ? '#000000' : document.getElementById('bgColor').value;
+  return {
+    symmetry: +document.getElementById('symmetry').value,
+    layers: +document.getElementById('layers').value,
+    complexity: +document.getElementById('complexity').value,
+    petalShape: document.getElementById('petalShape').value,
+    innerPattern: document.getElementById('innerPattern').value,
+    lineThick: +document.getElementById('lineThick').value,
+    fillOpacity: +document.getElementById('fillOpacity').value / 100,
+    primary: document.getElementById('primaryColor').value,
+    secondary: document.getElementById('secondaryColor').value,
+    bg,
+    colorMode
+  };
+}
+
+function sliderChange(id) {
+  const el = document.getElementById(id);
+  const valEl = document.getElementById(id + '-val');
+  valEl.textContent = id === 'fillOpacity' ? el.value + '%' : el.value;
+  draw();
+}
+
+function setColorMode(mode, btn) {
+  colorMode = mode;
+  document.querySelectorAll('.cm-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const showSecondary = mode === 'Complementary' || mode === 'Custom';
+  document.getElementById('secondaryRow').classList.toggle('hidden', !showSecondary);
+  draw();
+}
+
+function bgModeChange() {
+  const mode = document.getElementById('bgMode').value;
+  document.getElementById('bgColor').classList.toggle('hidden', mode !== 'custom');
+  draw();
+}
+
+// ─── Color Utilities ─────────────────────────────────────────────
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return [r, g, b];
+}
+
+function rgbToHex(r, g, b) {
+  return '#' + [r,g,b].map(v => Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+}
+
+function hexToHsl(hex) {
+  let [r,g,b] = hexToRgb(hex).map(v => v/255);
+  const max = Math.max(r,g,b), min = Math.min(r,g,b);
+  let h, s, l = (max+min)/2;
+  if (max === min) { h = s = 0; }
+  else {
+    const d = max - min;
+    s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max) {
+      case r: h = (g-b)/d + (g<b?6:0); break;
+      case g: h = (b-r)/d + 2; break;
+      case b: h = (r-g)/d + 4; break;
+    }
+    h /= 6;
+  }
+  return [h*360, s*100, l*100];
+}
+
+function hslToHex(h, s, l) {
+  h/=360; s/=100; l/=100;
+  let r,g,b;
+  if (s===0) { r=g=b=l; }
+  else {
+    const hue2rgb = (p,q,t) => {
+      if(t<0)t+=1; if(t>1)t-=1;
+      if(t<1/6)return p+(q-p)*6*t;
+      if(t<1/2)return q;
+      if(t<2/3)return p+(q-p)*(2/3-t)*6;
+      return p;
+    };
+    const q = l<0.5?l*(1+s):l+s-l*s, p=2*l-q;
+    r=hue2rgb(p,q,h+1/3); g=hue2rgb(p,q,h); b=hue2rgb(p,q,h-1/3);
+  }
+  return rgbToHex(r*255, g*255, b*255);
+}
+
+function getColors(s, index, total) {
+  const [h,sat,lig] = hexToHsl(s.primary);
+  const alpha = s.fillOpacity;
+
+  if (s.colorMode === 'Rainbow') {
+    const hue = (index / total) * 360;
+    return { fill: hexToHsl_alpha(hslToHex(hue, 70, 60), alpha), stroke: hslToHex(hue, 80, 40) };
+  }
+  if (s.colorMode === 'Monochrome') {
+    const lig2 = 30 + (index / total) * 50;
+    return { fill: hexToHsl_alpha(hslToHex(h, sat, lig2), alpha), stroke: hslToHex(h, sat, lig2 - 20) };
+  }
+  if (s.colorMode === 'Complementary') {
+    const t = index / total;
+    const c = t < 0.5 ? s.primary : s.secondary;
+    const [ch,cs,cl] = hexToHsl(c);
+    return { fill: hexToHsl_alpha(hslToHex(ch, cs, cl), alpha), stroke: hslToHex(ch, cs, cl - 20) };
+  }
+  if (s.colorMode === 'Triadic') {
+    const hues = [h, (h+120)%360, (h+240)%360];
+    const hue = hues[index % 3];
+    return { fill: hexToHsl_alpha(hslToHex(hue, sat, lig), alpha), stroke: hslToHex(hue, sat, lig - 15) };
+  }
+  // Custom
+  const t = index / total;
+  const c = t < 0.5 ? s.primary : s.secondary;
+  const [ch,cs,cl] = hexToHsl(c);
+  return { fill: hexToHsl_alpha(c, alpha), stroke: hslToHex(ch, cs, cl - 20) };
+}
+
+function hexToHsl_alpha(hex, alpha) {
+  const [r,g,b] = hexToRgb(hex);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ─── Petal Drawing ────────────────────────────────────────────────
+function drawPetal(ctx, shape, size, { fill, stroke }, thick) {
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = thick;
+  ctx.beginPath();
+
+  switch(shape) {
+    case 'Circle':
+      ctx.arc(0, -size/2, size/2, 0, Math.PI*2);
+      break;
+    case 'Teardrop':
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(size*0.6, -size*0.3, size*0.6, -size*0.85, 0, -size);
+      ctx.bezierCurveTo(-size*0.6, -size*0.85, -size*0.6, -size*0.3, 0, 0);
+      break;
+    case 'Diamond':
+      ctx.moveTo(0, 0);
+      ctx.lineTo(size*0.4, -size*0.5);
+      ctx.lineTo(0, -size);
+      ctx.lineTo(-size*0.4, -size*0.5);
+      ctx.closePath();
+      break;
+    case 'Star': {
+      const pts = 5, inner = size*0.35, outer = size*0.7;
+      for (let i = 0; i < pts*2; i++) {
+        const r2 = i%2===0 ? outer : inner;
+        const ang = (i * Math.PI / pts) - Math.PI/2 - size*0.01;
+        i === 0 ? ctx.moveTo(Math.cos(ang)*r2, Math.sin(ang)*r2 - size*0.5)
+                : ctx.lineTo(Math.cos(ang)*r2, Math.sin(ang)*r2 - size*0.5);
+      }
+      ctx.closePath();
+      break;
+    }
+    case 'Wave':
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(size*0.7, -size*0.2, -size*0.3, -size*0.6, size*0.1, -size);
+      ctx.bezierCurveTo(size*0.5, -size*0.6, -size*0.4, -size*0.3, 0, 0);
+      break;
+    case 'Triangle':
+      ctx.moveTo(0, 0);
+      ctx.lineTo(size*0.5, -size);
+      ctx.lineTo(-size*0.5, -size);
+      ctx.closePath();
+      break;
+  }
+
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawInner(ctx, pattern, radius, { fill, stroke }, thick) {
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = thick;
+
+  if (pattern === 'Empty') return;
+
+  if (pattern === 'Dot') {
+    ctx.beginPath();
+    ctx.arc(0, 0, radius*0.5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    return;
+  }
+
+  if (pattern === 'Flower') {
+    for (let i = 0; i < 6; i++) {
+      ctx.save();
+      ctx.rotate(i * Math.PI / 3);
+      ctx.beginPath();
+      ctx.ellipse(0, -radius*0.55, radius*0.22, radius*0.44, 0, 0, Math.PI*2);
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+    ctx.beginPath();
+    ctx.arc(0,0,radius*0.2,0,Math.PI*2);
+    ctx.fill(); ctx.stroke();
+    return;
+  }
+
+  if (pattern === 'Star') {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const r2 = i%2===0 ? radius*0.7 : radius*0.3;
+      const ang = (i * Math.PI / 5) - Math.PI/2;
+      i===0 ? ctx.moveTo(Math.cos(ang)*r2, Math.sin(ang)*r2)
+             : ctx.lineTo(Math.cos(ang)*r2, Math.sin(ang)*r2);
+    }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    return;
+  }
+
+  if (pattern === 'Spiral') {
+    ctx.beginPath();
+    for (let t = 0; t < Math.PI*4; t += 0.1) {
+      const sr = (t/(Math.PI*4)) * radius * 0.8;
+      const x = Math.cos(t)*sr, y = Math.sin(t)*sr;
+      t===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    return;
+  }
+}
+
+// ─── Main Draw ────────────────────────────────────────────────────
+function draw() {
+  const s = getSettings();
+  const w = canvas.width, h = canvas.height;
+  const cx = w/2, cy = h/2;
+  const maxR = Math.min(cx, cy) * 0.92;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = s.bg;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rotation);
+
+  const layerStep = maxR / (s.layers + 1);
+
+  for (let layer = 1; layer <= s.layers; layer++) {
+    const r = layerStep * layer;
+    const colors = getColors(s, layer - 1, s.layers);
+
+    for (let seg = 0; seg < s.symmetry; seg++) {
+      ctx.save();
+      ctx.rotate((seg * 2 * Math.PI) / s.symmetry);
+
+      // Main petal
+      const petalSize = layerStep * 0.85;
+      ctx.save();
+      ctx.translate(0, -r);
+      drawPetal(ctx, s.petalShape, petalSize, colors, s.lineThick);
+      ctx.restore();
+
+      // Complexity sub-elements
+      if (s.complexity >= 2) {
+        for (let c = 0; c < Math.min(s.complexity - 1, 4); c++) {
+          const subR = r * (0.4 + c * 0.15);
+          const subSize = petalSize * (0.35 - c * 0.05);
+          const subColors = getColors(s, layer + c, s.layers + 3);
+          ctx.save();
+          ctx.rotate(Math.PI / s.symmetry);
+          ctx.translate(0, -subR);
+          drawPetal(ctx, s.petalShape, subSize, subColors, s.lineThick * 0.7);
+          ctx.restore();
+        }
+      }
+
+      // Mirrored
+      ctx.save();
+      ctx.scale(1, -1);
+      ctx.translate(0, -r);
+      drawPetal(ctx, s.petalShape, petalSize * 0.65, colors, s.lineThick);
+      ctx.restore();
+
+      ctx.restore(); // seg
+    }
+
+    // Ring line
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI*2);
+    ctx.strokeStyle = getColors(s, layer-1, s.layers).stroke;
+    ctx.lineWidth = s.lineThick * 0.5;
+    ctx.globalAlpha = 0.2;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // Inner pattern
+  const innerR = layerStep * 0.7;
+  drawInner(ctx, s.innerPattern, innerR, getColors(s, 0, 1), s.lineThick);
+
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(0, 0, 5, 0, Math.PI*2);
+  ctx.fillStyle = getColors(s, 0, 1).stroke;
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// ─── Animation ───────────────────────────────────────────────────
+function toggleAnimate() {
+  animating = !animating;
+  const btn = document.getElementById('animBtn');
+  btn.textContent = animating ? '⏹ Stop' : '▶ Animate';
+  btn.classList.toggle('active', animating);
+  if (animating) animate();
+  else { cancelAnimationFrame(animFrame); }
+}
+
+function animate() {
+  if (!animating) return;
+  rotation += 0.005;
+  draw();
+  animFrame = requestAnimationFrame(animate);
+}
+
+// ─── Presets ─────────────────────────────────────────────────────
+const MOODS = {
+  zen:    { symmetry:8,  layers:3, complexity:2, petalShape:'Circle',   innerPattern:'Flower', primary:'#7b9e87', secondary:'#c8e6c9', bg:'#f0f4f0', colorMode:'Monochrome' },
+  cosmic: { symmetry:12, layers:5, complexity:4, petalShape:'Star',     innerPattern:'Spiral', primary:'#1a1a4e', secondary:'#9c27b0', bg:'#000010', colorMode:'Complementary' },
+  floral: { symmetry:8,  layers:4, complexity:3, petalShape:'Teardrop', innerPattern:'Flower', primary:'#e91e8c', secondary:'#ff9800', bg:'#fff9fb', colorMode:'Triadic' },
+  ocean:  { symmetry:10, layers:4, complexity:3, petalShape:'Wave',     innerPattern:'Dot',    primary:'#006994', secondary:'#40c4ff', bg:'#e8f4f8', colorMode:'Complementary' },
+  sunset: { symmetry:8,  layers:5, complexity:3, petalShape:'Diamond',  innerPattern:'Star',   primary:'#ff5722', secondary:'#ffc107', bg:'#fff3e0', colorMode:'Triadic' },
+  forest: { symmetry:6,  layers:4, complexity:4, petalShape:'Teardrop', innerPattern:'Flower', primary:'#2e7d32', secondary:'#8bc34a', bg:'#f1f8e9', colorMode:'Complementary' },
+  candy:  { symmetry:10, layers:3, complexity:2, petalShape:'Circle',   innerPattern:'Flower', primary:'#f06292', secondary:'#aed581', bg:'#fce4ec', colorMode:'Rainbow' },
+  neon:   { symmetry:16, layers:5, complexity:5, petalShape:'Star',     innerPattern:'Spiral', primary:'#00e5ff', secondary:'#76ff03', bg:'#0d0d0d', colorMode:'Complementary' }
+};
+
+function applyMood(name) {
+  const m = MOODS[name];
+  if (!m) return;
+  applySettings(m);
+}
+
+function applySettings(m) {
+  if (m.symmetry !== undefined) { document.getElementById('symmetry').value = m.symmetry; document.getElementById('symmetry-val').textContent = m.symmetry; }
+  if (m.layers !== undefined) { document.getElementById('layers').value = m.layers; document.getElementById('layers-val').textContent = m.layers; }
+  if (m.complexity !== undefined) { document.getElementById('complexity').value = m.complexity; document.getElementById('complexity-val').textContent = m.complexity; }
+  if (m.petalShape) document.getElementById('petalShape').value = m.petalShape;
+  if (m.innerPattern) document.getElementById('innerPattern').value = m.innerPattern;
+  if (m.primary) document.getElementById('primaryColor').value = m.primary;
+  if (m.secondary) document.getElementById('secondaryColor').value = m.secondary;
+  if (m.bg) {
+    const bgMode = m.bg === '#ffffff' ? 'white' : m.bg === '#000000' || m.bg === '#000010' ? 'black' : 'custom';
+    document.getElementById('bgMode').value = bgMode;
+    if (bgMode === 'custom') { document.getElementById('bgColor').value = m.bg; document.getElementById('bgColor').classList.remove('hidden'); }
+    else document.getElementById('bgColor').classList.add('hidden');
+  }
+  if (m.colorMode) {
+    colorMode = m.colorMode;
+    document.querySelectorAll('.cm-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.cm-btn').forEach(b => { if (b.textContent.includes(m.colorMode.slice(0,4))) b.classList.add('active'); });
+    const showSecondary = m.colorMode === 'Complementary' || m.colorMode === 'Custom';
+    document.getElementById('secondaryRow').classList.toggle('hidden', !showSecondary);
+  }
+  draw();
+  saveToGallery();
+}
+
+// ─── Randomize ───────────────────────────────────────────────────
+function randomize() {
+  const shapes = ['Circle','Teardrop','Diamond','Star','Wave','Triangle'];
+  const patterns = ['Dot','Flower','Star','Spiral','Empty'];
+  const modes = ['Monochrome','Complementary','Triadic','Rainbow','Custom'];
+  const randHex = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+  applySettings({
+    symmetry: 4 + Math.floor(Math.random()*13),
+    layers: 1 + Math.floor(Math.random()*6),
+    complexity: 1 + Math.floor(Math.random()*5),
+    petalShape: shapes[Math.floor(Math.random()*shapes.length)],
+    innerPattern: patterns[Math.floor(Math.random()*patterns.length)],
+    primary: randHex(),
+    secondary: randHex(),
+    colorMode: modes[Math.floor(Math.random()*modes.length)]
+  });
+}
+
+// ─── Download PNG ────────────────────────────────────────────────
+function downloadPNG() {
+  const hiCanvas = document.createElement('canvas');
+  hiCanvas.width = 1000; hiCanvas.height = 1000;
+  const hiCtx = hiCanvas.getContext('2d');
+  hiCtx.scale(2, 2);
+  const s = getSettings();
+  drawOnContext(hiCtx, 500, 500, s);
+  hiCanvas.toBlob(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'mandala.png';
+    a.click();
+  });
+}
+
+function drawOnContext(c, w, h, s) {
+  const cx = w/2, cy = h/2, maxR = Math.min(cx,cy)*0.92;
+  c.clearRect(0,0,w,h);
+  c.fillStyle = s.bg; c.fillRect(0,0,w,h);
+  c.save(); c.translate(cx,cy); c.rotate(rotation);
+  const layerStep = maxR/(s.layers+1);
+  for (let layer=1; layer<=s.layers; layer++) {
+    const r=layerStep*layer, colors=getColors(s,layer-1,s.layers);
+    for (let seg=0; seg<s.symmetry; seg++) {
+      c.save(); c.rotate((seg*2*Math.PI)/s.symmetry);
+      const ps=layerStep*0.85;
+      c.save(); c.translate(0,-r); drawPetalCtx(c,s.petalShape,ps,colors,s.lineThick); c.restore();
+      if(s.complexity>=2){for(let cc=0;cc<Math.min(s.complexity-1,4);cc++){const subR=r*(0.4+cc*0.15),subSize=ps*(0.35-cc*0.05),subColors=getColors(s,layer+cc,s.layers+3);c.save();c.rotate(Math.PI/s.symmetry);c.translate(0,-subR);drawPetalCtx(c,s.petalShape,subSize,subColors,s.lineThick*0.7);c.restore();}}
+      c.save(); c.scale(1,-1); c.translate(0,-r); drawPetalCtx(c,s.petalShape,ps*0.65,colors,s.lineThick); c.restore();
+      c.restore();
+    }
+    c.beginPath(); c.arc(0,0,r,0,Math.PI*2); c.strokeStyle=getColors(s,layer-1,s.layers).stroke; c.lineWidth=s.lineThick*0.5; c.globalAlpha=0.2; c.stroke(); c.globalAlpha=1;
+  }
+  drawInner(c,s.innerPattern,layerStep*0.7,getColors(s,0,1),s.lineThick);
+  c.beginPath(); c.arc(0,0,5,0,Math.PI*2); c.fillStyle=getColors(s,0,1).stroke; c.fill();
+  c.restore();
+}
+
+function drawPetalCtx(c, shape, size, colors, thick) {
+  c.fillStyle = colors.fill; c.strokeStyle = colors.stroke; c.lineWidth = thick; c.beginPath();
+  switch(shape) {
+    case 'Circle': c.arc(0,-size/2,size/2,0,Math.PI*2); break;
+    case 'Teardrop': c.moveTo(0,0);c.bezierCurveTo(size*0.6,-size*0.3,size*0.6,-size*0.85,0,-size);c.bezierCurveTo(-size*0.6,-size*0.85,-size*0.6,-size*0.3,0,0);break;
+    case 'Diamond': c.moveTo(0,0);c.lineTo(size*0.4,-size*0.5);c.lineTo(0,-size);c.lineTo(-size*0.4,-size*0.5);c.closePath();break;
+    case 'Star':{const pts=5,inner=size*0.35,outer=size*0.7;for(let i=0;i<pts*2;i++){const r2=i%2===0?outer:inner,ang=(i*Math.PI/pts)-Math.PI/2-size*0.01;i===0?c.moveTo(Math.cos(ang)*r2,Math.sin(ang)*r2-size*0.5):c.lineTo(Math.cos(ang)*r2,Math.sin(ang)*r2-size*0.5);}c.closePath();break;}
+    case 'Wave': c.moveTo(0,0);c.bezierCurveTo(size*0.7,-size*0.2,-size*0.3,-size*0.6,size*0.1,-size);c.bezierCurveTo(size*0.5,-size*0.6,-size*0.4,-size*0.3,0,0);break;
+    case 'Triangle': c.moveTo(0,0);c.lineTo(size*0.5,-size);c.lineTo(-size*0.5,-size);c.closePath();break;
+  }
+  c.fill(); c.stroke();
+}
+
+// ─── Download SVG ────────────────────────────────────────────────
+function downloadSVG() {
+  const s = getSettings();
+  let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500">
+  <rect width="500" height="500" fill="${s.bg}"/>
+  <g transform="translate(250,250) rotate(${rotation * 180 / Math.PI})">`;
+
+  const maxR = 230, layerStep = maxR/(s.layers+1);
+  for (let layer=1; layer<=s.layers; layer++) {
+    const r = layerStep*layer;
+    const colors = getColors(s, layer-1, s.layers);
+    for (let seg=0; seg<s.symmetry; seg++) {
+      const angle = (seg*360/s.symmetry);
+      svgContent += `\n  <g transform="rotate(${angle})">`;
+      svgContent += `\n    <circle cx="0" cy="${-r}" r="${layerStep*0.35}" fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="${s.lineThick}"/>`;
+      svgContent += `\n  </g>`;
+    }
+    svgContent += `\n  <circle cx="0" cy="0" r="${r}" fill="none" stroke="${colors.stroke}" stroke-width="${s.lineThick*0.5}" opacity="0.2"/>`;
+  }
+
+  svgContent += `\n  <circle cx="0" cy="0" r="5" fill="${getColors(s,0,1).stroke}"/>`;
+  svgContent += `\n  </g>\n</svg>`;
+
+  const blob = new Blob([svgContent], {type:'image/svg+xml'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'mandala.svg'; a.click();
+}
+
+// ─── Share URL ───────────────────────────────────────────────────
+function shareURL() {
+  const s = getSettings();
+  const params = new URLSearchParams({
+    sym: s.symmetry, lay: s.layers, cmp: s.complexity,
+    ps: s.petalShape, ip: s.innerPattern, lt: s.lineThick,
+    fo: document.getElementById('fillOpacity').value,
+    p: s.primary.slice(1), sec: s.secondary.slice(1),
+    bg: s.bg.slice(1), cm: colorMode
+  });
+  const url = location.href.split('?')[0] + '?' + params.toString();
+  navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has('sym')) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
+  set('symmetry', params.get('sym')); document.getElementById('symmetry-val').textContent = params.get('sym');
+  set('layers', params.get('lay')); document.getElementById('layers-val').textContent = params.get('lay');
+  set('complexity', params.get('cmp')); document.getElementById('complexity-val').textContent = params.get('cmp');
+  set('petalShape', params.get('ps'));
+  set('innerPattern', params.get('ip'));
+  set('lineThick', params.get('lt')); document.getElementById('lineThick-val').textContent = params.get('lt');
+  set('fillOpacity', params.get('fo')); document.getElementById('fillOpacity-val').textContent = params.get('fo')+'%';
+  if (params.get('p')) document.getElementById('primaryColor').value = '#'+params.get('p');
+  if (params.get('sec')) document.getElementById('secondaryColor').value = '#'+params.get('sec');
+  if (params.get('bg')) {
+    const bg = '#'+params.get('bg');
+    const bgMode = bg==='#ffffff'?'white':bg==='#000000'?'black':'custom';
+    document.getElementById('bgMode').value = bgMode;
+    if (bgMode==='custom'){document.getElementById('bgColor').value=bg;document.getElementById('bgColor').classList.remove('hidden');}
+  }
+  if (params.get('cm')) {
+    colorMode = params.get('cm');
+    document.querySelectorAll('.cm-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.cm-btn').forEach(b => { if(b.getAttribute('onclick').includes(colorMode.slice(0,4))) b.classList.add('active'); });
+  }
+}
+
+// ─── Gallery ─────────────────────────────────────────────────────
+function saveToGallery() {
+  const thumb = canvas.toDataURL('image/jpeg', 0.5);
+  const s = JSON.stringify(getSettings());
+  let gallery = JSON.parse(localStorage.getItem('mandalaGallery') || '[]');
+  gallery.unshift({ thumb, settings: s });
+  gallery = gallery.slice(0, 8);
+  localStorage.setItem('mandalaGallery', JSON.stringify(gallery));
+  renderGallery();
+}
+
+function renderGallery() {
+  const strip = document.getElementById('galleryStrip');
+  const gallery = JSON.parse(localStorage.getItem('mandalaGallery') || '[]');
+  strip.innerHTML = gallery.map((g,i) =>
+    `<img class="gallery-thumb" src="${g.thumb}" title="Click to restore" onclick="restoreGallery(${i})">`
+  ).join('');
+}
+
+function restoreGallery(i) {
+  const gallery = JSON.parse(localStorage.getItem('mandalaGallery') || '[]');
+  if (!gallery[i]) return;
+  const s = JSON.parse(gallery[i].settings);
+  applySettings({ ...s, colorMode: s.colorMode });
+}
+
+// ─── Gemini API ───────────────────────────────────────────────────
+function getApiKey() {
+  const key = document.getElementById('apiKey').value.trim();
+  if (!key) { alert('Please enter your Gemini API key at the top of the page.'); return null; }
+  localStorage.setItem('geminiKey', key);
+  return key;
+}
+
+async function callGemini(prompt) {
+  const key = getApiKey();
+  if (!key) throw new Error('No API key');
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+  });
+  if (!res.ok) throw new Error('API error: ' + res.status);
+  const data = await res.json();
+  const text = data.candidates[0].content.parts[0].text;
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No JSON in response');
+  return JSON.parse(match[0]);
+}
+
+async function suggestPalette() {
+  const btn = event.target;
+  btn.innerHTML = 'Thinking… <span class="spinner"></span>';
+  btn.disabled = true;
+  try {
+    const data = await callGemini(`Suggest 5 beautiful color palette combinations for a mandala. Each palette should be harmonious and evocative.
+Return JSON:
+{
+  "palettes": [
+    { "name": "Ocean Calm", "primary": "#1a6b8a", "secondary": "#5bc4d8", "background": "#f0f8ff", "description": "Tranquil ocean blues" }
+  ]
+}`);
+    renderPalettes(data.palettes);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+  btn.textContent = '✦ Suggest Palette';
+  btn.disabled = false;
+}
+
+function renderPalettes(palettes) {
+  const container = document.getElementById('paletteSuggestions');
+  container.innerHTML = palettes.map(p => `
+    <div class="palette-item" onclick="applyPalette('${p.primary}','${p.secondary}','${p.background}')">
+      <div class="palette-swatches">
+        <div class="swatch" style="background:${p.primary}"></div>
+        <div class="swatch" style="background:${p.secondary}"></div>
+        <div class="swatch" style="background:${p.background}"></div>
+      </div>
+      <div class="palette-info">
+        <div class="palette-name">${p.name}</div>
+        <div class="palette-desc">${p.description}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function applyPalette(primary, secondary, background) {
+  document.getElementById('primaryColor').value = primary;
+  document.getElementById('secondaryColor').value = secondary;
+  const bgMode = background === '#ffffff' ? 'white' : background === '#000000' ? 'black' : 'custom';
+  document.getElementById('bgMode').value = bgMode;
+  if (bgMode === 'custom') {
+    document.getElementById('bgColor').value = background;
+    document.getElementById('bgColor').classList.remove('hidden');
+  }
+  colorMode = 'Complementary';
+  document.querySelectorAll('.cm-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.cm-btn').forEach(b => { if(b.textContent.includes('Comp')) b.classList.add('active'); });
+  document.getElementById('secondaryRow').classList.remove('hidden');
+  draw();
+}
+
+async function generateForMood() {
+  const mood = document.getElementById('moodInput').value.trim();
+  if (!mood) { alert('Please describe a mood or theme.'); return; }
+  const btn = event.target;
+  btn.innerHTML = '⏳ Generating…';
+  btn.disabled = true;
+  try {
+    const data = await callGemini(`Convert this mood/theme into mandala design settings: '${mood}'
+Return JSON:
+{
+  "symmetry": 8,
+  "layers": 4,
+  "complexity": 3,
+  "petalShape": "Teardrop",
+  "innerPattern": "Flower",
+  "colorMode": "Complementary",
+  "primary": "#hex",
+  "secondary": "#hex",
+  "background": "#hex",
+  "reasoning": "Why these settings match the mood"
+}`);
+    applySettings({ ...data, bg: data.background });
+    const out = document.getElementById('aiOutput');
+    out.textContent = '✦ ' + data.reasoning;
+    out.style.display = 'block';
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+  btn.innerHTML = '✦ Generate';
+  btn.disabled = false;
+}
+
+async function interpretMandala() {
+  const s = getSettings();
+  const btn = event.target;
+  btn.innerHTML = '⏳…';
+  btn.disabled = true;
+  try {
+    const data = await callGemini(`Look at these mandala settings and give a poetic interpretation of what this pattern might represent:
+Symmetry: ${s.symmetry}, Layers: ${s.layers}, Colors: ${s.primary} and ${s.secondary}, Shape: ${s.petalShape}.
+Return JSON: { "interpretation": "2-3 sentence poetic interpretation" }`);
+    const out = document.getElementById('aiOutput');
+    out.textContent = '✦ ' + data.interpretation;
+    out.style.display = 'block';
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+  btn.innerHTML = '? Interpret';
+  btn.disabled = false;
+}
+
+// ─── Init ────────────────────────────────────────────────────────
+const savedKey = localStorage.getItem('geminiKey');
+if (savedKey) document.getElementById('apiKey').value = savedKey;
+document.getElementById('apiKey').addEventListener('change', () => localStorage.setItem('geminiKey', document.getElementById('apiKey').value));
+
+// Hide secondary row initially (Monochrome default)
+document.getElementById('secondaryRow').classList.add('hidden');
+
+loadFromURL();
+draw();
+renderGallery();
+
+// Auto-save to gallery on draw (debounced)
+let saveTimer;
+const origDraw = draw;
+window.draw = function() { origDraw(); clearTimeout(saveTimer); saveTimer = setTimeout(saveToGallery, 1000); };
+</script>
+
+</body>
+</html>
