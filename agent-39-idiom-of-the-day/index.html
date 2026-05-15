@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Idiom of the Day 🌸</title>
+<style>
+  :root {
+    --bg: #fef0f5;
+    --accent: #f9bcd0;
+    --accent2: #f5a0c0;
+    --text: #b04070;
+    --text-dark: #7a1f45;
+    --white: #fff;
+    --shadow: rgba(176,64,112,0.12);
+    --green: #4caf7d;
+    --red: #e05a7a;
+    --blue: #5b9cf6;
+    --yellow: #ffd166;
+    --card-radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+  /* ---------- HEADER ---------- */
+  header {
+    background: linear-gradient(135deg, #f9bcd0 0%, #f5a0c0 100%);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 16px var(--shadow);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .logo { font-size: 1.6rem; font-weight: 800; color: var(--text-dark); letter-spacing: -0.5px; }
+  .logo span { font-size: 1.1rem; font-weight: 500; color: var(--text); margin-left: 8px; }
+  .api-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .api-row input {
+    padding: 8px 14px; border-radius: 50px; border: 2px solid var(--accent2);
+    background: #fff9fc; color: var(--text-dark); font-size: 0.85rem;
+    width: 240px; outline: none;
+  }
+  .api-row input:focus { border-color: var(--text); }
+  .btn-save {
+    padding: 8px 16px; border-radius: 50px; border: none;
+    background: var(--text); color: #fff; font-weight: 700; font-size: 0.85rem;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .btn-save:hover { background: var(--text-dark); }
+
+  /* ---------- NAV TABS ---------- */
+  nav {
+    display: flex; gap: 8px; padding: 14px 24px 0;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 9px 20px; border-radius: 50px;
+    border: 2px solid var(--accent); background: var(--white);
+    color: var(--text); font-weight: 600; font-size: 0.92rem;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+  .tab:hover:not(.active) { background: var(--accent); }
+
+  /* ---------- MAIN LAYOUT ---------- */
+  main { padding: 20px 24px; max-width: 820px; margin: 0 auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ---------- CARDS ---------- */
+  .card {
+    background: var(--white); border-radius: var(--card-radius);
+    box-shadow: 0 4px 20px var(--shadow); padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-label {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--accent2); margin-bottom: 8px;
+  }
+
+  /* ---------- HERO IDIOM CARD ---------- */
+  .hero-card {
+    background: linear-gradient(135deg, #fff0f8 0%, #fde8f4 100%);
+    border: 2px solid var(--accent);
+  }
+  .hero-idiom {
+    font-size: 2.4rem; font-weight: 900; color: var(--text-dark);
+    line-height: 1.1; margin-bottom: 6px;
+  }
+  .hero-category {
+    display: inline-block; padding: 4px 14px; border-radius: 50px;
+    background: var(--accent); color: var(--text-dark); font-size: 0.8rem;
+    font-weight: 700; margin-bottom: 18px;
+  }
+
+  /* Toggle */
+  .toggle-wrap { display: flex; gap: 0; border-radius: 50px; overflow: hidden; border: 2px solid var(--accent); margin-bottom: 16px; width: fit-content; }
+  .toggle-btn {
+    padding: 9px 22px; border: none; background: var(--white);
+    color: var(--text); font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
+  }
+  .toggle-btn.active { background: var(--text); color: #fff; }
+  .toggle-content { display: none; }
+  .toggle-content.active {
+    display: block; background: #fff8fb; border-radius: 12px;
+    padding: 16px; border: 1.5px dashed var(--accent);
+  }
+  .literal-art { font-size: 1.1rem; line-height: 1.6; }
+  .meaning-en { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
+  .meaning-vi { font-size: 1rem; color: #a05070; font-style: italic; }
+
+  /* Hear button */
+  .btn-hear {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 22px; border-radius: 50px; border: none;
+    background: linear-gradient(135deg, #f9bcd0, #f5a0c0);
+    color: var(--text-dark); font-weight: 700; font-size: 0.92rem;
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 3px 12px var(--shadow);
+  }
+  .btn-hear:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--shadow); }
+
+  /* Info boxes */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+  @media(max-width: 520px) { .info-grid { grid-template-columns: 1fr; } }
+  .info-box {
+    background: var(--bg); border-radius: 12px; padding: 14px 16px;
+    border-left: 4px solid var(--accent2);
+  }
+  .info-box.full { grid-column: 1/-1; }
+  .info-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--accent2); margin-bottom: 6px; }
+  .info-text { font-size: 0.95rem; line-height: 1.5; color: var(--text-dark); }
+  .usage-badge {
+    display: inline-block; padding: 3px 12px; border-radius: 50px;
+    font-size: 0.8rem; font-weight: 700;
+    background: #ffd166; color: #7a5000;
+  }
+
+  /* Examples */
+  .examples-list { list-style: none; }
+  .examples-list li {
+    padding: 10px 14px; margin-bottom: 8px; border-radius: 10px;
+    background: #fff0f8; border-left: 3px solid var(--accent2);
+    font-size: 0.95rem; line-height: 1.5; color: var(--text-dark);
+  }
+  .examples-list li::before { content: "💬 "; }
+
+  /* Story */
+  .story-text { font-size: 1rem; line-height: 1.7; color: var(--text-dark); font-style: italic; }
+
+  /* ---------- PRACTICE ---------- */
+  .blank-sentence {
+    font-size: 1.05rem; color: var(--text-dark); margin-bottom: 10px; line-height: 1.6;
+  }
+  .blank-input {
+    padding: 10px 16px; border-radius: 50px; border: 2px solid var(--accent);
+    font-size: 0.95rem; color: var(--text-dark); outline: none; width: 100%;
+    background: #fff8fb;
+  }
+  .blank-input:focus { border-color: var(--text); }
+  .blank-item { margin-bottom: 22px; }
+  .feedback-msg {
+    margin-top: 8px; padding: 10px 14px; border-radius: 10px;
+    font-size: 0.9rem; font-weight: 600; display: none;
+  }
+  .feedback-msg.correct { background: #d4f7e4; color: #1a6640; display: block; }
+  .feedback-msg.wrong { background: #fde8ee; color: #a0183a; display: block; }
+  .btn-check {
+    padding: 10px 24px; border-radius: 50px; border: none;
+    background: var(--text); color: #fff; font-weight: 700; font-size: 0.92rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-check:hover { background: var(--text-dark); transform: translateY(-1px); }
+  .sentence-textarea {
+    width: 100%; padding: 14px 18px; border-radius: 14px;
+    border: 2px solid var(--accent); font-size: 0.98rem;
+    color: var(--text-dark); background: #fff8fb; outline: none;
+    resize: vertical; min-height: 80px; font-family: inherit;
+  }
+  .sentence-textarea:focus { border-color: var(--text); }
+  .ai-feedback {
+    margin-top: 14px; padding: 16px; border-radius: 14px;
+    background: #f0fdf6; border: 1.5px solid #86efac; display: none;
+  }
+  .ai-feedback.wrong-fb { background: #fff1f4; border-color: #fca5a5; }
+  .ai-feedback.active { display: block; }
+  .ai-fb-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #4caf7d; margin-bottom: 6px; }
+  .ai-feedback.wrong-fb .ai-fb-label { color: var(--red); }
+
+  /* ---------- EXPLORE ---------- */
+  .search-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .search-input {
+    flex: 1; padding: 12px 20px; border-radius: 50px;
+    border: 2px solid var(--accent); font-size: 0.96rem;
+    color: var(--text-dark); background: #fff8fb; outline: none;
+  }
+  .search-input:focus { border-color: var(--text); }
+  .btn-search {
+    padding: 12px 22px; border-radius: 50px; border: none;
+    background: var(--text); color: #fff; font-weight: 700; cursor: pointer;
+    font-size: 0.92rem; transition: all 0.2s;
+  }
+  .btn-search:hover { background: var(--text-dark); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .chip {
+    padding: 7px 16px; border-radius: 50px; background: var(--white);
+    border: 2px solid var(--accent); color: var(--text);
+    font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+  }
+  .chip:hover, .chip.active { background: var(--accent); border-color: var(--accent2); }
+  .btn-random {
+    padding: 10px 22px; border-radius: 50px; border: 2px solid var(--accent2);
+    background: var(--white); color: var(--text); font-weight: 700; cursor: pointer;
+    font-size: 0.9rem; transition: all 0.2s; margin-bottom: 20px;
+  }
+  .btn-random:hover { background: var(--accent); }
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  .week-card {
+    background: var(--bg); border-radius: 12px; padding: 14px;
+    border: 1.5px solid var(--accent); cursor: pointer; transition: all 0.2s;
+  }
+  .week-card:hover { border-color: var(--text); transform: translateY(-2px); }
+  .week-card .day { font-size: 0.72rem; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 1px; }
+  .week-card .wi { font-size: 0.95rem; font-weight: 700; color: var(--text-dark); margin-top: 4px; }
+  .week-card .wcat { font-size: 0.78rem; color: var(--text); margin-top: 3px; }
+
+  /* Search result */
+  #search-result { margin-top: 20px; }
+
+  /* ---------- DICTIONARY ---------- */
+  .stats-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .stat-box {
+    flex: 1; min-width: 120px; background: var(--white); border-radius: 14px;
+    padding: 16px 20px; text-align: center; box-shadow: 0 2px 12px var(--shadow);
+  }
+  .stat-num { font-size: 2rem; font-weight: 900; color: var(--text-dark); }
+  .stat-lbl { font-size: 0.8rem; color: var(--text); font-weight: 600; margin-top: 2px; }
+  .dict-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .flashcard {
+    height: 130px; perspective: 600px; cursor: pointer;
+  }
+  .flashcard-inner {
+    position: relative; width: 100%; height: 100%;
+    transform-style: preserve-3d; transition: transform 0.5s;
+  }
+  .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+  .flashcard-front, .flashcard-back {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; padding: 14px; text-align: center;
+  }
+  .flashcard-front {
+    background: linear-gradient(135deg, #fff0f8, #fde8f4);
+    border: 2px solid var(--accent);
+  }
+  .flashcard-back {
+    background: linear-gradient(135deg, var(--text), var(--text-dark));
+    border: 2px solid var(--text-dark);
+    transform: rotateY(180deg);
+  }
+  .flashcard-front .fc-idiom { font-size: 1rem; font-weight: 800; color: var(--text-dark); }
+  .flashcard-front .fc-cat { font-size: 0.72rem; color: var(--text); margin-top: 5px; }
+  .flashcard-front .fc-hint { font-size: 0.72rem; color: var(--accent2); margin-top: 8px; }
+  .flashcard-back .fc-vi { font-size: 0.9rem; color: #ffe0ef; font-weight: 700; line-height: 1.4; }
+  .btn-quiz {
+    width: 100%; padding: 14px; border-radius: 50px; border: none;
+    background: linear-gradient(135deg, var(--text), var(--text-dark));
+    color: #fff; font-weight: 800; font-size: 1rem;
+    cursor: pointer; transition: all 0.2s; margin-top: 20px;
+  }
+  .btn-quiz:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--shadow); }
+  .quiz-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(176,64,112,0.18); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; z-index: 999; padding: 20px;
+  }
+  .quiz-modal.active { display: flex; }
+  .quiz-box {
+    background: var(--white); border-radius: 20px; padding: 30px;
+    max-width: 460px; width: 100%; box-shadow: 0 10px 40px var(--shadow);
+  }
+  .quiz-q { font-size: 1.3rem; font-weight: 800; color: var(--text-dark); margin-bottom: 8px; }
+  .quiz-hint { font-size: 0.85rem; color: var(--text); margin-bottom: 20px; }
+  .quiz-options { display: grid; gap: 10px; }
+  .quiz-opt {
+    padding: 12px 18px; border-radius: 12px; border: 2px solid var(--accent);
+    background: var(--bg); color: var(--text-dark); font-weight: 600;
+    cursor: pointer; transition: all 0.2s; text-align: left; font-size: 0.95rem;
+  }
+  .quiz-opt:hover { border-color: var(--text); background: var(--accent); }
+  .quiz-opt.correct { background: #d4f7e4; border-color: #4caf7d; color: #1a6640; }
+  .quiz-opt.wrong { background: #fde8ee; border-color: var(--red); color: #a0183a; }
+  .quiz-next {
+    margin-top: 16px; padding: 12px 28px; border-radius: 50px;
+    border: none; background: var(--text); color: #fff; font-weight: 700;
+    cursor: pointer; font-size: 0.95rem; display: none;
+  }
+  .quiz-close {
+    float: right; background: none; border: none; font-size: 1.4rem;
+    color: var(--text); cursor: pointer; line-height: 1;
+  }
+
+  /* ---------- LOADING ---------- */
+  .loading {
+    display: none; text-align: center; padding: 40px 20px;
+    font-size: 1rem; color: var(--text); font-weight: 600;
+  }
+  .loading.active { display: block; }
+  .spinner {
+    width: 36px; height: 36px; border: 4px solid var(--accent);
+    border-top-color: var(--text); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- EMPTY STATE ---------- */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text); }
+  .empty-state .em-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.95rem; opacity: 0.8; }
+
+  /* ---------- TOAST ---------- */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px);
+    background: var(--text-dark); color: #fff; padding: 12px 24px;
+    border-radius: 50px; font-weight: 600; font-size: 0.92rem;
+    transition: transform 0.3s; z-index: 9999; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ---------- SAVE BUTTON ---------- */
+  .btn-save-idiom {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 20px; border-radius: 50px; border: 2px solid var(--accent);
+    background: var(--white); color: var(--text); font-weight: 700;
+    font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-save-idiom:hover { background: var(--accent); }
+  .btn-save-idiom.saved { background: var(--text); color: #fff; border-color: var(--text); }
+  .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+
+  /* ---------- SECTION TITLE ---------- */
+  .section-title { font-size: 1.2rem; font-weight: 800; color: var(--text-dark); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">🌸 Idiom of the Day <span>for Sis English</span></div>
+  <div class="api-row">
+    <input type="password" id="api-key-input" placeholder="Enter Gemini API key..." />
+    <button class="btn-save" onclick="saveApiKey()">Save Key</button>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <button class="tab active" onclick="showPage('home',this)">🏠 Today</button>
+  <button class="tab" onclick="showPage('practice',this)">✏️ Practice</button>
+  <button class="tab" onclick="showPage('explore',this)">🔍 Explore</button>
+  <button class="tab" onclick="showPage('dictionary',this)">📖 My Dictionary</button>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ===== HOME ===== -->
+  <div class="page active" id="page-home">
+    <div class="loading" id="home-loading">
+      <div class="spinner"></div>
+      Finding today's idiom... ✨
+    </div>
+
+    <div id="home-content" style="display:none">
+      <!-- Hero card -->
+      <div class="card hero-card" id="hero-card">
+        <div class="card-label">⭐ Idiom of the Day</div>
+        <div class="hero-idiom" id="h-idiom">—</div>
+        <div class="hero-category" id="h-category"></div>
+
+        <div class="hero-actions">
+          <button class="btn-hear" onclick="speakIdiom()">🔊 Hear it</button>
+          <button class="btn-save-idiom" id="save-btn" onclick="toggleSave()">🔖 Save to Dictionary</button>
+        </div>
+
+        <!-- Toggle literal / real -->
+        <div class="toggle-wrap">
+          <button class="toggle-btn active" onclick="switchToggle('literal',this)">😂 Literal</button>
+          <button class="toggle-btn" onclick="switchToggle('real',this)">💡 Real Meaning</button>
+        </div>
+        <div class="toggle-content active" id="toggle-literal">
+          <div class="literal-art" id="h-literal"></div>
+        </div>
+        <div class="toggle-content" id="toggle-real">
+          <div class="meaning-en" id="h-meaning"></div>
+          <div class="meaning-vi" id="h-meaning-vi"></div>
+        </div>
+
+        <!-- Info grid -->
+        <div class="info-grid">
+          <div class="info-box full">
+            <div class="info-title">📖 Story</div>
+            <div class="story-text" id="h-story"></div>
+          </div>
+          <div class="info-box">
+            <div class="info-title">🏛️ Origin</div>
+            <div class="info-text" id="h-origin"></div>
+          </div>
+          <div class="info-box">
+            <div class="info-title">🇻🇳 Vietnamese Equivalent</div>
+            <div class="info-text" id="h-vi-equiv"></div>
+          </div>
+          <div class="info-box">
+            <div class="info-title">🏷️ Usage</div>
+            <div class="info-text"><span class="usage-badge" id="h-usage"></span></div>
+          </div>
+          <div class="info-box">
+            <div class="info-title">💬 Examples</div>
+            <ul class="examples-list" id="h-examples"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="home-error" style="display:none" class="card">
+      <div class="empty-state">
+        <div class="em-icon">😅</div>
+        <p id="home-error-msg">Please enter your Gemini API key above to get started!</p>
+        <p style="margin-top:10px;font-size:0.85rem;opacity:0.7">Get a free key at ai.google.dev</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PRACTICE ===== -->
+  <div class="page" id="page-practice">
+    <div class="loading" id="practice-loading" style="display:none">
+      <div class="spinner"></div>Loading practice...
+    </div>
+    <div id="practice-content">
+      <div class="card">
+        <div class="section-title">🎯 Fill in the Blank</div>
+        <div id="blanks-container"></div>
+        <button class="btn-check" onclick="checkBlanks()">Check Answers ✓</button>
+      </div>
+
+      <div class="card">
+        <div class="section-title">✍️ Make Your Own Sentence</div>
+        <p style="font-size:0.92rem;color:var(--text);margin-bottom:12px">Use the idiom <strong id="practice-idiom-name"></strong> in a sentence!</p>
+        <textarea class="sentence-textarea" id="user-sentence" placeholder="Type your sentence here..."></textarea>
+        <br><br>
+        <button class="btn-check" onclick="checkSentence()">Check it with AI 🤖</button>
+        <div class="ai-feedback" id="ai-feedback">
+          <div class="ai-fb-label" id="ai-fb-label">Gemini says:</div>
+          <div id="ai-fb-text" style="font-size:0.95rem;color:#1a6640;margin-bottom:8px"></div>
+          <div id="ai-fb-vi" style="font-size:0.88rem;color:#4a8060;font-style:italic"></div>
+          <div id="ai-fb-improved" style="margin-top:10px;padding:10px;background:#e8fdf0;border-radius:8px;font-size:0.88rem;display:none"></div>
+        </div>
+      </div>
+    </div>
+    <div id="practice-no-idiom" class="card" style="display:none">
+      <div class="empty-state">
+        <div class="em-icon">📚</div>
+        <p>Go to <strong>Today</strong> first to load today's idiom!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EXPLORE ===== -->
+  <div class="page" id="page-explore">
+    <div class="card">
+      <div class="search-row">
+        <input class="search-input" id="search-input" placeholder="Search any idiom... (e.g. raining cats)" onkeydown="if(event.key==='Enter')searchIdiom()" />
+        <button class="btn-search" onclick="searchIdiom()">🔍 Search</button>
+      </div>
+      <div class="chips" id="category-chips"></div>
+      <button class="btn-random" onclick="loadRandomIdiom()">🎲 Random Idiom</button>
+    </div>
+
+    <div class="loading" id="explore-loading" style="display:none">
+      <div class="spinner"></div>Looking it up...
+    </div>
+
+    <div id="search-result"></div>
+
+    <div class="card">
+      <div class="section-title">📅 This Week's Idioms</div>
+      <div class="week-grid" id="week-grid"></div>
+    </div>
+  </div>
+
+  <!-- ===== DICTIONARY ===== -->
+  <div class="page" id="page-dictionary">
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" id="streak-num">0</div>
+        <div class="stat-lbl">🔥 Day Streak</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="learned-num">0</div>
+        <div class="stat-lbl">📖 Idioms Learned</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="quiz-score-num">—</div>
+        <div class="stat-lbl">🏆 Best Quiz Score</div>
+      </div>
+    </div>
+
+    <div id="dict-empty" class="card" style="display:none">
+      <div class="empty-state">
+        <div class="em-icon">🌸</div>
+        <p>No idioms saved yet! Visit <strong>Today</strong> and click "Save to Dictionary".</p>
+      </div>
+    </div>
+
+    <div class="dict-grid" id="dict-grid"></div>
+
+    <button class="btn-quiz" id="quiz-btn" onclick="startQuiz()" style="display:none">Quiz Me on My Idioms! 🎉</button>
+  </div>
+
+</main>
+
+<!-- QUIZ MODAL -->
+<div class="quiz-modal" id="quiz-modal">
+  <div class="quiz-box">
+    <button class="quiz-close" onclick="closeQuiz()">×</button>
+    <div style="font-size:0.78rem;color:var(--text);font-weight:700;margin-bottom:14px" id="quiz-progress"></div>
+    <div class="quiz-q" id="quiz-q"></div>
+    <div class="quiz-hint" id="quiz-hint"></div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <button class="quiz-next" id="quiz-next" onclick="nextQuestion()">Next →</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================
+// STATE
+// ============================
+let apiKey = localStorage.getItem('gemini-api-key') || '';
+let todayData = null;
+let dictionary = JSON.parse(localStorage.getItem('idiom-dict') || '[]');
+let streak = parseInt(localStorage.getItem('streak') || '0');
+let lastVisit = localStorage.getItem('last-visit') || '';
+let bestScore = localStorage.getItem('best-score') || '—';
+let quizData = { questions: [], current: 0, score: 0 };
+
+const CATEGORIES = ['School life','Sports','Feelings','Weather','Time','Food','Animals','Money'];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+// ============================
+// INIT
+// ============================
+document.addEventListener('DOMContentLoaded', () => {
+  if (apiKey) document.getElementById('api-key-input').value = apiKey;
+  updateStreak();
+  loadToday();
+  renderWeekGrid();
+  renderDictionary();
+  renderCategoryChips();
+});
+
+function saveApiKey() {
+  apiKey = document.getElementById('api-key-input').value.trim();
+  localStorage.setItem('gemini-api-key', apiKey);
+  showToast('API key saved! ✓');
+  if (!todayData) loadToday();
+}
+
+function updateStreak() {
+  const today = new Date().toDateString();
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (lastVisit === today) {
+    // same day, no change
+  } else if (lastVisit === yesterday) {
+    streak++;
+    localStorage.setItem('streak', streak);
+  } else if (lastVisit !== today) {
+    streak = 1;
+    localStorage.setItem('streak', streak);
+  }
+  localStorage.setItem('last-visit', today);
+  document.getElementById('streak-num').textContent = streak;
+  document.getElementById('learned-num').textContent = dictionary.length;
+  document.getElementById('quiz-score-num').textContent = bestScore;
+}
+
+// ============================
+// GEMINI API
+// ============================
+async function callGemini(prompt) {
+  if (!apiKey) throw new Error('No API key');
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const clean = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+  return JSON.parse(clean);
+}
+
+// ============================
+// TODAY'S IDIOM
+// ============================
+function getTodayPrompt() {
+  const d = new Date();
+  const dateString = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  return `Give me an American English idiom appropriate for a 13-year-old Vietnamese ESL student. Today's date seed: ${dateString}. Make it commonly used in school or teen situations.
+
+Return JSON:
+{
+  "idiom": "Break a leg",
+  "literalImage": "Funny description of taking it literally (1 sentence)",
+  "meaning": "Simple English meaning",
+  "meaningVi": "Nghĩa tiếng Việt",
+  "story": "A 3-sentence story using this idiom in a teen/school context",
+  "origin": "Brief 1-2 sentence origin story",
+  "vietnameseEquivalent": "Closest Vietnamese expression",
+  "usage": "informal",
+  "examples": ["Teen example 1", "Teen example 2", "Teen example 3"],
+  "blanks": [
+    { "sentence": "Before her audition, her teacher said ___", "answer": "break a leg" },
+    { "sentence": "We always say ___ before a big game", "answer": "break a leg" },
+    { "sentence": "___ on your math test tomorrow!", "answer": "Break a leg" }
+  ],
+  "category": "School life"
+}
+Return only JSON, no markdown.`;
+}
+
+async function loadToday() {
+  if (!apiKey) {
+    showHomeError('Please enter your Gemini API key above to get started!');
+    return;
+  }
+  const cacheKey = `today-${new Date().toDateString()}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    todayData = JSON.parse(cached);
+    renderHero(todayData);
+    renderPractice(todayData);
+    return;
+  }
+  document.getElementById('home-loading').classList.add('active');
+  document.getElementById('home-content').style.display = 'none';
+  document.getElementById('home-error').style.display = 'none';
+  try {
+    const data = await callGemini(getTodayPrompt());
+    todayData = data;
+    localStorage.setItem(cacheKey, JSON.stringify(data));
+    renderHero(data);
+    renderPractice(data);
+  } catch(e) {
+    showHomeError('Could not load today\'s idiom. Check your API key and try again. ' + e.message);
+  } finally {
+    document.getElementById('home-loading').classList.remove('active');
+  }
+}
+
+function showHomeError(msg) {
+  document.getElementById('home-error').style.display = 'block';
+  document.getElementById('home-content').style.display = 'none';
+  document.getElementById('home-error-msg').textContent = msg;
+}
+
+function renderHero(d) {
+  document.getElementById('home-content').style.display = 'block';
+  document.getElementById('home-error').style.display = 'none';
+  document.getElementById('h-idiom').textContent = d.idiom;
+  document.getElementById('h-category').textContent = d.category || 'General';
+  document.getElementById('h-literal').textContent = '😄 ' + d.literalImage;
+  document.getElementById('h-meaning').textContent = d.meaning;
+  document.getElementById('h-meaning-vi').textContent = '🇻🇳 ' + d.meaningVi;
+  document.getElementById('h-story').textContent = d.story;
+  document.getElementById('h-origin').textContent = d.origin;
+  document.getElementById('h-vi-equiv').textContent = d.vietnameseEquivalent;
+  document.getElementById('h-usage').textContent = d.usage;
+  const ul = document.getElementById('h-examples');
+  ul.innerHTML = (d.examples||[]).map(e=>`<li>${e}</li>`).join('');
+  updateSaveBtn();
+}
+
+// ============================
+// TOGGLE LITERAL / REAL
+// ============================
+function switchToggle(mode, btn) {
+  document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('toggle-literal').classList.toggle('active', mode==='literal');
+  document.getElementById('toggle-real').classList.toggle('active', mode==='real');
+}
+
+// ============================
+// SPEAK
+// ============================
+function speakIdiom() {
+  if (!todayData) return;
+  const u = new SpeechSynthesisUtterance(todayData.idiom);
+  u.lang = 'en-US'; u.rate = 0.85;
+  speechSynthesis.speak(u);
+}
+
+// ============================
+// SAVE TO DICTIONARY
+// ============================
+function toggleSave() {
+  if (!todayData) return;
+  const idx = dictionary.findIndex(d=>d.idiom===todayData.idiom);
+  if (idx>=0) {
+    dictionary.splice(idx,1);
+    showToast('Removed from dictionary');
+  } else {
+    dictionary.push({ idiom: todayData.idiom, meaningVi: todayData.meaningVi, meaning: todayData.meaning, category: todayData.category, savedAt: Date.now() });
+    showToast('Saved to your dictionary! 🌸');
+    document.getElementById('learned-num').textContent = dictionary.length;
+  }
+  localStorage.setItem('idiom-dict', JSON.stringify(dictionary));
+  updateSaveBtn();
+  renderDictionary();
+}
+
+function updateSaveBtn() {
+  if (!todayData) return;
+  const saved = dictionary.some(d=>d.idiom===todayData.idiom);
+  const btn = document.getElementById('save-btn');
+  btn.textContent = saved ? '✅ Saved!' : '🔖 Save to Dictionary';
+  btn.classList.toggle('saved', saved);
+}
+
+// ============================
+// PRACTICE
+// ============================
+function renderPractice(d) {
+  document.getElementById('practice-idiom-name').textContent = '"' + d.idiom + '"';
+  const container = document.getElementById('blanks-container');
+  container.innerHTML = (d.blanks||[]).map((b,i)=>`
+    <div class="blank-item">
+      <div class="blank-sentence">${i+1}. ${b.sentence.replace('___','<span style="background:#ffe0ef;border-radius:4px;padding:0 8px">___</span>')}</div>
+      <input class="blank-input" id="blank-${i}" placeholder="Type the idiom..." data-answer="${b.answer}" />
+      <div class="feedback-msg" id="fb-${i}"></div>
+    </div>
+  `).join('');
+  document.getElementById('practice-no-idiom').style.display = 'none';
+  document.getElementById('practice-content').style.display = 'block';
+}
+
+function checkBlanks() {
+  if (!todayData || !todayData.blanks) return;
+  todayData.blanks.forEach((b,i)=>{
+    const input = document.getElementById(`blank-${i}`);
+    const fb = document.getElementById(`fb-${i}`);
+    if (!input) return;
+    const userAns = input.value.trim().toLowerCase();
+    const correct = b.answer.toLowerCase();
+    if (userAns === correct || userAns === correct.replace(/[^a-z\s]/g,'')) {
+      fb.textContent = '🎉 Correct! Great job!';
+      fb.className = 'feedback-msg correct';
+    } else {
+      fb.textContent = `Not quite! The answer is: "${b.answer}" — try again!`;
+      fb.className = 'feedback-msg wrong';
+    }
+  });
+}
+
+async function checkSentence() {
+  if (!todayData) return;
+  const sentence = document.getElementById('user-sentence').value.trim();
+  if (!sentence) { showToast('Please write a sentence first! ✍️'); return; }
+  if (!apiKey) { showToast('Please add your API key!'); return; }
+
+  const btn = document.querySelector('#page-practice .btn-check:last-of-type');
+  btn.textContent = 'Checking... 🤖';
+  btn.disabled = true;
+
+  const prompt = `A 13-year-old Vietnamese ESL student used the idiom '${todayData.idiom}' in this sentence: '${sentence}'
+Is the usage correct? Give friendly feedback in simple English and Vietnamese.
+Return JSON:
+{
+  "correct": true,
+  "feedback": "Simple English feedback (1-2 sentences)",
+  "feedbackVi": "Phản hồi bằng tiếng Việt",
+  "improvedSentence": "A slightly better version if needed, or same sentence if perfect"
+}`;
+
+  try {
+    const res = await callGemini(prompt);
+    const fb = document.getElementById('ai-feedback');
+    const lbl = document.getElementById('ai-fb-label');
+    fb.className = 'ai-feedback active' + (res.correct ? '' : ' wrong-fb');
+    lbl.textContent = res.correct ? '✅ Gemini says: Great job!' : '💡 Gemini says: Let\'s improve!';
+    lbl.style.color = res.correct ? '#4caf7d' : '#e05a7a';
+    document.getElementById('ai-fb-text').textContent = res.feedback;
+    document.getElementById('ai-fb-vi').textContent = res.feedbackVi;
+    const imp = document.getElementById('ai-fb-improved');
+    if (res.improvedSentence && res.improvedSentence !== sentence) {
+      imp.style.display = 'block';
+      imp.textContent = '✨ Suggested: ' + res.improvedSentence;
+    } else {
+      imp.style.display = 'none';
+    }
+  } catch(e) {
+    showToast('Could not check sentence. Try again!');
+  } finally {
+    btn.textContent = 'Check it with AI 🤖';
+    btn.disabled = false;
+  }
+}
+
+// ============================
+// EXPLORE
+// ============================
+function renderCategoryChips() {
+  document.getElementById('category-chips').innerHTML = CATEGORIES.map(c =>
+    `<button class="chip" onclick="searchByCategory('${c}',this)">${c}</button>`
+  ).join('');
+}
+
+function searchByCategory(cat, el) {
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const prompt = `Give me an American English idiom in the category "${cat}" appropriate for a 13-year-old Vietnamese ESL student. Make it commonly used in school or teen situations.
+
+Return JSON:
+{
+  "idiom": "...",
+  "literalImage": "...",
+  "meaning": "...",
+  "meaningVi": "...",
+  "story": "...",
+  "origin": "...",
+  "vietnameseEquivalent": "...",
+  "usage": "...",
+  "examples": ["...","...","..."],
+  "blanks": [{"sentence":"...","answer":"..."},{"sentence":"...","answer":"..."},{"sentence":"...","answer":"..."}],
+  "category": "${cat}"
+}
+Return only JSON, no markdown.`;
+  doExploreSearch(prompt);
+}
+
+async function searchIdiom() {
+  const q = document.getElementById('search-input').value.trim();
+  if (!q) return;
+  const prompt = `Explain the idiom '${q}' to a 13-year-old Vietnamese ESL student.
+Return JSON:
+{
+  "idiom": "...",
+  "literalImage": "...",
+  "meaning": "...",
+  "meaningVi": "...",
+  "story": "...",
+  "origin": "...",
+  "vietnameseEquivalent": "...",
+  "usage": "...",
+  "examples": ["...","...","..."],
+  "blanks": [{"sentence":"...","answer":"..."},{"sentence":"...","answer":"..."},{"sentence":"...","answer":"..."}],
+  "category": "..."
+}
+Return only JSON, no markdown.`;
+  doExploreSearch(prompt);
+}
+
+const RANDOM_IDIOMS = ['piece of cake','under the weather','bite the bullet','hit the nail on the head','cost an arm and a leg','the ball is in your court','break the ice','back to square one','blessing in disguise','hit the books'];
+
+async function loadRandomIdiom() {
+  const r = RANDOM_IDIOMS[Math.floor(Math.random()*RANDOM_IDIOMS.length)];
+  document.getElementById('search-input').value = r;
+  await searchIdiom();
+}
+
+async function doExploreSearch(prompt) {
+  if (!apiKey) { showToast('Please add your API key!'); return; }
+  document.getElementById('explore-loading').style.display = 'block';
+  document.getElementById('search-result').innerHTML = '';
+  try {
+    const d = await callGemini(prompt);
+    renderSearchResult(d);
+  } catch(e) {
+    document.getElementById('search-result').innerHTML = `<div class="card"><div class="empty-state"><div class="em-icon">😕</div><p>Could not find that idiom. Try another!</p></div></div>`;
+  } finally {
+    document.getElementById('explore-loading').style.display = 'none';
+  }
+}
+
+function renderSearchResult(d) {
+  const saved = dictionary.some(x=>x.idiom===d.idiom);
+  document.getElementById('search-result').innerHTML = `
+    <div class="card hero-card">
+      <div class="card-label">🔍 Found Idiom</div>
+      <div class="hero-idiom">${d.idiom}</div>
+      <div class="hero-category">${d.category||'General'}</div>
+      <button class="btn-save-idiom ${saved?'saved':''}" onclick="saveFromExplore(this,'${d.idiom.replace(/'/g,"\\'")}','${(d.meaningVi||'').replace(/'/g,"\\'")}','${(d.meaning||'').replace(/'/g,"\\'")}','${(d.category||'').replace(/'/g,"\\'")}')">
+        ${saved ? '✅ Saved!' : '🔖 Save to Dictionary'}
+      </button>
+      <div style="margin:14px 0;background:#fff8fb;border-radius:12px;padding:14px;border:1.5px dashed var(--accent)">
+        <div class="meaning-en">${d.meaning}</div>
+        <div class="meaning-vi">🇻🇳 ${d.meaningVi}</div>
+      </div>
+      <div class="info-grid">
+        <div class="info-box full"><div class="info-title">📖 Story</div><div class="story-text">${d.story}</div></div>
+        <div class="info-box"><div class="info-title">🏛️ Origin</div><div class="info-text">${d.origin}</div></div>
+        <div class="info-box"><div class="info-title">🇻🇳 Vietnamese Equivalent</div><div class="info-text">${d.vietnameseEquivalent}</div></div>
+        <div class="info-box full"><div class="info-title">💬 Examples</div><ul class="examples-list">${(d.examples||[]).map(e=>`<li>${e}</li>`).join('')}</ul></div>
+      </div>
+    </div>
+  `;
+}
+
+function saveFromExplore(btn, idiom, meaningVi, meaning, category) {
+  const idx = dictionary.findIndex(d=>d.idiom===idiom);
+  if (idx>=0) {
+    dictionary.splice(idx,1);
+    btn.textContent = '🔖 Save to Dictionary';
+    btn.classList.remove('saved');
+    showToast('Removed from dictionary');
+  } else {
+    dictionary.push({ idiom, meaningVi, meaning, category, savedAt: Date.now() });
+    btn.textContent = '✅ Saved!';
+    btn.classList.add('saved');
+    showToast('Saved! 🌸');
+    document.getElementById('learned-num').textContent = dictionary.length;
+  }
+  localStorage.setItem('idiom-dict', JSON.stringify(dictionary));
+  renderDictionary();
+}
+
+// ============================
+// WEEK GRID
+// ============================
+function renderWeekGrid() {
+  const today = new Date();
+  const grid = document.getElementById('week-grid');
+  const SAMPLE = ['Spill the tea','Hit the books','Piece of cake','Under the weather','Break a leg','Cost an arm and a leg','The ball is in your court'];
+  grid.innerHTML = Array.from({length:7},(_,i)=>{
+    const d = new Date(today);
+    d.setDate(today.getDate() - today.getDay() + i);
+    const isToday = d.toDateString() === today.toDateString();
+    const label = isToday ? '⭐ Today' : DAYS[d.getDay()];
+    const idiom = isToday && todayData ? todayData.idiom : SAMPLE[i];
+    return `<div class="week-card" onclick="weekCardClick(this,'${idiom}')">
+      <div class="day">${label}</div>
+      <div class="wi">${idiom}</div>
+      <div class="wcat">Tap to explore →</div>
+    </div>`;
+  }).join('');
+}
+
+function weekCardClick(el, idiom) {
+  showPage('explore', document.querySelectorAll('.tab')[2]);
+  document.getElementById('search-input').value = idiom;
+  setTimeout(searchIdiom, 100);
+}
+
+// ============================
+// DICTIONARY
+// ============================
+function renderDictionary() {
+  document.getElementById('learned-num').textContent = dictionary.length;
+  const grid = document.getElementById('dict-grid');
+  const empty = document.getElementById('dict-empty');
+  const quizBtn = document.getElementById('quiz-btn');
+  if (dictionary.length === 0) {
+    empty.style.display = 'block';
+    grid.innerHTML = '';
+    quizBtn.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  quizBtn.style.display = 'block';
+  grid.innerHTML = dictionary.map((d,i)=>`
+    <div class="flashcard" id="fc-${i}" onclick="this.classList.toggle('flipped')">
+      <div class="flashcard-inner">
+        <div class="flashcard-front">
+          <div class="fc-idiom">${d.idiom}</div>
+          <div class="fc-cat">${d.category||''}</div>
+          <div class="fc-hint">Tap to flip 🔄</div>
+        </div>
+        <div class="flashcard-back">
+          <div class="fc-vi">${d.meaningVi}</div>
+          <div style="font-size:0.72rem;color:#ffb8d8;margin-top:8px">${d.meaning}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================
+// QUIZ
+// ============================
+function startQuiz() {
+  if (dictionary.length < 2) { showToast('Save at least 2 idioms first!'); return; }
+  const shuffled = [...dictionary].sort(()=>Math.random()-0.5).slice(0, Math.min(8, dictionary.length));
+  quizData = {
+    questions: shuffled.map(d => {
+      const wrong = dictionary.filter(x=>x.idiom!==d.idiom).sort(()=>Math.random()-0.5).slice(0,3);
+      const opts = [...wrong, d].sort(()=>Math.random()-0.5);
+      return { idiom: d.idiom, meaning: d.meaningVi, options: opts.map(o=>o.meaningVi), correct: d.meaningVi };
+    }),
+    current: 0, score: 0
+  };
+  document.getElementById('quiz-modal').classList.add('active');
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = quizData.questions[quizData.current];
+  document.getElementById('quiz-progress').textContent = `Question ${quizData.current+1} of ${quizData.questions.length} · Score: ${quizData.score}`;
+  document.getElementById('quiz-q').textContent = q.idiom;
+  document.getElementById('quiz-hint').textContent = 'What does this idiom mean in Vietnamese?';
+  document.getElementById('quiz-options').innerHTML = q.options.map(o=>`
+    <button class="quiz-opt" onclick="answerQuiz(this,'${o.replace(/'/g,"\\'")}','${q.correct.replace(/'/g,"\\'")}')">
+      ${o}
+    </button>`).join('');
+  document.getElementById('quiz-next').style.display = 'none';
+}
+
+function answerQuiz(btn, chosen, correct) {
+  document.querySelectorAll('.quiz-opt').forEach(b=>b.style.pointerEvents='none');
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    quizData.score++;
+    showToast('🎉 Correct!');
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.quiz-opt').forEach(b=>{ if(b.textContent.trim()===correct) b.classList.add('correct'); });
+    showToast('Not quite! Keep going!');
+  }
+  document.getElementById('quiz-next').style.display = 'block';
+  document.getElementById('quiz-progress').textContent = `Question ${quizData.current+1} of ${quizData.questions.length} · Score: ${quizData.score}`;
+}
+
+function nextQuestion() {
+  quizData.current++;
+  if (quizData.current >= quizData.questions.length) {
+    const pct = Math.round(quizData.score/quizData.questions.length*100);
+    const scoreStr = `${quizData.score}/${quizData.questions.length}`;
+    if (bestScore === '—' || quizData.score > parseInt(bestScore)) {
+      bestScore = scoreStr;
+      localStorage.setItem('best-score', bestScore);
+      document.getElementById('quiz-score-num').textContent = bestScore;
+    }
+    document.getElementById('quiz-q').textContent = pct>=80 ? '🎉 Amazing!' : pct>=50 ? '👏 Good job!' : '📚 Keep practicing!';
+    document.getElementById('quiz-hint').textContent = `You scored ${scoreStr} (${pct}%). ${pct>=80?'You really know these idioms!':'Keep reviewing your dictionary!'}`;
+    document.getElementById('quiz-options').innerHTML = '';
+    document.getElementById('quiz-next').textContent = 'Close ✓';
+    document.getElementById('quiz-next').onclick = closeQuiz;
+  } else {
+    showQuestion();
+  }
+}
+
+function closeQuiz() {
+  document.getElementById('quiz-modal').classList.remove('active');
+  document.getElementById('quiz-next').onclick = nextQuestion;
+  document.getElementById('quiz-next').textContent = 'Next →';
+}
+
+// ============================
+// NAV
+// ============================
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+
+  if (id==='practice') {
+    if (!todayData) { document.getElementById('practice-no-idiom').style.display='block'; document.getElementById('practice-content').style.display='none'; }
+    else { document.getElementById('practice-no-idiom').style.display='none'; document.getElementById('practice-content').style.display='block'; }
+  }
+  if (id==='dictionary') renderDictionary();
+  if (id==='explore') renderWeekGrid();
+}
+
+// ============================
+// TOAST
+// ============================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
