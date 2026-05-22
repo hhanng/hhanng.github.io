@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internship JD Analyzer · Agent #25</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <header class="site-header">
+    <a class="back-link" href="../index.html">← Portfolio</a>
+    <div class="header-center">
+      <div class="header-icon">🔍</div>
+      <div>
+        <h1>Internship JD Analyzer</h1>
+        <p>Paste any JD and get your match score, gaps, keywords, and a "should I apply?" verdict.</p>
+      </div>
+    </div>
+    <div class="agent-tag">Agent #25</div>
+  </header>
+
+  <div class="container">
+
+    <div class="api-row">
+      <label for="apiKey">Gemini API Key</label>
+      <div class="api-input-wrap">
+        <input type="password" id="apiKey" placeholder="AIza…" autocomplete="off">
+        <span class="api-status" id="apiStatus"></span>
+      </div>
+    </div>
+
+    <div class="main-grid">
+
+      <section class="form-panel">
+        <h2 class="panel-title">Analyze a Job Description</h2>
+
+        <div class="form-group">
+          <label>Job Description</label>
+          <textarea id="jdText" placeholder="Paste the full job description here — the more detail the better…" rows="10"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Your Skills & Experience</label>
+          <textarea id="skillsText" placeholder="e.g. Python, React, 2 internships, built 3 AI tools, 4.0 GPA, HackMIT winner…" rows="5"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Your Year / Experience Level</label>
+          <div class="year-tabs" id="yearTabs">
+            <button class="year-btn active" data-year="Freshman">Freshman</button>
+            <button class="year-btn" data-year="Sophomore">Sophomore</button>
+            <button class="year-btn" data-year="Junior">Junior</button>
+            <button class="year-btn" data-year="Senior">Senior</button>
+            <button class="year-btn" data-year="New Grad">New Grad</button>
+          </div>
+        </div>
+
+        <div id="formError" class="error-box hidden"></div>
+
+        <button class="btn-analyze" id="analyzeBtn">
+          <span id="analyzeBtnText">Analyze JD ✨</span>
+          <span class="spinner hidden" id="analyzeSpinner"></span>
+        </button>
+      </section>
+
+      <section class="results-panel" id="resultsPanel">
+
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">📋</div>
+          <p>Paste a job description, add your skills, and hit <strong>Analyze</strong> to get your match score, keyword gaps, and a verdict.</p>
+        </div>
+
+        <div class="results-wrap hidden" id="resultsWrap">
+
+          <div class="score-section">
+            <div class="score-circle-wrap">
+              <svg class="score-ring" viewBox="0 0 120 120">
+                <circle class="ring-bg" cx="60" cy="60" r="52"/>
+                <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"
+                  stroke-dasharray="326.7"
+                  stroke-dashoffset="326.7"/>
+              </svg>
+              <div class="score-inner">
+                <span class="score-number" id="scoreNumber">—</span>
+                <span class="score-label">/ 100</span>
+              </div>
+            </div>
+            <div class="score-meta">
+              <div class="score-title" id="scoreTitle">Match Score</div>
+              <div class="score-desc" id="scoreDesc">Run analysis to see your result</div>
+            </div>
+          </div>
+
+          <div class="verdict-box" id="verdictBox">
+            <div class="verdict-icon" id="verdictIcon">—</div>
+            <div class="verdict-content">
+              <div class="verdict-label" id="verdictLabel">Verdict</div>
+              <div class="verdict-reason" id="verdictReason"></div>
+            </div>
+          </div>
+
+          <div class="keywords-section">
+            <h3 class="section-title">Keywords</h3>
+            <div class="kw-group">
+              <div class="kw-group-label">Must-Have — You Have ✓</div>
+              <div class="chip-row" id="mustHaveChips"></div>
+            </div>
+            <div class="kw-group">
+              <div class="kw-group-label">Nice-to-Have — You Have ✓</div>
+              <div class="chip-row" id="niceToHaveChips"></div>
+            </div>
+            <div class="kw-group">
+              <div class="kw-group-label">Your Gaps ✗</div>
+              <div class="chip-row" id="gapChips"></div>
+            </div>
+            <div class="kw-group">
+              <div class="kw-group-label">Your Strengths ★</div>
+              <div class="chip-row" id="strengthChips"></div>
+            </div>
+          </div>
+
+          <div class="resume-tips-section">
+            <h3 class="section-title">Top 3 Things to Add to Your Resume</h3>
+            <ol class="resume-tips-list" id="resumeTipsList"></ol>
+          </div>
+
+        </div>
+
+        <div class="raw-fallback hidden" id="rawFallback">
+          <h3 class="section-title">Analysis Result</h3>
+          <pre id="rawText"></pre>
+        </div>
+
+      </section>
+    </div>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

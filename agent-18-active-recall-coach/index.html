@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Active Recall Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-icon">🧠</div>
+    <h1>Active Recall Coach</h1>
+    <p>The best study technique — answer from memory, rate yourself, drill weak spots.</p>
+  </div>
+</header>
+
+<div class="api-bar">
+  <div class="container api-bar-inner">
+    <label for="apiKey">Gemini API Key</label>
+    <input type="password" id="apiKey" placeholder="AIza…" autocomplete="off" />
+    <button class="btn-save" onclick="saveApiKey()">Save</button>
+    <span class="api-status" id="apiStatus"></span>
+  </div>
+</div>
+
+<div class="container" id="appRoot">
+
+  <div id="stepNotes" class="step-panel active">
+    <div class="step-header">
+      <div class="step-pill">Step 1 of 4</div>
+      <h2>Paste Your Study Notes</h2>
+      <p class="step-desc">Drop in any text — lecture notes, a chapter summary, your own notes — and we'll turn them into recall questions.</p>
+    </div>
+    <div class="card notes-card">
+      <textarea id="notesInput" placeholder="Paste your study notes here…&#10;&#10;e.g. The mitochondria is the powerhouse of the cell. It produces ATP through cellular respiration…"></textarea>
+      <div class="notes-footer">
+        <span class="char-count" id="charCount">0 characters</span>
+        <button class="btn-primary" id="generateBtn" onclick="generateQuestions()">
+          <span id="genBtnText">Generate Questions</span>
+          <div class="inline-spinner" id="genSpinner"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="stepLoading" class="step-panel">
+    <div class="loading-area">
+      <div class="big-spinner"></div>
+      <div class="loading-text">Crafting your recall questions…</div>
+      <div class="loading-sub">This takes just a moment</div>
+    </div>
+  </div>
+
+  <div id="stepFlashcard" class="step-panel">
+    <div class="progress-bar-wrap">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-label" id="progressLabel"></span>
+    </div>
+
+    <div class="card flashcard" id="flashcard">
+      <div class="card-top">
+        <div class="step-pill">Question</div>
+        <div class="card-num" id="cardNum"></div>
+      </div>
+      <div class="question-text" id="questionText"></div>
+
+      <div class="answer-section" id="answerSection">
+        <label class="answer-label">Your Answer</label>
+        <textarea id="userAnswer" placeholder="Type your answer from memory… don't peek!"></textarea>
+        <button class="btn-primary reveal-btn" onclick="revealAnswer()">Reveal Answer</button>
+      </div>
+
+      <div class="model-answer" id="modelAnswer" style="display:none;">
+        <div class="model-label">Model Answer</div>
+        <div class="model-text" id="modelText"></div>
+
+        <div class="rating-section">
+          <div class="rating-label">How did you do?</div>
+          <div class="rating-btns">
+            <button class="btn-rating got-it" onclick="rateCard('got')">Got it ✓</button>
+            <button class="btn-rating needs-work" onclick="rateCard('needs')">Needs Work ✗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="stepSummary" class="step-panel">
+    <div class="card summary-card">
+      <div class="summary-icon">🎉</div>
+      <h2 class="summary-title">Session Complete!</h2>
+      <div class="score-row" id="scoreRow"></div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-track">
+          <div class="score-bar-fill" id="scoreBarFill"></div>
+        </div>
+        <span class="score-pct" id="scorePct"></span>
+      </div>
+
+      <div id="weakTopicsSection" class="weak-section" style="display:none;">
+        <div class="weak-label">Topics to review:</div>
+        <div class="weak-list" id="weakList"></div>
+      </div>
+
+      <div class="summary-actions">
+        <button class="btn-primary" id="redrill-btn" onclick="redrillWeak()" style="display:none;">Re-drill Weak Cards</button>
+        <button class="btn-secondary" onclick="startOver()">Start New Session</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

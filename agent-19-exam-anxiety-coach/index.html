@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exam Anxiety Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-icon">🌸</div>
+    <h1>Exam Anxiety Coach</h1>
+    <p>Breathe, reframe, and walk into your exam feeling ready.</p>
+  </div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" data-tab="breathing" onclick="switchTab('breathing', this)">🫁 Breathing</button>
+    <button class="tab" data-tab="reframe" onclick="switchTab('reframe', this)">💭 Reframe</button>
+    <button class="tab" data-tab="peptalk" onclick="switchTab('peptalk', this)">💪 Pep Talk</button>
+    <button class="tab" data-tab="checklist" onclick="switchTab('checklist', this)">✅ Checklist</button>
+  </div>
+
+  <div id="tab-breathing" class="tab-panel active">
+    <div class="panel-header">
+      <h2>Box Breathing</h2>
+      <p>A proven technique to calm your nervous system instantly. Follow the circle.</p>
+    </div>
+
+    <div class="breathing-center">
+      <div class="breath-wrap">
+        <div class="breath-ring outer-ring"></div>
+        <div class="breath-circle" id="breathCircle">
+          <div class="breath-icon">🫁</div>
+          <div class="breath-label" id="breathLabel">Press Start</div>
+          <div class="breath-count" id="breathCount"></div>
+        </div>
+      </div>
+
+      <div class="breath-phase-row">
+        <div class="phase-step" id="phase-in">Inhale<br><span>4s</span></div>
+        <div class="phase-step" id="phase-hold1">Hold<br><span>4s</span></div>
+        <div class="phase-step" id="phase-out">Exhale<br><span>4s</span></div>
+        <div class="phase-step" id="phase-hold2">Hold<br><span>4s</span></div>
+      </div>
+
+      <div class="cycle-count" id="cycleCount">Cycles completed: 0</div>
+
+      <div class="breath-controls">
+        <button class="btn-primary" id="breathStartBtn" onclick="startBreathing()">Start</button>
+        <button class="btn-secondary" id="breathStopBtn" onclick="stopBreathing()" style="display:none;">Stop</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-reframe" class="tab-panel">
+    <div class="panel-header">
+      <h2>Thought Reframing</h2>
+      <p>Your anxious thoughts aren't facts. Let's flip them into something helpful.</p>
+    </div>
+
+    <div class="reframe-grid">
+      <div class="reframe-card" onclick="expandReframe(this)">
+        <div class="reframe-negative">"I'm going to fail."</div>
+        <div class="reframe-arrow">→</div>
+        <div class="reframe-positive">"I've studied and prepared. Even if it's hard, I can work through each question one at a time."</div>
+      </div>
+      <div class="reframe-card" onclick="expandReframe(this)">
+        <div class="reframe-negative">"I'm going to blank on everything."</div>
+        <div class="reframe-arrow">→</div>
+        <div class="reframe-positive">"My brain stores more than I think. If I blank, I'll skip and come back — the answer often surfaces."</div>
+      </div>
+      <div class="reframe-card" onclick="expandReframe(this)">
+        <div class="reframe-negative">"Everyone else is smarter than me."</div>
+        <div class="reframe-arrow">→</div>
+        <div class="reframe-positive">"I only see other people's preparation, not their struggles. I have my own strengths and knowledge."</div>
+      </div>
+      <div class="reframe-card" onclick="expandReframe(this)">
+        <div class="reframe-negative">"This exam will ruin my future."</div>
+        <div class="reframe-arrow">→</div>
+        <div class="reframe-positive">"One exam is one data point. My future is built on patterns of effort, not a single moment."</div>
+      </div>
+      <div class="reframe-card" onclick="expandReframe(this)">
+        <div class="reframe-negative">"I haven't studied enough."</div>
+        <div class="reframe-arrow">→</div>
+        <div class="reframe-positive">"I've done what I could with the time I had. Worrying now won't add knowledge — staying calm will help me access it."</div>
+      </div>
+    </div>
+
+    <div class="custom-reframe-card">
+      <div class="custom-reframe-label">Type your own anxious thought:</div>
+      <div class="custom-input-row">
+        <input type="text" id="customThought" placeholder='"I can\'t do this…"' />
+        <button class="btn-primary small-btn" onclick="reframeCustom()">Reframe it</button>
+      </div>
+      <div class="custom-result" id="customResult" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div id="tab-peptalk" class="tab-panel">
+    <div class="panel-header">
+      <h2>Your Personal Pep Talk</h2>
+      <p>Answer 3 quick questions and get a motivational message written just for you.</p>
+    </div>
+
+    <div class="card pep-card" id="pepForm">
+      <div class="pep-questions">
+        <div class="pep-q">
+          <label for="pepExam">What exam are you taking?</label>
+          <input type="text" id="pepExam" placeholder="e.g. AP Biology final, Calculus midterm…" />
+        </div>
+        <div class="pep-q">
+          <label for="pepStudied">What topics did you study?</label>
+          <input type="text" id="pepStudied" placeholder="e.g. cell division, photosynthesis, genetics…" />
+        </div>
+        <div class="pep-q">
+          <label for="pepStrength">One thing you know really well?</label>
+          <input type="text" id="pepStrength" placeholder="e.g. the Krebs cycle, solving quadratics…" />
+        </div>
+      </div>
+      <button class="btn-primary full-btn" onclick="generatePepTalk()">Generate My Pep Talk</button>
+    </div>
+
+    <div class="pep-result card" id="pepResult" style="display:none;">
+      <div class="pep-emoji" id="pepEmoji">💪</div>
+      <div class="pep-message" id="pepMessage"></div>
+      <button class="btn-secondary" onclick="regeneratePep()" style="margin-top:18px;">Generate Another</button>
+    </div>
+  </div>
+
+  <div id="tab-checklist" class="tab-panel">
+    <div class="panel-header">
+      <h2>Pre-Exam Checklist</h2>
+      <p>Check off each item. You've got this.</p>
+    </div>
+
+    <div class="checklist-wrap card">
+      <div class="checklist-progress">
+        <div class="check-prog-fill" id="checkProgFill"></div>
+      </div>
+      <div class="check-prog-label" id="checkProgLabel">0 / 10 done</div>
+
+      <ul class="checklist" id="checklist">
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">Drink a glass of water</div>
+            <div class="check-desc">Hydration improves focus and recall</div>
+          </div>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">Get enough sleep</div>
+            <div class="check-desc">Memory consolidation happens during sleep</div>
+          </div>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">Reviewed your notes</div>
+            <div class="check-desc">A light review is better than cramming</div>
+          </div>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">Bathroom break taken</div>
+            <div class="check-desc">Don't let discomfort distract you</div>
+          </div>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">Phone is silenced</div>
+            <div class="check-desc">Notifications break concentration</div>
+          </div>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">Take 3 deep breaths</div>
+            <div class="check-desc">Activates your calm, focused state</div>
+          </div>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">Brought all required materials</div>
+            <div class="check-desc">Pens, pencils, calculator, ID, etc.</div>
+          </div>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">Eaten a light snack or meal</div>
+            <div class="check-desc">Steady energy keeps your brain sharp</div>
+          </div>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">Arrived or logged in early</div>
+            <div class="check-desc">Avoid last-minute rushing</div>
+          </div>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">Told yourself "I've got this"</div>
+            <div class="check-desc">Self-affirmation actually works</div>
+          </div>
+        </li>
+      </ul>
+
+      <div class="all-done-msg" id="allDoneMsg" style="display:none;">
+        <span class="all-done-icon">🌟</span>
+        <span>You're ready. Go show that exam what you've got!</span>
+      </div>
+
+      <button class="btn-secondary reset-check-btn" onclick="resetChecklist()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

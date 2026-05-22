@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock Interview Coach · Agent 22</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="topnav">
+  <a class="back-link" href="../index.html">← Portfolio</a>
+  <span class="nav-badge">Agent #22</span>
+</nav>
+
+<!-- SCREEN: Setup -->
+<div class="screen active" id="screenSetup">
+  <div class="hero">
+    <div class="hero-icon">🎤</div>
+    <h1>Mock Interview Coach</h1>
+    <p>Practice HR interviews in a real chat format and get scored coaching feedback.</p>
+  </div>
+
+  <div class="container">
+    <div class="card api-bar">
+      <label for="apiKey">Gemini API Key</label>
+      <input type="password" id="apiKey" placeholder="AIza…" autocomplete="off">
+      <span class="api-saved hidden" id="apiSaved">✓ Saved</span>
+    </div>
+
+    <div class="card setup-card">
+      <h2 class="section-title">Set up your interview</h2>
+      <p class="setup-sub">5 questions · live feedback · final coaching report</p>
+
+      <div class="setup-grid">
+        <div class="form-group">
+          <label>Role</label>
+          <div class="option-pills" id="roleOptions">
+            <button class="pill active" data-val="Software Engineer">Software Engineer</button>
+            <button class="pill" data-val="Product Manager">Product Manager</button>
+            <button class="pill" data-val="Data Analyst">Data Analyst</button>
+            <button class="pill" data-val="Designer">Designer</button>
+            <button class="pill" data-val="Marketing">Marketing</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Interview Stage</label>
+          <div class="option-pills" id="stageOptions">
+            <button class="pill active" data-val="Phone Screen">Phone Screen</button>
+            <button class="pill" data-val="Behavioral">Behavioral</button>
+            <button class="pill" data-val="Final Round">Final Round</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Difficulty</label>
+          <div class="option-pills" id="diffOptions">
+            <button class="pill active" data-val="Entry Level">Entry Level</button>
+            <button class="pill" data-val="Mid Level">Mid Level</button>
+            <button class="pill" data-val="Senior">Senior</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="setupError" class="error-box hidden"></div>
+
+      <button class="btn-primary" id="startBtn">
+        <span>🚀</span> Start Interview
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: Chat -->
+<div class="screen" id="screenChat">
+  <div class="chat-header">
+    <button class="btn-ghost-sm" id="exitBtn">← Exit</button>
+    <div class="chat-header-center">
+      <span class="interviewer-avatar">🧑‍💼</span>
+      <div>
+        <div class="chat-header-title" id="chatTitle">Mock Interview</div>
+        <div class="progress-label" id="progressLabel">Question 0 of 5</div>
+      </div>
+    </div>
+    <div class="progress-dots" id="progressDots">
+      <span class="dot" data-i="0"></span>
+      <span class="dot" data-i="1"></span>
+      <span class="dot" data-i="2"></span>
+      <span class="dot" data-i="3"></span>
+      <span class="dot" data-i="4"></span>
+    </div>
+  </div>
+
+  <div class="chat-body" id="chatBody">
+    <div class="loading-center hidden" id="chatLoading">
+      <div class="spinner"></div>
+      <p>Thinking…</p>
+    </div>
+  </div>
+
+  <div class="chat-footer" id="chatFooter">
+    <textarea id="userInput" placeholder="Type your answer here…" rows="3"></textarea>
+    <button class="btn-send" id="sendBtn">Send →</button>
+  </div>
+</div>
+
+<!-- SCREEN: Report -->
+<div class="screen" id="screenReport">
+  <div class="hero">
+    <div class="hero-icon">📊</div>
+    <h1>Session Report</h1>
+    <p>Your coaching feedback from this interview session.</p>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="report-score-hero" id="reportScoreHero">
+        <div class="score-ring" id="scoreRing">
+          <span id="scoreNum">—</span>
+          <small>/10</small>
+        </div>
+        <div class="score-label">
+          <div class="score-verdict" id="scoreVerdict">Great job!</div>
+          <div class="score-sub" id="scoreSub"></div>
+        </div>
+      </div>
+
+      <div id="reportLoading" class="loading-center">
+        <div class="spinner"></div>
+        <p>Generating your report…</p>
+      </div>
+
+      <div id="reportContent" class="hidden">
+        <div class="report-section">
+          <h3 class="report-section-title strengths-title">Strengths</h3>
+          <ul class="report-list strengths-list" id="strengthsList"></ul>
+        </div>
+
+        <div class="report-section">
+          <h3 class="report-section-title improve-title">Areas to Improve</h3>
+          <ul class="report-list improve-list" id="improveList"></ul>
+        </div>
+
+        <div class="report-section">
+          <h3 class="report-section-title tips-title">Tips for Next Time</h3>
+          <ul class="report-list tips-list" id="tipsList"></ul>
+        </div>
+      </div>
+
+      <div class="report-actions">
+        <button class="btn-primary" id="newSessionBtn"><span>↩</span> New Session</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
