@@ -59,6 +59,9 @@ made these to survive my own classes, now sharing them 😅
 | [#41](https://hhanng.github.io/agent-41-dp-coach/) | Dynamic Programming Coach | animated DP table visualizer for 10 classic problems |
 | [#42](https://hhanng.github.io/agent-42-recursion-visualizer/) | Recursion Visualizer | live call stack explorer — Fibonacci, Merge Sort, Hanoi |
 | [#43](https://hhanng.github.io/agent-45-os-concepts-simulator/) | OS Concepts Simulator | CPU scheduling, memory, page replacement, deadlocks |
+| [#51](https://hhanng.github.io/agent-51-leetcode-pattern-trainer/) | LeetCode Pattern Trainer | 12 core patterns with templates, problems + progress tracking |
+| [#52](https://hhanng.github.io/agent-52-binary-search-masterclass/) | Binary Search Masterclass | 6 binary search patterns, code templates, tiered practice |
+| [#53](https://hhanng.github.io/agent-53-us-high-school-survival-guide/) | US High School Survival Guide | GPA, SAT/ACT, college prep, grade checklists for 9th–12th |
 
 &nbsp;
 
@@ -75,7 +78,7 @@ because getting an internship is basically a full-time job
 | [#25](./agent-25-jd-analyzer/) | Internship JD Analyzer | match score, keyword chips, gaps, + "should I apply?" verdict |
 | [#48](./agent-48-faang-application-tracker/) | FAANG Application Tracker | track apps through 9 stages, CSV export, stats dashboard |
 | [#49](https://hhanng.github.io/agent-49-faang-comp-negotiator/) | FAANG Comp Negotiator | offer analyzer, negotiation scripts, TC calculator |
-| [#50](./agent-50-linkedin-connection-generator/) | LinkedIn Message Generator | 4 message types, 3 AI variants each, character count |
+| [#50](https://hhanng.github.io/agent-50-linkedin-connection-generator/) | LinkedIn Message Generator | 4 message types, 3 AI variants each, character count |
 
 &nbsp;
 
@@ -93,6 +96,7 @@ built for my mom and my little sister 🥹
 | [#45](https://hhanng.github.io/agent-43-american-pop-culture-explainer/) | Pop Culture Explainer | TikTok trends, memes, shows explained simply for ESL learners |
 | [#46](https://hhanng.github.io/agent-46-esl-grammar-checker/) | ESL Grammar Checker | gentle grammar fixes with level-matched tips |
 | [#47](https://hhanng.github.io/agent-47-book-report-buddy/) | Book Report Buddy | summaries, themes, quotes, and outlines for school books |
+| [#54](https://hhanng.github.io/agent-54-english-essay-writing-coach/) | English Essay Writing Coach | essay types, outline builder, structured lessons + practice prompts |
 
 &nbsp;
 
@@ -160,4 +164,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-22</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-22 · agents 50–54 live</sub>
