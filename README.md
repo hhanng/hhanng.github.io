@@ -1,55 +1,75 @@
-# 🌐 Han Han Nguyen — Portfolio
+# Han Han Nguyen — 100 AI Agents 🤖
 
-> International CS sophomore building 97 AI agents in public
+> Building 100 AI-powered mini web-apps, one agent at a time.
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-hhanng.github.io-brightgreen)](https://hhanng.github.io)
-[![97 Agents](https://img.shields.io/badge/97_AI_Agents-3_of_97-blue)](#-97-ai-agents-challenge)
-![HTML](https://img.shields.io/badge/HTML-orange)
-![JavaScript](https://img.shields.io/badge/JavaScript-yellow)
-![Python](https://img.shields.io/badge/Python-blue)
+## Progress
 
----
+```
+███████████████████████████░░░░░░░░░░░░░░░░░░░░░░░  54 / 100
+```
 
-## 🤖 97 AI Agents Challenge
+**54 / 100 agents built** · 54% complete
 
-Building 97 AI-powered web apps — one agent at a time — using Gemini Pro, Claude, and other AI APIs.
-
-| # | Agent | Description | Live |
-|---|-------|-------------|------|
-| 01 | [Ender's Game Flashcard Generator](agent-01-flashcards/) | AI flashcards for 9th graders studying Ender's Game | [→](https://hhanng.github.io/agent-01-flashcards/) |
-| 02 | [LinkedIn Internship Search Bot](agent-02-linkedin-bot/) | Search strategies, cold outreach, and JD analysis for CS students | [→](https://hhanng.github.io/agent-02-linkedin-bot/) |
-| 03 | [Prompt Engineering Coach](agent-03-prompt-coach/) | Evaluate, rewrite, and learn from your AI prompts | [→](https://hhanng.github.io/agent-03-prompt-coach/) |
+🌐 [Live Portfolio](https://hhanng.github.io)
 
 ---
 
-## 🗂️ Other Projects
+## Agent List
 
-| Project | Description | Link |
-|---------|-------------|------|
-| **AI Playlist Roaster** | Gemini AI roasts your Spotify taste in Gen-Z slang | [Live →](https://spotify-roaster.streamlit.app/) |
-| **AI Email Drafter** | Draft polished emails instantly with Gemini AI | [Live →](https://hhanng.github.io/ai_email_drafter.jsx/) |
-| **reminder-bot** | Telegram bot that sets reminders and syncs with Google Calendar | [Learn more →](https://hhanng.github.io/reminder-bot/) |
-| **Pixel Mood Diary** | Pixel-art journal to track daily mood and wishes | [Live →](https://hhanng.github.io/emotion-calendar./) |
-| **Egg Timer** | Minimalist countdown app with playful animations | [Live →](https://hhanng.github.io/EGG-TIMER/) |
-| **Study Timer** | Pomodoro-style timer for focused study sessions | [Live →](https://hhanng.github.io/STUDY-TIMER/) |
-| **HHAN Nail Salon** | Responsive minimalist website for a local nail salon | [Live →](https://hhanng.github.io/HHAN-nail-salon-website/) |
-| **ULUX Nail Spa** | Social media and campaign visuals for a Dallas nail spa | — |
+| # | Category | Agent |
+|---|----------|-------|
+| #01 | 🤖 AI Dev | [AI Email Drafter](https://hhanng.github.io/ai_email_drafter.jsx/) |
+| #02 | 💼 Career | [LinkedIn Internship Bot](./agent-02-linkedin-bot/) |
+| #03 | 🤖 AI Dev | [Prompt Engineering Coach](./agent-03-prompt-coach/) |
+| #04 | 🤖 AI Dev | [Gemini API Playground](./agent-04-gemini-playground/) |
+| #05 | 🤖 AI Dev | [AI Agent Idea Generator](./agent-05-agent-idea-generator/) |
+| #06 | 🤖 AI Dev | [API Error Debugger](./agent-06-api-error-debugger/) |
+| #07 | 🤖 AI Dev | [Code Review Bot](./agent-07-code-review-bot/) |
+| #08 | 🤖 AI Dev | [Bug Explainer](./agent-08-bug-explainer/) |
+| #09 | 🤖 AI Dev | [Git Commit Writer](./agent-09-git-commit-writer/) |
+| #10 | 🤖 AI Dev | [README Generator](./agent-10-readme-generator/) |
+| #11 | 🤖 AI Dev | [Code Comment Generator](./agent-11-code-comment-generator/) |
+| #12 | ✨ Study &amp; CS | [Algorithm Explainer](./agent-12-algorithm-explainer/) |
+| #13 | ✨ Study &amp; CS | [CS Concept Simplifier](./agent-13-cs-concept-simplifier/) |
+| #14 | ✨ Study &amp; CS | [Quiz Generator from Notes](./agent-14-quiz-generator/) |
+| #15 | ✨ Study &amp; CS | [Study Plan Maker](./agent-15-study-plan-maker/) |
+| #16 | ✨ Study &amp; CS | [Homework Problem Solver](./agent-16-homework-solver/) |
+| #17 | ✨ Study &amp; CS | [Research Topic Finder](./agent-17-research-topic-finder/) |
+| #18 | ✨ Study &amp; CS | [Active Recall Coach](./agent-18-active-recall-coach/) |
+| #19 | ✨ Study &amp; CS | [Exam Anxiety Coach](./agent-19-exam-anxiety-coach/) |
+| #20 | ✨ Study &amp; CS | [Tech Interview Prep Bot](./agent-20-tech-interview-prep/) |
+| #21 | 💼 Career | [Cover Letter Generator](./agent-21-cover-letter-generator/) |
+| #22 | 💼 Career | [Mock Interview Coach](./agent-22-mock-interview-coach/) |
+| #23 | 💼 Career | [Resume Bullet Rewriter](./agent-23-resume-bullet-rewriter/) |
+| #24 | 💼 Career | [Cold Email to Recruiter](./agent-24-cold-email-recruiter/) |
+| #25 | 💼 Career | [Internship JD Analyzer](./agent-25-jd-analyzer/) |
+| #26 | 🇻🇳 Mom's English | [Daily Life English Learner](./agent-26-daily-life-english/) |
+| #27 | 🇻🇳 Mom's English | [Basic Conversation Practice](https://hhanng.github.io/agent-27-basic-conversation-practice/) |
+| #28 | 🤖 AI Dev | [AI Chatbot Builder Guide](https://hhanng.github.io/agent-28-chatbot-builder-guide/) |
+| #29 | 🤖 AI Dev | [JSON Formatter & Explainer](https://hhanng.github.io/agent-29-json-formatter/) |
+| #30 | 🤖 AI Dev | [CSS Style Generator](https://hhanng.github.io/agent-30-css-style-generator/) |
+| #31 | 🎮 Games & Fun | [Two Truths & a Lie](https://hhanng.github.io/agent-31-two-truths-lie/) |
+| #32 | 🎮 Games & Fun | [Meme Caption Generator](https://hhanng.github.io/agent-32-meme-caption-generator/) |
+| #33 | 🎮 Games & Fun | [Daily Dare Generator](https://hhanng.github.io/agent-33-daily-dare-generator/) |
+| #34 | 🎨 Art & Creative | [Pixel Art Idea Generator](https://hhanng.github.io/agent-34-pixel-art-idea-generator/) |
+| #35 | 🎨 Art & Creative | [Mandala Pattern Designer](https://hhanng.github.io/agent-35-mandala-designer/) |
+| #36 | 🍜 Vietnamese Family | [Recipe Remix Bot](https://hhanng.github.io/agent-36-recipe-remix-bot/) |
+| #37 | 🌟 Fun & Learning | [This Day in History Bot](https://hhanng.github.io/agent-37-this-day-in-history/) |
+| #38 | 🗣️ Sis English | [American Slang Decoder](https://hhanng.github.io/agent-38-slang-decoder/) |
+| #39 | 🗣️ Sis English | [Idiom of the Day](https://hhanng.github.io/agent-39-idiom-of-the-day/) |
+| #40 | 🗣️ Sis English | [Basketball English Vocab](https://hhanng.github.io/agent-40-basketball-english-vocab/) |
+| #41 | ✨ Study &amp; CS | [Dynamic Programming Coach](https://hhanng.github.io/agent-41-dp-coach/) |
+| #42 | ✨ Study &amp; CS | [Recursion Visualizer](https://hhanng.github.io/agent-42-recursion-visualizer/) |
+| #43 | ✨ Study &amp; CS | [OS Concepts Simulator](https://hhanng.github.io/agent-45-os-concepts-simulator/) |
+| #44 | 🗣️ Sis English | [School Conversation Coach](https://hhanng.github.io/agent-44-school-conversation-coach/) |
+| #45 | 🗣️ Sis English | [American Pop Culture Explainer](https://hhanng.github.io/agent-43-american-pop-culture-explainer/) |
+| #46 | 🗣️ Sis English | [ESL Grammar Checker](https://hhanng.github.io/agent-46-esl-grammar-checker/) |
+| #47 | 🗣️ Sis English | [Book Report Buddy](https://hhanng.github.io/agent-47-book-report-buddy/) |
+| #48 | 💼 Career | [FAANG Application Tracker](./agent-48-faang-application-tracker/) |
+| #49 | 💼 Career | [FAANG Comp Negotiator](https://hhanng.github.io/agent-49-faang-comp-negotiator/) |
+| #50 | 💼 Career | [LinkedIn Message Generator](./agent-50-linkedin-connection-generator/) |
 
 ---
 
-## About
-
-CS student at Dallas College — building with HTML, CSS, JavaScript, and Python, and managing content and social campaigns on the side. Originally from Vietnam, now in Dallas, building in public.
-
-**Tools:** HTML · CSS · JavaScript · Python · Gemini Pro API · Figma · Canva · GitHub Pages
-
----
-
-## Contact
-
-📧 [ngvuhhan07@gmail.com](mailto:ngvuhhan07@gmail.com)
-🌐 [hhanng.github.io](https://hhanng.github.io/)
-
----
-
-© 2026 Han Han Nguyen
+*README auto-generated by `scripts/generate-readme.js` — do not edit by hand.*
+*Last updated: 2026-05-22*

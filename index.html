@@ -293,11 +293,11 @@
     <h2 class="section-title">100 AI Agents</h2>
     <div class="progress-wrap">
       <div class="progress-bar-track">
-        <div class="progress-bar-fill" style="width:53%"></div>
+        <div class="progress-bar-fill" id="progress-fill"></div>
       </div>
-      <span class="progress-label">53 / 100</span>
+      <span class="progress-label" id="progress-label">0 / 100</span>
     </div>
-    <div class="grid">
+    <div class="grid" id="agents-grid" data-offset="4">
 
       <div class="card">
         <div class="card-tag">#01 · AI Dev</div>
@@ -595,13 +595,6 @@
       </div>
 
       <div class="card">
-        <div class="card-tag">#47 · Sis English</div>
-        <h3>Book Report Buddy</h3>
-        <p>Enter any school-assigned book and get instant summaries, character breakdowns, themes, key quotes, discussion questions, a report outline, and a passage explainer — 8 popular books pre-loaded.</p>
-        <a href="https://hhanng.github.io/agent-47-book-report-buddy/" class="btn primary" target="_blank">Launch</a>
-      </div>
-
-      <div class="card">
         <div class="card-tag">#43 · Study &amp; CS</div>
         <h3>OS Concepts Simulator</h3>
         <p>Interactive OS learning tool — simulate CPU scheduling (FCFS, SJF, Round Robin, Priority), memory allocation, page replacement, deadlock detection, and disk scheduling with step-by-step visualizations.</p>
@@ -627,6 +620,13 @@
         <h3>ESL Grammar Checker</h3>
         <p>Paste your writing and get gentle AI grammar corrections with tips — supports beginner, intermediate, and advanced levels. Highlights errors by type, rewrites your text, and tracks your progress over time.</p>
         <a href="https://hhanng.github.io/agent-46-esl-grammar-checker/" class="btn primary" target="_blank">Launch</a>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">#47 · Sis English</div>
+        <h3>Book Report Buddy</h3>
+        <p>Enter any school-assigned book and get instant summaries, character breakdowns, themes, key quotes, discussion questions, a report outline, and a passage explainer — 8 popular books pre-loaded.</p>
+        <a href="https://hhanng.github.io/agent-47-book-report-buddy/" class="btn primary" target="_blank">Launch</a>
       </div>
 
       <div class="card">
@@ -758,6 +758,17 @@
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    (function () {
+      const grid   = document.getElementById("agents-grid");
+      const fill   = document.getElementById("progress-fill");
+      const label  = document.getElementById("progress-label");
+      const offset = parseInt(grid.dataset.offset || "0", 10);
+      const count  = grid.querySelectorAll(".card").length + offset;
+      const pct    = Math.min(count, 100);
+      fill.style.width  = pct + "%";
+      label.textContent = count + " / 100";
+    })();
   </script>
 </body>
 </html>
