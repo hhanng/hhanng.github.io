@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LeetCode Pattern Trainer 🌸</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pink: #ffb7c5;
+      --pink-dark: #e08da0;
+      --cream: #fff9fa;
+      --ink: #1f2a1b;
+      --easy: #22c55e;
+      --medium: #f59e0b;
+      --hard: #ef4444;
+      --shadow: rgba(0,0,0,0.07);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at 70% 10%, #fff0f5 0%, #fff5f8 60%, #fff 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    .site-header {
+      background: white;
+      border-bottom: 1px solid #ffeef2;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+    .site-header h1 { font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+    .site-header h1 span { color: var(--pink-dark); }
+    .progress-pill {
+      background: #fff0f5;
+      border: 1.5px solid var(--pink);
+      border-radius: 99px;
+      padding: 4px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--pink-dark);
+      white-space: nowrap;
+    }
+    .back-link {
+      font-size: 0.8rem;
+      color: var(--pink-dark);
+      text-decoration: none;
+      font-weight: 600;
+      opacity: 0.8;
+    }
+    .back-link:hover { opacity: 1; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+
+    /* ─── Layout ─── */
+    .app { display: flex; min-height: calc(100vh - 57px); }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: white;
+      border-right: 1px solid #ffeef2;
+      padding: 16px 12px;
+      overflow-y: auto;
+      position: sticky;
+      top: 57px;
+      height: calc(100vh - 57px);
+    }
+    .sidebar-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--pink-dark);
+      padding: 0 8px;
+      margin-bottom: 10px;
+    }
+    .pattern-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--ink);
+      transition: background 0.15s, color 0.15s;
+      position: relative;
+      margin-bottom: 2px;
+    }
+    .pattern-btn:hover { background: #fff0f5; }
+    .pattern-btn.active { background: var(--pink); color: white; }
+    .pattern-btn.active .pat-icon { filter: none; }
+    .pat-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .pat-name { flex: 1; line-height: 1.3; }
+    .pat-check {
+      font-size: 0.75rem;
+      background: var(--easy);
+      color: white;
+      border-radius: 99px;
+      padding: 1px 6px;
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .pat-check.done { opacity: 1; }
+    .pattern-btn.active .pat-check { background: rgba(255,255,255,0.4); }
+
+    /* ─── Mobile dropdown ─── */
+    .mobile-select-wrap { display: none; padding: 12px 16px; }
+    .mobile-select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1.5px solid var(--pink);
+      background: white;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    /* ─── Main content ─── */
+    .main { flex: 1; padding: 28px 32px; max-width: 860px; }
+
+    /* ─── Welcome screen ─── */
+    .welcome {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .welcome .big-emoji { font-size: 4rem; margin-bottom: 16px; }
+    .welcome h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 10px; }
+    .welcome p { color: #666; font-size: 1rem; max-width: 420px; margin: 0 auto; line-height: 1.7; }
+    .pattern-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 32px;
+    }
+    .quick-card {
+      background: white;
+      border: 1.5px solid #ffeef2;
+      border-radius: 14px;
+      padding: 16px 12px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      text-align: center;
+    }
+    .quick-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px var(--shadow);
+      border-color: var(--pink);
+    }
+    .quick-card .qc-icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .quick-card .qc-name { font-size: 0.8rem; font-weight: 600; color: var(--ink); }
+
+    /* ─── Pattern header ─── */
+    .pattern-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .pattern-icon-big {
+      font-size: 2.8rem;
+      background: #fff0f5;
+      border-radius: 16px;
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .pattern-header-text h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+    .cat-badge {
+      display: inline-block;
+      background: #fff0f5;
+      color: var(--pink-dark);
+      border-radius: 99px;
+      padding: 2px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* ─── Info boxes ─── */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+    .info-box {
+      background: white;
+      border: 1px solid #ffeef2;
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    .info-box h4 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--pink-dark);
+      margin-bottom: 8px;
+    }
+    .info-box p { font-size: 0.88rem; line-height: 1.7; color: #444; }
+    .info-box.full { grid-column: 1 / -1; }
+    .code-hint {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 10px;
+      padding: 14px 16px;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* ─── Problems section ─── */
+    .problems-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--pink-dark);
+      margin-bottom: 12px;
+    }
+    .problem-card {
+      background: white;
+      border: 1px solid #ffeef2;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: border-color 0.2s;
+    }
+    .problem-card.seen { border-color: #bbf7d0; }
+    .problem-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .problem-name { font-size: 0.95rem; font-weight: 600; flex: 1; }
+    .diff-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      border-radius: 99px;
+      padding: 2px 10px;
+      color: white;
+    }
+    .diff-badge.Easy { background: var(--easy); }
+    .diff-badge.Medium { background: var(--medium); }
+    .diff-badge.Hard { background: var(--hard); }
+    .seen-dot {
+      font-size: 0.7rem;
+      color: var(--easy);
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .problem-card.seen .seen-dot { opacity: 1; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .reveal-btn {
+      padding: 7px 16px;
+      border-radius: 10px;
+      border: 1.5px solid var(--pink);
+      background: white;
+      color: var(--pink-dark);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .reveal-btn:hover { background: #fff0f5; }
+    .reveal-btn.active { background: var(--pink); color: white; border-color: var(--pink); }
+    .reveal-content {
+      display: none;
+      margin-top: 14px;
+      padding: 14px 16px;
+      background: #fff9fa;
+      border-radius: 10px;
+      border-left: 3px solid var(--pink);
+      font-size: 0.87rem;
+      line-height: 1.75;
+      color: #444;
+    }
+    .reveal-content.show { display: block; }
+    .reveal-content b { color: var(--ink); }
+
+    /* ─── Progress bar ─── */
+    .progress-section {
+      margin-top: 36px;
+      background: white;
+      border: 1px solid #ffeef2;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    .progress-section h4 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--pink-dark);
+      margin-bottom: 12px;
+    }
+    .progress-dots { display: flex; flex-wrap: wrap; gap: 8px; }
+    .p-dot {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      color: #888;
+      font-weight: 500;
+    }
+    .p-dot .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      flex-shrink: 0;
+    }
+    .p-dot.done .dot { background: var(--easy); }
+    .p-dot.done { color: var(--ink); }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .mobile-select-wrap { display: block; }
+      .main { padding: 16px; }
+      .info-grid { grid-template-columns: 1fr; }
+      .pattern-cards-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-left">
+    <a href="https://hhanng.github.io" class="back-link">← Portfolio</a>
+    <h1>#51 · <span>LeetCode Pattern Trainer</span></h1>
+  </div>
+  <div class="progress-pill" id="headerProgress">0 / 12 patterns</div>
+</header>
+
+<div class="mobile-select-wrap">
+  <select class="mobile-select" id="mobileSelect" onchange="selectPattern(this.value)">
+    <option value="">— Pick a pattern —</option>
+  </select>
+</div>
+
+<div class="app">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+const PATTERNS = [
+  {
+    id: 'sliding-window',
+    name: 'Sliding Window',
+    icon: '🪟',
+    category: 'Arrays & Strings',
+    when: 'Use when you need to find a subarray or substring that satisfies a condition. The window slides right, expanding or contracting as needed. Look for: "max/min sum of size K", "longest substring with condition", "smallest window containing..."',
+    insight: 'Avoid nested loops by maintaining a window with two pointers. Expand right pointer, shrink left when constraint is violated. Time: O(n).',
+    template: `left = 0
+for right in range(len(arr)):
+    # expand: add arr[right] to window
+    window_sum += arr[right]
+
+    while window_sum > target:  # shrink
+        window_sum -= arr[left]
+        left += 1
+
+    # check/update answer`,
+    problems: [
+      { name: 'Maximum Sum Subarray of Size K', diff: 'Easy', hint: 'Keep a running sum. When window size hits K, record max, then slide by adding next and removing first.', approach: '<b>1.</b> Add elements to window sum. <b>2.</b> When window size = K, update max. <b>3.</b> Subtract arr[left] and increment left. Time O(n), Space O(1).' },
+      { name: 'Longest Substring Without Repeating Characters', diff: 'Medium', hint: 'Use a set or frequency map to track characters in the current window. Shrink left when a duplicate is found.', approach: '<b>1.</b> Use a set to track chars in window. <b>2.</b> If arr[right] in set → remove arr[left] from set, left++. <b>3.</b> Add arr[right], update max length. Time O(n).' },
+      { name: 'Minimum Size Subarray Sum ≥ Target', diff: 'Medium', hint: 'Variable-size window: expand until sum ≥ target, then shrink from left to minimize length.', approach: '<b>1.</b> Expand right until window_sum ≥ target. <b>2.</b> Record window size. <b>3.</b> Shrink from left while condition still holds. Time O(n).' },
+      { name: 'Longest Substring with K Distinct Characters', diff: 'Medium', hint: 'Frequency map tracks how many distinct chars are in window. Shrink when distinct count exceeds K.', approach: '<b>1.</b> Use a dict to count char frequencies. <b>2.</b> When len(dict) > K, decrement arr[left] count, remove if 0, left++. <b>3.</b> Update max. Time O(n).' },
+      { name: 'Permutation in String (s2 contains permutation of s1)', diff: 'Medium', hint: 'Fixed window of len(s1). Compare frequency maps of s1 and current window.', approach: '<b>1.</b> Build freq map for s1. <b>2.</b> Slide window of size len(s1) over s2. <b>3.</b> If freq maps match → return True. Use array of 26 ints for O(1) comparison.' },
+    ]
+  },
+  {
+    id: 'two-pointers',
+    name: 'Two Pointers',
+    icon: '👆',
+    category: 'Arrays & Strings',
+    when: 'Use on sorted arrays when searching for pairs/triplets or rearranging. Classic signals: "find two numbers that sum to target", "remove duplicates in-place", "square sorted array". Saves O(n) space vs. hash map.',
+    insight: 'Start left=0, right=end. Move both inward based on comparison. For triplets: fix one element, run two-pointer on the rest.',
+    template: `left, right = 0, len(arr) - 1
+while left < right:
+    current_sum = arr[left] + arr[right]
+    if current_sum == target:
+        return [left, right]
+    elif current_sum < target:
+        left += 1
+    else:
+        right -= 1`,
+    problems: [
+      { name: 'Two Sum II (sorted input)', diff: 'Easy', hint: 'Start pointers at both ends. Move left if sum too small, right if too large.', approach: '<b>1.</b> left=0, right=n-1. <b>2.</b> If sum < target → left++. If sum > target → right--. <b>3.</b> Return indices when equal. Time O(n), Space O(1).' },
+      { name: 'Three Sum (find all unique triplets = 0)', diff: 'Medium', hint: 'Sort first. Fix arr[i], then two-pointer on i+1..end. Skip duplicates carefully.', approach: '<b>1.</b> Sort. <b>2.</b> For each i, two-pointer on right. <b>3.</b> Skip arr[i] == arr[i-1]. <b>4.</b> After finding triplet, skip duplicates on both sides. Time O(n²).' },
+      { name: 'Container With Most Water', diff: 'Medium', hint: 'Greedy: always move the pointer at the shorter line. Area = min(h[L], h[R]) × (R-L).', approach: '<b>1.</b> left=0, right=n-1. <b>2.</b> Compute area = min(h[l], h[r]) * (r-l). <b>3.</b> Move the shorter pointer inward. <b>4.</b> Track max area. Time O(n).' },
+      { name: 'Remove Duplicates from Sorted Array', diff: 'Easy', hint: 'Slow pointer tracks insertion position. Fast pointer scans ahead for new values.', approach: '<b>1.</b> slow=0, fast=1. <b>2.</b> If arr[fast] != arr[slow], increment slow, copy arr[fast] to arr[slow]. <b>3.</b> Return slow+1. Time O(n), Space O(1).' },
+      { name: 'Trapping Rain Water', diff: 'Hard', hint: 'Water at index i = min(maxLeft, maxRight) - height[i]. Use two pointers to track running max from each side.', approach: '<b>1.</b> left=0, right=n-1, lMax=rMax=0. <b>2.</b> If h[left] ≤ h[right]: if h[left] ≥ lMax → update lMax, else add lMax-h[left] to result, left++. Mirror for right. Time O(n).' },
+    ]
+  },
+  {
+    id: 'fast-slow-pointers',
+    name: 'Fast & Slow Pointers',
+    icon: '🐢',
+    category: 'Linked Lists',
+    when: 'Use for cycle detection in linked lists or arrays. Fast pointer moves 2x speed. They meet inside a cycle — guaranteed by Floyd\'s algorithm. Also great for: finding middle of list, detecting if number is "happy".',
+    insight: 'If there\'s a cycle, fast will lap slow and they\'ll meet. If no cycle, fast reaches null first. After meeting, reset one pointer to head — advance both 1 step at a time to find cycle start.',
+    template: `slow = fast = head
+while fast and fast.next:
+    slow = slow.next
+    fast = fast.next.next
+    if slow == fast:  # cycle detected
+        break
+
+# Find cycle start:
+slow = head
+while slow != fast:
+    slow = slow.next
+    fast = fast.next`,
+    problems: [
+      { name: 'Linked List Cycle (detect)', diff: 'Easy', hint: 'If fast ever equals slow (and not at start), there\'s a cycle.', approach: '<b>1.</b> slow=fast=head. <b>2.</b> Move slow 1 step, fast 2 steps. <b>3.</b> If slow==fast → return True. If fast reaches null → return False. Time O(n), Space O(1).' },
+      { name: 'Find Middle of Linked List', diff: 'Easy', hint: 'When fast reaches end, slow is at middle. For even lists, slow ends up at second middle.', approach: '<b>1.</b> slow=fast=head. <b>2.</b> Move slow 1, fast 2. <b>3.</b> When fast is None or fast.next is None → return slow. Time O(n).' },
+      { name: 'Happy Number', diff: 'Easy', hint: 'Unhappy numbers cycle. Treat digit-sum transformation as a linked list. Detect cycle = not happy.', approach: '<b>1.</b> Define digitSquareSum(n). <b>2.</b> slow=n, fast=digitSquareSum(n). <b>3.</b> Move until slow==fast. <b>4.</b> If slow==1 → happy, else not. Time O(log n).' },
+      { name: 'Find Duplicate Number (array 1..n)', diff: 'Medium', hint: 'Treat array as linked list: i → arr[i]. Duplicate creates a cycle. Run Floyd\'s algorithm.', approach: '<b>1.</b> slow=arr[0], fast=arr[arr[0]]. <b>2.</b> Move until slow==fast. <b>3.</b> Reset slow=0. <b>4.</b> Move both 1 step until equal — that\'s the duplicate. Time O(n), Space O(1).' },
+      { name: 'Reorder List (L0→Ln→L1→Ln-1...)', diff: 'Medium', hint: '3 steps: find middle, reverse second half, merge two halves.', approach: '<b>1.</b> Find middle with slow/fast. <b>2.</b> Reverse second half. <b>3.</b> Merge first and reversed second half by alternating nodes. Time O(n), Space O(1).' },
+    ]
+  },
+  {
+    id: 'merge-intervals',
+    name: 'Merge Intervals',
+    icon: '📅',
+    category: 'Intervals',
+    when: 'Use when dealing with overlapping ranges: scheduling, time slots, ranges on a number line. Key signal: given a list of [start, end] pairs. Sort by start first, then greedily merge.',
+    insight: 'Two intervals [a,b] and [c,d] overlap if c ≤ b. After sorting by start: if current start ≤ previous end → merge by updating end to max(prev_end, curr_end).',
+    template: `intervals.sort(key=lambda x: x[0])
+merged = [intervals[0]]
+
+for start, end in intervals[1:]:
+    prev_end = merged[-1][1]
+    if start <= prev_end:          # overlap
+        merged[-1][1] = max(prev_end, end)
+    else:
+        merged.append([start, end])`,
+    problems: [
+      { name: 'Merge Intervals', diff: 'Medium', hint: 'Sort by start. Walk through: if overlap with last merged interval, extend it. Else append new.', approach: '<b>1.</b> Sort by start. <b>2.</b> Init result with first interval. <b>3.</b> For each interval: if start ≤ result[-1][1] → update result[-1][1] = max. Else append. Time O(n log n).' },
+      { name: 'Insert Interval (already sorted)', diff: 'Medium', hint: 'Three phases: add all intervals ending before new one, merge all overlapping, add remaining.', approach: '<b>1.</b> Add all i where end < new_start. <b>2.</b> Merge all overlapping: newInterval = [min(starts), max(ends)]. <b>3.</b> Add remaining. Time O(n).' },
+      { name: 'Non-overlapping Intervals (min removals)', diff: 'Medium', hint: 'Greedy: sort by end time. Keep interval with earliest end. Count how many you keep, remove the rest.', approach: '<b>1.</b> Sort by end. <b>2.</b> Track prev_end = first interval\'s end. <b>3.</b> For each next: if start ≥ prev_end → keep it, update prev_end. Else → remove (count++). Time O(n log n).' },
+      { name: 'Meeting Rooms (can attend all?)', diff: 'Easy', hint: 'Sort by start. If any meeting starts before previous one ends → conflict.', approach: '<b>1.</b> Sort by start time. <b>2.</b> For i in 1..n: if intervals[i][0] < intervals[i-1][1] → return False. <b>3.</b> Return True. Time O(n log n).' },
+      { name: 'Minimum Meeting Rooms Required', diff: 'Medium', hint: 'Use a min-heap of end times. For each meeting, if earliest-ending meeting is done, reuse room (pop+push). Else add room.', approach: '<b>1.</b> Sort by start. <b>2.</b> Min-heap of end times. <b>3.</b> For each meeting: if heap[0] ≤ curr_start → heappop. Always heappush curr_end. <b>4.</b> Return len(heap). Time O(n log n).' },
+    ]
+  },
+  {
+    id: 'cyclic-sort',
+    name: 'Cyclic Sort',
+    icon: '🔄',
+    category: 'Arrays',
+    when: 'Use when given an array of numbers in range 1..n (or 0..n) and asked to find missing/duplicate/smallest numbers. The trick: each number i should be at index i-1. Swap into correct position in O(n) without extra space.',
+    insight: 'Iterate. If arr[i] is not at its correct index (arr[i]-1), swap it there. Only move to next index when current position is correct or has a duplicate.',
+    template: `i = 0
+while i < len(nums):
+    correct = nums[i] - 1          # where this num belongs
+    if nums[i] != nums[correct]:   # not in right place
+        nums[i], nums[correct] = nums[correct], nums[i]
+    else:
+        i += 1
+
+# Now scan for anomalies:
+for i, num in enumerate(nums):
+    if num != i + 1:
+        return i + 1  # missing number`,
+    problems: [
+      { name: 'Missing Number (0..n)', diff: 'Easy', hint: 'Numbers in range 0..n. After cyclic sort (adjust for 0-indexed), any index where nums[i] != i is the missing one.', approach: '<b>1.</b> Cyclic sort: correct = nums[i], swap if nums[i] < n and nums[i] != nums[correct]. <b>2.</b> Scan: if nums[i] != i → return i. <b>3.</b> Return n. Time O(n), Space O(1).' },
+      { name: 'Find All Disappeared Numbers', diff: 'Easy', hint: 'After cyclic sort, all indices where nums[i] != i+1 are missing numbers.', approach: '<b>1.</b> Cyclic sort (1..n range). <b>2.</b> Collect all i+1 where nums[i] != i+1. Time O(n), Space O(1) (ignoring output).' },
+      { name: 'Find the Duplicate Number', diff: 'Medium', hint: 'After sort, the number that\'s at a position it shouldn\'t be (and its correct position already has the right number) is the duplicate.', approach: '<b>1.</b> Cyclic sort: if nums[i] != nums[nums[i]-1] → swap. Else i++. <b>2.</b> Scan: if nums[i] != i+1 → return nums[i]. Time O(n).' },
+      { name: 'Find All Duplicates', diff: 'Medium', hint: 'Similar to above but collect all positions where nums[i] != i+1 after the sort.', approach: '<b>1.</b> Cyclic sort. <b>2.</b> Collect nums[i] for all i where nums[i] != i+1. Time O(n), Space O(1).' },
+      { name: 'First Missing Positive', diff: 'Hard', hint: 'Ignore numbers ≤ 0 or > n. After sort, first index with nums[i] != i+1 gives answer.', approach: '<b>1.</b> Sort: only swap if 1 ≤ nums[i] ≤ n and nums[i] != nums[nums[i]-1]. <b>2.</b> Scan for first nums[i] != i+1. <b>3.</b> Return i+1 (or n+1 if all correct). Time O(n).' },
+    ]
+  },
+  {
+    id: 'tree-bfs',
+    name: 'Tree BFS',
+    icon: '🌊',
+    category: 'Trees',
+    when: 'Use for level-order traversal, finding shortest path, or anything where you need to process a tree level by level. Key signals: "level order", "minimum depth", "right view", "connect siblings at same level".',
+    insight: 'Use a queue (deque). Process all nodes at current level before moving to next. Track level size at start of each iteration.',
+    template: `from collections import deque
+queue = deque([root])
+
+while queue:
+    level_size = len(queue)  # nodes at this level
+    current_level = []
+
+    for _ in range(level_size):
+        node = queue.popleft()
+        current_level.append(node.val)
+        if node.left:  queue.append(node.left)
+        if node.right: queue.append(node.right)
+
+    result.append(current_level)`,
+    problems: [
+      { name: 'Binary Tree Level Order Traversal', diff: 'Medium', hint: 'Classic BFS. Track level size to know when one level ends and the next begins.', approach: '<b>1.</b> Queue with root. <b>2.</b> Each iteration: level_size = len(queue). Process level_size nodes, collect values. Enqueue children. <b>3.</b> Append level to result. Time O(n).' },
+      { name: 'Binary Tree Zigzag Level Order', diff: 'Medium', hint: 'BFS level order, but alternate direction each level. Use a deque or just reverse every other level.', approach: '<b>1.</b> Standard BFS. <b>2.</b> Track left_to_right flag. <b>3.</b> If False, reverse current_level before appending. Toggle flag. Time O(n).' },
+      { name: 'Minimum Depth of Binary Tree', diff: 'Easy', hint: 'BFS level by level. First time you reach a leaf node (both children null), return current depth.', approach: '<b>1.</b> BFS with depth counter. <b>2.</b> For each node: if no children → return depth. <b>3.</b> Increment depth each level. Time O(n).' },
+      { name: 'Binary Tree Right Side View', diff: 'Medium', hint: 'BFS level order. The last element of each level is visible from the right.', approach: '<b>1.</b> Standard level-order BFS. <b>2.</b> At each level, take the last node\'s value. <b>3.</b> Append to result. Time O(n).' },
+      { name: 'Populating Next Right Pointers (connect siblings)', diff: 'Medium', hint: 'Within each level: link node.next to the next node in queue for that level.', approach: '<b>1.</b> BFS. <b>2.</b> For each level, iterate nodes; set node.next = next in queue (or null if last). <b>3.</b> Use level_size to know boundaries. Time O(n), Space O(n).' },
+    ]
+  },
+  {
+    id: 'tree-dfs',
+    name: 'Tree DFS',
+    icon: '🌳',
+    category: 'Trees',
+    when: 'Use for path problems, computing values bottom-up, or when you need to explore all paths. Key signals: "path sum", "diameter", "max depth", "all paths from root to leaf". DFS = recursion (or explicit stack).',
+    insight: 'Two DFS styles: (1) top-down: pass accumulated info (current path sum) down. (2) bottom-up: return value from children up to compute answer at each node. Many problems need both.',
+    template: `def dfs(node, current_path_sum):
+    if not node:
+        return
+
+    current_path_sum += node.val
+
+    # Leaf node check
+    if not node.left and not node.right:
+        if current_path_sum == target:
+            self.result.append(path[:])
+        return
+
+    dfs(node.left,  current_path_sum)
+    dfs(node.right, current_path_sum)`,
+    problems: [
+      { name: 'Path Sum (root-to-leaf = target)', diff: 'Easy', hint: 'Subtract node value from target as you go down. At leaf, check if target == 0.', approach: '<b>1.</b> Recurse with remaining = target - node.val. <b>2.</b> At leaf: return remaining == 0. <b>3.</b> Return left_result or right_result. Time O(n).' },
+      { name: 'All Paths for a Given Sum', diff: 'Medium', hint: 'Track current path in a list. At leaf, if sum matches, copy path to result. Backtrack after recursion.', approach: '<b>1.</b> Pass current_path and remaining to recursion. <b>2.</b> Append node to path. <b>3.</b> At leaf + remaining=0 → save copy. <b>4.</b> Recurse left+right. <b>5.</b> Pop from path (backtrack). Time O(n²).' },
+      { name: 'Diameter of Binary Tree', diff: 'Easy', hint: 'Diameter through a node = left_depth + right_depth. Compute depth bottom-up, update global max at each node.', approach: '<b>1.</b> def depth(node): if null return 0. <b>2.</b> l = depth(left), r = depth(right). <b>3.</b> self.ans = max(self.ans, l+r). <b>4.</b> return 1 + max(l, r). Time O(n).' },
+      { name: 'Path Sum III (paths summing to target, any node)', diff: 'Medium', hint: 'Prefix sum + hashmap. At each node, check how many previous prefix sums satisfy (curr - target).', approach: '<b>1.</b> Track prefix sums in a dict. <b>2.</b> At each node: count += prefix[curr_sum - target]. <b>3.</b> Add curr_sum to prefix. <b>4.</b> Recurse. <b>5.</b> Remove curr_sum from prefix (backtrack). Time O(n).' },
+      { name: 'Binary Tree Maximum Path Sum', diff: 'Hard', hint: 'At each node, max contribution upward = node.val + max(left_gain, right_gain, 0). Update global max with node.val + left_gain + right_gain.', approach: '<b>1.</b> def gain(node): if null return 0. <b>2.</b> l = max(gain(left), 0), r = max(gain(right), 0). <b>3.</b> self.ans = max(self.ans, node.val+l+r). <b>4.</b> return node.val + max(l, r). Time O(n).' },
+    ]
+  },
+  {
+    id: 'binary-search',
+    name: 'Binary Search',
+    icon: '🔍',
+    category: 'Arrays',
+    when: 'Use on sorted arrays or when the answer space is monotonic (larger K works → smaller K also works). Signals: O(log n) required, "find minimum/maximum that satisfies condition", rotated sorted arrays, search in matrix.',
+    insight: 'Classic: lo=0, hi=n-1, mid=(lo+hi)//2. Decide which half the answer is in. For "find minimum satisfying condition" problems: lo=0, hi=max_value, binary search the answer space.',
+    template: `lo, hi = 0, len(arr) - 1
+while lo <= hi:
+    mid = lo + (hi - lo) // 2  # avoids overflow
+    if arr[mid] == target:
+        return mid
+    elif arr[mid] < target:
+        lo = mid + 1
+    else:
+        hi = mid - 1
+return -1`,
+    problems: [
+      { name: 'Binary Search (classic)', diff: 'Easy', hint: 'Standard template. lo=0, hi=n-1. Cut the search space in half each iteration.', approach: '<b>1.</b> lo=0, hi=n-1. <b>2.</b> mid=(lo+hi)//2. <b>3.</b> If arr[mid]==target → return mid. If arr[mid] < target → lo=mid+1. Else → hi=mid-1. Time O(log n).' },
+      { name: 'Search in Rotated Sorted Array', diff: 'Medium', hint: 'One half is always sorted. Figure out which half, then check if target is in that half.', approach: '<b>1.</b> If arr[lo] ≤ arr[mid] (left half sorted): if lo ≤ target < mid → hi=mid-1, else lo=mid+1. <b>2.</b> Else (right half sorted): if mid < target ≤ hi → lo=mid+1, else hi=mid-1. Time O(log n).' },
+      { name: 'Find Minimum in Rotated Sorted Array', diff: 'Medium', hint: 'Minimum is in the unsorted half. If arr[mid] > arr[hi], minimum is to the right.', approach: '<b>1.</b> lo=0, hi=n-1. <b>2.</b> While lo < hi: mid=(lo+hi)//2. <b>3.</b> If arr[mid] > arr[hi] → lo=mid+1 (min on right). Else → hi=mid. <b>4.</b> Return arr[lo]. Time O(log n).' },
+      { name: 'Search a 2D Matrix (sorted rows/cols)', diff: 'Medium', hint: 'Treat the 2D matrix as a 1D sorted array. Index i → row=i//cols, col=i%cols.', approach: '<b>1.</b> lo=0, hi=rows*cols-1. <b>2.</b> mid=(lo+hi)//2. <b>3.</b> val=matrix[mid//cols][mid%cols]. <b>4.</b> Standard binary search. Time O(log(m*n)).' },
+      { name: 'Koko Eating Bananas (min speed)', diff: 'Medium', hint: 'Binary search on the answer: speed ranges from 1 to max(piles). Check if given speed finishes in H hours.', approach: '<b>1.</b> lo=1, hi=max(piles). <b>2.</b> For speed=mid: hours = sum(ceil(p/mid) for p in piles). <b>3.</b> If hours ≤ H → hi=mid. Else → lo=mid+1. <b>4.</b> Return lo. Time O(n log m).' },
+    ]
+  },
+  {
+    id: 'dynamic-programming',
+    name: 'Dynamic Programming',
+    icon: '📐',
+    category: 'Optimization',
+    when: 'Use when: optimal substructure (optimal solution built from optimal sub-solutions) AND overlapping subproblems (same sub-problems computed multiple times). Signals: "count ways", "min/max cost", "can you achieve X", "longest subsequence/substring".',
+    insight: 'Step 1: define state (what does dp[i] represent?). Step 2: find recurrence (how does dp[i] relate to dp[i-1], dp[i-2]?). Step 3: base case. Step 4: order of computation.',
+    template: `# 1D DP example (Climbing Stairs)
+dp = [0] * (n + 1)
+dp[0] = 1  # base case
+dp[1] = 1
+
+for i in range(2, n + 1):
+    dp[i] = dp[i-1] + dp[i-2]
+
+# 2D DP example (LCS)
+dp = [[0] * (m+1) for _ in range(n+1)]
+for i in range(1, n+1):
+    for j in range(1, m+1):
+        if s1[i-1] == s2[j-1]:
+            dp[i][j] = dp[i-1][j-1] + 1
+        else:
+            dp[i][j] = max(dp[i-1][j], dp[i][j-1])`,
+    problems: [
+      { name: 'Climbing Stairs (reach top in min steps)', diff: 'Easy', hint: 'dp[i] = ways to reach step i. You can come from step i-1 or i-2. dp[i] = dp[i-1] + dp[i-2] (Fibonacci!).', approach: '<b>1.</b> dp[1]=1, dp[2]=2. <b>2.</b> dp[i] = dp[i-1] + dp[i-2]. <b>3.</b> Return dp[n]. Optimize to O(1) space with two variables. Time O(n).' },
+      { name: 'House Robber (no adjacent houses)', diff: 'Medium', hint: 'dp[i] = max money robbing up to house i. At each house: rob it (dp[i-2] + val) OR skip it (dp[i-1]).', approach: '<b>1.</b> dp[0]=nums[0], dp[1]=max(nums[0], nums[1]). <b>2.</b> dp[i] = max(dp[i-1], dp[i-2]+nums[i]). <b>3.</b> Return dp[-1]. Optimize to 2 variables. Time O(n).' },
+      { name: 'Coin Change (fewest coins for amount)', diff: 'Medium', hint: 'dp[amount] = min coins. For each amount, try every coin: dp[a] = min(dp[a], dp[a-coin] + 1).', approach: '<b>1.</b> dp = [inf] * (amount+1), dp[0]=0. <b>2.</b> For a in 1..amount: for coin in coins: if a≥coin → dp[a] = min(dp[a], dp[a-coin]+1). <b>3.</b> Return dp[amount]. Time O(amount × coins).' },
+      { name: 'Longest Common Subsequence', diff: 'Medium', hint: 'dp[i][j] = LCS of s1[:i] and s2[:j]. If chars match: dp[i][j] = dp[i-1][j-1]+1. Else: max of skipping one.', approach: '<b>1.</b> dp[0][*]=0, dp[*][0]=0. <b>2.</b> If s1[i-1]==s2[j-1]: dp[i][j]=dp[i-1][j-1]+1. Else: dp[i][j]=max(dp[i-1][j], dp[i][j-1]). Time O(m×n).' },
+      { name: 'Longest Increasing Subsequence', diff: 'Medium', hint: 'dp[i] = length of LIS ending at index i. For each j < i: if nums[j] < nums[i] → dp[i] = max(dp[i], dp[j]+1).', approach: '<b>1.</b> dp = [1] * n. <b>2.</b> For i: for j in 0..i: if nums[j]<nums[i] → dp[i] = max(dp[i], dp[j]+1). <b>3.</b> Return max(dp). Time O(n²). Optimize to O(n log n) with patience sorting.' },
+    ]
+  },
+  {
+    id: 'graph-bfs-dfs',
+    name: 'Graph BFS / DFS',
+    icon: '🗺️',
+    category: 'Graphs',
+    when: 'Use for: finding connected components, shortest path (BFS), reachability, cycle detection, topological sort. Key signals: grid problems ("number of islands"), dependency problems ("course schedule"), multi-source problems.',
+    insight: 'BFS = shortest path in unweighted graph. DFS = explores deep, good for connected components, cycle detection. Always track visited to avoid infinite loops.',
+    template: `# BFS (shortest path)
+from collections import deque
+visited = set([start])
+queue = deque([(start, 0)])  # (node, distance)
+
+while queue:
+    node, dist = queue.popleft()
+    if node == target: return dist
+    for neighbor in graph[node]:
+        if neighbor not in visited:
+            visited.add(neighbor)
+            queue.append((neighbor, dist+1))
+
+# DFS (connected components)
+def dfs(node):
+    visited.add(node)
+    for neighbor in graph[node]:
+        if neighbor not in visited:
+            dfs(neighbor)`,
+    problems: [
+      { name: 'Number of Islands', diff: 'Medium', hint: 'For each unvisited \'1\', run DFS/BFS to mark all connected land. Count how many times you start a new DFS.', approach: '<b>1.</b> Iterate grid. <b>2.</b> If grid[r][c]==\'1\' and unvisited: count++, DFS to mark all connected \'1\'s. <b>3.</b> In DFS: mark as \'0\' or visited, recurse on 4 neighbors. Time O(m×n).' },
+      { name: 'Clone Graph', diff: 'Medium', hint: 'BFS/DFS with a map from original node → clone. When you clone a neighbor, check map first to avoid duplicates.', approach: '<b>1.</b> cloned = {}. <b>2.</b> DFS(node): if in cloned return it. Create clone. <b>3.</b> For each neighbor: clone.neighbors.append(DFS(neighbor)). <b>4.</b> Store in cloned. Time O(V+E).' },
+      { name: 'Course Schedule (detect cycle)', diff: 'Medium', hint: 'Build directed graph of prereqs. Course possible iff no cycle. Use DFS with 3 states: unvisited, visiting, visited.', approach: '<b>1.</b> State: 0=unvisited, 1=visiting, 2=done. <b>2.</b> DFS: mark as 1, recurse neighbors. If neighbor is 1 → cycle. Mark as 2 when done. <b>3.</b> Run DFS on all nodes. Time O(V+E).' },
+      { name: 'Pacific Atlantic Water Flow', diff: 'Medium', hint: 'Reverse: flood-fill from each ocean boundary (uphill only). Cells reachable from both oceans are the answer.', approach: '<b>1.</b> BFS/DFS from all Pacific border cells (marking pacific set). <b>2.</b> BFS/DFS from all Atlantic border cells. <b>3.</b> Return intersection. Time O(m×n).' },
+      { name: 'Word Ladder (min transformation steps)', diff: 'Hard', hint: 'BFS where each word is a node. Neighbors = words differing by 1 letter that exist in wordList.', approach: '<b>1.</b> BFS from beginWord. <b>2.</b> For current word: try changing each char to a-z. <b>3.</b> If new word in wordSet: add to queue, remove from wordSet (visited). <b>4.</b> Return depth when endWord reached. Time O(n × m × 26).' },
+    ]
+  },
+  {
+    id: 'backtracking',
+    name: 'Backtracking',
+    icon: '🔙',
+    category: 'Recursion',
+    when: 'Use to generate all combinations, permutations, subsets, or find paths satisfying constraints. Key signals: "all possible", "generate all", "find all paths", "N-Queens". Explore → constraint check → undo (backtrack).',
+    insight: 'Template: choose → explore → unchoose. The "unchoose" step is what makes it backtracking. Use a start index to avoid re-using elements; swap in-place for permutations.',
+    template: `def backtrack(start, current):
+    result.append(current[:])   # record state
+
+    for i in range(start, len(nums)):
+        # Pruning: skip duplicates
+        if i > start and nums[i] == nums[i-1]:
+            continue
+
+        current.append(nums[i])          # choose
+        backtrack(i + 1, current)        # explore
+        current.pop()                    # unchoose`,
+    problems: [
+      { name: 'Subsets', diff: 'Medium', hint: 'At each index, choose to include or not. Or: build all subsets by adding each element to existing subsets.', approach: '<b>1.</b> backtrack(start, path). <b>2.</b> Add path copy to result. <b>3.</b> For i in start..n: path.append(nums[i]), recurse(i+1), path.pop(). Time O(n × 2ⁿ).' },
+      { name: 'Permutations', diff: 'Medium', hint: 'At each step, pick any unused number. Track used with a boolean array or swap in-place.', approach: '<b>1.</b> backtrack(used, path). <b>2.</b> If len(path)==n → add to result. <b>3.</b> For i in 0..n: if not used[i]: mark used, append, recurse, unmark, pop. Time O(n × n!).' },
+      { name: 'Combination Sum (reuse allowed)', diff: 'Medium', hint: 'Pass same index i to allow reuse of same element. Prune when remaining < 0.', approach: '<b>1.</b> backtrack(start, path, remaining). <b>2.</b> If remaining==0 → save. If remaining<0 → return. <b>3.</b> For i in start..n: append, recurse(i, ...), pop. Time O(n^(t/m)) where t=target, m=min candidate.' },
+      { name: 'Letter Combinations of Phone Number', diff: 'Medium', hint: 'Map each digit to its letters. For each digit, try each letter, recurse on next digit.', approach: '<b>1.</b> phone_map = {\'2\':\'abc\', ...}. <b>2.</b> backtrack(index, path). <b>3.</b> If index==len(digits) → save. <b>4.</b> For letter in phone_map[digits[index]]: path.append, recurse(index+1), pop. Time O(4ⁿ).' },
+      { name: 'Palindrome Partitioning', diff: 'Medium', hint: 'At each position, try all substrings starting here. If it\'s a palindrome, recurse on the rest.', approach: '<b>1.</b> backtrack(start, path). <b>2.</b> If start==len(s) → save path. <b>3.</b> For end in start+1..n: if s[start:end] is palindrome: path.append, recurse(end), pop. Time O(n × 2ⁿ).' },
+    ]
+  },
+  {
+    id: 'two-heaps',
+    name: 'Two Heaps',
+    icon: '⚖️',
+    category: 'Heaps',
+    when: 'Use when you need to efficiently track the median of a dynamic dataset, or split elements into two halves where you need quick access to the max of the smaller half and min of the larger half.',
+    insight: 'Maintain a max-heap (lower half) and min-heap (upper half). Keep them balanced (size differ by at most 1). Median = max-heap top (odd total) or average of both tops (even total).',
+    template: `import heapq
+lo = []   # max-heap (negate values)
+hi = []   # min-heap
+
+def add_num(num):
+    heapq.heappush(lo, -num)
+    heapq.heappush(hi, -heapq.heappop(lo))  # balance
+    if len(hi) > len(lo):                    # rebalance
+        heapq.heappush(lo, -heapq.heappop(hi))
+
+def find_median():
+    if len(lo) > len(hi):
+        return -lo[0]
+    return (-lo[0] + hi[0]) / 2`,
+    problems: [
+      { name: 'Find Median from Data Stream', diff: 'Hard', hint: 'Two heaps: max-heap for lower half, min-heap for upper half. Always rebalance after insert.', approach: '<b>1.</b> addNum: push to max-heap, move top to min-heap. If min-heap larger → move back. <b>2.</b> findMedian: if equal size → avg of tops. Else → top of larger heap. Time O(log n) per insert.' },
+      { name: 'Sliding Window Median', diff: 'Hard', hint: 'Same two-heap setup, but remove elements that fall out of the window. Use a "lazy deletion" strategy with a dict of elements to remove.', approach: '<b>1.</b> Use two heaps + a hash map for lazy deletion. <b>2.</b> On each step: add new element, remove outgoing element (lazy). <b>3.</b> Clean tops of heaps (skip invalidated). <b>4.</b> Compute median. Time O(n log k).' },
+      { name: 'IPO (maximize capital with limited projects)', diff: 'Hard', hint: 'Greedily pick the highest profit project you can afford. Use min-heap for capital (unlock available projects) and max-heap for profit (pick best available).', approach: '<b>1.</b> Sort projects by capital. <b>2.</b> For each of k rounds: push all projects with capital ≤ W into max-heap by profit. <b>3.</b> Pop highest profit, add to W. Time O(n log n).' },
+    ]
+  },
+];
+
+// ─── State ───
+let currentPatternId = null;
+let progress = JSON.parse(localStorage.getItem('lc_progress') || '{}');
+
+function saveProgress() {
+  localStorage.setItem('lc_progress', JSON.stringify(progress));
+}
+
+function isPatternDone(pid) {
+  const p = PATTERNS.find(x => x.id === pid);
+  if (!p) return false;
+  const seen = progress[pid] || {};
+  return p.problems.every((_, i) => seen[i]);
+}
+
+function totalDone() {
+  return PATTERNS.filter(p => isPatternDone(p.id)).length;
+}
+
+// ─── Sidebar ───
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const mobileSelect = document.getElementById('mobileSelect');
+
+  sidebar.innerHTML = '<div class="sidebar-label">Patterns</div>';
+  mobileSelect.innerHTML = '<option value="">— Pick a pattern —</option>';
+
+  PATTERNS.forEach(p => {
+    const done = isPatternDone(p.id);
+    const btn = document.createElement('button');
+    btn.className = 'pattern-btn' + (currentPatternId === p.id ? ' active' : '');
+    btn.innerHTML = `<span class="pat-icon">${p.icon}</span><span class="pat-name">${p.name}</span><span class="pat-check ${done ? 'done' : ''}">✓</span>`;
+    btn.onclick = () => selectPattern(p.id);
+    sidebar.appendChild(btn);
+
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.icon} ${p.name}${done ? ' ✓' : ''}`;
+    mobileSelect.appendChild(opt);
+  });
+
+  if (currentPatternId) mobileSelect.value = currentPatternId;
+  document.getElementById('headerProgress').textContent = `${totalDone()} / ${PATTERNS.length} patterns`;
+}
+
+// ─── Select Pattern ───
+function selectPattern(id) {
+  if (!id) return;
+  currentPatternId = id;
+  renderSidebar();
+  renderPattern(id);
+}
+
+// ─── Render Pattern ───
+function renderPattern(id) {
+  const p = PATTERNS.find(x => x.id === id);
+  if (!p) return;
+  const seen = progress[id] || {};
+  const main = document.getElementById('main');
+
+  const problems = p.problems.map((prob, i) => `
+    <div class="problem-card${seen[i] ? ' seen' : ''}" id="prob-${id}-${i}">
+      <div class="problem-top">
+        <span class="problem-name">${prob.name}</span>
+        <span class="diff-badge ${prob.diff}">${prob.diff}</span>
+        <span class="seen-dot">✓ Reviewed</span>
+      </div>
+      <div class="btn-row">
+        <button class="reveal-btn" id="hint-btn-${i}" onclick="toggleReveal('hint', ${i}, '${id}')">💡 Show Hint</button>
+        <button class="reveal-btn" id="approach-btn-${i}" onclick="toggleReveal('approach', ${i}, '${id}')">🚀 Show Approach</button>
+      </div>
+      <div class="reveal-content" id="hint-${i}">${prob.hint}</div>
+      <div class="reveal-content" id="approach-${i}">${prob.approach}</div>
+    </div>
+  `).join('');
+
+  const progressDots = PATTERNS.map(pt => `
+    <span class="p-dot ${isPatternDone(pt.id) ? 'done' : ''}">
+      <span class="dot"></span>${pt.name}
+    </span>
+  `).join('');
+
+  main.innerHTML = `
+    <div class="pattern-header">
+      <div class="pattern-icon-big">${p.icon}</div>
+      <div class="pattern-header-text">
+        <h2>${p.name}</h2>
+        <span class="cat-badge">${p.category}</span>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-box">
+        <h4>🎯 When to Use</h4>
+        <p>${p.when}</p>
+      </div>
+      <div class="info-box">
+        <h4>💡 Key Insight</h4>
+        <p>${p.insight}</p>
+      </div>
+      <div class="info-box full">
+        <h4>🧩 Code Template</h4>
+        <div class="code-hint">${p.template.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      </div>
+    </div>
+
+    <div class="problems-label">Practice Problems</div>
+    ${problems}
+
+    <div class="progress-section">
+      <h4>📊 Overall Progress</h4>
+      <div class="progress-dots">${progressDots}</div>
+    </div>
+  `;
+}
+
+// ─── Toggle Reveal ───
+function toggleReveal(type, i, patternId) {
+  const el = document.getElementById(`${type}-${i}`);
+  const btn = document.getElementById(`${type}-btn-${i}`);
+  const labels = { hint: ['💡 Show Hint', '💡 Hide Hint'], approach: ['🚀 Show Approach', '🚀 Hide Approach'] };
+
+  const isOpen = el.classList.toggle('show');
+  btn.classList.toggle('active', isOpen);
+  btn.textContent = labels[type][isOpen ? 1 : 0];
+
+  if (type === 'approach' && isOpen) {
+    if (!progress[patternId]) progress[patternId] = {};
+    progress[patternId][i] = true;
+    saveProgress();
+    const card = document.getElementById(`prob-${patternId}-${i}`);
+    if (card) card.classList.add('seen');
+    renderSidebar();
+    // refresh overall progress dots without re-rendering whole pattern
+    const dots = document.querySelector('.progress-dots');
+    if (dots) {
+      dots.innerHTML = PATTERNS.map(pt => `
+        <span class="p-dot ${isPatternDone(pt.id) ? 'done' : ''}">
+          <span class="dot"></span>${pt.name}
+        </span>
+      `).join('');
+    }
+  }
+}
+
+// ─── Welcome Screen ───
+function renderWelcome() {
+  const main = document.getElementById('main');
+  const cards = PATTERNS.map(p => `
+    <div class="quick-card" onclick="selectPattern('${p.id}')">
+      <div class="qc-icon">${p.icon}</div>
+      <div class="qc-name">${p.name}</div>
+    </div>
+  `).join('');
+
+  main.innerHTML = `
+    <div class="welcome">
+      <div class="big-emoji">🌸</div>
+      <h2>LeetCode Pattern Trainer</h2>
+      <p>Master the patterns behind every coding interview problem. Pick a pattern to learn when to use it, study the template, and practice with real problems.</p>
+      <div class="pattern-cards-grid">${cards}</div>
+    </div>
+  `;
+}
+
+// ─── Init ───
+renderSidebar();
+renderWelcome();
+</script>
+</body>
+</html>
