@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recipe Remix Bot 🍜</title>
+  <style>
+    :root {
+      --bg: #fdf0ef;
+      --accent: #f4b8b0;
+      --accent-dark: #e8908a;
+      --text: #a83828;
+      --text-dark: #6b1f14;
+      --text-body: #4a2020;
+      --white: #fff;
+      --card-bg: #fffaf9;
+      --border: #f0c8c3;
+      --muted: #c08080;
+      --success: #6b8e6b;
+      --shadow: 0 4px 24px rgba(168,56,40,0.10);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text-body);
+      font-family: 'Georgia', 'Times New Roman', serif;
+      min-height: 100vh;
+    }
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #a83828 0%, #c94f3e 60%, #e07060 100%);
+      color: #fff;
+      text-align: center;
+      padding: 2.5rem 1rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -30px;
+      width: 160px; height: 160px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+    header h1 { font-size: 2.4rem; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
+    header p { font-size: 1.05rem; opacity: 0.9; font-style: italic; }
+    /* API KEY */
+    .api-bar {
+      background: #fff3f2;
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .api-bar label { font-size: 0.85rem; color: var(--text); font-weight: 600; white-space: nowrap; }
+    .api-bar input {
+      flex: 1; min-width: 200px; max-width: 420px;
+      padding: 0.45rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      background: var(--white);
+      color: var(--text-body);
+    }
+    .api-bar input:focus { outline: none; border-color: var(--accent-dark); }
+    .api-save-btn {
+      padding: 0.45rem 1rem;
+      background: var(--text);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .api-save-btn:hover { background: var(--text-dark); }
+    /* MAIN */
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+    /* QUICK DISHES */
+    .quick-section { margin-bottom: 2rem; }
+    .quick-section h2 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.75rem; }
+    .quick-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .quick-chip {
+      padding: 0.45rem 1rem;
+      background: var(--white);
+      border: 1.5px solid var(--accent);
+      border-radius: 99px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: var(--text);
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .quick-chip:hover { background: var(--accent); color: #fff; }
+    /* FORM CARD */
+    .form-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+    .form-row { margin-bottom: 1.5rem; }
+    .form-row label {
+      display: block;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      padding: 0.85rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--white);
+      color: var(--text-body);
+      resize: vertical;
+    }
+    textarea:focus { outline: none; border-color: var(--accent-dark); }
+    /* LANGUAGE TOGGLE */
+    .lang-toggle {
+      display: inline-flex;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--white);
+    }
+    .lang-toggle button {
+      padding: 0.45rem 1.1rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .lang-toggle button.active {
+      background: var(--text);
+      color: #fff;
+    }
+    /* PILL SELECTOR */
+    .pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .pill {
+      padding: 0.45rem 1.1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      background: var(--white);
+      color: var(--text-body);
+      transition: all 0.15s;
+      user-select: none;
+      font-family: inherit;
+    }
+    .pill:hover { border-color: var(--accent-dark); }
+    .pill.selected { background: var(--text); color: #fff; border-color: var(--text); }
+    /* DIETARY CHIPS */
+    .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .chip {
+      padding: 0.35rem 0.9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      background: var(--white);
+      color: var(--muted);
+      transition: all 0.15s;
+      user-select: none;
+      font-family: inherit;
+    }
+    .chip:hover { border-color: var(--accent-dark); }
+    .chip.selected { background: var(--accent); color: var(--text); border-color: var(--accent-dark); }
+    /* BUTTON */
+    .remix-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #a83828, #c94f3e);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(168,56,40,0.25);
+    }
+    .remix-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(168,56,40,0.35); }
+    .remix-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    /* LOADING */
+    .loading {
+      text-align: center;
+      padding: 3rem 1rem;
+      display: none;
+    }
+    .loading.show { display: block; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--text);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading p { color: var(--muted); font-style: italic; }
+    /* RESULT CARD */
+    .result-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+      display: none;
+    }
+    .result-card.show { display: block; }
+    .result-header { margin-bottom: 1.5rem; }
+    .result-dish-name { font-size: 1.8rem; color: var(--text); margin-bottom: 0.4rem; }
+    .result-remix-badge {
+      display: inline-block;
+      padding: 0.3rem 0.9rem;
+      background: var(--accent);
+      color: var(--text);
+      border-radius: 99px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    .result-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.75rem;
+      background: #fff3f2;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: var(--text-body);
+    }
+    .badge span { font-weight: 700; color: var(--text); }
+    .intro-text {
+      font-style: italic;
+      color: var(--text-body);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #fff8f7;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+    }
+    /* INGREDIENTS TABLE */
+    .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.75rem; margin-top: 1.5rem; }
+    .ingredients-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    @media (max-width: 600px) { .ingredients-grid { grid-template-columns: 1fr; } }
+    .ing-col {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .ing-col h4 { font-size: 0.88rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; }
+    .ing-original h4 { color: var(--muted); }
+    .ing-remixed h4 { color: var(--text); }
+    .ing-list { list-style: none; }
+    .ing-list li { padding: 0.3rem 0; font-size: 0.9rem; border-bottom: 1px solid #f5e5e3; line-height: 1.5; }
+    .ing-list li:last-child { border-bottom: none; }
+    .ing-note { font-size: 0.78rem; color: var(--muted); font-style: italic; }
+    .ing-amount { font-weight: 600; color: var(--text); }
+    /* STEPS */
+    .steps-list { list-style: none; margin-bottom: 1.5rem; }
+    .step-item { display: flex; gap: 1rem; margin-bottom: 1.25rem; align-items: flex-start; }
+    .step-num {
+      flex-shrink: 0;
+      width: 32px; height: 32px;
+      background: var(--text);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .step-content { flex: 1; }
+    .step-en { line-height: 1.6; color: var(--text-body); }
+    .step-vi { font-style: italic; color: var(--muted); font-size: 0.88rem; margin-top: 0.3rem; line-height: 1.5; }
+    /* CHEF TIP */
+    .chef-tip {
+      background: linear-gradient(135deg, #fff8e7, #fff3e0);
+      border: 1.5px solid #f0d090;
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    .chef-tip-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .chef-tip-text { font-size: 0.92rem; line-height: 1.6; color: #6b4c10; }
+    .chef-tip-label { font-weight: 700; color: #8b5e14; margin-bottom: 0.2rem; }
+    /* NUTRITION */
+    .nutrition-note {
+      background: #f0f7f0;
+      border: 1.5px solid #b8d8b8;
+      border-radius: 12px;
+      padding: 0.85rem 1.1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.88rem;
+      color: var(--success);
+      line-height: 1.5;
+    }
+    .nutrition-note::before { content: '🥗 '; }
+    /* ACTION BUTTONS */
+    .action-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn-secondary {
+      padding: 0.7rem 1.5rem;
+      border: 1.5px solid var(--text);
+      border-radius: 10px;
+      color: var(--text);
+      background: transparent;
+      font-size: 0.92rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover { background: var(--text); color: #fff; }
+    .btn-print {
+      padding: 0.7rem 1.5rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-body);
+      background: var(--white);
+      font-size: 0.92rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-print:hover { border-color: var(--accent-dark); }
+    /* SAVED RECIPES */
+    .saved-section { margin-top: 2rem; }
+    .saved-section h2 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.75rem; }
+    .saved-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .saved-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .saved-item:hover { border-color: var(--accent-dark); background: #fff8f7; }
+    .saved-item-name { font-size: 0.9rem; color: var(--text-body); }
+    .saved-item-type { font-size: 0.78rem; color: var(--muted); margin-top: 0.1rem; }
+    .saved-del {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0 0.25rem;
+      line-height: 1;
+    }
+    .saved-del:hover { color: var(--text); }
+    /* ERROR */
+    .error-msg {
+      background: #fff0f0;
+      border: 1.5px solid #f4b0b0;
+      border-radius: 10px;
+      padding: 1rem;
+      color: var(--text);
+      font-size: 0.92rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+    /* PRINT */
+    @media print {
+      .api-bar, .quick-section, .form-card, .saved-section, .action-btns, header { display: none !important; }
+      .result-card { box-shadow: none !important; border: none !important; }
+      body { background: #fff !important; }
+    }
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.8rem; }
+      .form-card { padding: 1.25rem; }
+      .result-card { padding: 1.25rem; }
+    }
+    /* DIVIDER */
+    .divider {
+      border: none;
+      border-top: 1.5px solid var(--border);
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1 id="header-title">🍜 Recipe Remix Bot</h1>
+  <p id="header-sub">Paste any recipe and remix it — healthier, fusion, or budget-friendly</p>
+</header>
+
+<div class="api-bar">
+  <label id="api-label">🔑 Gemini API Key:</label>
+  <input type="password" id="api-key" placeholder="AIza..." autocomplete="off" />
+  <button class="api-save-btn" onclick="saveApiKey()" id="api-save-btn">Save</button>
+</div>
+
+<div class="container">
+
+  <!-- QUICK DISHES -->
+  <div class="quick-section">
+    <h2 id="quick-title">⚡ Quick remix a popular dish:</h2>
+    <div class="quick-chips">
+      <button class="quick-chip" onclick="quickFill('Phở bò')">🍜 Phở bò</button>
+      <button class="quick-chip" onclick="quickFill('Bánh mì')">🥖 Bánh mì</button>
+      <button class="quick-chip" onclick="quickFill('Bún bò Huế')">🌶️ Bún bò Huế</button>
+      <button class="quick-chip" onclick="quickFill('Cơm tấm')">🍚 Cơm tấm</button>
+      <button class="quick-chip" onclick="quickFill('Chả giò')">🥢 Chả giò</button>
+      <button class="quick-chip" onclick="quickFill('Gỏi cuốn')">🌿 Gỏi cuốn</button>
+      <button class="quick-chip" onclick="quickFill('Bún chả')">🔥 Bún chả</button>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-card">
+    <div class="form-row">
+      <label id="label-recipe">📝 Recipe or dish name</label>
+      <textarea id="recipe-input" placeholder="Paste a full recipe, or just type a dish name like 'Phở bò' or 'Spaghetti carbonara'..."></textarea>
+    </div>
+
+    <div class="form-row">
+      <label id="label-lang">🌐 Language</label>
+      <div class="lang-toggle">
+        <button id="btn-en" class="active" onclick="setLang('en')">English</button>
+        <button id="btn-vi" onclick="setLang('vi')">Tiếng Việt</button>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label id="label-remix">🎨 Remix type <span style="font-weight:400;color:var(--muted)">(pick one or more)</span></label>
+      <div class="pills" id="remix-pills">
+        <button class="pill" data-value="Healthier" onclick="togglePill(this)">🥦 <span id="p-healthier">Healthier</span></button>
+        <button class="pill" data-value="Faster" onclick="togglePill(this)">⚡ <span id="p-faster">Faster</span></button>
+        <button class="pill" data-value="Budget-friendly" onclick="togglePill(this)">💰 <span id="p-budget">Budget-friendly</span></button>
+        <button class="pill" data-value="American pantry" onclick="togglePill(this)">🛒 <span id="p-american">American pantry</span></button>
+        <button class="pill" data-value="Fusion" onclick="togglePill(this)">🌏 <span id="p-fusion">Fusion</span></button>
+        <button class="pill" data-value="Vegetarian/Vegan" onclick="togglePill(this)">🌱 <span id="p-vegan">Vegetarian/Vegan</span></button>
+        <button class="pill" data-value="Bigger serving" onclick="togglePill(this)">👨‍👩‍👧‍👦 <span id="p-bigger">Bigger serving</span></button>
+        <button class="pill" data-value="Kid-friendly" onclick="togglePill(this)">🧒 <span id="p-kid">Kid-friendly</span></button>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label id="label-diet">⚠️ Dietary restrictions <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <div class="chips" id="diet-chips">
+        <button class="chip" data-value="Gluten-free" onclick="toggleChip(this)" id="d-gluten">Gluten-free</button>
+        <button class="chip" data-value="Dairy-free" onclick="toggleChip(this)" id="d-dairy">Dairy-free</button>
+        <button class="chip" data-value="Nut-free" onclick="toggleChip(this)" id="d-nut">Nut-free</button>
+        <button class="chip" data-value="Low sodium" onclick="toggleChip(this)" id="d-sodium">Low sodium</button>
+      </div>
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <button class="remix-btn" id="remix-btn" onclick="remixRecipe()">
+      <span id="remix-btn-text">✨ Remix This Recipe</span>
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p id="loading-text">Remixing your recipe with AI magic...</p>
+  </div>
+
+  <!-- RESULT CARD -->
+  <div class="result-card" id="result-card">
+    <div class="result-header">
+      <div class="result-dish-name" id="res-dish-name"></div>
+      <div class="result-remix-badge" id="res-badge"></div>
+      <div class="result-badges" id="res-badges"></div>
+    </div>
+    <div class="intro-text" id="res-intro"></div>
+    <hr class="divider">
+    <div class="section-title" id="res-ing-title">🛒 Ingredients</div>
+    <div class="ingredients-grid">
+      <div class="ing-col ing-original">
+        <h4 id="res-orig-label">Original</h4>
+        <ul class="ing-list" id="res-orig-ings"></ul>
+      </div>
+      <div class="ing-col ing-remixed">
+        <h4 id="res-remix-label">Remixed</h4>
+        <ul class="ing-list" id="res-remix-ings"></ul>
+      </div>
+    </div>
+    <div class="section-title" id="res-steps-title">👩‍🍳 Instructions</div>
+    <ol class="steps-list" id="res-steps"></ol>
+    <div class="nutrition-note" id="res-nutrition" style="display:none"></div>
+    <div class="chef-tip" id="res-chef-tip">
+      <div class="chef-tip-icon">👨‍🍳</div>
+      <div class="chef-tip-text">
+        <div class="chef-tip-label" id="res-tip-label">Chef's Tip</div>
+        <div id="res-tip-text"></div>
+      </div>
+    </div>
+    <div class="action-btns">
+      <button class="btn-secondary" onclick="tryAnother()" id="res-try-another">🔄 Try another remix</button>
+      <button class="btn-print" onclick="window.print()">🖨️ Print recipe</button>
+    </div>
+  </div>
+
+  <!-- SAVED RECIPES -->
+  <div class="saved-section" id="saved-section" style="display:none">
+    <h2 id="saved-title">📚 Recent remixes</h2>
+    <div class="saved-list" id="saved-list"></div>
+  </div>
+
+</div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let lang = 'en';
+let currentResult = null;
+
+const i18n = {
+  en: {
+    headerTitle: '🍜 Recipe Remix Bot',
+    headerSub: 'Paste any recipe and remix it — healthier, fusion, or budget-friendly',
+    apiLabel: '🔑 Gemini API Key:',
+    apiSave: 'Save',
+    quickTitle: '⚡ Quick remix a popular dish:',
+    labelRecipe: '📝 Recipe or dish name',
+    recipePlaceholder: "Paste a full recipe, or just type a dish name like 'Phở bò' or 'Spaghetti carbonara'...",
+    labelLang: '🌐 Language',
+    labelRemix: '🎨 Remix type',
+    remixHint: '(pick one or more)',
+    labelDiet: '⚠️ Dietary restrictions',
+    dietHint: '(optional)',
+    remixBtn: '✨ Remix This Recipe',
+    loading: 'Remixing your recipe with AI magic...',
+    ingTitle: '🛒 Ingredients',
+    origLabel: 'Original',
+    remixLabel: 'Remixed ✨',
+    stepsTitle: '👩‍🍳 Instructions',
+    tipLabel: "Chef's Tip",
+    tryAnother: '🔄 Try another remix',
+    savedTitle: '📚 Recent remixes',
+    pills: { Healthier:'Healthier', Faster:'Faster', 'Budget-friendly':'Budget-friendly', 'American pantry':'American pantry', Fusion:'Fusion', 'Vegetarian/Vegan':'Vegetarian/Vegan', 'Bigger serving':'Bigger serving', 'Kid-friendly':'Kid-friendly' },
+    diet: { 'Gluten-free':'Gluten-free', 'Dairy-free':'Dairy-free', 'Nut-free':'Nut-free', 'Low sodium':'Low sodium' },
+    errNoKey: 'Please enter your Gemini API key at the top.',
+    errNoRecipe: 'Please enter a recipe or dish name.',
+    errNoRemix: 'Please select at least one remix type.',
+    cookTime: 'Cook Time', servings: 'Servings', difficulty: 'Difficulty',
+  },
+  vi: {
+    headerTitle: '🍜 Recipe Remix Bot',
+    headerSub: 'Dán công thức vào và biến tấu theo ý bạn — lành mạnh hơn, hòa trộn, hay tiết kiệm',
+    apiLabel: '🔑 Khóa API Gemini:',
+    apiSave: 'Lưu',
+    quickTitle: '⚡ Biến tấu nhanh món phổ biến:',
+    labelRecipe: '📝 Công thức hoặc tên món',
+    recipePlaceholder: 'Dán công thức đầy đủ, hoặc chỉ cần gõ tên món như "Phở bò" hay "Mì Ý carbonara"...',
+    labelLang: '🌐 Ngôn ngữ',
+    labelRemix: '🎨 Kiểu biến tấu',
+    remixHint: '(chọn một hoặc nhiều)',
+    labelDiet: '⚠️ Hạn chế ăn kiêng',
+    dietHint: '(không bắt buộc)',
+    remixBtn: '✨ Biến Tấu Ngay',
+    loading: 'AI đang biến tấu công thức của bạn...',
+    ingTitle: '🛒 Nguyên liệu',
+    origLabel: 'Nguyên bản',
+    remixLabel: 'Đã biến tấu ✨',
+    stepsTitle: '👩‍🍳 Hướng dẫn nấu',
+    tipLabel: 'Mẹo của đầu bếp',
+    tryAnother: '🔄 Thử biến tấu khác',
+    savedTitle: '📚 Biến tấu gần đây',
+    pills: { Healthier:'Lành mạnh hơn', Faster:'Nhanh hơn', 'Budget-friendly':'Tiết kiệm', 'American pantry':'Nguyên liệu Mỹ', Fusion:'Hòa trộn', 'Vegetarian/Vegan':'Chay/Thuần chay', 'Bigger serving':'Khẩu phần lớn', 'Kid-friendly':'Cho trẻ em' },
+    diet: { 'Gluten-free':'Không gluten', 'Dairy-free':'Không sữa', 'Nut-free':'Không hạt', 'Low sodium':'Ít muối' },
+    errNoKey: 'Vui lòng nhập khóa API Gemini ở phía trên.',
+    errNoRecipe: 'Vui lòng nhập công thức hoặc tên món.',
+    errNoRemix: 'Vui lòng chọn ít nhất một kiểu biến tấu.',
+    cookTime: 'Thời gian nấu', servings: 'Khẩu phần', difficulty: 'Độ khó',
+  }
+};
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const savedKey = localStorage.getItem('gemini_api_key');
+  if (savedKey) document.getElementById('api-key').value = savedKey;
+  renderSaved();
+  applyLang();
+});
+
+// ─── API KEY ────────────────────────────────────────────────────────────────
+function saveApiKey() {
+  const key = document.getElementById('api-key').value.trim();
+  if (key) {
+    localStorage.setItem('gemini_api_key', key);
+    const btn = document.getElementById('api-save-btn');
+    btn.textContent = '✓';
+    setTimeout(() => { btn.textContent = i18n[lang].apiSave; }, 1500);
+  }
+}
+
+// ─── LANGUAGE ───────────────────────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-vi').classList.toggle('active', l === 'vi');
+  applyLang();
+}
+
+function applyLang() {
+  const t = i18n[lang];
+  document.getElementById('header-title').textContent = t.headerTitle;
+  document.getElementById('header-sub').textContent = t.headerSub;
+  document.getElementById('api-label').textContent = t.apiLabel;
+  document.getElementById('api-save-btn').textContent = t.apiSave;
+  document.getElementById('quick-title').textContent = t.quickTitle;
+  document.getElementById('label-recipe').textContent = t.labelRecipe;
+  document.getElementById('recipe-input').placeholder = t.recipePlaceholder;
+  document.getElementById('label-lang').textContent = t.labelLang;
+  document.getElementById('label-remix').childNodes[0].textContent = t.labelRemix + ' ';
+  document.getElementById('label-diet').childNodes[0].textContent = t.labelDiet + ' ';
+  document.getElementById('remix-btn-text').textContent = t.remixBtn;
+  document.getElementById('loading-text').textContent = t.loading;
+  document.getElementById('saved-title').textContent = t.savedTitle;
+  // pill labels
+  const pillMap = { Healthier:'p-healthier', Faster:'p-faster', 'Budget-friendly':'p-budget', 'American pantry':'p-american', Fusion:'p-fusion', 'Vegetarian/Vegan':'p-vegan', 'Bigger serving':'p-bigger', 'Kid-friendly':'p-kid' };
+  for (const [val, id] of Object.entries(pillMap)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t.pills[val];
+  }
+  // dietary chip labels
+  const dietMap = { 'Gluten-free':'d-gluten', 'Dairy-free':'d-dairy', 'Nut-free':'d-nut', 'Low sodium':'d-sodium' };
+  for (const [val, id] of Object.entries(dietMap)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t.diet[val];
+  }
+}
+
+// ─── PILLS & CHIPS ──────────────────────────────────────────────────────────
+function togglePill(el) { el.classList.toggle('selected'); }
+function toggleChip(el) { el.classList.toggle('selected'); }
+
+function getSelectedPills() {
+  return [...document.querySelectorAll('#remix-pills .pill.selected')].map(p => p.dataset.value);
+}
+function getSelectedChips() {
+  return [...document.querySelectorAll('#diet-chips .chip.selected')].map(c => c.dataset.value);
+}
+
+// ─── QUICK FILL ─────────────────────────────────────────────────────────────
+function quickFill(dish) {
+  document.getElementById('recipe-input').value = dish;
+  document.getElementById('recipe-input').focus();
+  // auto-select American pantry for Vietnamese dishes
+  document.querySelectorAll('#remix-pills .pill').forEach(p => {
+    if (p.dataset.value === 'American pantry') p.classList.add('selected');
+  });
+}
+
+// ─── REMIX ───────────────────────────────────────────────────────────────────
+async function remixRecipe() {
+  const t = i18n[lang];
+  const apiKey = document.getElementById('api-key').value.trim() || localStorage.getItem('gemini_api_key') || '';
+  const recipe = document.getElementById('recipe-input').value.trim();
+  const remixTypes = getSelectedPills();
+  const dietary = getSelectedChips();
+  const errEl = document.getElementById('error-msg');
+
+  errEl.classList.remove('show');
+
+  if (!apiKey) { showError(t.errNoKey); return; }
+  if (!recipe) { showError(t.errNoRecipe); return; }
+  if (remixTypes.length === 0) { showError(t.errNoRemix); return; }
+
+  setLoading(true);
+  document.getElementById('result-card').classList.remove('show');
+
+  const prompt = `Remix this recipe with the following changes: ${remixTypes.join(', ')}.${dietary.length ? ' Dietary restrictions: ' + dietary.join(', ') : ''}
+
+Recipe: ${recipe}
+
+${lang === 'vi' ? 'Respond with Vietnamese translation for key steps.' : 'Provide Vietnamese translation for each step in the stepVi field.'}
+
+Return JSON:
+{
+  "dishName": "Original dish name",
+  "remixTitle": "Remixed version name",
+  "intro": "2-3 sentences explaining what changed and why it works",
+  "originalIngredients": ["ingredient 1", "ingredient 2"],
+  "remixedIngredients": [
+    { "item": "ingredient", "amount": "2 cups", "note": "substitution note if any" }
+  ],
+  "steps": [
+    { "step": "Step instruction in English", "stepVi": "Bước dịch sang tiếng Việt" }
+  ],
+  "cookTime": "30 minutes",
+  "servings": "4",
+  "difficulty": "Easy",
+  "chefTip": "One pro tip specific to this dish",
+  "nutritionNote": "Brief nutrition highlight if healthier remix (empty string otherwise)"
+}
+Return only JSON, no markdown.`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err?.error?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    // Strip markdown code fences if present
+    text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    const json = JSON.parse(text);
+
+    currentResult = { ...json, remixTypes, dietary };
+    renderResult(json, remixTypes);
+    saveToHistory(json.dishName, remixTypes, recipe);
+    setLoading(false);
+  } catch (e) {
+    setLoading(false);
+    showError('Error: ' + e.message);
+  }
+}
+
+// ─── RENDER RESULT ──────────────────────────────────────────────────────────
+function renderResult(d, remixTypes) {
+  const t = i18n[lang];
+  document.getElementById('res-dish-name').textContent = d.dishName || d.remixTitle;
+  document.getElementById('res-badge').textContent = (remixTypes || []).join(' · ');
+
+  // badges
+  const badgesEl = document.getElementById('res-badges');
+  badgesEl.innerHTML = '';
+  if (d.cookTime) badgesEl.innerHTML += `<div class="badge">⏱ ${t.cookTime}: <span>${d.cookTime}</span></div>`;
+  if (d.servings) badgesEl.innerHTML += `<div class="badge">🍽 ${t.servings}: <span>${d.servings}</span></div>`;
+  if (d.difficulty) badgesEl.innerHTML += `<div class="badge">📊 ${t.difficulty}: <span>${d.difficulty}</span></div>`;
+
+  document.getElementById('res-intro').textContent = d.intro || '';
+
+  // labels
+  document.getElementById('res-ing-title').textContent = t.ingTitle;
+  document.getElementById('res-orig-label').textContent = t.origLabel;
+  document.getElementById('res-remix-label').textContent = t.remixLabel;
+  document.getElementById('res-steps-title').textContent = t.stepsTitle;
+  document.getElementById('res-tip-label').textContent = t.tipLabel;
+  document.getElementById('res-try-another').textContent = t.tryAnother;
+
+  // original ingredients
+  const origEl = document.getElementById('res-orig-ings');
+  origEl.innerHTML = '';
+  (d.originalIngredients || []).forEach(ing => {
+    const li = document.createElement('li');
+    li.textContent = ing;
+    origEl.appendChild(li);
+  });
+
+  // remixed ingredients
+  const remixEl = document.getElementById('res-remix-ings');
+  remixEl.innerHTML = '';
+  (d.remixedIngredients || []).forEach(ing => {
+    const li = document.createElement('li');
+    const amount = ing.amount ? `<span class="ing-amount">${ing.amount}</span> ` : '';
+    const note = ing.note ? `<div class="ing-note">${ing.note}</div>` : '';
+    li.innerHTML = `${amount}${ing.item}${note}`;
+    remixEl.appendChild(li);
+  });
+
+  // steps
+  const stepsEl = document.getElementById('res-steps');
+  stepsEl.innerHTML = '';
+  (d.steps || []).forEach((s, i) => {
+    const li = document.createElement('li');
+    li.className = 'step-item';
+    li.innerHTML = `
+      <div class="step-num">${i + 1}</div>
+      <div class="step-content">
+        <div class="step-en">${s.step}</div>
+        ${s.stepVi ? `<div class="step-vi">${s.stepVi}</div>` : ''}
+      </div>`;
+    stepsEl.appendChild(li);
+  });
+
+  // nutrition
+  const nutEl = document.getElementById('res-nutrition');
+  if (d.nutritionNote) {
+    nutEl.textContent = d.nutritionNote;
+    nutEl.style.display = 'block';
+  } else {
+    nutEl.style.display = 'none';
+  }
+
+  // chef tip
+  document.getElementById('res-tip-text').textContent = d.chefTip || '';
+
+  document.getElementById('result-card').classList.add('show');
+  document.getElementById('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── TRY ANOTHER ────────────────────────────────────────────────────────────
+function tryAnother() {
+  document.getElementById('result-card').classList.remove('show');
+  document.getElementById('recipe-input').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('recipe-input').focus();
+}
+
+// ─── HELPERS ────────────────────────────────────────────────────────────────
+function setLoading(on) {
+  document.getElementById('loading').classList.toggle('show', on);
+  document.getElementById('remix-btn').disabled = on;
+}
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+// ─── SAVED HISTORY ──────────────────────────────────────────────────────────
+function saveToHistory(dishName, remixTypes, recipe) {
+  let history = JSON.parse(localStorage.getItem('recipe_history') || '[]');
+  history.unshift({ dishName, remixTypes, recipe, date: new Date().toLocaleDateString() });
+  history = history.slice(0, 5);
+  localStorage.setItem('recipe_history', JSON.stringify(history));
+  renderSaved();
+}
+
+function renderSaved() {
+  const history = JSON.parse(localStorage.getItem('recipe_history') || '[]');
+  const section = document.getElementById('saved-section');
+  const list = document.getElementById('saved-list');
+  if (history.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = '';
+  history.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'saved-item';
+    div.innerHTML = `
+      <div onclick="loadSaved(${i})" style="flex:1;cursor:pointer">
+        <div class="saved-item-name">${item.dishName}</div>
+        <div class="saved-item-type">${(item.remixTypes || []).join(', ')} · ${item.date}</div>
+      </div>
+      <button class="saved-del" onclick="deleteSaved(${i})" title="Remove">×</button>`;
+    list.appendChild(div);
+  });
+}
+
+function loadSaved(i) {
+  const history = JSON.parse(localStorage.getItem('recipe_history') || '[]');
+  const item = history[i];
+  if (!item) return;
+  document.getElementById('recipe-input').value = item.recipe || item.dishName;
+  // select pills
+  document.querySelectorAll('#remix-pills .pill').forEach(p => {
+    p.classList.toggle('selected', (item.remixTypes || []).includes(p.dataset.value));
+  });
+  document.getElementById('recipe-input').scrollIntoView({ behavior: 'smooth' });
+}
+
+function deleteSaved(i) {
+  let history = JSON.parse(localStorage.getItem('recipe_history') || '[]');
+  history.splice(i, 1);
+  localStorage.setItem('recipe_history', JSON.stringify(history));
+  renderSaved();
+}
+</script>
+</body>
+</html>

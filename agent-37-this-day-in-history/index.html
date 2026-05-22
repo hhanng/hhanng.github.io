@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>This Day in History Bot</title>
+<style>
+  :root {
+    --bg: #fdfbee;
+    --accent: #f0e8b0;
+    --accent2: #e8d870;
+    --text: #786000;
+    --text-light: #a08030;
+    --text-dark: #4a3a00;
+    --card-bg: #fffef5;
+    --border: #e0d080;
+    --hero-bg: #fffef0;
+    --shadow: 0 2px 16px rgba(120,96,0,0.10);
+    --radius: 16px;
+    --chip-active: #786000;
+    --chip-active-text: #fffef0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.7;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #f5e880 0%, #fdfbee 60%);
+    border-bottom: 2px solid var(--border);
+    padding: 18px 24px 14px;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-dark);
+    flex: 1;
+    min-width: 180px;
+  }
+  .logo span { font-size: 1.6rem; }
+
+  .api-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .api-row input {
+    padding: 7px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 0.82rem;
+    width: 220px;
+    outline: none;
+    font-family: monospace;
+  }
+  .api-row input:focus { border-color: var(--text-light); }
+  .btn-save {
+    padding: 7px 14px;
+    background: var(--text);
+    color: #fffef0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .btn-save:hover { background: var(--text-dark); }
+
+  .streak-pill {
+    background: var(--accent);
+    border: 1.5px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: bold;
+    color: var(--text-dark);
+  }
+
+  /* ── Main layout ── */
+  .main-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 28px;
+  }
+  @media (max-width: 820px) {
+    .main-wrap { grid-template-columns: 1fr; }
+    .sidebar { order: 3; }
+  }
+
+  /* ── Controls bar ── */
+  .controls-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    grid-column: 1 / -1;
+  }
+  .date-heading {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-dark);
+    flex: 1;
+  }
+  .date-heading small {
+    font-size: 0.9rem;
+    font-weight: normal;
+    color: var(--text-light);
+    display: block;
+    margin-top: 2px;
+  }
+  input[type="date"] {
+    padding: 8px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="date"]:focus { border-color: var(--text-light); }
+
+  .btn-surprise {
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #f0e000, #c8b800);
+    color: var(--text-dark);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    font-family: inherit;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 2px 8px rgba(120,96,0,0.15);
+  }
+  .btn-surprise:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(120,96,0,0.2); }
+  .btn-surprise:active { transform: translateY(0); }
+
+  .vietnam-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    user-select: none;
+    color: var(--text);
+    padding: 7px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .vietnam-toggle.active {
+    background: #fff0c0;
+    border-color: var(--text-light);
+    font-weight: bold;
+  }
+  .vietnam-toggle input { display: none; }
+
+  /* ── Category chips ── */
+  .chips-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    grid-column: 1 / -1;
+    margin-bottom: 6px;
+  }
+  .chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-light);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    user-select: none;
+  }
+  .chip.active {
+    background: var(--chip-active);
+    border-color: var(--chip-active);
+    color: var(--chip-active-text);
+  }
+  .chip:hover:not(.active) { background: var(--accent); color: var(--text); }
+
+  /* ── Load button ── */
+  .btn-load {
+    padding: 10px 28px;
+    background: var(--text-dark);
+    color: #fffef0;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: var(--shadow);
+    grid-column: 1 / -1;
+    align-self: start;
+    width: fit-content;
+  }
+  .btn-load:hover { background: #786000; transform: translateY(-1px); }
+  .btn-load:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* ── Hero card ── */
+  .hero-card {
+    background: var(--hero-bg);
+    border: 2px solid var(--accent2);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    position: relative;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  .hero-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+  .year-badge {
+    display: inline-block;
+    background: var(--text);
+    color: #fffef0;
+    font-size: 0.85rem;
+    font-weight: bold;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+  .hero-title {
+    font-size: 1.7rem;
+    font-weight: bold;
+    color: var(--text-dark);
+    margin-bottom: 18px;
+    line-height: 1.3;
+  }
+  .story-text { color: var(--text); font-size: 1rem; }
+  .story-text p { margin-bottom: 14px; }
+
+  .why-box {
+    margin: 20px 0;
+    padding: 16px 18px;
+    background: #fffacc;
+    border-left: 4px solid var(--accent2);
+    border-radius: 0 10px 10px 0;
+  }
+  .why-box h4 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
+    margin-bottom: 6px;
+  }
+  .why-box p { font-size: 0.95rem; color: var(--text); }
+
+  .fun-fact-box {
+    margin: 18px 0;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #fffde0, #f5f0b0);
+    border: 1.5px solid var(--accent2);
+    border-radius: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .fun-fact-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .fun-fact-box p { font-size: 0.92rem; color: var(--text-dark); }
+
+  .did-you-know {
+    margin: 18px 0;
+    padding: 14px 18px;
+    background: var(--card-bg);
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+  }
+  .did-you-know p.question { font-weight: bold; color: var(--text-dark); font-size: 0.95rem; }
+  .reveal-btn {
+    margin-top: 8px;
+    padding: 5px 14px;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .reveal-btn:hover { background: var(--accent); color: var(--text); }
+  .answer-text {
+    display: none;
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: #fffde0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    animation: fadeIn 0.25s ease;
+  }
+  .answer-text.show { display: block; }
+
+  .hero-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .btn-action {
+    padding: 7px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-action:hover { background: var(--accent); border-color: var(--accent2); }
+  .btn-action.bookmarked { background: #fffacc; border-color: var(--accent2); }
+
+  /* ── More events ── */
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-dark);
+    margin: 28px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .more-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 580px) { .more-grid { grid-template-columns: 1fr; } }
+
+  .event-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .event-card:hover { box-shadow: var(--shadow); border-color: var(--accent2); }
+
+  .event-year { font-size: 0.85rem; font-weight: bold; color: var(--text-light); margin-bottom: 6px; }
+  .event-text { font-size: 0.92rem; color: var(--text); margin-bottom: 10px; line-height: 1.5; }
+  .category-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    background: var(--accent);
+    color: var(--text-dark);
+    margin-bottom: 8px;
+  }
+  .read-more-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-family: inherit;
+    display: block;
+    margin-top: 6px;
+    transition: all 0.15s;
+    width: 100%;
+    text-align: left;
+  }
+  .read-more-btn:hover { background: var(--accent); }
+  .expanded-text {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background: #fffde0;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text);
+    animation: fadeIn 0.2s ease;
+  }
+  .expanded-text.show { display: block; }
+
+  /* ── Sidebar ── */
+  .sidebar { display: flex; flex-direction: column; gap: 18px; }
+
+  .sidebar-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .sidebar-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--text-dark);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Time machine */
+  .time-machine-year {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .time-machine-year input {
+    width: 90px;
+    padding: 5px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.88rem;
+    outline: none;
+    font-family: inherit;
+  }
+  .btn-tm {
+    padding: 5px 10px;
+    background: var(--text);
+    color: #fffef0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .btn-tm:hover { background: var(--text-dark); }
+
+  .tm-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+  }
+  .tm-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+  .tm-label { font-size: 0.7rem; color: var(--text-light); display: block; }
+  .tm-value { color: var(--text-dark); font-weight: bold; }
+  .tm-loading { text-align: center; color: var(--text-light); font-size: 0.85rem; padding: 8px; }
+
+  /* Bookmarks */
+  .bookmark-list { list-style: none; }
+  .bookmark-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--accent);
+    font-size: 0.83rem;
+    color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .bookmark-item:last-child { border-bottom: none; }
+  .bookmark-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    padding: 0 4px;
+    line-height: 1;
+  }
+  .bookmark-del:hover { color: #c00; }
+  .bk-empty { font-size: 0.83rem; color: var(--text-light); font-style: italic; }
+
+  /* Streak */
+  .streak-display { text-align: center; }
+  .streak-num { font-size: 2.5rem; font-weight: bold; color: var(--text-dark); line-height: 1; }
+  .streak-label { font-size: 0.78rem; color: var(--text-light); margin-top: 4px; }
+  .streak-fire { font-size: 1.6rem; }
+
+  /* ── Loading / empty states ── */
+  .loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-light);
+  }
+  .loading-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--accent);
+    border-top-color: var(--text);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-light);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text-dark);
+    color: #fffef0;
+    padding: 10px 22px;
+    border-radius: 24px;
+    font-size: 0.88rem;
+    z-index: 9999;
+    transition: transform 0.3s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .header-inner { gap: 10px; }
+    .api-row input { width: 160px; }
+    .main-wrap { padding: 16px 14px; }
+    .hero-title { font-size: 1.3rem; }
+    .controls-bar { gap: 8px; }
+    .date-heading { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo"><span>📅</span> This Day in History</div>
+    <div class="api-row">
+      <input type="password" id="apiKeyInput" placeholder="Enter Gemini API key…" autocomplete="off">
+      <button class="btn-save" onclick="saveApiKey()">Save</button>
+    </div>
+    <div class="streak-pill" id="streakPill">🔥 0-day streak</div>
+  </div>
+</header>
+
+<!-- Main -->
+<div class="main-wrap">
+
+  <!-- Controls -->
+  <div class="controls-bar">
+    <div class="date-heading">
+      <span id="dateHeading">Today is May 14</span>
+      <small id="dateSubheading">Discover what happened on this day in history</small>
+    </div>
+    <input type="date" id="datePicker" onchange="onDateChange()">
+    <button class="btn-surprise" onclick="surpriseMe()">🎲 Surprise me</button>
+    <label class="vietnam-toggle" id="vietnamToggle">
+      <input type="checkbox" id="vietnamCheck" onchange="toggleVietnam()">
+      🇻🇳 Vietnam Connection
+    </label>
+  </div>
+
+  <!-- Category chips -->
+  <div class="chips-row">
+    <button class="chip active" data-cat="Science & Tech" onclick="toggleChip(this)">🔬 Science & Tech</button>
+    <button class="chip active" data-cat="World History" onclick="toggleChip(this)">🌍 World History</button>
+    <button class="chip active" data-cat="Arts & Culture" onclick="toggleChip(this)">🎨 Arts & Culture</button>
+    <button class="chip active" data-cat="Sports" onclick="toggleChip(this)">⚽ Sports</button>
+    <button class="chip active" data-cat="Births & Deaths" onclick="toggleChip(this)">🌟 Births & Deaths</button>
+    <button class="chip active" data-cat="Vietnam History" onclick="toggleChip(this)">🇻🇳 Vietnam History</button>
+    <button class="chip active" data-cat="Space" onclick="toggleChip(this)">🚀 Space</button>
+    <button class="chip active" data-cat="Surprising/Weird" onclick="toggleChip(this)">😲 Surprising/Weird</button>
+  </div>
+
+  <!-- Load button -->
+  <button class="btn-load" id="loadBtn" onclick="loadHistory()">✨ Load Today's History</button>
+
+  <!-- Main content -->
+  <main id="mainContent">
+    <div class="empty-state">
+      <div class="empty-icon">📖</div>
+      <h3>Ready to explore history?</h3>
+      <p>Enter your Gemini API key above, then click "Load Today's History" to begin.</p>
+    </div>
+  </main>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <!-- Streak -->
+    <div class="sidebar-card">
+      <div class="sidebar-title">🔥 Daily Streak</div>
+      <div class="streak-display">
+        <div class="streak-fire">🔥</div>
+        <div class="streak-num" id="streakNum">0</div>
+        <div class="streak-label">days in a row</div>
+      </div>
+    </div>
+
+    <!-- Time Machine -->
+    <div class="sidebar-card">
+      <div class="sidebar-title">⏰ Time Machine</div>
+      <div class="time-machine-year">
+        <input type="number" id="tmYear" placeholder="Year" min="1000" max="2024" value="1969">
+        <button class="btn-tm" onclick="loadTimeMachine()">Go</button>
+      </div>
+      <div id="tmContent">
+        <p style="font-size:0.82rem;color:var(--text-light);font-style:italic;">Enter a year to see what life was like on this day.</p>
+      </div>
+    </div>
+
+    <!-- Bookmarks -->
+    <div class="sidebar-card">
+      <div class="sidebar-title">🔖 Bookmarks <span style="font-size:0.75rem;font-weight:normal;color:var(--text-light)">(up to 10)</span></div>
+      <div id="bookmarkList"><p class="bk-empty">No bookmarks yet.</p></div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ── State ──
+let currentDate = new Date();
+let vietnamMode = false;
+let bookmarks = JSON.parse(localStorage.getItem('history_bookmarks') || '[]');
+let currentTopEvent = null;
+let currentDateStr = '';
+
+const CATEGORIES = [
+  'Science & Tech','World History','Arts & Culture','Sports',
+  'Births & Deaths','Vietnam History','Space','Surprising/Weird'
+];
+
+// ── Init ──
+(function init() {
+  // API key
+  const saved = localStorage.getItem('gemini_api_key');
+  if (saved) document.getElementById('apiKeyInput').value = saved;
+
+  // Date
+  const today = new Date();
+  currentDate = today;
+  const dp = document.getElementById('datePicker');
+  dp.value = formatDateInput(today);
+  updateDateHeading(today);
+
+  // Streak
+  updateStreak();
+  renderBookmarks();
+})();
+
+function formatDateInput(d) {
+  return d.toISOString().split('T')[0];
+}
+
+function monthName(d) {
+  return d.toLocaleDateString('en-US', { month: 'long' });
+}
+
+function dayNum(d) { return d.getDate(); }
+
+function updateDateHeading(d) {
+  const opts = { month: 'long', day: 'numeric' };
+  const str = d.toLocaleDateString('en-US', opts);
+  document.getElementById('dateHeading').textContent = `Today is ${str}`;
+  currentDateStr = str;
+}
+
+function onDateChange() {
+  const val = document.getElementById('datePicker').value;
+  if (!val) return;
+  currentDate = new Date(val + 'T12:00:00');
+  const opts = { month: 'long', day: 'numeric' };
+  const str = currentDate.toLocaleDateString('en-US', opts);
+  document.getElementById('dateHeading').textContent = `Exploring ${str}`;
+  document.getElementById('dateSubheading').textContent = 'Discover what happened on this day in history';
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) { toast('Please enter an API key.'); return; }
+  localStorage.setItem('gemini_api_key', key);
+  toast('✅ API key saved!');
+}
+
+function getApiKey() {
+  return localStorage.getItem('gemini_api_key') || document.getElementById('apiKeyInput').value.trim();
+}
+
+// ── Chips ──
+function toggleChip(el) {
+  el.classList.toggle('active');
+}
+
+function getActiveCategories() {
+  return [...document.querySelectorAll('.chip.active')].map(c => c.dataset.cat);
+}
+
+// ── Vietnam toggle ──
+function toggleVietnam() {
+  vietnamMode = document.getElementById('vietnamCheck').checked;
+  document.getElementById('vietnamToggle').classList.toggle('active', vietnamMode);
+}
+
+// ── Surprise me ──
+function surpriseMe() {
+  const start = new Date(1800, 0, 1);
+  const end = new Date();
+  const rand = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  currentDate = rand;
+  document.getElementById('datePicker').value = formatDateInput(rand);
+  const opts = { month: 'long', day: 'numeric' };
+  const str = rand.toLocaleDateString('en-US', opts);
+  document.getElementById('dateHeading').textContent = `Exploring ${str}`;
+  loadHistory();
+}
+
+// ── Load History ──
+async function loadHistory() {
+  const key = getApiKey();
+  if (!key) { toast('⚠️ Please enter your Gemini API key first.'); return; }
+
+  const cats = getActiveCategories();
+  if (cats.length === 0) { toast('⚠️ Select at least one category.'); return; }
+
+  const month = monthName(currentDate);
+  const day = dayNum(currentDate);
+
+  // Save API key if typed
+  if (document.getElementById('apiKeyInput').value.trim()) {
+    localStorage.setItem('gemini_api_key', document.getElementById('apiKeyInput').value.trim());
+  }
+
+  showLoading();
+  document.getElementById('loadBtn').disabled = true;
+
+  const prompt = `Tell me about historically significant events that happened on ${month} ${day} throughout history. Categories of interest: ${cats.join(', ')}.${vietnamMode ? ' Include at least one Vietnam-related event if possible.' : ''}
+
+Write the top event as an engaging 3-paragraph story — not bullet points. Make it feel like a mini documentary.
+
+Return JSON:
+{
+  "topEvent": {
+    "year": 1969,
+    "title": "Event title",
+    "story": "Three engaging paragraphs telling this as a story...",
+    "whyItMatters": "Connection to modern life (2-3 sentences)",
+    "funFact": "A surprising detail most people don't know",
+    "didYouKnow": "An intriguing follow-up question",
+    "didYouKnowAnswer": "The answer revealed"
+  },
+  "moreEvents": [
+    { "year": 1903, "event": "One-line description", "category": "Science & Tech" },
+    { "year": 1955, "event": "One-line description", "category": "World History" },
+    { "year": 1991, "event": "One-line description", "category": "Arts & Culture" },
+    { "year": 2004, "event": "One-line description", "category": "Sports" }
+  ]
+}
+Return only JSON, no markdown.`;
+
+  try {
+    const data = await callGemini(key, prompt);
+    currentTopEvent = data.topEvent;
+    renderHistory(data, month, day);
+    markVisited();
+    // Update time machine year
+    if (data.topEvent && data.topEvent.year) {
+      document.getElementById('tmYear').value = data.topEvent.year;
+    }
+  } catch (e) {
+    showError(e.message);
+  }
+
+  document.getElementById('loadBtn').disabled = false;
+}
+
+async function callGemini(key, prompt) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.9, maxOutputTokens: 2048 }
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${res.status}`);
+  }
+
+  const json = await res.json();
+  let text = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  // Strip markdown fences
+  text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+  return JSON.parse(text);
+}
+
+// ── Render ──
+function showLoading() {
+  document.getElementById('mainContent').innerHTML = `
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Consulting the chronicles of history…</p>
+    </div>`;
+}
+
+function showError(msg) {
+  document.getElementById('mainContent').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <h3>Something went wrong</h3>
+      <p style="max-width:360px;margin:0 auto">${escHtml(msg)}</p>
+    </div>`;
+}
+
+function renderHistory(data, month, day) {
+  const top = data.topEvent;
+  const more = data.moreEvents || [];
+
+  const storyParas = (top.story || '').split(/\n+/).filter(p => p.trim()).map(p =>
+    `<p>${escHtml(p)}</p>`
+  ).join('');
+
+  const isBookmarked = bookmarks.some(b => b.title === top.title && b.year === top.year);
+
+  let moreCards = '';
+  more.forEach((ev, i) => {
+    moreCards += `
+    <div class="event-card">
+      <div class="event-year">📅 ${ev.year}</div>
+      <div class="category-badge">${escHtml(ev.category || '')}</div>
+      <div class="event-text">${escHtml(ev.event || '')}</div>
+      <button class="read-more-btn" onclick="expandEvent(this, ${i})">▸ Read more</button>
+      <div class="expanded-text" id="expanded-${i}"></div>
+    </div>`;
+  });
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="hero-card" id="heroCard">
+      <div class="hero-label">✨ Top Story of the Day</div>
+      <div class="year-badge">${top.year}</div>
+      <div class="hero-title">${escHtml(top.title)}</div>
+      <div class="story-text">${storyParas}</div>
+      <div class="why-box">
+        <h4>🌐 Why it matters today</h4>
+        <p>${escHtml(top.whyItMatters || '')}</p>
+      </div>
+      <div class="fun-fact-box">
+        <div class="fun-fact-icon">💡</div>
+        <div><strong>Fun Fact:</strong> <p>${escHtml(top.funFact || '')}</p></div>
+      </div>
+      <div class="did-you-know">
+        <p class="question">🤔 Did you know? ${escHtml(top.didYouKnow || '')}</p>
+        <button class="reveal-btn" onclick="revealAnswer(this)">Reveal answer</button>
+        <div class="answer-text" id="dykAnswer">${escHtml(top.didYouKnowAnswer || '')}</div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-action" onclick="shareEvent()">📤 Share</button>
+        <button class="btn-action ${isBookmarked ? 'bookmarked' : ''}" id="bookmarkBtn" onclick="toggleBookmark()">
+          ${isBookmarked ? '🔖 Bookmarked' : '🔖 Bookmark'}
+        </button>
+      </div>
+    </div>
+    ${more.length > 0 ? `<div class="section-title">📚 More from this day</div><div class="more-grid">${moreCards}</div>` : ''}
+  `;
+
+  // Store more events for expand
+  window._moreEvents = more;
+  window._month = month;
+  window._day = day;
+}
+
+async function expandEvent(btn, idx) {
+  const box = document.getElementById(`expanded-${idx}`);
+  if (box.classList.contains('show')) {
+    box.classList.remove('show');
+    btn.textContent = '▸ Read more';
+    return;
+  }
+  const ev = window._moreEvents[idx];
+  btn.textContent = '▾ Loading…';
+
+  if (ev._expanded) {
+    box.innerHTML = ev._expanded;
+    box.classList.add('show');
+    btn.textContent = '▾ Collapse';
+    return;
+  }
+
+  const key = getApiKey();
+  const prompt = `In 2-3 sentences, tell me an engaging mini-story about this historical event: "${ev.event}" (${ev.year}, ${window._month} ${window._day}). Make it vivid and interesting. Return only plain text, no JSON, no markdown.`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const json = await res.json();
+    const text = json.candidates?.[0]?.content?.parts?.[0]?.text || 'Could not load details.';
+    ev._expanded = escHtml(text);
+    box.innerHTML = ev._expanded;
+    box.classList.add('show');
+    btn.textContent = '▾ Collapse';
+  } catch {
+    box.innerHTML = 'Could not load details.';
+    box.classList.add('show');
+    btn.textContent = '▾ Collapse';
+  }
+}
+
+function revealAnswer(btn) {
+  const ans = document.getElementById('dykAnswer');
+  ans.classList.add('show');
+  btn.style.display = 'none';
+}
+
+// ── Time Machine ──
+async function loadTimeMachine() {
+  const key = getApiKey();
+  if (!key) { toast('⚠️ Please enter your Gemini API key.'); return; }
+  const year = document.getElementById('tmYear').value;
+  if (!year) return;
+
+  const month = monthName(currentDate);
+  const day = dayNum(currentDate);
+
+  document.getElementById('tmContent').innerHTML = `<div class="tm-loading">Loading time machine…</div>`;
+
+  const prompt = `What was everyday life like on ${month} ${day}, ${year}? Give brief, interesting answers.
+Return JSON:
+{
+  "topSong": "Song title — Artist",
+  "technology": "What technology people used daily",
+  "breadPrice": "Average price of a loaf of bread",
+  "worldPopulation": "World population at the time",
+  "headline": "A typical newspaper headline from that week"
+}
+Return only JSON, no markdown.`;
+
+  try {
+    const data = await callGemini(key, prompt);
+    document.getElementById('tmContent').innerHTML = `
+      <div class="tm-item"><div class="tm-icon">🎵</div><div>
+        <span class="tm-label">Top song</span>
+        <span class="tm-value">${escHtml(data.topSong || '—')}</span>
+      </div></div>
+      <div class="tm-item"><div class="tm-icon">💻</div><div>
+        <span class="tm-label">Technology</span>
+        <span class="tm-value">${escHtml(data.technology || '—')}</span>
+      </div></div>
+      <div class="tm-item"><div class="tm-icon">🍞</div><div>
+        <span class="tm-label">Bread price</span>
+        <span class="tm-value">${escHtml(data.breadPrice || '—')}</span>
+      </div></div>
+      <div class="tm-item"><div class="tm-icon">🌏</div><div>
+        <span class="tm-label">World population</span>
+        <span class="tm-value">${escHtml(data.worldPopulation || '—')}</span>
+      </div></div>
+      <div class="tm-item"><div class="tm-icon">📰</div><div>
+        <span class="tm-label">Headline</span>
+        <span class="tm-value">${escHtml(data.headline || '—')}</span>
+      </div></div>
+    `;
+  } catch (e) {
+    document.getElementById('tmContent').innerHTML = `<p style="color:var(--text-light);font-size:0.82rem">Error: ${escHtml(e.message)}</p>`;
+  }
+}
+
+// ── Bookmarks ──
+function toggleBookmark() {
+  if (!currentTopEvent) return;
+  const ev = currentTopEvent;
+  const idx = bookmarks.findIndex(b => b.title === ev.title && b.year === ev.year);
+  if (idx > -1) {
+    bookmarks.splice(idx, 1);
+    document.getElementById('bookmarkBtn').textContent = '🔖 Bookmark';
+    document.getElementById('bookmarkBtn').classList.remove('bookmarked');
+    toast('Bookmark removed.');
+  } else {
+    if (bookmarks.length >= 10) { toast('⚠️ Max 10 bookmarks. Remove one first.'); return; }
+    bookmarks.push({ year: ev.year, title: ev.title, date: currentDateStr });
+    document.getElementById('bookmarkBtn').textContent = '🔖 Bookmarked';
+    document.getElementById('bookmarkBtn').classList.add('bookmarked');
+    toast('✅ Bookmarked!');
+  }
+  localStorage.setItem('history_bookmarks', JSON.stringify(bookmarks));
+  renderBookmarks();
+}
+
+function renderBookmarks() {
+  const list = document.getElementById('bookmarkList');
+  if (bookmarks.length === 0) {
+    list.innerHTML = '<p class="bk-empty">No bookmarks yet.</p>';
+    return;
+  }
+  list.innerHTML = '<ul class="bookmark-list">' +
+    bookmarks.map((b, i) => `
+      <li class="bookmark-item">
+        <span><strong>${b.year}</strong> — ${escHtml(b.title.slice(0, 50))}${b.title.length > 50 ? '…' : ''}</span>
+        <button class="bookmark-del" onclick="removeBookmark(${i})" title="Remove">×</button>
+      </li>`).join('') +
+    '</ul>';
+}
+
+function removeBookmark(i) {
+  bookmarks.splice(i, 1);
+  localStorage.setItem('history_bookmarks', JSON.stringify(bookmarks));
+  renderBookmarks();
+  toast('Bookmark removed.');
+}
+
+// ── Share ──
+function shareEvent() {
+  if (!currentTopEvent) return;
+  const text = `On ${currentDateStr}, ${currentTopEvent.year}: ${currentTopEvent.title}`;
+  navigator.clipboard.writeText(text).then(() => toast('📋 Copied to clipboard!')).catch(() => {
+    prompt('Copy this:', text);
+  });
+}
+
+// ── Streak ──
+function markVisited() {
+  const today = new Date().toDateString();
+  const data = JSON.parse(localStorage.getItem('history_streak') || '{"count":0,"last":""}');
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (data.last === today) return; // already counted
+  if (data.last === yesterday.toDateString()) {
+    data.count += 1;
+  } else {
+    data.count = 1;
+  }
+  data.last = today;
+  localStorage.setItem('history_streak', JSON.stringify(data));
+  updateStreakDisplay(data.count);
+}
+
+function updateStreak() {
+  const data = JSON.parse(localStorage.getItem('history_streak') || '{"count":0,"last":""}');
+  const today = new Date().toDateString();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  // Reset if missed a day
+  if (data.last && data.last !== today && data.last !== yesterday.toDateString()) {
+    data.count = 0;
+  }
+  updateStreakDisplay(data.count);
+}
+
+function updateStreakDisplay(n) {
+  document.getElementById('streakNum').textContent = n;
+  document.getElementById('streakPill').textContent = `🔥 ${n}-day streak`;
+}
+
+// ── Helpers ──
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, dur = 2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+</script>
+</body>
+</html>

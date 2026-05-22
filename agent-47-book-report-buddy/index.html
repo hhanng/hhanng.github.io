@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Book Report Buddy</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOP BAR */
+.topbar{background:#161b27;border-bottom:1px solid #aa88ff33;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:1.5rem}
+.logo-text{font-size:1rem;font-weight:700;color:#aa88ff;letter-spacing:.4px}
+.logo-sub{font-size:.7rem;color:#888;margin-top:1px}
+.api-wrap{display:flex;align-items:center;gap:8px}
+.api-wrap label{font-size:.72rem;color:#888;white-space:nowrap}
+.api-wrap input{background:#1e2535;border:1px solid #ffffff22;color:#fff;font-size:.75rem;padding:6px 10px;border-radius:4px;outline:none;width:210px;transition:.2s}
+.api-wrap input:focus{border-color:#aa88ff}
+.api-wrap .save-btn{background:transparent;border:1px solid #aa88ff;color:#aa88ff;font-size:.72rem;padding:6px 12px;border-radius:4px;cursor:pointer;transition:.2s}
+.api-wrap .save-btn:hover{background:#aa88ff;color:#0f1117}
+.api-status{font-size:.7rem;padding:3px 8px;border-radius:10px}
+.api-status.ok{color:#00ff88;background:#00ff8820;border:1px solid #00ff8844}
+.api-status.no{color:#888;background:#ffffff10;border:1px solid #ffffff22}
+
+/* LAYOUT */
+.layout{flex:1;display:grid;grid-template-columns:260px 1fr;min-height:0}
+@media(max-width:720px){.layout{grid-template-columns:1fr}}
+
+/* SIDEBAR */
+.sidebar{background:#161b27;border-right:1px solid #ffffff0a;display:flex;flex-direction:column;overflow-y:auto}
+.sb-sec{padding:12px 14px;border-bottom:1px solid #ffffff08}
+.sb-title{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:8px}
+
+/* BOOK ENTRY */
+.book-input{width:100%;background:#1e2535;border:1px solid #ffffff22;color:#fff;font-size:.8rem;padding:7px 10px;border-radius:5px;outline:none;font-family:inherit;transition:.2s;margin-bottom:6px}
+.book-input:focus{border-color:#aa88ff}
+select.book-input{cursor:pointer}
+
+/* RECENT BOOKS */
+.recent-book{display:flex;align-items:center;gap:8px;padding:7px 0;cursor:pointer;border-bottom:1px solid #ffffff06;transition:.2s}
+.recent-book:hover .rb-title{color:#aa88ff}
+.rb-emoji{font-size:1rem;flex-shrink:0}
+.rb-title{font-size:.78rem;color:#aaa;flex:1}
+.rb-del{background:transparent;border:none;color:#333;font-size:.72rem;cursor:pointer;padding:0 2px}
+.rb-del:hover{color:#ff4466}
+
+/* POPULAR BOOKS */
+.pop-btn{width:100%;text-align:left;background:transparent;border:1px solid #ffffff0f;border-radius:5px;padding:7px 10px;margin-bottom:5px;cursor:pointer;font-family:inherit;transition:.2s;display:flex;align-items:center;gap:8px}
+.pop-btn:hover{border-color:#aa88ff44;background:#aa88ff08}
+.pop-icon{font-size:.95rem}
+.pop-info{flex:1}
+.pop-title{font-size:.78rem;color:#ccc;font-weight:600}
+.pop-grade{font-size:.65rem;color:#666}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+
+/* TABS */
+.tab-row{display:flex;background:#161b27;border-bottom:1px solid #ffffff0a;overflow-x:auto}
+.tab-btn{background:transparent;border:none;color:#888;font-size:.75rem;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;font-family:inherit;white-space:nowrap}
+.tab-btn:hover{color:#aa88ff}
+.tab-btn.active{color:#aa88ff;border-bottom-color:#aa88ff}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+
+/* SEARCH HERO */
+.hero{background:#161b27;border:1px solid #ffffff0f;border-radius:10px;padding:20px}
+.hero-title{font-size:.95rem;font-weight:700;color:#aa88ff;margin-bottom:4px}
+.hero-sub{font-size:.78rem;color:#888;margin-bottom:14px}
+.hero-row{display:flex;gap:8px;flex-wrap:wrap}
+.hero-input{flex:2;min-width:180px;background:#1e2535;border:1px solid #ffffff22;color:#fff;font-size:.88rem;padding:10px 14px;border-radius:6px;outline:none;font-family:inherit;transition:.2s}
+.hero-input:focus{border-color:#aa88ff}
+.hero-select{flex:1;min-width:120px;background:#1e2535;border:1px solid #ffffff22;color:#fff;font-size:.82rem;padding:10px 10px;border-radius:6px;outline:none;font-family:inherit;cursor:pointer}
+.go-btn{background:#aa88ff;border:none;color:#0f1117;font-size:.85rem;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;transition:.2s;font-family:inherit;white-space:nowrap}
+.go-btn:hover{background:#bb99ff}
+.go-btn:disabled{opacity:.4;cursor:not-allowed;background:#aa88ff}
+
+/* RESULT CARDS */
+.r-card{background:#161b27;border:1px solid #ffffff0f;border-radius:8px;overflow:hidden}
+.r-card-head{background:#1e2535;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff0a}
+.r-card-title{font-size:.82rem;font-weight:600;color:#aa88ff}
+.r-card-body{padding:14px;font-size:.83rem;line-height:1.75;color:#ccc}
+
+/* SECTION LABEL */
+.slbl{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#555;margin:14px 0 6px}
+.slbl:first-child{margin-top:0}
+
+/* BOXES */
+.purple-box{background:#aa88ff0f;border-left:3px solid #aa88ff;border-radius:0 5px 5px 0;padding:10px 12px;margin:6px 0;font-size:.83rem;line-height:1.7}
+.green-box{background:#00ff8810;border-left:3px solid #00ff88;border-radius:0 5px 5px 0;padding:10px 12px;margin:6px 0;font-size:.83rem;line-height:1.7}
+.amber-box{background:#ffaa0010;border-left:3px solid #ffaa00;border-radius:0 5px 5px 0;padding:10px 12px;margin:6px 0;font-size:.83rem;line-height:1.7}
+.cyan-box{background:#00d4ff10;border-left:3px solid #00d4ff;border-radius:0 5px 5px 0;padding:10px 12px;margin:6px 0;font-size:.83rem;line-height:1.7}
+.box-lbl{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.purple-box .box-lbl{color:#aa88ff}
+.green-box .box-lbl{color:#00ff88}
+.amber-box .box-lbl{color:#ffaa00}
+.cyan-box .box-lbl{color:#00d4ff}
+
+/* CHARACTER CARDS */
+.char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:6px 0}
+.char-card{background:#1e2535;border:1px solid #ffffff0f;border-radius:6px;padding:10px 12px;border-top:3px solid #aa88ff}
+.char-name{font-size:.85rem;font-weight:700;color:#aa88ff;margin-bottom:3px}
+.char-role{font-size:.68rem;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.char-desc{font-size:.78rem;color:#bbb;line-height:1.5}
+
+/* THEME PILLS */
+.theme-grid{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.theme-pill{background:#aa88ff15;border:1px solid #aa88ff33;border-radius:16px;padding:5px 13px;font-size:.78rem;color:#cc99ff}
+
+/* QUOTE CARDS */
+.quote-card{background:#0f1117;border:1px solid #ffffff0a;border-radius:6px;padding:12px 14px;margin:6px 0;border-left:4px solid #aa88ff55}
+.quote-text{font-size:.88rem;color:#e0e0e0;font-style:italic;line-height:1.7;margin-bottom:5px}
+.quote-src{font-size:.7rem;color:#666}
+.quote-meaning{font-size:.78rem;color:#aaa;margin-top:5px}
+
+/* DISCUSSION QUESTIONS */
+.q-item{background:#1e2535;border-radius:6px;padding:10px 12px;margin:5px 0;display:flex;gap:10px;align-items:flex-start;cursor:pointer;transition:.2s;border:1px solid #ffffff0a}
+.q-item:hover{border-color:#aa88ff33;background:#aa88ff08}
+.q-num{color:#aa88ff;font-weight:700;font-size:.8rem;flex-shrink:0;margin-top:1px}
+.q-text{font-size:.82rem;color:#ccc;line-height:1.5}
+.q-expand{font-size:.72rem;color:#555;margin-top:5px;display:none;line-height:1.5}
+.q-item.open .q-expand{display:block;color:#aaa}
+
+/* OUTLINE */
+.outline-section{margin:6px 0}
+.outline-head{background:#1e2535;border-radius:5px 5px 0 0;padding:8px 12px;font-size:.78rem;font-weight:700;color:#aa88ff;border:1px solid #aa88ff33;border-bottom:none}
+.outline-body{background:#0f1117;border:1px solid #ffffff0a;border-radius:0 0 5px 5px;padding:10px 12px;font-size:.8rem;line-height:1.7;color:#ccc}
+
+/* PASSAGE EXPLAINER */
+.passage-area{width:100%;background:#1e2535;border:1px solid #ffffff22;color:#e0e0e0;font-size:.83rem;padding:10px;border-radius:6px;outline:none;font-family:inherit;min-height:90px;resize:vertical;line-height:1.6;transition:.2s}
+.passage-area:focus{border-color:#aa88ff}
+
+/* COPY BTN */
+.copy-btn{background:transparent;border:1px solid #ffffff22;color:#666;font-size:.68rem;padding:3px 9px;border-radius:4px;cursor:pointer;transition:.2s}
+.copy-btn:hover{border-color:#aa88ff;color:#aa88ff}
+
+/* BTN */
+.btn{background:transparent;border:1px solid #aa88ff;color:#aa88ff;font-size:.78rem;padding:7px 16px;border-radius:5px;cursor:pointer;transition:.2s;font-family:inherit}
+.btn:hover:not(:disabled){background:#aa88ff;color:#0f1117}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.green{border-color:#00ff88;color:#00ff88}
+.btn.green:hover:not(:disabled){background:#00ff88;color:#0f1117}
+.btn.sm{font-size:.7rem;padding:4px 10px}
+
+/* LOADING */
+.loading{text-align:center;padding:30px;color:#555}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid #ffffff15;border-top-color:#aa88ff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ALERT */
+.alert{padding:9px 12px;border-radius:5px;font-size:.78rem}
+.alert.error{background:#ff446620;border:1px solid #ff446655;color:#ff4466}
+.alert.info{background:#aa88ff15;border:1px solid #aa88ff33;color:#aa88ff}
+
+/* WELCOME */
+.welcome{text-align:center;padding:50px 20px;max-width:480px;margin:0 auto}
+.welcome-emoji{font-size:3rem;margin-bottom:12px}
+.welcome h2{font-size:1rem;color:#aa88ff;margin-bottom:8px}
+.welcome p{font-size:.82rem;color:#888;line-height:1.7}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:#0f1117}
+::-webkit-scrollbar-thumb{background:#ffffff18;border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-icon">📚</span>
+    <div>
+      <div class="logo-text">Book Report Buddy</div>
+      <div class="logo-sub">Understand &amp; discuss any school-assigned book</div>
+    </div>
+  </div>
+  <div class="api-wrap">
+    <label>Gemini API Key</label>
+    <input type="password" id="api-key" placeholder="AIza…" autocomplete="off"/>
+    <button class="save-btn" onclick="saveKey()">Save</button>
+    <span class="api-status no" id="api-status">No key</span>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-sec">
+      <div class="sb-title">Look Up a Book</div>
+      <input class="book-input" id="sb-title" placeholder="Book title…" onkeydown="if(event.key==='Enter')quickLoad()"/>
+      <input class="book-input" id="sb-author" placeholder="Author (optional)"/>
+      <select class="book-input" id="sb-grade">
+        <option value="">Grade level (optional)</option>
+        <option value="6th-7th grade">6th–7th Grade</option>
+        <option value="8th-9th grade">8th–9th Grade</option>
+        <option value="10th-12th grade">10th–12th Grade</option>
+        <option value="college">College</option>
+      </select>
+      <button class="btn" style="width:100%;margin-top:2px" onclick="quickLoad()" id="sb-go-btn" disabled>📖 Load Book</button>
+    </div>
+
+    <div class="sb-sec">
+      <div class="sb-title">📌 Popular Reads</div>
+      <button class="pop-btn" onclick="loadPopular('To Kill a Mockingbird','Harper Lee','8th-9th grade')">
+        <span class="pop-icon">🐦</span><div class="pop-info"><div class="pop-title">To Kill a Mockingbird</div><div class="pop-grade">Harper Lee · 8th–9th</div></div>
+      </button>
+      <button class="pop-btn" onclick="loadPopular('The Great Gatsby','F. Scott Fitzgerald','10th-12th grade')">
+        <span class="pop-icon">🟢</span><div class="pop-info"><div class="pop-title">The Great Gatsby</div><div class="pop-grade">Fitzgerald · 10th–12th</div></div>
+      </button>
+      <button class="pop-btn" onclick="loadPopular('Of Mice and Men','John Steinbeck','8th-9th grade')">
+        <span class="pop-icon">🐭</span><div class="pop-info"><div class="pop-title">Of Mice and Men</div><div class="pop-grade">Steinbeck · 8th–9th</div></div>
+      </button>
+      <button class="pop-btn" onclick="loadPopular('Romeo and Juliet','William Shakespeare','8th-9th grade')">
+        <span class="pop-icon">🌹</span><div class="pop-info"><div class="pop-title">Romeo and Juliet</div><div class="pop-grade">Shakespeare · 8th–9th</div></div>
+      </button>
+      <button class="pop-btn" onclick="loadPopular('The Outsiders','S.E. Hinton','6th-7th grade')">
+        <span class="pop-icon">🌅</span><div class="pop-info"><div class="pop-title">The Outsiders</div><div class="pop-grade">S.E. Hinton · 6th–7th</div></div>
+      </button>
+      <button class="pop-btn" onclick="loadPopular('Lord of the Flies','William Golding','10th-12th grade')">
+        <span class="pop-icon">🪰</span><div class="pop-info"><div class="pop-title">Lord of the Flies</div><div class="pop-grade">Golding · 10th–12th</div></div>
+      </button>
+      <button class="pop-btn" onclick="loadPopular('The Giver','Lois Lowry','6th-7th grade')">
+        <span class="pop-icon">🎁</span><div class="pop-info"><div class="pop-title">The Giver</div><div class="pop-grade">Lois Lowry · 6th–7th</div></div>
+      </button>
+      <button class="pop-btn" onclick="loadPopular('1984','George Orwell','10th-12th grade')">
+        <span class="pop-icon">👁️</span><div class="pop-info"><div class="pop-title">1984</div><div class="pop-grade">Orwell · 10th–12th</div></div>
+      </button>
+    </div>
+
+    <div class="sb-sec" style="flex:1">
+      <div class="sb-title">🕐 Recent Books</div>
+      <div id="recent-list"><div style="font-size:.72rem;color:#555">No recent books yet.</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="tab-row" id="tab-row" style="display:none">
+      <button class="tab-btn active" onclick="showTab('overview',this)">📖 Overview</button>
+      <button class="tab-btn" onclick="showTab('characters',this)">👥 Characters</button>
+      <button class="tab-btn" onclick="showTab('themes',this)">💡 Themes & Symbols</button>
+      <button class="tab-btn" onclick="showTab('quotes',this)">💬 Key Quotes</button>
+      <button class="tab-btn" onclick="showTab('discuss',this)">🗣️ Discussion Qs</button>
+      <button class="tab-btn" onclick="showTab('outline',this)">✍️ Report Outline</button>
+      <button class="tab-btn" onclick="showTab('passage',this)">🔍 Explain Passage</button>
+    </div>
+
+    <div class="content" id="main-content">
+      <div class="welcome" id="welcome-msg">
+        <div class="welcome-emoji">📚</div>
+        <h2>Enter your book to get started</h2>
+        <p>Type a book title in the sidebar or pick a popular read. I'll explain the story, characters, themes, and help you write a great report.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GEMINI_URL = k=>`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
+let apiKey='', currentBook=null, bookData={}, recentBooks=[];
+
+// ==================== INIT ====================
+(function(){
+  const s=localStorage.getItem('book-buddy-v1');
+  if(s){try{const d=JSON.parse(s);if(d.key){apiKey=d.key;document.getElementById('api-key').value=d.key;updateStatus(true);}if(d.recent)recentBooks=d.recent;}catch(e){}}
+  renderRecent();
+})();
+
+function saveKey(){apiKey=document.getElementById('api-key').value.trim();updateStatus(!!apiKey);persist();}
+function updateStatus(ok){
+  const el=document.getElementById('api-status');
+  el.textContent=ok?'✓ Key saved':'No key';
+  el.className='api-status '+(ok?'ok':'no');
+  document.getElementById('sb-go-btn').disabled=!ok;
+}
+function quickLoad(){
+  const t=document.getElementById('sb-title').value.trim();
+  if(!t||!apiKey)return;
+  loadBook(t,document.getElementById('sb-author').value.trim(),document.getElementById('sb-grade').value);
+}
+function loadPopular(title,author,grade){
+  document.getElementById('sb-title').value=title;
+  document.getElementById('sb-author').value=author;
+  document.getElementById('sb-grade').value=grade;
+  loadBook(title,author,grade);
+}
+function showTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTab(name);
+}
+function renderRecent(){
+  const el=document.getElementById('recent-list');
+  if(!recentBooks.length){el.innerHTML='<div style="font-size:.72rem;color:#555">No recent books yet.</div>';return;}
+  el.innerHTML=recentBooks.slice(0,6).map(b=>`
+    <div class="recent-book" onclick="loadBook('${ej(b.title)}','${ej(b.author||'')}','${ej(b.grade||'')}')">
+      <span class="rb-emoji">📗</span>
+      <span class="rb-title">${eh(b.title)}</span>
+    </div>`).join('');
+}
+function persist(){try{localStorage.setItem('book-buddy-v1',JSON.stringify({key:apiKey,recent:recentBooks}));}catch(e){}}
+
+// ==================== LOAD BOOK ====================
+async function loadBook(title,author,grade){
+  if(!apiKey)return;
+  currentBook={title,author,grade};
+  bookData={};
+  document.getElementById('tab-row').style.display='flex';
+  document.getElementById('welcome-msg') && (document.getElementById('welcome-msg').style.display='none');
+  showTabActive('overview');
+  setLoading('Loading overview for "'+title+'"…');
+
+  const prompt=`You are a friendly study helper for a student (${grade||'high school'} level) reading "${title}"${author?' by '+author:''}.
+
+Return ONLY valid JSON (no markdown):
+{
+  "title": "${title}",
+  "author": "${author||''}",
+  "genre": "genre(s)",
+  "year": "publication year",
+  "setting": "time and place in 1 sentence",
+  "summary": "3–4 sentence plain-English summary — no spoilers about the very end",
+  "full_summary": "6–8 sentence complete summary including the ending",
+  "conflict": "The main conflict in 1–2 sentences",
+  "climax": "The climax of the story in 1 sentence",
+  "resolution": "How it ends in 1–2 sentences",
+  "why_assigned": "1–2 sentences explaining why schools assign this book",
+  "characters": [
+    {"name":"","role":"protagonist|antagonist|supporting","description":"2 sentences about personality and role in the story"}
+  ],
+  "themes": [
+    {"theme":"theme name","explanation":"2–3 sentence explanation with evidence from the book"}
+  ],
+  "symbols": [
+    {"symbol":"object or idea","meaning":"what it represents in 1–2 sentences"}
+  ],
+  "quotes": [
+    {"text":"exact or paraphrased quote","source":"who said it / chapter","meaning":"what it means and why it matters"}
+  ],
+  "discussion_questions": [
+    {"question":"question text","hint":"a hint or talking point to help answer it"}
+  ],
+  "report_outline": {
+    "intro": "What to write in the introduction (2–3 sentences of guidance)",
+    "body_paragraphs": ["Body paragraph 1 topic + what to include","Body paragraph 2 topic + what to include","Body paragraph 3 topic + what to include"],
+    "conclusion": "What to write in the conclusion (1–2 sentences of guidance)"
+  },
+  "vocab": [
+    {"word":"difficult word from the book","definition":"simple definition"}
+  ]
+}
+Include 4–6 characters, 3–5 themes, 3–4 symbols, 4–5 quotes, 6–8 discussion questions, 5–8 vocab words.`;
+
+  try{
+    const raw=await callGemini(prompt);
+    bookData=parseJSON(raw);
+    addRecent(title,author,grade);
+    renderTab('overview');
+  }catch(e){
+    document.getElementById('main-content').innerHTML=`<div class="alert error">Error: ${eh(e.message)}</div>`;
+  }
+}
+
+// ==================== RENDER TABS ====================
+function showTabActive(name){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    const names=['overview','characters','themes','quotes','discuss','outline','passage'];
+    b.classList.toggle('active',names[i]===name);
+  });
+  renderTab(name);
+}
+
+function renderTab(name){
+  const c=document.getElementById('main-content');
+  if(!bookData.title&&name!=='passage'){setLoading('Loading…');return;}
+  if(name==='overview') renderOverview(c);
+  else if(name==='characters') renderCharacters(c);
+  else if(name==='themes') renderThemes(c);
+  else if(name==='quotes') renderQuotes(c);
+  else if(name==='discuss') renderDiscuss(c);
+  else if(name==='outline') renderOutline(c);
+  else if(name==='passage') renderPassage(c);
+}
+
+function setLoading(msg){
+  document.getElementById('main-content').innerHTML=`<div class="loading"><div class="spinner"></div><div>${eh(msg)}</div></div>`;
+}
+
+function renderOverview(c){
+  const d=bookData;
+  c.innerHTML=`
+    <div class="r-card">
+      <div class="r-card-head">
+        <span class="r-card-title">📖 ${eh(d.title)} ${d.author?'— '+eh(d.author):''}</span>
+        <span style="font-size:.72rem;color:#666">${eh(d.genre||'')} · ${eh(d.year||'')}</span>
+      </div>
+      <div class="r-card-body">
+        <div class="slbl">Setting</div>
+        <div class="purple-box">${eh(d.setting||'')}</div>
+        <div class="slbl">Short Summary (no spoilers)</div>
+        <div class="purple-box">${eh(d.summary||'')}</div>
+        <div class="slbl">Full Summary</div>
+        <div class="purple-box">${eh(d.full_summary||'')}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+          <div><div class="slbl">Main Conflict</div><div class="amber-box">${eh(d.conflict||'')}</div></div>
+          <div><div class="slbl">Climax</div><div class="cyan-box">${eh(d.climax||'')}</div></div>
+        </div>
+        <div class="slbl">Resolution</div>
+        <div class="green-box">${eh(d.resolution||'')}</div>
+        <div class="slbl">Why Schools Assign This Book</div>
+        <div class="amber-box"><div class="box-lbl" style="color:#ffaa00">📌 Good to know</div>${eh(d.why_assigned||'')}</div>
+      </div>
+    </div>`;
+}
+
+function renderCharacters(c){
+  const chars=bookData.characters||[];
+  c.innerHTML=`<div class="r-card"><div class="r-card-head"><span class="r-card-title">👥 Characters</span></div>
+    <div class="r-card-body">
+      <div class="char-grid">${chars.map(ch=>`
+        <div class="char-card">
+          <div class="char-name">${eh(ch.name)}</div>
+          <div class="char-role">${eh(ch.role)}</div>
+          <div class="char-desc">${eh(ch.description)}</div>
+        </div>`).join('')}
+      </div>
+    </div></div>`;
+}
+
+function renderThemes(c){
+  const themes=bookData.themes||[];
+  const symbols=bookData.symbols||[];
+  c.innerHTML=`<div class="r-card"><div class="r-card-head"><span class="r-card-title">💡 Themes</span></div>
+    <div class="r-card-body">
+      <div class="theme-grid">${themes.map(t=>`<div class="theme-pill">${eh(t.theme)}</div>`).join('')}</div>
+      ${themes.map(t=>`
+        <div class="purple-box" style="margin-top:8px">
+          <div class="box-lbl">📌 ${eh(t.theme)}</div>
+          ${eh(t.explanation)}
+        </div>`).join('')}
+    </div></div>
+  <div class="r-card"><div class="r-card-head"><span class="r-card-title">🔮 Symbols</span></div>
+    <div class="r-card-body">
+      ${symbols.map(s=>`
+        <div class="amber-box">
+          <div class="box-lbl">🔸 ${eh(s.symbol)}</div>
+          ${eh(s.meaning)}
+        </div>`).join('')}
+    </div></div>`;
+}
+
+function renderQuotes(c){
+  const quotes=bookData.quotes||[];
+  c.innerHTML=`<div class="r-card"><div class="r-card-head"><span class="r-card-title">💬 Key Quotes</span></div>
+    <div class="r-card-body">
+      ${quotes.map(q=>`
+        <div class="quote-card">
+          <div class="quote-text">"${eh(q.text)}"</div>
+          <div class="quote-src">${eh(q.source)}</div>
+          <div class="quote-meaning">💡 ${eh(q.meaning)}</div>
+        </div>`).join('')}
+    </div></div>`;
+}
+
+function renderDiscuss(c){
+  const qs=bookData.discussion_questions||[];
+  c.innerHTML=`<div class="r-card"><div class="r-card-head"><span class="r-card-title">🗣️ Discussion Questions</span>
+      <span style="font-size:.68rem;color:#666">Click a question to see a hint</span></div>
+    <div class="r-card-body">
+      ${qs.map((q,i)=>`
+        <div class="q-item" id="qi-${i}" onclick="toggleQ(${i})">
+          <span class="q-num">Q${i+1}</span>
+          <div>
+            <div class="q-text">${eh(q.question)}</div>
+            <div class="q-expand" id="qe-${i}">💡 Hint: ${eh(q.hint)}</div>
+          </div>
+        </div>`).join('')}
+    </div></div>`;
+}
+
+function toggleQ(i){
+  const el=document.getElementById('qi-'+i);
+  el.classList.toggle('open');
+}
+
+function renderOutline(c){
+  const o=bookData.report_outline||{};
+  const bp=o.body_paragraphs||[];
+  c.innerHTML=`<div class="r-card"><div class="r-card-head"><span class="r-card-title">✍️ Report Outline</span>
+      <button class="copy-btn" onclick="copyOutline()">Copy All</button></div>
+    <div class="r-card-body">
+      <div class="outline-section">
+        <div class="outline-head">I. Introduction</div>
+        <div class="outline-body">${eh(o.intro||'')}</div>
+      </div>
+      ${bp.map((p,i)=>`
+        <div class="outline-section">
+          <div class="outline-head">II.${i+1} Body Paragraph ${i+1}</div>
+          <div class="outline-body">${eh(p)}</div>
+        </div>`).join('')}
+      <div class="outline-section">
+        <div class="outline-head">${numToRoman(bp.length+2)}. Conclusion</div>
+        <div class="outline-body">${eh(o.conclusion||'')}</div>
+      </div>
+      ${bookData.vocab&&bookData.vocab.length?`
+      <div class="slbl" style="margin-top:14px">📚 Vocabulary from the Book</div>
+      ${bookData.vocab.map(v=>`<div class="amber-box" style="display:flex;gap:10px;align-items:baseline">
+        <span style="color:#ffaa00;font-weight:700;min-width:120px">${eh(v.word)}</span>
+        <span>${eh(v.definition)}</span></div>`).join('')}`:''}
+    </div></div>`;
+}
+
+function renderPassage(c){
+  c.innerHTML=`<div class="r-card"><div class="r-card-head"><span class="r-card-title">🔍 Explain a Passage</span></div>
+    <div class="r-card-body">
+      <div class="slbl">Paste a confusing sentence or paragraph</div>
+      <textarea class="passage-area" id="passage-input" placeholder="Paste any confusing text from the book here…"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn" onclick="explainPassage()" id="explain-btn" ${!apiKey?'disabled':''}>🔍 Explain This</button>
+        ${currentBook?`<span style="font-size:.72rem;color:#666;align-self:center">Book: ${eh(currentBook.title)}</span>`:''}
+      </div>
+      <div id="passage-result" style="margin-top:10px"></div>
+    </div></div>`;
+}
+
+async function explainPassage(){
+  const text=document.getElementById('passage-input').value.trim();
+  if(!text||!apiKey)return;
+  const btn=document.getElementById('explain-btn');
+  btn.disabled=true;btn.textContent='Explaining…';
+  const context=currentBook?`from "${currentBook.title}"${currentBook.author?' by '+currentBook.author:''}`:' from a school book';
+  const prompt=`A student is reading a passage${context} and needs help understanding it.
+
+Passage: "${text}"
+
+Explain it simply in plain English. Return JSON:
+{
+  "plain_english": "What this passage means in simple words (2–3 sentences)",
+  "context": "Why this moment matters in the story (1–2 sentences)",
+  "literary_devices": ["device name: what it is and how it's used here"],
+  "key_words": [{"word":"difficult word","meaning":"simple definition"}]
+}`;
+  try{
+    const raw=await callGemini(prompt);
+    const d=parseJSON(raw);
+    document.getElementById('passage-result').innerHTML=`
+      <div class="purple-box"><div class="box-lbl">📖 Plain English</div>${eh(d.plain_english||'')}</div>
+      <div class="cyan-box"><div class="box-lbl">🔗 Why It Matters</div>${eh(d.context||'')}</div>
+      ${(d.literary_devices||[]).length?`<div class="green-box"><div class="box-lbl">✍️ Literary Devices</div>${(d.literary_devices||[]).map(l=>`<div style="margin:3px 0">• ${eh(l)}</div>`).join('')}</div>`:''}
+      ${(d.key_words||[]).length?`<div class="amber-box"><div class="box-lbl">📚 Key Words</div>${(d.key_words||[]).map(w=>`<div style="display:flex;gap:8px;margin:2px 0"><span style="color:#ffaa00;font-weight:600;min-width:100px">${eh(w.word)}</span><span>${eh(w.meaning)}</span></div>`).join('')}</div>`:''}`;
+  }catch(e){
+    document.getElementById('passage-result').innerHTML=`<div class="alert error">${eh(e.message)}</div>`;
+  }finally{btn.disabled=false;btn.textContent='🔍 Explain This';}
+}
+
+function copyOutline(){
+  const o=bookData.report_outline||{};
+  const bp=o.body_paragraphs||[];
+  const text=`Book Report Outline: ${bookData.title}\n\nI. Introduction\n${o.intro}\n\n${bp.map((p,i)=>`II.${i+1} Body Paragraph ${i+1}\n${p}`).join('\n\n')}\n\n${numToRoman(bp.length+2)}. Conclusion\n${o.conclusion}`;
+  navigator.clipboard.writeText(text).catch(()=>{});
+}
+
+function addRecent(title,author,grade){
+  recentBooks=[{title,author,grade},...recentBooks.filter(b=>b.title!==title)].slice(0,10);
+  persist();renderRecent();
+}
+
+function numToRoman(n){return['I','II','III','IV','V','VI','VII','VIII'][n-1]||String(n);}
+
+async function callGemini(prompt){
+  const res=await fetch(GEMINI_URL(apiKey),{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.4,maxOutputTokens:2500}})});
+  if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error '+res.status);}
+  const d=await res.json();
+  return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+function parseJSON(raw){return JSON.parse(raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim());}
+function eh(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function ej(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');}
+</script>
+</body>
+</html>

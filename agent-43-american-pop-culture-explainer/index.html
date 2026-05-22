@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>American Pop Culture Explainer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOP BAR */
+.topbar{background:#161b27;border-bottom:1px solid #ff446633;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:1.6rem}
+.logo-text{font-size:1.05rem;font-weight:700;color:#ff4466;letter-spacing:.5px}
+.logo-sub{font-size:.7rem;color:#888;margin-top:1px}
+.api-wrap{display:flex;align-items:center;gap:8px}
+.api-wrap label{font-size:.72rem;color:#888;white-space:nowrap}
+.api-wrap input{background:#1e2535;border:1px solid #ffffff22;color:#fff;font-size:.75rem;padding:6px 10px;border-radius:4px;outline:none;width:210px;transition:.2s}
+.api-wrap input:focus{border-color:#ff4466}
+.api-wrap button{background:transparent;border:1px solid #ff4466;color:#ff4466;font-size:.72rem;padding:6px 12px;border-radius:4px;cursor:pointer;transition:.2s;white-space:nowrap}
+.api-wrap button:hover{background:#ff4466;color:#0f1117}
+.api-status{font-size:.7rem;padding:3px 8px;border-radius:10px}
+.api-status.ok{color:#00ff88;background:#00ff8820;border:1px solid #00ff8844}
+.api-status.no{color:#888;background:#ffffff10;border:1px solid #ffffff22}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;min-height:0;overflow:hidden}
+@media(max-width:700px){.layout{flex-direction:column}}
+
+/* SIDEBAR */
+.sidebar{width:260px;min-width:220px;background:#161b27;border-right:1px solid #ffffff0f;display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-section{padding:12px 14px;border-bottom:1px solid #ffffff0a}
+.sidebar-title{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:8px}
+
+/* CATEGORY CHIPS */
+.cat-chip{display:block;width:100%;text-align:left;background:transparent;border:1px solid #ffffff11;color:#aaa;font-size:.78rem;padding:7px 10px;border-radius:5px;cursor:pointer;margin-bottom:5px;transition:.2s;font-family:inherit}
+.cat-chip:hover{border-color:#ff446644;color:#ff4466}
+.cat-chip.active{background:#ff446622;border-color:#ff4466;color:#ff4466}
+
+/* TRENDING LIST */
+.trend-item{display:flex;align-items:center;gap:8px;padding:7px 0;cursor:pointer;border-bottom:1px solid #ffffff06;transition:.2s}
+.trend-item:hover .trend-text{color:#ff4466}
+.trend-num{font-size:.65rem;color:#555;width:18px;text-align:right;flex-shrink:0}
+.trend-text{font-size:.78rem;color:#aaa}
+.trend-badge{font-size:.6rem;padding:1px 6px;border-radius:8px;margin-left:auto;flex-shrink:0}
+.trend-badge.hot{background:#ff446633;color:#ff4466;border:1px solid #ff446655}
+.trend-badge.new{background:#00d4ff33;color:#00d4ff;border:1px solid #00d4ff55}
+.trend-badge.classic{background:#ffaa0033;color:#ffaa00;border:1px solid #ffaa0055}
+
+/* MAIN CONTENT */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* SEARCH BAR */
+.search-bar{padding:14px 16px;border-bottom:1px solid #ffffff0a;background:#161b27}
+.search-row{display:flex;gap:8px}
+.search-input{flex:1;background:#1e2535;border:1px solid #ffffff22;color:#fff;font-size:.88rem;padding:10px 14px;border-radius:6px;outline:none;transition:.2s;font-family:inherit}
+.search-input:focus{border-color:#ff4466}
+.search-btn{background:#ff4466;border:none;color:#fff;font-size:.82rem;padding:10px 20px;border-radius:6px;cursor:pointer;transition:.2s;font-family:inherit;font-weight:600;white-space:nowrap}
+.search-btn:hover{background:#ff2244}
+.search-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* CATEGORY PILLS */
+.pill-row{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid #ffffff0a;background:#0f1117}
+.pill{background:#1e2535;border:1px solid #ffffff15;color:#888;font-size:.7rem;padding:4px 12px;border-radius:12px;cursor:pointer;transition:.2s;white-space:nowrap}
+.pill:hover{border-color:#ff446644;color:#ff4466}
+.pill.active{background:#ff446222;border-color:#ff4466;color:#ff4466}
+
+/* RESULT AREA */
+.result-area{flex:1;overflow-y:auto;padding:16px}
+
+/* WELCOME */
+.welcome{text-align:center;padding:40px 20px;max-width:560px;margin:0 auto}
+.welcome-emoji{font-size:3.5rem;margin-bottom:14px}
+.welcome h2{font-size:1.1rem;color:#ff4466;margin-bottom:8px}
+.welcome p{font-size:.82rem;color:#888;line-height:1.7;margin-bottom:16px}
+.suggestion-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px}
+.suggestion-btn{background:#1e2535;border:1px solid #ffffff15;color:#aaa;font-size:.75rem;padding:7px 14px;border-radius:16px;cursor:pointer;transition:.2s}
+.suggestion-btn:hover{border-color:#ff4466;color:#ff4466;background:#ff446211}
+
+/* CARD */
+.result-card{background:#161b27;border:1px solid #ffffff11;border-radius:10px;overflow:hidden;margin-bottom:12px;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card-header{padding:14px 16px;border-bottom:1px solid #ffffff0a;display:flex;align-items:flex-start;gap:10px}
+.card-emoji{font-size:1.8rem;flex-shrink:0;margin-top:2px}
+.card-meta{flex:1}
+.card-title{font-size:1rem;font-weight:700;color:#fff;margin-bottom:3px}
+.card-category{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#ff4466;margin-bottom:4px}
+.card-vibe{font-size:.72rem;color:#888}
+.card-body{padding:14px 16px}
+.section-label{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#555;margin:12px 0 5px}
+.section-label:first-child{margin-top:0}
+.explain-text{font-size:.85rem;line-height:1.75;color:#ccc}
+
+/* BOXES */
+.simple-box{background:#0f1117;border-left:3px solid #ff4466;border-radius:0 5px 5px 0;padding:10px 12px;margin:8px 0;font-size:.83rem;line-height:1.65;color:#e0e0e0}
+.analogy-box{background:#ffaa0015;border-left:3px solid #ffaa00;border-radius:0 5px 5px 0;padding:10px 12px;margin:8px 0;font-size:.83rem;line-height:1.65}
+.analogy-box strong{color:#ffaa00}
+.example-box{background:#00d4ff10;border-left:3px solid #00d4ff;border-radius:0 5px 5px 0;padding:10px 12px;margin:8px 0;font-size:.83rem;line-height:1.65}
+.example-box strong{color:#00d4ff}
+.dos-donts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.do-box{background:#00ff8812;border:1px solid #00ff8833;border-radius:5px;padding:10px}
+.dont-box{background:#ff446612;border:1px solid #ff446633;border-radius:5px;padding:10px}
+.box-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.do-box .box-title{color:#00ff88}
+.dont-box .box-title{color:#ff4466}
+.box-item{font-size:.78rem;color:#ccc;margin:4px 0;padding-left:4px}
+
+/* QUIZ */
+.quiz-box{background:#1e2535;border:1px solid #ffffff11;border-radius:7px;padding:12px;margin-top:8px}
+.quiz-q{font-size:.82rem;color:#e0e0e0;margin-bottom:10px;font-weight:600}
+.quiz-opts{display:flex;flex-direction:column;gap:6px}
+.quiz-opt{background:#0f1117;border:1px solid #ffffff15;color:#aaa;font-size:.78rem;padding:8px 12px;border-radius:5px;cursor:pointer;transition:.2s;text-align:left;font-family:inherit}
+.quiz-opt:hover{border-color:#ff4466;color:#ff4466}
+.quiz-opt.correct{background:#00ff8820;border-color:#00ff88;color:#00ff88}
+.quiz-opt.wrong{background:#ff446620;border-color:#ff4466;color:#ff4466}
+.quiz-feedback{font-size:.78rem;padding:8px 10px;border-radius:5px;margin-top:6px;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.correct{background:#00ff8820;color:#00ff88}
+.quiz-feedback.wrong{background:#ff446620;color:#ff4466}
+
+/* RELATED */
+.related-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.related-chip{background:#1e2535;border:1px solid #ffffff15;color:#888;font-size:.72rem;padding:4px 10px;border-radius:10px;cursor:pointer;transition:.2s}
+.related-chip:hover{border-color:#ff4466;color:#ff4466}
+
+/* LOADING */
+.loading-card{background:#161b27;border:1px solid #ffffff0a;border-radius:10px;padding:30px;text-align:center;color:#555}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid #ffffff15;border-top-color:#ff4466;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:.82rem;color:#555}
+
+/* HISTORY */
+.history-item{background:#1e2535;border-radius:5px;padding:6px 10px;margin-bottom:5px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:8px;font-size:.75rem;color:#888}
+.history-item:hover{background:#ff446615;color:#ff4466}
+.history-emoji{font-size:.9rem}
+
+/* ALERTS */
+.alert{padding:10px 14px;border-radius:5px;font-size:.8rem;margin:8px 0}
+.alert.error{background:#ff446622;border:1px solid #ff446655;color:#ff4466}
+.alert.info{background:#00d4ff15;border:1px solid #00d4ff44;color:#00d4ff}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:#0f1117}
+::-webkit-scrollbar-thumb{background:#ffffff15;border-radius:3px}
+
+@media(max-width:700px){
+  .sidebar{width:100%;border-right:none;border-bottom:1px solid #ffffff0a}
+  .dos-donts{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-icon">🇺🇸</span>
+    <div>
+      <div class="logo-text">American Pop Culture Explainer</div>
+      <div class="logo-sub">TikTok trends, memes, TV shows &amp; more — explained simply</div>
+    </div>
+  </div>
+  <div class="api-wrap">
+    <label>Gemini API Key</label>
+    <input type="password" id="api-key" placeholder="AIza…" autocomplete="off"/>
+    <button onclick="saveKey()">Save</button>
+    <span class="api-status no" id="api-status">No key</span>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Browse by Category</div>
+      <button class="cat-chip active" data-cat="all" onclick="setCat(this)">🌐 All Categories</button>
+      <button class="cat-chip" data-cat="tiktok" onclick="setCat(this)">📱 TikTok & Viral</button>
+      <button class="cat-chip" data-cat="memes" onclick="setCat(this)">😂 Memes & Internet</button>
+      <button class="cat-chip" data-cat="tv" onclick="setCat(this)">📺 TV & Streaming</button>
+      <button class="cat-chip" data-cat="music" onclick="setCat(this)">🎵 Music & Artists</button>
+      <button class="cat-chip" data-cat="slang" onclick="setCat(this)">💬 Slang & Phrases</button>
+      <button class="cat-chip" data-cat="sports" onclick="setCat(this)">🏈 Sports Culture</button>
+      <button class="cat-chip" data-cat="celebs" onclick="setCat(this)">⭐ Celebrities</button>
+      <button class="cat-chip" data-cat="holidays" onclick="setCat(this)">🎉 Holidays & Events</button>
+    </div>
+
+    <div class="sidebar-section" style="flex:1">
+      <div class="sidebar-title">🔥 Trending Now</div>
+      <div id="trending-list"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">🕐 Recent Searches</div>
+      <div id="history-list"><div style="font-size:.72rem;color:#555">No recent searches yet.</div></div>
+      <button style="background:transparent;border:none;color:#555;font-size:.68rem;cursor:pointer;margin-top:6px;padding:0" onclick="clearHistory()">Clear history</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="search-bar">
+      <div class="search-row">
+        <input class="search-input" id="search-input" placeholder="Ask anything… e.g. &quot;What is NPC streaming?&quot; or &quot;Explain rizz&quot;"
+          onkeydown="if(event.key==='Enter')search()" autocomplete="off"/>
+        <button class="search-btn" id="search-btn" onclick="search()" disabled>Explain →</button>
+      </div>
+    </div>
+
+    <div class="pill-row" id="pill-row">
+      <span class="pill active" onclick="filterPills(this,'all')">All</span>
+      <span class="pill" onclick="filterPills(this,'tiktok')">TikTok</span>
+      <span class="pill" onclick="filterPills(this,'memes')">Memes</span>
+      <span class="pill" onclick="filterPills(this,'tv')">TV & Streaming</span>
+      <span class="pill" onclick="filterPills(this,'music')">Music</span>
+      <span class="pill" onclick="filterPills(this,'slang')">Slang</span>
+      <span class="pill" onclick="filterPills(this,'sports')">Sports</span>
+    </div>
+
+    <div class="result-area" id="result-area">
+      <div class="welcome" id="welcome">
+        <div class="welcome-emoji">🍿</div>
+        <h2>What's confusing you about American culture?</h2>
+        <p>Ask about any trend, meme, TV show, slang word, celebrity moment — or pick from the suggestions below. I'll explain it simply so you can join the conversation!</p>
+        <div class="suggestion-grid" id="suggestion-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+const GEMINI_URL = k => `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
+
+const TRENDING = [
+  {text:'NPC streaming',cat:'tiktok',badge:'hot'},
+  {text:'Brain rot',cat:'memes',badge:'hot'},
+  {text:'Looksmaxxing',cat:'tiktok',badge:'hot'},
+  {text:'Tradwife',cat:'tiktok',badge:'new'},
+  {text:'Midwest emo',cat:'music',badge:'new'},
+  {text:'The Bear (FX)',cat:'tv',badge:'hot'},
+  {text:'Rizz',cat:'slang',badge:'classic'},
+  {text:'Delulu',cat:'slang',badge:'hot'},
+  {text:'Roman Empire trend',cat:'memes',badge:'classic'},
+  {text:'Skibidi Toilet',cat:'memes',badge:'classic'},
+  {text:'Era',cat:'slang',badge:'hot'},
+  {text:'Taylor Swift album cycles',cat:'music',badge:'hot'},
+];
+
+const SUGGESTIONS = [
+  'What does "no cap" mean?','Explain NPC streaming','What is rizz?',
+  'What is the Eras Tour?','Explain "brain rot"','What is a "situationship"?',
+  'What does "slay" mean?','Explain Skibidi Toilet','What is looksmaxxing?',
+  'What is "main character energy"?','Explain "understood the assignment"','What is a "vibe check"?',
+];
+
+const CAT_EMOJIS = {tiktok:'📱',memes:'😂',tv:'📺',music:'🎵',slang:'💬',sports:'🏈',celebs:'⭐',holidays:'🎉',all:'🌐'};
+
+let apiKey = '';
+let searchHistory = [];
+let currentCat = 'all';
+let quizAnswered = false;
+
+// ==================== INIT ====================
+(function(){
+  const saved = localStorage.getItem('popculture-v1');
+  if(saved){
+    try{
+      const d = JSON.parse(saved);
+      if(d.key){apiKey=d.key;document.getElementById('api-key').value=d.key;updateStatus(true);}
+      if(d.history) searchHistory = d.history;
+    }catch(e){}
+  }
+  renderTrending();
+  renderHistory();
+  renderSuggestions();
+})();
+
+function saveKey(){
+  apiKey = document.getElementById('api-key').value.trim();
+  updateStatus(!!apiKey);
+  persist();
+}
+function updateStatus(ok){
+  const el = document.getElementById('api-status');
+  el.textContent = ok?'✓ Key saved':'No key';
+  el.className = 'api-status '+(ok?'ok':'no');
+  document.getElementById('search-btn').disabled = !ok;
+}
+function setCat(btn){
+  document.querySelectorAll('.cat-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCat = btn.dataset.cat;
+  renderTrending();
+}
+function filterPills(pill, cat){
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  pill.classList.add('active');
+  currentCat = cat;
+}
+function renderTrending(){
+  const items = currentCat==='all' ? TRENDING : TRENDING.filter(t=>t.cat===currentCat);
+  document.getElementById('trending-list').innerHTML = items.map((t,i)=>`
+    <div class="trend-item" onclick="quickSearch('${escJ(t.text)}')">
+      <span class="trend-num">${i+1}</span>
+      <span class="trend-text">${t.text}</span>
+      <span class="trend-badge ${t.badge}">${t.badge}</span>
+    </div>`).join('') || '<div style="font-size:.72rem;color:#555">No items in this category.</div>';
+}
+function renderSuggestions(){
+  document.getElementById('suggestion-grid').innerHTML = SUGGESTIONS.map(s=>
+    `<button class="suggestion-btn" onclick="quickSearch('${escJ(s)}')">${s}</button>`).join('');
+}
+function renderHistory(){
+  const el = document.getElementById('history-list');
+  if(!searchHistory.length){el.innerHTML='<div style="font-size:.72rem;color:#555">No recent searches yet.</div>';return;}
+  el.innerHTML = searchHistory.slice(0,8).map(h=>`
+    <div class="history-item" onclick="quickSearch('${escJ(h.q)}')">
+      <span class="history-emoji">${h.emoji||'🔍'}</span>
+      <span>${h.q}</span>
+    </div>`).join('');
+}
+function clearHistory(){searchHistory=[];persist();renderHistory();}
+function quickSearch(q){
+  document.getElementById('search-input').value = q;
+  search();
+}
+function persist(){
+  try{localStorage.setItem('popculture-v1',JSON.stringify({key:apiKey,history:searchHistory}));}catch(e){}
+}
+
+// ==================== SEARCH ====================
+async function search(){
+  const q = document.getElementById('search-input').value.trim();
+  if(!q||!apiKey) return;
+  const area = document.getElementById('result-area');
+  document.getElementById('welcome').style.display='none';
+  area.innerHTML = `<div class="loading-card"><div class="spinner"></div><div class="loading-text">Looking that up for you…</div></div>`;
+  document.getElementById('search-btn').disabled = true;
+
+  const prompt = `You are a friendly, enthusiastic guide explaining American pop culture to someone who grew up outside the US (e.g., Vietnamese, international ESL learner). Keep language clear and simple.
+
+The user asked: "${q}"
+
+Return ONLY valid JSON (no markdown, no code fences) in exactly this structure:
+{
+  "found": true,
+  "emoji": "🔥",
+  "title": "Name of the thing",
+  "category": "one of: TikTok & Viral | Memes & Internet | TV & Streaming | Music & Artists | Slang & Phrases | Sports Culture | Celebrities | Holidays & Events | General Culture",
+  "vibe": "one short sentence (< 12 words) capturing the cultural vibe/feel",
+  "simple_explanation": "2-3 sentences using very simple English. Explain what it is, where it came from, and why Americans love it.",
+  "analogy": "A comparison to something universal (food, family, sports) that a non-American can relate to. Start with 'Think of it like...'",
+  "example": "A concrete sentence showing how an American might use this in real life, or a real example of it happening.",
+  "dos_donts": {
+    "dos": ["Something you can do/say", "Another appropriate use"],
+    "donts": ["A common mistake to avoid", "Something that would seem weird"]
+  },
+  "quiz": {
+    "question": "A fun multiple-choice question testing understanding",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correct_index": 0,
+    "explanation": "Why that answer is correct (1 sentence)"
+  },
+  "related": ["Related term 1", "Related term 2", "Related term 3"],
+  "fun_fact": "One surprising or funny fact about this topic."
+}
+
+If the query is not about American pop culture, set "found": false and "title": "Not sure about that one" with a brief explanation in "simple_explanation".`;
+
+  try{
+    const raw = await callGemini(prompt);
+    const data = parseJSON(raw);
+    renderCard(q, data);
+    addHistory(q, data.emoji||'🔍');
+  }catch(e){
+    area.innerHTML = `<div class="alert error">Error: ${e.message}<br><small>Make sure your Gemini API key is correct.</small></div>`;
+  }finally{
+    document.getElementById('search-btn').disabled = !apiKey;
+  }
+}
+
+async function callGemini(prompt){
+  const res = await fetch(GEMINI_URL(apiKey),{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.7,maxOutputTokens:1500}})
+  });
+  if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error '+res.status);}
+  const d = await res.json();
+  return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+
+function parseJSON(raw){
+  return JSON.parse(raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim());
+}
+
+// ==================== RENDER CARD ====================
+let cardCount = 0;
+function renderCard(q, data){
+  const id = 'card-'+(++cardCount);
+  const area = document.getElementById('result-area');
+  const dos = (data.dos_donts?.dos||[]).map(d=>`<div class="box-item">✓ ${escH(d)}</div>`).join('');
+  const donts = (data.dos_donts?.donts||[]).map(d=>`<div class="box-item">✗ ${escH(d)}</div>`).join('');
+  const related = (data.related||[]).map(r=>`<span class="related-chip" onclick="quickSearch('${escJ(r)}')">${escH(r)}</span>`).join('');
+  const quiz = data.quiz;
+  const quizHTML = quiz ? `
+    <div class="section-label">🧠 Quick Quiz</div>
+    <div class="quiz-box" id="quiz-${id}">
+      <div class="quiz-q">${escH(quiz.question)}</div>
+      <div class="quiz-opts">
+        ${(quiz.options||[]).map((o,i)=>`
+          <button class="quiz-opt" onclick="answerQuiz('${id}',${i},${quiz.correct_index},'${escJ(quiz.explanation||'')}')">${escH(o)}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="qfb-${id}"></div>
+    </div>` : '';
+
+  const html = `
+    <div class="result-card" id="${id}">
+      <div class="card-header">
+        <span class="card-emoji">${data.emoji||'🇺🇸'}</span>
+        <div class="card-meta">
+          <div class="card-category">${escH(data.category||'')}</div>
+          <div class="card-title">${escH(data.title||q)}</div>
+          <div class="card-vibe">${escH(data.vibe||'')}</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="section-label">📖 What is it?</div>
+        <div class="simple-box">${escH(data.simple_explanation||'')}</div>
+
+        ${data.analogy?`<div class="section-label">🔗 Easy Analogy</div>
+        <div class="analogy-box"><strong>💡</strong> ${escH(data.analogy)}</div>`:''}
+
+        ${data.example?`<div class="section-label">🗣️ Real-Life Example</div>
+        <div class="example-box"><strong>Example:</strong> ${escH(data.example)}</div>`:''}
+
+        ${(dos||donts)?`<div class="section-label">✅ Do's &amp; Don'ts</div>
+        <div class="dos-donts">
+          <div class="do-box"><div class="box-title">Do ✓</div>${dos}</div>
+          <div class="dont-box"><div class="box-title">Don't ✗</div>${donts}</div>
+        </div>`:''}
+
+        ${data.fun_fact?`<div class="section-label">✨ Fun Fact</div>
+        <div class="simple-box" style="border-color:#aa88ff;color:#ccc">${escH(data.fun_fact)}</div>`:''}
+
+        ${quizHTML}
+
+        ${related?`<div class="section-label">🔗 Related Topics</div>
+        <div class="related-chips">${related}</div>`:''}
+      </div>
+    </div>`;
+  area.innerHTML = html;
+}
+
+function answerQuiz(id, chosen, correct, explanation){
+  const box = document.getElementById('quiz-'+id);
+  const opts = box.querySelectorAll('.quiz-opt');
+  opts.forEach((o,i)=>{
+    o.disabled = true;
+    if(i===correct) o.classList.add('correct');
+    else if(i===chosen && chosen!==correct) o.classList.add('wrong');
+  });
+  const fb = document.getElementById('qfb-'+id);
+  fb.classList.add('show');
+  if(chosen===correct){
+    fb.className='quiz-feedback show correct';
+    fb.textContent = '🎉 Correct! '+decodeURIComponent(explanation);
+  }else{
+    fb.className='quiz-feedback show wrong';
+    fb.textContent = '❌ Not quite. '+decodeURIComponent(explanation);
+  }
+}
+
+function addHistory(q, emoji){
+  searchHistory = [{q,emoji},...searchHistory.filter(h=>h.q!==q)].slice(0,20);
+  persist();
+  renderHistory();
+}
+
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escJ(s){return String(s||'').replace(/'/g,"\\'").replace(/"/g,'\\"');}
+</script>
+</body>
+</html>

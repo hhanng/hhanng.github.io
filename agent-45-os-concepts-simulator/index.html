@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>OS Concepts Simulator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e0e0e0;font-family:'Courier New',Courier,monospace;min-height:100vh}
+a{color:#00d4ff}
+h2{color:#00d4ff;font-size:1rem;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+h3{color:#00ff88;font-size:.9rem;margin:10px 0 6px}
+
+/* NAV */
+.nav{display:flex;background:#161b27;border-bottom:1px solid #00d4ff33;overflow-x:auto;flex-wrap:nowrap}
+.nav button{background:transparent;border:none;color:#888;font-family:inherit;font-size:.78rem;padding:12px 16px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:.2s}
+.nav button:hover{color:#00d4ff}
+.nav button.active{color:#00d4ff;border-bottom-color:#00d4ff}
+
+/* TABS */
+.tab{display:none;padding:16px;max-width:1200px;margin:0 auto}
+.tab.active{display:block}
+
+/* PANELS */
+.panel{background:#161b27;border:1px solid #ffffff11;border-radius:6px;padding:14px;margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:10px}
+.row label{font-size:.75rem;color:#888;display:block;margin-bottom:3px}
+
+/* INPUTS */
+input,select{background:#1e2535;border:1px solid #ffffff22;color:#fff;font-family:inherit;font-size:.8rem;padding:6px 8px;border-radius:4px;outline:none;transition:.2s}
+input:focus,select:focus{border-color:#00d4ff}
+input[type=number]{width:80px}
+.input-sm{width:60px}
+
+/* BUTTONS */
+button.btn{background:transparent;border:1px solid #00d4ff;color:#00d4ff;font-family:inherit;font-size:.78rem;padding:6px 14px;border-radius:4px;cursor:pointer;transition:.2s;white-space:nowrap}
+button.btn:hover{background:#00d4ff;color:#0f1117}
+button.btn.green{border-color:#00ff88;color:#00ff88}
+button.btn.green:hover{background:#00ff88;color:#0f1117}
+button.btn.amber{border-color:#ffaa00;color:#ffaa00}
+button.btn.amber:hover{background:#ffaa00;color:#0f1117}
+button.btn.red{border-color:#ff4466;color:#ff4466}
+button.btn.red:hover{background:#ff4466;color:#0f1117}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.75rem}
+th{background:#1e2535;color:#00d4ff;padding:7px 8px;text-align:left;border:1px solid #ffffff11}
+td{padding:6px 8px;border:1px solid #ffffff11}
+tr:nth-child(even) td{background:#161b27}
+tr:nth-child(odd) td{background:#0f1117}
+tr.highlight td{background:#00d4ff22!important;color:#00d4ff}
+tr.fault td{background:#ff446622!important}
+tr.hit td{background:#00ff8822!important}
+
+/* GANTT */
+.gantt-wrap{overflow-x:auto;margin-top:8px}
+.gantt{display:flex;height:36px;min-width:600px}
+.gantt-cell{display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#0f1117;font-weight:bold;border-right:1px solid #0f1117;transition:opacity .3s}
+.gantt-labels{display:flex;min-width:600px;font-size:.65rem;color:#888;border-top:1px solid #ffffff22;padding-top:2px}
+.gantt-lbl{text-align:left;padding-left:2px}
+
+/* MEMORY MAP */
+.mem-map{width:60px;min-height:300px;background:#1e2535;border:1px solid #ffffff22;position:relative;display:inline-block;vertical-align:top;margin-right:20px}
+.mem-seg{position:absolute;width:100%;display:flex;align-items:center;justify-content:center;font-size:.6rem;overflow:hidden;transition:.4s;border-top:1px solid #0f1117}
+.mem-seg.free{background:repeating-linear-gradient(45deg,#1e2535,#1e2535 4px,#2a3040 4px,#2a3040 8px)}
+
+/* PAGE FRAMES */
+.frame-grid{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.frame-box{background:#1e2535;border:1px solid #ffffff22;border-radius:4px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:.3s}
+.frame-box.fault{border-color:#ff4466;background:#ff446622;color:#ff4466}
+.frame-box.hit{border-color:#00ff88;background:#00ff8822;color:#00ff88}
+
+/* CHART TIMELINE */
+.timeline{display:flex;gap:2px;flex-wrap:wrap;margin:6px 0}
+.tl-cell{width:28px;height:28px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:bold;cursor:default}
+.tl-cell.fault{background:#ff4466;color:#0f1117}
+.tl-cell.hit{background:#00ff88;color:#0f1117}
+
+/* GRAPH */
+canvas{background:#1e2535;border:1px solid #ffffff22;border-radius:4px;display:block;max-width:100%}
+
+/* METRICS */
+.metrics{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.metric-box{background:#1e2535;border:1px solid #ffffff11;border-radius:4px;padding:10px 14px;min-width:130px}
+.metric-box .val{font-size:1.3rem;color:#00d4ff}
+.metric-box .lbl{font-size:.68rem;color:#888}
+
+/* DEADLOCK GRAPH */
+#dl-canvas{width:100%;height:320px}
+
+/* ALERTS */
+.alert{padding:8px 12px;border-radius:4px;font-size:.78rem;margin:6px 0}
+.alert.error{background:#ff446622;border:1px solid #ff4466;color:#ff4466}
+.alert.success{background:#00ff8822;border:1px solid #00ff88;color:#00ff88}
+.alert.info{background:#00d4ff22;border:1px solid #00d4ff;color:#00d4ff}
+.alert.warn{background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00}
+
+/* REFERENCE */
+.ref-section{border:1px solid #ffffff11;border-radius:6px;margin-bottom:8px;overflow:hidden}
+.ref-header{background:#161b27;padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.85rem;user-select:none}
+.ref-header:hover{background:#1e2535}
+.ref-body{display:none;padding:14px;background:#0f1117}
+.ref-body.open{display:block}
+.faang-box{background:#00d4ff15;border-left:3px solid #00d4ff;padding:8px 12px;margin:8px 0;font-size:.78rem}
+.faang-box strong{color:#00d4ff}
+.misconception{background:#ffaa0015;border-left:3px solid #ffaa00;padding:8px 12px;margin:8px 0;font-size:.78rem}
+.misconception strong{color:#ffaa00}
+pre{background:#1e2535;padding:10px;border-radius:4px;font-size:.72rem;overflow-x:auto;margin:6px 0}
+.ref-body p{font-size:.78rem;line-height:1.6;margin:4px 0}
+
+/* FAANG BADGE */
+.faang-badge{position:fixed;bottom:16px;right:16px;background:#161b27;border:1px solid #00d4ff;border-radius:20px;padding:6px 14px;font-size:.7rem;color:#00d4ff;cursor:pointer;z-index:999;transition:.2s}
+.faang-badge:hover{background:#00d4ff;color:#0f1117}
+
+/* SEARCH */
+#ref-search{width:100%;padding:8px;font-size:.85rem;margin-bottom:12px}
+
+/* READY QUEUE */
+.rq-wrap{display:flex;gap:6px;flex-wrap:wrap;min-height:30px;padding:6px;background:#1e2535;border-radius:4px}
+.rq-item{background:#00d4ff33;border:1px solid #00d4ff55;border-radius:3px;padding:2px 8px;font-size:.72rem;color:#00d4ff}
+
+/* COMPARISON BAR */
+.cmp-bar-wrap{margin:4px 0}
+.cmp-bar-label{font-size:.72rem;color:#888;margin-bottom:2px;display:flex;justify-content:space-between}
+.cmp-bar-track{background:#1e2535;border-radius:3px;height:18px;overflow:hidden}
+.cmp-bar-fill{height:100%;border-radius:3px;transition:width .5s;display:flex;align-items:center;padding-left:6px;font-size:.65rem;color:#0f1117;font-weight:bold}
+
+/* BANKER */
+.matrix-wrap{overflow-x:auto;margin:6px 0}
+.seq-item{display:inline-flex;align-items:center;gap:4px;background:#00ff8815;border:1px solid #00ff8844;border-radius:4px;padding:4px 10px;font-size:.78rem;color:#00ff88;margin:3px}
+.arrow{color:#888}
+
+/* responsive */
+@media(max-width:600px){
+  .nav button{font-size:.7rem;padding:10px 10px}
+  .metric-box{min-width:90px}
+}
+</style>
+</head>
+<body>
+
+<div class="nav" id="nav">
+  <button class="active" onclick="switchTab(0)">⚙️ Scheduler</button>
+  <button onclick="switchTab(1)">🧠 Memory</button>
+  <button onclick="switchTab(2)">🔄 Page Replace</button>
+  <button onclick="switchTab(3)">🔒 Deadlock</button>
+  <button onclick="switchTab(4)">🗃️ Disk</button>
+  <button onclick="switchTab(5)">📚 Reference</button>
+</div>
+
+<!-- ========== TAB 1: SCHEDULER ========== -->
+<div class="tab active" id="tab-0">
+  <div class="panel">
+    <h2>⚙️ Process Scheduler</h2>
+    <div class="row">
+      <div><label>Algorithm</label>
+        <select id="sched-algo">
+          <option value="fcfs">FCFS</option>
+          <option value="sjf">SJF (Non-preemptive)</option>
+          <option value="srtf">SJF Preemptive (SRTF)</option>
+          <option value="rr">Round Robin</option>
+          <option value="pri">Priority (Non-preemptive)</option>
+          <option value="pri-pre">Priority Preemptive</option>
+        </select>
+      </div>
+      <div><label>Quantum</label><input type="number" id="quantum" value="2" min="1" max="10" style="width:60px"></div>
+    </div>
+    <div class="row">
+      <div><label>Arrival</label><input type="number" id="p-arrival" value="0" min="0" class="input-sm"></div>
+      <div><label>Burst</label><input type="number" id="p-burst" value="5" min="1" class="input-sm"></div>
+      <div><label>Priority</label><input type="number" id="p-priority" value="1" min="1" class="input-sm"></div>
+      <button class="btn green" onclick="addProcess()">+ Add Process</button>
+      <button class="btn" onclick="addRandom()">🎲 Random</button>
+    </div>
+    <div class="row">
+      <button class="btn green" onclick="runScheduler()">▶ Run</button>
+      <button class="btn amber" onclick="stepScheduler()">⏭ Step</button>
+      <button class="btn red" onclick="resetScheduler()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Process Table</h3>
+    <div class="tbl-wrap">
+      <table id="proc-table">
+        <thead><tr><th>PID</th><th>Arrival</th><th>Burst</th><th>Priority</th><th>Start</th><th>Finish</th><th>Turnaround</th><th>Waiting</th><th>Response</th></tr></thead>
+        <tbody id="proc-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Gantt Chart</h3>
+    <div class="gantt-wrap">
+      <div class="gantt" id="gantt-chart"></div>
+      <div class="gantt-labels" id="gantt-labels"></div>
+    </div>
+    <div style="margin-top:10px">
+      <span style="font-size:.72rem;color:#888">Ready Queue: </span>
+      <div class="rq-wrap" id="ready-queue"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Metrics</h3>
+    <div class="metrics" id="sched-metrics"></div>
+  </div>
+</div>
+
+<!-- ========== TAB 2: MEMORY ========== -->
+<div class="tab" id="tab-1">
+  <div class="panel">
+    <h2>🧠 Memory Manager</h2>
+    <div class="row">
+      <div><label>Strategy</label>
+        <select id="mem-strategy">
+          <option value="first">First Fit</option>
+          <option value="best">Best Fit</option>
+          <option value="worst">Worst Fit</option>
+          <option value="next">Next Fit</option>
+        </select>
+      </div>
+      <div><label>Memory Size</label><input type="number" id="mem-size" value="1000" min="100" max="9999" style="width:90px"></div>
+      <button class="btn green" onclick="initMemory()">Init Memory</button>
+    </div>
+    <div class="row">
+      <div><label>Free Block Size</label><input type="number" id="block-size" value="200" min="1" class="input-sm"></div>
+      <button class="btn" onclick="addFreeBlock()">+ Free Block</button>
+    </div>
+    <div class="row">
+      <div><label>Process Name</label><input type="text" id="proc-name" value="P1" style="width:70px"></div>
+      <div><label>Size</label><input type="number" id="proc-size" value="150" min="1" class="input-sm"></div>
+      <button class="btn green" onclick="allocateMemory()">Allocate</button>
+    </div>
+    <div class="row">
+      <div><label>Deallocate Process</label><select id="dealloc-select"></select></div>
+      <button class="btn amber" onclick="deallocateMemory()">Deallocate</button>
+      <button class="btn red" onclick="resetMemory()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="panel" style="display:flex;flex-wrap:wrap;gap:20px">
+    <div>
+      <h3>Memory Map</h3>
+      <div style="position:relative">
+        <div class="mem-map" id="mem-map"></div>
+        <div id="mem-tooltip" style="position:fixed;background:#1e2535;border:1px solid #00d4ff;padding:4px 8px;font-size:.7rem;border-radius:4px;display:none;z-index:99;pointer-events:none"></div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:280px">
+      <h3>Block Table</h3>
+      <div class="tbl-wrap">
+        <table id="mem-table">
+          <thead><tr><th>#</th><th>Start</th><th>End</th><th>Size</th><th>Status</th><th>Process</th></tr></thead>
+          <tbody id="mem-tbody"></tbody>
+        </table>
+      </div>
+      <div class="metrics" id="mem-metrics" style="margin-top:10px"></div>
+    </div>
+  </div>
+  <div id="mem-alert"></div>
+</div>
+
+<!-- ========== TAB 3: PAGE REPLACEMENT ========== -->
+<div class="tab" id="tab-2">
+  <div class="panel">
+    <h2>🔄 Page Replacement</h2>
+    <div class="row">
+      <div><label>Algorithm</label>
+        <select id="pr-algo">
+          <option value="fifo">FIFO</option>
+          <option value="lru">LRU</option>
+          <option value="optimal">Optimal</option>
+          <option value="lfu">LFU</option>
+          <option value="clock">Clock (2nd Chance)</option>
+        </select>
+      </div>
+      <div><label>Frames (1–7)</label><input type="number" id="pr-frames" value="3" min="1" max="7" class="input-sm"></div>
+    </div>
+    <div class="row">
+      <div style="flex:1"><label>Reference String</label><input type="text" id="pr-ref" value="7 0 1 2 0 3 0 4 2 3 0 3" style="width:100%;min-width:200px"></div>
+      <button class="btn" onclick="randomRefString()">🎲 Random</button>
+    </div>
+    <div class="row">
+      <button class="btn green" onclick="runPageReplacement()">▶ Run</button>
+      <button class="btn amber" onclick="stepPageReplacement()">⏭ Step</button>
+      <button class="btn" onclick="comparePageAlgos()">📊 Compare All</button>
+      <button class="btn red" onclick="resetPageReplacement()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Frame State</h3>
+    <div class="tbl-wrap" id="pr-frame-table"></div>
+    <div style="margin-top:10px">
+      <h3>Hit / Fault Timeline</h3>
+      <div class="timeline" id="pr-timeline"></div>
+    </div>
+    <div id="pr-step-msg" class="alert info" style="display:none"></div>
+    <div class="metrics" id="pr-metrics"></div>
+  </div>
+
+  <div class="panel" id="pr-compare-panel" style="display:none">
+    <h3>Algorithm Comparison (same reference string)</h3>
+    <div id="pr-compare-bars"></div>
+  </div>
+</div>
+
+<!-- ========== TAB 4: DEADLOCK ========== -->
+<div class="tab" id="tab-3">
+  <div class="panel">
+    <h2>🔒 Deadlock Detector</h2>
+    <div class="row">
+      <button class="btn green" onclick="dlAddProcess()">+ Process</button>
+      <div><label>Resource Name</label><input type="text" id="dl-rname" value="R1" style="width:60px"></div>
+      <div><label>Instances</label><input type="number" id="dl-rinstances" value="1" min="1" max="5" class="input-sm"></div>
+      <button class="btn green" onclick="dlAddResource()">+ Resource</button>
+    </div>
+    <div class="row">
+      <div><label>Allocate: Process</label><select id="dl-alloc-p"></select></div>
+      <div><label>holds Resource</label><select id="dl-alloc-r"></select></div>
+      <button class="btn amber" onclick="dlAddAlloc()">+ Allocation</button>
+    </div>
+    <div class="row">
+      <div><label>Request: Process</label><select id="dl-req-p"></select></div>
+      <div><label>wants Resource</label><select id="dl-req-r"></select></div>
+      <button class="btn amber" onclick="dlAddRequest()">+ Request</button>
+    </div>
+    <div class="row">
+      <button class="btn green" onclick="dlDetect()">🔍 Detect Deadlock</button>
+      <button class="btn" onclick="dlBanker()">🏦 Banker's Algorithm</button>
+      <button class="btn red" onclick="dlClear()">↺ Clear</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Resource Allocation Graph</h3>
+    <canvas id="dl-canvas" height="320"></canvas>
+    <div id="dl-result"></div>
+  </div>
+
+  <div class="panel" id="banker-panel" style="display:none">
+    <h3>Banker's Algorithm</h3>
+    <div id="banker-output"></div>
+  </div>
+</div>
+
+<!-- ========== TAB 5: DISK SCHEDULER ========== -->
+<div class="tab" id="tab-4">
+  <div class="panel">
+    <h2>🗃️ Disk Scheduler</h2>
+    <div class="row">
+      <div><label>Algorithm</label>
+        <select id="disk-algo">
+          <option value="fcfs">FCFS</option>
+          <option value="sstf">SSTF</option>
+          <option value="scan">SCAN</option>
+          <option value="cscan">C-SCAN</option>
+          <option value="look">LOOK</option>
+          <option value="clook">C-LOOK</option>
+        </select>
+      </div>
+      <div><label>Head Position</label><input type="number" id="disk-head" value="50" min="0" max="199" class="input-sm"></div>
+      <div><label>Disk Size</label><input type="number" id="disk-size" value="200" min="50" max="999" style="width:70px"></div>
+    </div>
+    <div class="row">
+      <div style="flex:1"><label>Request Queue</label><input type="text" id="disk-queue" value="98 183 37 122 14 124 65 67" style="width:100%;min-width:200px"></div>
+      <button class="btn" onclick="randomDiskQueue()">🎲 Random</button>
+    </div>
+    <div class="row">
+      <button class="btn green" onclick="runDisk()">▶ Run</button>
+      <button class="btn amber" onclick="stepDisk()">⏭ Step</button>
+      <button class="btn" onclick="compareDisk()">📊 Compare All</button>
+      <button class="btn red" onclick="resetDisk()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Seek Path</h3>
+    <canvas id="disk-canvas" height="280"></canvas>
+    <h3 style="margin-top:12px">Seek Order</h3>
+    <div class="tbl-wrap">
+      <table id="disk-table">
+        <thead><tr><th>#</th><th>Cylinder</th><th>Seek Distance</th></tr></thead>
+        <tbody id="disk-tbody"></tbody>
+      </table>
+    </div>
+    <div class="metrics" id="disk-metrics"></div>
+  </div>
+
+  <div class="panel" id="disk-compare-panel" style="display:none">
+    <h3>Algorithm Comparison (Total Seek Distance)</h3>
+    <div id="disk-compare-bars"></div>
+  </div>
+</div>
+
+<!-- ========== TAB 6: REFERENCE ========== -->
+<div class="tab" id="tab-5">
+  <div class="panel">
+    <h2>📚 OS Concept Reference</h2>
+    <input type="text" id="ref-search" placeholder="Search concepts..." oninput="filterRef(this.value)">
+    <div id="ref-sections"></div>
+  </div>
+</div>
+
+<button class="faang-badge" onclick="switchTab(5)">💡 FAANG Tips →</button>
+
+<script>
+// ==================== UTILITIES ====================
+const COLORS = ['#00d4ff','#00ff88','#ffaa00','#ff4466','#aa88ff','#ff8844','#44ffcc','#ff44aa'];
+const save = () => { try { localStorage.setItem('os-simulator-v1', JSON.stringify({procs, memBlocks, memSize: currentMemSize})); } catch(e){} };
+const load = () => { try { const d = JSON.parse(localStorage.getItem('os-simulator-v1') || '{}'); if(d.procs) procs = d.procs; if(d.memBlocks) memBlocks = d.memBlocks; if(d.memSize) currentMemSize = d.memSize; } catch(e){} };
+const metricHTML = (val, lbl) => `<div class="metric-box"><div class="val">${val}</div><div class="lbl">${lbl}</div></div>`;
+
+function switchTab(i) {
+  document.querySelectorAll('.tab').forEach((t,j) => t.classList.toggle('active', i===j));
+  document.querySelectorAll('.nav button').forEach((b,j) => b.classList.toggle('active', i===j));
+}
+
+// ==================== TAB 1: SCHEDULER ====================
+let procs = [];
+let procCounter = 1;
+let schedResult = null;
+let schedStep = 0;
+let stepTimer = null;
+
+function addProcess(arr, bst, pri) {
+  const arrival = arr !== undefined ? arr : +document.getElementById('p-arrival').value;
+  const burst   = bst !== undefined ? bst : +document.getElementById('p-burst').value;
+  const priority= pri !== undefined ? pri : +document.getElementById('p-priority').value;
+  procs.push({ id: `P${procCounter++}`, arrival, burst, priority });
+  renderProcTable();
+  save();
+}
+
+function addRandom() {
+  const n = 4 + Math.floor(Math.random()*3);
+  for(let i=0;i<n;i++) addProcess(Math.floor(Math.random()*8), 1+Math.floor(Math.random()*10), 1+Math.floor(Math.random()*5));
+}
+
+function resetScheduler() {
+  procs = []; procCounter = 1; schedResult = null; schedStep = 0;
+  if(stepTimer) clearInterval(stepTimer);
+  document.getElementById('proc-tbody').innerHTML = '';
+  document.getElementById('gantt-chart').innerHTML = '';
+  document.getElementById('gantt-labels').innerHTML = '';
+  document.getElementById('sched-metrics').innerHTML = '';
+  document.getElementById('ready-queue').innerHTML = '';
+  save();
+}
+
+function renderProcTable(highlight) {
+  const tb = document.getElementById('proc-tbody');
+  const res = schedResult;
+  tb.innerHTML = procs.map(p => {
+    const r = res ? res.details[p.id] : null;
+    const isHL = highlight === p.id;
+    return `<tr class="${isHL?'highlight':''}">
+      <td>${p.id}</td><td>${p.arrival}</td><td>${p.burst}</td><td>${p.priority}</td>
+      <td>${r ? r.start : '-'}</td><td>${r ? r.finish : '-'}</td>
+      <td>${r ? r.turnaround : '-'}</td><td>${r ? r.waiting : '-'}</td>
+      <td>${r ? r.response : '-'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function computeSchedule() {
+  const algo = document.getElementById('sched-algo').value;
+  const q = +document.getElementById('quantum').value;
+  const ps = procs.map(p => ({...p, rem: p.burst, started: false}));
+  let t = 0, timeline = [], details = {}, readyAt = {};
+
+  if(algo === 'fcfs') {
+    ps.sort((a,b) => a.arrival-b.arrival);
+    for(const p of ps) {
+      if(t < p.arrival) t = p.arrival;
+      details[p.id] = {start:t, finish:t+p.burst, turnaround:t+p.burst-p.arrival, waiting:t-p.arrival, response:t-p.arrival};
+      for(let i=0;i<p.burst;i++) timeline.push({pid:p.id, t:t+i});
+      t += p.burst;
+    }
+  } else if(algo === 'sjf') {
+    const done = new Set(), queue = [], n = ps.length;
+    ps.sort((a,b) => a.arrival-b.arrival);
+    let i = 0;
+    while(done.size < n) {
+      while(i < n && ps[i].arrival <= t) queue.push(ps[i++]);
+      if(!queue.length) { t = ps[i].arrival; continue; }
+      queue.sort((a,b) => a.burst-b.burst);
+      const p = queue.shift();
+      details[p.id] = {start:t, finish:t+p.burst, turnaround:t+p.burst-p.arrival, waiting:t-p.arrival, response:t-p.arrival};
+      for(let j=0;j<p.burst;j++) timeline.push({pid:p.id, t:t+j});
+      t += p.burst; done.add(p.id);
+    }
+  } else if(algo === 'srtf') {
+    const rem = {}; ps.forEach(p => rem[p.id] = p.burst);
+    const start = {}; const finish = {};
+    const n = ps.length; let done = 0;
+    const sorted = [...ps].sort((a,b) => a.arrival-b.arrival);
+    while(done < n) {
+      const avail = ps.filter(p => p.arrival <= t && rem[p.id] > 0);
+      if(!avail.length) { t++; continue; }
+      avail.sort((a,b) => rem[a.id]-rem[b.id]);
+      const p = avail[0];
+      if(!(p.id in start)) start[p.id] = t;
+      timeline.push({pid:p.id, t});
+      rem[p.id]--;
+      t++;
+      if(rem[p.id] === 0) { finish[p.id] = t; done++; }
+    }
+    ps.forEach(p => { details[p.id] = {start:start[p.id], finish:finish[p.id], turnaround:finish[p.id]-p.arrival, waiting:finish[p.id]-p.arrival-p.burst, response:start[p.id]-p.arrival}; });
+  } else if(algo === 'rr') {
+    const queue = [], rem = {}, start = {}, finish = {};
+    const sorted = [...ps].sort((a,b) => a.arrival-b.arrival);
+    ps.forEach(p => rem[p.id] = p.burst);
+    let i = 0;
+    while(i < sorted.length && sorted[i].arrival <= 0) queue.push(sorted[i++]);
+    while(queue.length) {
+      const p = queue.shift();
+      const run = Math.min(q, rem[p.id]);
+      if(!(p.id in start)) start[p.id] = t;
+      for(let j=0;j<run;j++) timeline.push({pid:p.id, t:t+j});
+      t += run; rem[p.id] -= run;
+      while(i < sorted.length && sorted[i].arrival <= t) queue.push(sorted[i++]);
+      if(rem[p.id] > 0) queue.push(p); else finish[p.id] = t;
+    }
+    ps.forEach(p => { details[p.id] = {start:start[p.id], finish:finish[p.id]||t, turnaround:(finish[p.id]||t)-p.arrival, waiting:(finish[p.id]||t)-p.arrival-p.burst, response:start[p.id]-p.arrival}; });
+  } else if(algo === 'pri') {
+    const done = new Set(), queue = [], n = ps.length;
+    ps.sort((a,b) => a.arrival-b.arrival);
+    let i = 0;
+    while(done.size < n) {
+      while(i < n && ps[i].arrival <= t) queue.push(ps[i++]);
+      if(!queue.length) { t = ps[i].arrival; continue; }
+      queue.sort((a,b) => a.priority-b.priority);
+      const p = queue.shift();
+      details[p.id] = {start:t, finish:t+p.burst, turnaround:t+p.burst-p.arrival, waiting:t-p.arrival, response:t-p.arrival};
+      for(let j=0;j<p.burst;j++) timeline.push({pid:p.id, t:t+j});
+      t += p.burst; done.add(p.id);
+    }
+  } else if(algo === 'pri-pre') {
+    const rem = {}, start = {}, finish = {};
+    ps.forEach(p => rem[p.id] = p.burst);
+    let done = 0, n = ps.length;
+    while(done < n) {
+      const avail = ps.filter(p => p.arrival <= t && rem[p.id] > 0);
+      if(!avail.length) { t++; continue; }
+      avail.sort((a,b) => a.priority-b.priority);
+      const p = avail[0];
+      if(!(p.id in start)) start[p.id] = t;
+      timeline.push({pid:p.id, t});
+      rem[p.id]--; t++;
+      if(rem[p.id] === 0) { finish[p.id] = t; done++; }
+    }
+    ps.forEach(p => { details[p.id] = {start:start[p.id], finish:finish[p.id], turnaround:finish[p.id]-p.arrival, waiting:finish[p.id]-p.arrival-p.burst, response:start[p.id]-p.arrival}; });
+  }
+
+  // build ready queue snapshots
+  const rqSnaps = {};
+  timeline.forEach(cell => {
+    const avail = procs.filter(p => p.arrival <= cell.t && !Object.values(details).find(d=>d.finish<=cell.t && procs.find(pr=>pr.id===p.id))).map(p=>p.id).filter(id => id !== cell.pid);
+    rqSnaps[cell.t] = avail;
+  });
+
+  const vals = Object.values(details);
+  const avgTAT = vals.reduce((s,d)=>s+d.turnaround,0)/vals.length;
+  const avgWT  = vals.reduce((s,d)=>s+d.waiting,0)/vals.length;
+  const avgRT  = vals.reduce((s,d)=>s+d.response,0)/vals.length;
+  const cpuUtil = (timeline.length / (Math.max(...vals.map(d=>d.finish)) - Math.min(...procs.map(p=>p.arrival)))) * 100;
+  const throughput = (vals.length / Math.max(...vals.map(d=>d.finish))).toFixed(3);
+
+  return { timeline, details, rqSnaps, metrics: { avgTAT: avgTAT.toFixed(2), avgWT: avgWT.toFixed(2), avgRT: avgRT.toFixed(2), cpuUtil: cpuUtil.toFixed(1), throughput } };
+}
+
+function runScheduler() {
+  if(!procs.length) return;
+  schedResult = computeSchedule();
+  schedStep = schedResult.timeline.length;
+  renderSchedulerFull();
+}
+
+function renderSchedulerFull() {
+  renderProcTable();
+  renderGantt(schedResult.timeline.length);
+  renderSchedMetrics();
+  const last = schedResult.timeline[schedResult.timeline.length-1];
+  renderReadyQueue(last ? schedResult.rqSnaps[last.t] || [] : []);
+}
+
+function stepScheduler() {
+  if(!procs.length) return;
+  if(!schedResult) { schedResult = computeSchedule(); schedStep = 0; }
+  if(schedStep >= schedResult.timeline.length) { schedStep = 0; }
+  schedStep++;
+  renderGantt(schedStep);
+  const cell = schedResult.timeline[schedStep-1];
+  renderProcTable(cell ? cell.pid : null);
+  const rq = cell ? (schedResult.rqSnaps[cell.t] || []) : [];
+  renderReadyQueue(rq);
+  if(schedStep >= schedResult.timeline.length) renderSchedMetrics();
+}
+
+function renderGantt(upTo) {
+  const tl = schedResult.timeline.slice(0, upTo);
+  const colorMap = {};
+  procs.forEach((p,i) => colorMap[p.id] = COLORS[i % COLORS.length]);
+  // compress consecutive same pid
+  const compressed = [];
+  tl.forEach(cell => {
+    if(compressed.length && compressed[compressed.length-1].pid === cell.pid) compressed[compressed.length-1].len++;
+    else compressed.push({pid:cell.pid, start:cell.t, len:1});
+  });
+  const totalT = tl.length || 1;
+  const chart = document.getElementById('gantt-chart');
+  const labels = document.getElementById('gantt-labels');
+  chart.innerHTML = compressed.map(c => `<div class="gantt-cell" style="background:${colorMap[c.pid]};width:${c.len/totalT*100}%">${c.pid}</div>`).join('');
+  // labels
+  let lbl = '';
+  compressed.forEach(c => { lbl += `<div class="gantt-lbl" style="width:${c.len/totalT*100}%">${c.start}</div>`; });
+  if(compressed.length) lbl += `<div class="gantt-lbl">${compressed[compressed.length-1].start+compressed[compressed.length-1].len}</div>`;
+  labels.innerHTML = lbl;
+}
+
+function renderReadyQueue(rq) {
+  document.getElementById('ready-queue').innerHTML = rq.map(id=>`<span class="rq-item">${id}</span>`).join('') || '<span style="color:#555;font-size:.72rem">empty</span>';
+}
+
+function renderSchedMetrics() {
+  const m = schedResult.metrics;
+  document.getElementById('sched-metrics').innerHTML =
+    metricHTML(m.avgTAT,'Avg Turnaround') + metricHTML(m.avgWT,'Avg Waiting') + metricHTML(m.avgRT,'Avg Response') +
+    metricHTML(m.cpuUtil+'%','CPU Utilization') + metricHTML(m.throughput,'Throughput (proc/unit)');
+}
+
+// ==================== TAB 2: MEMORY ====================
+let memBlocks = []; // {id, start, end, size, status, process}
+let currentMemSize = 1000;
+let nextFitPtr = 0;
+let allocColors = {};
+let allocColorIdx = 0;
+let memProcCounter = 2;
+
+function initMemory() {
+  currentMemSize = +document.getElementById('mem-size').value;
+  memBlocks = [{id:0, start:0, end:currentMemSize-1, size:currentMemSize, status:'free', process:null}];
+  nextFitPtr = 0;
+  renderMemory();
+  document.getElementById('mem-alert').innerHTML = '';
+  save();
+}
+
+function resetMemory() { memBlocks = []; allocColors = {}; allocColorIdx = 0; memProcCounter = 2; renderMemory(); document.getElementById('mem-alert').innerHTML = ''; save(); }
+
+function addFreeBlock() {
+  const sz = +document.getElementById('block-size').value;
+  const start = memBlocks.length ? memBlocks[memBlocks.length-1].end+1 : 0;
+  memBlocks.push({id:memBlocks.length, start, end:start+sz-1, size:sz, status:'free', process:null});
+  currentMemSize = start+sz;
+  renderMemory();
+  save();
+}
+
+function allocateMemory() {
+  const name = document.getElementById('proc-name').value || `P${memProcCounter++}`;
+  const sz = +document.getElementById('proc-size').value;
+  const strategy = document.getElementById('mem-strategy').value;
+  const free = memBlocks.filter(b => b.status==='free' && b.size >= sz);
+  if(!free.length) {
+    document.getElementById('mem-alert').innerHTML = `<div class="alert error">Allocation Failed — No free block large enough for ${sz} units. External fragmentation: ${memBlocks.filter(b=>b.status==='free').reduce((s,b)=>s+b.size,0)} free units in ${memBlocks.filter(b=>b.status==='free').length} fragments.</div>`;
+    return;
+  }
+  let chosen;
+  if(strategy==='first') chosen = free[0];
+  else if(strategy==='best') chosen = free.reduce((a,b)=>b.size<a.size?b:a);
+  else if(strategy==='worst') chosen = free.reduce((a,b)=>b.size>a.size?b:a);
+  else { // next fit
+    const afterPtr = memBlocks.filter(b => b.status==='free' && b.size>=sz && b.id>=nextFitPtr);
+    chosen = afterPtr.length ? afterPtr[0] : free[0];
+    nextFitPtr = chosen.id;
+  }
+  // flash
+  chosen.flash = true; renderMemory(); setTimeout(() => { chosen.flash = false; }, 400);
+  // split block if needed
+  const idx = memBlocks.indexOf(chosen);
+  if(!allocColors[name]) allocColors[name] = COLORS[allocColorIdx++ % COLORS.length];
+  if(chosen.size > sz) {
+    const newBlock = {id:memBlocks.length, start:chosen.start+sz, end:chosen.end, size:chosen.size-sz, status:'free', process:null};
+    chosen.end = chosen.start+sz-1; chosen.size = sz; chosen.status = 'allocated'; chosen.process = name;
+    memBlocks.splice(idx+1, 0, newBlock);
+    memBlocks.forEach((b,i)=>b.id=i);
+  } else { chosen.status='allocated'; chosen.process=name; }
+  document.getElementById('proc-name').value = `P${++memProcCounter}`;
+  document.getElementById('mem-alert').innerHTML = `<div class="alert success">Allocated ${sz} units to ${name} at address ${chosen.start}–${chosen.end}</div>`;
+  renderMemory(); save();
+}
+
+function deallocateMemory() {
+  const name = document.getElementById('dealloc-select').value;
+  memBlocks.forEach(b => { if(b.process===name) { b.status='free'; b.process=null; } });
+  // merge adjacent free blocks
+  let merged = true;
+  while(merged) {
+    merged = false;
+    for(let i=0;i<memBlocks.length-1;i++) {
+      if(memBlocks[i].status==='free' && memBlocks[i+1].status==='free') {
+        memBlocks[i].end = memBlocks[i+1].end; memBlocks[i].size += memBlocks[i+1].size;
+        memBlocks.splice(i+1,1); memBlocks.forEach((b,j)=>b.id=j); merged = true; break;
+      }
+    }
+  }
+  renderMemory(); save();
+}
+
+function renderMemory() {
+  const total = memBlocks.reduce((s,b)=>s+b.size,0) || currentMemSize;
+  // map
+  const map = document.getElementById('mem-map');
+  map.style.height = '320px';
+  map.innerHTML = '';
+  memBlocks.forEach(b => {
+    const div = document.createElement('div');
+    const pct = b.size / total * 100;
+    div.className = 'mem-seg' + (b.status==='free'?' free':'');
+    div.style.top = (b.start/total*100) + '%';
+    div.style.height = Math.max(pct, 0.5) + '%';
+    if(b.status==='allocated') div.style.background = allocColors[b.process] || '#888';
+    div.style.color = '#0f1117'; div.style.fontSize = '.55rem';
+    if(b.flash) { div.style.outline = '2px solid #fff'; div.style.opacity = '0.5'; }
+    div.innerHTML = b.status==='allocated' ? `<span>${b.process}</span>` : '';
+    div.addEventListener('mousemove', e => {
+      const tt = document.getElementById('mem-tooltip');
+      tt.style.display='block'; tt.style.left=(e.clientX+12)+'px'; tt.style.top=(e.clientY-20)+'px';
+      tt.textContent = `${b.start}–${b.end} | ${b.size} units | ${b.status==='free'?'Free':b.process}`;
+    });
+    div.addEventListener('mouseleave', () => { document.getElementById('mem-tooltip').style.display='none'; });
+    map.appendChild(div);
+  });
+  // table
+  const tb = document.getElementById('mem-tbody');
+  tb.innerHTML = memBlocks.map(b => `<tr><td>${b.id}</td><td>${b.start}</td><td>${b.end}</td><td>${b.size}</td>
+    <td style="color:${b.status==='free'?'#888':'#00ff88'}">${b.status==='free'?'Free':'Allocated'}</td>
+    <td>${b.process||'-'}</td></tr>`).join('');
+  // dealloc select
+  const sel = document.getElementById('dealloc-select');
+  const allocated = [...new Set(memBlocks.filter(b=>b.status==='allocated').map(b=>b.process))];
+  sel.innerHTML = allocated.map(n=>`<option>${n}</option>`).join('');
+  // metrics
+  const free = memBlocks.filter(b=>b.status==='free');
+  const allocd = memBlocks.filter(b=>b.status==='allocated');
+  const freeTotal = free.reduce((s,b)=>s+b.size,0);
+  const allocTotal = allocd.reduce((s,b)=>s+b.size,0);
+  const extFrag = total>0 ? ((freeTotal/total)*100).toFixed(1) : 0;
+  document.getElementById('mem-metrics').innerHTML =
+    metricHTML(freeTotal,'Total Free') + metricHTML(allocTotal,'Total Allocated') +
+    metricHTML(extFrag+'%','External Fragmentation') + metricHTML(free.length,'Free Blocks');
+}
+
+// ==================== TAB 3: PAGE REPLACEMENT ====================
+let prState = null;
+let prStep = 0;
+
+function randomRefString() {
+  const arr = Array.from({length:12}, () => Math.floor(Math.random()*8));
+  document.getElementById('pr-ref').value = arr.join(' ');
+}
+
+function resetPageReplacement() {
+  prState = null; prStep = 0;
+  document.getElementById('pr-frame-table').innerHTML = '';
+  document.getElementById('pr-timeline').innerHTML = '';
+  document.getElementById('pr-metrics').innerHTML = '';
+  document.getElementById('pr-step-msg').style.display = 'none';
+  document.getElementById('pr-compare-panel').style.display = 'none';
+}
+
+function computePageReplacement(refs, frames, algo) {
+  const n = frames, steps = [];
+  let frameState = Array(n).fill(null);
+  let faults = 0, hits = 0;
+  let order = []; // for FIFO
+  let lastUsed = {}; // for LRU
+  let freq = {}; // for LFU
+  let clockPtr = 0, refBits = Array(n).fill(0); // for Clock
+
+  refs.forEach((page, i) => {
+    const prev = [...frameState];
+    let fault = false, replaced = null, reason = '';
+
+    if(frameState.includes(page)) {
+      hits++;
+      if(algo==='lru') lastUsed[page] = i;
+      if(algo==='lfu') freq[page] = (freq[page]||0)+1;
+      if(algo==='clock') { const idx = frameState.indexOf(page); refBits[idx] = 1; }
+    } else {
+      fault = true; faults++;
+      const emptyIdx = frameState.indexOf(null);
+      if(emptyIdx !== -1) {
+        frameState[emptyIdx] = page;
+        if(algo==='fifo') order.push(page);
+        if(algo==='clock') { refBits[emptyIdx] = 1; }
+      } else {
+        // replace
+        if(algo==='fifo') {
+          replaced = order.shift(); const idx = frameState.indexOf(replaced); frameState[idx] = page; order.push(page);
+          reason = `Replaced ${replaced} — first in`;
+        } else if(algo==='lru') {
+          const oldest = frameState.reduce((a,b) => (lastUsed[a]||0)<(lastUsed[b]||0)?a:b);
+          replaced = oldest; const idx = frameState.indexOf(oldest); frameState[idx] = page;
+          reason = `Replaced ${replaced} — least recently used`;
+        } else if(algo==='optimal') {
+          const future = frameState.map(p => { const next = refs.slice(i+1).indexOf(p); return next===-1?Infinity:next; });
+          const farthest = future.indexOf(Math.max(...future));
+          replaced = frameState[farthest]; frameState[farthest] = page;
+          reason = `Replaced ${replaced} — used farthest in future`;
+        } else if(algo==='lfu') {
+          const minFreq = Math.min(...frameState.map(p=>freq[p]||0));
+          const lfuPage = frameState.find(p=>(freq[p]||0)===minFreq);
+          replaced = lfuPage; const idx = frameState.indexOf(lfuPage); frameState[idx] = page;
+          reason = `Replaced ${replaced} — least frequently used (freq=${minFreq})`;
+        } else if(algo==='clock') {
+          while(true) {
+            if(refBits[clockPtr]===0) { replaced = frameState[clockPtr]; frameState[clockPtr] = page; refBits[clockPtr] = 1; clockPtr=(clockPtr+1)%n; break; }
+            refBits[clockPtr]=0; clockPtr=(clockPtr+1)%n;
+          }
+          reason = `Replaced ${replaced} — second chance eviction`;
+        }
+      }
+      if(algo==='lru') lastUsed[page] = i;
+      if(algo==='lfu') { freq[page] = (freq[page]||0)+1; }
+    }
+    steps.push({page, frameState:[...frameState], fault, replaced, reason});
+  });
+  return {steps, faults, hits, total:refs.length};
+}
+
+function runPageReplacement() {
+  const refs = document.getElementById('pr-ref').value.trim().split(/\s+/).map(Number).filter(n=>!isNaN(n));
+  const frames = +document.getElementById('pr-frames').value;
+  const algo = document.getElementById('pr-algo').value;
+  if(!refs.length) return;
+  prState = {refs, frames, algo, result: computePageReplacement(refs, frames, algo)};
+  prStep = refs.length;
+  renderPageFull();
+}
+
+function stepPageReplacement() {
+  const refs = document.getElementById('pr-ref').value.trim().split(/\s+/).map(Number).filter(n=>!isNaN(n));
+  const frames = +document.getElementById('pr-frames').value;
+  const algo = document.getElementById('pr-algo').value;
+  if(!refs.length) return;
+  if(!prState || prState.algo !== algo || JSON.stringify(prState.refs) !== JSON.stringify(refs)) {
+    prState = {refs, frames, algo, result: computePageReplacement(refs, frames, algo)};
+    prStep = 0;
+  }
+  if(prStep >= refs.length) prStep = 0;
+  prStep++;
+  renderPageUpTo(prStep);
+  const step = prState.result.steps[prStep-1];
+  const msg = document.getElementById('pr-step-msg');
+  msg.style.display = 'block';
+  msg.textContent = step.fault ? `Page Fault — Page ${step.page}. ${step.reason || (step.replaced ? `Replaced ${step.replaced}` : 'Loaded into empty frame')}` : `Page Hit — Page ${step.page} already in memory`;
+  msg.className = 'alert ' + (step.fault ? 'error' : 'success');
+}
+
+function renderPageFull() { renderPageUpTo(prState.refs.length); }
+
+function renderPageUpTo(upTo) {
+  const {refs, frames, result} = prState;
+  const steps = result.steps.slice(0, upTo);
+  // frame table
+  let html = '<table><thead><tr><th>Frame</th>';
+  refs.slice(0,upTo).forEach(r => html += `<th>${r}</th>`);
+  html += '</tr></thead><tbody>';
+  for(let f=0;f<frames;f++) {
+    html += `<tr><td>F${f}</td>`;
+    steps.forEach((s,i) => {
+      const pg = s.frameState[f];
+      const cls = i===steps.length-1 && s.fault && s.frameState[f]===s.page ? 'fault' : (i===steps.length-1 && !s.fault && s.page===pg ? 'hit' : '');
+      html += `<td class="${cls}">${pg !== null ? pg : ''}</td>`;
+    });
+    html += '</tr>';
+  }
+  // fault/hit row
+  html += '<tr><td></td>';
+  steps.forEach(s => html += `<td style="background:${s.fault?'#ff446622':'#00ff8822'};color:${s.fault?'#ff4466':'#00ff88'}">${s.fault?'F':'H'}</td>`);
+  html += '</tr></tbody></table>';
+  document.getElementById('pr-frame-table').innerHTML = html;
+  // timeline
+  document.getElementById('pr-timeline').innerHTML = steps.map(s => `<div class="tl-cell ${s.fault?'fault':'hit'}" title="${s.fault?'Fault':'Hit'}: page ${s.page}">${s.page}</div>`).join('');
+  // metrics
+  const faults = steps.filter(s=>s.fault).length;
+  const hits = steps.length - faults;
+  document.getElementById('pr-metrics').innerHTML =
+    metricHTML(steps.length,'References') + metricHTML(faults,'Page Faults') + metricHTML(hits,'Page Hits') +
+    metricHTML((hits/steps.length*100||0).toFixed(1)+'%','Hit Rate') + metricHTML((faults/steps.length*100||0).toFixed(1)+'%','Fault Rate');
+}
+
+function comparePageAlgos() {
+  const refs = document.getElementById('pr-ref').value.trim().split(/\s+/).map(Number).filter(n=>!isNaN(n));
+  const frames = +document.getElementById('pr-frames').value;
+  if(!refs.length) return;
+  const algos = ['fifo','lru','optimal','lfu','clock'];
+  const labels = ['FIFO','LRU','Optimal','LFU','Clock'];
+  const colors = ['#00d4ff','#00ff88','#ffaa00','#ff4466','#aa88ff'];
+  const results = algos.map(a => computePageReplacement(refs, frames, a));
+  const maxFaults = Math.max(...results.map(r=>r.faults));
+  const panel = document.getElementById('pr-compare-panel');
+  panel.style.display = 'block';
+  panel.querySelector('#pr-compare-bars').innerHTML = results.map((r,i) => `
+    <div class="cmp-bar-wrap">
+      <div class="cmp-bar-label"><span>${labels[i]}</span><span>${r.faults} faults (${(r.faults/r.total*100).toFixed(0)}%)</span></div>
+      <div class="cmp-bar-track"><div class="cmp-bar-fill" style="width:${maxFaults?r.faults/maxFaults*100:0}%;background:${colors[i]}">${r.faults}</div></div>
+    </div>`).join('');
+}
+
+// ==================== TAB 4: DEADLOCK ====================
+let dlProcesses = [], dlResources = [], dlAllocs = [], dlRequests = [];
+let dlPCounter = 1, dlRCounter = 1;
+
+function dlAddProcess() { dlProcesses.push(`P${dlPCounter++}`); dlUpdateSelects(); dlDrawGraph(); }
+function dlAddResource() {
+  const name = document.getElementById('dl-rname').value || `R${dlRCounter}`;
+  const inst = +document.getElementById('dl-rinstances').value;
+  dlResources.push({name, inst}); dlRCounter++;
+  document.getElementById('dl-rname').value = `R${dlRCounter}`;
+  dlUpdateSelects(); dlDrawGraph();
+}
+function dlAddAlloc() {
+  const p = document.getElementById('dl-alloc-p').value;
+  const r = document.getElementById('dl-alloc-r').value;
+  if(p && r) { dlAllocs.push({p,r}); dlDrawGraph(); }
+}
+function dlAddRequest() {
+  const p = document.getElementById('dl-req-p').value;
+  const r = document.getElementById('dl-req-r').value;
+  if(p && r) { dlRequests.push({p,r}); dlDrawGraph(); }
+}
+function dlClear() {
+  dlProcesses=[]; dlResources=[]; dlAllocs=[]; dlRequests=[];
+  dlPCounter=1; dlRCounter=1;
+  dlUpdateSelects(); dlDrawGraph();
+  document.getElementById('dl-result').innerHTML = '';
+  document.getElementById('banker-panel').style.display = 'none';
+}
+
+function dlUpdateSelects() {
+  ['dl-alloc-p','dl-req-p'].forEach(id => {
+    document.getElementById(id).innerHTML = dlProcesses.map(p=>`<option>${p}</option>`).join('');
+  });
+  ['dl-alloc-r','dl-req-r'].forEach(id => {
+    document.getElementById(id).innerHTML = dlResources.map(r=>`<option>${r.name}</option>`).join('');
+  });
+}
+
+function dlDetect() {
+  // Simple cycle detection via DFS on wait-for graph
+  // Build wait-for: P waits for Q if P requests R and Q holds R
+  const waitFor = {};
+  dlProcesses.forEach(p => waitFor[p] = []);
+  dlRequests.forEach(req => {
+    dlAllocs.filter(a => a.r===req.r).forEach(a => {
+      if(a.p !== req.p && !waitFor[req.p].includes(a.p)) waitFor[req.p].push(a.p);
+    });
+  });
+  // DFS cycle detection
+  const visited = {}, recStack = {}, cycle = [];
+  const dfs = (node, path) => {
+    visited[node]=true; recStack[node]=true; path.push(node);
+    for(const nb of (waitFor[node]||[])) {
+      if(!visited[nb]) { const c = dfs(nb,[...path]); if(c.length) return c; }
+      else if(recStack[nb]) { return [...path, nb]; }
+    }
+    recStack[node]=false; return [];
+  };
+  let deadlockCycle = [];
+  for(const p of dlProcesses) { if(!visited[p]) { const c = dfs(p,[]); if(c.length) { deadlockCycle=c; break; } } }
+  const res = document.getElementById('dl-result');
+  if(deadlockCycle.length) {
+    res.innerHTML = `<div class="alert error">⚠ Deadlock Detected — Processes involved: ${[...new Set(deadlockCycle)].join(', ')}<br>Cycle: ${deadlockCycle.join(' → ')}</div>`;
+    dlDrawGraph(deadlockCycle);
+  } else {
+    res.innerHTML = `<div class="alert success">✓ No Deadlock Detected — System is in a safe state</div>`;
+    dlDrawGraph();
+  }
+}
+
+function dlBanker() {
+  // Simplified banker's: treat each process's total allocations as "allocated", requests as "max-allocated"=need
+  const panel = document.getElementById('banker-panel');
+  panel.style.display = 'block';
+  const resNames = dlResources.map(r=>r.name);
+  const available = {};
+  dlResources.forEach(r => {
+    const allocd = dlAllocs.filter(a=>a.r===r.name).length;
+    available[r.name] = Math.max(0, r.inst - allocd);
+  });
+  // need[p][r] = requests
+  const work = {...available};
+  const finish = {}, safeSeq = [];
+  dlProcesses.forEach(p => finish[p]=false);
+  let changed = true;
+  while(changed) {
+    changed = false;
+    for(const p of dlProcesses) {
+      if(finish[p]) continue;
+      const need = resNames.every(r => {
+        const req = dlRequests.filter(rq=>rq.p===p&&rq.r===r).length;
+        return req <= (work[r]||0);
+      });
+      if(need) {
+        dlAllocs.filter(a=>a.p===p).forEach(a => work[a.r] = (work[a.r]||0)+1);
+        finish[p]=true; safeSeq.push(p); changed=true;
+      }
+    }
+  }
+  const safe = dlProcesses.every(p=>finish[p]);
+  let html = '';
+  // matrices
+  html += `<div class="tbl-wrap"><table><thead><tr><th>Process</th>`;
+  resNames.forEach(r => html+=`<th>Alloc ${r}</th>`);
+  resNames.forEach(r => html+=`<th>Need ${r}</th>`);
+  html += '</tr></thead><tbody>';
+  dlProcesses.forEach(p => {
+    html += `<tr><td>${p}</td>`;
+    resNames.forEach(r => html+=`<td>${dlAllocs.filter(a=>a.p===p&&a.r===r).length}</td>`);
+    resNames.forEach(r => html+=`<td>${dlRequests.filter(rq=>rq.p===p&&rq.r===r).length}</td>`);
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  html += `<div style="margin:8px 0;font-size:.78rem">Available: ${resNames.map(r=>`${r}=${available[r]||0}`).join(', ')}</div>`;
+  if(safe) {
+    html += `<div class="alert success">✓ Safe State — Safe Sequence: </div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">`;
+    safeSeq.forEach((p,i) => html+=`<span class="seq-item">${p}${i<safeSeq.length-1?'<span class="arrow"> →</span>':''}</span>`);
+    html += '</div>';
+  } else {
+    const stuck = dlProcesses.filter(p=>!finish[p]);
+    html += `<div class="alert error">✗ Unsafe State — No safe sequence. Stuck: ${stuck.join(', ')}</div>`;
+  }
+  panel.querySelector('#banker-output').innerHTML = html;
+}
+
+function dlDrawGraph(deadlockCycle) {
+  const canvas = document.getElementById('dl-canvas');
+  canvas.width = canvas.offsetWidth || 600; canvas.height = 320;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const W=canvas.width, H=canvas.height;
+  // layout positions
+  const positions = {};
+  const nP = dlProcesses.length, nR = dlResources.length;
+  dlProcesses.forEach((p,i) => { positions[p] = {x:W*0.25, y:H*0.15+i*(H*0.7/(Math.max(nP-1,1)))}; });
+  dlResources.forEach((r,i) => { positions[r.name] = {x:W*0.75, y:H*0.15+i*(H*0.7/(Math.max(nR-1,1)))}; });
+  const dlCycleSet = new Set(deadlockCycle||[]);
+
+  // Draw edges
+  dlAllocs.forEach(a => {
+    const from = positions[a.r], to = positions[a.p];
+    if(!from||!to) return;
+    ctx.beginPath(); ctx.moveTo(from.x,from.y); ctx.lineTo(to.x,to.y);
+    ctx.strokeStyle = '#00ff8888'; ctx.lineWidth=1.5; ctx.setLineDash([]);
+    ctx.stroke(); drawArrow(ctx,from.x,from.y,to.x,to.y,'#00ff88');
+  });
+  dlRequests.forEach(a => {
+    const from = positions[a.p], to = positions[a.r];
+    if(!from||!to) return;
+    const isInCycle = dlCycleSet.has(a.p);
+    ctx.beginPath(); ctx.moveTo(from.x,from.y); ctx.lineTo(to.x,to.y);
+    ctx.strokeStyle = isInCycle ? '#ff4466' : '#ffaa0088'; ctx.lineWidth = isInCycle?2.5:1.5; ctx.setLineDash([5,4]);
+    ctx.stroke(); ctx.setLineDash([]); drawArrow(ctx,from.x,from.y,to.x,to.y,isInCycle?'#ff4466':'#ffaa00');
+  });
+
+  // Draw process nodes
+  dlProcesses.forEach(p => {
+    const pos = positions[p]; if(!pos) return;
+    ctx.beginPath(); ctx.arc(pos.x,pos.y,22,0,Math.PI*2);
+    ctx.fillStyle = dlCycleSet.has(p) ? '#ff446633' : '#00d4ff22';
+    ctx.fill(); ctx.strokeStyle = dlCycleSet.has(p)?'#ff4466':'#00d4ff'; ctx.lineWidth=2; ctx.setLineDash([]);
+    if(dlCycleSet.has(p)) { ctx.shadowBlur=10; ctx.shadowColor='#ff4466'; }
+    ctx.stroke(); ctx.shadowBlur=0;
+    ctx.fillStyle='#fff'; ctx.font='bold 12px Courier New'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(p,pos.x,pos.y);
+  });
+
+  // Draw resource nodes
+  dlResources.forEach(r => {
+    const pos = positions[r.name]; if(!pos) return;
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(pos.x-24,pos.y-18,48,36,4) : ctx.rect(pos.x-24,pos.y-18,48,36);
+    ctx.fillStyle = '#ffaa0022'; ctx.fill();
+    ctx.strokeStyle='#ffaa00'; ctx.lineWidth=2; ctx.setLineDash([]); ctx.stroke();
+    ctx.fillStyle='#ffaa00'; ctx.font='11px Courier New'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(r.name,pos.x,pos.y-5);
+    for(let i=0;i<r.inst;i++) {
+      ctx.beginPath(); ctx.arc(pos.x-((r.inst-1)*6)+i*12,pos.y+8,4,0,Math.PI*2);
+      ctx.fillStyle='#ffaa00'; ctx.fill();
+    }
+  });
+}
+
+function drawArrow(ctx,x1,y1,x2,y2,color) {
+  const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
+  if(len<2) return;
+  const ux=dx/len, uy=dy/len, tip=24;
+  const ax=x2-ux*tip, ay=y2-uy*tip;
+  ctx.beginPath(); ctx.moveTo(ax-uy*5,ay+ux*5); ctx.lineTo(ax+ux*8,ay+uy*8); ctx.lineTo(ax+uy*5,ay-ux*5);
+  ctx.fillStyle=color; ctx.fill();
+}
+
+// ==================== TAB 5: DISK ====================
+let diskResult = null;
+let diskStep = 0;
+let diskStepState = null;
+
+function randomDiskQueue() {
+  const arr = Array.from({length:8}, () => Math.floor(Math.random()*200));
+  document.getElementById('disk-queue').value = arr.join(' ');
+}
+
+function resetDisk() {
+  diskResult = null; diskStep = 0; diskStepState = null;
+  document.getElementById('disk-tbody').innerHTML = '';
+  document.getElementById('disk-metrics').innerHTML = '';
+  document.getElementById('disk-compare-panel').style.display = 'none';
+  const canvas = document.getElementById('disk-canvas');
+  const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+function computeDisk(requests, head, diskSize, algo) {
+  const reqs = [...requests];
+  let order = [], cur = head;
+  if(algo==='fcfs') { order = reqs; }
+  else if(algo==='sstf') {
+    const rem = [...reqs];
+    while(rem.length) {
+      rem.sort((a,b)=>Math.abs(a-cur)-Math.abs(b-cur));
+      cur = rem.shift(); order.push(cur);
+    }
+  } else if(algo==='scan' || algo==='look') {
+    const sorted = [...reqs].sort((a,b)=>a-b);
+    const right = sorted.filter(r=>r>=head), left = sorted.filter(r=>r<head).reverse();
+    if(algo==='scan') right.push(diskSize-1);
+    order = [...right, ...left];
+  } else if(algo==='cscan' || algo==='clook') {
+    const sorted = [...reqs].sort((a,b)=>a-b);
+    const right = sorted.filter(r=>r>=head), left = sorted.filter(r=>r<head);
+    if(algo==='cscan') { right.push(diskSize-1); right.push(0); }
+    order = [...right, ...left];
+  }
+  const path = [head, ...order];
+  const seeks = [];
+  for(let i=1;i<path.length;i++) seeks.push({cyl:path[i], dist:Math.abs(path[i]-path[i-1])});
+  const totalSeek = seeks.reduce((s,k)=>s+k.dist,0);
+  return {path, seeks, totalSeek};
+}
+
+function runDisk() {
+  const reqs = document.getElementById('disk-queue').value.trim().split(/\s+/).map(Number).filter(n=>!isNaN(n));
+  const head = +document.getElementById('disk-head').value;
+  const diskSize = +document.getElementById('disk-size').value;
+  const algo = document.getElementById('disk-algo').value;
+  diskResult = computeDisk(reqs, head, diskSize, algo);
+  diskStep = diskResult.path.length;
+  renderDisk(diskStep);
+}
+
+function stepDisk() {
+  const reqs = document.getElementById('disk-queue').value.trim().split(/\s+/).map(Number).filter(n=>!isNaN(n));
+  const head = +document.getElementById('disk-head').value;
+  const diskSize = +document.getElementById('disk-size').value;
+  const algo = document.getElementById('disk-algo').value;
+  if(!diskResult) { diskResult = computeDisk(reqs, head, diskSize, algo); diskStep = 0; }
+  if(diskStep >= diskResult.path.length) diskStep = 0;
+  diskStep++;
+  renderDisk(diskStep);
+}
+
+function renderDisk(upTo) {
+  const res = diskResult;
+  const canvas = document.getElementById('disk-canvas');
+  canvas.width = canvas.offsetWidth || 600; canvas.height = 280;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const W=canvas.width, H=canvas.height, pad=40;
+  const diskSize = +document.getElementById('disk-size').value;
+  const path = res.path.slice(0,upTo);
+  const toX = i => pad + (i/(path.length-1||1))*(W-2*pad);
+  const toY = cyl => pad + (cyl/diskSize)*(H-2*pad);
+  // axes
+  ctx.strokeStyle='#333'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,H-pad); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke();
+  // y-axis labels
+  ctx.fillStyle='#555'; ctx.font='10px Courier New'; ctx.textAlign='right';
+  for(let v=0;v<=diskSize;v+=Math.ceil(diskSize/10)) {
+    const y=toY(v); ctx.fillText(v,pad-4,y+3);
+    ctx.beginPath(); ctx.moveTo(pad-3,y); ctx.lineTo(pad,y); ctx.strokeStyle='#333'; ctx.stroke();
+  }
+  // path
+  if(path.length > 1) {
+    ctx.beginPath(); ctx.moveTo(toX(0), toY(path[0]));
+    path.forEach((cyl,i) => { ctx.lineTo(toX(i),toY(cyl)); });
+    ctx.strokeStyle='#00d4ff'; ctx.lineWidth=2; ctx.setLineDash([]); ctx.stroke();
+    path.forEach((cyl,i) => {
+      ctx.beginPath(); ctx.arc(toX(i),toY(cyl),4,0,Math.PI*2);
+      ctx.fillStyle = i===0?'#ffaa00':'#00d4ff'; ctx.fill();
+    });
+  }
+  // table
+  const seeks = res.seeks.slice(0, upTo-1);
+  document.getElementById('disk-tbody').innerHTML = seeks.map((s,i)=>
+    `<tr><td>${i+1}</td><td>${s.cyl}</td><td>${s.dist}</td></tr>`).join('');
+  // metrics
+  const total = seeks.reduce((s,k)=>s+k.dist,0);
+  document.getElementById('disk-metrics').innerHTML =
+    metricHTML(total,'Total Seek Distance') + metricHTML(seeks.length?Math.round(total/seeks.length):0,'Avg Seek Distance') + metricHTML(seeks.length,'Requests Served');
+}
+
+function compareDisk() {
+  const reqs = document.getElementById('disk-queue').value.trim().split(/\s+/).map(Number).filter(n=>!isNaN(n));
+  const head = +document.getElementById('disk-head').value;
+  const diskSize = +document.getElementById('disk-size').value;
+  const algos = ['fcfs','sstf','scan','cscan','look','clook'];
+  const labels = ['FCFS','SSTF','SCAN','C-SCAN','LOOK','C-LOOK'];
+  const colors = ['#00d4ff','#00ff88','#ffaa00','#ff4466','#aa88ff','#ff8844'];
+  const results = algos.map(a => computeDisk(reqs, head, diskSize, a));
+  const maxD = Math.max(...results.map(r=>r.totalSeek));
+  const panel = document.getElementById('disk-compare-panel');
+  panel.style.display = 'block';
+  panel.querySelector('#disk-compare-bars').innerHTML = results.map((r,i) => `
+    <div class="cmp-bar-wrap">
+      <div class="cmp-bar-label"><span>${labels[i]}</span><span>${r.totalSeek} cylinders</span></div>
+      <div class="cmp-bar-track"><div class="cmp-bar-fill" style="width:${maxD?r.totalSeek/maxD*100:0}%;background:${colors[i]}">${r.totalSeek}</div></div>
+    </div>`).join('');
+}
+
+// ==================== TAB 6: REFERENCE ====================
+const REF_DATA = [
+  {
+    title: '1. Processes vs Threads',
+    content: `<p>A <strong>process</strong> is an independent program in execution with its own address space, PCB (Process Control Block), and resources. A <strong>thread</strong> is a lightweight execution unit within a process that shares the process's memory and resources.</p>
+    <p>Context switching between processes is expensive (save/restore entire CPU state, flush TLB, switch memory maps). Thread context switches are cheaper since they share the same address space.</p>
+    <div class="faang-box"><strong>FAANG Interview Angle:</strong> "Why use threads over processes?" → Shared memory = faster IPC, lower creation cost. But threads share bugs too — one thread crash can kill the process. "What's in a PCB?" → PID, state, program counter, registers, memory maps, open file descriptors, scheduling info.</div>
+    <pre>// Thread creation (POSIX)
+pthread_t t;
+pthread_create(&t, NULL, worker_fn, arg);
+pthread_join(t, NULL);
+
+// Process creation
+pid_t pid = fork();
+if(pid == 0) { /* child */ exec(...); }
+else { wait(NULL); }</pre>
+    <div class="misconception"><strong>Common Misconception:</strong> "Threads are always faster than processes." Not true for CPU-bound tasks in Python (GIL) or when threads cause heavy lock contention.</div>`,
+  },
+  {
+    title: '2. CPU Scheduling',
+    content: `<p>Scheduling algorithms determine which process runs on the CPU. Key metrics: turnaround time (finish − arrival), waiting time (turnaround − burst), response time (first run − arrival).</p>
+    <p><strong>FCFS</strong>: simple but suffers from convoy effect. <strong>SJF</strong>: optimal for average waiting time but requires knowing burst time. <strong>Round Robin</strong>: fair, good for interactive systems. <strong>Priority</strong>: can cause starvation — solved by aging.</p>
+    <div class="faang-box"><strong>FAANG Interview Angle:</strong> "Which algorithm does Linux use?" → Completely Fair Scheduler (CFS) — uses a red-black tree ordered by virtual runtime. "What is starvation?" → A low-priority process never runs because higher-priority processes always arrive. Fix: aging (gradually increase priority).</div>
+    <pre>// Convoy effect: one long process blocks all short ones
+FCFS: P1(24ms), P2(3ms), P3(3ms)
+WT:   P1=0,    P2=24,   P3=27 → avg=17ms
+SJF:  P2(3ms), P3(3ms), P1(24ms)
+WT:   P2=0,    P3=3,    P1=6  → avg=3ms</pre>
+    <div class="misconception"><strong>Common Misconception:</strong> "SJF is always optimal." Only optimal for non-preemptive average waiting time. SRTF is the preemptive version and can cause starvation of long processes.</div>`,
+  },
+  {
+    title: '3. Memory Management',
+    content: `<p><strong>Paging</strong> divides memory into fixed-size frames/pages — eliminates external fragmentation but causes internal fragmentation. <strong>Segmentation</strong> divides by logical segments (code, stack, heap) — no internal fragmentation but has external fragmentation.</p>
+    <p>The <strong>TLB</strong> (Translation Lookaside Buffer) is a hardware cache for page table entries. <strong>Thrashing</strong> occurs when a process spends more time swapping pages than executing — fix with working set model or page fault frequency control.</p>
+    <div class="faang-box"><strong>FAANG Interview Angle:</strong> "What happens on a TLB miss?" → Walk the page table in memory (expensive). If page not in memory → page fault → OS loads from disk. "What is the working set?" → The set of pages actively used in a recent time window τ.</div>
+    <pre>// Virtual address translation
+VA = [VPN | offset]
+TLB lookup(VPN) → PFN (hit: ~1 cycle)
+     ↓ miss
+Page Table Walk → PFN (10s of cycles)
+     ↓ page fault
+Disk I/O → load page (millions of cycles)</pre>
+    <div class="misconception"><strong>Common Misconception:</strong> "More RAM always prevents thrashing." Wrong — you need the right page replacement policy AND sufficient frames per process.</div>`,
+  },
+  {
+    title: '4. Deadlock',
+    content: `<p>Deadlock requires all four <strong>Coffman conditions</strong> simultaneously: (1) Mutual Exclusion, (2) Hold and Wait, (3) No Preemption, (4) Circular Wait. Breaking any one condition prevents deadlock.</p>
+    <p><strong>Detection</strong>: run the banker's algorithm periodically; kill a process in the cycle. <strong>Prevention</strong>: eliminate one of the four conditions. <strong>Avoidance</strong>: banker's algorithm — only grant if result is in a safe state.</p>
+    <div class="faang-box"><strong>FAANG Interview Angle:</strong> "How does the OS handle deadlock in practice?" → Most OS (Linux, Windows) use detection + recovery (kill process) or ignore it (ostrich algorithm) for rare deadlocks. "How does a database avoid deadlock?" → Lock ordering, timeout + retry, or wait-for-graph detection.</div>
+    <pre>// Prevent circular wait: always acquire locks in order
+// BAD:
+Thread1: lock(A); lock(B)
+Thread2: lock(B); lock(A)  // deadlock!
+
+// GOOD:
+Thread1: lock(A); lock(B)
+Thread2: lock(A); lock(B)  // safe</pre>
+    <div class="misconception"><strong>Common Misconception:</strong> "Mutex always causes deadlock." Only if there's circular wait. A single mutex can never deadlock by itself.</div>`,
+  },
+  {
+    title: '5. Synchronization',
+    content: `<p>A <strong>race condition</strong> occurs when the result depends on the timing of concurrent operations. A <strong>mutex</strong> (mutual exclusion lock) ensures only one thread enters a critical section. A <strong>semaphore</strong> is a counter that controls access to shared resources (binary semaphore = mutex).</p>
+    <p>A <strong>monitor</strong> is a high-level construct combining mutex + condition variables. A <strong>spinlock</strong> busy-waits — efficient for short critical sections on multi-core but wastes CPU on single-core.</p>
+    <div class="faang-box"><strong>FAANG Interview Angle:</strong> "Mutex vs Semaphore?" → Mutex has ownership (only locker can unlock); semaphore has no ownership and can be signaled by any thread — used for producer/consumer. "What is a condition variable?" → Lets threads wait for a condition to become true while releasing the lock atomically.</div>
+    <pre>// Producer-Consumer with semaphore
+sem_t empty = N, full = 0;
+mutex_t lock;
+
+Producer: sem_wait(&empty); mutex_lock(&lock);
+          add_to_buffer(); mutex_unlock(&lock); sem_post(&full);
+Consumer: sem_wait(&full);  mutex_lock(&lock);
+          take_from_buffer(); mutex_unlock(&lock); sem_post(&empty);</pre>
+    <div class="misconception"><strong>Common Misconception:</strong> "volatile keyword in C prevents race conditions." No — volatile only prevents compiler optimizations; you still need proper locks or atomics.</div>`,
+  },
+  {
+    title: '6. File Systems',
+    content: `<p>An <strong>inode</strong> stores file metadata (permissions, timestamps, block pointers) but NOT the filename. Filenames live in directory entries. A file can have multiple directory entries (hard links) pointing to the same inode.</p>
+    <p><strong>FAT</strong> (File Allocation Table) uses a linked list of clusters — simple, no inodes. <strong>Journaling</strong> (ext4, NTFS) logs changes before applying — ensures consistency after crashes. <strong>RAID</strong>: 0=striping (speed), 1=mirroring (redundancy), 5=striping+parity, 6=double parity.</p>
+    <div class="faang-box"><strong>FAANG Interview Angle:</strong> "What's a file descriptor?" → An index into the per-process open file table; points to a system-wide file table entry, which points to the inode. "Why is journaling important?" → Prevents filesystem corruption on crash. Without it, a partial write can leave the FS in an inconsistent state.</div>
+    <pre>// Inode structure (simplified)
+struct inode {
+  uid_t uid; gid_t gid; mode_t mode;
+  time_t atime, mtime, ctime;
+  uint32_t direct[12];    // direct block pointers
+  uint32_t indirect;      // single indirect
+  uint32_t dbl_indirect;  // double indirect
+};</pre>
+    <div class="misconception"><strong>Common Misconception:</strong> "Deleting a file frees disk space immediately." The space is freed only when all file descriptors pointing to it are closed (reference count drops to 0).</div>`,
+  },
+  {
+    title: '7. Virtual Memory',
+    content: `<p><strong>Demand paging</strong> loads pages only when accessed, reducing startup time. A <strong>page fault</strong> triggers: OS finds a free frame → loads page from disk → updates page table → restarts the faulting instruction.</p>
+    <p><strong>Copy-on-Write (COW)</strong>: after fork(), parent and child share pages marked read-only. On first write, a private copy is made. This makes fork() O(1) instead of O(n). <strong>mmap</strong> maps files directly into virtual address space for zero-copy I/O.</p>
+    <div class="faang-box"><strong>FAANG Interview Angle:</strong> "Why is fork() fast despite copying address space?" → COW: pages are only copied on write. "What is huge pages?" → 2MB or 1GB pages reduce TLB misses for large memory workloads (databases, ML training).</div>
+    <pre>// Page fault handling
+1. CPU raises page fault exception
+2. OS page fault handler runs
+3. Find faulting virtual address (CR2 on x86)
+4. Check: valid address? access allowed?
+5. Find free frame (or evict via replacement algo)
+6. Schedule disk I/O to load page
+7. Update page table, mark present
+8. Restart faulting instruction</pre>
+    <div class="misconception"><strong>Common Misconception:</strong> "Virtual memory = swap space." Virtual memory is the abstraction. Swap is just one backing store. Anonymous pages can be swapped; file-backed pages are discarded and re-read from the file.</div>`,
+  },
+  {
+    title: '8. IPC — Inter-Process Communication',
+    content: `<p><strong>Pipes</strong>: unidirectional byte stream between related processes (parent-child). <strong>Named pipes (FIFOs)</strong>: between unrelated processes. Both are kernel-buffered and block on full/empty buffer.</p>
+    <p><strong>Message queues</strong>: typed messages, persist until explicitly removed. <strong>Shared memory</strong>: fastest IPC — no copy, but requires external synchronization. <strong>Signals</strong>: async notifications (SIGKILL, SIGTERM, SIGCHLD). <strong>Sockets</strong>: IPC across network or on same machine (Unix domain sockets).</p>
+    <div class="faang-box"><strong>FAANG Interview Angle:</strong> "Which IPC is fastest?" → Shared memory (no kernel involvement after setup). "Why use message queues over pipes?" → Message boundaries preserved, typed messages, random access by priority, survives sender exit. "What is a Unix domain socket vs TCP?" → Same machine: unix socket avoids TCP/IP stack overhead.</div>
+    <pre>// Shared memory (POSIX)
+int fd = shm_open("/myshm", O_CREAT|O_RDWR, 0666);
+ftruncate(fd, SIZE);
+void *ptr = mmap(0, SIZE, PROT_READ|PROT_WRITE,
+                 MAP_SHARED, fd, 0);
+// Now both processes can read/write *ptr directly
+// BUT: need semaphore/mutex for sync!</pre>
+    <div class="misconception"><strong>Common Misconception:</strong> "Signals are reliable for data transfer." Signals are best-effort notifications with no queuing guarantee (multiple signals of same type may be merged). Use queues or pipes for data.</div>`,
+  },
+];
+
+function buildRef() {
+  const container = document.getElementById('ref-sections');
+  container.innerHTML = REF_DATA.map((s,i) => `
+    <div class="ref-section" data-idx="${i}">
+      <div class="ref-header" onclick="toggleRef(${i})">
+        <span>${s.title}</span><span id="ref-arrow-${i}">▼</span>
+      </div>
+      <div class="ref-body" id="ref-body-${i}">${s.content}</div>
+    </div>`).join('');
+}
+
+function toggleRef(i) {
+  const body = document.getElementById(`ref-body-${i}`);
+  const arrow = document.getElementById(`ref-arrow-${i}`);
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function filterRef(q) {
+  const term = q.toLowerCase();
+  document.querySelectorAll('.ref-section').forEach(sec => {
+    const idx = +sec.dataset.idx;
+    const s = REF_DATA[idx];
+    const match = !term || s.title.toLowerCase().includes(term) || s.content.toLowerCase().includes(term);
+    sec.style.display = match ? '' : 'none';
+    if(match && term) {
+      const body = document.getElementById(`ref-body-${idx}`);
+      body.classList.add('open');
+      document.getElementById(`ref-arrow-${idx}`).textContent = '▲';
+    }
+  });
+}
+
+// ==================== INIT ====================
+load();
+buildRef();
+renderProcTable();
+if(memBlocks.length) renderMemory();
+
+// resize handler for canvas
+window.addEventListener('resize', () => {
+  if(diskResult) renderDisk(diskStep);
+  dlDrawGraph();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>American Slang Decoder 🌸</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #fef0f5;
+    --accent: #f9bcd0;
+    --accent2: #f7a8c4;
+    --text: #b04070;
+    --text-dark: #7a2050;
+    --white: #ffffff;
+    --card: #fff5f8;
+    --border: #f4c0d4;
+    --green: #4caf7d;
+    --yellow: #f9c846;
+    --purple: #9b59b6;
+    --blue: #4a90d9;
+    --shadow: 0 4px 20px rgba(176,64,112,0.12);
+    --shadow-hover: 0 8px 30px rgba(176,64,112,0.2);
+  }
+
+  body {
+    font-family: 'Segoe UI', 'Arial Rounded MT Bold', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #f9bcd0 0%, #f4a0c0 50%, #e8789a 100%);
+    padding: 20px 20px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '✨🌸💅✨';
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 20px;
+    opacity: 0.6;
+  }
+  .header::after {
+    content: '✨🌸💅✨';
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 20px;
+    opacity: 0.6;
+  }
+  .header h1 {
+    font-size: clamp(22px, 5vw, 36px);
+    font-weight: 900;
+    color: var(--white);
+    text-shadow: 2px 2px 8px rgba(176,64,112,0.4);
+    letter-spacing: -0.5px;
+  }
+  .header p {
+    color: rgba(255,255,255,0.9);
+    font-size: 15px;
+    margin-top: 6px;
+  }
+
+  /* API Key */
+  .api-section {
+    background: var(--white);
+    border-bottom: 2px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .api-section label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .api-section input {
+    flex: 1;
+    min-width: 180px;
+    padding: 8px 14px;
+    border: 2px solid var(--border);
+    border-radius: 30px;
+    font-size: 13px;
+    color: var(--text-dark);
+    background: var(--bg);
+    outline: none;
+  }
+  .api-section input:focus { border-color: var(--accent2); }
+  .api-save-btn {
+    padding: 8px 18px;
+    background: var(--text);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .api-status { font-size: 12px; color: var(--green); font-weight: 600; }
+
+  /* Container */
+  .container { max-width: 860px; margin: 0 auto; padding: 20px 16px; }
+
+  /* Slang of the Day */
+  .sotd-card {
+    background: linear-gradient(135deg, #fff0f7, #ffe4ef);
+    border: 2px solid var(--accent);
+    border-radius: 20px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sotd-card::before {
+    content: '🌟';
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    font-size: 50px;
+    opacity: 0.15;
+  }
+  .sotd-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent2);
+    margin-bottom: 8px;
+  }
+  .sotd-word {
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: 900;
+    color: var(--text-dark);
+    line-height: 1;
+  }
+  .sotd-def {
+    font-size: 16px;
+    color: var(--text);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .sotd-def-vi {
+    font-size: 14px;
+    color: #c06090;
+    font-style: italic;
+    margin-top: 4px;
+  }
+  .sotd-example {
+    margin-top: 10px;
+    background: rgba(249,188,208,0.3);
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    color: var(--text-dark);
+  }
+  .sotd-loading {
+    color: var(--accent2);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 14px 20px;
+    border: 2.5px solid var(--border);
+    border-radius: 16px;
+    background: var(--white);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .tab-btn.active {
+    background: var(--text);
+    border-color: var(--text);
+    color: white;
+    box-shadow: var(--shadow);
+  }
+  .tab-btn:hover:not(.active) {
+    background: var(--accent);
+    border-color: var(--accent2);
+  }
+
+  /* Tab panels */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Mode 1 — Decode word */
+  .mode-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .mode-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+  }
+  .search-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 14px 20px;
+    border: 2.5px solid var(--border);
+    border-radius: 30px;
+    font-size: 17px;
+    color: var(--text-dark);
+    background: var(--bg);
+    outline: none;
+    font-weight: 600;
+  }
+  .search-input:focus { border-color: var(--accent2); background: white; }
+  .search-input::placeholder { color: #d4a0b8; font-weight: 400; }
+
+  .decode-btn {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--text), #e05888);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(176,64,112,0.35);
+  }
+  .decode-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(176,64,112,0.45); }
+  .decode-btn:active { transform: translateY(0); }
+  .decode-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* Slang chips */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    padding: 8px 16px;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover {
+    background: var(--accent);
+    color: var(--text-dark);
+    transform: scale(1.05);
+  }
+
+  /* Textarea mode */
+  .decode-textarea {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2.5px solid var(--border);
+    border-radius: 16px;
+    font-size: 16px;
+    color: var(--text-dark);
+    background: var(--bg);
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 110px;
+    margin-bottom: 14px;
+  }
+  .decode-textarea:focus { border-color: var(--accent2); background: white; }
+  .decode-textarea::placeholder { color: #d4a0b8; }
+
+  /* Loading spinner */
+  .loading-wrap {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--accent);
+    border-top-color: var(--text);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--text); font-size: 15px; font-weight: 600; }
+
+  /* Result Card — single word */
+  .result-card {
+    background: var(--white);
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: var(--shadow-hover);
+    margin-top: 20px;
+    border: 2px solid var(--border);
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .result-emoji { font-size: 52px; line-height: 1; }
+  .result-word-wrap { flex: 1; }
+  .result-slang {
+    font-size: clamp(28px, 6vw, 44px);
+    font-weight: 900;
+    color: var(--text-dark);
+    line-height: 1;
+  }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-origin { background: #e8f4fd; color: var(--blue); border: 1.5px solid #b8d8f4; }
+  .badge-current { background: #eafaf1; color: var(--green); border: 1.5px solid #a8e8c4; }
+  .badge-old { background: #fdf5e6; color: #d4800a; border: 1.5px solid #f0d090; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent2);
+    margin-bottom: 6px;
+    margin-top: 18px;
+  }
+  .definition-box {
+    background: linear-gradient(135deg, #fff5f8, #ffeef5);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 4px;
+  }
+  .definition-en {
+    font-size: 17px;
+    color: var(--text-dark);
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .definition-vi {
+    font-size: 15px;
+    color: #c06090;
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .use-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  @media (max-width: 500px) { .use-grid { grid-template-columns: 1fr; } }
+  .use-box {
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .use-box.yes { background: #eafaf1; border: 2px solid #a8e8c4; }
+  .use-box.no { background: #fef0f0; border: 2px solid #f4b8b8; }
+  .use-box-title {
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .use-box.yes .use-box-title { color: var(--green); }
+  .use-box.no .use-box-title { color: #d45050; }
+  .use-box p { font-size: 14px; color: var(--text-dark); line-height: 1.4; }
+
+  /* Cringe-o-meter */
+  .cringe-wrap {
+    background: #fff8e1;
+    border: 2px solid #f9c846;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-top: 6px;
+  }
+  .cringe-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #c08010;
+    margin-bottom: 8px;
+  }
+  .cringe-bar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .cringe-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2.5px solid #f0c868;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .cringe-dot.filled { background: var(--yellow); border-color: #d4a020; }
+  .cringe-label { font-size: 13px; color: #a06010; margin-left: 8px; font-weight: 600; }
+
+  /* Examples */
+  .examples-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+  .examples-list li {
+    background: var(--bg);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 10px 14px;
+    font-size: 15px;
+    color: var(--text-dark);
+    line-height: 1.4;
+  }
+
+  /* Similar words */
+  .similar-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .similar-chip {
+    padding: 6px 14px;
+    background: #f0e8f8;
+    border: 1.5px solid #d4b8ec;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--purple);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .similar-chip:hover { background: #d4b8ec; }
+
+  /* Action buttons */
+  .action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 2px solid var(--border);
+  }
+  .action-btn {
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-speak { background: #e8f4fd; color: var(--blue); border-color: #b8d8f4; }
+  .btn-speak:hover { background: #b8d8f4; }
+  .btn-save { background: #eafaf1; color: var(--green); border-color: #a8e8c4; }
+  .btn-save:hover { background: #a8e8c4; }
+  .btn-practice { background: linear-gradient(135deg, var(--text), #e05888); color: white; border-color: transparent; }
+  .btn-practice:hover { opacity: 0.9; transform: scale(1.03); }
+
+  /* Practice scenarios */
+  .practice-card {
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    margin-top: 16px;
+    animation: slideUp 0.3s ease;
+  }
+  .practice-title { font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 12px; }
+  .scenario {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--purple);
+  }
+  .scenario-num { font-size: 11px; font-weight: 800; color: var(--purple); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .scenario p { font-size: 15px; color: var(--text-dark); line-height: 1.5; }
+
+  /* Sentence result */
+  .sentence-original {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-dark);
+    padding: 16px 20px;
+    background: var(--bg);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .highlight {
+    background: linear-gradient(135deg, #f9bcd0, #f4a0c0);
+    border-radius: 6px;
+    padding: 2px 6px;
+    color: var(--text-dark);
+    font-weight: 800;
+    cursor: default;
+    position: relative;
+  }
+  .translate-box {
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .translate-box.en { background: #e8f4fd; border: 2px solid #b8d8f4; }
+  .translate-box.vi { background: #fff0f7; border: 2px solid var(--accent); }
+  .translate-box .t-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .translate-box.en .t-label { color: var(--blue); }
+  .translate-box.vi .t-label { color: var(--text); }
+  .translate-box p { font-size: 16px; color: var(--text-dark); line-height: 1.5; font-weight: 600; }
+
+  /* Accordion */
+  .accordion { margin-top: 16px; }
+  .accordion-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+  }
+  .accordion-item {
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .accordion-header {
+    padding: 14px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--white);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    user-select: none;
+  }
+  .accordion-header:hover { background: var(--bg); }
+  .accordion-arrow { transition: transform 0.2s; font-size: 12px; }
+  .accordion-item.open .accordion-arrow { transform: rotate(180deg); }
+  .accordion-body {
+    display: none;
+    padding: 14px 18px;
+    background: var(--bg);
+    font-size: 15px;
+    color: var(--text-dark);
+    line-height: 1.5;
+    border-top: 2px solid var(--border);
+  }
+  .accordion-item.open .accordion-body { display: block; }
+  .accordion-vi { color: #c06090; font-style: italic; margin-top: 4px; font-size: 14px; }
+
+  /* Dictionary */
+  .dict-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+  }
+  .flip-card {
+    height: 110px;
+    perspective: 600px;
+    cursor: pointer;
+  }
+  .flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s;
+    transform-style: preserve-3d;
+  }
+  .flip-card:hover .flip-inner,
+  .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .flip-front {
+    background: linear-gradient(135deg, var(--text), #e05888);
+    color: white;
+    font-size: 18px;
+    font-weight: 900;
+  }
+  .flip-back {
+    background: var(--white);
+    border: 2px solid var(--border);
+    color: var(--text-dark);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    transform: rotateY(180deg);
+  }
+  .dict-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--accent2);
+    font-size: 15px;
+  }
+  .dict-clear-btn {
+    padding: 8px 18px;
+    background: #fef0f0;
+    color: #d45050;
+    border: 2px solid #f4b8b8;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+
+  /* Quiz */
+  .quiz-start-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #9b59b6, #7d3c98);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(155,89,182,0.3);
+    transition: all 0.2s;
+  }
+  .quiz-start-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(155,89,182,0.4); }
+
+  .quiz-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    border: 2px solid var(--border);
+  }
+  .quiz-progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .quiz-progress-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 10px;
+    margin: 0 12px;
+    overflow: hidden;
+  }
+  .quiz-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--text), #e05888);
+    border-radius: 10px;
+    transition: width 0.4s;
+  }
+  .quiz-q-num { font-size: 13px; font-weight: 700; color: var(--accent2); }
+  .quiz-question { font-size: 18px; font-weight: 700; color: var(--text-dark); line-height: 1.5; margin-bottom: 20px; }
+  .quiz-blank { display: inline-block; min-width: 100px; border-bottom: 3px solid var(--text); padding: 2px 8px; font-weight: 800; color: var(--text); }
+  .quiz-input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2.5px solid var(--border);
+    border-radius: 14px;
+    font-size: 16px;
+    color: var(--text-dark);
+    background: var(--bg);
+    outline: none;
+    font-family: inherit;
+    margin-bottom: 12px;
+  }
+  .quiz-input:focus { border-color: var(--accent2); background: white; }
+  .quiz-submit-btn {
+    padding: 12px 28px;
+    background: var(--purple);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .quiz-submit-btn:hover { opacity: 0.9; }
+  .quiz-feedback {
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    margin-top: 10px;
+    display: none;
+  }
+  .quiz-feedback.correct { background: #eafaf1; color: var(--green); border: 2px solid #a8e8c4; }
+  .quiz-feedback.wrong { background: #fef0f0; color: #d45050; border: 2px solid #f4b8b8; }
+
+  .quiz-score-card {
+    text-align: center;
+    padding: 40px 24px;
+  }
+  .score-emoji { font-size: 72px; margin-bottom: 16px; }
+  .score-num { font-size: 52px; font-weight: 900; color: var(--text-dark); }
+  .score-label { font-size: 18px; color: var(--text); margin-top: 8px; }
+  .score-msg { font-size: 15px; color: var(--text); margin-top: 12px; line-height: 1.5; }
+
+  /* Error */
+  .error-box {
+    background: #fff0f0;
+    border: 2px solid #f4b8b8;
+    border-radius: 14px;
+    padding: 16px 20px;
+    color: #d45050;
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 16px;
+  }
+
+  /* Divider */
+  .section-divider {
+    border: none;
+    border-top: 2.5px dashed var(--border);
+    margin: 8px 0 20px;
+  }
+
+  /* No-key warning */
+  .no-key-msg {
+    background: #fff8e1;
+    border: 2px solid var(--yellow);
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: #a06010;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 480px) {
+    .header { padding: 16px 16px 24px; }
+    .result-card { padding: 20px 16px; }
+    .mode-card { padding: 18px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🌸 American Slang Decoder</h1>
+  <p>Học tiếng lóng Mỹ — hiểu bạn bè nói gì! ✨</p>
+</div>
+
+<!-- API Key Section -->
+<div class="api-section">
+  <label>🔑 Gemini API Key:</label>
+  <input type="password" id="apiKeyInput" placeholder="Paste your Gemini API key here...">
+  <button class="api-save-btn" onclick="saveApiKey()">Save</button>
+  <span class="api-status" id="apiStatus"></span>
+</div>
+
+<div class="container">
+
+  <!-- Slang of the Day -->
+  <div class="sotd-card" id="sotdCard">
+    <div class="sotd-label">🌟 Slang of the Day · Tiếng lóng hôm nay</div>
+    <div class="sotd-loading" id="sotdContent">Loading today's slang...</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('decode')">🔍 Decode a Word</button>
+    <button class="tab-btn" onclick="switchTab('sentence')">📝 Decode a Sentence</button>
+    <button class="tab-btn" onclick="switchTab('dictionary')">📚 My Dictionary</button>
+    <button class="tab-btn" onclick="switchTab('quiz')">🎯 Quiz Me!</button>
+  </div>
+
+  <!-- TAB: Decode a Word -->
+  <div class="tab-panel active" id="tab-decode">
+
+    <div id="noKeyWarning" class="no-key-msg" style="display:none">
+      ⚠️ Please enter your Gemini API key above to start decoding slang!
+    </div>
+
+    <div class="mode-card">
+      <div class="mode-title">🔍 What does this slang mean?</div>
+      <div class="search-row">
+        <input type="text" class="search-input" id="slangInput" placeholder="Type any slang word or phrase..." onkeydown="if(event.key==='Enter')decodeWord()">
+        <button class="decode-btn" id="decodeBtn" onclick="decodeWord()">✨ Decode it!</button>
+      </div>
+      <div class="section-label">Popular right now — tap to decode:</div>
+      <div class="chips" id="quickChips"></div>
+    </div>
+
+    <div id="wordLoading" class="loading-wrap" style="display:none">
+      <div class="spinner"></div>
+      <div class="loading-text">Decoding the vibes... 💅</div>
+    </div>
+
+    <div id="wordResult"></div>
+    <div id="practiceResult"></div>
+
+  </div>
+
+  <!-- TAB: Decode a Sentence -->
+  <div class="tab-panel" id="tab-sentence">
+
+    <div class="mode-card">
+      <div class="mode-title">📝 Paste a confusing sentence</div>
+      <textarea class="decode-textarea" id="sentenceInput" placeholder='e.g. "omg bestie that fit is snatched no cap you're giving main character fr"'></textarea>
+      <button class="decode-btn" onclick="decodeSentence()">🔍 Decode this sentence</button>
+    </div>
+
+    <div id="sentenceLoading" class="loading-wrap" style="display:none">
+      <div class="spinner"></div>
+      <div class="loading-text">Reading between the lines... ✨</div>
+    </div>
+
+    <div id="sentenceResult"></div>
+
+  </div>
+
+  <!-- TAB: My Dictionary -->
+  <div class="tab-panel" id="tab-dictionary">
+
+    <div class="mode-card">
+      <div class="mode-title">📚 My Slang Dictionary</div>
+      <p style="font-size:15px; color:var(--text); margin-bottom:4px;">Words you've saved — tap a card to flip it!</p>
+    </div>
+
+    <div id="dictContent"></div>
+
+  </div>
+
+  <!-- TAB: Quiz -->
+  <div class="tab-panel" id="tab-quiz">
+
+    <div class="mode-card">
+      <div class="mode-title">🎯 Can you use it right?</div>
+      <p style="font-size:15px; color:var(--text); margin-bottom:16px;">Fill in the blanks with the right slang! 5 questions — let's go!</p>
+      <button class="quiz-start-btn" onclick="startQuiz()">🎮 Start Quiz!</button>
+    </div>
+
+    <div id="quizContent"></div>
+
+  </div>
+
+</div>
+
+<script>
+// ========================
+// STATE & CONFIG
+// ========================
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+const POPULAR_SLANG = [
+  'no cap','slay','bussin','lowkey','it\'s giving','periodt',
+  'fr fr','understood the assignment','main character','rizz',
+  'NPC','delulu','snatched','hits different','based'
+];
+
+const CRINGE_LABELS = ['', 'Totally safe 👍', 'Pretty normal 😊', 'Use carefully 🤔', 'Only with close friends 😬', 'Risky — be very sure 😱'];
+const VIBE_EMOJIS = {
+  happy:'😄', excited:'🤩', cool:'😎', funny:'😂', sarcastic:'🙄',
+  surprised:'😲', love:'💕', confused:'😵', sad:'😢', angry:'😤',
+  chill:'😌', confident:'💅', silly:'🤪', mysterious:'🌙', default:'✨'
+};
+
+let savedWords = JSON.parse(localStorage.getItem('slangDict') || '[]');
+let quizQuestions = [];
+let currentQuizIdx = 0;
+let quizScore = 0;
+let currentWordData = null;
+
+// ========================
+// API KEY
+// ========================
+function getApiKey() { return localStorage.getItem('geminiApiKey') || ''; }
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return;
+  localStorage.setItem('geminiApiKey', key);
+  document.getElementById('apiStatus').textContent = '✓ Saved!';
+  document.getElementById('noKeyWarning').style.display = 'none';
+  setTimeout(() => document.getElementById('apiStatus').textContent = '', 2000);
+  loadDailySlang();
+}
+
+function checkApiKey() {
+  const key = getApiKey();
+  if (key) {
+    document.getElementById('apiKeyInput').value = key;
+    document.getElementById('apiStatus').textContent = '✓ Ready!';
+  } else {
+    document.getElementById('noKeyWarning').style.display = 'block';
+  }
+}
+
+// ========================
+// GEMINI API
+// ========================
+async function callGemini(prompt) {
+  const key = getApiKey();
+  if (!key) throw new Error('No API key. Please enter your Gemini API key above.');
+
+  const res = await fetch(`${GEMINI_URL}?key=${key}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${res.status}`);
+  }
+
+  const data = await res.json();
+  let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  return JSON.parse(text);
+}
+
+// ========================
+// SLANG OF THE DAY
+// ========================
+async function loadDailySlang() {
+  const today = new Date().toDateString();
+  const cached = localStorage.getItem('sotd_date') === today
+    ? JSON.parse(localStorage.getItem('sotd_data') || 'null')
+    : null;
+
+  if (cached) { renderSOTD(cached); return; }
+
+  const key = getApiKey();
+  if (!key) {
+    document.getElementById('sotdContent').innerHTML = '<span style="color:var(--accent2)">Enter your API key to load today\'s slang! 🔑</span>';
+    return;
+  }
+
+  try {
+    const prompt = `Give me one fun American slang word popular with teenagers right now. Keep it appropriate for a 13-year-old.
+Return JSON: { "slang": "rizz", "quickDef": "charm or ability to attract people", "quickDefVi": "sức hút, khả năng làm người khác thích mình", "example": "He's got so much rizz!" }
+Return only JSON, no markdown.`;
+    const data = await callGemini(prompt);
+    localStorage.setItem('sotd_date', today);
+    localStorage.setItem('sotd_data', JSON.stringify(data));
+    renderSOTD(data);
+  } catch(e) {
+    document.getElementById('sotdContent').innerHTML = '<span style="color:var(--accent2)">Could not load — check your API key 🌸</span>';
+  }
+}
+
+function renderSOTD(d) {
+  document.getElementById('sotdContent').innerHTML = `
+    <div class="sotd-word">${escHtml(d.slang)}</div>
+    <div class="sotd-def">${escHtml(d.quickDef)}</div>
+    <div class="sotd-def-vi">🇻🇳 ${escHtml(d.quickDefVi)}</div>
+    <div class="sotd-example">💬 "${escHtml(d.example)}"</div>
+  `;
+}
+
+// ========================
+// TABS
+// ========================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['decode','sentence','dictionary','quiz'][i] === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  if (tab === 'dictionary') renderDictionary();
+}
+
+// ========================
+// QUICK CHIPS
+// ========================
+function renderChips() {
+  const wrap = document.getElementById('quickChips');
+  wrap.innerHTML = POPULAR_SLANG.map(s =>
+    `<button class="chip" onclick="document.getElementById('slangInput').value='${s}';decodeWord()">${s}</button>`
+  ).join('');
+}
+
+// ========================
+// DECODE WORD
+// ========================
+async function decodeWord() {
+  const slang = document.getElementById('slangInput').value.trim();
+  if (!slang) { document.getElementById('slangInput').focus(); return; }
+
+  if (!getApiKey()) {
+    document.getElementById('noKeyWarning').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('wordResult').innerHTML = '';
+  document.getElementById('practiceResult').innerHTML = '';
+  document.getElementById('wordLoading').style.display = 'block';
+  document.getElementById('decodeBtn').disabled = true;
+  currentWordData = null;
+
+  try {
+    const prompt = `Explain the American slang word/phrase '${slang}' to a 13-year-old Vietnamese girl who moved to the US and wants to understand what her American classmates are saying.
+
+Keep it fun, simple, and age-appropriate. Include a Vietnamese translation.
+
+Return JSON:
+{
+  "slang": "${slang}",
+  "vibe": "happy",
+  "definition": "Simple English definition a 13-year-old would understand",
+  "definitionVi": "Định nghĩa bằng tiếng Việt",
+  "whenToUse": "Context: texting friends, casual conversation, social media",
+  "whenNotToUse": "Don't say this to teachers or in formal situations",
+  "cringeometer": 2,
+  "examples": ["Example sentence 1", "Example sentence 2", "Example sentence 3"],
+  "similarWords": ["related slang 1", "related slang 2"],
+  "origin": "Gen Z",
+  "isCurrent": true
+}
+Return only JSON, no markdown.`;
+
+    const data = await callGemini(prompt);
+    currentWordData = data;
+    renderWordResult(data);
+  } catch(e) {
+    document.getElementById('wordResult').innerHTML = `<div class="error-box">😞 Oops! ${escHtml(e.message)}</div>`;
+  } finally {
+    document.getElementById('wordLoading').style.display = 'none';
+    document.getElementById('decodeBtn').disabled = false;
+  }
+}
+
+function renderWordResult(d) {
+  const vibe = VIBE_EMOJIS[d.vibe] || VIBE_EMOJIS.default;
+  const cringeNum = Math.min(5, Math.max(1, parseInt(d.cringeometer) || 1));
+  const cringeDots = Array.from({length:5}, (_,i) =>
+    `<div class="cringe-dot${i < cringeNum ? ' filled' : ''}">${i < cringeNum ? '🔥' : ''}</div>`
+  ).join('');
+
+  const originBadge = d.isCurrent
+    ? `<span class="badge badge-current">✨ Current</span>`
+    : `<span class="badge badge-old">📼 Older slang</span>`;
+  const originLabel = d.origin ? `<span class="badge badge-origin">${escHtml(d.origin)}</span>` : '';
+
+  const examples = (d.examples || []).map(ex => `<li>${escHtml(ex)}</li>`).join('');
+  const similar = (d.similarWords || []).map(w =>
+    `<button class="similar-chip" onclick="document.getElementById('slangInput').value='${escHtml(w)}';decodeWord()">${escHtml(w)}</button>`
+  ).join('');
+
+  document.getElementById('wordResult').innerHTML = `
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-emoji">${vibe}</div>
+        <div class="result-word-wrap">
+          <div class="result-slang">${escHtml(d.slang)}</div>
+          <div class="badges">${originLabel}${originBadge}</div>
+        </div>
+      </div>
+
+      <div class="section-label">📖 What it means</div>
+      <div class="definition-box">
+        <div class="definition-en">${escHtml(d.definition)}</div>
+        <div class="definition-vi">🇻🇳 ${escHtml(d.definitionVi)}</div>
+      </div>
+
+      <div class="section-label">✅ When to use / ❌ When NOT to use</div>
+      <div class="use-grid">
+        <div class="use-box yes">
+          <div class="use-box-title">✅ Use it when:</div>
+          <p>${escHtml(d.whenToUse)}</p>
+        </div>
+        <div class="use-box no">
+          <div class="use-box-title">❌ Avoid when:</div>
+          <p>${escHtml(d.whenNotToUse)}</p>
+        </div>
+      </div>
+
+      <div class="section-label">🔥 Cringe-o-meter</div>
+      <div class="cringe-wrap">
+        <div class="cringe-title">How risky is it to use? (1 = safe · 5 = very cringe)</div>
+        <div class="cringe-bar">
+          ${cringeDots}
+          <span class="cringe-label">${CRINGE_LABELS[cringeNum]}</span>
+        </div>
+      </div>
+
+      <div class="section-label">💬 Example sentences</div>
+      <ul class="examples-list">${examples}</ul>
+
+      ${similar ? `<div class="section-label">🔗 Similar slang</div><div class="similar-chips">${similar}</div>` : ''}
+
+      <div class="action-row">
+        <button class="action-btn btn-speak" onclick="speakWord('${escHtml(d.slang)}')">🔊 Hear it</button>
+        <button class="action-btn btn-save" onclick="saveWord()" id="saveBtn">💾 Save to dictionary</button>
+        <button class="action-btn btn-practice" onclick="generatePractice('${escHtml(d.slang)}')">🎭 Teach me to use it</button>
+      </div>
+    </div>
+  `;
+}
+
+// ========================
+// SPEAK
+// ========================
+function speakWord(word) {
+  if (!window.speechSynthesis) { alert('Sorry, your browser does not support text-to-speech!'); return; }
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.lang = 'en-US';
+  utter.rate = 0.9;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+
+// ========================
+// SAVE TO DICTIONARY
+// ========================
+function saveWord() {
+  if (!currentWordData) return;
+  const existing = savedWords.find(w => w.slang.toLowerCase() === currentWordData.slang.toLowerCase());
+  if (existing) { alert('Already saved! ✨'); return; }
+  savedWords.push({
+    slang: currentWordData.slang,
+    definition: currentWordData.definition,
+    definitionVi: currentWordData.definitionVi
+  });
+  localStorage.setItem('slangDict', JSON.stringify(savedWords));
+  const btn = document.getElementById('saveBtn');
+  if (btn) { btn.textContent = '✅ Saved!'; btn.disabled = true; }
+}
+
+// ========================
+// PRACTICE SCENARIOS
+// ========================
+async function generatePractice(slang) {
+  const key = getApiKey();
+  if (!key) { document.getElementById('noKeyWarning').style.display = 'block'; return; }
+
+  document.getElementById('practiceResult').innerHTML = `
+    <div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Creating practice scenarios... 🎭</div></div>`;
+
+  try {
+    const prompt = `Create 3 fun practice scenarios for a 13-year-old Vietnamese girl to practice using the slang word "${slang}" naturally with American classmates.
+Each scenario should be a realistic school/teen social situation.
+Return JSON: { "scenarios": ["Scenario 1 description with example of how to use the word", "Scenario 2...", "Scenario 3..."] }
+Return only JSON, no markdown.`;
+    const data = await callGemini(prompt);
+    const scenarios = (data.scenarios || []).map((s, i) => `
+      <div class="scenario">
+        <div class="scenario-num">Scenario ${i + 1}</div>
+        <p>${escHtml(s)}</p>
+      </div>
+    `).join('');
+    document.getElementById('practiceResult').innerHTML = `
+      <div class="practice-card">
+        <div class="practice-title">🎭 Practice using "${escHtml(slang)}"</div>
+        ${scenarios}
+      </div>
+    `;
+  } catch(e) {
+    document.getElementById('practiceResult').innerHTML = `<div class="error-box">😞 ${escHtml(e.message)}</div>`;
+  }
+}
+
+// ========================
+// DECODE SENTENCE
+// ========================
+async function decodeSentence() {
+  const sentence = document.getElementById('sentenceInput').value.trim();
+  if (!sentence) { document.getElementById('sentenceInput').focus(); return; }
+
+  if (!getApiKey()) {
+    alert('Please enter your Gemini API key first!');
+    return;
+  }
+
+  document.getElementById('sentenceResult').innerHTML = '';
+  document.getElementById('sentenceLoading').style.display = 'block';
+
+  try {
+    const prompt = `Decode this sentence for a 13-year-old Vietnamese ESL student: '${sentence}'
+Find all slang/informal words and explain them.
+Return JSON:
+{
+  "plainEnglish": "Full sentence in plain English",
+  "plainVietnamese": "Dịch sang tiếng Việt",
+  "slangFound": [
+    { "word": "snatched", "meaning": "looks really good", "meaningVi": "trông rất đẹp" }
+  ]
+}
+Return only JSON, no markdown.`;
+    const data = await callGemini(prompt);
+    renderSentenceResult(sentence, data);
+  } catch(e) {
+    document.getElementById('sentenceResult').innerHTML = `<div class="error-box">😞 ${escHtml(e.message)}</div>`;
+  } finally {
+    document.getElementById('sentenceLoading').style.display = 'none';
+  }
+}
+
+function renderSentenceResult(original, data) {
+  // Highlight slang words in original sentence
+  let highlighted = escHtml(original);
+  const slangFound = data.slangFound || [];
+  slangFound.forEach(item => {
+    const pattern = new RegExp(`\\b${escRegex(item.word)}\\b`, 'gi');
+    highlighted = highlighted.replace(pattern, `<span class="highlight" title="${escHtml(item.meaning)}">${item.word}</span>`);
+  });
+
+  const accordion = slangFound.map((item, i) => `
+    <div class="accordion-item" id="acc-${i}">
+      <div class="accordion-header" onclick="toggleAccordion('acc-${i}')">
+        <span>🏷️ <strong>${escHtml(item.word)}</strong></span>
+        <span class="accordion-arrow">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div>${escHtml(item.meaning)}</div>
+        <div class="accordion-vi">🇻🇳 ${escHtml(item.meaningVi)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('sentenceResult').innerHTML = `
+    <div class="result-card">
+      <div class="section-label">💬 Your sentence (slang highlighted in pink)</div>
+      <div class="sentence-original">${highlighted}</div>
+
+      <div class="translate-box en">
+        <div class="t-label">🇺🇸 Plain English</div>
+        <p>${escHtml(data.plainEnglish)}</p>
+      </div>
+
+      <div class="translate-box vi">
+        <div class="t-label">🇻🇳 Tiếng Việt</div>
+        <p>${escHtml(data.plainVietnamese)}</p>
+      </div>
+
+      ${slangFound.length > 0 ? `
+        <div class="accordion">
+          <div class="accordion-title">📚 Word-by-word breakdown</div>
+          ${accordion}
+        </div>
+      ` : '<p style="color:var(--accent2);margin-top:10px">No slang found — this sentence is pretty standard!</p>'}
+    </div>
+  `;
+}
+
+function toggleAccordion(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ========================
+// DICTIONARY
+// ========================
+function renderDictionary() {
+  const wrap = document.getElementById('dictContent');
+  if (savedWords.length === 0) {
+    wrap.innerHTML = `
+      <div class="mode-card">
+        <div class="dict-empty">
+          <div style="font-size:48px;margin-bottom:12px">📚</div>
+          <div>No words saved yet! Decode some slang and hit "Save to dictionary" 🌸</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const cards = savedWords.map((w, i) => `
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front">${escHtml(w.slang)}</div>
+        <div class="flip-back">
+          <div>
+            <div style="font-weight:700;color:var(--text-dark);font-size:14px">${escHtml(w.definition)}</div>
+            <div style="color:#c06090;font-style:italic;font-size:12px;margin-top:4px">🇻🇳 ${escHtml(w.definitionVi)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  wrap.innerHTML = `
+    <div class="mode-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:16px;font-weight:700;color:var(--text-dark)">📚 ${savedWords.length} word${savedWords.length===1?'':'s'} saved</div>
+        <button class="dict-clear-btn" onclick="clearDictionary()">🗑️ Clear all</button>
+      </div>
+      <div class="dict-grid">${cards}</div>
+    </div>`;
+}
+
+function clearDictionary() {
+  if (!confirm('Clear all saved words?')) return;
+  savedWords = [];
+  localStorage.removeItem('slangDict');
+  renderDictionary();
+}
+
+// ========================
+// QUIZ
+// ========================
+const QUIZ_DATA = [
+  { slang: 'no cap', sentence: 'She is the best singer in school, _____.', answer: 'no cap', hint: 'meaning "I\'m being honest"' },
+  { slang: 'slay', sentence: 'You looked amazing at the party! You totally _____ that outfit!', answer: 'slayed', hint: 'meaning "did it perfectly"' },
+  { slang: 'bussin', sentence: 'This boba tea is so good — it\'s literally _____!', answer: 'bussin', hint: 'meaning "really delicious"' },
+  { slang: 'lowkey', sentence: 'I _____ want to stay home instead of going out tonight.', answer: 'lowkey', hint: 'meaning "kind of secretly"' },
+  { slang: 'rizz', sentence: 'He walked into the room and everyone noticed him — he has so much _____.', answer: 'rizz', hint: 'meaning "natural charm"' },
+  { slang: 'delulu', sentence: 'She thinks she can become a popstar without practicing — she\'s so _____.', answer: 'delulu', hint: 'meaning "delusional, living in a fantasy"' },
+  { slang: 'snatched', sentence: 'Omg your eyebrows are _____ today! Who did them?', answer: 'snatched', hint: 'meaning "looking perfect/flawless"' },
+  { slang: 'based', sentence: 'He told the teacher his honest opinion even though everyone disagreed. That\'s so _____.', answer: 'based', hint: 'meaning "confident and not caring about others\' judgment"' },
+];
+
+function startQuiz() {
+  quizQuestions = [...QUIZ_DATA].sort(() => Math.random() - 0.5).slice(0, 5);
+  currentQuizIdx = 0;
+  quizScore = 0;
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  if (currentQuizIdx >= quizQuestions.length) {
+    renderQuizScore();
+    return;
+  }
+  const q = quizQuestions[currentQuizIdx];
+  const pct = (currentQuizIdx / quizQuestions.length) * 100;
+  const sentenceDisplay = q.sentence.replace('_____', `<span class="quiz-blank">_____</span>`);
+
+  document.getElementById('quizContent').innerHTML = `
+    <div class="quiz-card">
+      <div class="quiz-progress">
+        <span class="quiz-q-num">Q${currentQuizIdx + 1}/5</span>
+        <div class="quiz-progress-bar-wrap">
+          <div class="quiz-progress-bar" style="width:${pct}%"></div>
+        </div>
+        <span class="quiz-q-num">⭐ ${quizScore}</span>
+      </div>
+
+      <div class="quiz-question">Fill in the blank with the right slang word:<br><br>${sentenceDisplay}</div>
+      <div style="font-size:13px;color:var(--accent2);margin-bottom:14px">Hint: ${q.hint}</div>
+
+      <input type="text" class="quiz-input" id="quizInput" placeholder="Type your answer here..."
+        onkeydown="if(event.key==='Enter')submitQuizAnswer()">
+      <button class="quiz-submit-btn" onclick="submitQuizAnswer()">✅ Submit</button>
+
+      <div class="quiz-feedback" id="quizFeedback"></div>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('quizInput')?.focus(), 100);
+}
+
+function submitQuizAnswer() {
+  const q = quizQuestions[currentQuizIdx];
+  const input = document.getElementById('quizInput');
+  const answer = input.value.trim().toLowerCase();
+  const correct = q.answer.toLowerCase();
+  const feedback = document.getElementById('quizFeedback');
+
+  input.disabled = true;
+  document.querySelector('.quiz-submit-btn').disabled = true;
+
+  const isCorrect = answer === correct || answer.includes(correct) || correct.includes(answer);
+
+  if (isCorrect) {
+    quizScore++;
+    feedback.className = 'quiz-feedback correct';
+    feedback.textContent = `✅ Yes! "${q.answer}" is right! You're so smart! 🌟`;
+  } else {
+    feedback.className = 'quiz-feedback wrong';
+    feedback.textContent = `❌ The answer was "${q.answer}" — now you know! 💪`;
+  }
+  feedback.style.display = 'block';
+
+  setTimeout(() => {
+    currentQuizIdx++;
+    renderQuizQuestion();
+  }, 2000);
+}
+
+function renderQuizScore() {
+  const pct = quizScore / quizQuestions.length;
+  let emoji, msg;
+  if (pct === 1) { emoji = '🏆'; msg = 'PERFECT! You are literally a slang queen! 👑'; }
+  else if (pct >= 0.8) { emoji = '🌟'; msg = 'Amazing job! You\'re getting the hang of American slang!'; }
+  else if (pct >= 0.6) { emoji = '💕'; msg = 'Good try! Keep practicing and you\'ll slay it next time!'; }
+  else { emoji = '💪'; msg = 'Keep going! Decode more words and try again — you\'ve got this!'; }
+
+  document.getElementById('quizContent').innerHTML = `
+    <div class="quiz-card quiz-score-card">
+      <div class="score-emoji">${emoji}</div>
+      <div class="score-num">${quizScore}/5</div>
+      <div class="score-label">correct answers</div>
+      <div class="score-msg">${msg}</div>
+      <br>
+      <button class="quiz-start-btn" onclick="startQuiz()" style="margin-bottom:0">🎮 Play Again!</button>
+    </div>
+  `;
+}
+
+// ========================
+// UTILS
+// ========================
+function escHtml(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function escRegex(str) {
+  return String(str || '').replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+}
+
+// ========================
+// INIT
+// ========================
+window.addEventListener('DOMContentLoaded', () => {
+  checkApiKey();
+  renderChips();
+  loadDailySlang();
+});
+</script>
+</body>
+</html>

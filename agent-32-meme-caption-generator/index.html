@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meme Caption Generator</title>
+<style>
+  :root {
+    --bg: #f4f0fb;
+    --accent: #ccc0e8;
+    --primary: #5040a8;
+    --primary-light: #7060c8;
+    --primary-dark: #3a2e8a;
+    --card-bg: #ffffff;
+    --text: #2a1f6e;
+    --muted: #7a6ea8;
+    --danger: #e05050;
+    --success: #50a870;
+    --border: #ddd8f0;
+    --shadow: 0 2px 12px rgba(80,64,168,0.1);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* ---- HEADER ---- */
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
+    padding: 20px 24px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 16px rgba(80,64,168,0.3);
+  }
+  header h1 { font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 800; letter-spacing: -0.5px; }
+  header p { font-size: 0.85rem; opacity: 0.85; margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ---- LAYOUT ---- */
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  section { margin-bottom: 32px; }
+  h2 { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  h2 .icon { font-size: 1.2rem; }
+
+  /* ---- API KEY ---- */
+  .api-row {
+    display: flex; gap: 10px; align-items: center;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    box-shadow: var(--shadow);
+  }
+  .api-row label { font-size: 0.85rem; font-weight: 600; white-space: nowrap; color: var(--muted); }
+  .api-row input {
+    flex: 1; border: none; outline: none; background: transparent;
+    font-size: 0.9rem; color: var(--text); font-family: monospace;
+  }
+  .api-row button {
+    padding: 6px 14px; border-radius: 8px; border: none; cursor: pointer;
+    background: var(--accent); color: var(--primary); font-weight: 600; font-size: 0.8rem;
+  }
+  .api-status { font-size: 0.75rem; color: var(--success); font-weight: 600; white-space: nowrap; }
+  .api-status.error { color: var(--danger); }
+
+  /* ---- TABS ---- */
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 9px 20px; border-radius: 24px; border: 2px solid var(--accent);
+    background: var(--card-bg); color: var(--primary); cursor: pointer;
+    font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .tab-btn:hover:not(.active) { background: var(--accent); }
+
+  /* ---- TEMPLATE GRID ---- */
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .template-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .template-card:hover { border-color: var(--primary-light); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(80,64,168,0.15); }
+  .template-card.selected { border-color: var(--primary); background: linear-gradient(135deg, #f0ecff, #e8e0ff); }
+  .template-thumb {
+    width: 100%; height: 80px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.9);
+    margin-bottom: 8px; letter-spacing: 0.3px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    position: relative; overflow: hidden;
+  }
+  .template-thumb .panel-line {
+    position: absolute; left: 0; right: 0; height: 2px; background: rgba(255,255,255,0.4);
+  }
+  .template-name { font-size: 0.78rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .template-panels { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+
+  /* ---- GENERATOR FORM ---- */
+  .gen-form {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .selected-template-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+    padding-bottom: 14px; border-bottom: 1.5px solid var(--border);
+  }
+  .selected-thumb-sm {
+    width: 56px; height: 42px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.5rem; color: white; font-weight: 700; flex-shrink: 0;
+  }
+  .selected-info h3 { font-size: 1rem; font-weight: 700; }
+  .selected-info p { font-size: 0.8rem; color: var(--muted); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
+  .form-group textarea, .form-group input[type="text"] {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+    border-radius: 10px; font-size: 0.9rem; font-family: inherit;
+    background: var(--bg); color: var(--text); outline: none;
+    transition: border-color 0.2s; resize: vertical;
+  }
+  .form-group textarea:focus, .form-group input[type="text"]:focus { border-color: var(--primary); }
+  .form-group textarea { min-height: 72px; }
+
+  .vibe-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .vibe-chip {
+    padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--accent);
+    background: var(--card-bg); color: var(--primary); cursor: pointer;
+    font-size: 0.82rem; font-weight: 600; transition: all 0.15s;
+  }
+  .vibe-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .vibe-chip:hover:not(.active) { background: var(--accent); }
+
+  .btn-primary {
+    width: 100%; padding: 13px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white; font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; box-shadow: 0 4px 16px rgba(80,64,168,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(80,64,168,0.4); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* ---- RESULTS ---- */
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .btn-regen {
+    padding: 8px 18px; border-radius: 10px; border: 1.5px solid var(--primary);
+    background: transparent; color: var(--primary); font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-regen:hover { background: var(--primary); color: white; }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .result-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s;
+  }
+  .result-card:hover { box-shadow: 0 6px 24px rgba(80,64,168,0.15); }
+  .result-canvas-wrap { background: #1a1a2e; display: flex; justify-content: center; align-items: center; padding: 10px; }
+  .result-canvas-wrap canvas { max-width: 100%; height: auto; border-radius: 6px; display: block; }
+  .result-info { padding: 14px; }
+  .result-panels { margin-bottom: 10px; }
+  .panel-text-row { display: flex; gap: 6px; margin-bottom: 4px; align-items: flex-start; }
+  .panel-label { font-size: 0.7rem; font-weight: 700; color: var(--primary); background: var(--accent); padding: 2px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
+  .panel-text { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+  .result-explanation { font-size: 0.78rem; color: var(--muted); font-style: italic; margin-bottom: 12px; border-left: 3px solid var(--accent); padding-left: 10px; }
+  .result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-sm {
+    padding: 7px 14px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: var(--bg); color: var(--primary); font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; flex: 1; min-width: 100px; text-align: center;
+  }
+  .btn-sm:hover { background: var(--accent); border-color: var(--accent); }
+  .btn-sm.download { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn-sm.download:hover { background: var(--primary-dark); }
+  .btn-sm.copied { background: var(--success); color: white; border-color: var(--success); }
+
+  /* ---- FREE MODE ---- */
+  .free-mode-form {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .free-template-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: var(--primary); padding: 6px 14px;
+    border-radius: 20px; font-weight: 700; font-size: 0.85rem; margin-bottom: 16px;
+  }
+  .free-reason { font-size: 0.82rem; color: var(--muted); font-style: italic; margin-bottom: 16px; }
+
+  /* ---- LOADING ---- */
+  .loading-wrap { text-align: center; padding: 40px 20px; }
+  .spinner {
+    width: 48px; height: 48px; border: 4px solid var(--accent);
+    border-top-color: var(--primary); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-wrap p { color: var(--muted); font-weight: 600; }
+
+  /* ---- ERROR ---- */
+  .error-box {
+    background: #fff0f0; border: 1.5px solid #ffcccc; border-radius: 10px;
+    padding: 14px 16px; color: var(--danger); font-size: 0.85rem; font-weight: 600;
+  }
+
+  /* ---- HISTORY ---- */
+  .history-grid {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .history-item {
+    position: relative; border-radius: 10px; overflow: hidden; cursor: pointer;
+    border: 2px solid var(--border); transition: all 0.2s;
+    width: 110px; flex-shrink: 0;
+  }
+  .history-item:hover { border-color: var(--primary); transform: scale(1.05); }
+  .history-item img { width: 110px; height: 82px; object-fit: cover; display: block; }
+  .history-item .h-label { font-size: 0.65rem; padding: 3px 5px; background: rgba(80,64,168,0.85); color: white; font-weight: 600; text-align: center; }
+  .history-empty { color: var(--muted); font-size: 0.85rem; font-style: italic; }
+  .btn-clear-hist {
+    padding: 5px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: 0.75rem; cursor: pointer;
+  }
+  .btn-clear-hist:hover { background: #fff0f0; color: var(--danger); border-color: #ffcccc; }
+
+  /* ---- PROMPT PLACEHOLDER ---- */
+  .prompt-hint { font-size: 0.78rem; color: var(--muted); margin-top: 5px; }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 600px) {
+    .template-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    .results-grid { grid-template-columns: 1fr; }
+    .tabs { gap: 6px; }
+    .tab-btn { padding: 8px 14px; font-size: 0.82rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎭 Meme Caption Generator</h1>
+  <p>Pick a template, describe your situation, get AI-generated captions with live preview</p>
+  <div class="badge">Agent #32 · Games & Fun · Gemini 2.0 Flash</div>
+</header>
+
+<div class="container">
+
+  <!-- API KEY -->
+  <section>
+    <div class="api-row">
+      <label>🔑 Gemini API Key</label>
+      <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
+      <button onclick="saveKey()">Save</button>
+      <span class="api-status" id="apiStatus"></span>
+    </div>
+  </section>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('picker')">🖼️ Template Picker</button>
+    <button class="tab-btn" onclick="switchTab('free')">✨ Best Format Mode</button>
+    <button class="tab-btn" onclick="switchTab('history')">📚 History</button>
+  </div>
+
+  <!-- TAB: TEMPLATE PICKER -->
+  <div id="tab-picker">
+    <section>
+      <h2><span class="icon">🗂️</span> Choose a Meme Template</h2>
+      <div class="template-grid" id="templateGrid"></div>
+    </section>
+
+    <section id="genSection" style="display:none">
+      <h2><span class="icon">✍️</span> Caption Generator</h2>
+      <div class="gen-form">
+        <div class="selected-template-header">
+          <div class="selected-thumb-sm" id="selectedThumbSm"></div>
+          <div class="selected-info">
+            <h3 id="selectedName">—</h3>
+            <p id="selectedPanelDesc">—</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>💬 What's this meme about?</label>
+          <textarea id="contextInput" placeholder="e.g. me trying to wake up for 8am class, debugging code at 3am, when the build finally passes..." rows="3"></textarea>
+          <div class="prompt-hint">Be specific — better context = funnier captions!</div>
+        </div>
+
+        <div class="form-group">
+          <label>🎨 Vibe</label>
+          <div class="vibe-grid" id="vibeGrid"></div>
+        </div>
+
+        <button class="btn-primary" id="genBtn" onclick="generateCaptions()">
+          🎲 Generate Captions
+        </button>
+      </div>
+    </section>
+
+    <section id="resultsSection" style="display:none">
+      <div class="results-header">
+        <h2 style="margin-bottom:0"><span class="icon">🎉</span> Generated Memes</h2>
+        <button class="btn-regen" onclick="generateCaptions()">🔄 Regenerate</button>
+      </div>
+      <div id="loadingDiv" style="display:none" class="loading-wrap">
+        <div class="spinner"></div>
+        <p>Cooking up some 🔥 captions...</p>
+      </div>
+      <div id="errorDiv" style="display:none" class="error-box"></div>
+      <div class="results-grid" id="resultsGrid"></div>
+    </section>
+  </div>
+
+  <!-- TAB: FREE MODE -->
+  <div id="tab-free" style="display:none">
+    <section>
+      <h2><span class="icon">✨</span> Best Format Mode</h2>
+      <p style="font-size:0.88rem;color:var(--muted);margin-bottom:16px;">Describe your situation — AI picks the perfect meme template AND writes the caption for you.</p>
+      <div class="free-mode-form">
+        <div class="form-group">
+          <label>📝 Describe your situation</label>
+          <textarea id="freeInput" placeholder="e.g. When my code finally works but I have no idea why... or When the client says 'just one small change'" rows="3"></textarea>
+        </div>
+        <button class="btn-primary" id="freeBtn" onclick="generateFreeMode()">
+          🤖 Find Best Meme Format
+        </button>
+      </div>
+    </section>
+
+    <section id="freeResultSection" style="display:none">
+      <h2><span class="icon">🎯</span> AI Picked This Template</h2>
+      <div id="freeLoadingDiv" style="display:none" class="loading-wrap">
+        <div class="spinner"></div>
+        <p>Finding the perfect meme for you...</p>
+      </div>
+      <div id="freeErrorDiv" style="display:none" class="error-box"></div>
+      <div id="freeResult"></div>
+    </section>
+  </div>
+
+  <!-- TAB: HISTORY -->
+  <div id="tab-history" style="display:none">
+    <section>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h2 style="margin-bottom:0"><span class="icon">📚</span> Recent Memes</h2>
+        <button class="btn-clear-hist" onclick="clearHistory()">🗑️ Clear</button>
+      </div>
+      <div class="history-grid" id="historyGrid"></div>
+    </section>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// MEME TEMPLATES DATA
+// ============================================================
+const TEMPLATES = [
+  { id: 'drake', name: 'Drake', panels: ['Reject', 'Prefer'], color: ['#c65c3c','#3c8cc6'], layout: 'drake', desc: '2 panels (reject/prefer)' },
+  { id: 'distracted', name: 'Distracted Boyfriend', panels: ['Girlfriend', 'Boyfriend', 'Other Woman'], color: ['#c65c8c'], layout: 'thirds', desc: '3 labels (classic love triangle)' },
+  { id: 'thisfine', name: 'This is Fine', panels: ['Top', 'Bottom'], color: ['#e8a040','#e86020'], layout: 'standard', desc: '2 panels (denial)' },
+  { id: 'onedoes', name: 'One Does Not Simply', panels: ['Top', 'Bottom'], color: ['#607088'], layout: 'standard', desc: '2 panels (Boromir classic)' },
+  { id: 'successkid', name: 'Success Kid', panels: ['Top', 'Bottom'], color: ['#50a060'], layout: 'standard', desc: '2 panels (fist pump)' },
+  { id: 'doge', name: 'Doge', panels: ['wow', 'such', 'very', 'amaze'], color: ['#e8c860'], layout: 'scatter', desc: '4 floating labels' },
+  { id: 'pikachu', name: 'Surprised Pikachu', panels: ['Setup', 'Reaction'], color: ['#f0c840'], layout: 'standard', desc: '2 panels (shocked face)' },
+  { id: 'twobuttons', name: 'Two Buttons', panels: ['Button 1', 'Button 2', 'Sweating Guy'], color: ['#6080c8'], layout: 'twobuttons', desc: '3 labels (impossible choice)' },
+  { id: 'changemymind', name: 'Change My Mind', panels: ['Sign Text'], color: ['#8060a0'], layout: 'sign', desc: '1 panel (debate sign)' },
+  { id: 'galaxybrain', name: 'Galaxy Brain', panels: ['Normal brain', 'Glowing brain', 'Galaxy brain', 'Universe brain'], color: ['#4060c0','#6080e0','#80a0ff','#a0c0ff'], layout: 'stack4', desc: '4 panels (escalating logic)' },
+  { id: 'expandingbrain', name: 'Expanding Brain', panels: ['Small brain', 'Normal brain', 'Exploding brain', 'Galaxy brain'], color: ['#6050a0','#8070c0','#a090e0','#c0b0ff'], layout: 'stack4', desc: '4 panels (brain expand)' },
+  { id: 'grusplan', name: "Gru's Plan", panels: ['Step 1', 'Step 2', 'Step 3 (same as 1)'], color: ['#5070c8'], layout: 'stack3', desc: '3 panels (plan backfires)' },
+  { id: 'yoda', name: 'Yoda', panels: ['Top', 'Bottom'], color: ['#507040'], layout: 'standard', desc: '2 panels (inverted wisdom)' },
+  { id: 'womancat', name: 'Woman Yelling at Cat', panels: ['Woman yelling', 'Cat at dinner'], color: ['#c05060','#60a060'], layout: 'side2', desc: '2 side-by-side panels' },
+  { id: 'confusedmath', name: 'Confused Math Lady', panels: ['Top', 'Bottom'], color: ['#c08040'], layout: 'standard', desc: '2 panels (overwhelmed)' },
+  { id: 'monkeypuppet', name: 'Monkey Puppet', panels: ['Situation', 'Side-eye'], color: ['#a07050'], layout: 'standard', desc: '2 panels (awkward side-eye)' },
+  { id: 'alwayshasbeen', name: 'Always Has Been', panels: ['Realization', '"Always has been"'], color: ['#204060'], layout: 'astronaut', desc: '2 panels (betrayal reveal)' },
+  { id: 'panikkalm', name: 'Panik / Kalm', panels: ['Panik', 'Kalm', 'PANIK'], color: ['#c04040','#40a040','#c04040'], layout: 'stack3', desc: '3 panels (anxiety cycle)' },
+  { id: 'bernie', name: 'Bernie Sanders', panels: ['Caption'], color: ['#6080a0'], layout: 'sign', desc: '1 panel (sitting with mittens)' },
+  { id: 'custom', name: 'Custom (Upload)', panels: ['Top', 'Bottom'], color: ['#a0a0b0'], layout: 'standard', desc: '2 panels (your own image)', custom: true }
+];
+
+const VIBES = ['Relatable', 'Sarcastic', 'Gen Z / Internet', 'Wholesome', 'Dark humor (mild)', 'CS student life'];
+
+let selectedTemplate = null;
+let selectedVibe = 'Relatable';
+let lastContext = '';
+let lastResults = [];
+let customImageDataUrl = null;
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  loadKey();
+  renderTemplates();
+  renderVibes();
+  renderHistory();
+});
+
+// ============================================================
+// API KEY
+// ============================================================
+function loadKey() {
+  const k = localStorage.getItem('gemini_api_key');
+  if (k) {
+    document.getElementById('apiKey').value = k;
+    document.getElementById('apiStatus').textContent = '✓ Saved';
+    document.getElementById('apiStatus').className = 'api-status';
+  }
+}
+
+function saveKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (!k) return;
+  localStorage.setItem('gemini_api_key', k);
+  const s = document.getElementById('apiStatus');
+  s.textContent = '✓ Saved!';
+  s.className = 'api-status';
+  setTimeout(() => { s.textContent = '✓ Ready'; }, 2000);
+}
+
+function getKey() {
+  return document.getElementById('apiKey').value.trim() || localStorage.getItem('gemini_api_key') || '';
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(tab) {
+  ['picker','free','history'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === tab ? '' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', ['picker','free','history'][i] === tab);
+  });
+  if (tab === 'history') renderHistory();
+}
+
+// ============================================================
+// TEMPLATE GRID
+// ============================================================
+function renderTemplates() {
+  const grid = document.getElementById('templateGrid');
+  grid.innerHTML = TEMPLATES.map(t => `
+    <div class="template-card" id="card-${t.id}" onclick="selectTemplate('${t.id}')">
+      <div class="template-thumb" style="background:linear-gradient(135deg,${getColors(t)})">
+        ${getThumbLayout(t)}
+        <span>${t.name}</span>
+      </div>
+      <div class="template-name">${t.name}</div>
+      <div class="template-panels">${t.desc}</div>
+    </div>
+  `).join('');
+}
+
+function getColors(t) {
+  const c = t.color;
+  if (c.length === 1) return `${c[0]}, ${adjustColor(c[0])}`;
+  return c.slice(0,2).join(', ');
+}
+
+function adjustColor(hex) {
+  // darken slightly
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.max(0, ((n>>16)&255)-40);
+  const g = Math.max(0, ((n>>8)&255)-40);
+  const b = Math.max(0, (n&255)-40);
+  return `#${((r<<16)|(g<<8)|b).toString(16).padStart(6,'0')}`;
+}
+
+function getThumbLayout(t) {
+  if (t.layout === 'drake') return '<div class="panel-line" style="top:50%"></div>';
+  if (t.layout === 'side2') return '<div class="panel-line" style="top:0;bottom:0;left:50%;width:2px;height:100%"></div>';
+  if (['stack3','stack4'].includes(t.layout)) {
+    const n = t.layout === 'stack4' ? 4 : 3;
+    return Array.from({length:n-1},(_,i)=>`<div class="panel-line" style="top:${Math.round((i+1)*100/n)}%"></div>`).join('');
+  }
+  return '';
+}
+
+function selectTemplate(id) {
+  selectedTemplate = TEMPLATES.find(t => t.id === id);
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('card-'+id).classList.add('selected');
+
+  // update form header
+  const thumb = document.getElementById('selectedThumbSm');
+  thumb.style.background = `linear-gradient(135deg,${getColors(selectedTemplate)})`;
+  thumb.textContent = selectedTemplate.name.slice(0,3);
+  document.getElementById('selectedName').textContent = selectedTemplate.name;
+  document.getElementById('selectedPanelDesc').textContent = selectedTemplate.desc;
+
+  document.getElementById('genSection').style.display = '';
+  document.getElementById('resultsSection').style.display = 'none';
+  document.getElementById('resultsGrid').innerHTML = '';
+
+  // custom upload
+  if (selectedTemplate.custom) {
+    showCustomUpload();
+  }
+
+  document.getElementById('genSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showCustomUpload() {
+  const fg = document.querySelector('.form-group');
+  if (document.getElementById('customUploadRow')) return;
+  const row = document.createElement('div');
+  row.className = 'form-group';
+  row.id = 'customUploadRow';
+  row.innerHTML = `<label>🖼️ Upload Your Image</label>
+    <input type="file" accept="image/*" onchange="handleCustomUpload(this)" style="font-size:0.85rem">`;
+  fg.parentNode.insertBefore(row, fg);
+}
+
+function handleCustomUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { customImageDataUrl = e.target.result; };
+  reader.readAsDataURL(file);
+}
+
+// ============================================================
+// VIBES
+// ============================================================
+function renderVibes() {
+  document.getElementById('vibeGrid').innerHTML = VIBES.map(v =>
+    `<button class="vibe-chip${v===selectedVibe?' active':''}" onclick="selectVibe('${v}')">${v}</button>`
+  ).join('');
+}
+
+function selectVibe(v) {
+  selectedVibe = v;
+  document.querySelectorAll('.vibe-chip').forEach(c => {
+    c.classList.toggle('active', c.textContent === v);
+  });
+}
+
+// ============================================================
+// GEMINI API
+// ============================================================
+async function callGemini(prompt) {
+  const key = getKey();
+  if (!key) throw new Error('Please enter your Gemini API key first.');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 1.0, topP: 0.95 }
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API error ${resp.status}`);
+  }
+  const data = await resp.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  // strip markdown code fences if present
+  return text.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
+}
+
+// ============================================================
+// GENERATE CAPTIONS
+// ============================================================
+async function generateCaptions() {
+  if (!selectedTemplate) return;
+  const context = document.getElementById('contextInput').value.trim();
+  if (!context) { alert('Please describe what your meme is about!'); return; }
+
+  lastContext = context;
+  const t = selectedTemplate;
+  const panelLabels = t.panels;
+
+  const prompt = `Generate 3 funny caption sets for the '${t.name}' meme format about: '${context}'. Vibe: ${selectedVibe}.
+
+The ${t.name} meme has ${panelLabels.length} text area(s): ${panelLabels.join(', ')}.
+
+Make the captions genuinely funny — relatable, clever, or perfectly timed. Each set should have a different angle on the topic.
+
+Return JSON:
+{
+  "captions": [
+    { "panels": ["Top text", "Bottom text"], "explanation": "Why this is funny" },
+    { "panels": ["Alt top", "Alt bottom"], "explanation": "Why this works" },
+    { "panels": ["Another top", "Another bottom"], "explanation": "The angle here" }
+  ]
+}
+Return only JSON, no markdown.`;
+
+  showLoading(true);
+  document.getElementById('resultsSection').style.display = '';
+  document.getElementById('resultsGrid').innerHTML = '';
+
+  try {
+    const raw = await callGemini(prompt);
+    const parsed = JSON.parse(raw);
+    lastResults = parsed.captions || [];
+    renderResults(lastResults, t);
+  } catch(e) {
+    showError(e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+function showLoading(on) {
+  document.getElementById('loadingDiv').style.display = on ? '' : 'none';
+  document.getElementById('genBtn').disabled = on;
+  document.getElementById('errorDiv').style.display = 'none';
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorDiv');
+  el.style.display = '';
+  el.textContent = '⚠️ ' + msg;
+}
+
+// ============================================================
+// RENDER RESULTS
+// ============================================================
+function renderResults(captions, template) {
+  const grid = document.getElementById('resultsGrid');
+  grid.innerHTML = '';
+  captions.forEach((cap, i) => {
+    const card = createResultCard(cap, template, i);
+    grid.appendChild(card);
+  });
+}
+
+function createResultCard(cap, template, index) {
+  const card = document.createElement('div');
+  card.className = 'result-card';
+
+  // canvas
+  const wrap = document.createElement('div');
+  wrap.className = 'result-canvas-wrap';
+  const canvas = document.createElement('canvas');
+  canvas.width = 500;
+  canvas.height = getCanvasHeight(template);
+  wrap.appendChild(canvas);
+  card.appendChild(wrap);
+
+  // draw async (after appending)
+  setTimeout(() => drawMeme(canvas, template, cap.panels, customImageDataUrl), 0);
+
+  // info
+  const info = document.createElement('div');
+  info.className = 'result-info';
+
+  const panelsHtml = cap.panels.map((p, pi) => `
+    <div class="panel-text-row">
+      <span class="panel-label">${template.panels[pi] || `P${pi+1}`}</span>
+      <span class="panel-text">${escHtml(p)}</span>
+    </div>
+  `).join('');
+
+  info.innerHTML = `
+    <div class="result-panels">${panelsHtml}</div>
+    <div class="result-explanation">${escHtml(cap.explanation || '')}</div>
+    <div class="result-actions">
+      <button class="btn-sm" onclick="copyCaption(this, ${JSON.stringify(cap.panels).replace(/"/g,'&quot;')}, '${escHtml(template.name)}')">📋 Copy Text</button>
+      <button class="btn-sm" onclick="shareCaption(${JSON.stringify(cap.panels).replace(/"/g,'&quot;')}, '${escHtml(template.name)}')">🔗 Share</button>
+      <button class="btn-sm download" onclick="downloadCanvas(this)">⬇️ Download PNG</button>
+    </div>
+  `;
+  card.appendChild(info);
+
+  // store canvas ref for download
+  card.querySelector('.btn-sm.download')._canvas = canvas;
+  card.querySelector('.btn-sm.download')._template = template;
+  card.querySelector('.btn-sm.download')._index = index;
+
+  saveToHistory(canvas, template.name, cap.panels);
+  return card;
+}
+
+function getCanvasHeight(t) {
+  if (t.layout === 'drake') return 500;
+  if (t.layout === 'stack4') return 500;
+  if (t.layout === 'stack3') return 450;
+  if (t.layout === 'side2') return 280;
+  if (t.layout === 'scatter') return 360;
+  return 360;
+}
+
+// ============================================================
+// CANVAS MEME RENDERER
+// ============================================================
+function drawMeme(canvas, template, panels, customImgUrl) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+
+  if (customImgUrl && template.custom) {
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, w, h);
+      overlayMemeText(ctx, template, panels, w, h);
+    };
+    img.src = customImgUrl;
+    return;
+  }
+
+  drawTemplateBackground(ctx, template, w, h);
+  overlayMemeText(ctx, template, panels, w, h);
+}
+
+function drawTemplateBackground(ctx, t, w, h) {
+  const colors = t.color;
+
+  if (t.layout === 'drake') {
+    // Two vertical panels with distinct colors
+    const panelH = h / 2;
+    const grad1 = ctx.createLinearGradient(0, 0, w, panelH);
+    grad1.addColorStop(0, colors[0]); grad1.addColorStop(1, adjustColorJs(colors[0], -20));
+    ctx.fillStyle = grad1; ctx.fillRect(0, 0, w, panelH);
+    const grad2 = ctx.createLinearGradient(0, panelH, w, h);
+    grad2.addColorStop(0, colors[1] || colors[0]); grad2.addColorStop(1, adjustColorJs(colors[1]||colors[0], -20));
+    ctx.fillStyle = grad2; ctx.fillRect(0, panelH, w, panelH);
+    // separator
+    ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(0, panelH-2, w, 4);
+    // add "drake" figure placeholder
+    drawFigurePlaceholder(ctx, 60, 10, 80, panelH-20, '🚫', '#c0392b');
+    drawFigurePlaceholder(ctx, 60, panelH+10, 80, panelH-20, '👉', '#27ae60');
+  } else if (t.layout === 'side2') {
+    const panelW = w / 2;
+    fillPanel(ctx, 0, 0, panelW, h, colors[0]);
+    fillPanel(ctx, panelW, 0, panelW, h, colors[1] || adjustColorJs(colors[0], 40));
+    ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(panelW-2, 0, 4, h);
+  } else if (t.layout === 'stack4') {
+    const ph = h / 4;
+    colors.forEach((c, i) => fillPanel(ctx, 0, i*ph, w, ph, c || colors[0]));
+    for (let i=1;i<4;i++) { ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fillRect(0, i*ph-1, w, 2); }
+  } else if (t.layout === 'stack3') {
+    const ph = h / 3;
+    for (let i=0;i<3;i++) fillPanel(ctx, 0, i*ph, w, ph, colors[i] || colors[0]);
+    for (let i=1;i<3;i++) { ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fillRect(0, i*ph-1, w, 2); }
+  } else if (t.layout === 'twobuttons') {
+    fillPanel(ctx, 0, 0, w, h, colors[0]);
+    // two button boxes
+    roundRect(ctx, 40, 60, 180, 80, 12, '#ffffff33');
+    roundRect(ctx, 40, 180, 180, 80, 12, '#ffffff33');
+    // sweating figure placeholder
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.beginPath(); ctx.arc(w-100, h/2, 70, 0, Math.PI*2); ctx.fill();
+  } else if (t.layout === 'sign') {
+    fillPanel(ctx, 0, 0, w, h, colors[0]);
+    // sign box
+    roundRect(ctx, w*0.05, h*0.35, w*0.9, h*0.35, 10, 'rgba(255,255,255,0.2)');
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2; ctx.stroke();
+  } else if (t.layout === 'scatter') {
+    fillPanel(ctx, 0, 0, w, h, colors[0]);
+  } else if (t.layout === 'astronaut') {
+    fillPanel(ctx, 0, 0, w, h, colors[0]);
+    // stars
+    for (let s=0;s<60;s++) {
+      ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.8+0.2})`;
+      const sx = Math.random()*w, sy = Math.random()*h;
+      ctx.fillRect(sx, sy, Math.random()*2+1, Math.random()*2+1);
+    }
+  } else if (t.layout === 'thirds') {
+    // distracted boyfriend - 3 color zones
+    fillPanel(ctx, 0, 0, w/3, h, '#c65c8c');
+    fillPanel(ctx, w/3, 0, w/3, h, '#5c8cc6');
+    fillPanel(ctx, 2*w/3, 0, w/3, h, '#8cc65c');
+    ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fillRect(w/3-1,0,2,h); ctx.fillRect(2*w/3-1,0,2,h);
+  } else {
+    // standard
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, colors[0]);
+    grad.addColorStop(1, adjustColorJs(colors[0], -30));
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+  }
+
+  // Watermark / template label
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.font = `bold ${Math.min(w/10, 28)}px serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText(t.name, w/2, h/2 + 10);
+}
+
+function fillPanel(ctx, x, y, pw, ph, color) {
+  const grad = ctx.createLinearGradient(x, y, x+pw, y+ph);
+  grad.addColorStop(0, color);
+  grad.addColorStop(1, adjustColorJs(color, -25));
+  ctx.fillStyle = grad; ctx.fillRect(x, y, pw, ph);
+}
+
+function roundRect(ctx, x, y, w, h, r, fill) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
+  ctx.arcTo(x+w, y, x+w, y+r, r); ctx.lineTo(x+w, y+h-r);
+  ctx.arcTo(x+w, y+h, x+w-r, y+h, r); ctx.lineTo(x+r, y+h);
+  ctx.arcTo(x, y+h, x, y+h-r, r); ctx.lineTo(x, y+r);
+  ctx.arcTo(x, y, x+r, y, r); ctx.closePath();
+  ctx.fillStyle = fill; ctx.fill();
+}
+
+function drawFigurePlaceholder(ctx, x, y, pw, ph, emoji, color) {
+  ctx.fillStyle = color + '33'; ctx.fillRect(x, y, pw, ph);
+  ctx.font = `${Math.min(ph*0.5, 36)}px serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, x + pw/2, y + ph/2);
+}
+
+function adjustColorJs(hex, amount) {
+  const n = parseInt(hex.replace('#',''), 16);
+  const clamp = v => Math.max(0, Math.min(255, v));
+  const r = clamp(((n>>16)&255)+amount);
+  const g = clamp(((n>>8)&255)+amount);
+  const b = clamp((n&255)+amount);
+  return `#${((r<<16)|(g<<8)|b).toString(16).padStart(6,'0')}`;
+}
+
+function overlayMemeText(ctx, template, panels, w, h) {
+  const t = template;
+  if (t.layout === 'drake') {
+    const ph = h / 2;
+    // right side text
+    drawMemeTextBox(ctx, panels[0]||'', w*0.35, 10, w*0.62, ph-20, 'center');
+    drawMemeTextBox(ctx, panels[1]||'', w*0.35, ph+10, w*0.62, ph-20, 'center');
+  } else if (t.layout === 'side2') {
+    const pw = w/2;
+    drawMemeTextBox(ctx, panels[0]||'', 4, 4, pw-8, h-8, 'center');
+    drawMemeTextBox(ctx, panels[1]||'', pw+4, 4, pw-8, h-8, 'center');
+  } else if (t.layout === 'stack4') {
+    const ph = h/4;
+    panels.forEach((p,i) => drawMemeTextBox(ctx, p||'', 4, i*ph+4, w-8, ph-8, 'center'));
+  } else if (t.layout === 'stack3') {
+    const ph = h/3;
+    panels.forEach((p,i) => drawMemeTextBox(ctx, p||'', 4, i*ph+4, w-8, ph-8, 'center'));
+  } else if (t.layout === 'twobuttons') {
+    // button labels
+    drawMemeTextBox(ctx, panels[0]||'', 45, 65, 170, 70, 'center');
+    drawMemeTextBox(ctx, panels[1]||'', 45, 185, 170, 70, 'center');
+    if (panels[2]) drawMemeTextBox(ctx, panels[2], w-220, h*0.3, 160, h*0.4, 'center');
+  } else if (t.layout === 'sign') {
+    // sign text centered
+    drawMemeTextBox(ctx, panels[0]||'', w*0.08, h*0.37, w*0.84, h*0.3, 'center');
+  } else if (t.layout === 'scatter') {
+    // doge-style scattered text
+    const positions = [[0.1,0.1],[0.6,0.2],[0.05,0.7],[0.55,0.75]];
+    panels.forEach((p, i) => {
+      const [px, py] = positions[i] || [0.1, 0.1+i*0.2];
+      drawMemeTextBox(ctx, `${['wow','such','very','much'][i]||''} ${p}`, px*w, py*h, w*0.38, h*0.18, 'left');
+    });
+  } else if (t.layout === 'thirds') {
+    const labels = ['She (ignored)', 'He (distracted)', 'New Interest'];
+    panels.forEach((p, i) => {
+      drawMemeTextBox(ctx, p||labels[i], (i/3+0.02)*w, h*0.05, w/3-8, h*0.25, 'center');
+    });
+  } else if (t.layout === 'astronaut') {
+    // two bubbles
+    drawMemeTextBox(ctx, panels[0]||'', 10, h*0.1, w*0.45, h*0.3, 'center');
+    drawMemeTextBox(ctx, panels[1]||'"Always has been"', w*0.5, h*0.55, w*0.45, h*0.3, 'center');
+  } else {
+    // standard: top + bottom
+    drawMemeText(ctx, panels[0]||'', w/2, 36, w-20);
+    drawMemeText(ctx, panels[1]||'', w/2, h-16, w-20);
+  }
+}
+
+function drawMemeText(ctx, text, x, y, maxW) {
+  if (!text) return;
+  const size = Math.min(52, Math.max(22, Math.floor(maxW / (text.length * 0.55 + 1))));
+  ctx.font = `900 ${size}px Impact, Arial Black, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = size * 0.18;
+  ctx.lineJoin = 'round';
+  const lines = wrapText(ctx, text.toUpperCase(), maxW);
+  const lineH = size * 1.1;
+  const isBottom = y > 200;
+  const startY = isBottom ? y - lineH*(lines.length-1) : y;
+  lines.forEach((line, i) => {
+    ctx.strokeText(line, x, startY + i*lineH);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(line, x, startY + i*lineH);
+  });
+}
+
+function drawMemeTextBox(ctx, text, x, y, bw, bh, align) {
+  if (!text) return;
+  const cx = align === 'center' ? x + bw/2 : x + 6;
+  const maxW = bw - 12;
+  const size = Math.min(36, Math.max(14, Math.floor(bw / (text.length * 0.52 + 1))));
+  ctx.font = `900 ${size}px Impact, Arial Black, sans-serif`;
+  ctx.textAlign = align === 'center' ? 'center' : 'left';
+  ctx.textBaseline = 'top';
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = size * 0.18;
+  ctx.lineJoin = 'round';
+  const lines = wrapText(ctx, text.toUpperCase(), maxW);
+  const lineH = size * 1.15;
+  const totalH = lines.length * lineH;
+  const startY = y + (bh - totalH) / 2;
+  lines.forEach((line, i) => {
+    ctx.strokeText(line, cx, startY + i*lineH);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(line, cx, startY + i*lineH);
+  });
+}
+
+function wrapText(ctx, text, maxW) {
+  const words = text.split(' ');
+  const lines = [];
+  let cur = '';
+  for (const w of words) {
+    const test = cur ? cur + ' ' + w : w;
+    if (ctx.measureText(test).width > maxW && cur) {
+      lines.push(cur); cur = w;
+    } else { cur = test; }
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [text];
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function copyCaption(btn, panels, templateName) {
+  const text = panels.join(' / ') + ` (${templateName})`;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copy Text'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function shareCaption(panels, templateName) {
+  const text = panels.join(' / ') + ` (${templateName} meme)`;
+  if (navigator.share) {
+    navigator.share({ title: 'My Meme', text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => alert('Caption copied to clipboard!\n\n' + text));
+  }
+}
+
+function downloadCanvas(btn) {
+  const canvas = btn._canvas;
+  const template = btn._template;
+  const idx = btn._index;
+  const link = document.createElement('a');
+  link.download = `meme-${template.id}-${idx+1}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// ============================================================
+// HISTORY
+// ============================================================
+function saveToHistory(canvas, templateName, panels) {
+  try {
+    const hist = JSON.parse(localStorage.getItem('meme_history') || '[]');
+    const entry = {
+      dataUrl: canvas.toDataURL('image/png'),
+      template: templateName,
+      panels,
+      ts: Date.now()
+    };
+    hist.unshift(entry);
+    if (hist.length > 10) hist.pop();
+    localStorage.setItem('meme_history', JSON.stringify(hist));
+  } catch(e) { /* storage full */ }
+}
+
+function renderHistory() {
+  const grid = document.getElementById('historyGrid');
+  const hist = JSON.parse(localStorage.getItem('meme_history') || '[]');
+  if (!hist.length) {
+    grid.innerHTML = '<p class="history-empty">No memes generated yet — make some!</p>';
+    return;
+  }
+  grid.innerHTML = hist.map(e => `
+    <div class="history-item" onclick="showHistoryMeme('${escAttr(e.dataUrl)}','${escAttr(e.template)}')">
+      <img src="${e.dataUrl}" alt="${escHtml(e.template)}">
+      <div class="h-label">${escHtml(e.template)}</div>
+    </div>
+  `).join('');
+}
+
+function showHistoryMeme(dataUrl, templateName) {
+  const win = window.open('', '_blank', 'width=520,height=420');
+  win.document.write(`<html><head><title>${templateName} Meme</title><style>body{margin:0;background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:14px;}img{max-width:500px;border-radius:10px;}a{color:white;font-family:sans-serif;font-size:14px;}</style></head><body><img src="${dataUrl}"><a href="${dataUrl}" download="meme.png">⬇️ Download PNG</a></body></html>`);
+}
+
+function clearHistory() {
+  if (!confirm('Clear all meme history?')) return;
+  localStorage.removeItem('meme_history');
+  renderHistory();
+}
+
+// ============================================================
+// FREE MODE
+// ============================================================
+async function generateFreeMode() {
+  const situation = document.getElementById('freeInput').value.trim();
+  if (!situation) { alert('Please describe your situation!'); return; }
+
+  const prompt = `Someone wants to make a meme about: '${situation}'.
+Pick the best meme template from this list: Drake, Distracted Boyfriend, This is Fine, Surprised Pikachu, Two Buttons, Galaxy Brain, Gru's Plan, Woman Yelling at Cat, Panik/Kalm.
+Write captions for it.
+Return JSON: { "template": "Drake", "panels": ["text 1", "text 2"], "reason": "why this template fits" }
+Return only JSON, no markdown.`;
+
+  document.getElementById('freeResultSection').style.display = '';
+  document.getElementById('freeLoadingDiv').style.display = '';
+  document.getElementById('freeResult').innerHTML = '';
+  document.getElementById('freeErrorDiv').style.display = 'none';
+  document.getElementById('freeBtn').disabled = true;
+
+  try {
+    const raw = await callGemini(prompt);
+    const data = JSON.parse(raw);
+    document.getElementById('freeLoadingDiv').style.display = 'none';
+    renderFreeResult(data);
+  } catch(e) {
+    document.getElementById('freeLoadingDiv').style.display = 'none';
+    const err = document.getElementById('freeErrorDiv');
+    err.style.display = ''; err.textContent = '⚠️ ' + e.message;
+  } finally {
+    document.getElementById('freeBtn').disabled = false;
+  }
+}
+
+function renderFreeResult(data) {
+  const tName = data.template;
+  const template = TEMPLATES.find(t => t.name.toLowerCase().includes(tName.toLowerCase())) || TEMPLATES[0];
+  const panels = data.panels || [];
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 500; canvas.height = getCanvasHeight(template);
+  setTimeout(() => drawMeme(canvas, template, panels, null), 0);
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'result-card';
+  const canvasWrap = document.createElement('div');
+  canvasWrap.className = 'result-canvas-wrap';
+  canvasWrap.appendChild(canvas);
+  wrapper.appendChild(canvasWrap);
+
+  const panelsHtml = panels.map((p, i) => `
+    <div class="panel-text-row">
+      <span class="panel-label">${template.panels[i] || `P${i+1}`}</span>
+      <span class="panel-text">${escHtml(p)}</span>
+    </div>
+  `).join('');
+
+  const info = document.createElement('div');
+  info.className = 'result-info';
+  info.innerHTML = `
+    <div class="free-template-badge">🎯 ${escHtml(tName)}</div>
+    <div class="free-reason">${escHtml(data.reason || '')}</div>
+    <div class="result-panels">${panelsHtml}</div>
+    <div class="result-actions">
+      <button class="btn-sm" onclick="copyCaption(this, ${JSON.stringify(panels).replace(/"/g,'&quot;')}, '${escHtml(tName)}')">📋 Copy Text</button>
+      <button class="btn-sm download" id="freeDlBtn">⬇️ Download PNG</button>
+    </div>
+  `;
+  wrapper.appendChild(info);
+  document.getElementById('freeResult').innerHTML = '';
+  document.getElementById('freeResult').appendChild(wrapper);
+
+  // bind download
+  const dlBtn = info.querySelector('#freeDlBtn');
+  dlBtn._canvas = canvas;
+  dlBtn._template = template;
+  dlBtn._index = 0;
+  dlBtn.addEventListener('click', () => downloadCanvas(dlBtn));
+
+  saveToHistory(canvas, tName, panels);
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function escAttr(str) {
+  return String(str||'').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

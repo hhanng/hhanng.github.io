@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Dare Generator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f0fb;
+    --accent: #ccc0e8;
+    --primary: #5040a8;
+    --primary-light: #7060c8;
+    --card-bg: #fff;
+    --text: #2d2460;
+    --text-muted: #7a70a8;
+    --social: #ff7f6e;
+    --creative: #9b6fd4;
+    --physical: #4db6ac;
+    --learning: #5b8dd9;
+    --random: #f5a623;
+    --green: #4caf50;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(80,64,168,0.10);
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #5040a8 0%, #7060c8 100%);
+    color: #fff;
+    padding: 20px 24px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 2px 12px rgba(80,64,168,0.2);
+  }
+
+  header h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+  header p { font-size: 0.85rem; opacity: 0.85; }
+
+  .api-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 6px 12px;
+  }
+
+  .api-row label { font-size: 0.8rem; opacity: 0.9; white-space: nowrap; }
+  .api-row input {
+    border: none;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 0.82rem;
+    width: 200px;
+    outline: none;
+  }
+  .api-row input::placeholder { color: rgba(255,255,255,0.6); }
+
+  .container { max-width: 740px; margin: 0 auto; padding: 24px 16px; }
+
+  /* Dare Card */
+  .dare-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px 28px 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+
+  .dare-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--cat-color, var(--primary)), var(--primary-light));
+  }
+
+  .dare-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .cat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stars {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .star { font-size: 1.1rem; }
+  .star.filled { color: #f5a623; }
+  .star.empty { color: #ddd; }
+
+  .dare-text {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.35;
+    margin-bottom: 14px;
+  }
+
+  .dare-meta {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    font-size: 0.86rem;
+    color: var(--text-muted);
+  }
+
+  .dare-meta p { margin-bottom: 6px; }
+  .dare-meta p:last-child { margin-bottom: 0; }
+  .dare-meta strong { color: var(--text); }
+
+  .timer-bar {
+    background: var(--bg);
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 4px;
+    display: none;
+  }
+
+  .timer-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), #81c784);
+    border-radius: 6px;
+    transition: width 1s linear;
+  }
+
+  .timer-text { font-size: 0.78rem; color: var(--green); font-weight: 600; display: none; }
+
+  .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .btn-accepted {
+    background: var(--green);
+    color: #fff;
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--primary);
+  }
+
+  .btn-ghost {
+    background: var(--bg);
+    color: var(--text-muted);
+  }
+
+  .btn-sm { padding: 7px 13px; font-size: 0.8rem; }
+
+  .skip-count { font-size: 0.78rem; color: var(--text-muted); align-self: center; }
+
+  /* Personalization panel */
+  .panel {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .panel-header {
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .panel-header.open { border-color: var(--accent); }
+  .panel-header h3 { font-size: 0.95rem; font-weight: 700; }
+  .panel-chevron { transition: transform 0.25s; font-size: 0.9rem; color: var(--text-muted); }
+  .panel-chevron.open { transform: rotate(180deg); }
+
+  .panel-body { padding: 16px 20px 20px; display: none; }
+  .panel-body.open { display: block; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid var(--accent);
+    color: var(--text-muted);
+    background: #fff;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .pill:hover { border-color: var(--primary); color: var(--primary); }
+  .pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  .age-select {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .age-btn {
+    padding: 7px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid var(--accent);
+    color: var(--text-muted);
+    background: #fff;
+    transition: all 0.15s;
+  }
+
+  .age-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  /* Completion flow */
+  .completion-section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .completion-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; }
+
+  textarea {
+    width: 100%;
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--text);
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: var(--bg);
+  }
+
+  textarea:focus { border-color: var(--primary); }
+
+  .ai-response {
+    background: linear-gradient(135deg, #f4f0fb, #e8e0f8);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 14px;
+    font-size: 0.88rem;
+    display: none;
+  }
+
+  .ai-response .encouragement { color: var(--text); margin-bottom: 10px; font-weight: 500; }
+  .ai-response .reflection { color: var(--primary); font-weight: 700; font-style: italic; }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 16px;
+    text-align: center;
+  }
+
+  .stat-num { font-size: 2rem; font-weight: 900; color: var(--primary); }
+  .stat-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
+
+  /* Badges */
+  .badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 2px solid var(--accent);
+    color: var(--text-muted);
+    background: #fff;
+  }
+
+  .badge.earned { background: linear-gradient(135deg, #5040a8, #7060c8); border-color: #5040a8; color: #fff; }
+
+  /* History */
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    font-size: 0.83rem;
+    box-shadow: 0 1px 6px rgba(80,64,168,0.07);
+  }
+
+  .history-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .history-date { color: var(--text-muted); font-size: 0.75rem; margin-left: auto; white-space: nowrap; }
+
+  /* Loading */
+  .loading-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+  }
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--accent);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 14px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Confetti canvas */
+  #confetti-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* Section titles */
+  .section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+  }
+
+  .msg { padding: 12px 16px; border-radius: 10px; font-size: 0.87rem; margin-bottom: 12px; }
+  .msg-info { background: #e8e0f8; color: var(--primary); }
+  .msg-success { background: #e8f5e9; color: #2e7d32; }
+  .msg-warn { background: #fff8e1; color: #e65100; }
+
+  .share-box {
+    background: var(--bg);
+    border: 2px dashed var(--accent);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.85rem;
+    color: var(--text);
+    margin-top: 12px;
+    word-break: break-word;
+    display: none;
+  }
+
+  @media (max-width: 500px) {
+    .dare-text { font-size: 1.2rem; }
+    header { padding: 16px; }
+    .api-row input { width: 150px; }
+    .dare-card { padding: 22px 18px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<header>
+  <div>
+    <h1>🎯 Daily Dare Generator</h1>
+    <p>Step outside your comfort zone — one dare at a time</p>
+  </div>
+  <div class="api-row">
+    <label>Gemini Key</label>
+    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Dare Card -->
+  <div id="dareCard" class="dare-card">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Enter your Gemini API key to generate your daily dare!</p>
+    </div>
+  </div>
+
+  <!-- Personalization Panel -->
+  <div class="panel">
+    <div class="panel-header" id="personToggle">
+      <h3>✨ Personalize my dare</h3>
+      <span class="panel-chevron" id="personChevron">▼</span>
+    </div>
+    <div class="panel-body" id="personBody">
+      <div class="field">
+        <label>Your vibe today</label>
+        <div class="pills" id="vibePills">
+          <span class="pill" data-val="Adventurous">🚀 Adventurous</span>
+          <span class="pill" data-val="Low energy">😌 Low energy</span>
+          <span class="pill active" data-val="Social">😄 Social</span>
+          <span class="pill" data-val="Solo">🧘 Solo</span>
+          <span class="pill" data-val="Creative">🎨 Creative</span>
+          <span class="pill" data-val="Productive">⚡ Productive</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Comfort zone areas to push</label>
+        <div class="pills" id="zonePills">
+          <span class="pill active" data-val="Talking to strangers">👋 Talking to strangers</span>
+          <span class="pill" data-val="Trying new food">🍜 Trying new food</span>
+          <span class="pill active" data-val="Being creative">🎨 Being creative</span>
+          <span class="pill" data-val="Physical challenges">💪 Physical challenges</span>
+          <span class="pill" data-val="Learning something">📚 Learning something</span>
+          <span class="pill" data-val="Being silly in public">🤪 Being silly in public</span>
+          <span class="pill" data-val="Digital detox">📵 Digital detox</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Age group</label>
+        <div class="age-select" id="ageBtns">
+          <button class="age-btn" data-val="Teen">🧒 Teen</button>
+          <button class="age-btn active" data-val="College student">🎓 College student</button>
+          <button class="age-btn" data-val="Adult">👤 Adult</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="regenBtn" style="margin-top:6px">🔄 Regenerate dare for my vibe</button>
+    </div>
+  </div>
+
+  <!-- Completion Flow -->
+  <div class="completion-section" id="completionSection">
+    <h3>How did it go? 🌟</h3>
+    <textarea id="reflectionText" placeholder="Tell me what happened — even if it was awkward! (optional)"></textarea>
+    <div class="btn-group" style="margin-top:10px">
+      <button class="btn btn-primary" id="submitReflection">💬 Get AI encouragement</button>
+    </div>
+    <div class="ai-response" id="aiResponse">
+      <p class="encouragement" id="encouragementText"></p>
+      <p class="reflection" id="reflectionQuestion"></p>
+    </div>
+    <div class="btn-group" style="margin-top:14px">
+      <button class="btn btn-ghost btn-sm" id="chickenOutBtn">😅 I chickened out — no judgment!</button>
+    </div>
+    <div id="chickenMsg" style="display:none" class="msg msg-info" style="margin-top:10px">
+      No worries! Trying is the first step. Want an easier version?
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <p class="section-title">Your Stats</p>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num" id="statStreak">0</div>
+      <div class="stat-label">🔥 Day Streak</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">✅ Total Dares</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statFav">—</div>
+      <div class="stat-label">⭐ Fav Category</div>
+    </div>
+  </div>
+
+  <!-- Badges -->
+  <p class="section-title">Badges</p>
+  <div class="badges-row" id="badgesRow">
+    <div class="badge" id="badge-first">🎯 First Dare</div>
+    <div class="badge" id="badge-streak3">🔥 3-Day Streak</div>
+    <div class="badge" id="badge-social">🦋 Social Butterfly</div>
+    <div class="badge" id="badge-10dares">💪 10 Dares Done</div>
+  </div>
+
+  <!-- Dare a Friend -->
+  <div style="margin-bottom:20px">
+    <button class="btn btn-outline" id="shareDareBtn">📤 Dare a friend</button>
+    <div class="share-box" id="shareBox"></div>
+  </div>
+
+  <!-- History -->
+  <p class="section-title">Dare History</p>
+  <div id="historyList" class="history-list">
+    <p style="color:var(--text-muted);font-size:0.85rem">No dares yet — accept your first dare above!</p>
+  </div>
+
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+const S = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set: (k, v) => localStorage.setItem(k, JSON.stringify(v))
+};
+
+let state = S.get('ddg_state') || {
+  streak: 0,
+  total: 0,
+  lastCompleted: null,
+  skipsToday: 0,
+  lastSkipDate: null,
+  acceptedDate: null,
+  acceptedDare: null,
+  timerEnd: null,
+  history: [],
+  categoryCount: {}
+};
+
+let currentDare = null;
+let isAccepted = false;
+let timerInterval = null;
+
+const prefs = {
+  vibe: 'Social',
+  zones: ['Talking to strangers', 'Being creative'],
+  age: 'College student'
+};
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+const apiKeyEl = document.getElementById('apiKey');
+apiKeyEl.value = S.get('ddg_apikey') || '';
+apiKeyEl.addEventListener('change', () => {
+  S.set('ddg_apikey', apiKeyEl.value.trim());
+  if (!currentDare && apiKeyEl.value.trim()) generateDare();
+});
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getApiKey() { return (S.get('ddg_apikey') || apiKeyEl.value || '').trim(); }
+
+// ─── Category config ──────────────────────────────────────────────────────────
+const CAT = {
+  Social:   { color: '#ff7f6e', icon: '💬' },
+  Creative: { color: '#9b6fd4', icon: '🎨' },
+  Physical: { color: '#4db6ac', icon: '💪' },
+  Learning: { color: '#5b8dd9', icon: '📚' },
+  Random:   { color: '#f5a623', icon: '🎲' }
+};
+
+// ─── Render dare card ─────────────────────────────────────────────────────────
+function renderDare(dare, accepted) {
+  currentDare = dare;
+  const cat = CAT[dare.category] || CAT.Random;
+  const stars = Array.from({length: 5}, (_, i) =>
+    `<span class="star ${i < dare.difficulty ? 'filled' : 'empty'}">★</span>`
+  ).join('');
+
+  const card = document.getElementById('dareCard');
+  card.style.setProperty('--cat-color', cat.color);
+
+  card.innerHTML = `
+    <div class="dare-top">
+      <span class="cat-badge" style="background:${cat.color}">${cat.icon} ${dare.category}</span>
+      <div class="stars">${stars}</div>
+    </div>
+    <div class="dare-text">${dare.dare}</div>
+    <div class="dare-meta">
+      <p>💡 <strong>Why it helps:</strong> ${dare.whyItHelps}</p>
+      <p>🔑 <strong>Tip:</strong> ${dare.tip}</p>
+    </div>
+    <div class="timer-bar" id="timerBar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+    <div class="timer-text" id="timerText"></div>
+    <div class="btn-group">
+      <button class="btn ${accepted ? 'btn-accepted' : 'btn-primary'}" id="acceptBtn">
+        ${accepted ? '✅ Dare Accepted!' : '🎯 Accept Dare'}
+      </button>
+      <button class="btn btn-outline" id="easierBtn" title="${dare.easierVersion}">😅 Easier</button>
+      <button class="btn btn-outline" id="harderBtn" title="${dare.harderVersion}">🔥 Harder</button>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-ghost btn-sm" id="skipBtn">⏭ Skip &amp; get new dare</button>
+      <span class="skip-count" id="skipCount">${3 - getTodaySkips()} skips left today</span>
+    </div>
+    ${accepted ? '' : ''}
+  `;
+
+  // Wire buttons
+  document.getElementById('acceptBtn').onclick = handleAccept;
+  document.getElementById('easierBtn').onclick = () => swapDare('easier');
+  document.getElementById('harderBtn').onclick = () => swapDare('harder');
+  document.getElementById('skipBtn').onclick = handleSkip;
+
+  if (accepted) {
+    document.getElementById('acceptBtn').disabled = true;
+    startTimerUI();
+    document.getElementById('completionSection').style.display = 'block';
+  }
+
+  updateStats();
+}
+
+function renderLoading(msg) {
+  document.getElementById('dareCard').innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>${msg}</p>
+    </div>`;
+}
+
+// ─── Generate dare ────────────────────────────────────────────────────────────
+async function generateDare(forceFresh) {
+  const key = getApiKey();
+  if (!key) {
+    renderLoading('Enter your Gemini API key above to generate your daily dare!');
+    return;
+  }
+
+  // Same dare all day unless forced fresh
+  const today = todayStr();
+  if (!forceFresh && state.acceptedDate === today && state.acceptedDare) {
+    renderDare(state.acceptedDare, isAccepted);
+    return;
+  }
+
+  const cached = S.get('ddg_today_dare');
+  if (!forceFresh && cached && cached.date === today) {
+    renderDare(cached.dare, false);
+    return;
+  }
+
+  renderLoading('Generating your dare...');
+
+  const zones = prefs.zones.length ? prefs.zones : ['Being creative', 'Talking to strangers'];
+  const prompt = `Generate a fun daily dare for a ${prefs.age} who is feeling ${prefs.vibe} today. Comfort zone areas to push: ${zones.join(', ')}.
+
+The dare should be:
+- Specific and actionable (can be done today)
+- Safe and appropriate
+- Fun, not anxiety-inducing
+- Completable in under 30 minutes
+
+Return JSON:
+{
+  "dare": "The specific dare text (1-2 sentences, action-oriented)",
+  "category": "Social",
+  "difficulty": 3,
+  "whyItHelps": "One sentence on why this dare is good for personal growth",
+  "tip": "One tip to make it easier to actually do this",
+  "easierVersion": "A gentler version of the same dare",
+  "harderVersion": "A more challenging version of the same dare"
+}
+Return only JSON, no markdown.`;
+
+  try {
+    const res = await callGemini(prompt, key);
+    const dare = parseJSON(res);
+    if (!dare || !dare.dare) throw new Error('Bad response');
+    S.set('ddg_today_dare', { date: today, dare });
+    renderDare(dare, false);
+  } catch (e) {
+    document.getElementById('dareCard').innerHTML = `
+      <div class="msg msg-warn">⚠️ Could not generate dare: ${e.message}. Check your API key and try again.</div>
+      <button class="btn btn-outline" onclick="generateDare(true)">Retry</button>`;
+  }
+}
+
+async function callGemini(prompt, key) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+  const body = { contents: [{ parts: [{ text: prompt }] }] };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function parseJSON(text) {
+  try {
+    const match = text.match(/\{[\s\S]*\}/);
+    return match ? JSON.parse(match[0]) : null;
+  } catch { return null; }
+}
+
+// ─── Accept dare ──────────────────────────────────────────────────────────────
+function handleAccept() {
+  if (isAccepted) return;
+  isAccepted = true;
+  const endTime = Date.now() + 24 * 60 * 60 * 1000;
+  state.acceptedDate = todayStr();
+  state.acceptedDare = currentDare;
+  state.timerEnd = endTime;
+  saveState();
+  renderDare(currentDare, true);
+}
+
+function startTimerUI() {
+  if (!state.timerEnd) return;
+  const bar = document.getElementById('timerBar');
+  const fill = document.getElementById('timerFill');
+  const text = document.getElementById('timerText');
+  if (!bar) return;
+  bar.style.display = 'block';
+  text.style.display = 'block';
+
+  function tick() {
+    const remaining = state.timerEnd - Date.now();
+    if (remaining <= 0) {
+      fill.style.width = '0%';
+      text.textContent = 'Time is up!';
+      clearInterval(timerInterval);
+      return;
+    }
+    const pct = (remaining / (24 * 60 * 60 * 1000)) * 100;
+    fill.style.width = pct + '%';
+    const h = Math.floor(remaining / 3600000);
+    const m = Math.floor((remaining % 3600000) / 60000);
+    text.textContent = `⏰ ${h}h ${m}m left to complete this dare`;
+  }
+  tick();
+  timerInterval = setInterval(tick, 60000);
+}
+
+// ─── Easier / Harder ─────────────────────────────────────────────────────────
+function swapDare(type) {
+  if (!currentDare) return;
+  const newDare = { ...currentDare };
+  if (type === 'easier') {
+    newDare.dare = currentDare.easierVersion;
+    newDare.difficulty = Math.max(1, currentDare.difficulty - 1);
+  } else {
+    newDare.dare = currentDare.harderVersion;
+    newDare.difficulty = Math.min(5, currentDare.difficulty + 1);
+  }
+  currentDare = newDare;
+  S.set('ddg_today_dare', { date: todayStr(), dare: newDare });
+  renderDare(newDare, isAccepted);
+}
+
+// ─── Skip ─────────────────────────────────────────────────────────────────────
+function getTodaySkips() {
+  const today = todayStr();
+  if (state.lastSkipDate !== today) return 0;
+  return state.skipsToday || 0;
+}
+
+function handleSkip() {
+  const today = todayStr();
+  if (state.lastSkipDate !== today) {
+    state.skipsToday = 0;
+    state.lastSkipDate = today;
+  }
+  if (state.skipsToday >= 3) {
+    alert("You've used all 3 skips for today! Come back tomorrow for a fresh dare.");
+    return;
+  }
+  state.skipsToday++;
+  saveState();
+  generateDare(true);
+}
+
+// ─── Completion ───────────────────────────────────────────────────────────────
+document.getElementById('submitReflection').onclick = async function() {
+  if (!currentDare) return;
+  const reflection = document.getElementById('reflectionText').value.trim();
+  const key = getApiKey();
+  if (!key) { alert('Enter your API key first.'); return; }
+
+  // Mark as done
+  markDareDone(currentDare);
+
+  if (!reflection) {
+    showEncouragement('Amazing — you did it! Every dare completed is a step toward a braver, more awesome you. 🎉', 'What was the moment you decided to just go for it?');
+    return;
+  }
+
+  document.getElementById('submitReflection').textContent = '⏳ Getting encouragement...';
+  document.getElementById('submitReflection').disabled = true;
+
+  const prompt = `A person just completed this dare: '${currentDare.dare}'. They said: '${reflection}'.
+Respond with warm encouragement (2 sentences) and one thoughtful reflection question.
+Return JSON: { "encouragement": "...", "reflectionQuestion": "..." }`;
+
+  try {
+    const res = await callGemini(prompt, key);
+    const data = parseJSON(res);
+    if (data) {
+      showEncouragement(data.encouragement, data.reflectionQuestion);
+    } else {
+      showEncouragement('Incredible — you actually did it! That took real courage.', 'How did stepping outside your comfort zone make you feel?');
+    }
+  } catch {
+    showEncouragement('You did it, and that is what matters most! Every dare makes the next one easier.', 'What surprised you most about completing this dare?');
+  }
+
+  document.getElementById('submitReflection').textContent = '💬 Get AI encouragement';
+  document.getElementById('submitReflection').disabled = false;
+};
+
+function showEncouragement(enc, ref) {
+  const box = document.getElementById('aiResponse');
+  document.getElementById('encouragementText').textContent = enc;
+  document.getElementById('reflectionQuestion').textContent = '💭 ' + ref;
+  box.style.display = 'block';
+  triggerConfetti();
+}
+
+document.getElementById('chickenOutBtn').onclick = function() {
+  document.getElementById('chickenMsg').style.display = 'block';
+  document.getElementById('chickenMsg').innerHTML =
+    "No judgment here — just showing up is brave! 💛 Want to try the easier version? <button class='btn btn-outline btn-sm' style='margin-top:8px' onclick='swapDare(\"easier\");document.getElementById(\"completionSection\").style.display=\"none\"'>Try easier version</button>";
+};
+
+function markDareDone(dare) {
+  const today = todayStr();
+  const last = state.lastCompleted;
+
+  if (last === today) return; // already counted today
+
+  // Streak logic
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  if (last === yesterday) {
+    state.streak++;
+  } else if (last !== today) {
+    state.streak = 1;
+  }
+
+  state.total++;
+  state.lastCompleted = today;
+
+  const cat = dare.category || 'Random';
+  state.categoryCount[cat] = (state.categoryCount[cat] || 0) + 1;
+
+  state.history.unshift({ date: today, dare: dare.dare, category: cat, done: true });
+  if (state.history.length > 30) state.history.pop();
+
+  saveState();
+  updateStats();
+  updateBadges();
+  renderHistory();
+}
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('statStreak').textContent = state.streak;
+  document.getElementById('statTotal').textContent = state.total;
+  const fav = Object.entries(state.categoryCount).sort((a, b) => b[1] - a[1])[0];
+  document.getElementById('statFav').textContent = fav ? fav[0].slice(0, 3) : '—';
+}
+
+function updateBadges() {
+  const check = (id, earned) => document.getElementById(id)?.classList.toggle('earned', earned);
+  check('badge-first', state.total >= 1);
+  check('badge-streak3', state.streak >= 3);
+  check('badge-social', (state.categoryCount['Social'] || 0) >= 3);
+  check('badge-10dares', state.total >= 10);
+}
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (!state.history.length) {
+    el.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem">No dares yet — accept your first dare above!</p>';
+    return;
+  }
+  el.innerHTML = state.history.map(h => {
+    const cat = CAT[h.category] || CAT.Random;
+    return `<div class="history-item">
+      <div class="history-dot" style="background:${cat.color}"></div>
+      <span>${h.dare.length > 70 ? h.dare.slice(0, 70) + '…' : h.dare}</span>
+      <span class="history-date">${h.date}</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── Personalization ──────────────────────────────────────────────────────────
+document.getElementById('personToggle').onclick = function() {
+  const body = document.getElementById('personBody');
+  const chevron = document.getElementById('personChevron');
+  const isOpen = body.classList.toggle('open');
+  chevron.classList.toggle('open', isOpen);
+  document.getElementById('personToggle').classList.toggle('open', isOpen);
+};
+
+// Vibe pills (single select)
+document.getElementById('vibePills').addEventListener('click', e => {
+  if (!e.target.classList.contains('pill')) return;
+  document.querySelectorAll('#vibePills .pill').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  prefs.vibe = e.target.dataset.val;
+});
+
+// Zone pills (multi-select)
+document.getElementById('zonePills').addEventListener('click', e => {
+  if (!e.target.classList.contains('pill')) return;
+  e.target.classList.toggle('active');
+  prefs.zones = [...document.querySelectorAll('#zonePills .pill.active')].map(p => p.dataset.val);
+});
+
+// Age
+document.getElementById('ageBtns').addEventListener('click', e => {
+  if (!e.target.classList.contains('age-btn')) return;
+  document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  prefs.age = e.target.dataset.val;
+});
+
+document.getElementById('regenBtn').onclick = () => {
+  S.set('ddg_today_dare', null);
+  generateDare(true);
+};
+
+// ─── Share ────────────────────────────────────────────────────────────────────
+document.getElementById('shareDareBtn').onclick = function() {
+  if (!currentDare) return;
+  const text = `🎯 Daily Dare: ${currentDare.dare}\n\nCategory: ${currentDare.category} | Difficulty: ${'⭐'.repeat(currentDare.difficulty)}\n\nI dare you! Try it today 💪`;
+  const box = document.getElementById('shareBox');
+  box.textContent = text;
+  box.style.display = 'block';
+  navigator.clipboard?.writeText(text).then(() => {
+    this.textContent = '✅ Copied to clipboard!';
+    setTimeout(() => { this.textContent = '📤 Dare a friend'; }, 2500);
+  });
+};
+
+// ─── Confetti ─────────────────────────────────────────────────────────────────
+function triggerConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const pieces = Array.from({ length: 120 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    size: Math.random() * 10 + 5,
+    color: ['#5040a8','#ff7f6e','#4db6ac','#f5a623','#9b6fd4','#5b8dd9'][Math.floor(Math.random() * 6)],
+    vx: (Math.random() - 0.5) * 4,
+    vy: Math.random() * 4 + 2,
+    rot: Math.random() * 360,
+    vr: (Math.random() - 0.5) * 6
+  }));
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      ctx.restore();
+    });
+    frame++;
+    if (frame < 120) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+// ─── Persist ──────────────────────────────────────────────────────────────────
+function saveState() {
+  S.set('ddg_state', state);
+}
+
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+function init() {
+  updateStats();
+  updateBadges();
+  renderHistory();
+
+  // Check if already accepted today
+  if (state.acceptedDate === todayStr() && state.acceptedDare) {
+    isAccepted = true;
+    renderDare(state.acceptedDare, true);
+    document.getElementById('completionSection').style.display = 'block';
+    startTimerUI();
+  } else {
+    isAccepted = false;
+    generateDare(false);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

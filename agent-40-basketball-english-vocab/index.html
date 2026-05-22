@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Basketball English Vocab 🏀</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #fef0f5;
+    --card-bg: #fff;
+    --card-border: #f4c0d1;
+    --primary: #b04070;
+    --orange: #f4845f;
+    --orange-light: #fde8e0;
+    --pink-light: #fce4ee;
+    --pink-mid: #f9bcd0;
+    --text: #2d1a24;
+    --text-muted: #8a5570;
+    --green-bg: #eaf3de;
+    --green-text: #27500a;
+    --red-bg: #faece7;
+    --red-text: #4a1b0c;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(176,64,112,0.10);
+  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 72px; font-size: 15px; }
+  h1 { color: var(--primary); }
+  h2 { color: var(--primary); }
+
+  /* ── Header ── */
+  .app-header { background: linear-gradient(135deg, #b04070 0%, #f4845f 100%); color: #fff; padding: 16px 18px 12px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .app-header h1 { font-size: 20px; font-weight: 800; letter-spacing: .5px; color: #fff; }
+  .app-header .subtitle { font-size: 12px; opacity: .85; margin-top: 2px; }
+
+  /* ── Bottom Nav ── */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1.5px solid var(--card-border); display: flex; z-index: 200; box-shadow: 0 -2px 10px rgba(176,64,112,0.08); }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 2px 10px; background: none; border: none; cursor: pointer; font-size: 10px; color: var(--text-muted); gap: 3px; min-height: 60px; transition: color .2s; }
+  .nav-btn .nav-icon { font-size: 22px; line-height: 1; }
+  .nav-btn.active { color: var(--primary); }
+  .nav-btn.active .nav-icon { filter: drop-shadow(0 1px 4px rgba(176,64,112,0.3)); }
+  .nav-label { font-size: 10px; font-weight: 600; }
+
+  /* ── Screens ── */
+  .screen { display: none; padding: 16px; animation: fadeIn .2s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ── Home Screen ── */
+  .home-hero { text-align: center; padding: 18px 0 14px; }
+  .home-hero .ball { font-size: 52px; animation: bounce 1.4s infinite; }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  .home-hero h2 { font-size: 22px; color: var(--primary); font-weight: 800; margin-top: 6px; }
+  .home-hero p { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+  .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .cat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 16px 12px 14px; cursor: pointer; text-align: center; box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s; position: relative; overflow: hidden; }
+  .cat-card:hover, .cat-card:active { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(176,64,112,0.18); }
+  .cat-card.pink { background: linear-gradient(135deg, #fff5f9 0%, #fce4ee 100%); }
+  .cat-card.orange { background: linear-gradient(135deg, #fff8f5 0%, #fde8e0 100%); }
+  .cat-icon { font-size: 32px; margin-bottom: 6px; }
+  .cat-name-en { font-size: 14px; font-weight: 700; color: var(--primary); line-height: 1.2; }
+  .cat-name-vi { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .cat-count { position: absolute; top: 8px; right: 8px; background: var(--orange); color: #fff; font-size: 10px; font-weight: 700; border-radius: 20px; padding: 2px 7px; }
+
+  /* ── Section header ── */
+  .section-back { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .back-btn { background: var(--pink-mid); border: none; border-radius: 20px; padding: 6px 14px; font-size: 14px; cursor: pointer; color: var(--primary); font-weight: 600; min-height: 36px; }
+  .section-title { font-size: 18px; font-weight: 800; color: var(--primary); }
+
+  /* ── Vocab Lesson ── */
+  .word-list { display: flex; flex-direction: column; gap: 10px; }
+  .word-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); cursor: pointer; transition: transform .1s; }
+  .word-card:active { transform: scale(.99); }
+  .word-card .en-word { font-size: 20px; font-weight: 800; color: var(--orange); }
+  .word-card .vi-word { font-size: 14px; color: var(--primary); margin-top: 3px; font-weight: 600; }
+  .word-card .example-en { font-size: 13px; font-style: italic; color: var(--text); margin-top: 8px; border-top: 1px solid #f4c0d1; padding-top: 8px; }
+  .word-card .example-vi { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .word-card .card-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .say-btn { background: var(--orange); color: #fff; border: none; border-radius: 20px; padding: 6px 16px; font-size: 13px; font-weight: 600; cursor: pointer; min-height: 36px; display: flex; align-items: center; gap: 5px; }
+  .say-btn:hover { background: #e06040; }
+  .star-btn { background: var(--pink-light); border: none; border-radius: 20px; padding: 6px 14px; font-size: 15px; cursor: pointer; min-height: 36px; transition: background .2s; }
+  .star-btn.starred { background: #ffe066; }
+  .lesson-actions { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .action-btn { background: var(--primary); color: #fff; border: none; border-radius: 20px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; min-height: 44px; flex: 1; text-align: center; }
+  .action-btn.orange { background: var(--orange); }
+  .action-btn:hover { opacity: .88; }
+
+  /* ── Flashcard Mode ── */
+  .flashcard-wrap { perspective: 1000px; height: 280px; margin: 0 auto; max-width: 400px; }
+  .flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform .5s ease; cursor: pointer; border-radius: 18px; }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .fc-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; box-shadow: 0 6px 24px rgba(176,64,112,0.18); }
+  .fc-front { background: linear-gradient(135deg, #fff5f9, #fce4ee); border: 2px solid var(--pink-mid); }
+  .fc-back { background: linear-gradient(135deg, #fff8f5, #fde8e0); border: 2px solid #f4c0d1; transform: rotateY(180deg); }
+  .fc-cat-icon { font-size: 36px; margin-bottom: 8px; }
+  .fc-word { font-size: 28px; font-weight: 900; color: var(--orange); }
+  .fc-category { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .fc-flip-hint { font-size: 11px; color: var(--text-muted); margin-top: 12px; opacity: .7; }
+  .fc-vi { font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+  .fc-example { font-size: 13px; font-style: italic; color: var(--text); margin-top: 8px; }
+  .fc-example-vi { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .fc-controls { display: flex; gap: 12px; margin-top: 18px; justify-content: center; }
+  .fc-btn { border: none; border-radius: 16px; padding: 12px 24px; font-size: 15px; font-weight: 700; cursor: pointer; min-height: 48px; min-width: 120px; }
+  .fc-btn.no { background: var(--red-bg); color: var(--red-text); border: 2px solid #e8b0a0; }
+  .fc-btn.yes { background: var(--green-bg); color: var(--green-text); border: 2px solid #a0c880; }
+  .fc-progress-wrap { margin: 14px 0 4px; }
+  .progress-bar-track { background: var(--pink-light); border-radius: 20px; height: 10px; overflow: hidden; }
+  .progress-bar-fill { background: linear-gradient(90deg, var(--orange), var(--primary)); border-radius: 20px; height: 100%; transition: width .3s; }
+  .progress-text { font-size: 12px; color: var(--text-muted); text-align: right; margin-top: 4px; }
+  .fc-result { text-align: center; padding: 30px 20px; }
+  .fc-result .trophy { font-size: 64px; }
+  .fc-result h3 { font-size: 22px; color: var(--primary); font-weight: 800; margin-top: 10px; }
+  .fc-result p { color: var(--text-muted); margin-top: 6px; }
+  .fc-result .restart-btn { background: var(--orange); color: #fff; border: none; border-radius: 20px; padding: 12px 28px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 18px; min-height: 48px; }
+  .fc-counter { text-align: center; font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+  /* ── Quiz ── */
+  .quiz-question-num { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .quiz-sentence { font-size: 17px; font-weight: 600; color: var(--text); background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; line-height: 1.6; box-shadow: var(--shadow); }
+  .quiz-blank { color: var(--orange); font-weight: 900; border-bottom: 2px solid var(--orange); padding: 0 4px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-opt { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: var(--radius); padding: 14px 16px; font-size: 15px; cursor: pointer; font-weight: 600; transition: all .15s; min-height: 52px; text-align: left; }
+  .quiz-opt:hover:not(.disabled) { border-color: var(--orange); background: var(--orange-light); }
+  .quiz-opt.correct { background: var(--green-bg); border-color: #6aaa38; color: var(--green-text); }
+  .quiz-opt.wrong { background: var(--red-bg); border-color: #e06040; color: var(--red-text); }
+  .quiz-opt.disabled { cursor: default; }
+  .quiz-feedback { padding: 12px 14px; border-radius: 10px; margin-top: 10px; font-size: 13px; display: none; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: var(--green-bg); color: var(--green-text); }
+  .quiz-feedback.wrong { background: var(--red-bg); color: var(--red-text); }
+  .quiz-next-btn { background: var(--primary); color: #fff; border: none; border-radius: 20px; padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 14px; min-height: 48px; display: none; }
+  .quiz-next-btn.show { display: inline-block; }
+  .quiz-result { text-align: center; padding: 30px 16px; }
+  .quiz-result .score-big { font-size: 56px; font-weight: 900; color: var(--orange); }
+  .quiz-result .score-label { font-size: 14px; color: var(--text-muted); }
+  .quiz-result .msg { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 14px; padding: 14px; background: var(--pink-light); border-radius: var(--radius); }
+  .quiz-restart { background: var(--orange); color: #fff; border: none; border-radius: 20px; padding: 12px 28px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 18px; min-height: 48px; }
+
+  /* ── Word Search ── */
+  .ws-grid-wrap { overflow-x: auto; padding: 4px 0; }
+  .ws-grid { display: inline-grid; gap: 2px; user-select: none; }
+  .ws-cell { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-family: 'Courier New', monospace; font-size: 16px; font-weight: 700; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 6px; cursor: pointer; transition: background .1s; color: var(--text); }
+  .ws-cell.selected { background: var(--pink-mid); }
+  .ws-cell.found { background: var(--orange); color: #fff; border-color: var(--orange); }
+  .ws-word-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+  .ws-word-tag { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: 20px; padding: 5px 12px; font-size: 13px; font-weight: 600; color: var(--primary); }
+  .ws-word-tag.found { background: var(--green-bg); border-color: #6aaa38; color: var(--green-text); text-decoration: line-through; opacity: .7; }
+  .ws-timer { font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+  .ws-confetti { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; display: none; }
+  .confetti-piece { position: absolute; width: 10px; height: 10px; border-radius: 2px; animation: confettiFall 2.5s ease-in forwards; }
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+  .ws-success { text-align: center; padding: 20px; background: var(--green-bg); border-radius: var(--radius); margin-top: 12px; display: none; }
+  .ws-success.show { display: block; }
+  .ws-success h3 { color: var(--green-text); font-size: 20px; }
+
+  /* ── My Book ── */
+  .book-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .book-empty .empty-icon { font-size: 52px; margin-bottom: 10px; }
+  .book-stats { display: flex; gap: 12px; margin-bottom: 16px; }
+  .stat-card { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 14px; text-align: center; box-shadow: var(--shadow); }
+  .stat-num { font-size: 28px; font-weight: 900; color: var(--orange); }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .book-word-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 13px 15px; margin-bottom: 9px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow); }
+  .book-word-card .bw-en { font-size: 17px; font-weight: 800; color: var(--orange); flex: 1; }
+  .book-word-card .bw-vi { font-size: 13px; color: var(--primary); }
+  .book-word-card .bw-cat { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .remove-btn { background: var(--red-bg); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 15px; color: var(--red-text); display: flex; align-items: center; justify-content: center; }
+  .trophy-banner { background: linear-gradient(135deg, #ffe066, #ffd700); border-radius: var(--radius); padding: 14px 18px; text-align: center; margin-bottom: 14px; display: none; }
+  .trophy-banner.show { display: block; }
+  .trophy-banner h3 { color: #7a5a00; font-size: 16px; }
+  .quiz-words-btn { background: var(--primary); color: #fff; border: none; border-radius: 20px; padding: 12px 24px; font-size: 14px; font-weight: 700; cursor: pointer; min-height: 44px; margin-bottom: 14px; }
+
+  /* ── Category selector ── */
+  .cat-selector { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 14px; margin-bottom: 16px; }
+  .cat-selector label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
+  .cat-selector select { width: 100%; padding: 10px; border: 1.5px solid var(--card-border); border-radius: 8px; font-size: 14px; color: var(--text); background: var(--bg); min-height: 44px; }
+
+  /* Utility */
+  .hidden { display: none !important; }
+  .text-center { text-align: center; }
+  .mt-12 { margin-top: 12px; }
+  .badge { display: inline-block; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700; border-radius: 20px; padding: 2px 9px; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>🏀 Basketball English Vocab</h1>
+  <div class="subtitle">Level up your game and your English!</div>
+</div>
+
+<!-- ══════════ HOME SCREEN ══════════ -->
+<div id="screen-home" class="screen active">
+  <div class="home-hero">
+    <div class="ball">🏀</div>
+    <h2>Welcome, Star Player! ⭐</h2>
+    <p>Pick a topic to start learning!</p>
+  </div>
+  <div class="category-grid" id="home-grid"></div>
+</div>
+
+<!-- ══════════ LEARN SCREEN ══════════ -->
+<div id="screen-learn" class="screen">
+  <div class="cat-selector">
+    <label>Choose Category</label>
+    <select id="learn-cat-select"></select>
+  </div>
+  <div class="lesson-actions">
+    <button class="action-btn orange" onclick="goFlashcards()">🃏 Flashcards</button>
+    <button class="action-btn" onclick="goQuiz()">❓ Quiz</button>
+  </div>
+  <div class="word-list" id="word-list"></div>
+</div>
+
+<!-- ══════════ FLASHCARD SCREEN ══════════ -->
+<div id="screen-cards" class="screen">
+  <div class="cat-selector">
+    <label>Choose Category</label>
+    <select id="fc-cat-select"></select>
+  </div>
+  <div id="fc-area"></div>
+</div>
+
+<!-- ══════════ QUIZ SCREEN ══════════ -->
+<div id="screen-quiz" class="screen">
+  <div class="cat-selector">
+    <label>Choose Category</label>
+    <select id="quiz-cat-select"></select>
+  </div>
+  <div id="quiz-area"></div>
+</div>
+
+<!-- ══════════ WORD SEARCH SCREEN ══════════ -->
+<div id="screen-search" class="screen">
+  <h2 style="margin-bottom:10px;">🔍 Word Search</h2>
+  <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Find 8 hidden basketball words in the grid!</p>
+  <div class="ws-timer" id="ws-timer">⏱ 0:00</div>
+  <div class="ws-word-list" id="ws-word-tags"></div>
+  <div class="ws-grid-wrap"><div class="ws-grid" id="ws-grid"></div></div>
+  <div class="ws-success" id="ws-success">
+    <div style="font-size:48px;">🎉</div>
+    <h3>You found them all!</h3>
+    <p id="ws-final-time" style="color:var(--text-muted);margin-top:6px;"></p>
+    <button onclick="initWordSearch()" style="margin-top:14px;background:var(--orange);color:#fff;border:none;border-radius:20px;padding:12px 24px;font-size:15px;font-weight:700;cursor:pointer;min-height:44px;">Play Again 🔄</button>
+  </div>
+</div>
+
+<!-- ══════════ MY BOOK SCREEN ══════════ -->
+<div id="screen-book" class="screen">
+  <h2 style="margin-bottom:14px;">📚 My Vocab Book</h2>
+  <div id="book-content"></div>
+</div>
+
+<!-- ══════════ BOTTOM NAV ══════════ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-screen="home" onclick="showScreen('home',this)">
+    <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+  </button>
+  <button class="nav-btn" data-screen="learn" onclick="showScreen('learn',this)">
+    <span class="nav-icon">📖</span><span class="nav-label">Learn</span>
+  </button>
+  <button class="nav-btn" data-screen="cards" onclick="showScreen('cards',this)">
+    <span class="nav-icon">🃏</span><span class="nav-label">Cards</span>
+  </button>
+  <button class="nav-btn" data-screen="quiz" onclick="showScreen('quiz',this)">
+    <span class="nav-icon">❓</span><span class="nav-label">Quiz</span>
+  </button>
+  <button class="nav-btn" data-screen="search" onclick="showScreen('search',this)">
+    <span class="nav-icon">🔍</span><span class="nav-label">Search</span>
+  </button>
+  <button class="nav-btn" data-screen="book" onclick="showScreen('book',this)">
+    <span class="nav-icon">📚</span><span class="nav-label">My Book</span>
+  </button>
+</nav>
+
+<!-- Confetti canvas -->
+<div class="ws-confetti" id="confetti-container"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  VOCABULARY DATA
+// ═══════════════════════════════════════════════════
+const CATEGORIES = [
+  {
+    id: "positions",
+    en: "Positions",
+    vi: "Vị trí thi đấu",
+    icon: "👟",
+    color: "pink",
+    words: [
+      { en: "Point Guard", vi: "Hậu vệ tổ chức", ex: "The point guard brings the ball up and sets up the play.", exVi: "Hậu vệ tổ chức đưa bóng lên và sắp xếp chiến thuật." },
+      { en: "Shooting Guard", vi: "Hậu vệ ném", ex: "Our shooting guard scored 20 points last game!", exVi: "Hậu vệ ném của chúng tôi đã ghi 20 điểm trong trận đấu vừa rồi!" },
+      { en: "Small Forward", vi: "Tiền phong nhỏ", ex: "A small forward needs to be fast and strong.", exVi: "Tiền phong nhỏ cần phải nhanh và mạnh." },
+      { en: "Power Forward", vi: "Tiền phong mạnh", ex: "The power forward grabbed five rebounds in one quarter.", exVi: "Tiền phong mạnh đã giành được 5 bóng bật trong một hiệp." },
+      { en: "Center", vi: "Trung phong", ex: "The center is usually the tallest player on the team.", exVi: "Trung phong thường là cầu thủ cao nhất trong đội." },
+    ]
+  },
+  {
+    id: "court",
+    en: "Court Parts",
+    vi: "Các phần sân",
+    icon: "🏟️",
+    color: "orange",
+    words: [
+      { en: "Three-Point Line", vi: "Vạch 3 điểm", ex: "She made the shot from behind the three-point line!", exVi: "Cô ấy đã ném bóng từ sau vạch 3 điểm!" },
+      { en: "Paint / Key", vi: "Khu vực sơn", ex: "Only stand in the paint for three seconds.", exVi: "Chỉ đứng trong khu vực sơn tối đa ba giây." },
+      { en: "Free-Throw Line", vi: "Vạch ném phạt", ex: "She stepped up to the free-throw line calmly.", exVi: "Cô ấy bình tĩnh bước lên vạch ném phạt." },
+      { en: "Half-Court", vi: "Giữa sân", ex: "The ball must cross half-court in eight seconds.", exVi: "Bóng phải qua giữa sân trong vòng tám giây." },
+      { en: "Baseline", vi: "Đường biên cuối sân", ex: "She dribbled along the baseline and drove to the hoop.", exVi: "Cô ấy dẫn bóng dọc đường biên cuối sân và đột phá vào rổ." },
+      { en: "Sideline", vi: "Đường biên dọc", ex: "The coach shouted instructions from the sideline.", exVi: "Huấn luyện viên hét hướng dẫn từ đường biên dọc." },
+      { en: "Backboard", vi: "Bảng rổ", ex: "She banked the ball off the backboard into the net.", exVi: "Cô ấy đánh bóng vào bảng rổ và rơi vào lưới." },
+      { en: "Rim", vi: "Vành rổ", ex: "The ball rolled around the rim and fell in!", exVi: "Bóng lăn quanh vành rổ rồi rơi vào!" },
+      { en: "Net", vi: "Lưới rổ", ex: "Nothing but net — a perfect shot!", exVi: "Chỉ có lưới thôi — một cú ném hoàn hảo!" },
+    ]
+  },
+  {
+    id: "actions",
+    en: "Actions",
+    vi: "Hành động",
+    icon: "⚡",
+    color: "pink",
+    words: [
+      { en: "Dribble", vi: "Dẫn bóng", ex: "She can dribble the ball with both hands equally well.", exVi: "Cô ấy có thể dẫn bóng bằng cả hai tay như nhau." },
+      { en: "Pass", vi: "Chuyền bóng", ex: "A good pass can open up the whole defense.", exVi: "Một đường chuyền tốt có thể phá vỡ cả hàng phòng thủ." },
+      { en: "Shoot", vi: "Ném bóng", ex: "She loves to shoot from the corner three.", exVi: "Cô ấy thích ném bóng từ góc 3 điểm." },
+      { en: "Rebound", vi: "Tranh bóng bật", ex: "She jumped high to rebound the missed shot.", exVi: "Cô ấy nhảy cao để tranh bóng bật sau cú ném hỏng." },
+      { en: "Steal", vi: "Cướp bóng", ex: "She made a steal and ran for the fast break!", exVi: "Cô ấy cướp được bóng và chạy phản công nhanh!" },
+      { en: "Block", vi: "Chắn bóng", ex: "She blocked the layup at the last second!", exVi: "Cô ấy chắn cú ném layup vào giây cuối cùng!" },
+      { en: "Pivot", vi: "Xoay người", ex: "She used a pivot move to create space.", exVi: "Cô ấy dùng động tác xoay người để tạo khoảng trống." },
+      { en: "Layup", vi: "Ném lên rổ gần", ex: "A layup is one of the first moves you should learn.", exVi: "Ném layup là một trong những động tác đầu tiên bạn nên học." },
+      { en: "Dunk", vi: "Đập bóng vào rổ", ex: "She worked so hard so that one day she can dunk.", exVi: "Cô ấy tập luyện chăm chỉ để một ngày có thể đập bóng vào rổ." },
+      { en: "Screen", vi: "Màn chắn", ex: "She set a screen to help her teammate get open.", exVi: "Cô ấy đặt màn chắn để giúp đồng đội có không gian." },
+    ]
+  },
+  {
+    id: "gameterms",
+    en: "Game Terms",
+    vi: "Thuật ngữ trận đấu",
+    icon: "📋",
+    color: "orange",
+    words: [
+      { en: "Foul", vi: "Lỗi", ex: "She committed a foul by hitting the shooter's arm.", exVi: "Cô ấy phạm lỗi vì chạm tay vào cánh tay người ném bóng." },
+      { en: "Timeout", vi: "Tạm nghỉ", ex: "The coach called a timeout to change the strategy.", exVi: "Huấn luyện viên gọi tạm nghỉ để thay đổi chiến thuật." },
+      { en: "Overtime", vi: "Hiệp phụ", ex: "The game went into overtime and our team won!", exVi: "Trận đấu vào hiệp phụ và đội chúng tôi thắng!" },
+      { en: "Possession", vi: "Quyền kiểm soát bóng", ex: "Our team had possession for most of the fourth quarter.", exVi: "Đội chúng tôi kiểm soát bóng trong hầu hết hiệp bốn." },
+      { en: "Turnover", vi: "Mất bóng", ex: "She was upset about the turnover she made.", exVi: "Cô ấy buồn vì đã mất bóng." },
+      { en: "Assist", vi: "Kiến tạo", ex: "She got an assist after passing to the open player.", exVi: "Cô ấy có một đường kiến tạo sau khi chuyền cho cầu thủ trống người." },
+      { en: "Fast Break", vi: "Phản công nhanh", ex: "The fast break gave us an easy two points.", exVi: "Đợt phản công nhanh mang lại cho chúng tôi 2 điểm dễ dàng." },
+      { en: "Press", vi: "Bẫy bóng", ex: "The full-court press made it hard to bring the ball up.", exVi: "Bẫy bóng toàn sân khiến việc đưa bóng lên rất khó khăn." },
+    ]
+  },
+  {
+    id: "equipment",
+    en: "Equipment",
+    vi: "Dụng cụ thi đấu",
+    icon: "👟",
+    color: "pink",
+    words: [
+      { en: "Basketball", vi: "Quả bóng rổ", ex: "She got a new basketball for her birthday!", exVi: "Cô ấy được tặng một quả bóng rổ mới nhân dịp sinh nhật!" },
+      { en: "Sneakers", vi: "Giày thể thao", ex: "Good sneakers can protect your ankles.", exVi: "Giày thể thao tốt có thể bảo vệ mắt cá chân của bạn." },
+      { en: "Jersey", vi: "Áo thi đấu", ex: "She wears the number 10 jersey for her team.", exVi: "Cô ấy mặc áo thi đấu số 10 của đội." },
+      { en: "Shorts", vi: "Quần đùi", ex: "Basketball shorts are loose so you can move freely.", exVi: "Quần đùi bóng rổ rộng để bạn có thể di chuyển thoải mái." },
+      { en: "Mouthguard", vi: "Miếng bảo vệ miệng", ex: "Always wear your mouthguard during practice!", exVi: "Luôn đeo miếng bảo vệ miệng khi tập luyện!" },
+      { en: "Knee Pads", vi: "Băng bảo vệ đầu gối", ex: "Knee pads help protect you when you dive for the ball.", exVi: "Băng bảo vệ đầu gối giúp bảo vệ bạn khi bạn nhào lộn tranh bóng." },
+    ]
+  },
+  {
+    id: "teamwork",
+    en: "Teamwork",
+    vi: "Làm việc nhóm",
+    icon: "🤝",
+    color: "orange",
+    words: [
+      { en: "Communicate", vi: "Giao tiếp", ex: "Great teams communicate on both offense and defense.", exVi: "Đội giỏi luôn giao tiếp tốt ở cả tấn công lẫn phòng thủ." },
+      { en: "Support", vi: "Hỗ trợ", ex: "She always runs to support her teammates.", exVi: "Cô ấy luôn chạy để hỗ trợ đồng đội." },
+      { en: "Trust", vi: "Tin tưởng", ex: "You have to trust your teammate's decision on the court.", exVi: "Bạn phải tin tưởng quyết định của đồng đội trên sân." },
+      { en: "Strategy", vi: "Chiến thuật", ex: "The coach explained the strategy before the game.", exVi: "Huấn luyện viên giải thích chiến thuật trước trận đấu." },
+      { en: "Rotate", vi: "Xoay vị trí", ex: "Rotate quickly when the ball goes to the other side.", exVi: "Xoay vị trí nhanh khi bóng chuyển sang phía kia." },
+      { en: "Switch", vi: "Đổi người", ex: "Switch on the screen so no one is left open.", exVi: "Đổi người khi có màn chắn để không ai bị bỏ trống." },
+      { en: "Help Defense", vi: "Phòng thủ hỗ trợ", ex: "She came over for help defense and stopped the drive.", exVi: "Cô ấy đến hỗ trợ phòng thủ và cản đột phá thành công." },
+    ]
+  },
+  {
+    id: "stats",
+    en: "Stats",
+    vi: "Chỉ số",
+    icon: "📊",
+    color: "pink",
+    words: [
+      { en: "Points", vi: "Điểm", ex: "She scored 15 points and led the team to victory.", exVi: "Cô ấy ghi 15 điểm và dẫn đội đến chiến thắng." },
+      { en: "Rebounds", vi: "Bóng bật", ex: "She had 8 rebounds, most of any player in the game.", exVi: "Cô ấy có 8 bóng bật, nhiều nhất trong trận đấu." },
+      { en: "Assists", vi: "Kiến tạo", ex: "She had 6 assists and her teammates loved playing with her.", exVi: "Cô ấy có 6 kiến tạo và đồng đội rất thích chơi cùng cô ấy." },
+      { en: "Steals", vi: "Cướp bóng", ex: "Her 3 steals helped turn the game around.", exVi: "3 lần cướp bóng của cô ấy đã giúp thay đổi cục diện trận đấu." },
+      { en: "Blocks", vi: "Chắn bóng", ex: "She had 2 blocks that saved the team from losing points.", exVi: "Cô ấy có 2 lần chắn bóng giúp đội tránh mất điểm." },
+      { en: "Minutes Played", vi: "Thời gian thi đấu", ex: "She played 28 minutes and never seemed tired!", exVi: "Cô ấy thi đấu 28 phút và không hề có vẻ mệt mỏi!" },
+      { en: "Shooting %", vi: "Tỷ lệ ném thành công", ex: "Her shooting percentage improved a lot after extra practice.", exVi: "Tỷ lệ ném của cô ấy cải thiện rất nhiều sau khi tập thêm." },
+    ]
+  },
+  {
+    id: "phrases",
+    en: "Game Phrases",
+    vi: "Câu nói trên sân",
+    icon: "💬",
+    color: "orange",
+    words: [
+      { en: "Good job!", vi: "Làm tốt lắm!", ex: "Good job! That was a perfect pass!", exVi: "Làm tốt lắm! Đó là một đường chuyền hoàn hảo!" },
+      { en: "My bad!", vi: "Lỗi của mình!", ex: "My bad! I should have passed earlier.", exVi: "Lỗi của mình! Mình lẽ ra phải chuyền sớm hơn." },
+      { en: "I'm open!", vi: "Mình trống đây!", ex: "I'm open! Pass me the ball!", exVi: "Mình trống đây! Chuyền bóng cho mình!" },
+      { en: "Box out!", vi: "Chắn người ra!", ex: "Box out and get the rebound!", exVi: "Chắn người ra và tranh bóng bật!" },
+      { en: "Nice shot!", vi: "Ném đẹp lắm!", ex: "Nice shot! You've been practicing a lot!", exVi: "Ném đẹp lắm! Bạn đã tập luyện rất nhiều!" },
+      { en: "Let's go!", vi: "Cố lên nào!", ex: "Let's go team! We can do this!", exVi: "Cố lên nào cả đội! Chúng ta làm được!" },
+      { en: "Pass the ball!", vi: "Chuyền bóng đây!", ex: "Pass the ball! Don't hold it too long!", exVi: "Chuyền bóng đây! Đừng giữ bóng quá lâu!" },
+      { en: "Stay focused!", vi: "Tập trung nào!", ex: "Stay focused! The game isn't over yet!", exVi: "Tập trung nào! Trận đấu chưa kết thúc đâu!" },
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+let learnedWords = JSON.parse(localStorage.getItem('learnedWords') || '[]');
+// learnedWords = [{catId, wordIndex}, ...]
+
+function saveLearnedWords() {
+  localStorage.setItem('learnedWords', JSON.stringify(learnedWords));
+}
+
+function isLearned(catId, wordIndex) {
+  return learnedWords.some(w => w.catId === catId && w.wordIndex === wordIndex);
+}
+
+function toggleLearned(catId, wordIndex) {
+  if (isLearned(catId, wordIndex)) {
+    learnedWords = learnedWords.filter(w => !(w.catId === catId && w.wordIndex === wordIndex));
+  } else {
+    learnedWords.push({ catId, wordIndex });
+  }
+  saveLearnedWords();
+}
+
+// ═══════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════
+let currentScreen = 'home';
+let wsTimerInterval = null;
+
+function showScreen(name, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  currentScreen = name;
+  if (name === 'book') renderBook();
+  if (name === 'search' && !wsInitialized) initWordSearch();
+  if (name === 'learn') renderLearnScreen();
+  if (name === 'cards') renderFlashcards();
+  if (name === 'quiz') renderQuizScreen();
+}
+
+// ═══════════════════════════════════════════════════
+//  HOME SCREEN
+// ═══════════════════════════════════════════════════
+function buildHome() {
+  const grid = document.getElementById('home-grid');
+  grid.innerHTML = CATEGORIES.map((cat, i) => `
+    <div class="cat-card ${cat.color}" onclick="openCategoryLearn('${cat.id}')">
+      <span class="cat-count">${cat.words.length}</span>
+      <div class="cat-icon">${cat.icon}</div>
+      <div class="cat-name-en">${cat.en}</div>
+    </div>
+  `).join('');
+}
+
+function openCategoryLearn(catId) {
+  document.getElementById('learn-cat-select').value = catId;
+  showScreen('learn', document.querySelector('[data-screen="learn"]'));
+  renderLearnScreen();
+}
+
+// ═══════════════════════════════════════════════════
+//  LEARN SCREEN
+// ═══════════════════════════════════════════════════
+let currentLearnCat = 'positions';
+
+function buildCatSelects() {
+  const opts = CATEGORIES.map(c => `<option value="${c.id}">${c.icon} ${c.en}</option>`).join('');
+  ['learn-cat-select','fc-cat-select','quiz-cat-select'].forEach(id => {
+    document.getElementById(id).innerHTML = opts;
+  });
+  document.getElementById('learn-cat-select').addEventListener('change', renderLearnScreen);
+  document.getElementById('fc-cat-select').addEventListener('change', renderFlashcards);
+  document.getElementById('quiz-cat-select').addEventListener('change', () => startQuiz());
+}
+
+function renderLearnScreen() {
+  const catId = document.getElementById('learn-cat-select').value;
+  currentLearnCat = catId;
+  const cat = CATEGORIES.find(c => c.id === catId);
+  const list = document.getElementById('word-list');
+  list.innerHTML = cat.words.map((w, i) => `
+    <div class="word-card" onclick="toggleWordExpand(this)">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span class="en-word">${w.en}</span>
+        <span style="font-size:18px;">${isLearned(catId,i)?'⭐':'☆'}</span>
+      </div>
+      <div class="vi-word">${w.vi}</div>
+      <div class="example-en">📝 "${w.ex}"</div>
+      <div class="example-vi">🇻🇳 Vietnamese: "${w.exVi}"</div>
+      <div class="card-actions">
+        <button class="say-btn" onclick="speakWord(event,'${w.en.replace(/'/g,"\\'")}')">🔊 Pronounce</button>
+        <button class="star-btn ${isLearned(catId,i)?'starred':''}" onclick="starWord(event,'${catId}',${i},this)">${isLearned(catId,i)?'⭐':'☆'}</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleWordExpand(card) {
+  // cards are always expanded in this design
+}
+
+function speakWord(e, word) {
+  e.stopPropagation();
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(word);
+    utter.lang = 'en-US';
+    utter.rate = 0.85;
+    window.speechSynthesis.speak(utter);
+  }
+}
+
+function starWord(e, catId, wordIndex, btn) {
+  e.stopPropagation();
+  toggleLearned(catId, wordIndex);
+  const learned = isLearned(catId, wordIndex);
+  btn.textContent = learned ? '⭐' : '☆';
+  btn.classList.toggle('starred', learned);
+  // also update the star in the card header
+  const card = btn.closest('.word-card');
+  const headerStar = card.querySelector('span[style]');
+  if (headerStar) headerStar.textContent = learned ? '⭐' : '☆';
+}
+
+function goFlashcards() {
+  const catId = document.getElementById('learn-cat-select').value;
+  document.getElementById('fc-cat-select').value = catId;
+  showScreen('cards', document.querySelector('[data-screen="cards"]'));
+  renderFlashcards();
+}
+
+function goQuiz() {
+  const catId = document.getElementById('learn-cat-select').value;
+  document.getElementById('quiz-cat-select').value = catId;
+  showScreen('quiz', document.querySelector('[data-screen="quiz"]'));
+  startQuiz();
+}
+
+// ═══════════════════════════════════════════════════
+//  FLASHCARD SCREEN
+// ═══════════════════════════════════════════════════
+let fcState = { cards:[], idx:0, known:0, isFlipped:false };
+
+function renderFlashcards() {
+  const catId = document.getElementById('fc-cat-select').value;
+  const cat = CATEGORIES.find(c => c.id === catId);
+  fcState.cards = cat.words.map((w,i) => ({...w, catId, catIcon: cat.icon}));
+  fcState.idx = 0; fcState.known = 0; fcState.isFlipped = false;
+  renderFC();
+}
+
+function renderFC() {
+  const area = document.getElementById('fc-area');
+  if (fcState.idx >= fcState.cards.length) {
+    area.innerHTML = `
+      <div class="fc-result">
+        <div class="trophy">${fcState.known === fcState.cards.length ? '🏆' : '🎯'}</div>
+        <h3>${fcState.known === fcState.cards.length ? 'Perfect! All correct!' : `You know ${fcState.known}/${fcState.cards.length} words!`}</h3>
+        <p>${fcState.known === fcState.cards.length ? 'Amazing work — keep it up!' : 'Review the ones you missed and try again!'}</p>
+        <button class="restart-btn" onclick="renderFlashcards()">🔄 Play Again</button>
+      </div>`;
+    return;
+  }
+  const c = fcState.cards[fcState.idx];
+  const pct = Math.round((fcState.idx / fcState.cards.length) * 100);
+  area.innerHTML = `
+    <div class="fc-progress-wrap">
+      <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="progress-text">${fcState.idx}/${fcState.cards.length} cards</div>
+    </div>
+    <div class="flashcard-wrap">
+      <div class="flashcard" id="fc-card" onclick="flipFC()">
+        <div class="fc-face fc-front">
+          <div class="fc-cat-icon">${c.catIcon}</div>
+          <div class="fc-word">${c.en}</div>
+          <div class="fc-flip-hint">Tap to flip</div>
+        </div>
+        <div class="fc-face fc-back">
+          <div class="fc-vi">${c.vi}</div>
+          <div class="fc-example">"${c.ex}"</div>
+          <div class="fc-example-vi">"${c.exVi}"</div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-counter">Card ${fcState.idx+1} of ${fcState.cards.length} · Known: ${fcState.known} ✓</div>
+    <div class="fc-controls">
+      <button class="fc-btn no" onclick="fcAnswer(false)">🔴 Review Again</button>
+      <button class="fc-btn yes" onclick="fcAnswer(true)">🟢 Know it!</button>
+    </div>
+  `;
+  fcState.isFlipped = false;
+}
+
+function flipFC() {
+  const card = document.getElementById('fc-card');
+  fcState.isFlipped = !fcState.isFlipped;
+  card.classList.toggle('flipped', fcState.isFlipped);
+}
+
+function fcAnswer(knew) {
+  if (knew) fcState.known++;
+  fcState.idx++;
+  fcState.isFlipped = false;
+  renderFC();
+}
+
+// ═══════════════════════════════════════════════════
+//  QUIZ SCREEN
+// ═══════════════════════════════════════════════════
+let quizState = { questions:[], idx:0, score:0, answered:false };
+
+function renderQuizScreen() {
+  startQuiz();
+}
+
+function startQuiz() {
+  const catId = document.getElementById('quiz-cat-select').value;
+  const cat = CATEGORIES.find(c => c.id === catId);
+  // Build 10 questions (or all words if fewer)
+  const words = [...cat.words];
+  shuffle(words);
+  const pool = words.slice(0, Math.min(10, words.length));
+  quizState.questions = pool.map(w => makeQuestion(w, cat));
+  quizState.idx = 0; quizState.score = 0; quizState.answered = false;
+  renderQuizQuestion();
+}
+
+function makeQuestion(word, cat) {
+  // blank the word in the example sentence
+  const regex = new RegExp(word.en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi');
+  const sentence = word.ex.replace(regex, '___');
+  // get 3 wrong answers from same category or other categories
+  const allWords = CATEGORIES.flatMap(c => c.words);
+  const wrong = allWords.filter(w => w.en !== word.en);
+  shuffle(wrong);
+  const distractors = wrong.slice(0, 3).map(w => w.en);
+  const options = shuffle([word.en, ...distractors]);
+  return { sentence, answer: word.en, options, word, exVi: word.exVi };
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function renderQuizQuestion() {
+  const area = document.getElementById('quiz-area');
+  if (quizState.idx >= quizState.questions.length) {
+    const s = quizState.score, t = quizState.questions.length;
+    let msg;
+    if (s === t) msg = "🏀 Nothing but net! Perfect score!";
+    else if (s >= 7) msg = "🎯 Great game! Keep practicing!";
+    else if (s >= 4) msg = "💪 Good effort! Review the cards and try again!";
+    else msg = "🏃 Keep dribbling! You'll get there!";
+    area.innerHTML = `
+      <div class="quiz-result">
+        <div class="score-big">${s}/${t}</div>
+        <div class="score-label">Your Score</div>
+        <div class="msg">${msg}</div>
+        <button class="quiz-restart" onclick="startQuiz()">🔄 Play Again</button>
+      </div>`;
+    return;
+  }
+  const q = quizState.questions[quizState.idx];
+  area.innerHTML = `
+    <div class="quiz-question-num">Question ${quizState.idx+1} / ${quizState.questions.length}</div>
+    <div class="fc-progress-wrap">
+      <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${Math.round(quizState.idx/quizState.questions.length*100)}%"></div></div>
+    </div>
+    <div class="quiz-sentence" style="margin-top:12px;">
+      ${q.sentence.replace('___', '<span class="quiz-blank">___</span>')}
+    </div>
+    <div class="quiz-options">
+      ${q.options.map((opt,i) => `<button class="quiz-opt" id="opt-${i}" onclick="checkAnswer(this,'${opt.replace(/'/g,"\\'")}','${q.answer.replace(/'/g,"\\'")}',${i})">${opt}</button>`).join('')}
+    </div>
+    <div class="quiz-feedback" id="qfeedback"></div>
+    <button class="quiz-next-btn" id="quiz-next" onclick="nextQuestion()">Next →</button>
+  `;
+}
+
+function checkAnswer(btn, chosen, answer, idx) {
+  if (quizState.answered) return;
+  quizState.answered = true;
+  const correct = chosen === answer;
+  if (correct) quizState.score++;
+  document.querySelectorAll('.quiz-opt').forEach((b,i) => {
+    b.classList.add('disabled');
+    if (b.textContent.trim() === answer) b.classList.add('correct');
+    else if (b === btn && !correct) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('qfeedback');
+  fb.classList.add('show', correct ? 'correct' : 'wrong');
+  if (correct) {
+    fb.innerHTML = `✅ Correct! "${answer}" is right!`;
+  } else {
+    const q = quizState.questions[quizState.idx];
+    fb.innerHTML = `❌ The answer is: <strong>${answer}</strong>`;
+  }
+  document.getElementById('quiz-next').classList.add('show');
+}
+
+function nextQuestion() {
+  quizState.idx++;
+  quizState.answered = false;
+  renderQuizQuestion();
+}
+
+// ═══════════════════════════════════════════════════
+//  WORD SEARCH
+// ═══════════════════════════════════════════════════
+const WS_SIZE = 10;
+const WS_WORDS = [
+  { en: "DRIBBLE", vi: "Dẫn bóng" },
+  { en: "REBOUND", vi: "Bóng bật" },
+  { en: "LAYUP",   vi: "Ném lên rổ gần" },
+  { en: "FOUL",    vi: "Lỗi" },
+  { en: "ASSIST",  vi: "Kiến tạo" },
+  { en: "SCREEN",  vi: "Màn chắn" },
+  { en: "STEAL",   vi: "Cướp bóng" },
+  { en: "PIVOT",   vi: "Xoay người" },
+];
+let wsGrid = [], wsFound = new Set(), wsStartCell = null, wsSelecting = [], wsTimerSec = 0, wsInitialized = false;
+let wsWordPositions = []; // [{word, cells:[{r,c}]}]
+
+function initWordSearch() {
+  wsInitialized = true;
+  wsFound = new Set();
+  wsSelecting = [];
+  wsStartCell = null;
+  wsTimerSec = 0;
+  document.getElementById('ws-success').classList.remove('show');
+  clearInterval(wsTimerInterval);
+  wsTimerInterval = setInterval(() => {
+    wsTimerSec++;
+    const m = Math.floor(wsTimerSec/60), s = wsTimerSec%60;
+    document.getElementById('ws-timer').textContent = `⏱ ${m}:${s.toString().padStart(2,'0')}`;
+  }, 1000);
+  buildWSGrid();
+  renderWSGrid();
+  renderWSTags();
+}
+
+function buildWSGrid() {
+  wsGrid = Array.from({length:WS_SIZE}, () => Array(WS_SIZE).fill(''));
+  wsWordPositions = [];
+  const dirs = [[0,1],[1,0]]; // horizontal, vertical only
+  const words = [...WS_WORDS].sort((a,b)=>b.en.length-a.en.length);
+  for (const w of words) {
+    let placed = false, tries = 0;
+    while (!placed && tries < 200) {
+      tries++;
+      const dir = dirs[Math.floor(Math.random()*dirs.length)];
+      const maxR = dir[0]===0 ? WS_SIZE-1 : WS_SIZE-w.en.length;
+      const maxC = dir[1]===0 ? WS_SIZE-1 : WS_SIZE-w.en.length;
+      if (maxR < 0 || maxC < 0) continue;
+      const r = Math.floor(Math.random()*(maxR+1));
+      const c = Math.floor(Math.random()*(maxC+1));
+      // check fit
+      let ok = true; const cells = [];
+      for (let k=0; k<w.en.length; k++) {
+        const nr=r+dir[0]*k, nc=c+dir[1]*k;
+        if (wsGrid[nr][nc] !== '' && wsGrid[nr][nc] !== w.en[k]) { ok=false; break; }
+        cells.push({r:nr,c:nc});
+      }
+      if (ok) {
+        cells.forEach((cl,k) => wsGrid[cl.r][cl.c]=w.en[k]);
+        wsWordPositions.push({word:w.en,cells});
+        placed=true;
+      }
+    }
+  }
+  // fill remaining cells
+  const alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let r=0; r<WS_SIZE; r++) for (let c=0; c<WS_SIZE; c++)
+    if (!wsGrid[r][c]) wsGrid[r][c]=alpha[Math.floor(Math.random()*alpha.length)];
+}
+
+function renderWSGrid() {
+  const g = document.getElementById('ws-grid');
+  g.style.gridTemplateColumns = `repeat(${WS_SIZE},34px)`;
+  g.innerHTML = '';
+  for (let r=0; r<WS_SIZE; r++) for (let c=0; c<WS_SIZE; c++) {
+    const cell = document.createElement('div');
+    cell.className='ws-cell';
+    cell.textContent=wsGrid[r][c];
+    cell.dataset.r=r; cell.dataset.c=c;
+    cell.addEventListener('mousedown', wsStartSelect);
+    cell.addEventListener('mouseover', wsMoveSel);
+    cell.addEventListener('mouseup', wsEndSelect);
+    cell.addEventListener('touchstart', wsTouchStart, {passive:false});
+    cell.addEventListener('touchmove', wsTouchMove, {passive:false});
+    cell.addEventListener('touchend', wsTouchEnd);
+    g.appendChild(cell);
+  }
+}
+
+function renderWSTags() {
+  document.getElementById('ws-word-tags').innerHTML = WS_WORDS.map(w=>`
+    <div class="ws-word-tag ${wsFound.has(w.en)?'found':''}" id="wstag-${w.en}">
+      ${w.en}
+    </div>`).join('');
+}
+
+function getCellAt(r,c) {
+  return document.querySelector(`#ws-grid .ws-cell[data-r="${r}"][data-c="${c}"]`);
+}
+
+function wsStartSelect(e) {
+  wsStartCell = {r:+e.target.dataset.r, c:+e.target.dataset.c};
+  wsSelecting = [wsStartCell];
+  highlightSel([wsStartCell]);
+}
+
+function wsMoveSel(e) {
+  if (!wsStartCell) return;
+  const end = {r:+e.target.dataset.r, c:+e.target.dataset.c};
+  wsSelecting = getCellsInLine(wsStartCell, end);
+  highlightSel(wsSelecting);
+}
+
+function wsEndSelect(e) {
+  if (!wsStartCell) return;
+  const end = {r:+e.target.dataset.r, c:+e.target.dataset.c};
+  wsSelecting = getCellsInLine(wsStartCell, end);
+  checkWSSelection(wsSelecting);
+  clearHighlight();
+  wsStartCell = null; wsSelecting = [];
+}
+
+function wsTouchStart(e) {
+  e.preventDefault();
+  const t = e.touches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if (el && el.classList.contains('ws-cell')) wsStartSelect({target:el});
+}
+
+function wsTouchMove(e) {
+  e.preventDefault();
+  const t = e.touches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if (el && el.classList.contains('ws-cell')) wsMoveSel({target:el});
+}
+
+function wsTouchEnd(e) {
+  e.preventDefault();
+  const t = e.changedTouches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if (el && el.classList.contains('ws-cell')) wsEndSelect({target:el});
+  else { checkWSSelection(wsSelecting); clearHighlight(); wsStartCell=null; wsSelecting=[]; }
+}
+
+function getCellsInLine(a, b) {
+  const dr=b.r-a.r, dc=b.c-a.c;
+  const len=Math.max(Math.abs(dr),Math.abs(dc));
+  if (len===0) return [a];
+  if (dr!==0 && dc!==0 && Math.abs(dr)!==Math.abs(dc)) {
+    // not a straight/diagonal — use whichever axis dominates
+    if (Math.abs(dr)>Math.abs(dc)) return getCellsInLine(a,{r:b.r,c:a.c});
+    else return getCellsInLine(a,{r:a.r,c:b.c});
+  }
+  const sr=Math.sign(dr), sc=Math.sign(dc);
+  const cells=[];
+  for (let i=0;i<=len;i++) cells.push({r:a.r+sr*i,c:a.c+sc*i});
+  return cells;
+}
+
+function highlightSel(cells) {
+  document.querySelectorAll('.ws-cell.selected').forEach(c=>c.classList.remove('selected'));
+  cells.forEach(({r,c})=>{ const el=getCellAt(r,c); if(el&&!el.classList.contains('found')) el.classList.add('selected'); });
+}
+
+function clearHighlight() {
+  document.querySelectorAll('.ws-cell.selected').forEach(c=>c.classList.remove('selected'));
+}
+
+function checkWSSelection(cells) {
+  const word = cells.map(({r,c})=>wsGrid[r][c]).join('');
+  const rev = word.split('').reverse().join('');
+  for (const wp of wsWordPositions) {
+    if (wsFound.has(wp.word)) continue;
+    if (word === wp.word || rev === wp.word) {
+      wsFound.add(wp.word);
+      wp.cells.forEach(({r,c})=>{ const el=getCellAt(r,c); if(el) {el.classList.remove('selected');el.classList.add('found');} });
+      renderWSTags();
+      if (wsFound.size === WS_WORDS.length) wsComplete();
+      return;
+    }
+  }
+}
+
+function wsComplete() {
+  clearInterval(wsTimerInterval);
+  const m=Math.floor(wsTimerSec/60), s=wsTimerSec%60;
+  document.getElementById('ws-final-time').textContent = `Time: ${m}:${s.toString().padStart(2,'0')}`;
+  document.getElementById('ws-success').classList.add('show');
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const container = document.getElementById('confetti-container');
+  container.style.display = 'block';
+  container.innerHTML = '';
+  const colors = ['#f4845f','#b04070','#f9bcd0','#ffd700','#6aaa38','#3a88cc'];
+  for (let i=0; i<60; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDelay = Math.random()*1.5 + 's';
+    p.style.width = (8+Math.random()*8) + 'px';
+    p.style.height = (8+Math.random()*8) + 'px';
+    container.appendChild(p);
+  }
+  setTimeout(() => { container.style.display='none'; container.innerHTML=''; }, 4000);
+}
+
+// ═══════════════════════════════════════════════════
+//  MY VOCAB BOOK
+// ═══════════════════════════════════════════════════
+function renderBook() {
+  const content = document.getElementById('book-content');
+  if (learnedWords.length === 0) {
+    content.innerHTML = `
+      <div class="book-empty">
+        <div class="empty-icon">📖</div>
+        <h3 style="color:var(--primary);">No words yet!</h3>
+        <p>Star words in the Learn tab to save them here.</p>
+      </div>`;
+    return;
+  }
+  const trophy = learnedWords.length >= 20 ? '<div class="trophy-banner show"><h3>🏆 Champion! You have 20+ words mastered!</h3></div>' : '';
+  const stats = `
+    <div class="book-stats">
+      <div class="stat-card"><div class="stat-num">${learnedWords.length}</div><div class="stat-label">Words Learned</div></div>
+      <div class="stat-card"><div class="stat-num">${new Set(learnedWords.map(w=>w.catId)).size}</div><div class="stat-label">Categories</div></div>
+    </div>`;
+  const quizBtn = `<button class="quiz-words-btn" onclick="quizLearnedWords()">❓ Quiz My Words</button>`;
+  const wordCards = learnedWords.map(({catId, wordIndex}) => {
+    const cat = CATEGORIES.find(c=>c.id===catId);
+    const w = cat.words[wordIndex];
+    return `<div class="book-word-card">
+      <div style="flex:1;">
+        <div class="bw-en">${w.en}</div>
+        <div class="bw-vi">${w.vi}</div>
+        <div class="bw-cat">${cat.icon} ${cat.en}</div>
+      </div>
+      <button class="remove-btn" onclick="removeFromBook('${catId}',${wordIndex})" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+  content.innerHTML = trophy + stats + quizBtn + wordCards;
+}
+
+function removeFromBook(catId, wordIndex) {
+  learnedWords = learnedWords.filter(w => !(w.catId===catId && w.wordIndex===wordIndex));
+  saveLearnedWords();
+  renderBook();
+}
+
+function quizLearnedWords() {
+  if (learnedWords.length < 2) { alert('Add at least 2 starred words to quiz!'); return; }
+  // build quiz from learned words
+  const pool = learnedWords.slice();
+  shuffle(pool);
+  const questions = pool.slice(0, Math.min(10, pool.length)).map(({catId, wordIndex}) => {
+    const cat = CATEGORIES.find(c=>c.id===catId);
+    const w = cat.words[wordIndex];
+    return makeQuestion(w, cat);
+  });
+  quizState.questions = questions;
+  quizState.idx = 0; quizState.score = 0; quizState.answered = false;
+  showScreen('quiz', document.querySelector('[data-screen="quiz"]'));
+  renderQuizQuestion();
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+buildHome();
+buildCatSelects();
+renderLearnScreen();
+renderFlashcards();
+startQuiz();
+</script>
+</body>
+</html>
