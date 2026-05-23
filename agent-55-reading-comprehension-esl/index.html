@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent #55 — Reading Comprehension Trainer for ESL</title>
+<style>
+  :root {
+    --bg:#0f1117; --card:#1a1d27; --card2:#20243a;
+    --blue:#4f8ef7; --blue-dim:#2a4a8a;
+    --green:#4ade80; --green-dim:#1a4a30;
+    --yellow:#facc15; --red:#f87171; --purple:#a78bfa;
+    --text:#e8eaf0; --muted:#8b90a8; --border:#2a2d3e;
+    --radius:12px; --radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:40px;}
+
+  header{background:linear-gradient(135deg,#1a1d27,#0f1117);border-bottom:1px solid var(--border);padding:20px 24px 0;position:sticky;top:0;z-index:100;}
+  .header-top{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+  .header-icon{font-size:2rem;background:linear-gradient(135deg,var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .header-title h1{font-size:1.35rem;font-weight:700;}
+  .header-title p{font-size:0.78rem;color:var(--muted);margin-top:1px;}
+  .header-badge{margin-left:auto;background:var(--blue-dim);color:var(--blue);padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;white-space:nowrap;}
+  .tabs{display:flex;gap:2px;}
+  .tab-btn{background:none;border:none;color:var(--muted);padding:10px 18px;cursor:pointer;font-size:0.8rem;font-weight:600;letter-spacing:0.5px;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+  .main{max-width:900px;margin:0 auto;padding:28px 20px;}
+  .tab-panel{display:none;} .tab-panel.active{display:block;}
+  .section-title{font-size:1.1rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+  .pill{background:var(--card2);color:var(--muted);font-size:0.72rem;padding:3px 9px;border-radius:20px;font-weight:500;}
+
+  /* LEVELS */
+  .level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+  .level-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;cursor:pointer;transition:transform .15s,border-color .2s,box-shadow .2s;position:relative;overflow:hidden;}
+  .level-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--lc,var(--blue));}
+  .level-card:hover{transform:translateY(-2px);border-color:var(--lc,var(--blue));box-shadow:0 8px 24px rgba(0,0,0,.4);}
+  .level-badge{display:inline-block;background:var(--card2);color:var(--muted);font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+  .level-name{font-size:1rem;font-weight:700;margin-bottom:6px;}
+  .level-sub{font-size:0.78rem;color:var(--muted);margin-bottom:10px;}
+  .level-count{font-size:0.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:8px;margin-top:4px;}
+  .level-progress-bar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .level-progress-fill{height:100%;border-radius:2px;background:var(--lc,var(--blue));transition:width .4s;}
+
+  /* READ TAB */
+  .back-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.82rem;font-weight:600;transition:background .2s;}
+  .back-btn:hover{background:var(--card2);}
+  .read-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+  .passage-select{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+  .passage-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 18px;cursor:pointer;text-align:left;transition:border-color .2s;}
+  .passage-btn:hover{border-color:var(--blue);}
+  .passage-btn.done{border-left:3px solid var(--green);}
+  .pbtn-title{font-size:0.9rem;font-weight:700;}
+  .pbtn-meta{font-size:0.72rem;color:var(--muted);margin-top:3px;}
+
+  .passage-area{display:none;}
+  .passage-title{font-size:1.2rem;font-weight:700;margin-bottom:6px;}
+  .passage-meta{font-size:0.75rem;color:var(--muted);margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;}
+  .passage-text{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;line-height:1.75;font-size:0.92rem;margin-bottom:22px;}
+  .passage-text b{color:var(--yellow);}
+
+  .quiz-section{margin-top:8px;}
+  .quiz-q-title{font-size:0.82rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
+  .question-block{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+  .q-text{font-size:0.9rem;font-weight:600;margin-bottom:12px;}
+  .q-choices{display:flex;flex-direction:column;gap:7px;}
+  .q-choice{background:none;border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:var(--radius-sm);cursor:pointer;text-align:left;font-size:0.83rem;transition:all .15s;}
+  .q-choice:hover:not(:disabled){border-color:var(--blue);}
+  .q-choice.correct{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+  .q-choice.wrong{background:rgba(248,113,113,.12);border-color:var(--red);color:var(--red);}
+  .q-result{font-size:0.78rem;margin-top:8px;font-weight:600;}
+  .check-btn{background:var(--blue);color:#fff;border:none;padding:10px 22px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.85rem;font-weight:700;margin-top:14px;transition:opacity .2s;}
+  .check-btn:hover{opacity:.88;}
+  .score-banner{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;margin-top:16px;}
+  .score-banner-num{font-size:2rem;font-weight:800;color:var(--blue);}
+  .score-banner-msg{font-size:0.88rem;color:var(--muted);margin-top:4px;}
+
+  /* VOCAB FLASHCARDS */
+  .vocab-controls{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+  .vctrl-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;cursor:pointer;font-size:0.75rem;font-weight:600;transition:all .15s;}
+  .vctrl-btn.active,.vctrl-btn:hover{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+  .flashcard-wrap{perspective:1000px;margin:0 auto 20px;max-width:500px;}
+  .flashcard{width:100%;height:200px;position:relative;transform-style:preserve-3d;transition:transform .5s;cursor:pointer;}
+  .flashcard.flipped{transform:rotateY(180deg);}
+  .card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--radius);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;}
+  .card-front{background:var(--card);}
+  .card-back{background:var(--card2);transform:rotateY(180deg);}
+  .card-word{font-size:1.6rem;font-weight:800;color:var(--blue);margin-bottom:6px;}
+  .card-pos{font-size:0.72rem;color:var(--muted);font-style:italic;}
+  .card-def{font-size:0.9rem;margin-bottom:8px;line-height:1.5;}
+  .card-ex{font-size:0.78rem;color:var(--yellow);font-style:italic;}
+  .card-tap-hint{font-size:0.72rem;color:var(--muted);position:absolute;bottom:12px;}
+  .flashcard-nav{display:flex;gap:12px;justify-content:center;align-items:center;margin-bottom:16px;}
+  .nav-btn{background:var(--card);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1rem;transition:all .15s;}
+  .nav-btn:hover{border-color:var(--blue);color:var(--blue);}
+  .nav-count{font-size:0.82rem;color:var(--muted);min-width:60px;text-align:center;}
+
+  /* PROGRESS */
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;}
+  .stat-number{font-size:2rem;font-weight:800;color:var(--blue);}
+  .stat-label{font-size:0.72rem;color:var(--muted);font-weight:600;margin-top:4px;}
+  .prog-section{margin-bottom:24px;}
+  .prog-section-title{font-size:0.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
+  .prog-item{margin-bottom:12px;}
+  .prog-info{display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.83rem;}
+  .prog-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+  .prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .6s;}
+  .empty-state{text-align:center;padding:40px;color:var(--muted);font-size:0.88rem;}
+
+  @media(max-width:600px){.level-grid{grid-template-columns:1fr 1fr;}.stats-grid{grid-template-columns:repeat(3,1fr);}.tab-btn{padding:10px 10px;font-size:0.72rem;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-top">
+    <div class="header-icon">📚</div>
+    <div class="header-title">
+      <h1>Reading Comprehension Trainer</h1>
+      <p>12 ESL passages · 4 levels · vocab flashcards</p>
+    </div>
+    <div class="header-badge">#55 / 100</div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('levels')">📋 LEVELS</button>
+    <button class="tab-btn" onclick="switchTab('read')">📖 READ</button>
+    <button class="tab-btn" onclick="switchTab('vocab')">🗃 VOCAB</button>
+    <button class="tab-btn" onclick="switchTab('progress')">📊 PROGRESS</button>
+  </div>
+</header>
+
+<div class="main">
+
+<!-- LEVELS -->
+<div class="tab-panel active" id="tab-levels">
+  <div class="section-title">Choose Your Level <span class="pill" id="levels-pill">0 passages read</span></div>
+  <div class="level-grid" id="level-grid"></div>
+</div>
+
+<!-- READ -->
+<div class="tab-panel" id="tab-read">
+  <div id="read-level-view">
+    <div class="read-header">
+      <button class="back-btn" onclick="switchTab('levels')">← Levels</button>
+      <span id="read-level-title" style="font-size:1rem;font-weight:700;"></span>
+    </div>
+    <div class="passage-select" id="passage-select"></div>
+  </div>
+  <div id="read-passage-view" class="passage-area">
+    <div class="read-header">
+      <button class="back-btn" onclick="goBackToPassageList()">← Back</button>
+      <span id="read-passage-header" style="font-size:0.9rem;font-weight:600;color:var(--muted);"></span>
+    </div>
+    <div class="passage-title" id="passage-title"></div>
+    <div class="passage-meta" id="passage-meta"></div>
+    <div class="passage-text" id="passage-text"></div>
+    <div class="quiz-section" id="quiz-section"></div>
+  </div>
+</div>
+
+<!-- VOCAB -->
+<div class="tab-panel" id="tab-vocab">
+  <div class="section-title">Vocabulary Flashcards <span class="pill" id="vocab-pill">0 words</span></div>
+  <div class="vocab-controls" id="vocab-filters"></div>
+  <div class="flashcard-wrap">
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="card-face card-front">
+        <div class="card-word" id="card-word">Select a level</div>
+        <div class="card-pos" id="card-pos"></div>
+        <div class="card-tap-hint">Tap to reveal meaning →</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-def" id="card-def">Choose a level filter above</div>
+        <div class="card-ex" id="card-ex"></div>
+        <div class="card-tap-hint">← Tap to flip back</div>
+      </div>
+    </div>
+  </div>
+  <div class="flashcard-nav">
+    <button class="nav-btn" onclick="prevCard()">◀</button>
+    <span class="nav-count" id="nav-count">0 / 0</span>
+    <button class="nav-btn" onclick="nextCard()">▶</button>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="tab-panel" id="tab-progress">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-number" id="stat-read">0</div><div class="stat-label">Passages Read</div></div>
+    <div class="stat-card"><div class="stat-number" id="stat-score">—</div><div class="stat-label">Avg Quiz Score</div></div>
+    <div class="stat-card"><div class="stat-number" id="stat-vocab">0</div><div class="stat-label">Words Seen</div></div>
+  </div>
+  <div class="prog-section">
+    <div class="prog-section-title">Progress by Level</div>
+    <div id="level-progress-bars"></div>
+  </div>
+  <div class="prog-section">
+    <div class="prog-section-title">Recent Quiz Scores</div>
+    <div id="quiz-score-list"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────
+const LEVELS = [
+  { id:'beginner', name:'Beginner', cefr:'A1–A2', color:'#4ade80', desc:'Simple sentences, everyday topics' },
+  { id:'elementary', name:'Elementary', cefr:'A2–B1', color:'#4f8ef7', desc:'Short paragraphs, familiar subjects' },
+  { id:'intermediate', name:'Intermediate', cefr:'B1–B2', color:'#a78bfa', desc:'Longer texts, abstract ideas' },
+  { id:'advanced', name:'Advanced', cefr:'B2–C1', color:'#facc15', desc:'Complex texts, nuanced language' },
+];
+
+const PASSAGES = [
+  // BEGINNER
+  {
+    id:'b1', level:'beginner', title:'My Morning Routine', words:180,
+    text:`Every day, I wake up at 7:00 in the morning. First, I go to the bathroom and wash my face. The water is cold, so I feel more awake.
+Then, I go to the kitchen. I make breakfast. I usually eat bread with butter and drink a glass of orange juice. Sometimes I also have an egg.
+After breakfast, I get dressed. I put on my clothes and comb my hair. I look in the mirror to make sure I look nice.
+At 8:00, I pick up my school bag. I check if I have everything — my books, my pencils, and my lunch box. Then I say goodbye to my family and walk to the bus stop.
+The bus comes at 8:15. I sit near the window and look outside. I see trees, shops, and other people walking to work. I arrive at school at 8:45.
+I love my morning routine. It helps me start the day in a good way.`,
+    vocab:[
+      {word:'routine',pos:'noun',def:'Things you do regularly in the same order',ex:'My morning routine takes about one hour.'},
+      {word:'awake',pos:'adj',def:'Not sleeping; conscious',ex:'The cold water made me feel awake.'},
+      {word:'comb',pos:'verb',def:'To make your hair neat using a comb',ex:'She combs her hair every morning.'},
+      {word:'arrive',pos:'verb',def:'To reach a place',ex:'I arrive at school before my friends.'},
+      {word:'regular',pos:'adj',def:'Happening often or at the same time',ex:'We have a regular meeting on Mondays.'},
+    ],
+    questions:[
+      {q:'What time does the person wake up?',choices:['6:00','7:00','8:00','9:00'],ans:1},
+      {q:'What does the person drink for breakfast?',choices:['Milk','Coffee','Orange juice','Water'],ans:2},
+      {q:'What does the person check in their bag?',choices:['Phone and keys','Books, pencils, and lunch box','Wallet and ID','Clothes and shoes'],ans:1},
+      {q:'Where does the person sit on the bus?',choices:['At the back','Near the driver','Near the window','In the middle'],ans:2},
+      {q:'What time does the bus come?',choices:['7:15','8:00','8:15','8:45'],ans:2},
+    ]
+  },
+  {
+    id:'b2', level:'beginner', title:'The City Park', words:170,
+    text:`Near my house, there is a beautiful park. Many people go there every day. The park has tall green trees, colorful flowers, and a big lake in the middle.
+In the morning, people exercise in the park. Some people run on the path around the lake. Others do yoga on the grass. Children play on the swings and the slide.
+There are benches near the trees where old people sit and talk. They feed the ducks at the lake. The ducks come quickly because they know the old people have bread.
+On the weekends, families come to the park for picnics. They bring food, drinks, and blankets. Children fly kites when the wind is strong. Sometimes musicians play guitar near the fountain.
+The park is very important to our community. It is a place where people can relax, exercise, and meet their friends. I go to the park every Sunday morning. It makes me feel happy and peaceful.`,
+    vocab:[
+      {word:'exercise',pos:'verb',def:'To move your body to stay healthy',ex:'I exercise in the park every morning.'},
+      {word:'path',pos:'noun',def:'A narrow road for walking',ex:'We walked along the path by the lake.'},
+      {word:'bench',pos:'noun',def:'A long seat for two or more people',ex:'We sat on a bench under the tree.'},
+      {word:'community',pos:'noun',def:'A group of people who live in the same area',ex:'The park is important to our community.'},
+      {word:'peaceful',pos:'adj',def:'Quiet and calm',ex:'The park feels very peaceful in the morning.'},
+    ],
+    questions:[
+      {q:'What is in the middle of the park?',choices:['A playground','A fountain','A big lake','A garden'],ans:2},
+      {q:'What do old people feed at the lake?',choices:['Fish','Ducks','Pigeons','Swans'],ans:1},
+      {q:'What do children do when the wind is strong?',choices:['Run races','Play football','Swim','Fly kites'],ans:3},
+      {q:'When do families come for picnics?',choices:['Every day','On weekdays','On weekends','In the evenings'],ans:2},
+      {q:'How does the park make the writer feel?',choices:['Bored','Happy and peaceful','Tired','Hungry'],ans:1},
+    ]
+  },
+  {
+    id:'b3', level:'beginner', title:'My Best Friend', words:175,
+    text:`My best friend's name is Lily. We have been friends for five years. We met in primary school when we were in the same class.
+Lily has long black hair and brown eyes. She is always smiling and laughing. She is very kind and helpful. When I have a problem, she always listens to me.
+We like to do many things together. On Saturdays, we go shopping at the mall. We try on clothes and look at shoes. We usually buy one or two things. After shopping, we eat ice cream at our favorite shop.
+Lily is very good at drawing. She draws beautiful pictures of animals and places. She wants to be an artist when she grows up. I think she will be a great artist because her pictures are amazing.
+I am good at math and science. Lily always asks me to help her with her homework. I help her understand the problems. She says I explain things very clearly.
+Good friends help each other. I am very happy to have Lily as my best friend.`,
+    vocab:[
+      {word:'primary',pos:'adj',def:'First or most important; also describes early school years',ex:'We met in primary school.'},
+      {word:'helpful',pos:'adj',def:'Ready to help; useful',ex:'She is very kind and helpful.'},
+      {word:'mall',pos:'noun',def:'A large building with many shops inside',ex:'We go shopping at the mall on Saturdays.'},
+      {word:'artist',pos:'noun',def:'A person who makes art, such as paintings or drawings',ex:'She wants to be an artist.'},
+      {word:'explain',pos:'verb',def:'To make something clear by giving details',ex:'I explain the math problems to her.'},
+    ],
+    questions:[
+      {q:'How long have the writer and Lily been friends?',choices:['Two years','Three years','Five years','Ten years'],ans:2},
+      {q:'What do they usually do after shopping?',choices:['Watch a movie','Eat ice cream','Drink coffee','Go home'],ans:1},
+      {q:'What is Lily very good at?',choices:['Math','Science','Drawing','Singing'],ans:2},
+      {q:'What does Lily want to be?',choices:['A teacher','A doctor','A singer','An artist'],ans:3},
+      {q:'What subject does the writer help Lily with?',choices:['History','Art','Math and science','English'],ans:2},
+    ]
+  },
+  // ELEMENTARY
+  {
+    id:'e1', level:'elementary', title:'A Trip to the Farmers Market', words:220,
+    text:`Every Saturday morning, my mother and I go to the farmers market in the center of town. It is one of my favorite activities of the week.
+The market opens at seven o'clock in the morning, but we usually arrive at eight. By that time, it is already very busy. Farmers from nearby villages bring fresh vegetables, fruits, cheese, bread, and honey to sell. The colors and smells are wonderful.
+My mother always buys tomatoes, carrots, and onions because they are cheaper than in the supermarket and much fresher. Sometimes she also buys a jar of local honey or a loaf of homemade bread.
+I love walking around and looking at everything. Last week, a farmer was selling purple sweet potatoes. I had never seen purple potatoes before! My mother bought some to try. She cooked them for dinner, and they tasted delicious — a little sweet and very soft.
+At the market, people talk to each other and greet the farmers they know. It feels different from shopping in a big store. Everything is more personal and friendly.
+Going to the farmers market teaches me about where food comes from. I now appreciate fresh food more than before. I hope we never stop going.`,
+    vocab:[
+      {word:'nearby',pos:'adj',def:'Not far away; close',ex:'Farmers from nearby villages come to sell food.'},
+      {word:'fresh',pos:'adj',def:'Recently made or picked; not old or frozen',ex:'The vegetables are fresh and colorful.'},
+      {word:'jar',pos:'noun',def:'A glass container with a lid',ex:'She bought a jar of local honey.'},
+      {word:'appreciate',pos:'verb',def:'To recognize the value of something; to be grateful for it',ex:'I appreciate fresh food more than before.'},
+      {word:'personal',pos:'adj',def:'Relating to a specific person; individual and friendly',ex:'Shopping at the market feels more personal.'},
+    ],
+    questions:[
+      {q:'What time does the market open?',choices:['Six o\'clock','Seven o\'clock','Eight o\'clock','Nine o\'clock'],ans:1},
+      {q:'Why does the mother prefer buying vegetables at the market?',choices:['It is closer to home','They are cheaper and fresher','The variety is larger','The market opens early'],ans:1},
+      {q:'What unusual item did the writer see last week?',choices:['Blue carrots','Purple sweet potatoes','Green tomatoes','Yellow onions'],ans:1},
+      {q:'How did the purple potatoes taste?',choices:['Bitter and hard','Salty and crunchy','Sweet and soft','Sour and watery'],ans:2},
+      {q:'What does the writer learn from going to the market?',choices:['How to cook','How to sell vegetables','Where food comes from','How to count money'],ans:2},
+    ]
+  },
+  {
+    id:'e2', level:'elementary', title:'Making New Friends at School', words:215,
+    text:`Starting a new school is not easy. When I moved to this city last September, I did not know anyone. I was nervous and quiet during the first few days.
+In my new class, everyone already had their group of friends. I sat alone at lunch and did not talk much. I felt lonely, but I tried not to show it.
+One day, a boy named Daniel sat next to me in the library. We were both reading books about space. He noticed my book and said, "I love that book! Did you get to the part about black holes yet?" I said yes and we started talking. We talked for thirty minutes and forgot about the time.
+After that, Daniel introduced me to his friends during lunch. They were all very welcoming. We started sitting together every day. They showed me the best places in the school — the quiet reading corner, the best table near the window, and the shortcut to the sports hall.
+Within a month, I felt like I had always been a part of the group. Making friends takes time, but it happens naturally if you stay open and be yourself.
+Now, when I see new students looking lost, I try to say hello first. A small gesture can make a big difference.`,
+    vocab:[
+      {word:'nervous',pos:'adj',def:'Worried and a little afraid about something',ex:'I was nervous on my first day at school.'},
+      {word:'lonely',pos:'adj',def:'Unhappy because you are alone or have no friends',ex:'I felt lonely at lunch.'},
+      {word:'introduce',pos:'verb',def:'To present someone to another person for the first time',ex:'Daniel introduced me to his friends.'},
+      {word:'welcoming',pos:'adj',def:'Friendly to visitors or new people',ex:'They were all very welcoming.'},
+      {word:'gesture',pos:'noun',def:'An action that expresses a feeling or message',ex:'A small gesture can make a big difference.'},
+    ],
+    questions:[
+      {q:'Why did the writer feel lonely at first?',choices:['The teacher was unfriendly','Everyone already had friends','The school was very large','The classes were too difficult'],ans:1},
+      {q:'Where did the writer first talk to Daniel?',choices:['In the cafeteria','In the sports hall','In the library','In the classroom'],ans:2},
+      {q:'What were both the writer and Daniel reading about?',choices:['Animals','History','Sports','Space'],ans:3},
+      {q:'What is the "shortcut" mentioned in the text?',choices:['A fast way to the sports hall','A secret code','A quick recipe','A fast way to do homework'],ans:0},
+      {q:'What does the writer do now when seeing new students?',choices:['Ignores them','Tells the teacher','Says hello first','Gives them a book'],ans:2},
+    ]
+  },
+  {
+    id:'e3', level:'elementary', title:'Weather Around the World', words:225,
+    text:`Weather is different in every part of the world. The place where you live affects what kind of weather you experience each day.
+In countries near the equator, such as Brazil or Indonesia, the weather is hot and humid all year. These places get a lot of rain, and the forests there are thick and green. There are no four seasons — just a wet season and a dry season.
+Countries far from the equator, like Canada or Russia, have very cold winters. In some parts of these countries, the temperature can fall below minus thirty degrees Celsius. Snow covers the ground for many months. Summers are short but can be warm and pleasant.
+In between, many countries have four seasons: spring, summer, autumn, and winter. Spring is warm with lots of flowers. Summer is the hottest time. Autumn brings cooler weather and colorful leaves. Winter is cold, and it sometimes snows.
+Some places have extreme weather. Tropical storms and hurricanes form over warm oceans and can cause great damage when they reach land. Deserts are extremely hot in the day and very cold at night.
+Understanding weather helps people plan their daily lives. Farmers need to know when to plant seeds. Pilots need to know about storms. And everyone needs to know whether to wear a coat!`,
+    vocab:[
+      {word:'equator',pos:'noun',def:'An imaginary line around the middle of the Earth',ex:'Countries near the equator are very hot.'},
+      {word:'humid',pos:'adj',def:'Very damp; with a lot of water in the air',ex:'The weather is hot and humid near the equator.'},
+      {word:'season',pos:'noun',def:'One of the four periods of the year: spring, summer, autumn, winter',ex:'Some countries have four seasons.'},
+      {word:'extreme',pos:'adj',def:'Very great or intense; far beyond what is normal',ex:'Some places have extreme weather.'},
+      {word:'damage',pos:'noun',def:'Physical harm that makes something less good or useful',ex:'Hurricanes can cause great damage.'},
+    ],
+    questions:[
+      {q:'How many seasons do countries near the equator have?',choices:['Four','Three','Two','One'],ans:2},
+      {q:'How cold can it get in parts of Canada or Russia?',choices:['Minus 10°C','Minus 20°C','Minus 30°C','Minus 50°C'],ans:2},
+      {q:'What happens to leaves in autumn?',choices:['They grow bigger','They turn colorful','They fall immediately','They turn green'],ans:1},
+      {q:'Where do tropical storms form?',choices:['Over cold mountains','Over warm oceans','Over flat deserts','Over frozen rivers'],ans:1},
+      {q:'Why do farmers need to understand weather?',choices:['To plan holidays','To know when to plant seeds','To avoid storms at sea','To dress appropriately'],ans:1},
+    ]
+  },
+  // INTERMEDIATE
+  {
+    id:'i1', level:'intermediate', title:'Social Media and Teenagers', words:270,
+    text:`Social media has become a central part of teenage life. Platforms such as Instagram, TikTok, and Snapchat attract billions of users, many of whom are between the ages of thirteen and seventeen. While these platforms offer ways to connect and express creativity, they also raise serious concerns about mental health.
+Research published in several psychology journals suggests a link between heavy social media use and increased feelings of anxiety, loneliness, and depression among teenagers. Constant exposure to carefully edited photos and highlight reels of others' lives can create unrealistic expectations about one's own appearance and achievements. This phenomenon, often called "social comparison," is not new, but social media has amplified it to an unprecedented degree.
+Despite these concerns, not all research points to negative outcomes. Some studies indicate that social media can strengthen friendships, particularly for teenagers who feel isolated at school or who belong to minority groups. Online communities can provide a sense of belonging that might be difficult to find locally.
+The key issue appears to be how social media is used rather than whether it is used at all. Passive scrolling — spending hours watching other people's content without interaction — is associated with lower well-being. Active use — commenting, creating content, and messaging friends — is linked to more positive outcomes.
+Parents, educators, and health professionals are increasingly calling for better digital literacy education. Teaching teenagers to think critically about what they see online, to recognize manipulated images, and to set healthy boundaries around screen time may be more effective than outright bans.`,
+    vocab:[
+      {word:'phenomenon',pos:'noun',def:'A fact or event that can be observed and studied',ex:'Social comparison is a common psychological phenomenon.'},
+      {word:'unprecedented',pos:'adj',def:'Never having happened or existed before',ex:'Social media has amplified this to an unprecedented degree.'},
+      {word:'isolated',pos:'adj',def:'Far from other people; alone',ex:'Some teenagers feel isolated at school.'},
+      {word:'passive',pos:'adj',def:'Accepting something without taking action; not active',ex:'Passive scrolling is linked to lower well-being.'},
+      {word:'literacy',pos:'noun',def:'The ability to understand and use a specific type of information',ex:'We need better digital literacy education.'},
+    ],
+    questions:[
+      {q:'What does "social comparison" mean in this context?',choices:['Comparing different social media platforms','Comparing your life negatively with others\'','Comparing school grades online','Discussing social issues on the internet'],ans:1},
+      {q:'According to the text, social media can be beneficial for which group?',choices:['Teenagers who use it passively','Adults who create content','Teenagers who feel isolated or belong to minorities','Teachers who monitor students'],ans:2},
+      {q:'What type of social media use is linked to better mental health?',choices:['Passive scrolling','Active use like commenting and messaging','Watching videos for long hours','Posting edited photos'],ans:1},
+      {q:'What solution do professionals suggest instead of banning social media?',choices:['Limiting screen time to one hour','Teaching digital literacy','Removing all platforms','Making social media paid'],ans:1},
+      {q:'What is a "highlight reel" as used in the text?',choices:['A film festival program','A news summary','A video of someone\'s best moments','A list of trending topics'],ans:2},
+    ]
+  },
+  {
+    id:'i2', level:'intermediate', title:'The Science of Sleep', words:265,
+    text:`Sleep is far more than a period of rest. Scientists now understand that while we sleep, our brains and bodies are performing essential maintenance tasks that are impossible to carry out during waking hours.
+During sleep, the brain consolidates memories — a process in which experiences from the day are transferred from short-term to long-term storage. This is why people who sleep well after learning new information tend to remember it better than those who stay awake. Students who pull all-nighters before exams may actually harm their ability to recall information.
+The body also undergoes significant physical repair during sleep. Growth hormone, which is responsible for tissue repair and muscle growth, is released primarily during deep sleep. The immune system becomes more active, producing proteins called cytokines that help fight infection and inflammation. This explains why sick people often feel the need to sleep more.
+There are different stages of sleep, broadly divided into non-REM and REM sleep. Non-REM sleep is divided into three stages of increasing depth. REM (Rapid Eye Movement) sleep is when most dreaming occurs. Each full cycle takes approximately ninety minutes, and adults typically need four to six cycles per night.
+The recommended amount of sleep for adults is seven to nine hours, yet surveys consistently show that many people sleep fewer than six hours. Chronic sleep deprivation is linked to serious health conditions including obesity, diabetes, cardiovascular disease, and reduced cognitive function.
+Prioritizing sleep is not laziness — it is an investment in both mental and physical health.`,
+    vocab:[
+      {word:'consolidate',pos:'verb',def:'To make something stronger or more solid; to combine',ex:'Sleep helps the brain consolidate memories.'},
+      {word:'primarily',pos:'adv',def:'Mainly; mostly; above all',ex:'Growth hormone is released primarily during deep sleep.'},
+      {word:'inflammation',pos:'noun',def:'Redness, swelling, and pain in part of the body',ex:'Cytokines help fight infection and inflammation.'},
+      {word:'chronic',pos:'adj',def:'Continuing for a long time; persistent',ex:'Chronic sleep deprivation causes serious health problems.'},
+      {word:'cognitive',pos:'adj',def:'Related to thinking, learning, and understanding',ex:'Lack of sleep reduces cognitive function.'},
+    ],
+    questions:[
+      {q:'What happens to memories during sleep?',choices:['They are deleted','They are transferred to long-term storage','They become less accurate','They are created for the first time'],ans:1},
+      {q:'Why might all-nighters before exams be counterproductive?',choices:['Students feel too tired to write','Sleep deprivation harms memory recall','The exam is too early in the morning','Students forget to eat breakfast'],ans:1},
+      {q:'When is growth hormone mainly released?',choices:['During exercise','During deep sleep','During REM sleep','During waking hours'],ans:1},
+      {q:'How long does one full sleep cycle last?',choices:['Forty-five minutes','Sixty minutes','Ninety minutes','Two hours'],ans:2},
+      {q:'What is the recommended sleep for adults?',choices:['Five to six hours','Six to seven hours','Seven to nine hours','Nine to ten hours'],ans:2},
+    ]
+  },
+  {
+    id:'i3', level:'intermediate', title:'Urban Farming: Growing Food in the City', words:260,
+    text:`As cities grow larger and the distance between food producers and consumers increases, urban farming is emerging as an innovative response to both food security concerns and environmental challenges.
+Urban farming refers to the practice of growing food within or near a city. This includes rooftop gardens, community allotments, vertical farms in disused warehouses, and hydroponic systems that grow plants without soil. Cities such as Singapore, Detroit, and Medellín have made urban agriculture part of their city planning strategy.
+The benefits of urban farming are numerous. It reduces the carbon footprint associated with transporting food across long distances. Fresh produce grown locally requires less refrigeration and packaging, further lowering environmental impact. In cities where access to fresh vegetables and fruit is limited — areas sometimes called "food deserts" — urban farms can provide nutritious food directly to residents who need it most.
+Beyond food production, urban farms contribute to community well-being. Studies show that green spaces in cities reduce stress and improve mental health. Community gardens, in particular, encourage social interaction among neighbors who might otherwise never meet.
+However, challenges remain. Urban land is expensive and scarce. Water management can be difficult, and not all crops are suitable for small urban spaces. The economics of urban farming are also complicated; without subsidies or volunteer labor, many operations struggle to be financially viable.
+Despite these obstacles, the growth of urban farming reflects a broader shift in attitudes toward food systems. Increasingly, people want to understand where their food comes from and to participate in growing it.`,
+    vocab:[
+      {word:'emerging',pos:'adj/verb',def:'Coming into view or existence; beginning to develop',ex:'Urban farming is emerging as an innovative solution.'},
+      {word:'hydroponic',pos:'adj',def:'Growing plants in water with nutrients, without soil',ex:'Hydroponic systems grow plants without soil.'},
+      {word:'footprint',pos:'noun',def:'The impact that something has, especially on the environment',ex:'Urban farming reduces the carbon footprint of food transport.'},
+      {word:'scarce',pos:'adj',def:'Not enough of something; in short supply',ex:'Urban land is expensive and scarce.'},
+      {word:'viable',pos:'adj',def:'Capable of working successfully; practical',ex:'Many urban farms struggle to be financially viable.'},
+    ],
+    questions:[
+      {q:'What is a "food desert" as described in the text?',choices:['A desert where food grows poorly','A city area with limited access to fresh food','A type of dry climate farming','An outdoor market that has closed down'],ans:1},
+      {q:'Which cities are mentioned as embracing urban farming?',choices:['New York, London, Paris','Tokyo, Beijing, Seoul','Singapore, Detroit, Medellín','Rome, Madrid, Berlin'],ans:2},
+      {q:'What environmental benefit does local food production offer?',choices:['It uses more water','It needs more land','It reduces transport carbon footprint','It requires no packaging at all'],ans:2},
+      {q:'What is one challenge of urban farming?',choices:['Plants grow too fast','City land is expensive and scarce','There is too much rainfall','People dislike fresh produce'],ans:1},
+      {q:'What broader shift does urban farming reflect?',choices:['A desire to eat less food','A move to the countryside','A change in attitudes toward food systems','A rejection of technology'],ans:2},
+    ]
+  },
+  // ADVANCED
+  {
+    id:'a1', level:'advanced', title:'Artificial Intelligence and the Future of Work', words:300,
+    text:`The integration of artificial intelligence into the global economy is accelerating at a rate that many economists and policymakers find difficult to track, let alone regulate. Unlike previous waves of automation, which primarily displaced routine manual labor, modern AI systems are increasingly capable of performing complex cognitive tasks — writing code, analyzing medical images, drafting legal documents, and generating creative content — areas once considered uniquely human.
+The consequences for employment are contested. Technological optimists argue that, as with the Industrial Revolution, new technologies will create new categories of work that we cannot yet envision. History, they contend, demonstrates that productivity gains lead to higher living standards and expanded demand, which in turn generates employment. From this perspective, fears of mass unemployment are cyclical anxieties that fail to account for human adaptability.
+Skeptics, however, point to several structural differences that make this wave of automation qualitatively distinct. The speed of AI development is unprecedented; the Industrial Revolution unfolded over generations, giving workers and institutions time to adapt. AI, by contrast, is disrupting multiple sectors simultaneously, compressing the adjustment period into years rather than decades. Furthermore, the cognitive nature of AI capabilities means that even highly educated workers in professional fields are not immune.
+Empirical evidence is beginning to accumulate. Researchers at MIT and other institutions have found that exposure to AI tools has measurably reduced employment in certain white-collar roles. At the same time, workers who learn to use AI as a complement rather than a substitute appear to command higher wages and experience productivity gains.
+The challenge for governments and educational institutions is not to halt technological progress — which would be both futile and counterproductive — but to design adaptive systems that allow workers to retrain continuously, and to establish social safety nets adequate to manage the transition.`,
+    vocab:[
+      {word:'displace',pos:'verb',def:'To force something out of its position; to take the place of',ex:'AI may displace workers in many industries.'},
+      {word:'cognitive',pos:'adj',def:'Related to thinking, reasoning, and understanding',ex:'AI can now perform complex cognitive tasks.'},
+      {word:'contend',pos:'verb',def:'To argue or assert something strongly',ex:'Optimists contend that new jobs will be created.'},
+      {word:'empirical',pos:'adj',def:'Based on observation and evidence rather than theory',ex:'Empirical evidence is beginning to accumulate.'},
+      {word:'futile',pos:'adj',def:'Having no useful result; pointless',ex:'Trying to halt technological progress would be futile.'},
+    ],
+    questions:[
+      {q:'How does this wave of AI differ from previous automation, according to the text?',choices:['It only affects manual workers','It targets complex cognitive tasks','It is slower than previous waves','It primarily affects developing countries'],ans:1},
+      {q:'What argument do technological optimists make about AI and jobs?',choices:['AI will eliminate all jobs','New technologies will create new types of work','Governments should ban AI','Only young workers will be affected'],ans:1},
+      {q:'What structural difference makes this wave of automation distinct?',choices:['It is slower and more gradual','It only affects one sector','The speed is unprecedented and multiple sectors are affected simultaneously','It mainly affects developing nations'],ans:2},
+      {q:'According to MIT research, what helps workers benefit from AI?',choices:['Ignoring AI tools entirely','Using AI as a complement rather than a substitute','Moving to rural areas','Reducing working hours'],ans:1},
+      {q:'What does the author suggest governments should do?',choices:['Stop all AI development immediately','Design systems for retraining and establish social safety nets','Leave the market to solve the problem','Increase taxes on technology companies only'],ans:1},
+    ]
+  },
+  {
+    id:'a2', level:'advanced', title:'The Psychology of Habit Formation', words:295,
+    text:`Human behavior is, to a remarkable degree, governed by habit. Neuroscientific research suggests that approximately forty to fifty percent of daily actions are performed habitually — that is, without conscious deliberation. Understanding the mechanisms by which habits form, persist, and can be changed has become one of the most practically significant areas of behavioral science.
+The habit loop, a concept popularized by Charles Duhigg and supported by research from MIT, describes a three-part neurological process: a cue that triggers the behavior, the routine behavior itself, and a reward that reinforces it. Over time, this loop becomes encoded in the basal ganglia, a region of the brain associated with procedural memory, which explains why habits can persist even when explicit memory — such as knowing why one started a behavior — has been lost, as in some neurological conditions.
+The practical implication of this architecture is that willpower alone is rarely sufficient to change entrenched habits. Because the basal ganglia operates below the level of conscious awareness, intention and motivation — which originate in the prefrontal cortex — are often too weak to override well-established routines. This explains why New Year's resolutions, which rely almost entirely on motivation, have such a poor success rate.
+Effective habit change, research suggests, requires identifying and modifying the cue or replacing the routine while keeping the reward constant. This technique, known as habit substitution, has shown considerable success in clinical settings, particularly in addiction treatment. Environmental redesign — changing the physical or social context in which a habit is performed — can also dramatically reduce the cognitive effort required to break undesired patterns.
+Ultimately, understanding habits empowers individuals to move from reactive to intentional living — not through superhuman willpower, but through a more intelligent engagement with the architecture of their own behavior.`,
+    vocab:[
+      {word:'deliberation',pos:'noun',def:'Long and careful consideration before making a decision',ex:'Habits occur without conscious deliberation.'},
+      {word:'encode',pos:'verb',def:'To convert information into a particular form; to store in memory',ex:'Habits become encoded in the basal ganglia.'},
+      {word:'entrenched',pos:'adj',def:'Firmly established and difficult to change',ex:'Willpower alone rarely changes entrenched habits.'},
+      {word:'substitution',pos:'noun',def:'Replacing one thing with another',ex:'Habit substitution is used in addiction treatment.'},
+      {word:'intentional',pos:'adj',def:'Done on purpose; deliberate',ex:'Understanding habits helps us live more intentionally.'},
+    ],
+    questions:[
+      {q:'What percentage of daily actions are estimated to be habitual?',choices:['10–20%','25–35%','40–50%','60–70%'],ans:2},
+      {q:'Where are habits stored in the brain?',choices:['The prefrontal cortex','The hippocampus','The basal ganglia','The cerebellum'],ans:2},
+      {q:'Why do New Year\'s resolutions often fail, according to the text?',choices:['People forget about them quickly','They rely too much on motivation and willpower','They are set in winter when people are tired','They usually involve too many changes at once'],ans:1},
+      {q:'What is "habit substitution"?',choices:['Removing all cues','Replacing the routine while keeping the reward the same','Changing the reward entirely','Ignoring the habit loop'],ans:1},
+      {q:'What does "environmental redesign" mean in this context?',choices:['Renovating your home for better sleep','Changing the physical or social context of a habit','Redesigning office spaces','Planting trees in cities'],ans:1},
+    ]
+  },
+  {
+    id:'a3', level:'advanced', title:'Cultural Identity in a Globalized World', words:290,
+    text:`Globalization has brought unprecedented connectivity — the free flow of goods, capital, ideas, and people across national borders. While this integration has generated considerable economic benefits and cross-cultural exchange, it has simultaneously intensified anxieties about cultural homogenization: the fear that distinctive local identities, languages, and traditions are being absorbed into a dominant global culture, frequently characterized as Western, and more specifically American, in its contours.
+These anxieties are not without empirical basis. The number of languages spoken globally has declined significantly over the past century; linguists estimate that one language disappears approximately every two weeks. Transnational media corporations distribute content that shapes aesthetic preferences, relationship norms, and consumer desires across vastly different cultural contexts. Traditional crafts, cuisines, and social rituals face competition from standardized, commercially produced alternatives.
+Yet the narrative of simple cultural loss is complicated by equally compelling evidence of resilience and hybridization. Cultural practices do not passively succumb to external forces; they adapt, incorporate, and transform. Japanese anime, South Korean pop music, Bollywood cinema, and Nigerian literature have not merely survived globalization — they have used global distribution networks to achieve unprecedented international reach. In many cases, exposure to global culture has sparked renewed interest in local heritage.
+The psychologist Henri Tajfel's social identity theory suggests that people maintain a robust sense of group membership even in conditions of cultural flux. What changes is not identity itself, but the content and boundaries through which it is expressed. Cultural identity in the contemporary world is increasingly multidimensional — individuals may simultaneously identify with their national culture, a religious community, a professional subculture, and a globally distributed fan community.
+The productive tension between belonging and openness may, in fact, be one of the defining features of contemporary life.`,
+    vocab:[
+      {word:'homogenization',pos:'noun',def:'The process of making things uniform and less diverse',ex:'Globalization raises fears of cultural homogenization.'},
+      {word:'hybridization',pos:'noun',def:'The mixing of different elements to create something new',ex:'Cultural hybridization produces new and creative forms.'},
+      {word:'succumb',pos:'verb',def:'To fail to resist something; to give way to a force',ex:'Cultural practices do not passively succumb to external forces.'},
+      {word:'multidimensional',pos:'adj',def:'Having many different dimensions or aspects',ex:'Cultural identity today is increasingly multidimensional.'},
+      {word:'flux',pos:'noun',def:'Continuous change and uncertainty',ex:'Identity can be maintained even in conditions of cultural flux.'},
+    ],
+    questions:[
+      {q:'What is "cultural homogenization" as used in this text?',choices:['The study of global cultures','Local cultures absorbing foreign ones','The spread of one dominant culture at the expense of others','A method of teaching culture in schools'],ans:2},
+      {q:'According to the text, how quickly is a language disappearing globally?',choices:['One per day','One per week','One every two weeks','One per month'],ans:2},
+      {q:'What do examples like K-pop and Bollywood demonstrate?',choices:['That globalization destroys local culture','That local cultures can thrive and reach global audiences','That only American culture succeeds globally','That traditional arts are no longer interesting'],ans:1},
+      {q:'What does Tajfel\'s social identity theory suggest?',choices:['People abandon group identity under pressure','Cultural identity changes completely in global societies','People maintain group membership even in cultural flux','Younger generations have no cultural identity'],ans:2},
+      {q:'What does the author suggest cultural identity has become in the modern world?',choices:['Simpler and more unified','Based purely on nationality','Multidimensional and layered','Less important to individuals'],ans:2},
+    ]
+  },
+];
+
+// all vocab words flat
+const ALL_VOCAB = [];
+PASSAGES.forEach(p => p.vocab.forEach(v => ALL_VOCAB.push({...v, level:p.level, source:p.title})));
+
+// ── STATE ────────────────────────────────────────────
+const LS = k => 'esl55_'+k;
+let activeReadLevel = null;
+let activePassageId = null;
+let cardPool = [];
+let cardIndex = 0;
+let cardFlipped = false;
+let vocabFilter = 'all';
+
+function getRead(id){ try{return JSON.parse(localStorage.getItem(LS('read_'+id))||'null');}catch{return null;} }
+function saveRead(id, score){ localStorage.setItem(LS('read_'+id), JSON.stringify({score, date:new Date().toLocaleDateString()})); }
+function getVocabSeen(){ try{return new Set(JSON.parse(localStorage.getItem(LS('vocab_seen'))||'[]'));}catch{return new Set();} }
+function markVocabSeen(word){ const s=getVocabSeen(); s.add(word); localStorage.setItem(LS('vocab_seen'),JSON.stringify([...s])); }
+
+// ── TABS ──────────────────────────────────────────────
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['levels','read','vocab','progress'][i]===t));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='levels') renderLevels();
+  if(t==='vocab') renderVocab();
+  if(t==='progress') renderProgress();
+}
+
+// ── LEVELS ────────────────────────────────────────────
+function renderLevels(){
+  const totalRead = PASSAGES.filter(p=>getRead(p.id)).length;
+  document.getElementById('levels-pill').textContent = totalRead+' passages read';
+  const grid = document.getElementById('level-grid');
+  grid.innerHTML = LEVELS.map((lv,li)=>{
+    const lvPsg = PASSAGES.filter(p=>p.level===lv.id);
+    const done = lvPsg.filter(p=>getRead(p.id)).length;
+    const pct = Math.round(done/lvPsg.length*100);
+    return `<div class="level-card" style="--lc:${lv.color}" onclick="openLevel('${lv.id}')">
+      <div class="level-badge">${lv.cefr}</div>
+      <div class="level-name">${lv.name}</div>
+      <div class="level-sub">${lv.desc}</div>
+      <div class="level-count">${done}/${lvPsg.length} passages read</div>
+      <div class="level-progress-bar"><div class="level-progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function openLevel(lid){
+  activeReadLevel = lid;
+  document.getElementById('read-level-view').style.display='block';
+  document.getElementById('read-passage-view').style.display='none';
+  const lv = LEVELS.find(l=>l.id===lid);
+  document.getElementById('read-level-title').textContent = lv.name+' — '+lv.cefr;
+  const passages = PASSAGES.filter(p=>p.level===lid);
+  document.getElementById('passage-select').innerHTML = passages.map(p=>{
+    const r=getRead(p.id);
+    return `<button class="passage-btn ${r?'done':''}" onclick="openPassage('${p.id}')">
+      <div class="pbtn-title">${p.title}</div>
+      <div class="pbtn-meta">${p.words} words${r?' · ✓ Score: '+r.score+'/5 · '+r.date:''}</div>
+    </button>`;
+  }).join('');
+  switchTab('read');
+}
+
+function openPassage(pid){
+  activePassageId = pid;
+  const p = PASSAGES.find(x=>x.id===pid);
+  document.getElementById('read-level-view').style.display='none';
+  const pv = document.getElementById('read-passage-view');
+  pv.style.display='block';
+  const lv = LEVELS.find(l=>l.id===p.level);
+  document.getElementById('read-passage-header').textContent = lv.name+' · '+lv.cefr;
+  document.getElementById('passage-title').textContent = p.title;
+  document.getElementById('passage-meta').innerHTML =
+    `<span>📝 ${p.words} words</span><span>📚 ${lv.name} (${lv.cefr})</span>`;
+  document.getElementById('passage-text').innerHTML = p.text.split('\n').map(par=>par.trim()?`<p style="margin-bottom:10px">${par}</p>`:'').join('');
+  renderPassageQuiz(p);
+}
+
+function goBackToPassageList(){
+  document.getElementById('read-level-view').style.display='block';
+  document.getElementById('read-passage-view').style.display='none';
+  openLevel(activeReadLevel);
+}
+
+function renderPassageQuiz(p){
+  const qs = document.getElementById('quiz-section');
+  qs.innerHTML = `<div class="quiz-q-title">Comprehension Questions</div>`
+    + p.questions.map((q,qi)=>`
+    <div class="question-block" id="qb-${qi}">
+      <div class="q-text">${qi+1}. ${q.q}</div>
+      <div class="q-choices">
+        ${q.choices.map((c,ci)=>`<button class="q-choice" id="qc-${qi}-${ci}" onclick="pickAnswer(${qi},${ci},${q.ans})">${c}</button>`).join('')}
+      </div>
+      <div class="q-result" id="qr-${qi}" style="display:none"></div>
+    </div>`).join('')
+    + `<button class="check-btn" id="check-all-btn" onclick="submitAll()" style="display:none"></button>
+       <div class="score-banner" id="score-banner" style="display:none"></div>`;
+  // track answered
+  window._answered = {};
+}
+
+let _answered = {};
+function pickAnswer(qi, ci, correct){
+  if(_answered[qi]!==undefined) return;
+  _answered[qi] = ci;
+  const isCorrect = ci===correct;
+  document.querySelectorAll(`[id^="qc-${qi}-"]`).forEach(b=>{
+    b.disabled=true;
+    const idx = parseInt(b.id.split('-')[2]);
+    if(idx===correct) b.classList.add('correct');
+    else if(idx===ci && !isCorrect) b.classList.add('wrong');
+  });
+  const res = document.getElementById('qr-'+qi);
+  res.style.display='block';
+  res.style.color = isCorrect?'var(--green)':'var(--red)';
+  res.textContent = isCorrect?'✓ Correct!':'✗ Incorrect.';
+  if(Object.keys(_answered).length===PASSAGES.find(p=>p.id===activePassageId).questions.length){
+    showFinalScore();
+  }
+}
+
+function showFinalScore(){
+  const p = PASSAGES.find(x=>x.id===activePassageId);
+  const score = p.questions.reduce((s,q,i)=>s+(_answered[i]===q.ans?1:0),0);
+  saveRead(p.id, score);
+  const banner = document.getElementById('score-banner');
+  banner.style.display='block';
+  const pct=Math.round(score/p.questions.length*100);
+  let msg = pct>=80?'Excellent work! 🎉':pct>=60?'Good effort! Keep reading.':'Keep practicing — try again!';
+  banner.innerHTML=`<div class="score-banner-num">${score} / ${p.questions.length}</div><div class="score-banner-msg">${msg}</div>`;
+  renderLevels();
+}
+
+// ── VOCAB ─────────────────────────────────────────────
+function renderVocab(){
+  const filters = document.getElementById('vocab-filters');
+  filters.innerHTML = ['all',...LEVELS.map(l=>l.id)].map(f=>`
+    <button class="vctrl-btn ${vocabFilter===f?'active':''}" onclick="setVocabFilter('${f}',this)">
+      ${f==='all'?'All Levels':LEVELS.find(l=>l.id===f).name}
+    </button>`).join('');
+  buildCardPool();
+}
+function setVocabFilter(f,btn){
+  vocabFilter=f;
+  document.querySelectorAll('.vctrl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  cardIndex=0; cardFlipped=false;
+  buildCardPool();
+}
+function buildCardPool(){
+  cardPool = vocabFilter==='all'?[...ALL_VOCAB]:ALL_VOCAB.filter(v=>v.level===vocabFilter);
+  document.getElementById('vocab-pill').textContent=cardPool.length+' words';
+  showCard();
+}
+function showCard(){
+  if(cardPool.length===0){
+    document.getElementById('card-word').textContent='No words';
+    document.getElementById('card-pos').textContent='';
+    document.getElementById('card-def').textContent='Select a level above';
+    document.getElementById('card-ex').textContent='';
+    document.getElementById('nav-count').textContent='0 / 0';
+    return;
+  }
+  cardFlipped=false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  const v=cardPool[cardIndex];
+  document.getElementById('card-word').textContent=v.word;
+  document.getElementById('card-pos').textContent='('+v.pos+')';
+  document.getElementById('card-def').textContent=v.def;
+  document.getElementById('card-ex').textContent='"'+v.ex+'"';
+  document.getElementById('nav-count').textContent=(cardIndex+1)+' / '+cardPool.length;
+  markVocabSeen(v.word);
+}
+function flipCard(){
+  cardFlipped=!cardFlipped;
+  document.getElementById('flashcard').classList.toggle('flipped',cardFlipped);
+}
+function prevCard(){ if(cardIndex>0){cardIndex--;showCard();} }
+function nextCard(){ if(cardIndex<cardPool.length-1){cardIndex++;showCard();} }
+
+// ── PROGRESS ──────────────────────────────────────────
+function renderProgress(){
+  const readPassages = PASSAGES.filter(p=>getRead(p.id));
+  const scores = readPassages.map(p=>getRead(p.id).score);
+  const avgScore = scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length*100/5)+'%':'—';
+  document.getElementById('stat-read').textContent=readPassages.length;
+  document.getElementById('stat-score').textContent=avgScore;
+  document.getElementById('stat-vocab').textContent=getVocabSeen().size;
+  const bars = document.getElementById('level-progress-bars');
+  bars.innerHTML = LEVELS.map(lv=>{
+    const lvP = PASSAGES.filter(p=>p.level===lv.id);
+    const done = lvP.filter(p=>getRead(p.id)).length;
+    const pct = Math.round(done/lvP.length*100);
+    return `<div class="prog-item">
+      <div class="prog-info"><span>${lv.name} (${lv.cefr})</span><span>${done}/${lvP.length}</span></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+  const scoreList = document.getElementById('quiz-score-list');
+  if(!readPassages.length){ scoreList.innerHTML='<div class="empty-state">No passages read yet. Go to LEVELS to start!</div>'; return; }
+  scoreList.innerHTML = readPassages.slice(-5).reverse().map(p=>{
+    const r=getRead(p.id);
+    const pct=Math.round(r.score/5*100);
+    const cls=pct>=80?'color:var(--green)':pct>=60?'color:var(--yellow)':'color:var(--red)';
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div><div style="font-size:.85rem;font-weight:600;">${p.title}</div><div style="font-size:.72rem;color:var(--muted);">${LEVELS.find(l=>l.id===p.level).name} · ${r.date}</div></div>
+      <div style="font-weight:700;${cls}">${r.score}/5</div>
+    </div>`;
+  }).join('');
+}
+
+// ── INIT ──────────────────────────────────────────────
+_answered = {};
+renderLevels();
+buildCardPool();
+</script>
+</body>
+</html>
