@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design Interview Simulator</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0f1117;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  header{background:#1a1d27;border-bottom:1px solid #2d3148;padding:16px 24px;display:flex;align-items:center;gap:16px}
+  header h1{font-size:1.25rem;font-weight:700;color:#4f8ef7}
+  header span{font-size:.85rem;color:#94a3b8}
+  .tabs{display:flex;gap:4px;background:#1a1d27;border-bottom:1px solid #2d3148;padding:0 24px}
+  .tab{padding:14px 20px;cursor:pointer;font-size:.9rem;font-weight:500;color:#94a3b8;border-bottom:2px solid transparent;transition:all .2s}
+  .tab.active{color:#4f8ef7;border-bottom-color:#4f8ef7}
+  .tab:hover:not(.active){color:#e2e8f0}
+  .panel{display:none;padding:24px;max-width:960px;margin:0 auto}
+  .panel.active{display:block}
+  .btn{padding:10px 20px;border:none;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s}
+  .btn-primary{background:#4f8ef7;color:#fff}
+  .btn-primary:hover{background:#3b7de8}
+  .btn-secondary{background:#2d3148;color:#e2e8f0}
+  .btn-secondary:hover{background:#3a3f5c}
+  .btn-green{background:#4ade8022;color:#4ade80;border:1px solid #4ade8040}
+  .btn-green:hover{background:#4ade8033}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .badge-easy{background:#4ade8022;color:#4ade80}
+  .badge-medium{background:#fb923c22;color:#fb923c}
+  .badge-hard{background:#f8717122;color:#f87171}
+  .tag{display:inline-block;background:#1e293b;color:#94a3b8;padding:3px 10px;border-radius:20px;font-size:.73rem;margin:2px}
+
+  /* PROBLEMS */
+  .problems-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .problem-card{background:#1a1d27;border:1px solid #2d3148;border-radius:14px;padding:20px;cursor:pointer;transition:all .2s}
+  .problem-card:hover{border-color:#4f8ef7;transform:translateY(-2px)}
+  .problem-card.done{border-color:#4ade8040}
+  .problem-card .ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px}
+  .problem-card h3{font-size:.95rem;font-weight:600;flex:1}
+  .problem-card .tags{margin-top:10px}
+  .problem-card .footer{margin-top:14px;display:flex;align-items:center;justify-content:space-between}
+  .done-check{color:#4ade80;font-size:.85rem}
+
+  /* INTERVIEW */
+  #interviewView{display:none}
+  .interview-header{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .back-btn{background:#2d3148;border:none;color:#94a3b8;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.85rem}
+  .back-btn:hover{background:#3a3f5c;color:#e2e8f0}
+  .interview-title{font-size:1.3rem;font-weight:700}
+  .steps-nav{display:flex;gap:8px;margin-bottom:24px;overflow-x:auto;padding-bottom:4px}
+  .step-btn{padding:8px 16px;border-radius:8px;border:1px solid #2d3148;background:transparent;color:#94a3b8;cursor:pointer;font-size:.82rem;white-space:nowrap;transition:all .2s}
+  .step-btn.active{background:#4f8ef7;color:#fff;border-color:#4f8ef7}
+  .step-btn.visited{border-color:#4f8ef730;color:#e2e8f0}
+  .step-content{background:#1a1d27;border:1px solid #2d3148;border-radius:14px;padding:24px;margin-bottom:16px}
+  .step-content h2{font-size:1.05rem;font-weight:600;margin-bottom:14px;color:#4f8ef7}
+  .step-content p{color:#94a3b8;line-height:1.7;margin-bottom:10px;font-size:.9rem}
+  .step-content ul{list-style:none;padding-left:0}
+  .step-content ul li{padding:6px 0;color:#94a3b8;font-size:.9rem;border-bottom:1px solid #0f1117}
+  .step-content ul li:before{content:"→ ";color:#4f8ef7}
+  .step-content ul li:last-child{border:none}
+  .reveal-btn{background:#2d3148;border:none;color:#94a3b8;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;gap:8px}
+  .reveal-btn:hover{background:#3a3f5c;color:#e2e8f0}
+  .hint-box{background:#1e293b;border:1px solid #4f8ef720;border-radius:10px;padding:16px;margin-top:12px}
+  .hint-box h4{color:#4f8ef7;font-size:.85rem;margin-bottom:8px}
+  .hint-box p,.hint-box li{color:#94a3b8;font-size:.85rem;line-height:1.6}
+  .checklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px}
+  .check-item{background:#0f1117;border:1px solid #2d3148;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s}
+  .check-item.checked{border-color:#4ade8040;background:#4ade8008}
+  .check-item .ci-box{width:16px;height:16px;border:2px solid #2d3148;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .check-item.checked .ci-box{background:#4ade80;border-color:#4ade80;color:#0f1117;font-size:.7rem}
+  .check-item span{font-size:.82rem;color:#94a3b8}
+  .check-item.checked span{color:#e2e8f0}
+  .solution-box{background:#0f1117;border-radius:10px;padding:20px;margin-top:12px}
+  .solution-box h4{color:#4ade80;margin-bottom:12px;font-size:.9rem}
+  .solution-step{display:flex;gap:12px;margin-bottom:12px}
+  .solution-step .num{background:#4f8ef7;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;margin-top:2px}
+  .solution-step p{color:#94a3b8;font-size:.85rem;line-height:1.6}
+  .nav-row{display:flex;justify-content:space-between;margin-top:16px}
+  .requirements-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+  .req-box{background:#0f1117;border-radius:10px;padding:16px}
+  .req-box h4{font-size:.82rem;font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
+  .req-box.func h4{color:#4f8ef7}
+  .req-box.nonfunc h4{color:#fb923c}
+  .req-box li{color:#94a3b8;font-size:.83rem;padding:4px 0;border-bottom:1px solid #1a1d27;list-style:none}
+  .req-box li:before{content:"• ";color:#4f8ef750}
+  .rate-row{display:flex;gap:8px;align-items:center;margin-top:16px}
+  .rate-label{color:#94a3b8;font-size:.85rem}
+  .star{font-size:1.3rem;cursor:pointer;color:#2d3148;transition:color .15s}
+  .star.on{color:#fbbf24}
+
+  /* CONCEPTS */
+  .concepts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .concept-card{background:#1a1d27;border:1px solid #2d3148;border-radius:14px;padding:20px;cursor:pointer;transition:all .2s}
+  .concept-card:hover{border-color:#4f8ef7}
+  .concept-card.reviewed{border-color:#4ade8040}
+  .concept-card h3{font-size:.95rem;font-weight:600;margin-bottom:8px;color:#e2e8f0}
+  .concept-card .preview{font-size:.82rem;color:#94a3b8;line-height:1.5}
+  .concept-detail{display:none;background:#1a1d27;border:1px solid #2d3148;border-radius:14px;padding:24px;margin-top:16px}
+  .concept-detail.open{display:block}
+  .concept-detail h2{font-size:1.1rem;font-weight:700;margin-bottom:14px;color:#4f8ef7}
+  .concept-section{margin-bottom:16px}
+  .concept-section h4{font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:8px}
+  .concept-section p,.concept-section li{font-size:.88rem;color:#cbd5e1;line-height:1.7}
+  .concept-section ul{padding-left:0;list-style:none}
+  .concept-section ul li:before{content:"▸ ";color:#4f8ef7}
+
+  /* PROGRESS */
+  .progress-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+  .prog-card{background:#1a1d27;border:1px solid #2d3148;border-radius:14px;padding:20px}
+  .prog-card .pv{font-size:2rem;font-weight:700;color:#4f8ef7}
+  .prog-card .pk{color:#94a3b8;font-size:.82rem;margin-top:6px}
+  .section-head{font-size:1rem;font-weight:600;margin-bottom:14px;color:#e2e8f0}
+  .weak-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+  .weak-item{background:#1a1d27;border:1px solid #2d3148;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+  .weak-item .wn{font-size:.9rem}
+  .stars-display{color:#fbbf24;font-size:.9rem}
+  .no-data{text-align:center;padding:40px;color:#94a3b8}
+
+  /* misc */
+  .hidden{display:none!important}
+  .search-box{background:#1a1d27;border:1px solid #2d3148;border-radius:8px;padding:10px 16px;width:100%;font-size:.9rem;color:#e2e8f0;outline:none;margin-bottom:16px}
+  .search-box:focus{border-color:#4f8ef7}
+  .filter-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+  .filter-btn{padding:6px 14px;border-radius:20px;border:1px solid #2d3148;background:transparent;color:#94a3b8;cursor:pointer;font-size:.82rem;transition:all .2s}
+  .filter-btn.on{background:#4f8ef7;border-color:#4f8ef7;color:#fff}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>System Design Interview Simulator</h1>
+  <span>100 AI Agents · #64</span>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('problems')">PROBLEMS</div>
+  <div class="tab" onclick="switchTab('interview')">INTERVIEW</div>
+  <div class="tab" onclick="switchTab('concepts')">CONCEPTS</div>
+  <div class="tab" onclick="switchTab('progress')">PROGRESS</div>
+</div>
+
+<!-- PROBLEMS -->
+<div id="tab-problems" class="panel active">
+  <input class="search-box" id="problemSearch" placeholder="Search problems..." oninput="renderProblems()">
+  <div class="filter-row">
+    <button class="filter-btn" id="fb-Easy" onclick="toggleDiff('Easy',this)">Easy</button>
+    <button class="filter-btn" id="fb-Medium" onclick="toggleDiff('Medium',this)">Medium</button>
+    <button class="filter-btn" id="fb-Hard" onclick="toggleDiff('Hard',this)">Hard</button>
+  </div>
+  <div class="problems-grid" id="problemsGrid"></div>
+</div>
+
+<!-- INTERVIEW -->
+<div id="tab-interview" class="panel">
+  <div id="interviewPrompt" style="text-align:center;padding:60px 20px">
+    <div style="font-size:3rem;margin-bottom:16px">🏗️</div>
+    <h2 style="font-size:1.4rem;margin-bottom:8px">Pick a Problem to Start</h2>
+    <p style="color:#94a3b8;margin-bottom:24px">Go to PROBLEMS tab and click "Start" on any problem to begin a mock interview.</p>
+    <button class="btn btn-primary" onclick="switchTab('problems')">Browse Problems</button>
+  </div>
+
+  <div id="interviewView">
+    <div class="interview-header">
+      <button class="back-btn" onclick="exitInterview()">← Back</button>
+      <div>
+        <div class="interview-title" id="ivTitle"></div>
+        <div id="ivBadge" style="margin-top:4px"></div>
+      </div>
+    </div>
+
+    <div class="steps-nav" id="stepsNav"></div>
+    <div id="stepContent"></div>
+    <div class="nav-row">
+      <button class="btn btn-secondary" id="prevBtn" onclick="prevStep()">← Previous</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONCEPTS -->
+<div id="tab-concepts" class="panel">
+  <input class="search-box" id="conceptSearch" placeholder="Search concepts..." oninput="renderConcepts()">
+  <div class="concepts-grid" id="conceptsGrid"></div>
+</div>
+
+<!-- PROGRESS -->
+<div id="tab-progress" class="panel">
+  <div class="progress-grid" id="progressGrid"></div>
+  <div class="section-head">Problem Ratings</div>
+  <div id="ratingsSection"></div>
+  <div class="section-head" style="margin-top:20px">Concepts Reviewed</div>
+  <div id="conceptsReviewed"></div>
+</div>
+
+<script>
+const PROBLEMS = [
+  {
+    id:'url',title:'Design URL Shortener',difficulty:'Easy',
+    tags:['Hashing','Database','Caching'],
+    statement:'Design a URL shortening service like bit.ly. Users paste a long URL and get a short alias that redirects to the original.',
+    functional:['Shorten a long URL to a unique short code','Redirect short URL to original URL','Optional: custom aliases','Optional: analytics (click count)'],
+    nonfunctional:['100M URLs stored','100K reads/sec (read-heavy)','Availability over consistency','Links never expire by default'],
+    steps:{
+      clarify:'Clarify: Should links expire? Custom aliases? Analytics? Any auth? — Assume: no expiry by default, no auth needed, basic click tracking.',
+      estimate:'~100M URLs × 100 bytes avg = 10GB storage. 100K reads/sec → need caching. 1K writes/sec.',
+      design:'API: POST /shorten → short_code, GET /{code} → 302 redirect. Use Base62 encoding (a-zA-Z0-9) on an auto-increment ID for the short code. Store in relational DB (id, short_code, original_url, created_at).',
+      deepdive:'Hash collisions: Use counter or random + collision check. Cache hot URLs in Redis (LRU). DB: shard by short_code hash for scale. For analytics: write click events async to a queue.',
+      tradeoffs:'Counter-based vs. random: counter is sequential (guessable), random needs collision detection. SQL vs NoSQL: SQL simpler, NoSQL scales easier. 302 vs 301: 302 doesn\'t cache (allows analytics), 301 caches (less load).'
+    },
+    hints:['Think about how to encode an integer to a short string — Base62 maps 62 chars to ~6-char codes for 56B combinations','The redirect endpoint is read-heavy — what layer do you add in front of the DB?','How do you handle concurrent writes generating the same short code?'],
+    checklist:['Load Balancer','Short Code Generator','Key-Value Cache (Redis)','Relational DB','CDN','Analytics Queue','Rate Limiter'],
+    solution:[
+      'Client sends POST /shorten → Load Balancer → App Server',
+      'App Server generates short code: Base62(auto-increment ID) or random + collision check',
+      'Store {short_code, original_url, created_at} in MySQL/PostgreSQL',
+      'On GET /{code}: check Redis cache first, then DB; cache hit rate ~99%',
+      'Return 302 redirect; log click event to Kafka → analytics consumer',
+      'Scale write path: shard DB by short_code; scale read path: Redis cluster + CDN'
+    ]
+  },
+  {
+    id:'twitter',title:'Design Twitter',difficulty:'Hard',
+    tags:['Fan-out','Timeline','NoSQL','Caching'],
+    statement:'Design a social media platform where users post tweets, follow others, and see a personalized timeline feed.',
+    functional:['Post a tweet (text, images)','Follow/unfollow users','View home timeline (tweets from followed users)','Like and retweet'],
+    nonfunctional:['500M users, 100M DAU','300K tweet writes/sec','Timeline reads: 1M/sec','Eventual consistency OK for timeline'],
+    steps:{
+      clarify:'Clarify: Is this read-heavy or write-heavy? Both. Any character limit? 280 chars. Do we need search? Scope out for now.',
+      estimate:'100M tweets/day = ~1,200/sec writes. Timeline read: ~1M/sec. Media stored separately in object store.',
+      design:'Users, Tweets, Follows tables. Fan-out on write (push) vs. fan-out on read (pull). Push tweet to followers\' timeline caches on write. Pull is simpler but slow for high-follower users.',
+      deepdive:'Celebrity problem: users with >1M followers — don\'t fan-out to all, use hybrid approach (push for normal users, pull for celebrities). Timeline stored in Redis sorted sets (score=timestamp).',
+      tradeoffs:'Fan-out on write: fast reads, expensive for celebrities. Fan-out on read: simple writes, slow reads. Hybrid balances both. NoSQL (Cassandra) for tweets — wide column, time-series friendly.'
+    },
+    hints:['A user following 1000 accounts — how do you build their timeline efficiently?','What happens when a celebrity with 50M followers tweets?','Redis sorted sets are great for time-ordered feeds — what\'s the key?'],
+    checklist:['Load Balancer','Tweet Service','Timeline Service','Fan-out Service','Redis (Timeline Cache)','Cassandra (Tweets)','CDN (Media)','Message Queue'],
+    solution:[
+      'POST /tweet → Tweet Service → store in Cassandra, media in S3',
+      'Fan-out Service subscribes to tweet events via Kafka',
+      'For each follower (if < threshold): push tweet_id to their Redis timeline sorted set',
+      'For celebrities: skip fan-out; pull their tweets at read time and merge',
+      'GET /timeline: fetch tweet_ids from Redis, batch-fetch tweet details from Cassandra',
+      'Add CDN for media; rate limit APIs; use consistent hashing for Redis sharding'
+    ]
+  },
+  {
+    id:'netflix',title:'Design Netflix',difficulty:'Hard',
+    tags:['CDN','Streaming','Microservices','Encoding'],
+    statement:'Design a video streaming service that serves millions of users with high-quality video with minimal buffering.',
+    functional:['Upload and store video content','Stream video to users','Support multiple resolutions/quality levels','Track watch history and recommendations'],
+    nonfunctional:['200M subscribers','Netflix uses 15% of global internet bandwidth','High availability: 99.99%','Adaptive bitrate streaming'],
+    steps:{
+      clarify:'Clarify: Live or on-demand? On-demand. Mobile + web? Yes. DRM needed? Yes. Focus on video delivery pipeline.',
+      estimate:'1 hour HD video ≈ 2GB. 36K concurrent streams × 5Mbps = 180Gbps egress. 500K video titles.',
+      design:'Upload pipeline: raw video → transcoding service → multiple formats (DASH/HLS) at resolutions 360p-4K → stored in S3 → pushed to CDN edge nodes. Playback: client requests manifest → CDN serves chunks.',
+      deepdive:'Adaptive bitrate: client downloads small segments (2-10s), monitors bandwidth, switches quality level dynamically. CDN edge prefetches popular content. Use consistent hashing to route users to closest edge.',
+      tradeoffs:'Centralized vs. distributed CDN: Netflix uses Open Connect appliances in ISP data centers. Push vs. pull CDN: push popular content proactively. Encoding: per-title encoding vs. fixed ladder — per-title uses less bandwidth for same quality.'
+    },
+    hints:['How does the video get from a datacenter to a user with minimal latency?','What does "adaptive bitrate" mean in practice for segment requests?','How would you handle a popular show premiering and millions requesting it simultaneously?'],
+    checklist:['Upload Service','Transcoding Service','CDN (Edge Nodes)','Manifest Service','Recommendation Engine','DRM Service','Load Balancer','Object Store (S3)'],
+    solution:[
+      'Video uploaded → Upload Service → raw stored in S3',
+      'Transcoding Service (worker fleet) converts to HLS/DASH at 6+ quality levels',
+      'Transcoded chunks pushed to CDN edge nodes globally',
+      'Client requests manifest file → gets chunk URLs from nearest CDN edge',
+      'ABR algorithm selects quality based on network speed every few seconds',
+      'Watch history + events → Kafka → ML pipeline → personalized recommendations'
+    ]
+  },
+  {
+    id:'uber',title:'Design Uber',difficulty:'Hard',
+    tags:['Geospatial','Real-time','Matching','WebSocket'],
+    statement:'Design a ride-sharing platform where riders request rides and drivers accept them, with real-time location tracking.',
+    functional:['Rider requests a ride from location A to B','Match rider with nearby available driver','Real-time driver location tracking','Trip tracking and fare calculation'],
+    nonfunctional:['1M concurrent trips globally','Driver location updates every 5 seconds','Match latency < 1 second','High consistency for trip state'],
+    steps:{
+      clarify:'Clarify: What markets? Global. Is this just matching, or full platform? Full. Need pricing? Surge pricing is a stretch goal.',
+      estimate:'1M drivers × location update every 5s = 200K writes/sec to location store. 1M riders × ride request = 10K requests/sec.',
+      design:'Driver App pings location every 5s → Location Service writes to geospatial store. Rider requests ride → Matching Service queries nearby drivers using geohash/quadtree. Driver accepts → Trip Service creates trip.',
+      deepdive:'Geospatial indexing: Geohash encodes lat/lng to a string prefix (nearby = similar prefix). Query drivers in a geohash cell. WebSocket for real-time driver tracking during trip.',
+      tradeoffs:'Geohash vs. QuadTree: Geohash simpler, QuadTree better for uneven density. Push vs. poll location updates: push with WebSocket reduces latency. Strong vs. eventual consistency for trip: strong required (can\'t match driver twice).'
+    },
+    hints:['How do you efficiently find drivers within 2km of a rider?','How do you prevent two riders from matching to the same driver simultaneously?','How does the rider\'s app show the driver moving in real time?'],
+    checklist:['Load Balancer','Location Service','Matching Service','Trip Service','WebSocket Server','Geospatial DB (Redis GEO)','Message Queue','Payment Service'],
+    solution:[
+      'Driver App → WebSocket → Location Service → write lat/lng to Redis GEO',
+      'Rider requests ride → Matching Service queries Redis GEORADIUS for nearby drivers',
+      'Rank drivers by distance + rating; send push notification to top candidates',
+      'First driver to accept → Trip Service atomically locks driver (Redis SET NX)',
+      'Trip state machine: REQUESTED→ACCEPTED→IN_PROGRESS→COMPLETED stored in PostgreSQL',
+      'During trip: driver location streamed via WebSocket to rider app in real time'
+    ]
+  },
+  {
+    id:'whatsapp',title:'Design WhatsApp',difficulty:'Medium',
+    tags:['Messaging','WebSocket','End-to-End Encryption','Consistency'],
+    statement:'Design a real-time messaging app that delivers messages reliably with read receipts.',
+    functional:['Send text/media messages between users','Group chats up to 256 members','Message delivery receipts (sent/delivered/read)','Media file sharing'],
+    nonfunctional:['2B users, 100B messages/day','End-to-end encryption','Message delivery guarantee (at-least-once)','Store messages for offline delivery'],
+    steps:{
+      clarify:'Clarify: How long to store messages? 30 days after delivery. Group size? 256. Multi-device? Yes. Focus on 1-1 first.',
+      estimate:'100B messages/day = ~1.2M messages/sec. Message size avg 200 bytes = 240MB/sec = 20TB/day.',
+      design:'WebSocket connections held open per device. Sender → Chat Service → Message Queue → Delivery Service → recipient WebSocket. Store message until ACK received.',
+      deepdive:'Message ID: global sequence using Snowflake IDs for ordering. Fanout for group messages. Read receipts: recipient sends ACK → update message status. Offline users: store in message table, deliver on reconnect.',
+      tradeoffs:'Push vs. pull delivery: push with WebSocket for low latency. XMPP vs custom protocol: custom binary protocol more efficient. When to delete messages: only after delivery ACK or 30-day TTL.'
+    },
+    hints:['What happens when the recipient is offline when a message is sent?','How do you ensure exactly-once delivery (no duplicates)?','How would you fanout a message to 256 group members efficiently?'],
+    checklist:['WebSocket Server','Chat Service','Message Queue (Kafka)','Message DB (Cassandra)','Media Store (S3)','Receipt Service','Push Notification','Presence Service'],
+    solution:[
+      'Sender opens WebSocket → Chat Service assigns server via consistent hashing',
+      'Message stored in Cassandra with status=PENDING, unique message_id',
+      'If recipient online: delivered via WebSocket, status→DELIVERED',
+      'If offline: stored; delivery attempted on reconnect',
+      'Read receipt: recipient sends ACK → status→READ → notify sender',
+      'Media: upload to S3, share URL; CDN serves downloads'
+    ]
+  },
+  {
+    id:'instagram',title:'Design Instagram',difficulty:'Medium',
+    tags:['Photo Storage','Feed','CDN','Fan-out'],
+    statement:'Design a photo-sharing platform where users post photos and see a feed of people they follow.',
+    functional:['Upload and share photos/videos','Follow other users','View personalized photo feed','Like and comment on posts'],
+    nonfunctional:['1B users, 100M daily uploads','Feed generation < 200ms','High read throughput','Media delivery via CDN'],
+    steps:{
+      clarify:'Clarify: Stories (ephemeral)? Scope out. Reels? Scope out. Focus on photos + feed.',
+      estimate:'100M uploads/day. Avg photo 3MB → 300TB/day storage for originals + thumbnails. Feed: 500M users × 3 feed loads/day = 17K/sec.',
+      design:'Upload: photo → S3 → CDN. Feed: fan-out on write. Post event → Fanout Service → push post_id to followers\' Redis feed list (cap at 500 entries).',
+      deepdive:'Thumbnail generation: async worker after upload creates multiple sizes (thumbnail, feed, full). Celeb problem same as Twitter — hybrid approach. Feed: Redis sorted set per user, score=timestamp.',
+      tradeoffs:'SQL (user/follow graph) + NoSQL (posts/feed) hybrid. Pre-generated feed vs. on-demand: pre-generated faster but uses more memory. Store thumbnail or original + resize on demand: pre-resize saves CPU at read time.'
+    },
+    hints:['How do you resize photos to different sizes efficiently?','How would you serve the same popular photo to 10M users without hammering your origin servers?','What happens to a user\'s feed cache when they unfollow someone?'],
+    checklist:['Upload Service','CDN','Image Processing Worker','Feed Service','Redis (Feed Cache)','Cassandra (Posts)','PostgreSQL (Users/Follows)','Fanout Queue'],
+    solution:[
+      'User uploads photo → Upload Service → original stored in S3',
+      'Image Worker creates thumbnails (3 sizes) → stored in S3 → pushed to CDN',
+      'Post event published to Kafka → Fanout Service reads follower list',
+      'For each follower: prepend post_id to Redis feed sorted set (LPUSH, cap 500)',
+      'GET /feed: reads post_ids from Redis, batch-fetches metadata from Cassandra',
+      'CDN serves media; cache invalidation on unfollow: background job prunes feed'
+    ]
+  },
+  {
+    id:'gdrive',title:'Design Google Drive',difficulty:'Medium',
+    tags:['File Storage','Sync','Chunking','Metadata'],
+    statement:'Design a cloud file storage service that allows users to store, sync, and share files across devices.',
+    functional:['Upload and download files','Sync files across devices','Share files/folders with others','Version history'],
+    nonfunctional:['1B users','File sizes from KB to 50GB','Eventual consistency for sync','Bandwidth optimization'],
+    steps:{
+      clarify:'Clarify: Collaborative editing? Scope out. Mobile + desktop? Yes. Max file size? 50GB. Version retention? 30 days.',
+      estimate:'1B users × 15GB avg = 15EB total. 10M uploads/day. Large files need chunking.',
+      design:'Files split into fixed-size chunks (4MB). Upload chunks in parallel. Detect diffs client-side — only upload changed chunks (delta sync). Metadata service tracks file→chunk mapping.',
+      deepdive:'Chunking: split file → hash each chunk (SHA-256) → upload only changed chunks → metadata records chunk order. Sync: periodic polling or long-poll for changes. File sharing: access control list per file.',
+      tradeoffs:'Block storage vs object storage: object (S3) cheaper for large files. Delta sync saves bandwidth — only upload changed blocks. Centralized metadata DB (relational) vs. distributed for scale.'
+    },
+    hints:['How do you avoid reuploading a large file that only had 1KB changed?','How does device B know that device A just updated a file?','What\'s the simplest way to implement version history?'],
+    checklist:['Upload Service','Metadata Service','Chunk Store (S3)','CDN','Delta Sync Engine','Notification Service','Version Store','Access Control'],
+    solution:[
+      'Client splits file into 4MB chunks, computes hash per chunk',
+      'Metadata Service returns which chunks already exist (deduplicate)',
+      'Client uploads only new/changed chunks to S3 via presigned URLs',
+      'Metadata updated: file_id→[chunk_hashes in order]',
+      'Notification Service pushes change event to other devices via long-poll',
+      'Other devices fetch changed chunk list → download only new chunks → reassemble'
+    ]
+  },
+  {
+    id:'ratelimiter',title:'Design Rate Limiter',difficulty:'Easy',
+    tags:['Algorithms','Redis','Distributed','API Gateway'],
+    statement:'Design a rate limiter that restricts how many requests a client can make to an API in a given time window.',
+    functional:['Allow N requests per user per time window','Return 429 Too Many Requests when exceeded','Support different limits per endpoint','Minimal latency overhead'],
+    nonfunctional:['Handle 100K requests/sec','Latency overhead < 1ms','Distributed across multiple servers','Eventual accuracy OK'],
+    steps:{
+      clarify:'Clarify: Per user, per IP, or per API key? Per user. Sliding or fixed window? Sliding preferred. Hard or soft limit? Hard.',
+      estimate:'100K req/sec × 1 Redis lookup/req = 100K Redis ops/sec. Redis handles 1M+ ops/sec — feasible.',
+      design:'Fixed window: counter per user per time window in Redis with TTL. Sliding window log: sorted set of timestamps in Redis, score=timestamp, count entries in last window. Sliding window counter: more memory efficient hybrid.',
+      deepdive:'Token bucket: tokens added at constant rate, request consumes one token — allows bursts. Leaky bucket: queue of requests processed at constant rate — smooth output. Redis atomic INCR+EXPIRE for fixed window.',
+      tradeoffs:'Fixed window: simple, but allows 2x burst at window boundary. Sliding window: accurate, more memory. Token bucket: allows controlled bursts. Central Redis vs. local counters: central is accurate but adds latency; local with sync has race conditions.'
+    },
+    hints:['What data structure in Redis lets you count timestamped events in a time range?','The fixed window algorithm has a race condition at the boundary — can you describe it?','How do you make the rate limit check atomic (no race conditions)?'],
+    checklist:['API Gateway','Redis (Counter Store)','Token Bucket Algorithm','Sliding Window Log','Distributed Lock','Config Service','Monitoring'],
+    solution:[
+      'Request arrives → Rate Limiter middleware (in API Gateway or SDK)',
+      'Redis key: "rate:{user_id}:{window}" with INCR and EXPIRE',
+      'If count > limit: return 429 with Retry-After header',
+      'For sliding window: Redis ZSET with ZADD + ZRANGEBYSCORE + ZCOUNT',
+      'For accuracy: use Lua script for atomic check-and-increment in Redis',
+      'Different limits per endpoint: key includes endpoint; config stored in Redis'
+    ]
+  },
+  {
+    id:'autocomplete',title:'Design Search Autocomplete',difficulty:'Medium',
+    tags:['Trie','Caching','Top-K','Real-time'],
+    statement:'Design a search autocomplete system that suggests the top 5 completions as a user types.',
+    functional:['Return top 5 query suggestions for a prefix in < 100ms','Suggestions ranked by search frequency','Update suggestions based on new search data','Support millions of unique queries'],
+    nonfunctional:['10B searches/day','< 100ms latency for suggestions','Handle 100K suggestion requests/sec','Suggestions updated daily'],
+    steps:{
+      clarify:'Clarify: Personalized or global? Global first. How many suggestions? Top 5. Multi-language? English only. Real-time updates? Batch daily.',
+      estimate:'10B searches/day. Unique queries: ~10M. Avg query length 20 chars → 20 prefix lookups per query.',
+      design:'Offline: aggregate search logs daily → compute top-K queries per prefix → store in Trie or KV store (Redis). Online: user types → prefix query → Redis ZREVRANGEBYSCORE → return top 5.',
+      deepdive:'Trie compressed as hash: key=prefix, value=sorted list of top suggestions. Browser caches suggestions per prefix. CDN caches API responses. Separate Trie builder (batch) from Trie server (read-only).',
+      tradeoffs:'Trie vs. hash map: Trie uses less memory for similar prefixes; hash map simpler to implement and shard. Real-time vs. batch updates: real-time complex but fresher; batch simpler. Personalization: add user history reranking layer.'
+    },
+    hints:['How do you efficiently find the most popular queries that start with "app"?','Where can you cache suggestion results to reduce backend load?','How do you update suggestions without downtime on the Trie server?'],
+    checklist:['API Server','Redis (Prefix Cache)','Trie Service','Batch Aggregation Job','CDN','Browser Cache','Log Collection','A/B Testing Layer'],
+    solution:[
+      'User types → browser checks local cache → if miss: GET /autocomplete?q=prefix',
+      'API Server → Redis HGET prefix → return cached top-5 if fresh',
+      'Batch job runs daily: aggregate search logs → count query frequency per prefix',
+      'Build Trie with top-5 queries stored at each node → serialize to Redis',
+      'Blue-green deploy of new Trie: build new, swap pointer atomically',
+      'CDN caches suggestion API responses with short TTL (1-5 min)'
+    ]
+  },
+  {
+    id:'payment',title:'Design Payment System',difficulty:'Hard',
+    tags:['Consistency','Idempotency','Distributed Transactions','Saga'],
+    statement:'Design a payment system that processes transactions between buyers and sellers reliably.',
+    functional:['Process payment from buyer to seller','Support refunds','Payment status tracking','Support multiple payment methods'],
+    nonfunctional:['Exactly-once payment processing','ACID transactions','High availability (99.99%)','Audit log for every transaction'],
+    steps:{
+      clarify:'Clarify: Our own payment rails or third-party (Stripe)? Integrate with third-party. Multi-currency? Yes. Refunds? Yes. Disputes? Scope out.',
+      estimate:'10M transactions/day = ~120/sec. Each transaction touches multiple services — need distributed transaction management.',
+      design:'Payment Service receives request → generates idempotency key → calls PSP (Stripe) → stores result → notifies order service. Idempotency key prevents double-charging on retries.',
+      deepdive:'Saga pattern: sequence of local transactions, each publishing events. Compensating transactions for rollback. Outbox pattern: write payment record + event to DB in same transaction; separate publisher reads outbox and emits event.',
+      tradeoffs:'2PC vs Saga: 2PC blocks resources (bad for scale); Saga is eventually consistent but more complex. Synchronous vs async: sync is simpler; async is more resilient. Ledger-based accounting: double-entry bookkeeping for auditability.'
+    },
+    hints:['What is an idempotency key and why is it critical for payments?','If your service crashes after calling Stripe but before saving the result, what happens on retry?','How do you ensure you don\'t charge a customer twice for the same order?'],
+    checklist:['Payment Service','Idempotency Store','PSP Integration (Stripe)','Ledger DB','Outbox Table','Event Publisher','Notification Service','Audit Log'],
+    solution:[
+      'Client sends payment request with idempotency_key',
+      'Payment Service checks idempotency store — if key exists, return cached result',
+      'Write pending payment record + call PSP (Stripe API)',
+      'Store PSP response + update payment status atomically using outbox pattern',
+      'Event publisher reads outbox → publishes PaymentCompleted event to Kafka',
+      'Order Service, Notification Service consume event; audit log captures every state change'
+    ]
+  },
+  {
+    id:'searchengine',title:'Design Web Search Engine',difficulty:'Hard',
+    tags:['Crawling','Inverted Index','PageRank','Distributed'],
+    statement:'Design a web search engine that crawls web pages and returns relevant results for queries.',
+    functional:['Crawl and index web pages','Return ranked search results for queries','Handle 10B+ web pages','Update index as pages change'],
+    nonfunctional:['Query latency < 200ms','Index 1B+ pages','Crawl rate: 1B pages/day','Highly distributed'],
+    steps:{
+      clarify:'Clarify: Full web or specific domain? Full web. Real-time or batch indexing? Batch with incremental updates. Just text or rich media too? Text for now.',
+      estimate:'1B pages × 100KB avg = 100TB of raw HTML/day. After dedup and compression: ~10TB. Inverted index: ~100GB for 1B docs.',
+      design:'Crawler: URL frontier (priority queue) → fetch → parse HTML → extract links → schedule. Index pipeline: content → tokenize → normalize → build inverted index → score with TF-IDF + PageRank. Query: parse → look up index → rank → return top K.',
+      deepdive:'Inverted index: term → [doc_id, positions, tf]. Distributed: shard by hash(term). PageRank: iterative algorithm computing importance from link graph. Query expansion: handle synonyms, spell correction.',
+      tradeoffs:'Freshness vs. cost: crawl popular pages hourly, rare pages weekly. Centralized vs. distributed index: distributed scales but adds complexity. Exact match vs. approximate: approximate with BM25 scoring is more practical.'
+    },
+    hints:['How do you avoid crawling the same page twice? And avoid spider traps?','What data structure maps a search term to all documents containing it?','How does PageRank determine which pages are more important?'],
+    checklist:['URL Frontier','Crawler Workers','HTML Parser','Dedup Store','Indexer','Inverted Index (Distributed)','PageRank Scorer','Query Processor','Result Ranker'],
+    solution:[
+      'URL Frontier: priority queue seeded with seed URLs, sorted by priority/freshness',
+      'Crawler fetches page → parses HTML → extracts text and outbound links',
+      'Dedup using URL hash + SimHash for near-duplicate content detection',
+      'Indexer: tokenize → stem → build posting lists (term → doc_ids + positions)',
+      'Distributed index sharded by term hash across many machines',
+      'Query: look up terms in index → merge posting lists → score with BM25 + PageRank → return top 10'
+    ]
+  },
+  {
+    id:'chat',title:'Design Slack / Team Chat',difficulty:'Medium',
+    tags:['Messaging','Channels','WebSocket','Search'],
+    statement:'Design a team communication platform with channels, direct messages, and message search.',
+    functional:['Create workspaces, channels, and DMs','Send messages with file attachments','Search messages by keyword','Mention users with @'],
+    nonfunctional:['10M daily active users','Messages searchable within seconds','Persistent message history','Deliver messages in < 500ms'],
+    steps:{
+      clarify:'Clarify: Real-time required? Yes. Message retention? Indefinite. Search? Yes, full-text. Reactions? Yes, stretch goal.',
+      estimate:'10M users × 50 messages/day = 500M messages/day. Average message 500 bytes = 250GB/day raw. Search index grows at ~50GB/day.',
+      design:'WebSocket per client. Message → Chat Server → Kafka → Fan-out to channel members. Cassandra for message storage (partitioned by channel_id + timestamp). Elasticsearch for full-text search.',
+      deepdive:'Channel membership: store in Redis (channel_id → Set of user_ids). Fan-out: for each channel member, push message to their WebSocket server. Message search: index in Elasticsearch, update asynchronously.',
+      tradeoffs:'Push vs. pull for channel updates: push is real-time but requires fan-out; pull works for very large channels. Cassandra vs. RDBMS: Cassandra handles time-series write throughput better. Sync vs. async search indexing: async keeps write path fast.'
+    },
+    hints:['In a 10,000-member channel, how do you deliver a message to all online users quickly?','How would you implement message search at scale?','What happens if a WebSocket server crashes — how do clients reconnect?'],
+    checklist:['WebSocket Server','Chat Service','Kafka (Message Bus)','Cassandra (Messages)','Elasticsearch (Search)','Redis (Presence/Membership)','File Store (S3)','Notification Service'],
+    solution:[
+      'Client connects via WebSocket → assigned to a Chat Server',
+      'User sends message → Chat Server → Kafka topic per channel',
+      'Fan-out consumer reads Kafka → for each online member: push to their WebSocket server',
+      'Message persisted to Cassandra (partition key: channel_id, clustering key: timestamp)',
+      'Elasticsearch consumer indexes message async for search',
+      'On disconnect: client reconnects, fetches missed messages via REST (timestamp-based pagination)'
+    ]
+  },
+  {
+    id:'booking',title:'Design Hotel Booking System',difficulty:'Medium',
+    tags:['Concurrency','Transactions','Inventory','Idempotency'],
+    statement:'Design a hotel booking system where users search for hotels, check availability, and book rooms.',
+    functional:['Search hotels by location and date','Check room availability','Book a room (no double booking)','Cancel and refund booking'],
+    nonfunctional:['No double bookings (strong consistency)','Handle booking spikes','Search: 1000 queries/sec','Booking: 100 transactions/sec'],
+    steps:{
+      clarify:'Clarify: Is inventory real-time? Yes. How far in advance? Up to 1 year. Flash sales (high spike)? Yes. Focus on preventing double booking.',
+      estimate:'10K hotels × 100 rooms = 1M room-nights per day range. Availability: sparse matrix. Booking confirmation must be < 3 seconds.',
+      design:'Search Service (Elasticsearch for geo + availability). Booking Service with pessimistic locking: SELECT ... FOR UPDATE on availability table. Confirm booking in transaction.',
+      deepdive:'Inventory table: hotel_id, room_type, date, total_rooms, reserved_rooms. Booking: decrement available count in DB transaction. Use Redis for fast availability check (cache), DB for authoritative booking.',
+      tradeoffs:'Optimistic vs. pessimistic locking: optimistic works at low concurrency (retry on conflict); pessimistic needed for hot inventory. Redis pre-check: fast rejection of unavailable rooms before hitting DB. 2-phase commit if payment separate.'
+    },
+    hints:['How do you prevent two users from booking the last available room simultaneously?','What\'s the tradeoff between optimistic and pessimistic locking for room inventory?','How would you handle a flash sale where 10,000 users try to book the same room simultaneously?'],
+    checklist:['Search Service','Booking Service','Inventory DB (MySQL)','Redis (Availability Cache)','Payment Service','Notification Service','Lock Mechanism','Idempotency Store'],
+    solution:[
+      'User searches → Elasticsearch for geo-location, date availability → show hotel list',
+      'User selects room → check Redis cache for quick availability pre-screen',
+      'Start booking: SELECT available_count FROM inventory WHERE ... FOR UPDATE (pessimistic lock)',
+      'If available: decrement count + create booking record in same DB transaction',
+      'Call payment service with idempotency key; on success: commit; on failure: rollback',
+      'Send confirmation email async via notification service'
+    ]
+  },
+  {
+    id:'typeahead',title:'Design YouTube',difficulty:'Hard',
+    tags:['Video','Streaming','Recommendations','CDN'],
+    statement:'Design a video platform where users upload, watch, and discover videos.',
+    functional:['Upload videos (up to 4K resolution)','Stream video with adaptive quality','Subscribe to channels and get notifications','Video recommendations'],
+    nonfunctional:['500 hours of video uploaded per minute','1B+ daily video views','99.9% availability','Sub-second start time'],
+    steps:{
+      clarify:'Clarify: Live streaming or on-demand? Both, focus on on-demand. Comments/likes? Yes. Monetization? Scope out.',
+      estimate:'500hr/min upload = 500×60sec×5Mbps = ~18Gbps ingest. 1B views × avg 5 min × 5Mbps = 42Pbps/day egress via CDN.',
+      design:'Upload → Transcoding (worker pool) → multiple resolutions → CDN. View → CDN serves HLS chunks. Metadata in MySQL. Views, likes in Cassandra. Recommendations: ML pipeline on watch history.',
+      deepdive:'Transcoding: DAG of jobs (split → encode each segment → merge manifest). Parallel encoding across resolutions. Thumbnail auto-generation. Search: Elasticsearch with metadata. Recommendations: collaborative filtering.',
+      tradeoffs:'Same CDN tradeoffs as Netflix. Thumbnail generation: server-side vs. client-side preview. Comment pagination: cursor-based for consistency. View count: eventual consistency OK (use Kafka counter).'
+    },
+    hints:['How do you transcode a 2-hour 4K video efficiently?','Why does YouTube serve video in small chunks instead of one big file?','How would you design the recommendation algorithm at a high level?'],
+    checklist:['Upload Service','Transcoding Workers','CDN','Metadata DB (MySQL)','Engagement DB (Cassandra)','Search (Elasticsearch)','Recommendation Engine','Notification Service'],
+    solution:[
+      'Video upload → chunk into segments → workers transcode each resolution in parallel',
+      'Segments stored in S3 → HLS manifest generated → pushed to CDN edge nodes',
+      'View request → CDN checks cache → serves chunk or fetches from S3',
+      'Video metadata (title, description, channel) stored in MySQL',
+      'View events → Kafka → counter service (eventual consistency OK for view count)',
+      'Recommendation: offline ML pipeline on watch history → store top-100 candidates per user in Redis'
+    ]
+  },
+  {
+    id:'notifications',title:'Design Push Notification System',difficulty:'Medium',
+    tags:['Fan-out','Priority Queues','APNs','Firebase'],
+    statement:'Design a push notification system that sends notifications to mobile and web users at scale.',
+    functional:['Send notifications to individual users','Broadcast to groups or all users','Support in-app, push, email, SMS channels','Track delivery status'],
+    nonfunctional:['1B notifications/day','Latency < 5 seconds','Priority ordering (transactional > marketing)','Deduplication'],
+    steps:{
+      clarify:'Clarify: All channels or just push? All. Priority levels? Yes: critical > high > normal > low. User preferences? Yes, users can opt out.',
+      estimate:'1B notifications/day = 12K/sec. Peak: 100K/sec (flash sale). Multiple channels can multiply volume.',
+      design:'Notification Service receives request → validates → persists → publishes to Kafka by priority topic → workers consume → dispatch to channel providers (APNs, FCM, SendGrid, Twilio).',
+      deepdive:'Fan-out for broadcast: read user segments → generate individual notification records → batch publish to Kafka. Retry with exponential backoff. Track delivery: provider callback/webhook updates status in DB.',
+      tradeoffs:'Real-time vs. batch delivery: critical real-time, marketing batched. Priority queues: separate Kafka topics. Storing notification history: helps with dedup and user notification center.'
+    },
+    hints:['How do you send a notification to all 1B users within 5 minutes?','What happens when APNs rejects a device token (app uninstalled)?','How do you prevent sending the same notification twice on retry?'],
+    checklist:['Notification Service','Kafka (Priority Topics)','Worker Fleet','APNs / FCM','Email Provider','SMS Provider','Delivery Status DB','User Preferences Service'],
+    solution:[
+      'Sender calls Notification API with message, target (user/segment), channel, priority',
+      'Notification Service persists notification + publishes to Kafka priority topic',
+      'Worker pool consumes messages → checks user preferences → routes to correct channel',
+      'Channel dispatcher calls APNs/FCM/SendGrid; handles rate limits and retries',
+      'Provider sends callback on delivery/failure → update delivery status in DB',
+      'Invalid tokens removed from device registry; rate limit marketing notifications per user'
+    ]
+  },
+  {
+    id:'localization',title:'Design Distributed Cache',difficulty:'Medium',
+    tags:['Caching','Consistent Hashing','Eviction','TTL'],
+    statement:'Design a distributed in-memory cache system like Redis or Memcached.',
+    functional:['Set and get key-value pairs','TTL (time-to-live) for entries','Eviction policies (LRU, LFU)','Replication for durability'],
+    nonfunctional:['< 1ms read/write latency','Handle 1M ops/sec','Horizontal scaling','High availability'],
+    steps:{
+      clarify:'Clarify: Persistence required? Optional (append-only log). Max value size? 1MB. Multi-tenancy? No. Focus on distribution.',
+      estimate:'1M ops/sec across N nodes. Consistent hashing distributes load. Each node handles ~100K ops/sec.',
+      design:'Client uses consistent hashing to determine which cache node to hit. Each node is an in-memory hash map with LRU eviction. Replication: primary + replicas for each shard.',
+      deepdive:'Consistent hashing: place nodes on virtual ring, key maps to nearest node clockwise. Virtual nodes (vnodes) for uniform distribution. LRU implementation: hash map + doubly linked list. TTL: min-heap or lazy expiry on access.',
+      tradeoffs:'Write-through vs. write-back: write-through ensures consistency (write to cache + DB simultaneously); write-back is faster but risks data loss. LRU vs. LFU: LRU simple, LFU better for skewed access. Replication synchronous vs. async.'
+    },
+    hints:['How do you redistribute keys when you add or remove a cache node?','How do you implement LRU eviction in O(1) for both get and put?','What\'s the "thundering herd" problem and how would you mitigate it?'],
+    checklist:['Consistent Hashing Ring','Cache Nodes','LRU Eviction','TTL Store','Replication Layer','Client Library','Config/Discovery Service','Monitoring'],
+    solution:[
+      'Client library uses consistent hashing (MD5/SHA1 of key) to route to cache node',
+      'Virtual nodes (150 vnodes/node) ensure even key distribution',
+      'Each cache node: in-memory HashMap + doubly-linked list for O(1) LRU',
+      'TTL: lazy expiry (check on access) + background cleanup thread',
+      'Replication: leader writes, async replicate to 2 followers; promote on failure',
+      'Thundering herd mitigation: mutex/lock on cache miss per key (only one thread fetches)'
+    ]
+  },
+  {
+    id:'collab',title:'Design Google Docs (Collaborative Editor)',difficulty:'Hard',
+    tags:['CRDT','OT','Real-time','Consistency'],
+    statement:'Design a collaborative document editor where multiple users can edit the same document simultaneously.',
+    functional:['Multiple users edit same doc in real time','Changes reflected to all collaborators in < 500ms','Offline editing with sync on reconnect','Version history'],
+    nonfunctional:['Document size up to 10MB','100 concurrent editors per doc','Conflict-free merging','Zero data loss'],
+    steps:{
+      clarify:'Clarify: Rich text or plain? Rich text. Conflict resolution approach? OT or CRDT. Real-time or asynchronous? Real-time.',
+      estimate:'100 concurrent editors × 1 op/sec = 100 ops/sec per doc. Low volume but high complexity in conflict resolution.',
+      design:'OT (Operational Transformation): transforms operations so concurrent edits merge correctly. Server is authoritative sequencer. Client sends ops → server transforms against concurrent ops → broadcasts to others.',
+      deepdive:'OT: insert at position N; if concurrent insert at < N, adjust position. CRDT (Conflict-free Replicated Data Type): logoot or LSEQ assign fractional positions; no server coordination needed. WebSocket for real-time op delivery.',
+      tradeoffs:'OT: simpler client, server bottleneck. CRDT: no server coordination, but complex client and memory overhead. Auto-save with version snapshots every N ops. Presence: show collaborator cursors in real time.'
+    },
+    hints:['If Alice inserts "X" at position 5 and Bob simultaneously deletes position 3, what happens to Alice\'s operation?','Why does OT require a central server but CRDTs don\'t?','How would you implement "show cursor position of collaborators" in real time?'],
+    checklist:['WebSocket Server','OT/CRDT Engine','Document Store','Op Log','Version Snapshot','Presence Service','Conflict Resolver','Sync Service'],
+    solution:[
+      'Each client maintains local document + pending operations queue',
+      'Client sends op to server via WebSocket with client_version',
+      'Server sequencer: transform incoming op against any concurrent ops → assign sequence number',
+      'Broadcast transformed op to all other clients; clients apply with OT transformation',
+      'Document stored as op log; snapshots every 1000 ops for fast load',
+      'Presence: client sends cursor position every 500ms → server broadcasts to collaborators'
+    ]
+  },
+  {
+    id:'fraud',title:'Design Fraud Detection System',difficulty:'Hard',
+    tags:['ML','Stream Processing','Rules Engine','Real-time'],
+    statement:'Design a real-time fraud detection system for financial transactions.',
+    functional:['Analyze each transaction for fraud risk in real time','Block or flag suspicious transactions','Learn from new fraud patterns','Alert users and analysts'],
+    nonfunctional:['< 100ms decision latency','Process 10K transactions/sec','False positive rate < 1%','Audit trail for every decision'],
+    steps:{
+      clarify:'Clarify: Credit card fraud or account takeover? Both. Is it blocking or alerting? Both — block high-risk, alert medium-risk. Historical data available? Yes.',
+      estimate:'10K transactions/sec. Each decision must be < 100ms. Model inference: < 10ms. Feature computation: < 50ms.',
+      design:'Transaction event → Feature Engineering (user history, geo, device, velocity) → Rules Engine (fast, interpretable) → ML Model (gradient boosted trees) → Risk Score → Block/Allow/Flag.',
+      deepdive:'Velocity checks: count transactions per user in last 1min/5min/1hr using Redis sliding window. Feature store: pre-computed user features (avg spend, usual merchants) updated batch daily. Real-time features via stream processing (Flink).',
+      tradeoffs:'Rules vs. ML: rules interpretable and fast to update; ML more accurate but black-box. Synchronous vs. async: sync allows blocking but adds latency to payment. False positives vs. negatives: financial impact differs — tune threshold carefully.'
+    },
+    hints:['How do you compute "user spent more than 3x their average in last hour" in under 100ms?','How do you handle a fraudster who learns your rules and adapts?','How would you explain a fraud decision to a customer who was falsely blocked?'],
+    checklist:['Event Ingestor (Kafka)','Feature Store (Redis)','Rules Engine','ML Model Serving','Risk Scorer','Decision Service','Alert Queue','Audit Log (Cassandra)'],
+    solution:[
+      'Transaction event → Kafka → Feature Engineering Service',
+      'Real-time features: query Redis for velocity counters (INCR + EXPIRE per time window)',
+      'Batch features: user historical profile from Feature Store (daily updated)',
+      'Rules Engine evaluates hard rules (new country + high amount = flag)',
+      'ML Model (gradient boosted trees) outputs fraud probability score',
+      'If score > threshold: block + alert user; medium score: 2FA challenge; low: allow'
+    ]
+  },
+  {
+    id:'metrics',title:'Design Metrics Monitoring System',difficulty:'Medium',
+    tags:['Time Series','Aggregation','Alerting','Retention'],
+    statement:'Design a metrics and monitoring system like Datadog or Prometheus that collects, stores, and alerts on system metrics.',
+    functional:['Collect metrics from thousands of hosts','Query metrics with aggregation (sum, avg, p99)','Set threshold-based alerts','Dashboard visualization'],
+    nonfunctional:['Ingest 1M metrics/sec','Query latency < 1 second','Retention: 1yr at low resolution, 2wks at raw','High write throughput'],
+    steps:{
+      clarify:'Clarify: Push or pull model? Pull (Prometheus-style) and push. What metrics? CPU, memory, custom app metrics. Anomaly detection? Stretch goal.',
+      estimate:'10K hosts × 100 metrics each × 1 sample/10sec = 100K samples/sec. 1yr retention at 1min resolution: 10K×100×525K min = 525B data points.',
+      design:'Agents on each host → push to Collector → write to Time Series DB (InfluxDB/Cassandra with time-partitioning). Query engine aggregates over time ranges. Alerting: periodic evaluation of metric queries against thresholds.',
+      deepdive:'Time series schema: (metric_name, tags, timestamp, value). Partitioning by time (hourly/daily chunks) for efficient range queries. Downsampling: aggregate 10s data to 1min, 5min, 1hr over time. WAL for durability.',
+      tradeoffs:'Pull vs. push: pull (Prometheus) - server controls scrape rate; push - works behind firewalls. Column-oriented storage (Parquet) vs. row-oriented: column much faster for aggregations. Approximate aggregates (HLL for cardinality) vs. exact.'
+    },
+    hints:['How do you store time-series data efficiently for range queries over months?','What\'s downsampling and why is it important for long-term retention?','How do you alert on "CPU > 90% for 5 minutes" without false positives?'],
+    checklist:['Metric Agents','Collector Fleet','Time Series DB','Downsampling Worker','Query Engine','Alert Evaluator','Alert Manager','Dashboard Service'],
+    solution:[
+      'Agents on each host scrape metrics every 10s → push to Collector fleet',
+      'Collector batches writes → Time Series DB (partitioned by metric + time window)',
+      'Rollup worker: every hour aggregates 10s→1min→5min→1hr data points',
+      'Query engine: parse PromQL-like query → fan out to relevant partitions → aggregate',
+      'Alert evaluator runs queries every 30s → compare against threshold → fire if sustained',
+      'Alert Manager deduplicates alerts, routes to PagerDuty/Slack based on severity'
+    ]
+  }
+];
+
+const CONCEPTS = [
+  {name:'Load Balancing',preview:'Distributing incoming traffic across multiple servers',explanation:'Load balancers distribute client requests across a pool of backend servers to prevent any single server from becoming a bottleneck. They also handle health checks — removing unhealthy servers from the pool.',whentouse:'Any system with multiple server replicas; needed when single-server throughput is insufficient.',tradeoffs:'L4 (TCP-level) is faster; L7 (HTTP-level) allows routing by path/header. Round-robin is simple; least-connections reduces hotspots. Active health checks add overhead.'},
+  {name:'Caching',preview:'Storing frequently accessed data in a fast layer',explanation:'Caching stores copies of expensive-to-compute or frequently-read data in a fast store (memory) to reduce latency and database load. Strategies: Cache-aside (app manages), Write-through (write to cache + DB), Write-back (cache first, async to DB).',whentouse:'Read-heavy systems, expensive computations, data that doesn\'t change frequently.',tradeoffs:'Cache invalidation is hard ("only two hard things in CS"). Stale data risk. Memory cost. TTL vs event-based invalidation.'},
+  {name:'CAP Theorem',preview:'Can only guarantee 2 of 3: Consistency, Availability, Partition tolerance',explanation:'In a distributed system, during a network partition you must choose: Consistency (all nodes see the same data) or Availability (system remains operational). Partition Tolerance is not optional in real networks.',whentouse:'When choosing distributed databases: CP (MongoDB, HBase) vs. AP (Cassandra, CouchDB).',tradeoffs:'CA (both C and A): only possible without network partitions — not realistic. CP gives strong consistency at cost of availability. AP gives high availability with eventual consistency.'},
+  {name:'SQL vs NoSQL',preview:'Relational databases vs. distributed non-relational stores',explanation:'SQL: structured schema, ACID transactions, joins, vertical scaling. NoSQL: flexible schema, horizontal scaling, sacrifice some consistency. Types: Document (MongoDB), Key-Value (Redis), Wide-Column (Cassandra), Graph (Neo4j).',whentouse:'SQL for complex queries, transactions, relationships. NoSQL for large-scale writes, flexible schema, time-series, caching.',tradeoffs:'SQL harder to scale horizontally. NoSQL often sacrifices consistency or rich queries. ACID in NoSQL is increasingly available (MongoDB 4.0+, DynamoDB transactions).'},
+  {name:'Sharding',preview:'Horizontal partitioning of data across multiple database nodes',explanation:'Sharding splits data across multiple database nodes so each node handles a subset. Common strategies: Hash-based (hash(key) % N), Range-based (by ID range or date), Directory-based (lookup table maps keys to shards).',whentouse:'Database too large or write-heavy for a single node.',tradeoffs:'Complex cross-shard queries and joins. Rebalancing when adding shards. Hot shards if distribution is uneven. Operations team complexity.'},
+  {name:'Replication',preview:'Maintaining copies of data across multiple nodes',explanation:'Replication copies data to multiple nodes for durability and availability. Single-leader: one primary accepts writes, replicas serve reads. Multi-leader: multiple primaries (for geo-distribution). Leaderless: any node accepts writes (Dynamo-style).',whentouse:'Any system needing high availability or disaster recovery. Read scaling (replicas handle reads).',tradeoffs:'Replication lag causes stale reads. Leader election complexity. Synchronous replication ensures durability but increases write latency. Async is faster but risks data loss on crash.'},
+  {name:'Message Queues',preview:'Async communication buffer between services',explanation:'Message queues (Kafka, RabbitMQ, SQS) decouple producers from consumers. Producers publish messages; consumers process at their own rate. Enables async processing, load leveling, and fan-out.',whentouse:'When services have different processing rates, for fan-out notifications, event-driven architectures, reliable async workflows.',tradeoffs:'Adds latency vs. synchronous calls. Message ordering guarantees vary. At-least-once delivery requires idempotent consumers. Queue depth as backpressure signal.'},
+  {name:'CDN',preview:'Content delivery network serves assets from geographically distributed edge nodes',explanation:'CDNs like Cloudflare, Akamai cache static and dynamic content at edge nodes globally. Reduces latency by serving from nodes close to users, offloads origin servers.',whentouse:'Static assets (JS/CSS/images), large media files, globally distributed users.',tradeoffs:'Cache invalidation delay. Cost per GB transferred. Origin shield adds another cache layer. Edge compute (Cloudflare Workers) enables logic at edge.'},
+  {name:'Rate Limiting',preview:'Controlling request rates to protect services',explanation:'Rate limiting restricts how many requests a client can make in a time window. Algorithms: Token Bucket (allows bursts), Leaky Bucket (smooth output), Fixed Window (simple, boundary burst problem), Sliding Window (accurate, memory cost).',whentouse:'APIs to prevent abuse, protect backend services from overload, enforce SLA tiers.',tradeoffs:'False positives block legitimate users. Distributed rate limiting needs coordination (Redis). Hard vs. soft limits. Rate limit by IP vs. user vs. API key.'},
+  {name:'Consistent Hashing',preview:'Distributing keys across nodes with minimal remapping on changes',explanation:'Consistent hashing maps keys and nodes to positions on a virtual ring. Each key is served by the nearest node clockwise. When a node is added/removed, only the keys between it and its predecessor are remapped (O(K/N) keys vs. O(K) for modulo hashing).',whentouse:'Distributed caches, load balancers, distributed databases where nodes come and go.',tradeoffs:'Virtual nodes (vnodes) needed for uniform distribution. Hot spots if node capacity differs. Complex implementation vs. simple modulo hashing.'},
+  {name:'Horizontal vs Vertical Scaling',preview:'Scale out (more servers) vs. scale up (bigger servers)',explanation:'Vertical scaling: add CPU/RAM to a single server. Simple but limited and has downtime for upgrades. Horizontal scaling: add more servers. More complex (distributed system) but unlimited scale and better fault tolerance.',whentouse:'Vertical first (simpler), switch to horizontal when you hit limits or need high availability.',tradeoffs:'Horizontal needs load balancing, stateless services, distributed data. Cost of larger servers (non-linear). Vertical can be faster for write-heavy workloads.'},
+  {name:'Microservices',preview:'Architecture with many small, independently deployable services',explanation:'Microservices split application into small services each owning their domain. Each deploys independently, scales independently, can use different tech stacks. Communicate via HTTP/gRPC or message queues.',whentouse:'Large teams, independent scaling of components, need different tech per service.',tradeoffs:'Network overhead vs. in-process calls. Distributed transactions are complex (need Saga/2PC). Operational overhead: service discovery, tracing, many deployments. Monolith is simpler to start.'},
+  {name:'API Gateway',preview:'Single entry point for all client requests',explanation:'API Gateway handles cross-cutting concerns: authentication, rate limiting, routing, SSL termination, request/response transformation, caching. Examples: Kong, AWS API Gateway, Nginx.',whentouse:'Microservices architecture, when multiple services need common auth/rate limiting, mobile clients needing aggregated APIs.',tradeoffs:'Single point of failure (mitigated by clustering). Bottleneck if not scaled. Logic in gateway can be hard to test. Increases latency (one extra hop).'},
+  {name:'Database Indexes',preview:'Data structures that speed up queries at the cost of write overhead',explanation:'Indexes (B-tree, hash, full-text) allow the DB to find rows without scanning every row. B-tree supports range queries; hash index supports exact lookups; full-text enables search. Covering index includes all columns needed by a query.',whentouse:'Any column used in WHERE, JOIN, ORDER BY clauses with large tables.',tradeoffs:'Write overhead (index updated on every insert/update/delete). Storage cost. Too many indexes slow writes. Partial and expression indexes for specific query patterns.'},
+  {name:'Eventual Consistency',preview:'All replicas converge to the same value given time without updates',explanation:'In an eventually consistent system, writes propagate to all replicas asynchronously. Reads may return stale data during propagation. Used in AP systems (Cassandra, DynamoDB). Clients must handle conflicts or accept stale reads.',whentouse:'Systems tolerating brief staleness: social feeds, shopping carts, DNS, analytics counters.',tradeoffs:'Conflict resolution (last-write-wins, vector clocks, CRDTs). Read-your-own-writes consistency: ensure writes route to same replica. User experience: showing stale like counts is acceptable; stale bank balance is not.'},
+  {name:'Idempotency',preview:'Operation that produces same result regardless of how many times it runs',explanation:'Idempotent operations can be safely retried. HTTP: GET/PUT/DELETE are idempotent; POST is not by default. Achieved via idempotency keys: client sends unique key per request; server stores result and returns it on retry.',whentouse:'Any operation that might be retried due to network failures: payments, notifications, order creation.',tradeoffs:'Server must store idempotency keys (memory/TTL cost). Keys must be unique (UUID). Window of de-duplication: how long to store keys.'},
+  {name:'Distributed Transactions',preview:'Coordinating transactions across multiple databases or services',explanation:'2PC (Two-Phase Commit): coordinator locks resources, then commits. Blocking protocol — bad for availability. Saga pattern: sequence of local transactions with compensating rollback actions. Outbox pattern: write event atomically with DB record.',whentouse:'Cross-service writes needing consistency (e.g., payment + order). Use Saga for microservices over 2PC.',tradeoffs:'2PC: blocking, single coordinator failure halts system. Saga: complex compensation logic, eventually consistent. Outbox: reliable but adds DB table and polling/CDC overhead.'},
+  {name:'Circuit Breaker',preview:'Stops calling a failing service to allow it to recover',explanation:'Circuit breaker wraps calls to remote services. States: Closed (normal), Open (failing — reject fast), Half-Open (testing recovery). Prevents cascade failures when a downstream service is slow or down.',whentouse:'Any microservice calling another service or external API.',tradeoffs:'False positive trips if threshold is too sensitive. Need fallback logic for when circuit is open. Adds complexity vs. simple retries.'},
+  {name:'Service Discovery',preview:'Automatic detection of service instances in a dynamic environment',explanation:'In microservices, instances start/stop dynamically. Service discovery (Consul, Eureka, Kubernetes DNS) tracks live instances. Client-side discovery: client queries registry and load balances. Server-side: load balancer queries registry.',whentouse:'Any microservices deployment where service instances scale dynamically.',tradeoffs:'Additional infrastructure to maintain. Stale registry entries if health checks fail. DNS-based discovery is simpler but slower to propagate changes.'},
+  {name:'WebSockets',preview:'Full-duplex persistent connection for real-time communication',explanation:'WebSockets upgrade an HTTP connection to a persistent, bidirectional TCP connection. Server can push data to client without polling. Used in chat, live feeds, collaborative editing, real-time dashboards.',whentouse:'When server needs to push updates to client (not just request-response): live sports, trading, multiplayer games.',tradeoffs:'Stateful connections complicate horizontal scaling (sticky sessions or shared state). Not cacheable. More complex than HTTP polling for simple cases. Connection per client limits server capacity.'},
+  {name:'Blob/Object Storage',preview:'Scalable storage for unstructured data (files, images, videos)',explanation:'Object stores (S3, GCS, Azure Blob) store unstructured data at petabyte scale. Data accessed by key (URL), not filesystem path. Features: lifecycle policies, versioning, event notifications, presigned URLs for direct client upload.',whentouse:'User-generated content, backups, logs, media files, ML training datasets.',tradeoffs:'Higher latency than local disk. Costs per GB + per request. Eventual consistency in some operations. Egress costs dominate for large-scale streaming.'},
+  {name:'Bloom Filter',preview:'Probabilistic data structure for set membership testing',explanation:'Bloom filter uses a bit array and k hash functions. Check if element might be in set (possible false positives) or definitely not in set (no false negatives). Never false negatives. Space-efficient: 10 bits/element at 1% false positive rate.',whentouse:'When you need fast set membership checks with acceptable false positives: cache pre-screening, duplicate URL detection, malware detection.',tradeoffs:'Cannot delete elements (use Counting Bloom Filter). False positive rate increases as filter fills. Must re-tune size as set grows.'},
+  {name:'Long Polling vs SSE vs WebSocket',preview:'Three techniques for server-to-client real-time updates',explanation:'Long Polling: client holds request open; server responds when data arrives. SSE (Server-Sent Events): server streams events to client over HTTP — unidirectional. WebSocket: bidirectional, persistent. Long polling works everywhere; SSE is simple for one-way; WebSocket is best for two-way real-time.',whentouse:'Long polling: simple, firewall-friendly. SSE: live feeds, notifications, dashboards. WebSocket: chat, games, collaborative editing.',tradeoffs:'Long polling: high server connection count, latency of round-trip. SSE: HTTP/2 multiplexing helps, but still unidirectional. WebSocket: stateful, harder to scale horizontally.'},
+  {name:'Geospatial Indexing',preview:'Efficient querying for location-based data',explanation:'Geohash encodes (lat, lng) as a string; nearby locations share a prefix. R-tree indexes bounding boxes for spatial range queries. PostGIS adds spatial indexing to PostgreSQL. Used in proximity searches.',whentouse:'Ride-sharing, food delivery, map apps, location-based recommendations.',tradeoffs:'Geohash cells are rectangular — may miss nearby points just across a boundary. R-tree better for irregular polygons. Quadtrees for dynamic data with non-uniform density.'},
+  {name:'Data Partitioning Strategies',preview:'How to split data across multiple nodes',explanation:'Hash partitioning: consistent hash distributes evenly, good for key lookups. Range partitioning: by date, ID range — good for range queries but can create hot partitions. Directory partitioning: explicit mapping table flexible but adds lookup overhead.',whentouse:'Any distributed database or storage system.',tradeoffs:'Hash: poor range queries, even distribution. Range: range queries fast, hotspots on sequential IDs. Directory: flexible but lookup table is a bottleneck/SPOF.'},
+  {name:'Leader Election',preview:'Choosing one node to act as coordinator in a distributed system',explanation:'Leader election algorithms (Raft, Paxos, ZooKeeper\'s ZAB) ensure exactly one node is elected leader. Leader handles writes or coordination. Consensus algorithms handle leader failure and re-election without data loss.',whentouse:'Distributed databases with primary replica, distributed locks, task schedulers (only one node should run a job).',tradeoffs:'Election process takes time — unavailability window. Split-brain if two nodes believe they\'re leader — prevent with fencing/epoch numbers. Raft is simpler to understand than Paxos.'},
+  {name:'Saga Pattern',preview:'Managing distributed transactions via a sequence of local transactions',explanation:'Saga breaks a distributed transaction into local transactions, each publishing an event. Two types: Choreography (each service listens for events and reacts) and Orchestration (central orchestrator commands each step). Failed steps trigger compensating transactions.',whentouse:'Microservices requiring cross-service data consistency without 2PC.',tradeoffs:'Complex compensation logic. Temporary inconsistency. Debugging event chains is hard. Orchestration: easier to track state but adds orchestrator dependency.'},
+  {name:'Write-Ahead Log (WAL)',preview:'Durability mechanism writing changes to log before applying them',explanation:'WAL (or transaction log) records every change before it\'s applied. On crash, the system replays the log to recover. Used in PostgreSQL, Kafka (commit log), distributed DBs. Enables replication by shipping the log.',whentouse:'Any stateful system needing crash recovery or replication.',tradeoffs:'Write amplification (write to log + actual storage). Log compaction needed to prevent unbounded growth. WAL shipping latency affects replica freshness.'},
+  {name:'Backpressure',preview:'Mechanism for consumers to signal producers to slow down',explanation:'Backpressure prevents producers from overwhelming consumers. Mechanisms: bounded queues (drop or block when full), TCP flow control, reactive streams protocol. Without backpressure, queues grow unbounded, causing OOM or cascading failures.',whentouse:'Any system with asynchronous processing: Kafka consumers, stream processing, microservice fan-out.',tradeoffs:'Blocking backpressure reduces throughput. Dropping messages loses data. Monitoring queue depth as a leading indicator of overload.'},
+  {name:'Checksums and Data Integrity',preview:'Detecting corruption in stored or transmitted data',explanation:'Checksums (CRC32, MD5, SHA-256) detect data corruption. Hash stored alongside data; recomputed on read/receipt and compared. Used in TCP, filesystems, object stores. SHA-256 for cryptographic integrity; CRC32 for fast non-cryptographic checks.',whentouse:'Any system storing or transmitting data that could be corrupted: file upload, inter-service data transfer, database storage.',tradeoffs:'CRC32 fast but not collision-resistant. SHA-256 slow but cryptographically secure. End-to-end integrity: client should verify hash, not just network layer.'}
+];
+
+const LS = 'sysdesign64_';
+
+function getProgress(){return JSON.parse(localStorage.getItem(LS+'progress')||'{}')}
+function saveProgress(p){localStorage.setItem(LS+'progress',JSON.stringify(p))}
+function getRatings(){return JSON.parse(localStorage.getItem(LS+'ratings')||'{}')}
+function saveRatings(r){localStorage.setItem(LS+'ratings',JSON.stringify(r))}
+function getReviewed(){return JSON.parse(localStorage.getItem(LS+'reviewed')||'[]')}
+function saveReviewed(r){localStorage.setItem(LS+'reviewed',JSON.stringify(r))}
+
+// PROBLEMS
+let diffFilter = new Set();
+function toggleDiff(d, btn){
+  if(diffFilter.has(d)){diffFilter.delete(d);btn.classList.remove('on');}
+  else{diffFilter.add(d);btn.classList.add('on');}
+  renderProblems();
+}
+
+function renderProblems(){
+  const q = (document.getElementById('problemSearch')||{value:''}).value.toLowerCase();
+  const prog = getProgress();
+  const filtered = PROBLEMS.filter(p=>
+    (diffFilter.size===0||diffFilter.has(p.difficulty))&&
+    (!q||p.title.toLowerCase().includes(q)||p.tags.some(t=>t.toLowerCase().includes(q)))
+  );
+  document.getElementById('problemsGrid').innerHTML = filtered.map(p=>{
+    const done = prog[p.id]==='done';
+    return `<div class="problem-card${done?' done':''}" onclick="openInterview('${p.id}')">
+      <div class="ph">
+        <h3>${p.title}</h3>
+        <span class="badge badge-${p.difficulty.toLowerCase()}">${p.difficulty}</span>
+      </div>
+      <div class="tags">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <div class="footer">
+        ${done?'<span class="done-check">✓ Attempted</span>':'<span style="color:#94a3b8;font-size:.8rem">Not started</span>'}
+        <button class="btn btn-primary" style="padding:7px 16px;font-size:.82rem" onclick="event.stopPropagation();openInterview('${p.id}')">Start →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// INTERVIEW
+let currentProblem = null;
+let currentStep = 0;
+const STEPS = ['clarify','estimate','design','deepdive','tradeoffs'];
+const STEP_LABELS = ['1. Clarify','2. Estimate','3. Design','4. Deep Dive','5. Tradeoffs'];
+let visitedSteps = new Set();
+let checklistState = {};
+let hintsRevealed = false;
+let solutionRevealed = false;
+
+function openInterview(id){
+  currentProblem = PROBLEMS.find(p=>p.id===id);
+  currentStep = 0;
+  visitedSteps = new Set([0]);
+  checklistState = {};
+  hintsRevealed = false;
+  solutionRevealed = false;
+  const prog = getProgress();
+  prog[id] = 'done';
+  saveProgress(prog);
+  document.getElementById('interviewPrompt').classList.add('hidden');
+  document.getElementById('interviewView').style.display='block';
+  document.getElementById('ivTitle').textContent = currentProblem.title;
+  document.getElementById('ivBadge').innerHTML = `<span class="badge badge-${currentProblem.difficulty.toLowerCase()}">${currentProblem.difficulty}</span> ${currentProblem.tags.map(t=>`<span class="tag">${t}</span>`).join('')}`;
+  renderStepsNav();
+  renderStep();
+  switchTab('interview');
+}
+
+function exitInterview(){
+  document.getElementById('interviewPrompt').classList.remove('hidden');
+  document.getElementById('interviewView').style.display='none';
+  renderProblems();
+}
+
+function renderStepsNav(){
+  document.getElementById('stepsNav').innerHTML = STEP_LABELS.map((l,i)=>`
+    <button class="step-btn${i===currentStep?' active':visitedSteps.has(i)?' visited':''}" onclick="goToStep(${i})">${l}</button>
+  `).join('');
+}
+
+function goToStep(i){
+  currentStep=i;
+  visitedSteps.add(i);
+  renderStepsNav();
+  renderStep();
+}
+
+function nextStep(){if(currentStep<STEPS.length-1){goToStep(currentStep+1);}}
+function prevStep(){if(currentStep>0){goToStep(currentStep-1);}}
+
+function renderStep(){
+  const p = currentProblem;
+  const skey = STEPS[currentStep];
+  let html = '';
+
+  if(currentStep===0){
+    // Clarify + Requirements
+    html = `<div class="step-content">
+      <h2>Step 1: Clarify Requirements</h2>
+      <p>${p.statement}</p>
+      <div class="requirements-row">
+        <div class="req-box func">
+          <h4>Functional Requirements</h4>
+          <ul>${p.functional.map(r=>`<li>${r}</li>`).join('')}</ul>
+        </div>
+        <div class="req-box nonfunc">
+          <h4>Non-Functional Requirements</h4>
+          <ul>${p.nonfunctional.map(r=>`<li>${r}</li>`).join('')}</ul>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <button class="reveal-btn" onclick="toggleHint('clarify-hint')">💡 Suggested Clarifications</button>
+        <div id="clarify-hint" class="hint-box" style="display:none">
+          <h4>What to Clarify</h4>
+          <p>${p.steps.clarify}</p>
+        </div>
+      </div>
+    </div>`;
+  } else if(currentStep===1){
+    html = `<div class="step-content">
+      <h2>Step 2: Capacity Estimation</h2>
+      <p style="color:#94a3b8">Estimate storage, bandwidth, and QPS. Back-of-envelope numbers help drive design decisions.</p>
+      <button class="reveal-btn" onclick="toggleHint('est-hint')">💡 Reveal Estimates</button>
+      <div id="est-hint" class="hint-box" style="display:none">
+        <h4>Estimation Notes</h4>
+        <p>${p.steps.estimate}</p>
+      </div>
+    </div>`;
+  } else if(currentStep===2){
+    html = `<div class="step-content">
+      <h2>Step 3: High-Level Design</h2>
+      <p style="color:#94a3b8">Sketch the major components and how data flows between them.</p>
+      <div style="margin-top:14px">
+        <div style="font-size:.85rem;font-weight:600;color:#94a3b8;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Key Components Checklist</div>
+        <div class="checklist" id="checklist">
+          ${p.checklist.map(c=>`<div class="check-item" id="ci-${c.replace(/\s/g,'_')}" onclick="toggleCheck('${c.replace(/\s/g,'_')}')">
+            <div class="ci-box" id="cib-${c.replace(/\s/g,'_')}"></div>
+            <span>${c}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <button class="reveal-btn" onclick="toggleHint('design-hint')">💡 Reveal Design Notes</button>
+        <div id="design-hint" class="hint-box" style="display:none">
+          <h4>Design Approach</h4>
+          <p>${p.steps.design}</p>
+        </div>
+      </div>
+    </div>`;
+    // Restore checklist state
+    Object.keys(checklistState).forEach(k=>{
+      if(checklistState[k]){
+        const ci = document.getElementById('ci-'+k);
+        const cib = document.getElementById('cib-'+k);
+        if(ci){ci.classList.add('checked');}
+        if(cib){cib.textContent='✓';}
+      }
+    });
+  } else if(currentStep===3){
+    html = `<div class="step-content">
+      <h2>Step 4: Deep Dive</h2>
+      <p style="color:#94a3b8">Go deeper into the most critical or complex component. Explain data flow, algorithms, and scaling.</p>
+      <div style="margin-top:16px">
+        <button class="reveal-btn" onclick="toggleHint('dd-hint')">💡 Deep Dive Hints</button>
+        <div id="dd-hint" class="hint-box" style="display:none">
+          <h4>Deep Dive Focus</h4>
+          <p>${p.steps.deepdive}</p>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div style="font-size:.85rem;color:#94a3b8;font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Hints Panel</div>
+        ${p.hints.map((h,i)=>`
+          <button class="reveal-btn" style="margin-bottom:8px;width:100%;justify-content:flex-start" onclick="toggleHint('hint-${i}')">🤔 Hint ${i+1}</button>
+          <div id="hint-${i}" class="hint-box" style="display:none;margin-bottom:12px">
+            <p>${h}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  } else if(currentStep===4){
+    html = `<div class="step-content">
+      <h2>Step 5: Tradeoffs & Conclusion</h2>
+      <p style="color:#94a3b8">Discuss design decisions and justify your choices. No perfect answer exists — show you understand the tradeoffs.</p>
+      <div style="margin-top:16px">
+        <button class="reveal-btn" onclick="toggleHint('to-hint')">💡 Tradeoff Discussion</button>
+        <div id="to-hint" class="hint-box" style="display:none">
+          <h4>Key Tradeoffs</h4>
+          <p>${p.steps.tradeoffs}</p>
+        </div>
+      </div>
+      <div style="margin-top:20px">
+        <button class="reveal-btn" onclick="toggleHint('solution-box')">🔓 Reveal Sample Solution</button>
+        <div id="solution-box" class="solution-box" style="display:none;margin-top:12px">
+          <h4>Sample Solution Outline</h4>
+          ${p.solution.map((s,i)=>`<div class="solution-step"><div class="num">${i+1}</div><p>${s}</p></div>`).join('')}
+        </div>
+      </div>
+      <div class="rate-row">
+        <span class="rate-label">Self-rate your performance:</span>
+        ${[1,2,3,4,5].map(n=>`<span class="star${getRatings()[p.id]>=n?' on':''}" onclick="rateProblem(${n})" id="star-${n}">★</span>`).join('')}
+        <span id="rateLabel" style="font-size:.82rem;color:#94a3b8;margin-left:8px">${getRatings()[p.id]?getRatings()[p.id]+'/5':''}</span>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('stepContent').innerHTML = html;
+  document.getElementById('prevBtn').style.visibility = currentStep===0?'hidden':'visible';
+  document.getElementById('nextBtn').textContent = currentStep===STEPS.length-1?'Finish':'Next →';
+  if(currentStep===STEPS.length-1){
+    document.getElementById('nextBtn').onclick = exitInterview;
+  } else {
+    document.getElementById('nextBtn').onclick = nextStep;
+  }
+}
+
+function toggleHint(id){
+  const el = document.getElementById(id);
+  if(el) el.style.display = el.style.display==='none'?'block':'none';
+}
+
+function toggleCheck(key){
+  checklistState[key] = !checklistState[key];
+  const ci = document.getElementById('ci-'+key);
+  const cib = document.getElementById('cib-'+key);
+  if(ci) ci.classList.toggle('checked', checklistState[key]);
+  if(cib) cib.textContent = checklistState[key]?'✓':'';
+}
+
+function rateProblem(n){
+  const r = getRatings();
+  r[currentProblem.id] = n;
+  saveRatings(r);
+  [1,2,3,4,5].forEach(i=>{
+    const s = document.getElementById('star-'+i);
+    if(s) s.className = 'star'+(i<=n?' on':'');
+  });
+  const rl = document.getElementById('rateLabel');
+  if(rl) rl.textContent = n+'/5';
+}
+
+// CONCEPTS
+let openConcept = null;
+function renderConcepts(){
+  const q = (document.getElementById('conceptSearch')||{value:''}).value.toLowerCase();
+  const reviewed = getReviewed();
+  const filtered = CONCEPTS.filter(c=>
+    !q||c.name.toLowerCase().includes(q)||c.explanation.toLowerCase().includes(q)
+  );
+  document.getElementById('conceptsGrid').innerHTML = filtered.map((c,i)=>`
+    <div class="concept-card${reviewed.includes(c.name)?' reviewed':''}" onclick="toggleConcept('${c.name.replace(/[^a-z0-9]/gi,'_')}')">
+      <h3>${c.name}${reviewed.includes(c.name)?'  <span style="color:#4ade80;font-size:.75rem">✓ Reviewed</span>':''}</h3>
+      <div class="preview">${c.preview}</div>
+    </div>
+    <div class="concept-detail" id="cd-${c.name.replace(/[^a-z0-9]/gi,'_')}">
+      <h2>${c.name}</h2>
+      <div class="concept-section"><h4>Explanation</h4><p>${c.explanation}</p></div>
+      <div class="concept-section"><h4>When to Use</h4><p>${c.whentouse}</p></div>
+      <div class="concept-section"><h4>Tradeoffs</h4><p>${c.tradeoffs}</p></div>
+      <button class="btn btn-green" style="margin-top:8px" onclick="event.stopPropagation();markReviewed('${c.name}')">✓ Mark as Reviewed</button>
+    </div>
+  `).join('');
+}
+
+function toggleConcept(id){
+  const el = document.getElementById('cd-'+id);
+  if(!el) return;
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.concept-detail').forEach(d=>d.classList.remove('open'));
+  if(!isOpen) el.classList.add('open');
+}
+
+function markReviewed(name){
+  const r = getReviewed();
+  if(!r.includes(name)) r.push(name);
+  saveReviewed(r);
+  renderConcepts();
+}
+
+// PROGRESS
+function renderProgress(){
+  const prog = getProgress();
+  const ratings = getRatings();
+  const reviewed = getReviewed();
+  const attempted = Object.keys(prog).length;
+  const rated = Object.keys(ratings).length;
+  const avgRating = rated? (Object.values(ratings).reduce((a,b)=>a+b,0)/rated).toFixed(1): 'N/A';
+  const weakProblems = PROBLEMS.filter(p=>ratings[p.id]&&ratings[p.id]<=2);
+
+  document.getElementById('progressGrid').innerHTML = `
+    <div class="prog-card"><div class="pv">${attempted}/${PROBLEMS.length}</div><div class="pk">Problems Attempted</div></div>
+    <div class="prog-card"><div class="pv">${rated}</div><div class="pk">Problems Rated</div></div>
+    <div class="prog-card"><div class="pv">${avgRating}</div><div class="pk">Avg Self Rating</div></div>
+    <div class="prog-card"><div class="pv">${reviewed.length}/${CONCEPTS.length}</div><div class="pk">Concepts Reviewed</div></div>
+  `;
+
+  const rs = document.getElementById('ratingsSection');
+  const ratedProblems = PROBLEMS.filter(p=>ratings[p.id]);
+  if(!ratedProblems.length){
+    rs.innerHTML='<div class="no-data">No ratings yet. Complete problems and rate yourself!</div>';
+  } else {
+    rs.innerHTML = '<div class="weak-list">'+ratedProblems.sort((a,b)=>ratings[a.id]-ratings[b.id]).map(p=>`
+      <div class="weak-item">
+        <span class="wn">${p.title} <span class="badge badge-${p.difficulty.toLowerCase()}">${p.difficulty}</span></span>
+        <span class="stars-display">${'★'.repeat(ratings[p.id])}${'☆'.repeat(5-ratings[p.id])}</span>
+      </div>
+    `).join('')+'</div>';
+  }
+
+  const cr = document.getElementById('conceptsReviewed');
+  if(!reviewed.length){
+    cr.innerHTML='<div class="no-data">No concepts reviewed yet. Go to CONCEPTS tab!</div>';
+  } else {
+    cr.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px">'+reviewed.map(c=>`<span class="tag" style="background:#4ade8015;color:#4ade80;border:1px solid #4ade8030">${c}</span>`).join('')+'</div>';
+  }
+}
+
+// TAB SWITCHING
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const names=['problems','interview','concepts','progress'];
+    t.classList.toggle('active',names[i]===name);
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='problems') renderProblems();
+  if(name==='concepts') renderConcepts();
+  if(name==='progress') renderProgress();
+}
+
+// Init
+renderProblems();
+renderConcepts();
+</script>
+</body>
+</html>
