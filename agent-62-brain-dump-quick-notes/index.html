@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain Dump / Quick Notes - Agent #62</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --card2: #20243a;
+    --blue: #4f8ef7; --green: #4ade80; --red: #f87171;
+    --yellow: #fbbf24; --purple: #a78bfa; --text: #e2e8f0;
+    --muted: #64748b; --border: #2d3150;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+  header { text-align: center; padding: 20px 16px 0; }
+  header h1 { font-size: 1.1rem; font-weight: 600; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  header p { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+  .tabs { display: flex; justify-content: center; gap: 4px; padding: 16px 16px 0; border-bottom: 1px solid var(--border); }
+  .tab-btn { background: none; border: none; color: var(--muted); font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; text-transform: uppercase; }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .tab-content { display: none; padding: 20px 16px; max-width: 760px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+
+  /* ─── DUMP TAB ─── */
+  .dump-area { position: relative; margin-bottom: 14px; }
+  .dump-textarea { width: 100%; min-height: 260px; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.6; resize: vertical; outline: none; font-family: inherit; transition: border .2s; }
+  .dump-textarea:focus { border-color: var(--blue); }
+  .autosave-indicator { position: absolute; top: 12px; right: 14px; font-size: 0.7rem; color: var(--muted); transition: opacity .4s; }
+  .autosave-indicator.saved { color: var(--green); }
+
+  .dump-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .tag-input-wrap { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 200px; }
+  .tag-input-wrap input { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 0.85rem; outline: none; transition: border .2s; }
+  .tag-input-wrap input:focus { border-color: var(--blue); }
+  .tag-input-wrap span { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+  .dump-tags-preview { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; min-height: 24px; }
+  .tag-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--card2); border: 1px solid var(--border); color: var(--blue); padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all .2s; user-select: none; }
+  .tag-chip:hover { border-color: var(--blue); }
+  .tag-chip .rm { color: var(--muted); font-size: 0.65rem; margin-left: 2px; }
+  .tag-chip .rm:hover { color: var(--red); }
+  .save-btn { background: var(--blue); color: #fff; border: none; padding: 9px 22px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: opacity .2s; }
+  .save-btn:hover { opacity: .85; }
+  .char-count { font-size: 0.72rem; color: var(--muted); text-align: right; margin-top: 4px; }
+
+  /* ─── NOTES TAB ─── */
+  .search-bar { position: relative; margin-bottom: 16px; }
+  .search-bar input { width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 14px 10px 36px; border-radius: 10px; font-size: 0.9rem; outline: none; transition: border .2s; }
+  .search-bar input:focus { border-color: var(--blue); }
+  .search-bar::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; }
+  .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .note-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all .2s; position: relative; display: flex; flex-direction: column; gap: 8px; }
+  .note-card:hover { border-color: var(--blue); transform: translateY(-1px); }
+  .note-card.pinned { border-color: var(--yellow); }
+  .pin-badge { position: absolute; top: 10px; right: 10px; font-size: 0.75rem; opacity: 0.7; }
+  .note-title { font-size: 0.9rem; font-weight: 700; line-height: 1.3; }
+  .note-preview { font-size: 0.78rem; color: var(--muted); line-height: 1.5; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+  .note-meta { display: flex; align-items: center; justify-content: space-between; }
+  .note-date { font-size: 0.7rem; color: var(--muted); }
+  .note-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+  .note-tag { font-size: 0.65rem; background: var(--card2); border: 1px solid var(--border); color: var(--blue); padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+  .note-actions { display: flex; gap: 6px; opacity: 0; transition: opacity .2s; }
+  .note-card:hover .note-actions { opacity: 1; }
+  .note-act { background: none; border: none; cursor: pointer; font-size: 0.75rem; color: var(--muted); padding: 3px 6px; border-radius: 4px; transition: all .2s; }
+  .note-act:hover { background: var(--card2); color: var(--text); }
+  .note-act.del:hover { color: var(--red); }
+  .empty-state { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 0.9rem; }
+  .empty-state div { font-size: 2.5rem; margin-bottom: 12px; }
+
+  /* ─── NOTE MODAL ─── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 600px; max-height: 85vh; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .modal-title { font-size: 1.1rem; font-weight: 700; border: none; background: none; color: var(--text); width: 100%; outline: none; font-family: inherit; padding: 0; }
+  .modal-title:focus { outline: 1px solid var(--blue); border-radius: 4px; }
+  .modal-body { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 12px; font-size: 0.9rem; line-height: 1.6; min-height: 160px; outline: none; font-family: inherit; resize: vertical; width: 100%; transition: border .2s; }
+  .modal-body:focus { border-color: var(--blue); }
+  .modal-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .modal-tags-input { flex: 1; min-width: 140px; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; outline: none; transition: border .2s; }
+  .modal-tags-input:focus { border-color: var(--blue); }
+  .modal-btns { display: flex; gap: 8px; }
+  .modal-btn { padding: 8px 18px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all .2s; }
+  .modal-btn.save { background: var(--blue); color: #fff; }
+  .modal-btn.save:hover { opacity: .85; }
+  .modal-btn.pin { background: var(--card2); color: var(--yellow); border: 1px solid var(--border); }
+  .modal-btn.pin.active { background: var(--yellow); color: #000; }
+  .modal-btn.cancel { background: var(--card2); color: var(--muted); border: 1px solid var(--border); }
+  .modal-btn.cancel:hover { color: var(--text); }
+
+  /* ─── ORGANIZE TAB ─── */
+  .organize-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .organize-header h3 { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .all-tags-cloud { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+  .org-tag-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; cursor: pointer; transition: all .2s; }
+  .org-tag-chip.active { border-color: var(--blue); background: var(--card2); }
+  .org-tag-chip:hover { border-color: var(--blue); }
+  .org-tag-name { font-size: 0.85rem; font-weight: 600; color: var(--blue); }
+  .org-tag-count { font-size: 0.75rem; color: var(--muted); background: var(--card2); padding: 1px 7px; border-radius: 10px; }
+  .org-tag-actions { display: flex; gap: 4px; opacity: 0; transition: opacity .2s; }
+  .org-tag-chip:hover .org-tag-actions { opacity: 1; }
+  .org-tag-act { background: none; border: none; cursor: pointer; font-size: 0.72rem; color: var(--muted); padding: 2px 5px; border-radius: 3px; }
+  .org-tag-act:hover { color: var(--red); }
+  .filtered-notes-section { margin-top: 8px; }
+  .filtered-notes-section h3 { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+  /* ─── ARCHIVE TAB ─── */
+  .archive-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .archive-header h3 { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .archive-search { margin-bottom: 16px; }
+  .archive-search input { width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; outline: none; transition: border .2s; }
+  .archive-search input:focus { border-color: var(--blue); }
+  .archive-list { display: flex; flex-direction: column; gap: 10px; }
+  .archive-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; opacity: 0.7; }
+  .archive-item-header { display: flex; align-items: center; gap: 10px; }
+  .archive-item-title { font-size: 0.9rem; font-weight: 600; flex: 1; }
+  .archive-item-date { font-size: 0.72rem; color: var(--muted); }
+  .archive-item-preview { font-size: 0.78rem; color: var(--muted); margin-top: 6px; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .archive-item-actions { display: flex; gap: 6px; margin-top: 10px; }
+  .arch-btn { padding: 5px 14px; border-radius: 6px; border: none; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .arch-btn.restore { background: var(--card2); color: var(--green); border: 1px solid var(--border); }
+  .arch-btn.restore:hover { border-color: var(--green); }
+  .arch-btn.permdel { background: none; color: var(--muted); border: 1px solid var(--border); }
+  .arch-btn.permdel:hover { border-color: var(--red); color: var(--red); }
+  .empty-archive { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 0.9rem; }
+  .empty-archive div { font-size: 2.5rem; margin-bottom: 12px; }
+  .purge-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 0.78rem; }
+  .purge-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--card); border: 1px solid var(--blue); color: var(--text); padding: 11px 22px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; transition: transform .35s ease; z-index: 999; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 520px) {
+    .notes-grid { grid-template-columns: 1fr; }
+    .dump-toolbar { flex-direction: column; align-items: stretch; }
+    .modal-footer { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Brain Dump / Quick Notes</h1>
+  <p>Agent #62 &bull; 100 AI Agents Challenge</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('dump',this)">Dump</button>
+  <button class="tab-btn" onclick="switchTab('notes',this)">Notes</button>
+  <button class="tab-btn" onclick="switchTab('organize',this)">Organize</button>
+  <button class="tab-btn" onclick="switchTab('archive',this)">Archive</button>
+</div>
+
+<!-- DUMP TAB -->
+<div class="tab-content active" id="tab-dump">
+  <div class="dump-area">
+    <textarea class="dump-textarea" id="dump-text" placeholder="Brain dump here... write anything, organize later.&#10;&#10;Ideas, thoughts, todos, observations — just let it flow."></textarea>
+    <span class="autosave-indicator" id="autosave-ind">Auto-save on</span>
+  </div>
+  <div class="char-count" id="char-count">0 characters</div>
+  <div class="dump-tags-preview" id="dump-tags-preview"></div>
+  <div class="dump-toolbar">
+    <div class="tag-input-wrap">
+      <span>#</span>
+      <input type="text" id="tag-input" placeholder="Add tag (work, idea, todo...)" onkeydown="handleTagKey(event)">
+    </div>
+    <button class="save-btn" onclick="saveDump()">Save as Note</button>
+  </div>
+</div>
+
+<!-- NOTES TAB -->
+<div class="tab-content" id="tab-notes">
+  <div class="search-bar">
+    <input type="text" id="notes-search" placeholder="Search notes..." oninput="renderNotes()">
+  </div>
+  <div class="notes-grid" id="notes-grid"></div>
+</div>
+
+<!-- ORGANIZE TAB -->
+<div class="tab-content" id="tab-organize">
+  <div class="organize-header">
+    <h3>All Tags</h3>
+    <span id="tag-filter-clear" style="font-size:.75rem;color:var(--blue);cursor:pointer;display:none" onclick="clearTagFilter()">Clear filter</span>
+  </div>
+  <div class="all-tags-cloud" id="all-tags-cloud"></div>
+  <div class="filtered-notes-section">
+    <h3 id="filtered-heading">All Notes</h3>
+    <div class="notes-grid" id="org-notes-grid"></div>
+  </div>
+</div>
+
+<!-- ARCHIVE TAB -->
+<div class="tab-content" id="tab-archive">
+  <div class="archive-header">
+    <h3>Archived Notes</h3>
+    <button class="purge-btn" onclick="purgeAll()">Delete All</button>
+  </div>
+  <div class="archive-search">
+    <input type="text" id="archive-search" placeholder="Search archive..." oninput="renderArchive()">
+  </div>
+  <div class="archive-list" id="archive-list"></div>
+</div>
+
+<!-- NOTE MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnBg(event)">
+  <div class="modal">
+    <input class="modal-title" id="modal-title" type="text" placeholder="Note title...">
+    <textarea class="modal-body" id="modal-body" placeholder="Note content..."></textarea>
+    <div class="modal-footer">
+      <input class="modal-tags-input" id="modal-tags" type="text" placeholder="#tags #space #separated">
+      <div class="modal-btns">
+        <button class="modal-btn pin" id="modal-pin-btn" onclick="toggleModalPin()">📌 Pin</button>
+        <button class="modal-btn save" onclick="saveModal()">Save</button>
+        <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const S = k => localStorage.getItem('notes62_' + k);
+const W = (k, v) => localStorage.setItem('notes62_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
+const J = k => { try { return JSON.parse(S(k)); } catch { return null; } };
+
+let notes = J('notes') || [];
+let archive = J('archive') || [];
+let dumpTags = [];
+let autosaveTimer = null;
+let modalNoteId = null;
+let orgFilterTag = null;
+
+// ─── INIT ───
+function init() {
+  const dump = S('dump') || '';
+  document.getElementById('dump-text').value = dump;
+  updateCharCount();
+  document.getElementById('dump-text').addEventListener('input', () => {
+    updateCharCount();
+    scheduleDumpSave();
+  });
+  renderNotes();
+  renderOrganize();
+  renderArchive();
+}
+
+function updateCharCount() {
+  const len = document.getElementById('dump-text').value.length;
+  document.getElementById('char-count').textContent = `${len} character${len !== 1 ? 's' : ''}`;
+}
+
+function scheduleDumpSave() {
+  clearTimeout(autosaveTimer);
+  document.getElementById('autosave-ind').textContent = 'Saving...';
+  document.getElementById('autosave-ind').className = 'autosave-indicator';
+  autosaveTimer = setTimeout(() => {
+    W('dump', document.getElementById('dump-text').value);
+    document.getElementById('autosave-ind').textContent = 'Saved ✓';
+    document.getElementById('autosave-ind').className = 'autosave-indicator saved';
+    setTimeout(() => {
+      document.getElementById('autosave-ind').textContent = 'Auto-save on';
+      document.getElementById('autosave-ind').className = 'autosave-indicator';
+    }, 2000);
+  }, 2000);
+}
+
+// ─── TABS ───
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (tab === 'notes') renderNotes();
+  if (tab === 'organize') renderOrganize();
+  if (tab === 'archive') renderArchive();
+}
+
+// ─── DUMP TAGS ───
+function handleTagKey(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    addDumpTag();
+  }
+}
+
+function addDumpTag() {
+  const inp = document.getElementById('tag-input');
+  const raw = inp.value.trim().replace(/^#/, '').toLowerCase().replace(/\s+/g, '-');
+  if (!raw || dumpTags.includes(raw)) { inp.value = ''; return; }
+  dumpTags.push(raw);
+  inp.value = '';
+  renderDumpTags();
+}
+
+function renderDumpTags() {
+  document.getElementById('dump-tags-preview').innerHTML = dumpTags.map(t => `
+    <span class="tag-chip" onclick="removeDumpTag('${escAttr(t)}')">#${escHtml(t)}<span class="rm">✕</span></span>
+  `).join('');
+}
+
+function removeDumpTag(tag) {
+  dumpTags = dumpTags.filter(t => t !== tag);
+  renderDumpTags();
+}
+
+// ─── SAVE DUMP AS NOTE ───
+function saveDump() {
+  const text = document.getElementById('dump-text').value.trim();
+  if (!text) { showToast('Nothing to save — write something first!'); return; }
+  // Extract a title from first line
+  const lines = text.split('\n').filter(l => l.trim());
+  const title = lines[0].slice(0, 60) || 'Brain Dump';
+  const body = lines.slice(1).join('\n').trim() || text;
+
+  // Add inline tags from text (#tag patterns)
+  const inlineTags = [...text.matchAll(/#([a-z0-9_-]+)/gi)].map(m => m[1].toLowerCase());
+  const allTags = [...new Set([...dumpTags, ...inlineTags])];
+
+  const note = { id: Date.now(), title, body: text, tags: allTags, pinned: false, created: Date.now(), updated: Date.now() };
+  notes.unshift(note);
+  W('notes', notes);
+  document.getElementById('dump-text').value = '';
+  W('dump', '');
+  dumpTags = [];
+  renderDumpTags();
+  updateCharCount();
+  showToast('Saved as note!');
+}
+
+// ─── NOTES ───
+function renderNotes(filterTag) {
+  const query = (document.getElementById('notes-search')?.value || '').toLowerCase();
+  let filtered = notes.filter(n => {
+    if (filterTag && !n.tags.includes(filterTag)) return false;
+    if (query) {
+      return n.title.toLowerCase().includes(query) ||
+             n.body.toLowerCase().includes(query) ||
+             n.tags.some(t => t.includes(query));
+    }
+    return true;
+  });
+  // Pinned first
+  filtered = [...filtered.filter(n => n.pinned), ...filtered.filter(n => !n.pinned)];
+
+  const grid = document.getElementById('notes-grid');
+  if (!grid) return;
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div>📝</div>${query ? 'No notes match your search.' : 'No notes yet.<br>Write something and save it!'}</div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(n => noteCard(n)).join('');
+}
+
+function noteCard(n) {
+  return `<div class="note-card ${n.pinned ? 'pinned' : ''}" onclick="openNote(${n.id})">
+    ${n.pinned ? '<span class="pin-badge">📌</span>' : ''}
+    <div class="note-title">${escHtml(n.title)}</div>
+    <div class="note-preview">${escHtml(n.body)}</div>
+    <div class="note-tags">${n.tags.map(t => `<span class="note-tag">#${escHtml(t)}</span>`).join('')}</div>
+    <div class="note-meta">
+      <span class="note-date">${fmtDate(n.updated)}</span>
+      <div class="note-actions" onclick="event.stopPropagation()">
+        <button class="note-act" onclick="togglePin(${n.id})" title="${n.pinned?'Unpin':'Pin'}">${n.pinned?'📌':'📍'}</button>
+        <button class="note-act del" onclick="archiveNote(${n.id})" title="Archive">🗑</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function fmtDate(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+  if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
+  if (diff < 604800000) return Math.floor(diff/86400000) + 'd ago';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function togglePin(id) {
+  const n = notes.find(x => x.id === id);
+  if (n) { n.pinned = !n.pinned; W('notes', notes); renderNotes(); renderOrganize(); showToast(n.pinned ? 'Pinned!' : 'Unpinned.'); }
+}
+
+function archiveNote(id) {
+  const idx = notes.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  archive.unshift({ ...notes[idx], archivedAt: Date.now() });
+  notes.splice(idx, 1);
+  W('notes', notes);
+  W('archive', archive);
+  renderNotes();
+  renderOrganize();
+  showToast('Note archived.');
+}
+
+// ─── MODAL ───
+function openNote(id) {
+  const n = notes.find(x => x.id === id);
+  if (!n) return;
+  modalNoteId = id;
+  document.getElementById('modal-title').value = n.title;
+  document.getElementById('modal-body').value = n.body;
+  document.getElementById('modal-tags').value = n.tags.map(t => '#' + t).join(' ');
+  const pinBtn = document.getElementById('modal-pin-btn');
+  pinBtn.className = 'modal-btn pin' + (n.pinned ? ' active' : '');
+  pinBtn.textContent = n.pinned ? '📌 Pinned' : '📌 Pin';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openNewNote() {
+  modalNoteId = null;
+  document.getElementById('modal-title').value = '';
+  document.getElementById('modal-body').value = '';
+  document.getElementById('modal-tags').value = '';
+  document.getElementById('modal-pin-btn').className = 'modal-btn pin';
+  document.getElementById('modal-pin-btn').textContent = '📌 Pin';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('modal-title').focus(), 50);
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+function closeModalOnBg(e) { if (e.target.id === 'modal-overlay') closeModal(); }
+
+function toggleModalPin() {
+  const btn = document.getElementById('modal-pin-btn');
+  btn.classList.toggle('active');
+  btn.textContent = btn.classList.contains('active') ? '📌 Pinned' : '📌 Pin';
+}
+
+function saveModal() {
+  const title = document.getElementById('modal-title').value.trim() || 'Untitled';
+  const body = document.getElementById('modal-body').value.trim();
+  const tagsRaw = document.getElementById('modal-tags').value;
+  const tags = [...tagsRaw.matchAll(/#?([a-z0-9_-]+)/gi)].map(m => m[1].toLowerCase()).filter(Boolean);
+  const pinned = document.getElementById('modal-pin-btn').classList.contains('active');
+
+  if (modalNoteId) {
+    const n = notes.find(x => x.id === modalNoteId);
+    if (n) { n.title = title; n.body = body; n.tags = tags; n.pinned = pinned; n.updated = Date.now(); }
+  } else {
+    notes.unshift({ id: Date.now(), title, body, tags, pinned, created: Date.now(), updated: Date.now() });
+  }
+  W('notes', notes);
+  closeModal();
+  renderNotes();
+  renderOrganize();
+  showToast('Note saved!');
+}
+
+// ─── ORGANIZE ───
+function renderOrganize() {
+  const tagMap = {};
+  notes.forEach(n => n.tags.forEach(t => { tagMap[t] = (tagMap[t] || 0) + 1; }));
+  const tags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
+
+  const cloud = document.getElementById('all-tags-cloud');
+  if (!cloud) return;
+  if (tags.length === 0) {
+    cloud.innerHTML = '<span style="color:var(--muted);font-size:.85rem">No tags yet. Add #tags when saving notes.</span>';
+  } else {
+    cloud.innerHTML = tags.map(([t, cnt]) => `
+      <div class="org-tag-chip ${orgFilterTag === t ? 'active' : ''}" onclick="filterByTag('${escAttr(t)}')">
+        <span class="org-tag-name">#${escHtml(t)}</span>
+        <span class="org-tag-count">${cnt}</span>
+        <div class="org-tag-actions" onclick="event.stopPropagation()">
+          <button class="org-tag-act" onclick="renameTag('${escAttr(t)}')" title="Rename">✏️</button>
+          <button class="org-tag-act" onclick="deleteTag('${escAttr(t)}')" title="Delete tag from all notes">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Filtered notes grid
+  const orgGrid = document.getElementById('org-notes-grid');
+  const heading = document.getElementById('filtered-heading');
+  const clearBtn = document.getElementById('tag-filter-clear');
+  if (orgFilterTag) {
+    heading.textContent = `Notes tagged #${orgFilterTag}`;
+    clearBtn.style.display = 'block';
+  } else {
+    heading.textContent = 'All Notes';
+    clearBtn.style.display = 'none';
+  }
+  let filtered = orgFilterTag ? notes.filter(n => n.tags.includes(orgFilterTag)) : notes;
+  filtered = [...filtered.filter(n => n.pinned), ...filtered.filter(n => !n.pinned)];
+  if (filtered.length === 0) {
+    orgGrid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div>🏷️</div>No notes with this tag.</div>';
+  } else {
+    orgGrid.innerHTML = filtered.map(n => noteCard(n)).join('');
+  }
+}
+
+function filterByTag(tag) {
+  orgFilterTag = orgFilterTag === tag ? null : tag;
+  renderOrganize();
+}
+
+function clearTagFilter() { orgFilterTag = null; renderOrganize(); }
+
+function renameTag(oldTag) {
+  const newTag = prompt(`Rename #${oldTag} to:`, oldTag);
+  if (!newTag || newTag.trim() === oldTag) return;
+  const cleaned = newTag.trim().toLowerCase().replace(/^#/, '').replace(/\s+/g, '-');
+  notes.forEach(n => { n.tags = n.tags.map(t => t === oldTag ? cleaned : t); });
+  W('notes', notes);
+  if (orgFilterTag === oldTag) orgFilterTag = cleaned;
+  renderOrganize();
+  showToast(`Tag renamed to #${cleaned}`);
+}
+
+function deleteTag(tag) {
+  if (!confirm(`Remove #${tag} from all notes?`)) return;
+  notes.forEach(n => { n.tags = n.tags.filter(t => t !== tag); });
+  W('notes', notes);
+  if (orgFilterTag === tag) orgFilterTag = null;
+  renderOrganize();
+  showToast(`Tag #${tag} deleted.`);
+}
+
+// ─── ARCHIVE ───
+function renderArchive() {
+  const query = (document.getElementById('archive-search')?.value || '').toLowerCase();
+  let filtered = archive.filter(n =>
+    !query || n.title.toLowerCase().includes(query) || n.body.toLowerCase().includes(query)
+  );
+  const list = document.getElementById('archive-list');
+  if (!list) return;
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-archive"><div>🗄️</div>${query ? 'No archived notes match.' : 'Archive is empty.'}</div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(n => `
+    <div class="archive-item">
+      <div class="archive-item-header">
+        <div class="archive-item-title">${escHtml(n.title)}</div>
+        <div class="archive-item-date">${fmtDate(n.archivedAt)}</div>
+      </div>
+      <div class="archive-item-preview">${escHtml(n.body)}</div>
+      <div class="archive-item-actions">
+        <button class="arch-btn restore" onclick="restoreNote(${n.id})">↩ Restore</button>
+        <button class="arch-btn permdel" onclick="permDeleteNote(${n.id})">Delete Forever</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function restoreNote(id) {
+  const idx = archive.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  const n = { ...archive[idx] };
+  delete n.archivedAt;
+  n.updated = Date.now();
+  notes.unshift(n);
+  archive.splice(idx, 1);
+  W('notes', notes);
+  W('archive', archive);
+  renderArchive();
+  renderNotes();
+  renderOrganize();
+  showToast('Note restored!');
+}
+
+function permDeleteNote(id) {
+  if (!confirm('Permanently delete this note? This cannot be undone.')) return;
+  archive = archive.filter(x => x.id !== id);
+  W('archive', archive);
+  renderArchive();
+  showToast('Note permanently deleted.');
+}
+
+function purgeAll() {
+  if (!confirm('Delete ALL archived notes permanently? This cannot be undone.')) return;
+  archive = [];
+  W('archive', archive);
+  renderArchive();
+  showToast('Archive cleared.');
+}
+
+// ─── UTILS ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) { return String(s).replace(/'/g,"\\'"); }
+
+// Close modal on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    if (document.getElementById('modal-overlay').classList.contains('open')) saveModal();
+    else if (document.getElementById('tab-dump').classList.contains('active')) saveDump();
+  }
+});
+
+init();
+</script>
+</body>
+</html>
