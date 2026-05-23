@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Portfolio Auditor — Agent #66</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --blue: #4f8ef7;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --purple: #a78bfa;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+  header .logo { font-size: 24px; }
+  header h1 { font-size: 20px; font-weight: 700; color: var(--blue); }
+  header .sub { font-size: 13px; color: var(--muted); margin-left: auto; }
+  .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; gap: 4px; }
+  .tab { padding: 14px 20px; cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 500; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .page { display: none; padding: 24px; max-width: 960px; margin: 0 auto; }
+  .page.active { display: block; }
+  .section-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all .15s; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { opacity: .85; }
+  .btn-green { background: var(--green); color: #0f1117; }
+  .btn-green:hover { opacity: .85; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+  input[type=text] { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 10px 14px; font-size: 14px; width: 100%; outline: none; transition: border .15s; }
+  input[type=text]:focus { border-color: var(--blue); }
+  /* Score ring */
+  .score-ring { position: relative; width: 140px; height: 140px; margin: 0 auto 20px; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .val { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+  .score-ring .val .num { font-size: 32px; font-weight: 700; }
+  .score-ring .val .denom { font-size: 14px; color: var(--muted); }
+  /* Checklist */
+  .checklist-section { margin-bottom: 20px; }
+  .checklist-section-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; padding-left: 4px; }
+  .check-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 8px; cursor: pointer; transition: background .12s; border: 1px solid transparent; margin-bottom: 6px; }
+  .check-item:hover { background: rgba(79,142,247,.05); border-color: var(--border); }
+  .check-item input[type=checkbox] { accent-color: var(--blue); width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; cursor: pointer; }
+  .check-item label { font-size: 14px; cursor: pointer; line-height: 1.4; }
+  .check-item.checked label { text-decoration: line-through; color: var(--muted); }
+  .grade-badge { display: inline-block; font-size: 28px; font-weight: 800; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
+  .grade-a { background: rgba(74,222,128,.2); color: var(--green); }
+  .grade-b { background: rgba(79,142,247,.2); color: var(--blue); }
+  .grade-c { background: rgba(251,191,36,.2); color: var(--yellow); }
+  .grade-d { background: rgba(248,113,113,.2); color: var(--red); }
+  /* Tips */
+  .tip-categories { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  @media(max-width:640px){ .tip-categories { grid-template-columns: repeat(2,1fr); } }
+  .tip-cat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; transition: all .15s; }
+  .tip-cat:hover { border-color: var(--blue); }
+  .tip-cat.active { border-color: var(--blue); background: rgba(79,142,247,.1); }
+  .tip-cat .icon { font-size: 22px; margin-bottom: 4px; }
+  .tip-cat .name { font-size: 11px; font-weight: 600; line-height: 1.3; }
+  .tip-list { list-style: none; }
+  .tip-list li { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
+  .tip-list li:last-child { border-bottom: none; }
+  .tip-list li .num { color: var(--blue); font-weight: 700; flex-shrink: 0; min-width: 20px; }
+  /* Templates */
+  .template-block { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; position: relative; }
+  .template-block pre { font-family: 'Menlo', 'Courier New', monospace; font-size: 12px; color: var(--muted); white-space: pre-wrap; word-break: break-word; line-height: 1.6; max-height: 260px; overflow-y: auto; }
+  .template-block .copy-btn { position: absolute; top: 12px; right: 12px; }
+  .template-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+  /* Progress tracking */
+  .history-row { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); margin-bottom: 8px; }
+  .history-date { font-size: 12px; color: var(--muted); width: 90px; flex-shrink: 0; }
+  .history-score { font-weight: 700; color: var(--blue); width: 60px; flex-shrink: 0; }
+  .history-bar { flex: 1; background: var(--border); height: 6px; border-radius: 3px; }
+  .history-fill { height: 100%; background: var(--blue); border-radius: 3px; }
+  .history-grade { font-size: 12px; font-weight: 700; width: 30px; text-align: right; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #0f1117; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; transform: translateY(80px); opacity: 0; transition: all .3s; z-index: 999; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🔍</div>
+  <h1>GitHub Portfolio Auditor</h1>
+  <div class="sub">Agent #66 · 100 AI Agents</div>
+</header>
+
+<nav class="tabs">
+  <div class="tab active" onclick="showTab('audit')">✅ Audit</div>
+  <div class="tab" onclick="showTab('tips')">💡 Tips</div>
+  <div class="tab" onclick="showTab('templates')">📋 Templates</div>
+  <div class="tab" onclick="showTab('checklist')">📈 Progress</div>
+</nav>
+
+<!-- AUDIT TAB -->
+<div id="tab-audit" class="page active">
+  <div class="section-title">✅ Portfolio Audit</div>
+
+  <div class="card" style="display:flex;gap:12px;align-items:flex-end;margin-bottom:20px;">
+    <div style="flex:1;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Your GitHub Username</div>
+      <input type="text" id="username-input" placeholder="e.g. octocat" value="">
+    </div>
+    <button class="btn btn-primary" onclick="startAudit()">🚀 Start Audit</button>
+  </div>
+
+  <div id="audit-body">
+    <div class="empty-state"><div class="icon">🐙</div><div>Enter your GitHub username above to begin your portfolio audit.</div></div>
+  </div>
+</div>
+
+<!-- TIPS TAB -->
+<div id="tab-tips" class="page">
+  <div class="section-title">💡 How to Improve Your Portfolio</div>
+  <div class="tip-categories" id="tip-cats">
+    <div class="tip-cat active" onclick="showTip(0,this)"><div class="icon">📝</div><div class="name">Great READMEs</div></div>
+    <div class="tip-cat" onclick="showTip(1,this)"><div class="icon">📌</div><div class="name">Pinning Repos</div></div>
+    <div class="tip-cat" onclick="showTip(2,this)"><div class="icon">👤</div><div class="name">Profile Setup</div></div>
+    <div class="tip-cat" onclick="showTip(3,this)"><div class="icon">✍️</div><div class="name">Commit Messages</div></div>
+    <div class="tip-cat" onclick="showTip(4,this)"><div class="icon">🏷️</div><div class="name">Project Naming</div></div>
+    <div class="tip-cat" onclick="showTip(5,this)"><div class="icon">🌐</div><div class="name">Live Demos</div></div>
+    <div class="tip-cat" onclick="showTip(6,this)"><div class="icon">🤝</div><div class="name">Open Source</div></div>
+    <div class="tip-cat" onclick="showTip(7,this)"><div class="icon">📄</div><div class="name">GitHub Pages</div></div>
+  </div>
+  <div class="card" id="tip-content"></div>
+</div>
+
+<!-- TEMPLATES TAB -->
+<div id="tab-templates" class="page">
+  <div class="section-title">📋 Copy-Paste Templates</div>
+
+  <div class="template-block">
+    <div class="template-title">📝 Project README Template</div>
+    <button class="btn btn-sm btn-primary copy-btn" onclick="copyTemplate(0)">📋 Copy</button>
+    <pre id="tmpl-0"># Project Name
+
+> One-line description of what this project does.
+
+## 🚀 Live Demo
+[View Demo](https://your-demo-link.com) · [Report Bug](https://github.com/you/repo/issues)
+
+## ✨ Features
+- Feature one — what it does
+- Feature two — what it does
+- Feature three — what it does
+
+## 🛠️ Built With
+- [React](https://react.dev/) — UI framework
+- [Node.js](https://nodejs.org/) — Backend runtime
+- [PostgreSQL](https://postgresql.org/) — Database
+
+## 📦 Getting Started
+
+### Prerequisites
+- Node.js v18+
+- npm or yarn
+
+### Installation
+```bash
+git clone https://github.com/you/project-name.git
+cd project-name
+npm install
+npm run dev
+```
+
+## 📖 Usage
+Brief explanation of how to use the project with a code snippet or screenshot.
+
+## 🤝 Contributing
+Pull requests are welcome. For major changes, open an issue first.
+
+## 📄 License
+[MIT](LICENSE)</pre>
+  </div>
+
+  <div class="template-block">
+    <div class="template-title">👤 GitHub Profile README Template</div>
+    <button class="btn btn-sm btn-primary copy-btn" onclick="copyTemplate(1)">📋 Copy</button>
+    <pre id="tmpl-1"># Hi there, I'm [Your Name] 👋
+
+🎓 **[Your Role]** at **[Your School/Company]**
+🌍 Based in **[City, Country]**
+🔭 Currently working on **[current project]**
+🌱 Learning **[skill you're developing]**
+💬 Ask me about **[your expertise]**
+📫 Reach me at **[email or LinkedIn URL]**
+
+---
+
+## 🛠️ Tech Stack
+
+**Languages:** Python · JavaScript · TypeScript · Go
+**Frontend:** React · Next.js · Tailwind CSS
+**Backend:** Node.js · FastAPI · PostgreSQL
+**Tools:** Git · Docker · GitHub Actions · Figma
+
+---
+
+## 📌 Featured Projects
+
+| Project | Description | Stack |
+|--------|-------------|-------|
+| [Project A](link) | What it does | React, Node |
+| [Project B](link) | What it does | Python, ML |
+| [Project C](link) | What it does | Go, Docker |
+
+---
+
+## 📊 GitHub Stats
+
+![Stats](https://github-readme-stats.vercel.app/api?username=YOURUSERNAME&show_icons=true&theme=dark)
+
+---
+
+⭐ *If you find my projects helpful, consider starring them!*</pre>
+  </div>
+
+  <div class="template-block">
+    <div class="template-title">✍️ Good Commit Message Examples</div>
+    <button class="btn btn-sm btn-primary copy-btn" onclick="copyTemplate(2)">📋 Copy</button>
+    <pre id="tmpl-2"># Format: <type>: <short summary> (50 chars max)
+# Body: explain WHY, not WHAT (wrap at 72 chars)
+
+# ✅ GOOD EXAMPLES
+
+feat: add user authentication with JWT
+fix: resolve null pointer error on login page
+docs: update README with deployment instructions
+refactor: extract validation logic into helper
+test: add unit tests for payment module
+chore: upgrade dependencies to latest stable
+style: format code with prettier
+perf: cache API responses to reduce load time
+
+# Bad → Good rewrites:
+# ❌ "fixed stuff"        → ✅ "fix: resolve crash when cart is empty"
+# ❌ "update"             → ✅ "docs: add API endpoint documentation"
+# ❌ "wip"                → ✅ "feat: add draft order functionality (in progress)"
+# ❌ "changes"            → ✅ "refactor: simplify auth middleware logic"
+
+# Types: feat | fix | docs | style | refactor | test | chore | perf | ci</pre>
+  </div>
+
+  <div class="template-block">
+    <div class="template-title">🏷️ Repo Description Examples</div>
+    <button class="btn btn-sm btn-primary copy-btn" onclick="copyTemplate(3)">📋 Copy</button>
+    <pre id="tmpl-3"># Formula: [What it does] + [who it's for] + [key differentiator]
+# Keep under 100 characters. No period at end.
+
+# ✅ GOOD DESCRIPTIONS
+
+"Flashcard app for medical students with spaced repetition and progress tracking"
+"CLI tool to auto-generate git commit messages using OpenAI GPT-4"
+"Next.js e-commerce starter with Stripe, Auth.js, and dark mode out of the box"
+"Chrome extension that summarizes any webpage in 3 bullet points"
+"REST API for task management with real-time WebSocket notifications"
+"Portfolio site built with React + Framer Motion — 100 Lighthouse score"
+"Discord bot that posts daily LeetCode challenges to your server"
+"Python script to batch-resize images and upload them to S3"
+
+# ❌ AVOID
+"my project"
+"test"
+"This is a web app I built for a class project in 2023 using various technologies"
+"TODO: add description"</pre>
+  </div>
+</div>
+
+<!-- CHECKLIST / PROGRESS TAB -->
+<div id="tab-checklist" class="page">
+  <div class="section-title">📈 Progress Tracker</div>
+
+  <div class="card" style="display:flex;gap:12px;align-items:flex-end;margin-bottom:20px;">
+    <div style="flex:1;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Save Score Snapshot</div>
+      <input type="text" id="snapshot-label" placeholder="e.g. Before improvements">
+    </div>
+    <button class="btn btn-green" onclick="saveSnapshot()">💾 Save Snapshot</button>
+  </div>
+
+  <div class="card">
+    <div style="font-size:15px;font-weight:700;margin-bottom:16px;">Score History</div>
+    <div id="history-area"></div>
+  </div>
+
+  <div style="margin-top:16px;text-align:right;">
+    <button class="btn btn-outline btn-sm" onclick="clearHistory()">🗑️ Clear History</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CHECKLIST DATA ───────────────────────────────────────────────────────────
+const CHECKLIST = [
+  { section: '👤 Profile', items: [
+    { id: 'p1', text: 'Profile photo uploaded — a real, professional-looking headshot or avatar' },
+    { id: 'p2', text: 'Bio filled in — describes who you are and what you do in 1–2 sentences' },
+    { id: 'p3', text: 'Location set — city/country (helps recruiters find local talent)' },
+    { id: 'p4', text: 'Website or portfolio link added to your profile' },
+    { id: 'p5', text: 'At least 6 repos pinned to your profile (choose your best work)' },
+    { id: 'p6', text: 'GitHub profile README created (username/username special repo)' },
+  ]},
+  { section: '📦 Repositories', items: [
+    { id: 'r1', text: 'Every pinned repo has a README.md with setup instructions' },
+    { id: 'r2', text: 'Every pinned repo has a description (shown on profile cards)' },
+    { id: 'r3', text: 'Repos have relevant topics/tags (e.g. "react", "machine-learning")' },
+    { id: 'r4', text: 'Live demo link included in repo description or README' },
+    { id: 'r5', text: 'Screenshots or GIFs in README to show the app visually' },
+    { id: 'r6', text: 'Repos are named clearly (no "assignment-2" or "test123")' },
+    { id: 'r7', text: 'License file added to public repos (MIT is standard for open source)' },
+  ]},
+  { section: '💻 Code Quality', items: [
+    { id: 'c1', text: '.gitignore present — node_modules, .env, build/ not committed' },
+    { id: 'c2', text: 'No API keys or secrets committed to any repo (check all branches)' },
+    { id: 'c3', text: 'Consistent file naming convention (e.g., kebab-case or camelCase)' },
+    { id: 'c4', text: 'Commit messages are descriptive (not "wip", "fix", or "stuff")' },
+    { id: 'c5', text: 'No large binaries committed (images belong in assets or CDN)' },
+    { id: 'c6', text: 'Code is organized into logical folders (not all files at root level)' },
+    { id: 'c7', text: 'Environment variables documented in README (.env.example provided)' },
+  ]},
+  { section: '📊 Activity', items: [
+    { id: 'a1', text: 'At least 1 commit in the past 30 days (shows active development)' },
+    { id: 'a2', text: 'Contribution graph has regular activity (no huge gaps)' },
+    { id: 'a3', text: 'Some repos have issues or PRs closed (shows real project use)' },
+    { id: 'a4', text: 'At least 1 repository with 2+ collaborators or contributors' },
+    { id: 'a5', text: 'You have starred repos in your area of interest (shows curiosity)' },
+    { id: 'a6', text: 'You have made contributions to at least 1 open-source project' },
+    { id: 'a7', text: 'Following relevant developers and organizations in your field' },
+  ]},
+];
+
+const TOTAL_ITEMS = CHECKLIST.reduce((sum, s) => sum + s.items.length, 0);
+let checks = JSON.parse(localStorage.getItem('ghaudit66_checks') || '{}');
+let auditedUser = localStorage.getItem('ghaudit66_user') || '';
+
+function saveChecks() { localStorage.setItem('ghaudit66_checks', JSON.stringify(checks)); }
+function saveUser(u) { localStorage.setItem('ghaudit66_user', u); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showTab(t) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(tb => tb.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (t === 'tips') showTip(0, document.querySelector('.tip-cat'));
+  if (t === 'checklist') renderHistory();
+}
+
+function getScore() { return Object.values(checks).filter(Boolean).length; }
+
+function getGrade(score) {
+  const pct = (score / TOTAL_ITEMS) * 100;
+  if (pct >= 90) return { grade: 'A', cls: 'grade-a', msg: 'Outstanding! Your portfolio is excellent.' };
+  if (pct >= 75) return { grade: 'B', cls: 'grade-b', msg: 'Great work! A few improvements and you\'ll be at the top.' };
+  if (pct >= 55) return { grade: 'C', cls: 'grade-c', msg: 'Good start. There\'s room to strengthen your portfolio.' };
+  return { grade: 'D', cls: 'grade-d', msg: 'Lots to improve — but you\'ve got a clear roadmap now.' };
+}
+
+function getScoreColor(score) {
+  const pct = (score / TOTAL_ITEMS) * 100;
+  if (pct >= 90) return '#4ade80';
+  if (pct >= 75) return '#4f8ef7';
+  if (pct >= 55) return '#fbbf24';
+  return '#f87171';
+}
+
+function startAudit() {
+  const user = document.getElementById('username-input').value.trim();
+  if (!user) { alert('Please enter a GitHub username.'); return; }
+  auditedUser = user;
+  saveUser(user);
+  renderAudit(user);
+}
+
+function renderAudit(user) {
+  const score = getScore();
+  const g = getGrade(score);
+  const color = getScoreColor(score);
+  const circumference = 2 * Math.PI * 54;
+  const filled = (score / TOTAL_ITEMS) * circumference;
+
+  const sectionsHtml = CHECKLIST.map(s => `
+    <div class="checklist-section">
+      <div class="checklist-section-title">${s.section}</div>
+      ${s.items.map(item => {
+        const checked = !!checks[item.id];
+        return `<div class="check-item ${checked?'checked':''}" id="ci-${item.id}" onclick="toggleCheck('${item.id}')">
+          <input type="checkbox" id="cb-${item.id}" ${checked?'checked':''} onchange="toggleCheck('${item.id}')">
+          <label for="cb-${item.id}">${item.text}</label>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+
+  document.getElementById('audit-body').innerHTML = `
+    <div class="card" style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:14px;color:var(--muted);margin-bottom:12px;">Auditing: <strong style="color:var(--blue)">@${user}</strong></div>
+      <div class="score-ring">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="54" fill="none" stroke="var(--border)" stroke-width="12"/>
+          <circle cx="70" cy="70" r="54" fill="none" stroke="${color}" stroke-width="12"
+            stroke-dasharray="${filled} ${circumference}" stroke-linecap="round"/>
+        </svg>
+        <div class="val">
+          <div class="num" style="color:${color}">${score}</div>
+          <div class="denom">/ ${TOTAL_ITEMS}</div>
+        </div>
+      </div>
+      <div class="grade-badge ${g.cls}">${g.grade}</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px;">${g.msg}</div>
+      <div style="font-size:13px;color:var(--muted);">${TOTAL_ITEMS - score} item${TOTAL_ITEMS-score!==1?'s':''} left to complete</div>
+    </div>
+    <div id="checklist-sections">${sectionsHtml}</div>`;
+}
+
+function toggleCheck(id) {
+  checks[id] = !checks[id];
+  saveChecks();
+  const ci = document.getElementById('ci-'+id);
+  const cb = document.getElementById('cb-'+id);
+  if (ci) ci.classList.toggle('checked', checks[id]);
+  if (cb) cb.checked = checks[id];
+  // Update score ring
+  const user = document.getElementById('username-input').value.trim() || auditedUser;
+  if (user) renderAudit(user);
+}
+
+// Auto-restore previous audit
+window.addEventListener('DOMContentLoaded', () => {
+  if (auditedUser) {
+    document.getElementById('username-input').value = auditedUser;
+    renderAudit(auditedUser);
+  }
+});
+
+// ─── TIPS DATA ────────────────────────────────────────────────────────────────
+const TIPS = [
+  { name: 'Great READMEs', icon: '📝', tips: [
+    'Start with a one-line description that explains <em>what</em> the project does and <em>who</em> it\'s for — don\'t make visitors guess.',
+    'Include a live demo link or video GIF at the top of the README. Visitors decide in seconds whether to explore further.',
+    'Document how to run the project locally in under 5 commands. If setup is complex, your README failed.',
+    'Add a "Built With" section listing your tech stack — it signals expertise to technical recruiters scanning your repos.',
+    'Use badges (shields.io) to show build status, license, and version at a glance. They signal professionalism immediately.',
+  ]},
+  { name: 'Pinning Repos', icon: '📌', tips: [
+    'Pin exactly 6 repos — GitHub shows a 2×3 grid and unfilled slots look incomplete. Always fill all 6.',
+    'Pin projects that show breadth: one frontend, one backend, one data/ML, one tool/utility — not 6 variations of the same thing.',
+    'Never pin forks unless you made significant contributions. Pinning untouched forks signals you have nothing original to show.',
+    'Update your pinned repos every 3–6 months as your skills grow — your best work from 2 years ago may hurt you today.',
+    'Prioritize repos with live demos, stars, or interesting problems over repos that are only technically correct.',
+  ]},
+  { name: 'Profile Setup', icon: '👤', tips: [
+    'Your GitHub bio is indexed by search. Include your role, key skills, and location in 2 sentences or less.',
+    'Use a real headshot or a consistent avatar across GitHub, LinkedIn, and your portfolio site for brand recognition.',
+    'Link your personal portfolio or LinkedIn in the website field — recruiters click it before they read your repos.',
+    'Create a GitHub profile README (a repo named exactly like your username). It\'s valuable prime real estate on your profile.',
+    'Set your status to show what you\'re working on or available for. It personalizes an otherwise static profile.',
+  ]},
+  { name: 'Commit Messages', icon: '✍️', tips: [
+    'Use the Conventional Commits format: feat/fix/docs/refactor/test + colon + short summary under 50 characters.',
+    'Explain WHY in the commit body, not WHAT. The diff shows what changed; the message should explain the reasoning.',
+    'Never commit with messages like "wip", "fix", "update", or "stuff" — they make your git log useless as documentation.',
+    'Group related changes into one commit. A commit that touches 15 unrelated files signals poor discipline.',
+    'Commit small and often during development, then squash before merging to keep history clean and meaningful.',
+  ]},
+  { name: 'Project Naming', icon: '🏷️', tips: [
+    'Use kebab-case for repo names: "task-manager-api" not "TaskManagerAPI" or "task manager api".',
+    'Avoid generic names: "project1", "homework", "test", "practice". Name it what it IS — "receipt-scanner-app".',
+    'Include the tech stack only if it\'s the key differentiator: "react-portfolio" vs "portfolio-site" — the latter is cleaner.',
+    'Add relevant GitHub topics to every repo: they improve discoverability in GitHub search and make your profile look organized.',
+    'Keep names under 30 characters when possible. Long names get truncated in the GitHub UI and look messy.',
+  ]},
+  { name: 'Live Demos', icon: '🌐', tips: [
+    'Deploy every frontend project — Vercel and Netlify offer free hosting with automatic deployments from GitHub.',
+    'Put the live demo URL as the first link in your README and in the repo\'s "website" field in settings.',
+    'Record a 30-second GIF or screen recording of the app in action. Not everyone will click a demo link.',
+    'Make sure demos are working — a broken link is worse than no link. Set a calendar reminder to check demos monthly.',
+    'For backend APIs, deploy to Render or Railway and add a Swagger UI or Postman collection link as the "demo."',
+  ]},
+  { name: 'Open Source', icon: '🤝', tips: [
+    'Start by fixing documentation typos or improving READMEs in popular repos — it lowers the barrier to your first contribution.',
+    'Look for issues labeled "good first issue" or "help wanted" on repos you already use and understand.',
+    'Quality over quantity: one merged PR to a well-known repo impresses far more than 50 PRs to toy projects.',
+    'Write a thoughtful PR description that explains the problem, your approach, and how to test it — this alone sets you apart.',
+    'Star and watch repos in your field, follow their maintainers, and engage with discussions even before you contribute code.',
+  ]},
+  { name: 'GitHub Pages', icon: '📄', tips: [
+    'GitHub Pages is free for public repos — any repo with an index.html on main branch can be a live website instantly.',
+    'Use a custom domain (from Namecheap or Google Domains, ~$12/year) — "yourname.dev" beats "username.github.io".',
+    'Automate deployment with GitHub Actions so every push to main updates your live site without any manual steps.',
+    'A GitHub Pages portfolio site with your own domain signals professionalism — especially for frontend and fullstack roles.',
+    'Enable HTTPS enforcement in your Pages settings. HTTP-only sites show a security warning in browsers.',
+  ]},
+];
+
+function showTip(idx, el) {
+  document.querySelectorAll('.tip-cat').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const t = TIPS[idx];
+  document.getElementById('tip-content').innerHTML = `
+    <div style="font-size:18px;font-weight:700;margin-bottom:16px;">${t.icon} ${t.name}</div>
+    <ul class="tip-list">${t.tips.map((tip,i) => `<li><span class="num">${i+1}.</span><span>${tip}</span></li>`).join('')}</ul>`;
+}
+
+// ─── TEMPLATES ────────────────────────────────────────────────────────────────
+function copyTemplate(idx) {
+  const pre = document.getElementById('tmpl-'+idx);
+  navigator.clipboard.writeText(pre.textContent.trim())
+    .then(() => toast('Copied to clipboard!'))
+    .catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = pre.textContent.trim();
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      toast('Copied!');
+    });
+}
+
+// ─── PROGRESS / HISTORY ───────────────────────────────────────────────────────
+function saveSnapshot() {
+  const label = document.getElementById('snapshot-label').value.trim() || 'Snapshot';
+  const score = getScore();
+  const history = JSON.parse(localStorage.getItem('ghaudit66_history') || '[]');
+  history.push({ label, score, date: new Date().toLocaleDateString(), user: auditedUser });
+  localStorage.setItem('ghaudit66_history', JSON.stringify(history));
+  document.getElementById('snapshot-label').value = '';
+  toast('Snapshot saved!');
+  renderHistory();
+}
+
+function renderHistory() {
+  const history = JSON.parse(localStorage.getItem('ghaudit66_history') || '[]');
+  const area = document.getElementById('history-area');
+  if (!history.length) {
+    area.innerHTML = '<div style="color:var(--muted);font-size:14px;text-align:center;padding:20px;">No snapshots yet. Complete your audit and save a snapshot to track progress over time.</div>';
+    return;
+  }
+  area.innerHTML = history.slice().reverse().map((h, i) => {
+    const g = getGrade(h.score);
+    const pct = (h.score / TOTAL_ITEMS) * 100;
+    const color = getScoreColor(h.score);
+    return `<div class="history-row">
+      <div class="history-date">${h.date}</div>
+      <div class="history-score" style="color:${color}">${h.score}/${TOTAL_ITEMS}</div>
+      <div class="history-bar"><div class="history-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="history-grade" style="color:${color}">${g.grade}</div>
+      <div style="font-size:12px;color:var(--muted);padding-left:12px;min-width:100px;">${h.label}${h.user ? ' (@'+h.user+')' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function clearHistory() {
+  if (!confirm('Clear all progress history?')) return;
+  localStorage.removeItem('ghaudit66_history');
+  toast('History cleared.');
+  renderHistory();
+}
+
+// Init tip view
+showTip(0, document.querySelector('.tip-cat'));
+</script>
+</body>
+</html>
