@@ -79,6 +79,7 @@ because getting an internship is basically a full-time job
 | [#48](./agent-48-faang-application-tracker/) | FAANG Application Tracker | track apps through 9 stages, CSV export, stats dashboard |
 | [#49](https://hhanng.github.io/agent-49-faang-comp-negotiator/) | FAANG Comp Negotiator | offer analyzer, negotiation scripts, TC calculator |
 | [#50](https://hhanng.github.io/agent-50-linkedin-connection-generator/) | LinkedIn Message Generator | 4 message types, 3 AI variants each, character count |
+| [#67](https://hhanng.github.io/agent-67-interview-confidence-coach/) | Interview Confidence Coach | 4-7-8 breathing, affirmations, 40 practice questions with hints + self-rating, body language tips, progress dashboard |
 
 &nbsp;
 
