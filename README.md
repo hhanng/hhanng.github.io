@@ -14,10 +14,10 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-████████████████████████████████████░░░░░░░░░░░░░░  71 / 100
+████████████████████████████████████░░░░░░░░░░░░░░  72 / 100
 ```
 
-**71 / 100 complete** — progress bar on the live site updates automatically 🎉
+**72 / 100 complete** — progress bar on the live site updates automatically 🎉
 
 &nbsp;
 
@@ -80,6 +80,7 @@ because getting an internship is basically a full-time job
 | [#49](https://hhanng.github.io/agent-49-faang-comp-negotiator/) | FAANG Comp Negotiator | offer analyzer, negotiation scripts, TC calculator |
 | [#50](https://hhanng.github.io/agent-50-linkedin-connection-generator/) | LinkedIn Message Generator | 4 message types, 3 AI variants each, character count |
 | [#67](https://hhanng.github.io/agent-67-interview-confidence-coach/) | Interview Confidence Coach | 4-7-8 breathing, affirmations, 40 practice questions with hints + self-rating, body language tips, progress dashboard |
+| [#68](https://hhanng.github.io/agent-68-coding-quiz-battle/) | Coding Quiz Battle | 100 questions across 10 CS topics, 20s timer, streak bonuses, answer explanations, personal leaderboard, topic accuracy stats |
 
 &nbsp;
 
@@ -165,4 +166,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-23 · agent #67 Interview Confidence Coach live: https://hhanng.github.io/agent-67-interview-confidence-coach/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-23 · agent #68 Coding Quiz Battle live: https://hhanng.github.io/agent-68-coding-quiz-battle/</sub>
