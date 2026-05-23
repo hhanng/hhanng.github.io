@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent #59 — American Idioms & Slang</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --card2: #20243a;
+    --blue: #4f8ef7;
+    --blue-dim: #2a4a8a;
+    --green: #4ade80;
+    --green-dim: #1a4a30;
+    --yellow: #facc15;
+    --red: #f87171;
+    --text: #e8eaf0;
+    --muted: #8b90a8;
+    --border: #2a2d3e;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px 0;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .header-icon {
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header-title h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px; }
+  .header-title p { font-size: 0.78rem; color: var(--muted); margin-top: 1px; }
+  .header-badge {
+    margin-left: auto;
+    background: var(--blue-dim);
+    color: var(--blue);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* ─── TABS ─── */
+  .tabs { display: flex; gap: 2px; }
+  .tab-btn {
+    background: none; border: none; color: var(--muted);
+    padding: 10px 18px; cursor: pointer;
+    font-size: 0.8rem; font-weight: 600; letter-spacing: 0.5px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  /* ─── MAIN ─── */
+  .main { max-width: 900px; margin: 0 auto; padding: 28px 20px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── SECTION TITLE ─── */
+  .section-title {
+    font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title .pill {
+    background: var(--card2); color: var(--muted);
+    font-size: 0.72rem; padding: 3px 9px; border-radius: 20px; font-weight: 500;
+  }
+
+  /* ─── CATEGORIES TAB ─── */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .cat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--cat-color, var(--blue));
+  }
+  .cat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--cat-color, var(--blue));
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .cat-icon { font-size: 2rem; margin-bottom: 10px; }
+  .cat-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+  .cat-count {
+    font-size: 0.72rem; color: var(--muted); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .cat-learned-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; }
+  .cat-preview {
+    font-size: 0.72rem; color: var(--muted); font-style: italic;
+    border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cat-progress-bar {
+    height: 3px; background: var(--border); border-radius: 2px;
+    margin-top: 10px; overflow: hidden;
+  }
+  .cat-progress-fill {
+    height: 100%; border-radius: 2px;
+    background: var(--cat-color, var(--blue));
+    transition: width 0.4s ease;
+  }
+
+  /* ─── BROWSE TAB ─── */
+  .browse-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+  }
+  .back-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 7px 14px; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 0.82rem; font-weight: 600;
+    transition: background 0.2s;
+  }
+  .back-btn:hover { background: var(--card2); }
+  .browse-cat-title { font-size: 1.1rem; font-weight: 700; }
+  .browse-cat-icon { font-size: 1.3rem; }
+
+  .browse-placeholder {
+    text-align: center; padding: 60px 20px;
+    color: var(--muted);
+  }
+  .browse-placeholder .big-icon { font-size: 3rem; margin-bottom: 12px; }
+  .browse-placeholder p { font-size: 0.9rem; margin-bottom: 4px; }
+  .browse-placeholder small { font-size: 0.78rem; opacity: 0.7; }
+
+  .browse-filter {
+    display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: 5px 13px; border-radius: 20px;
+    cursor: pointer; font-size: 0.75rem; font-weight: 600;
+    transition: all 0.15s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    background: var(--blue-dim); border-color: var(--blue); color: var(--blue);
+  }
+
+  .idiom-list { display: flex; flex-direction: column; gap: 10px; }
+  .idiom-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+  .idiom-card.learned { border-left: 3px solid var(--green); }
+  .idiom-card-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px;
+  }
+  .idiom-phrase {
+    font-size: 1rem; font-weight: 700; color: var(--blue);
+    margin-bottom: 4px;
+  }
+  .idiom-tag {
+    font-size: 0.68rem; font-weight: 600;
+    padding: 2px 8px; border-radius: 20px;
+    background: var(--green-dim); color: var(--green);
+    white-space: nowrap; flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .idiom-card.learned .idiom-tag { opacity: 1; }
+  .idiom-meanings { margin: 10px 0 0; }
+  .meaning-row {
+    display: grid; grid-template-columns: 90px 1fr;
+    gap: 8px; padding: 6px 0;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .meaning-row:first-child { border-top: none; }
+  .meaning-label {
+    color: var(--muted); font-size: 0.72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    padding-top: 1px;
+  }
+  .meaning-literal { color: var(--muted); }
+  .meaning-real { color: var(--text); font-weight: 500; }
+  .meaning-example { color: var(--yellow); font-style: italic; }
+
+  .learn-btn {
+    margin-top: 12px;
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); padding: 6px 14px;
+    border-radius: var(--radius-sm); cursor: pointer;
+    font-size: 0.75rem; font-weight: 600;
+    transition: all 0.2s;
+  }
+  .learn-btn:hover { border-color: var(--green); color: var(--green); }
+  .idiom-card.learned .learn-btn {
+    background: var(--green-dim); border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* ─── QUIZ TAB ─── */
+  .quiz-setup {
+    text-align: center; padding: 40px 20px;
+  }
+  .quiz-setup h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; }
+  .quiz-setup p { color: var(--muted); font-size: 0.88rem; margin-bottom: 30px; }
+  .start-btn {
+    background: linear-gradient(135deg, var(--blue), #6fa8ff);
+    color: #fff; border: none; padding: 14px 36px;
+    border-radius: var(--radius); font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.3px;
+  }
+  .start-btn:hover { opacity: 0.88; }
+  .quiz-cat-select {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; margin-bottom: 28px;
+  }
+  .quiz-cat-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: 7px 16px; border-radius: 20px;
+    cursor: pointer; font-size: 0.8rem; font-weight: 600;
+    transition: all 0.15s;
+  }
+  .quiz-cat-btn.selected {
+    background: var(--blue-dim); border-color: var(--blue); color: var(--blue);
+  }
+
+  /* quiz in progress */
+  .quiz-active { display: none; }
+  .quiz-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px;
+  }
+  .quiz-progress-text { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+  .quiz-score-badge {
+    background: var(--card2); padding: 5px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 700;
+  }
+  .quiz-progress-bar {
+    height: 6px; background: var(--border); border-radius: 3px;
+    margin-bottom: 28px; overflow: hidden;
+  }
+  .quiz-progress-fill {
+    height: 100%; background: var(--blue);
+    border-radius: 3px; transition: width 0.4s ease;
+  }
+  .question-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; margin-bottom: 20px;
+    text-align: center;
+  }
+  .question-label {
+    font-size: 0.72rem; color: var(--muted); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
+  }
+  .question-idiom {
+    font-size: 1.5rem; font-weight: 800; color: var(--blue);
+    margin-bottom: 8px; line-height: 1.3;
+  }
+  .question-sub { font-size: 0.82rem; color: var(--muted); }
+  .choices { display: flex; flex-direction: column; gap: 10px; }
+  .choice-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 14px 18px; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 0.88rem; text-align: left;
+    transition: all 0.15s; line-height: 1.4;
+  }
+  .choice-btn:hover:not(:disabled) {
+    border-color: var(--blue); background: var(--card2);
+  }
+  .choice-btn.correct {
+    background: var(--green-dim); border-color: var(--green); color: var(--green);
+  }
+  .choice-btn.wrong {
+    background: rgba(248,113,113,0.12); border-color: var(--red); color: var(--red);
+  }
+  .choice-btn:disabled { cursor: default; }
+  .quiz-feedback {
+    text-align: center; padding: 14px; border-radius: var(--radius-sm);
+    font-weight: 600; font-size: 0.9rem; margin-bottom: 16px; display: none;
+  }
+  .quiz-feedback.correct { background: var(--green-dim); color: var(--green); }
+  .quiz-feedback.wrong { background: rgba(248,113,113,0.12); color: var(--red); }
+  .next-btn {
+    background: var(--blue); color: #fff; border: none;
+    padding: 12px 28px; border-radius: var(--radius-sm);
+    font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    display: none; margin: 0 auto; transition: opacity 0.2s;
+  }
+  .next-btn:hover { opacity: 0.88; }
+
+  /* quiz results */
+  .quiz-results { display: none; text-align: center; padding: 20px 0; }
+  .score-ring {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: conic-gradient(var(--blue) 0%, var(--border) 0%);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px; position: relative;
+  }
+  .score-ring-inner {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: var(--bg); display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .score-number { font-size: 1.6rem; font-weight: 800; color: var(--blue); }
+  .score-denom { font-size: 0.72rem; color: var(--muted); }
+  .score-msg { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+  .score-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 28px; }
+
+  .wrong-review { text-align: left; margin-top: 16px; }
+  .wrong-review-title {
+    font-size: 0.82rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+  .wrong-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 8px;
+  }
+  .wrong-item-phrase { font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+  .wrong-item-answer { font-size: 0.8rem; color: var(--green); }
+  .retry-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 11px 26px; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 0.88rem; font-weight: 600;
+    transition: all 0.2s; margin-top: 20px;
+  }
+  .retry-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* ─── PROGRESS TAB ─── */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 14px; margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; text-align: center;
+  }
+  .stat-number { font-size: 2rem; font-weight: 800; color: var(--blue); }
+  .stat-label { font-size: 0.72rem; color: var(--muted); font-weight: 600; margin-top: 4px; }
+
+  .progress-section { margin-bottom: 28px; }
+  .progress-section-title {
+    font-size: 0.78rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px;
+  }
+  .cat-progress-item { margin-bottom: 14px; }
+  .cat-progress-info {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+  }
+  .cat-progress-name { font-size: 0.85rem; font-weight: 600; }
+  .cat-progress-count { font-size: 0.75rem; color: var(--muted); }
+  .progress-bar {
+    height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    transition: width 0.6s ease;
+  }
+
+  .quiz-history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .history-info { font-size: 0.82rem; color: var(--muted); }
+  .history-score {
+    font-size: 0.95rem; font-weight: 700;
+  }
+  .history-score.great { color: var(--green); }
+  .history-score.ok { color: var(--yellow); }
+  .history-score.low { color: var(--red); }
+
+  .empty-state {
+    text-align: center; padding: 40px; color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .cat-grid { grid-template-columns: 1fr 1fr; }
+    .question-idiom { font-size: 1.2rem; }
+    .tab-btn { padding: 10px 12px; font-size: 0.72rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="header-icon">💬</div>
+    <div class="header-title">
+      <h1>American Idioms & Slang</h1>
+      <p>120 idioms · 8 categories · quiz yourself</p>
+    </div>
+    <div class="header-badge">#59 / 100</div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('categories')">🗂 CATEGORIES</button>
+    <button class="tab-btn" onclick="switchTab('browse')">📖 BROWSE</button>
+    <button class="tab-btn" onclick="switchTab('quiz')">🎯 QUIZ</button>
+    <button class="tab-btn" onclick="switchTab('progress')">📊 PROGRESS</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- ── CATEGORIES TAB ── -->
+  <div class="tab-panel active" id="tab-categories">
+    <div class="section-title">
+      Browse by Category
+      <span class="pill" id="total-learned-pill">0 learned</span>
+    </div>
+    <div class="cat-grid" id="cat-grid"></div>
+  </div>
+
+  <!-- ── BROWSE TAB ── -->
+  <div class="tab-panel" id="tab-browse">
+    <div id="browse-placeholder" class="browse-placeholder">
+      <div class="big-icon">👆</div>
+      <p>Select a category to browse idioms</p>
+      <small>Go to CATEGORIES and click any card</small>
+    </div>
+    <div id="browse-content" style="display:none">
+      <div class="browse-header">
+        <button class="back-btn" onclick="goBackToCategories()">← Back</button>
+        <span class="browse-cat-icon" id="browse-icon"></span>
+        <span class="browse-cat-title" id="browse-cat-name"></span>
+      </div>
+      <div class="browse-filter">
+        <button class="filter-btn active" onclick="setFilter('all', this)">All (15)</button>
+        <button class="filter-btn" onclick="setFilter('learned', this)">✓ Learned</button>
+        <button class="filter-btn" onclick="setFilter('unlearned', this)">Not yet</button>
+      </div>
+      <div class="idiom-list" id="idiom-list"></div>
+    </div>
+  </div>
+
+  <!-- ── QUIZ TAB ── -->
+  <div class="tab-panel" id="tab-quiz">
+    <div class="quiz-setup" id="quiz-setup">
+      <h2>🎯 Test Your Slang</h2>
+      <p>20 questions — pick the correct real meaning of each idiom</p>
+      <div style="margin-bottom:10px; font-size:0.8rem; color:var(--muted)">Filter by category (optional):</div>
+      <div class="quiz-cat-select" id="quiz-cat-select"></div>
+      <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <div class="quiz-active" id="quiz-active">
+      <div class="quiz-header">
+        <span class="quiz-progress-text" id="quiz-progress-text">Question 1 of 20</span>
+        <span class="quiz-score-badge" id="quiz-score-badge">Score: 0</span>
+      </div>
+      <div class="quiz-progress-bar">
+        <div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div>
+      </div>
+      <div class="question-card">
+        <div class="question-label">What does this idiom mean?</div>
+        <div class="question-idiom" id="question-idiom"></div>
+        <div class="question-sub" id="question-sub"></div>
+      </div>
+      <div class="choices" id="choices"></div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next →</button>
+    </div>
+
+    <div class="quiz-results" id="quiz-results">
+      <div class="score-ring" id="score-ring">
+        <div class="score-ring-inner">
+          <div class="score-number" id="final-score-num">0</div>
+          <div class="score-denom" id="final-score-denom">/ 20</div>
+        </div>
+      </div>
+      <div class="score-msg" id="score-msg"></div>
+      <div class="score-sub" id="score-sub"></div>
+      <div class="wrong-review" id="wrong-review"></div>
+      <button class="retry-btn" onclick="resetQuiz()">Try Again</button>
+    </div>
+  </div>
+
+  <!-- ── PROGRESS TAB ── -->
+  <div class="tab-panel" id="tab-progress">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-total">0</div>
+        <div class="stat-label">Total Learned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-quiz">0</div>
+        <div class="stat-label">Quizzes Taken</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-best">—</div>
+        <div class="stat-label">Best Score</div>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-section-title">Idioms Learned per Category</div>
+      <div id="cat-progress-bars"></div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-section-title">Quiz History (Last 5)</div>
+      <div id="quiz-history-list"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ─────────────────────────────────────────────
+//  DATA — 120 idioms × 8 categories × 15 each
+// ─────────────────────────────────────────────
+const CATEGORIES = [
+  {
+    id: 'everyday',
+    name: 'Everyday Speech',
+    icon: '🗣️',
+    color: '#4f8ef7',
+    idioms: [
+      { phrase: 'Break a leg', literal: 'Fracture your leg bone', real: 'Good luck', example: 'Break a leg at your audition tonight!' },
+      { phrase: 'Hit the nail on the head', literal: 'Strike a nail accurately', real: 'To be exactly right', example: 'You hit the nail on the head with that analysis.' },
+      { phrase: 'Spill the beans', literal: 'Drop beans on the floor', real: 'Reveal a secret', example: 'Don\'t spill the beans about the surprise party!' },
+      { phrase: 'It\'s raining cats and dogs', literal: 'Animals are falling from the sky', real: 'It\'s raining very heavily', example: 'Bring an umbrella — it\'s raining cats and dogs.' },
+      { phrase: 'Bite the bullet', literal: 'Chew on a metal bullet', real: 'Endure a painful or difficult situation bravely', example: 'Just bite the bullet and get the shot over with.' },
+      { phrase: 'Kick the bucket', literal: 'Kick a bucket with your foot', real: 'To die', example: 'The old car finally kicked the bucket last winter.' },
+      { phrase: 'Hit the hay', literal: 'Fall into a pile of hay', real: 'Go to bed / go to sleep', example: 'I\'m exhausted — time to hit the hay.' },
+      { phrase: 'On the fence', literal: 'Physically sitting on a fence', real: 'Undecided or neutral about something', example: 'I\'m still on the fence about taking that job offer.' },
+      { phrase: 'Piece of cake', literal: 'A slice of baked cake', real: 'Something very easy to do', example: 'The final exam was a piece of cake.' },
+      { phrase: 'Under the weather', literal: 'Physically below the weather', real: 'Feeling ill or unwell', example: 'I\'m feeling a bit under the weather today.' },
+      { phrase: 'Let the cat out of the bag', literal: 'Release a cat from a bag', real: 'Accidentally reveal a secret', example: 'He let the cat out of the bag about the wedding plans.' },
+      { phrase: 'Once in a blue moon', literal: 'When the moon turns blue', real: 'Very rarely', example: 'She visits her hometown once in a blue moon.' },
+      { phrase: 'Cost an arm and a leg', literal: 'Pay with your limbs', real: 'Extremely expensive', example: 'That designer bag costs an arm and a leg.' },
+      { phrase: 'Bite off more than you can chew', literal: 'Take too large a bite of food', real: 'Take on more than you can handle', example: 'Taking three jobs at once was biting off more than she could chew.' },
+      { phrase: 'Hit the ground running', literal: 'Land and immediately sprint', real: 'Start something with full energy and enthusiasm', example: 'She hit the ground running on her very first day.' },
+    ]
+  },
+  {
+    id: 'work',
+    name: 'Work & School',
+    icon: '💼',
+    color: '#a78bfa',
+    idioms: [
+      { phrase: 'Back to the drawing board', literal: 'Return to a whiteboard', real: 'Start over from scratch', example: 'The project failed, so it\'s back to the drawing board.' },
+      { phrase: 'Touch base', literal: 'Make physical contact with a base', real: 'Check in or briefly make contact', example: 'Let\'s touch base on Friday to review progress.' },
+      { phrase: 'Think outside the box', literal: 'Think beyond a physical container', real: 'Think creatively or unconventionally', example: 'We need to think outside the box for this campaign.' },
+      { phrase: 'Get the ball rolling', literal: 'Push a ball into motion', real: 'Start something / get things moving', example: 'Let\'s get the ball rolling on the new project.' },
+      { phrase: 'Burn the midnight oil', literal: 'Use lamp oil very late at night', real: 'Work or study late into the night', example: 'She burned the midnight oil to finish the report.' },
+      { phrase: 'In the loop', literal: 'Physically inside a loop', real: 'Kept informed about a situation', example: 'Keep me in the loop about any changes.' },
+      { phrase: 'Hit a wall', literal: 'Physically strike a wall', real: 'Reach an obstacle or mental block', example: 'I\'ve hit a wall on this math problem.' },
+      { phrase: 'Pull strings', literal: 'Tug on physical strings', real: 'Use influence or connections to get something done', example: 'She pulled strings to get her son into the school.' },
+      { phrase: 'By the book', literal: 'Following a physical book', real: 'Following the rules exactly as written', example: 'The new manager does everything strictly by the book.' },
+      { phrase: 'Step up to the plate', literal: 'Walk to a baseball home plate', real: 'Take responsibility or rise to a challenge', example: 'It\'s time to step up to the plate and lead the team.' },
+      { phrase: 'Cut corners', literal: 'Shorten a path at the corners', real: 'Do something the cheap or easy way, sacrificing quality', example: 'Don\'t cut corners when building the foundation.' },
+      { phrase: 'On the same page', literal: 'Reading the identical page', real: 'In agreement and mutual understanding', example: 'Let\'s make sure we\'re all on the same page before we proceed.' },
+      { phrase: 'Drop the ball', literal: 'Let a ball fall to the ground', real: 'Make a mistake or fail at a responsibility', example: 'I really dropped the ball on that presentation.' },
+      { phrase: 'Ahead of the curve', literal: 'In front of a physical curve', real: 'More advanced than the average', example: 'Her research puts her well ahead of the curve.' },
+      { phrase: 'Go back to basics', literal: 'Return to fundamental things', real: 'Return to the fundamental principles', example: 'When sales dropped, they went back to basics.' },
+    ]
+  },
+  {
+    id: 'emotions',
+    name: 'Emotions',
+    icon: '❤️',
+    color: '#f472b6',
+    idioms: [
+      { phrase: 'Butterflies in your stomach', literal: 'Having butterflies inside your belly', real: 'Feeling nervous or excited', example: 'I had butterflies in my stomach before the interview.' },
+      { phrase: 'Blow off steam', literal: 'Release pressurized steam from a pipe', real: 'Release pent-up stress or anger', example: 'He goes for a run to blow off steam after a hard day.' },
+      { phrase: 'On top of the world', literal: 'Standing at the Earth\'s highest point', real: 'Feeling extremely happy and elated', example: 'After winning the award, she felt on top of the world.' },
+      { phrase: 'See red', literal: 'Vision physically turns red', real: 'Become very angry', example: 'When he lied to her again, she saw red.' },
+      { phrase: 'Over the moon', literal: 'Flying past the moon in space', real: 'Extremely happy or pleased', example: 'She was over the moon when she got promoted.' },
+      { phrase: 'Down in the dumps', literal: 'Physically inside a garbage dump', real: 'Feeling sad or depressed', example: 'He\'s been down in the dumps since the breakup.' },
+      { phrase: 'Walk on air', literal: 'Float above the ground', real: 'Feel extremely happy and lighthearted', example: 'She was walking on air after getting engaged.' },
+      { phrase: 'On edge', literal: 'Balanced on a sharp edge', real: 'Feeling nervous, tense, or irritable', example: 'The uncertainty is keeping everyone on edge.' },
+      { phrase: 'Bent out of shape', literal: 'Physically twisted or deformed', real: 'Upset or angry about something', example: 'Don\'t get bent out of shape over small mistakes.' },
+      { phrase: 'Keep a stiff upper lip', literal: 'Hold your upper lip rigid', real: 'Remain calm and stoic in difficulty', example: 'He kept a stiff upper lip even after receiving the bad news.' },
+      { phrase: 'Wear your heart on your sleeve', literal: 'Attach your heart to your clothing', real: 'Openly and openly show your emotions', example: 'He always wears his heart on his sleeve.' },
+      { phrase: 'Bite someone\'s head off', literal: 'Decapitate someone with teeth', real: 'Respond with excessive or unnecessary anger', example: 'She bit my head off when I asked a simple question.' },
+      { phrase: 'Green with envy', literal: 'Skin literally turns green', real: 'Feeling very jealous', example: 'I was green with envy when I saw her new house.' },
+      { phrase: 'Turn over a new leaf', literal: 'Physically flip a leaf over', real: 'Change behavior and start fresh for the better', example: 'After rehab, he turned over a new leaf.' },
+      { phrase: 'Jump for joy', literal: 'Leap upward out of happiness', real: 'Feel or express extreme happiness and excitement', example: 'She jumped for joy when she got the acceptance letter.' },
+    ]
+  },
+  {
+    id: 'food',
+    name: 'Food & Drinks',
+    icon: '🍔',
+    color: '#fb923c',
+    idioms: [
+      { phrase: 'Couch potato', literal: 'A potato vegetable sitting on a couch', real: 'A lazy person who watches too much TV', example: 'Stop being a couch potato and go outside!' },
+      { phrase: 'In a nutshell', literal: 'Inside the shell of a nut', real: 'In brief summary', example: 'In a nutshell, the project was a complete success.' },
+      { phrase: 'Egg on your face', literal: 'Food smeared on your face', real: 'Embarrassed due to a public mistake', example: 'His wrong prediction left egg on his face.' },
+      { phrase: 'Bread and butter', literal: 'Basic staple food items', real: 'Main source of income or basic livelihood', example: 'Advertising is the bread and butter of their business.' },
+      { phrase: 'Bite the hand that feeds you', literal: 'Bite the hand that offers you food', real: 'Harm or betray someone who helps you', example: 'Criticizing your sponsor is biting the hand that feeds you.' },
+      { phrase: 'Have a lot on your plate', literal: 'Many foods piled on a dish', real: 'Have many responsibilities or tasks to deal with', example: 'I can\'t take on more — I already have a lot on my plate.' },
+      { phrase: 'Cry over spilt milk', literal: 'Weep about spilled dairy', real: 'Waste time worrying about something that can\'t be changed', example: 'The deal is done — no use crying over spilt milk.' },
+      { phrase: 'Butter someone up', literal: 'Spread butter on a person', real: 'Flatter or praise someone to gain a favor', example: 'She buttered up the teacher before asking for an extension.' },
+      { phrase: 'Take with a grain of salt', literal: 'Season food with a pinch of salt', real: 'View something with skepticism; not take it too seriously', example: 'Take his reviews with a grain of salt — he always exaggerates.' },
+      { phrase: 'Not my cup of tea', literal: 'Not a beverage I prefer', real: 'Not something one enjoys or is interested in', example: 'Horror movies aren\'t really my cup of tea.' },
+      { phrase: 'Cherry on top', literal: 'A cherry placed as a garnish', real: 'A pleasing final addition to something already good', example: 'The bonus was the cherry on top of an already great year.' },
+      { phrase: 'Bring home the bacon', literal: 'Carry pork products home', real: 'Earn money to support the family', example: 'He works two jobs to bring home the bacon.' },
+      { phrase: 'Sour grapes', literal: 'Unripe, bitter grapes', real: 'Pretending not to want something you can\'t have', example: 'His criticism of the award was just sour grapes.' },
+      { phrase: 'Chew the fat', literal: 'Gnaw on animal fat', real: 'Have a long, casual conversation', example: 'We sat on the porch and chewed the fat all evening.' },
+      { phrase: 'Spice things up', literal: 'Add spices to food', real: 'Make something more interesting or exciting', example: 'They added live music to spice things up at the event.' },
+    ]
+  },
+  {
+    id: 'sports',
+    name: 'Sports',
+    icon: '🏆',
+    color: '#34d399',
+    idioms: [
+      { phrase: 'Ballpark figure', literal: 'A number from a baseball stadium', real: 'A rough estimate', example: 'Give me a ballpark figure for the renovation costs.' },
+      { phrase: 'Get a second wind', literal: 'Gain wind strength a second time', real: 'Find new energy after becoming tired', example: 'She got a second wind in the last mile of the race.' },
+      { phrase: 'Down to the wire', literal: 'Racing all the way to the finish-line wire', real: 'Continuing until the very last moment', example: 'The election result was down to the wire.' },
+      { phrase: 'Par for the course', literal: 'The expected number of strokes in golf', real: 'What is typical or expected in a situation', example: 'Traffic delays are par for the course on Monday mornings.' },
+      { phrase: 'On the ball', literal: 'Physically standing on top of a ball', real: 'Alert, competent, and quick to act', example: 'The new intern is really on the ball.' },
+      { phrase: 'Throw in the towel', literal: 'Toss a towel into a boxing ring', real: 'Give up or admit defeat', example: 'After months of struggling, he threw in the towel.' },
+      { phrase: 'The whole nine yards', literal: 'Nine yards of fabric or distance', real: 'Everything possible; the full effort or amount', example: 'She decorated the house — the whole nine yards.' },
+      { phrase: 'Jump the gun', literal: 'Start running before the starter\'s gun fires', real: 'Act too soon or prematurely', example: 'Don\'t jump the gun — wait for the official announcement.' },
+      { phrase: 'Move the goalposts', literal: 'Physically relocate goal posts', real: 'Unfairly change the rules or criteria', example: 'Every time we meet the target, they move the goalposts.' },
+      { phrase: 'Level playing field', literal: 'A flat, even sports surface', real: 'Fair and equal conditions for everyone', example: 'Good education creates a level playing field for all kids.' },
+      { phrase: 'Neck and neck', literal: 'Horses\' necks perfectly even in a race', real: 'Very close or tied in a competition', example: 'The two candidates are neck and neck in the polls.' },
+      { phrase: 'Go the extra mile', literal: 'Run one additional mile', real: 'Make extra effort beyond what is required', example: 'She always goes the extra mile for her clients.' },
+      { phrase: 'Slam dunk', literal: 'A forceful basketball basket', real: 'A sure thing; an easy, certain success', example: 'Getting that contract was a slam dunk.' },
+      { phrase: 'Out of left field', literal: 'Coming from the left side of a baseball field', real: 'Unexpected and surprising', example: 'His resignation came completely out of left field.' },
+      { phrase: 'Touch and go', literal: 'Barely making physical contact', real: 'Uncertain, risky, or precarious', example: 'It was touch and go for a while, but the patient recovered.' },
+    ]
+  },
+  {
+    id: 'money',
+    name: 'Money',
+    icon: '💰',
+    color: '#facc15',
+    idioms: [
+      { phrase: 'Break even', literal: 'Become equal after breaking something', real: 'Make neither a profit nor a loss', example: 'After two years, the store finally broke even.' },
+      { phrase: 'On a shoestring', literal: 'Using a shoelace as currency', real: 'With very little money', example: 'They traveled across Europe on a shoestring.' },
+      { phrase: 'Penny-pincher', literal: 'Someone who squeezes pennies', real: 'A person who is very careful (or stingy) with money', example: 'He\'s such a penny-pincher — he reuses paper towels.' },
+      { phrase: 'Golden opportunity', literal: 'An opportunity made of gold', real: 'An excellent or rare chance', example: 'Don\'t miss this golden opportunity to invest early.' },
+      { phrase: 'Foot the bill', literal: 'Pay with your foot', real: 'Pay for something, especially for others', example: 'The company will foot the bill for the conference.' },
+      { phrase: 'Hit the jackpot', literal: 'Win a slot machine grand prize', real: 'Achieve great success or unexpected luck', example: 'She hit the jackpot with her startup idea.' },
+      { phrase: 'In the red', literal: 'Written in red ink in accounting', real: 'In debt or losing money', example: 'The company has been in the red for three quarters.' },
+      { phrase: 'Money doesn\'t grow on trees', literal: 'Currency doesn\'t sprout from branches', real: 'Money is limited and must be earned', example: 'I can\'t buy everything — money doesn\'t grow on trees.' },
+      { phrase: 'Make ends meet', literal: 'Connect the ends of something together', real: 'Earn just enough money to pay for necessities', example: 'With two jobs, she barely makes ends meet.' },
+      { phrase: 'Penny for your thoughts', literal: 'Offering one cent in exchange', real: 'Asking what someone is quietly thinking about', example: 'You look distracted — penny for your thoughts?' },
+      { phrase: 'Nest egg', literal: 'An egg kept in a nest', real: 'Money saved and set aside for the future', example: 'They built a solid nest egg over twenty years.' },
+      { phrase: 'Born with a silver spoon', literal: 'Having a silver utensil at birth', real: 'Born into wealth and privilege', example: 'He was born with a silver spoon and never had to struggle.' },
+      { phrase: 'Nickel and dime', literal: 'Small denomination coins', real: 'To drain money from someone in many small amounts', example: 'The app nickels and dimes you with every add-on.' },
+      { phrase: 'Cash cow', literal: 'A cow made of money', real: 'A product or service that reliably generates profit', example: 'Their subscription plan is the company\'s cash cow.' },
+      { phrase: 'Put in your two cents', literal: 'Contribute two pennies to something', real: 'Share your opinion, often unsolicited', example: 'If I can put in my two cents, I think we should wait.' },
+    ]
+  },
+  {
+    id: 'time',
+    name: 'Time',
+    icon: '⏰',
+    color: '#38bdf8',
+    idioms: [
+      { phrase: 'In the nick of time', literal: 'At the nick or cut of time', real: 'Just before it is too late', example: 'The ambulance arrived in the nick of time.' },
+      { phrase: 'Kill two birds with one stone', literal: 'Slay two birds with a single rock', real: 'Accomplish two things with a single action', example: 'I\'ll stop at the bank during lunch — kill two birds with one stone.' },
+      { phrase: 'Around the clock', literal: 'Going around a clock\'s face', real: 'All day and night; 24 hours', example: 'The nurses work around the clock to care for patients.' },
+      { phrase: 'At the drop of a hat', literal: 'The exact moment a hat falls', real: 'Immediately, without hesitation', example: 'She\'d drop everything and help a friend at the drop of a hat.' },
+      { phrase: 'Beat the clock', literal: 'Physically defeat a timepiece', real: 'Finish before the deadline', example: 'We barely beat the clock to submit the proposal.' },
+      { phrase: 'Behind the times', literal: 'Slower than a clock\'s hands', real: 'Old-fashioned or out of date', example: 'His ideas about technology are really behind the times.' },
+      { phrase: 'Better late than never', literal: 'Arriving after the scheduled time is better', real: 'It is better to do something late than to not do it at all', example: 'He finally sent the apology — better late than never.' },
+      { phrase: 'On the spur of the moment', literal: 'Using a horse spur very quickly', real: 'Doing something impulsively without planning', example: 'We booked the whole trip on the spur of the moment.' },
+      { phrase: 'Time flies', literal: 'Time floats through the air', real: 'Time passes very quickly', example: 'I can\'t believe you\'re graduating already — time flies!' },
+      { phrase: 'At the last minute', literal: 'At the final sixty seconds', real: 'At the very end of the available time', example: 'He always submits his work at the last minute.' },
+      { phrase: 'On borrowed time', literal: 'Surviving on time you borrowed', real: 'Living or continuing beyond what was expected', example: 'That old bridge is on borrowed time.' },
+      { phrase: 'Buy time', literal: 'Purchase additional time', real: 'Delay something to gain more time', example: 'Let\'s offer a discount to buy time while we fix the issue.' },
+      { phrase: 'Take a rain check', literal: 'Accept a voucher for a rained-out event', real: 'Decline an offer but indicate you\'d like it another time', example: 'I can\'t make it tonight, but can I take a rain check?' },
+      { phrase: 'Play it by ear', literal: 'Play music without reading sheet music', real: 'Improvise and decide as things develop', example: 'We haven\'t made solid plans — we\'ll play it by ear.' },
+      { phrase: 'Long shot', literal: 'A shot fired from a great distance', real: 'Something unlikely to succeed or happen', example: 'Getting into that program is a long shot, but apply anyway.' },
+    ]
+  },
+  {
+    id: 'relationships',
+    name: 'Relationships',
+    icon: '🤝',
+    color: '#e879f9',
+    idioms: [
+      { phrase: 'On the rocks', literal: 'Resting on top of rocks', real: 'In serious trouble or difficulty', example: 'Their marriage has been on the rocks for months.' },
+      { phrase: 'Tied the knot', literal: 'Literally knotted a piece of rope', real: 'Got married', example: 'They tied the knot in a small ceremony last summer.' },
+      { phrase: 'Hit it off', literal: 'Hit something and it flies away', real: 'Immediately like someone and get along well', example: 'We hit it off right away at the party.' },
+      { phrase: 'Keep at arm\'s length', literal: 'Hold someone at physical arm distance', real: 'Avoid getting too close or intimate with someone', example: 'She tends to keep her coworkers at arm\'s length.' },
+      { phrase: 'Have a falling out', literal: 'Physically fall downward together', real: 'Have a serious argument that damages a relationship', example: 'They had a falling out over money and stopped talking.' },
+      { phrase: 'Bury the hatchet', literal: 'Bury an axe underground', real: 'End a conflict and make peace', example: 'After years of rivalry, the two teams finally buried the hatchet.' },
+      { phrase: 'Two peas in a pod', literal: 'Two peas inside the same pod', real: 'Two people who are very similar or always together', example: 'Those best friends are like two peas in a pod.' },
+      { phrase: 'Give the cold shoulder', literal: 'Show someone a cold shoulder blade', real: 'Deliberately ignore or be unfriendly to someone', example: 'She gave him the cold shoulder after their argument.' },
+      { phrase: 'Mend fences', literal: 'Repair broken fencing', real: 'Reconcile after a disagreement', example: 'He called his father to mend fences after the long fight.' },
+      { phrase: 'Bend over backwards', literal: 'Physically arch your spine backward', real: 'Make extraordinary effort to help someone', example: 'She bent over backwards to accommodate the difficult client.' },
+      { phrase: 'An old flame', literal: 'An aged fire or candle', real: 'A former romantic partner', example: 'He ran into an old flame at the grocery store.' },
+      { phrase: 'Play the field', literal: 'Play a game on an open field', real: 'Date many different people without settling down', example: 'He\'s not ready to commit — he wants to play the field.' },
+      { phrase: 'A shoulder to cry on', literal: 'A physical shoulder used for crying', real: 'Someone who provides emotional support and listens', example: 'She\'s always been a shoulder to cry on during tough times.' },
+      { phrase: 'Wear the pants', literal: 'Put on a pair of trousers', real: 'Be the dominant decision-maker in a relationship', example: 'In their household, she definitely wears the pants.' },
+      { phrase: 'Keep in touch', literal: 'Stay in physical contact with someone', real: 'Maintain communication with someone over time', example: 'Let\'s keep in touch after you move abroad.' },
+    ]
+  },
+];
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+const LS = key => 'idioms59_' + key;
+let activeBrowseCat = null;
+let browseFilter = 'all';
+
+// quiz state
+let quizQuestions = [];
+let quizIndex = 0;
+let quizScore = 0;
+let quizWrong = [];
+let quizAnswered = false;
+let selectedQuizCats = new Set(); // empty = all
+
+// ─────────────────────────────────────────────
+//  LEARNED HELPERS
+// ─────────────────────────────────────────────
+function getLearnedSet(catId) {
+  try { return new Set(JSON.parse(localStorage.getItem(LS('learned_' + catId)) || '[]')); }
+  catch { return new Set(); }
+}
+function toggleLearned(catId, phraseIdx) {
+  const s = getLearnedSet(catId);
+  if (s.has(phraseIdx)) s.delete(phraseIdx); else s.add(phraseIdx);
+  localStorage.setItem(LS('learned_' + catId), JSON.stringify([...s]));
+}
+function getTotalLearned() {
+  return CATEGORIES.reduce((t, c) => t + getLearnedSet(c.id).size, 0);
+}
+
+// ─────────────────────────────────────────────
+//  TABS
+// ─────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['categories','browse','quiz','progress'][i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'categories') renderCategories();
+  if (name === 'progress') renderProgress();
+}
+
+// ─────────────────────────────────────────────
+//  CATEGORIES TAB
+// ─────────────────────────────────────────────
+function renderCategories() {
+  const total = getTotalLearned();
+  document.getElementById('total-learned-pill').textContent = total + ' learned';
+
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = CATEGORIES.map((cat, ci) => {
+    const learned = getLearnedSet(cat.id).size;
+    const pct = Math.round(learned / cat.idioms.length * 100);
+    const preview = cat.idioms[0].phrase;
+    return `
+      <div class="cat-card" style="--cat-color:${cat.color}" onclick="openCategory(${ci})">
+        <div class="cat-icon">${cat.icon}</div>
+        <div class="cat-name">${cat.name}</div>
+        <div class="cat-count">
+          ${learned > 0 ? '<span class="cat-learned-dot"></span>' : ''}
+          ${learned}/${cat.idioms.length} learned
+        </div>
+        <div class="cat-preview">"${preview}"</div>
+        <div class="cat-progress-bar">
+          <div class="cat-progress-fill" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+//  BROWSE TAB
+// ─────────────────────────────────────────────
+function openCategory(catIdx) {
+  activeBrowseCat = catIdx;
+  browseFilter = 'all';
+  switchTab('browse');
+  document.getElementById('browse-placeholder').style.display = 'none';
+  document.getElementById('browse-content').style.display = 'block';
+  const cat = CATEGORIES[catIdx];
+  document.getElementById('browse-icon').textContent = cat.icon;
+  document.getElementById('browse-cat-name').textContent = cat.name;
+  renderIdiomList();
+}
+
+function goBackToCategories() {
+  document.getElementById('browse-placeholder').style.display = 'block';
+  document.getElementById('browse-content').style.display = 'none';
+  activeBrowseCat = null;
+  switchTab('categories');
+}
+
+function setFilter(f, btn) {
+  browseFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderIdiomList();
+}
+
+function renderIdiomList() {
+  if (activeBrowseCat === null) return;
+  const cat = CATEGORIES[activeBrowseCat];
+  const learned = getLearnedSet(cat.id);
+
+  let idioms = cat.idioms.map((id, i) => ({ ...id, idx: i }));
+  if (browseFilter === 'learned') idioms = idioms.filter(id => learned.has(id.idx));
+  if (browseFilter === 'unlearned') idioms = idioms.filter(id => !learned.has(id.idx));
+
+  const list = document.getElementById('idiom-list');
+  if (idioms.length === 0) {
+    list.innerHTML = '<div class="empty-state">No idioms match this filter.</div>';
+    return;
+  }
+  list.innerHTML = idioms.map(id => {
+    const isLearned = learned.has(id.idx);
+    return `
+      <div class="idiom-card ${isLearned ? 'learned' : ''}" id="icard-${cat.id}-${id.idx}">
+        <div class="idiom-card-top">
+          <div class="idiom-phrase">${id.phrase}</div>
+          <span class="idiom-tag">✓ Learned</span>
+        </div>
+        <div class="idiom-meanings">
+          <div class="meaning-row">
+            <span class="meaning-label">Literal</span>
+            <span class="meaning-literal">${id.literal}</span>
+          </div>
+          <div class="meaning-row">
+            <span class="meaning-label">Real meaning</span>
+            <span class="meaning-real">${id.real}</span>
+          </div>
+          <div class="meaning-row">
+            <span class="meaning-label">Example</span>
+            <span class="meaning-example">${id.example}</span>
+          </div>
+        </div>
+        <button class="learn-btn" onclick="toggleLearnedUI('${cat.id}', ${id.idx})">
+          ${isLearned ? '✓ Learned' : 'Mark as Learned'}
+        </button>
+      </div>`;
+  }).join('');
+}
+
+function toggleLearnedUI(catId, idx) {
+  toggleLearned(catId, idx);
+  renderIdiomList();
+  renderCategories(); // update pill
+}
+
+// ─────────────────────────────────────────────
+//  QUIZ TAB
+// ─────────────────────────────────────────────
+function initQuizCatSelect() {
+  const container = document.getElementById('quiz-cat-select');
+  container.innerHTML = CATEGORIES.map((cat, i) =>
+    `<button class="quiz-cat-btn" onclick="toggleQuizCat(${i}, this)">${cat.icon} ${cat.name}</button>`
+  ).join('');
+}
+
+function toggleQuizCat(catIdx, btn) {
+  if (selectedQuizCats.has(catIdx)) {
+    selectedQuizCats.delete(catIdx);
+    btn.classList.remove('selected');
+  } else {
+    selectedQuizCats.add(catIdx);
+    btn.classList.add('selected');
+  }
+}
+
+function buildQuizPool() {
+  let pool = [];
+  const useCats = selectedQuizCats.size > 0
+    ? CATEGORIES.filter((_, i) => selectedQuizCats.has(i))
+    : CATEGORIES;
+  useCats.forEach(cat => {
+    cat.idioms.forEach((idiom, idx) => {
+      pool.push({ catId: cat.id, idx, phrase: idiom.phrase, real: idiom.real, example: idiom.example });
+    });
+  });
+  return pool;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  const pool = buildQuizPool();
+  if (pool.length < 4) {
+    alert('Select at least one category with enough idioms!');
+    return;
+  }
+  quizQuestions = shuffle(pool).slice(0, 20);
+  quizIndex = 0;
+  quizScore = 0;
+  quizWrong = [];
+
+  document.getElementById('quiz-setup').style.display = 'none';
+  document.getElementById('quiz-active').style.display = 'block';
+  document.getElementById('quiz-results').style.display = 'none';
+  showQuestion();
+}
+
+function showQuestion() {
+  quizAnswered = false;
+  const q = quizQuestions[quizIndex];
+  const total = quizQuestions.length;
+
+  document.getElementById('quiz-progress-text').textContent = `Question ${quizIndex + 1} of ${total}`;
+  document.getElementById('quiz-score-badge').textContent = `Score: ${quizScore}`;
+  document.getElementById('quiz-progress-fill').style.width = (quizIndex / total * 100) + '%';
+  document.getElementById('question-idiom').textContent = '"' + q.phrase + '"';
+  document.getElementById('question-sub').textContent = '';
+  document.getElementById('quiz-feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+
+  // Build 4 choices: 1 correct + 3 random wrongs
+  const allPool = buildQuizPool();
+  const wrongs = shuffle(allPool.filter(x => x.real !== q.real)).slice(0, 3);
+  const choices = shuffle([q, ...wrongs]);
+
+  const container = document.getElementById('choices');
+  container.innerHTML = choices.map((c, i) =>
+    `<button class="choice-btn" onclick="selectAnswer(this, ${c.real === q.real}, ${i})">${c.real}</button>`
+  ).join('');
+}
+
+function selectAnswer(btn, isCorrect, idx) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const q = quizQuestions[quizIndex];
+
+  // Disable all
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+
+  const feedback = document.getElementById('quiz-feedback');
+  if (isCorrect) {
+    btn.classList.add('correct');
+    quizScore++;
+    document.getElementById('quiz-score-badge').textContent = `Score: ${quizScore}`;
+    feedback.textContent = '✓ Correct!';
+    feedback.className = 'quiz-feedback correct';
+  } else {
+    btn.classList.add('wrong');
+    // highlight correct
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (b.textContent.trim() === q.real) b.classList.add('correct');
+    });
+    quizWrong.push(q);
+    feedback.textContent = '✗ Not quite — the correct answer is highlighted in green.';
+    feedback.className = 'quiz-feedback wrong';
+  }
+  feedback.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  quizIndex++;
+  if (quizIndex >= quizQuestions.length) {
+    finishQuiz();
+  } else {
+    showQuestion();
+  }
+}
+
+function finishQuiz() {
+  document.getElementById('quiz-active').style.display = 'none';
+  document.getElementById('quiz-results').style.display = 'block';
+
+  const total = quizQuestions.length;
+  const pct = Math.round(quizScore / total * 100);
+
+  document.getElementById('final-score-num').textContent = quizScore;
+  document.getElementById('final-score-denom').textContent = '/ ' + total;
+
+  // Animate ring
+  const ring = document.getElementById('score-ring');
+  ring.style.background = `conic-gradient(var(--blue) ${pct * 3.6}deg, var(--border) 0deg)`;
+
+  let msg, sub;
+  if (pct >= 90) { msg = '🏆 Slang Master!'; sub = 'Outstanding! You know your idioms.'; }
+  else if (pct >= 70) { msg = '🎯 Solid Knowledge!'; sub = 'You\'re getting the hang of it!'; }
+  else if (pct >= 50) { msg = '📚 Good Effort!'; sub = 'Review the ones you missed and try again.'; }
+  else { msg = '💪 Keep Practicing!'; sub = 'Idioms take time — browse more and retry.'; }
+  document.getElementById('score-msg').textContent = msg;
+  document.getElementById('score-sub').textContent = sub;
+
+  // Wrong review
+  const wrongDiv = document.getElementById('wrong-review');
+  if (quizWrong.length > 0) {
+    wrongDiv.innerHTML = `<div class="wrong-review-title">Review — Missed (${quizWrong.length})</div>` +
+      quizWrong.map(w => `
+        <div class="wrong-item">
+          <div class="wrong-item-phrase">"${w.phrase}"</div>
+          <div class="wrong-item-answer">✓ ${w.real}</div>
+        </div>`).join('');
+  } else {
+    wrongDiv.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:8px">🎉 No mistakes — perfect round!</div>';
+  }
+
+  // Save to history
+  saveQuizHistory(quizScore, total);
+}
+
+function resetQuiz() {
+  document.getElementById('quiz-setup').style.display = 'block';
+  document.getElementById('quiz-active').style.display = 'none';
+  document.getElementById('quiz-results').style.display = 'none';
+}
+
+// ─────────────────────────────────────────────
+//  QUIZ HISTORY
+// ─────────────────────────────────────────────
+function saveQuizHistory(score, total) {
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem(LS('quiz_history')) || '[]'); } catch {}
+  history.unshift({ score, total, date: new Date().toLocaleDateString() });
+  if (history.length > 20) history = history.slice(0, 20);
+  localStorage.setItem(LS('quiz_history'), JSON.stringify(history));
+}
+
+function getQuizHistory() {
+  try { return JSON.parse(localStorage.getItem(LS('quiz_history')) || '[]'); } catch { return []; }
+}
+
+// ─────────────────────────────────────────────
+//  PROGRESS TAB
+// ─────────────────────────────────────────────
+function renderProgress() {
+  const total = getTotalLearned();
+  const history = getQuizHistory();
+  const best = history.length > 0 ? Math.max(...history.map(h => Math.round(h.score / h.total * 100))) : null;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-quiz').textContent = history.length;
+  document.getElementById('stat-best').textContent = best !== null ? best + '%' : '—';
+
+  // Per-category bars
+  const barsDiv = document.getElementById('cat-progress-bars');
+  barsDiv.innerHTML = CATEGORIES.map(cat => {
+    const learned = getLearnedSet(cat.id).size;
+    const pct = Math.round(learned / cat.idioms.length * 100);
+    return `
+      <div class="cat-progress-item">
+        <div class="cat-progress-info">
+          <span class="cat-progress-name">${cat.icon} ${cat.name}</span>
+          <span class="cat-progress-count">${learned} / ${cat.idioms.length}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Quiz history
+  const histDiv = document.getElementById('quiz-history-list');
+  const recent = history.slice(0, 5);
+  if (recent.length === 0) {
+    histDiv.innerHTML = '<div class="empty-state">No quizzes taken yet. Head to the QUIZ tab!</div>';
+  } else {
+    histDiv.innerHTML = recent.map((h, i) => {
+      const pct = Math.round(h.score / h.total * 100);
+      const cls = pct >= 80 ? 'great' : pct >= 50 ? 'ok' : 'low';
+      return `
+        <div class="history-item">
+          <div class="history-info">Quiz #${history.length - i} — ${h.date}</div>
+          <div class="history-score ${cls}">${h.score}/${h.total} (${pct}%)</div>
+        </div>`;
+    }).join('');
+  }
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+renderCategories();
+initQuizCatSelect();
+</script>
+</body>
+</html>
