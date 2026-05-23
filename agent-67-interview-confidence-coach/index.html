@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Interview Confidence Coach</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f9fafb;--surface:#ffffff;--border:#e5e7eb;
+  --text:#111827;--muted:#6b7280;--light:#f3f4f6;
+  --accent:#4f46e5;--accent-light:#eef2ff;--accent-dark:#3730a3;
+  --green:#059669;--yellow:#d97706;--red:#dc2626;
+  --radius:12px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+a{color:var(--accent)}
+
+/* ── LAYOUT ── */
+.app{max-width:820px;margin:0 auto;padding:24px 16px 48px}
+header{text-align:center;margin-bottom:28px}
+header h1{font-size:1.75rem;font-weight:700;color:var(--accent)}
+header p{color:var(--muted);font-size:.95rem;margin-top:4px}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;background:var(--light);border-radius:10px;padding:4px;margin-bottom:24px}
+.tab-btn{flex:1;padding:10px 8px;border:none;background:transparent;border-radius:8px;font-size:.82rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;letter-spacing:.03em}
+.tab-btn.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.tab-btn:hover:not(.active){background:rgba(255,255,255,.6);color:var(--text)}
+.panel{display:none}.panel.active{display:block}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:16px}
+.section-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title .icon{font-size:1.1rem}
+
+/* ── BREATHING ── */
+.breath-wrapper{display:flex;flex-direction:column;align-items:center;gap:20px;padding:8px 0}
+.breath-visual{position:relative;width:200px;height:200px;flex-shrink:0}
+.breath-visual svg{position:absolute;top:0;left:0;width:100%;height:100%;transform:rotate(-90deg)}
+.arc-track{fill:none;stroke:var(--light);stroke-width:8}
+.arc-fill{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .4s ease,stroke .4s ease;stroke-dasharray:565.49;stroke-dashoffset:565.49}
+.breath-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.breath-phase{font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:.05em}
+.breath-count{font-size:2.2rem;font-weight:800;color:var(--text);line-height:1}
+.breath-label{font-size:.75rem;color:var(--muted)}
+.breath-circle-bg{position:absolute;inset:20px;border-radius:50%;background:var(--accent-light);transition:transform .8s cubic-bezier(.4,0,.2,1),background .8s ease}
+
+.breath-controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.breath-loops{font-size:.85rem;color:var(--muted);text-align:center}
+.cycle-info{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.cycle-step{text-align:center;padding:8px 14px;background:var(--light);border-radius:8px;font-size:.8rem}
+.cycle-step strong{display:block;font-size:1.1rem;color:var(--accent)}
+
+/* ── AFFIRMATION ── */
+.affirmation-box{background:linear-gradient(135deg,#eef2ff,#e0e7ff);border-radius:var(--radius);padding:28px 24px;text-align:center;margin-bottom:12px}
+.affirmation-text{font-size:1.15rem;font-weight:600;color:var(--accent-dark);font-style:italic;line-height:1.5;min-height:60px;display:flex;align-items:center;justify-content:center}
+
+/* ── SLIDER ── */
+.slider-wrap{display:flex;flex-direction:column;gap:10px}
+.slider-row{display:flex;align-items:center;gap:12px}
+.slider-row input[type=range]{flex:1;accent-color:var(--accent);height:6px;cursor:pointer}
+.slider-val{font-size:1.4rem;font-weight:800;color:var(--accent);min-width:28px;text-align:center}
+.slider-labels{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+.confidence-emoji{font-size:2rem;text-align:center;min-height:2.5rem;transition:opacity .2s}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-dark)}
+.btn-secondary{background:var(--light);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--border)}
+.btn-sm{padding:7px 14px;font-size:.82rem}
+.btn-ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}.btn-ghost:hover{background:var(--accent-light)}
+.btn-danger{background:#fee2e2;color:var(--red);border:1px solid #fca5a5}.btn-danger:hover{background:#fca5a5;color:#fff}
+
+/* ── PRACTICE ── */
+.category-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:.04em;margin-bottom:10px}
+.cat-behavioral{background:#dbeafe;color:#1d4ed8}
+.cat-technical{background:#dcfce7;color:#15803d}
+.cat-culture{background:#fef3c7;color:#b45309}
+.cat-tough{background:#fce7f3;color:#be185d}
+
+.question-text{font-size:1.1rem;font-weight:600;line-height:1.5;margin-bottom:16px;color:var(--text)}
+.hint-toggle{font-size:.82rem;color:var(--accent);cursor:pointer;background:none;border:none;padding:0;font-weight:600;text-decoration:underline;margin-bottom:10px}
+.hint-box{background:var(--accent-light);border-left:3px solid var(--accent);border-radius:6px;padding:12px 14px;font-size:.85rem;color:var(--accent-dark);margin-bottom:14px;display:none}
+.hint-box.open{display:block}
+
+.answer-area{width:100%;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.9rem;font-family:inherit;resize:vertical;min-height:100px;outline:none;transition:border .2s;color:var(--text)}
+.answer-area:focus{border-color:var(--accent)}
+
+.star-rating{display:flex;gap:6px;margin:12px 0}
+.star{font-size:1.4rem;cursor:pointer;transition:transform .1s;color:#d1d5db;user-select:none}
+.star.filled,.star:hover{color:#f59e0b}
+.star:hover~.star{color:#d1d5db}
+.star:active{transform:scale(.85)}
+.rating-label{font-size:.8rem;color:var(--muted);margin-left:4px;align-self:center}
+
+.q-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:14px}
+.q-counter{font-size:.82rem;color:var(--muted)}
+
+/* ── BODY LANGUAGE ── */
+.bl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.bl-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;box-shadow:var(--shadow)}
+.bl-icon{font-size:1.6rem;margin-bottom:8px}
+.bl-title{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.bl-rule{font-size:.85rem;color:var(--muted);margin-bottom:8px}
+.bl-mistake{font-size:.8rem;color:#b45309;background:#fef3c7;border-radius:6px;padding:6px 8px}
+.bl-mistake::before{content:"⚠ Avoid: "}
+
+/* ── PROGRESS ── */
+.progress-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.stat-box{background:var(--accent-light);border-radius:10px;padding:16px;text-align:center}
+.stat-num{font-size:2rem;font-weight:800;color:var(--accent)}
+.stat-label{font-size:.8rem;color:var(--muted);margin-top:2px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-label{font-size:.82rem;color:var(--text);width:100px;flex-shrink:0}
+.bar-track{flex:1;background:var(--light);border-radius:4px;height:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .5s ease}
+.bar-val{font-size:.8rem;color:var(--muted);width:36px;text-align:right;flex-shrink:0}
+.weak-spot{display:inline-block;padding:4px 12px;background:#fee2e2;color:var(--red);border-radius:20px;font-size:.82rem;font-weight:600;margin:4px}
+.history-list{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--light);border-radius:8px;font-size:.85rem}
+.history-score{font-weight:700;color:var(--accent)}
+.empty-state{text-align:center;padding:24px;color:var(--muted);font-size:.9rem}
+
+/* ── SAVE NOTICE ── */
+.save-notice{position:fixed;bottom:20px;right:20px;background:var(--green);color:#fff;padding:10px 18px;border-radius:8px;font-size:.88rem;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15);transform:translateY(80px);opacity:0;transition:all .3s}
+.save-notice.show{transform:translateY(0);opacity:1}
+
+@media(max-width:540px){
+  .progress-grid{grid-template-columns:1fr}
+  .tabs{gap:2px}
+  .tab-btn{font-size:.72rem;padding:8px 4px}
+  .cycle-info{gap:8px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Interview Confidence Coach</h1>
+    <p>Breathe. Prepare. Believe. You've got this.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" onclick="switchTab('warmup')" role="tab">WARM-UP</button>
+    <button class="tab-btn" onclick="switchTab('practice')" role="tab">PRACTICE</button>
+    <button class="tab-btn" onclick="switchTab('bodylang')" role="tab">BODY LANGUAGE</button>
+    <button class="tab-btn" onclick="switchTab('progress')" role="tab">PROGRESS</button>
+  </div>
+
+  <!-- ═══════════════ WARM-UP ═══════════════ -->
+  <div id="panel-warmup" class="panel active">
+
+    <!-- Breathing -->
+    <div class="card">
+      <div class="section-title"><span class="icon">🌬</span> 4-7-8 Breathing Exercise</div>
+      <div class="cycle-info">
+        <div class="cycle-step"><strong>4s</strong>Inhale</div>
+        <div class="cycle-step"><strong>7s</strong>Hold</div>
+        <div class="cycle-step"><strong>8s</strong>Exhale</div>
+      </div>
+      <div style="height:16px"></div>
+      <div class="breath-wrapper">
+        <div class="breath-visual">
+          <div class="breath-circle-bg" id="breathBg"></div>
+          <svg viewBox="0 0 200 200">
+            <circle class="arc-track" cx="100" cy="100" r="90"/>
+            <circle class="arc-fill" id="arcFill" cx="100" cy="100" r="90"/>
+          </svg>
+          <div class="breath-center">
+            <div class="breath-phase" id="breathPhase">Ready</div>
+            <div class="breath-count" id="breathCount">–</div>
+            <div class="breath-label" id="breathLoops"></div>
+          </div>
+        </div>
+        <div class="breath-controls">
+          <button class="btn btn-primary" id="breathBtn" onclick="toggleBreath()">▶ Start</button>
+          <button class="btn btn-secondary" onclick="resetBreath()">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Affirmation -->
+    <div class="card">
+      <div class="section-title"><span class="icon">💬</span> Daily Affirmation</div>
+      <div class="affirmation-box">
+        <div class="affirmation-text" id="affirmText">Click below for your affirmation.</div>
+      </div>
+      <div style="text-align:center">
+        <button class="btn btn-ghost" onclick="newAffirmation()">✨ New Affirmation</button>
+      </div>
+    </div>
+
+    <!-- Confidence check-in -->
+    <div class="card">
+      <div class="section-title"><span class="icon">📊</span> Confidence Check-In</div>
+      <div class="slider-wrap">
+        <div class="confidence-emoji" id="confEmoji">😐</div>
+        <div class="slider-row">
+          <span style="font-size:.82rem;color:var(--muted)">1</span>
+          <input type="range" id="confSlider" min="1" max="10" value="5" oninput="updateSlider()"/>
+          <span style="font-size:.82rem;color:var(--muted)">10</span>
+          <div class="slider-val" id="confVal">5</div>
+        </div>
+        <div class="slider-labels"><span>Not confident</span><span>Super confident</span></div>
+        <div style="text-align:center;margin-top:8px">
+          <button class="btn btn-primary btn-sm" onclick="saveConfidence()">Save Check-In</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ PRACTICE ═══════════════ -->
+  <div id="panel-practice" class="panel">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+        <div class="section-title" style="margin:0"><span class="icon">🎯</span> Interview Question</div>
+        <span class="q-counter" id="qCounter">–</span>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="category-badge" id="catBadge">Behavioral</div>
+      <div class="question-text" id="qText">Loading question…</div>
+
+      <button class="hint-toggle" onclick="toggleHint()">Show Hint ▾</button>
+      <div class="hint-box" id="hintBox"></div>
+
+      <textarea class="answer-area" id="answerArea" placeholder="Type your answer here using the STAR method (Situation → Task → Action → Result)…"></textarea>
+
+      <div>
+        <div style="font-size:.82rem;color:var(--muted);margin-top:12px">Rate your answer:</div>
+        <div style="display:flex;align-items:center">
+          <div class="star-rating" id="starRating">
+            <span class="star" data-v="1" onclick="rateSelf(1)">★</span>
+            <span class="star" data-v="2" onclick="rateSelf(2)">★</span>
+            <span class="star" data-v="3" onclick="rateSelf(3)">★</span>
+            <span class="star" data-v="4" onclick="rateSelf(4)">★</span>
+            <span class="star" data-v="5" onclick="rateSelf(5)">★</span>
+          </div>
+          <span class="rating-label" id="ratingLabel">Not rated</span>
+        </div>
+      </div>
+
+      <div class="q-footer">
+        <button class="btn btn-secondary btn-sm" onclick="saveAnswer()">💾 Save Answer</button>
+        <button class="btn btn-primary" onclick="nextQuestion()">Next Question →</button>
+      </div>
+    </div>
+
+    <!-- Category filter -->
+    <div class="card" style="padding:16px">
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:10px;font-weight:600">Filter by category:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-secondary" onclick="filterCat('all')" id="f-all">All</button>
+        <button class="btn btn-sm btn-secondary" onclick="filterCat('behavioral')" id="f-behavioral">Behavioral</button>
+        <button class="btn btn-sm btn-secondary" onclick="filterCat('technical')" id="f-technical">Technical</button>
+        <button class="btn btn-sm btn-secondary" onclick="filterCat('culture')" id="f-culture">Culture Fit</button>
+        <button class="btn btn-sm btn-secondary" onclick="filterCat('tough')" id="f-tough">Tough</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ BODY LANGUAGE ═══════════════ -->
+  <div id="panel-bodylang" class="panel">
+    <div class="card" style="margin-bottom:20px">
+      <div class="section-title"><span class="icon">🧍</span> Body Language Mastery</div>
+      <p style="font-size:.88rem;color:var(--muted)">55% of communication is non-verbal. Master these 10 fundamentals before your interview.</p>
+    </div>
+    <div class="bl-grid" id="blGrid"></div>
+  </div>
+
+  <!-- ═══════════════ PROGRESS ═══════════════ -->
+  <div id="panel-progress" class="panel">
+
+    <div class="progress-grid" style="margin-bottom:16px">
+      <div class="stat-box">
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-label">Questions Practiced</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statSessions">0</div>
+        <div class="stat-label">Check-Ins Saved</div>
+      </div>
+    </div>
+
+    <!-- Questions per category -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="section-title"><span class="icon">📈</span> Questions by Category</div>
+      <div id="catBars"></div>
+    </div>
+
+    <!-- Avg rating per category -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="section-title"><span class="icon">⭐</span> Avg Self-Rating by Category</div>
+      <div id="ratingBars"></div>
+      <div style="margin-top:14px">
+        <div style="font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:8px">Weak Spots (avg &lt; 3)</div>
+        <div id="weakSpots"><span style="font-size:.85rem;color:var(--muted)">No data yet.</span></div>
+      </div>
+    </div>
+
+    <!-- Confidence history -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="section-title"><span class="icon">💙</span> Confidence History</div>
+      <div class="history-list" id="historyList">
+        <div class="empty-state">No check-ins yet. Go to Warm-Up to log your confidence.</div>
+      </div>
+    </div>
+
+    <div style="text-align:right">
+      <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑 Clear All Data</button>
+    </div>
+  </div>
+
+</div>
+<div class="save-notice" id="saveNotice">Saved ✓</div>
+
+<script>
+// ───────────────────────────────────────────────────────────
+// DATA
+// ───────────────────────────────────────────────────────────
+const AFFIRMATIONS = [
+  "I earned this seat.",
+  "Nervousness is just excitement in disguise.",
+  "I am prepared and I belong here.",
+  "Every question is an opportunity to shine.",
+  "I have valuable experience to share.",
+  "I am confident, calm, and capable.",
+  "Mistakes are proof that I'm trying.",
+  "I grow stronger with every challenge.",
+  "I am exactly what this company needs.",
+  "My unique perspective adds value.",
+  "I am a continuous learner — that matters.",
+  "Confidence is built one step at a time.",
+  "I deserve success, and today I claim it.",
+  "My preparation has led me to this moment.",
+  "I communicate clearly and effectively.",
+  "I handle pressure with grace and poise.",
+  "I am more capable than I realize.",
+  "Every interview is a learning experience.",
+  "I bring passion and dedication to everything.",
+  "The best chapter of my career starts today.",
+];
+
+const QUESTIONS = [
+  // Behavioral
+  {cat:'behavioral',q:"Tell me about a time you failed and what you learned from it.",hint:"Use STAR. Focus on growth and accountability — own the failure, then pivot to lessons."},
+  {cat:'behavioral',q:"Describe a situation where you had to work with a difficult team member.",hint:"Show empathy and conflict resolution. Avoid blaming — focus on the collaboration outcome."},
+  {cat:'behavioral',q:"Give an example of a goal you set and how you achieved it.",hint:"Quantify both the goal and the result (e.g., 'reduced load time by 40%')."},
+  {cat:'behavioral',q:"Tell me about a time you had to adapt to a significant change at work.",hint:"Flexibility and positive attitude are key. Show you can pivot without derailing."},
+  {cat:'behavioral',q:"Describe a project you led and its outcome.",hint:"Highlight your leadership style and how you brought the team along with you."},
+  {cat:'behavioral',q:"Tell me about a time you went above and beyond for a client or colleague.",hint:"Show initiative and ownership. Interviewers want to see you care about impact, not just tasks."},
+  {cat:'behavioral',q:"Give an example of how you handled conflicting priorities under pressure.",hint:"Mention the framework you used to prioritize (urgency vs. impact, stakeholder input, etc.)."},
+  {cat:'behavioral',q:"Describe a time you received critical feedback. How did you respond?",hint:"Show you welcome growth. Don't be defensive — show what changed as a result."},
+  {cat:'behavioral',q:"Tell me about your greatest professional achievement.",hint:"Be specific and explain YOUR contribution vs. the team's. Use numbers wherever possible."},
+  {cat:'behavioral',q:"Give an example of a time you made a decision with incomplete information.",hint:"Show analytical thinking: what signals did you use, what risk did you accept, what happened?"},
+  // Technical
+  {cat:'technical',q:"How do you approach debugging a complex problem you've never seen before?",hint:"Walk through a systematic method: reproduce → isolate → hypothesize → test → fix."},
+  {cat:'technical',q:"Describe your experience with version control and branching strategies.",hint:"Mention specific workflows (Git Flow, trunk-based) and how you've collaborated on teams."},
+  {cat:'technical',q:"How do you ensure code quality in your projects?",hint:"Cover testing (unit/integration), code reviews, linting, CI/CD, and documentation practices."},
+  {cat:'technical',q:"Explain a technical concept to me as if I were non-technical.",hint:"Choose something you know deeply. Use a real-world analogy. Check for understanding mid-way."},
+  {cat:'technical',q:"How do you stay current with industry trends and new technologies?",hint:"Name specific resources (blogs, podcasts, conferences, side projects) — not just 'I Google things'."},
+  {cat:'technical',q:"Describe a significant technical challenge you overcame. What was your approach?",hint:"Show problem decomposition, collaboration with others, and how you validated your solution."},
+  {cat:'technical',q:"How do you handle technical debt in a codebase you inherit?",hint:"Balance pragmatism with long-term maintainability. Show you understand business trade-offs."},
+  {cat:'technical',q:"What's your experience with agile or scrum methodologies?",hint:"Give concrete examples — sprint planning, retrospectives, story pointing, cross-functional teams."},
+  {cat:'technical',q:"How do you approach learning a new technology or programming language?",hint:"Show structured self-learning: docs → tutorials → small project → production use."},
+  {cat:'technical',q:"Walk me through how you would design a simple system from scratch (e.g., a URL shortener).",hint:"Cover requirements, key components, data model, APIs, and trade-offs (consistency vs. availability)."},
+  // Culture Fit
+  {cat:'culture',q:"Why do you want to work here specifically?",hint:"Research the company's mission, recent news, and culture. Connect them to your personal values."},
+  {cat:'culture',q:"Where do you see yourself in 5 years?",hint:"Align your growth goals with the company's trajectory. Show ambition balanced with realism."},
+  {cat:'culture',q:"How do you describe your ideal work environment?",hint:"Be honest but aligned with what you know about their culture. Avoid rigid demands."},
+  {cat:'culture',q:"What are your core values, and how do they align with ours?",hint:"Reference values from the company's website or job description. Be genuine, not performative."},
+  {cat:'culture',q:"What does work-life balance mean to you?",hint:"Show maturity: sustainable productivity, not entitlement. Avoid coming across as disengaged."},
+  {cat:'culture',q:"How do you handle stress and pressure?",hint:"Give specific coping strategies (prioritization, communication, delegation) with a real example."},
+  {cat:'culture',q:"Describe your ideal manager.",hint:"Be positive and focus on collaboration, feedback, and autonomy. Never badmouth past managers."},
+  {cat:'culture',q:"What do you look for in a team?",hint:"Highlight trust, psychological safety, diverse perspectives, and accountability."},
+  {cat:'culture',q:"How do you actively contribute to team culture?",hint:"Give specific examples: mentoring, knowledge sharing, organizing activities, or setting norms."},
+  {cat:'culture',q:"What's your approach to remote or hybrid work?",hint:"Show self-discipline, async communication skills, and adaptability to different setups."},
+  // Tough
+  {cat:'tough',q:"What's your biggest weakness?",hint:"Choose a genuine weakness with a concrete improvement plan. Avoid clichés like 'I work too hard'."},
+  {cat:'tough',q:"Why are you leaving your current job?",hint:"Stay positive. Frame it as moving toward opportunity, not escaping problems. No venting."},
+  {cat:'tough',q:"Tell me about a conflict with your manager and how you resolved it.",hint:"Show professional communication and constructive intent. Focus on the resolution."},
+  {cat:'tough',q:"Have you ever missed a deadline? What happened?",hint:"Own it fully, explain context briefly, and focus on what you changed to prevent recurrence."},
+  {cat:'tough',q:"Why should we hire you over other candidates?",hint:"Highlight your unique combination of skills + experience + passion. Be specific, not generic."},
+  {cat:'tough',q:"Describe a project you regret or would handle differently.",hint:"Be honest and show genuine reflection. What would you do differently and why?"},
+  {cat:'tough',q:"How do you handle being wrong, especially publicly?",hint:"Show humility and a growth mindset. Admit it quickly, fix it, and learn from it."},
+  {cat:'tough',q:"Describe a time you disagreed with a key decision. What did you do?",hint:"Show you voiced concerns professionally, then committed to the decision made by the team."},
+  {cat:'tough',q:"If you could change one thing about your career trajectory, what would it be?",hint:"Frame it as a learning opportunity, not a regret. Show forward-thinking."},
+  {cat:'tough',q:"What would a reference say is your biggest area for improvement?",hint:"Be authentic. Pick something real, show awareness, and explain what you're doing about it."},
+];
+
+const BODY_LANG = [
+  {icon:"👁",title:"Eye Contact",rule:"Maintain steady eye contact 70–80% of the time to project confidence and attentiveness.",mistake:"Staring unblinkingly OR darting eyes — both signal discomfort."},
+  {icon:"🧍",title:"Posture",rule:"Sit tall with shoulders back, feet flat, and lean slightly forward to show engagement.",mistake:"Slouching or leaning back too casually signals disinterest or overconfidence."},
+  {icon:"🤝",title:"Handshake",rule:"Offer a firm, brief, web-to-web handshake and match the interviewer's energy.",mistake:"A limp or crushing grip both leave a negative impression before you say a word."},
+  {icon:"🎙",title:"Speaking Pace",rule:"Speak at a deliberate, measured pace — about 120–150 words per minute.",mistake:"Rushing through answers when nervous makes you hard to follow and signals anxiety."},
+  {icon:"⏸",title:"Pausing Before Answering",rule:"Take 2–3 seconds to think before responding — silence shows confidence, not weakness.",mistake:"Jumping in immediately often leads to a rambling, unfocused answer."},
+  {icon:"🤐",title:"Avoiding Filler Words",rule:"Replace 'um', 'uh', 'like', 'you know' with a brief, deliberate pause.",mistake:"Overusing fillers undermines your credibility and distracts the interviewer."},
+  {icon:"🔁",title:"Mirroring",rule:"Subtly match the interviewer's tone, energy, and body language to build rapport.",mistake:"Mimicking too obviously or failing to adapt at all both break connection."},
+  {icon:"😊",title:"Facial Expression",rule:"Smile naturally, nod when listening, and let your face reflect genuine engagement.",mistake:"Keeping a blank or overly serious expression makes you seem guarded or disinterested."},
+  {icon:"🙌",title:"Hand Gestures",rule:"Use open, natural gestures at chest level to emphasize key points.",mistake:"Crossing your arms, pointing, or fidgeting with objects signals nervousness or aggression."},
+  {icon:"🚪",title:"Entering the Room",rule:"Walk in with purpose — shoulders back, head up — and introduce yourself warmly.",mistake:"Hesitating at the door or entering apologetically sets a weak tone for the entire interview."},
+];
+
+const CAT_LABELS = {behavioral:'Behavioral',technical:'Technical',culture:'Culture Fit',tough:'Tough'};
+const CAT_CLASSES = {behavioral:'cat-behavioral',technical:'cat-technical',culture:'cat-culture',tough:'cat-tough'};
+const CONF_EMOJIS = ['😰','😟','😕','😐','🙂','😊','😄','🤩','💪','🚀'];
+
+// ───────────────────────────────────────────────────────────
+// STORAGE HELPERS
+// ───────────────────────────────────────────────────────────
+const PREFIX = 'coach67_';
+const store = {
+  get:(k,d=null)=>{try{const v=localStorage.getItem(PREFIX+k);return v!==null?JSON.parse(v):d;}catch{return d;}},
+  set:(k,v)=>localStorage.setItem(PREFIX+k,JSON.stringify(v)),
+};
+
+// ───────────────────────────────────────────────────────────
+// TABS
+// ───────────────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  const tabs={warmup:0,practice:1,bodylang:2,progress:3};
+  document.querySelectorAll('.tab-btn')[tabs[id]].classList.add('active');
+  if(id==='progress') renderProgress();
+}
+
+// ───────────────────────────────────────────────────────────
+// BREATHING
+// ───────────────────────────────────────────────────────────
+const PHASES = [
+  {name:'INHALE',dur:4,scale:1.0,color:'#6366f1'},
+  {name:'HOLD',dur:7,scale:1.0,color:'#7c3aed'},
+  {name:'EXHALE',dur:8,scale:0.55,color:'#4f46e5'},
+];
+const CIRCUMFERENCE = 2 * Math.PI * 90; // r=90
+let breathRunning=false, phaseIdx=0, timeLeft=0, loops=0, breathInterval=null;
+let phaseElapsed=0;
+
+const $phase=document.getElementById('breathPhase');
+const $count=document.getElementById('breathCount');
+const $loopsEl=document.getElementById('breathLoops');
+const $arc=document.getElementById('arcFill');
+const $bg=document.getElementById('breathBg');
+const $breathBtn=document.getElementById('breathBtn');
+
+function setArc(frac,color){
+  $arc.style.strokeDashoffset = CIRCUMFERENCE*(1-frac);
+  $arc.style.stroke = color;
+}
+
+function applyPhase(pIdx,elapsed){
+  const p=PHASES[pIdx];
+  const frac = Math.min(elapsed/p.dur,1);
+  if(pIdx===2){ // exhale
+    $bg.style.transform=`scale(${1.0 - (1.0-p.scale)*frac})`;
+  } else if(pIdx===0){ // inhale
+    $bg.style.transform=`scale(${p.scale - (p.scale-0.55)*(1-frac)})`;
+  } else { // hold
+    $bg.style.transform=`scale(1.0)`;
+  }
+  setArc(frac, p.color);
+}
+
+function tick(){
+  phaseElapsed++;
+  const p = PHASES[phaseIdx];
+  const remain = p.dur - phaseElapsed + 1;
+  $count.textContent = Math.max(1,remain);
+  applyPhase(phaseIdx, phaseElapsed);
+  if(phaseElapsed >= p.dur){
+    phaseElapsed=0;
+    phaseIdx=(phaseIdx+1)%PHASES.length;
+    if(phaseIdx===0) loops++;
+    $phase.textContent=PHASES[phaseIdx].name;
+    $count.textContent=PHASES[phaseIdx].dur;
+    $loopsEl.textContent = loops>0?`${loops} cycle${loops>1?'s':''} complete`:'';
+  }
+}
+
+function toggleBreath(){
+  if(breathRunning){
+    clearInterval(breathInterval); breathRunning=false;
+    $breathBtn.textContent='▶ Resume';
+  } else {
+    if(!breathInterval && phaseIdx===0 && phaseElapsed===0){
+      $phase.textContent='INHALE'; $count.textContent='4';
+    }
+    breathRunning=true;
+    $breathBtn.textContent='⏸ Pause';
+    breathInterval=setInterval(tick,1000);
+  }
+}
+
+function resetBreath(){
+  clearInterval(breathInterval); breathInterval=null;
+  breathRunning=false; phaseIdx=0; phaseElapsed=0; loops=0;
+  $phase.textContent='Ready'; $count.textContent='–'; $loopsEl.textContent='';
+  $bg.style.transform='scale(0.55)';
+  setArc(0,'#4f46e5');
+  $breathBtn.textContent='▶ Start';
+}
+
+// ───────────────────────────────────────────────────────────
+// AFFIRMATION
+// ───────────────────────────────────────────────────────────
+let lastAffIdx=-1;
+function newAffirmation(){
+  let idx;
+  do{ idx=Math.floor(Math.random()*AFFIRMATIONS.length); } while(idx===lastAffIdx);
+  lastAffIdx=idx;
+  const el=document.getElementById('affirmText');
+  el.style.opacity='0';
+  setTimeout(()=>{ el.textContent='"'+AFFIRMATIONS[idx]+'"'; el.style.transition='opacity .4s'; el.style.opacity='1'; },200);
+}
+newAffirmation();
+
+// ───────────────────────────────────────────────────────────
+// CONFIDENCE SLIDER
+// ───────────────────────────────────────────────────────────
+function updateSlider(){
+  const v=parseInt(document.getElementById('confSlider').value);
+  document.getElementById('confVal').textContent=v;
+  document.getElementById('confEmoji').textContent=CONF_EMOJIS[v-1];
+}
+updateSlider();
+
+function saveConfidence(){
+  const v=parseInt(document.getElementById('confSlider').value);
+  const history=store.get('confidence_history',[]);
+  history.push({score:v,date:new Date().toLocaleString()});
+  store.set('confidence_history',history);
+  showNotice('Confidence saved ✓');
+}
+
+// ───────────────────────────────────────────────────────────
+// PRACTICE
+// ───────────────────────────────────────────────────────────
+let currentFilter='all';
+let filteredQ=[];
+let currentQIdx=0;
+let currentRating=0;
+
+function getFilteredQ(){
+  if(currentFilter==='all') return [...QUESTIONS];
+  return QUESTIONS.filter(q=>q.cat===currentFilter);
+}
+
+function shuffleQ(arr){ for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr; }
+
+function loadQuestion(){
+  if(filteredQ.length===0){ filteredQ=shuffleQ(getFilteredQ()); currentQIdx=0; }
+  const q=filteredQ[currentQIdx];
+  document.getElementById('catBadge').textContent=CAT_LABELS[q.cat];
+  document.getElementById('catBadge').className='category-badge '+CAT_CLASSES[q.cat];
+  document.getElementById('qText').textContent=q.q;
+  document.getElementById('hintBox').textContent=q.hint;
+  document.getElementById('hintBox').classList.remove('open');
+  document.querySelector('.hint-toggle').textContent='Show Hint ▾';
+  document.getElementById('answerArea').value='';
+  currentRating=0;
+  updateStars(0);
+  document.getElementById('qCounter').textContent=`Q ${currentQIdx+1}/${filteredQ.length} · ${CAT_LABELS[q.cat]}`;
+}
+
+function nextQuestion(){
+  if(currentRating>0) saveAnswer(true);
+  currentQIdx=(currentQIdx+1)%filteredQ.length;
+  loadQuestion();
+}
+
+function toggleHint(){
+  const box=document.getElementById('hintBox');
+  const open=box.classList.toggle('open');
+  document.querySelector('.hint-toggle').textContent=open?'Hide Hint ▴':'Show Hint ▾';
+}
+
+function rateSelf(v){
+  currentRating=v;
+  updateStars(v);
+  document.getElementById('ratingLabel').textContent=['Poor','Fair','Good','Great','Excellent'][v-1];
+}
+
+function updateStars(v){
+  document.querySelectorAll('.star').forEach((s,i)=>{
+    s.classList.toggle('filled',i<v);
+  });
+}
+
+function saveAnswer(silent=false){
+  const q=filteredQ[currentQIdx];
+  if(currentRating===0&&!silent) return showNotice('Rate your answer first!');
+  const key='practice_'+q.cat;
+  const entries=store.get(key,[]);
+  entries.push({q:q.q,answer:document.getElementById('answerArea').value,rating:currentRating,date:new Date().toISOString()});
+  store.set(key,entries);
+  // total count
+  const total=store.get('total_practiced',0);
+  store.set('total_practiced',total+1);
+  if(!silent) showNotice('Answer saved ✓');
+}
+
+function filterCat(cat){
+  currentFilter=cat;
+  filteredQ=shuffleQ(getFilteredQ());
+  currentQIdx=0;
+  loadQuestion();
+  document.querySelectorAll('[id^="f-"]').forEach(b=>b.classList.remove('btn-primary'));
+  document.getElementById('f-'+cat).classList.add('btn-primary');
+}
+
+// init practice
+filteredQ=shuffleQ([...QUESTIONS]);
+loadQuestion();
+document.getElementById('f-all').classList.add('btn-primary');
+
+// ───────────────────────────────────────────────────────────
+// BODY LANGUAGE
+// ───────────────────────────────────────────────────────────
+(function renderBL(){
+  const grid=document.getElementById('blGrid');
+  grid.innerHTML=BODY_LANG.map(b=>`
+    <div class="bl-card">
+      <div class="bl-icon">${b.icon}</div>
+      <div class="bl-title">${b.title}</div>
+      <div class="bl-rule">${b.rule}</div>
+      <div class="bl-mistake">${b.mistake}</div>
+    </div>`).join('');
+})();
+
+// ───────────────────────────────────────────────────────────
+// PROGRESS
+// ───────────────────────────────────────────────────────────
+function renderProgress(){
+  const cats=['behavioral','technical','culture','tough'];
+  const catData={};
+  let totalQ=0;
+  cats.forEach(cat=>{
+    const entries=store.get('practice_'+cat,[]);
+    totalQ+=entries.length;
+    const ratings=entries.filter(e=>e.rating>0).map(e=>e.rating);
+    catData[cat]={count:entries.length,avg:ratings.length?ratings.reduce((a,b)=>a+b,0)/ratings.length:0};
+  });
+  document.getElementById('statTotal').textContent=totalQ;
+  const hist=store.get('confidence_history',[]);
+  document.getElementById('statSessions').textContent=hist.length;
+
+  // Count bars
+  const maxCount=Math.max(1,...cats.map(c=>catData[c].count));
+  document.getElementById('catBars').innerHTML=cats.map(cat=>{
+    const d=catData[cat]; const pct=Math.round(d.count/maxCount*100);
+    return `<div class="bar-row">
+      <div class="bar-label">${CAT_LABELS[cat]}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="bar-val">${d.count}</div>
+    </div>`;
+  }).join('');
+
+  // Rating bars
+  document.getElementById('ratingBars').innerHTML=cats.map(cat=>{
+    const d=catData[cat]; const pct=d.avg/5*100;
+    return `<div class="bar-row">
+      <div class="bar-label">${CAT_LABELS[cat]}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${d.avg<3?'#f59e0b':'#4f46e5'}"></div></div>
+      <div class="bar-val">${d.avg?d.avg.toFixed(1):'–'}</div>
+    </div>`;
+  }).join('');
+
+  // Weak spots
+  const weak=cats.filter(c=>catData[c].avg>0&&catData[c].avg<3);
+  document.getElementById('weakSpots').innerHTML=weak.length
+    ? weak.map(c=>`<span class="weak-spot">${CAT_LABELS[c]}</span>`).join('')
+    : '<span style="font-size:.85rem;color:var(--muted)">Looking strong! No weak spots.</span>';
+
+  // Confidence history
+  const listEl=document.getElementById('historyList');
+  if(hist.length===0){
+    listEl.innerHTML='<div class="empty-state">No check-ins yet. Go to Warm-Up to log your confidence.</div>';
+  } else {
+    const recent=[...hist].reverse().slice(0,20);
+    listEl.innerHTML=recent.map(h=>`
+      <div class="history-item">
+        <span>${h.date}</span>
+        <span class="history-score">${h.score}/10 ${CONF_EMOJIS[h.score-1]}</span>
+      </div>`).join('');
+  }
+}
+
+function clearAllData(){
+  if(!confirm('Clear all saved data? This cannot be undone.')) return;
+  Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).forEach(k=>localStorage.removeItem(k));
+  showNotice('All data cleared');
+  renderProgress();
+}
+
+// ───────────────────────────────────────────────────────────
+// UTILS
+// ───────────────────────────────────────────────────────────
+let noticeTimer=null;
+function showNotice(msg){
+  const el=document.getElementById('saveNotice');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(noticeTimer);
+  noticeTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// Init bg scale
+document.getElementById('breathBg').style.transform='scale(0.55)';
+</script>
+</body>
+</html>
