@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent #68 — Coding Quiz Battle</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0d0a1a;--card:#1a1530;--card2:#231e3d;--purple:#a855f7;--purple2:#7c3aed;
+    --orange:#f97316;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;
+    --text:#e2e8f0;--muted:#94a3b8;--border:#2d2555;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;line-height:1.6}
+  a{color:var(--purple);text-decoration:none}
+
+  /* HEADER */
+  header{
+    text-align:center;padding:2rem 1rem 1.5rem;
+    background:linear-gradient(180deg,#120e24 0%,var(--bg) 100%);
+    border-bottom:1px solid var(--border);
+  }
+  .logo{font-size:2rem;font-weight:900;letter-spacing:-1px}
+  .logo span:first-child{color:var(--purple)}
+  .logo span:last-child{color:var(--orange)}
+  .subtitle{color:var(--muted);font-size:.9rem;margin-top:.3rem}
+  .badge{display:inline-block;background:var(--purple2);color:#fff;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:99px;margin-top:.5rem;letter-spacing:.5px}
+
+  /* TABS */
+  .tabs{display:flex;justify-content:center;gap:.5rem;padding:1.2rem 1rem;background:var(--bg);position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border)}
+  .tab{
+    background:var(--card);border:1px solid var(--border);color:var(--muted);
+    padding:.5rem 1.2rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:.85rem;
+    transition:all .2s;letter-spacing:.5px;
+  }
+  .tab:hover{border-color:var(--purple);color:var(--purple)}
+  .tab.active{background:var(--purple2);border-color:var(--purple);color:#fff;box-shadow:0 0 12px rgba(168,85,247,.3)}
+
+  /* PAGES */
+  .page{display:none;padding:1.5rem;max-width:900px;margin:0 auto}
+  .page.active{display:block}
+
+  /* SECTION TITLE */
+  .sec-title{font-size:1.3rem;font-weight:800;color:var(--purple);margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+  .sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  /* CARDS */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
+  .card2{background:var(--card2)}
+
+  /* BUTTONS */
+  .btn{
+    display:inline-flex;align-items:center;gap:.4rem;
+    padding:.55rem 1.3rem;border-radius:8px;border:none;
+    font-weight:700;font-size:.875rem;cursor:pointer;transition:all .2s;
+  }
+  .btn-purple{background:var(--purple);color:#fff}
+  .btn-purple:hover{background:var(--purple2);transform:translateY(-1px)}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}
+  .btn-outline:hover{border-color:var(--purple);color:var(--purple)}
+  .btn-orange{background:var(--orange);color:#fff}
+  .btn-orange:hover{background:#ea6c0b;transform:translateY(-1px)}
+  .btn-green{background:var(--green);color:#fff}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+
+  /* BATTLE PAGE */
+  .diff-row{display:flex;gap:.6rem;margin-bottom:1.2rem;flex-wrap:wrap}
+  .diff-btn{
+    padding:.45rem 1rem;border-radius:8px;border:1px solid var(--border);
+    background:var(--card);color:var(--muted);cursor:pointer;font-weight:700;font-size:.8rem;
+    transition:all .2s;
+  }
+  .diff-btn:hover{border-color:var(--purple);color:var(--purple)}
+  .diff-btn.sel{border-color:var(--purple);background:var(--purple2);color:#fff}
+  .diff-btn[data-d="easy"].sel{background:#15803d;border-color:var(--green)}
+  .diff-btn[data-d="medium"].sel{background:#b45309;border-color:var(--orange)}
+  .diff-btn[data-d="hard"].sel{background:#991b1b;border-color:var(--red)}
+
+  #battle-setup{text-align:center;padding:2rem 1rem}
+  #battle-setup h2{font-size:1.6rem;font-weight:900;margin-bottom:.5rem;color:var(--purple)}
+  #battle-setup p{color:var(--muted);margin-bottom:1.5rem}
+
+  /* QUIZ UI */
+  #battle-quiz{display:none}
+  .quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
+  .quiz-meta{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+  .meta-item{font-size:.8rem;color:var(--muted)}
+  .meta-val{font-weight:800;color:var(--text)}
+
+  .score-chip{background:var(--purple2);color:#fff;padding:.3rem .8rem;border-radius:99px;font-weight:800;font-size:.9rem}
+  .streak-chip{background:var(--orange);color:#fff;padding:.3rem .8rem;border-radius:99px;font-weight:800;font-size:.9rem;display:none}
+  .streak-chip.show{display:inline-block}
+
+  /* TIMER */
+  .timer-wrap{position:relative;margin-bottom:1rem}
+  .timer-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden}
+  .timer-fill{height:100%;border-radius:3px;background:var(--green);transition:width .1s linear,background .5s}
+  .timer-text{position:absolute;right:0;top:-1.2rem;font-size:.8rem;font-weight:700;color:var(--green)}
+
+  /* QUESTION */
+  .q-topic{font-size:.75rem;font-weight:700;color:var(--orange);letter-spacing:.5px;margin-bottom:.4rem;text-transform:uppercase}
+  .q-diff{display:inline-block;font-size:.7rem;font-weight:700;padding:.1rem .5rem;border-radius:4px;margin-left:.5rem}
+  .q-diff.easy{background:#14532d;color:var(--green)}
+  .q-diff.medium{background:#78350f;color:#fbbf24}
+  .q-diff.hard{background:#7f1d1d;color:var(--red)}
+  .q-text{font-size:1.1rem;font-weight:600;margin-bottom:1.2rem;line-height:1.5}
+
+  /* OPTIONS */
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem}
+  @media(max-width:600px){.options{grid-template-columns:1fr}}
+  .opt{
+    background:var(--card2);border:2px solid var(--border);border-radius:10px;
+    padding:.8rem 1rem;cursor:pointer;font-size:.9rem;transition:all .15s;
+    display:flex;align-items:flex-start;gap:.6rem;text-align:left;
+  }
+  .opt:hover:not(:disabled){border-color:var(--purple);background:#2a2250;transform:translateY(-1px)}
+  .opt:disabled{cursor:default}
+  .opt.correct{border-color:var(--green)!important;background:#14532d!important}
+  .opt.wrong{border-color:var(--red)!important;background:#7f1d1d!important}
+  .opt-key{
+    min-width:26px;height:26px;border-radius:6px;background:var(--border);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;
+    color:var(--muted);flex-shrink:0;
+  }
+  .opt.correct .opt-key{background:var(--green);color:#fff}
+  .opt.wrong .opt-key{background:var(--red);color:#fff}
+
+  /* EXPLANATION */
+  .explanation{
+    background:var(--card2);border:1px solid var(--border);border-radius:10px;
+    padding:1rem;margin-bottom:1rem;font-size:.9rem;line-height:1.6;display:none;
+  }
+  .explanation.show{display:block}
+  .expl-label{font-weight:800;color:var(--purple);margin-bottom:.3rem;font-size:.8rem}
+  .result-badge{display:inline-flex;align-items:center;gap:.4rem;font-weight:800;margin-bottom:.5rem;font-size:.95rem}
+  .result-badge.correct-badge{color:var(--green)}
+  .result-badge.wrong-badge{color:var(--red)}
+
+  /* ROUND END */
+  #battle-end{display:none;text-align:center;padding:1.5rem 1rem}
+  .end-score{font-size:3.5rem;font-weight:900;color:var(--purple)}
+  .end-sub{color:var(--muted);margin-bottom:1.5rem}
+  .end-stats{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin:1.2rem 0}
+  .end-stat{text-align:center}
+  .end-stat-val{font-size:1.8rem;font-weight:900;color:var(--orange)}
+  .end-stat-lbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+
+  /* PROGRESS */
+  .q-progress{display:flex;gap:.3rem;margin-bottom:1rem}
+  .q-dot{width:24px;height:6px;border-radius:3px;background:var(--border);transition:background .3s}
+  .q-dot.answered-correct{background:var(--green)}
+  .q-dot.answered-wrong{background:var(--red)}
+  .q-dot.current{background:var(--purple)}
+
+  /* TOPICS PAGE */
+  .topic-filter{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem}
+  .tf-btn{
+    padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);
+    background:var(--card);color:var(--muted);cursor:pointer;font-size:.8rem;font-weight:600;
+    transition:all .2s;
+  }
+  .tf-btn:hover,.tf-btn.active{border-color:var(--purple);background:var(--purple2);color:#fff}
+  .topic-group{margin-bottom:2rem}
+  .topic-head{
+    display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem;
+    font-size:1rem;font-weight:800;color:var(--text);
+  }
+  .topic-count{font-size:.75rem;color:var(--muted);font-weight:400}
+  .q-card{
+    background:var(--card);border:1px solid var(--border);border-radius:10px;
+    padding:1rem;margin-bottom:.6rem;cursor:pointer;transition:border-color .2s;
+  }
+  .q-card:hover{border-color:var(--purple)}
+  .q-card-q{font-size:.9rem;font-weight:600;margin-bottom:.4rem}
+  .q-card-ans{font-size:.85rem;color:var(--green);display:none}
+  .q-card-ans.show{display:block}
+  .q-card-expl{font-size:.8rem;color:var(--muted);margin-top:.3rem;display:none}
+  .q-card-expl.show{display:block}
+  .q-card-meta{display:flex;gap:.5rem;align-items:center;margin-bottom:.3rem}
+
+  /* LEADERBOARD */
+  .lb-table{width:100%;border-collapse:collapse}
+  .lb-table th{text-align:left;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:.5rem .8rem;border-bottom:1px solid var(--border)}
+  .lb-table td{padding:.7rem .8rem;border-bottom:1px solid var(--border);font-size:.9rem}
+  .lb-table tr:last-child td{border-bottom:none}
+  .rank-badge{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:6px;font-weight:900;font-size:.8rem;
+  }
+  .rank-1{background:#f59e0b;color:#000}
+  .rank-2{background:#94a3b8;color:#000}
+  .rank-3{background:#b45309;color:#fff}
+  .rank-n{background:var(--card2);color:var(--muted)}
+  .empty-state{text-align:center;padding:3rem;color:var(--muted)}
+  .empty-state .es-icon{font-size:3rem;margin-bottom:.8rem}
+
+  /* STATS PAGE */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin-bottom:1.5rem}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center}
+  .stat-val{font-size:2rem;font-weight:900;color:var(--purple)}
+  .stat-lbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem}
+  .topic-bar-wrap{margin-bottom:1.5rem}
+  .topic-bar-row{display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem}
+  .topic-bar-name{width:120px;font-size:.8rem;color:var(--muted);text-align:right;flex-shrink:0}
+  .topic-bar{flex:1;height:8px;border-radius:4px;background:var(--border);overflow:hidden}
+  .topic-bar-fill{height:100%;border-radius:4px;background:var(--purple);transition:width .6s}
+  .topic-bar-pct{font-size:.75rem;color:var(--muted);width:40px;text-align:right}
+
+  /* UTIL */
+  .flex-between{display:flex;justify-content:space-between;align-items:center}
+  .text-muted{color:var(--muted)}
+  .text-green{color:var(--green)}
+  .text-orange{color:var(--orange)}
+  .text-red{color:var(--red)}
+  .mt-1{margin-top:.5rem}.mt-2{margin-top:1rem}.mt-3{margin-top:1.5rem}
+  .mb-1{margin-bottom:.5rem}.mb-2{margin-bottom:1rem}
+  .bold{font-weight:800}
+  .gap-row{display:flex;gap:.6rem;flex-wrap:wrap}
+  footer{text-align:center;padding:2rem;color:var(--muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+  .pulse{animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+  /* CONFETTI */
+  .confetti-piece{position:fixed;width:10px;height:10px;pointer-events:none;z-index:9999;animation:fall 1.5s ease-out forwards}
+  @keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>&#x1F9E0; Coding</span> <span>Quiz Battle</span></div>
+  <div class="subtitle">100 coding questions · streaks · leaderboard · compete against yourself</div>
+  <div class="badge">Agent #68 · 100 AI Agents Challenge</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="battle">&#x26A1; BATTLE</button>
+  <button class="tab" data-tab="topics">&#x1F4DA; TOPICS</button>
+  <button class="tab" data-tab="leaderboard">&#x1F3C6; LEADERBOARD</button>
+  <button class="tab" data-tab="stats">&#x1F4CA; STATS</button>
+</nav>
+
+<!-- ===== BATTLE ===== -->
+<div class="page active" id="page-battle">
+
+  <!-- Setup -->
+  <div id="battle-setup">
+    <h2>&#x26A1; Ready to Battle?</h2>
+    <p>Answer 10 random questions. Beat the clock. Chain your streak.</p>
+
+    <div style="margin-bottom:1.5rem">
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px">Difficulty</div>
+      <div class="diff-row" style="justify-content:center">
+        <button class="diff-btn sel" data-d="easy">&#x1F7E2; Easy</button>
+        <button class="diff-btn" data-d="medium">&#x1F7E1; Medium</button>
+        <button class="diff-btn" data-d="hard">&#x1F534; Hard</button>
+        <button class="diff-btn" data-d="all">&#x1F7E3; All</button>
+      </div>
+    </div>
+
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:1rem;max-width:380px;margin:0 auto 1.5rem;font-size:.85rem;color:var(--muted)">
+      <div class="flex-between mb-1"><span>Questions per round</span><span class="bold text-muted">10</span></div>
+      <div class="flex-between mb-1"><span>Time per question</span><span class="bold text-muted">20s</span></div>
+      <div class="flex-between mb-1"><span>Correct answer</span><span class="bold text-green">+10 pts</span></div>
+      <div class="flex-between mb-1"><span>Streak bonus</span><span class="bold text-orange">+2 per streak</span></div>
+      <div class="flex-between"><span>Wrong answer</span><span class="bold text-red">streak resets</span></div>
+    </div>
+
+    <button class="btn btn-purple" id="start-btn" style="font-size:1rem;padding:.75rem 2.5rem">&#x25B6; Start Battle</button>
+  </div>
+
+  <!-- Quiz -->
+  <div id="battle-quiz">
+    <div class="quiz-header">
+      <div class="quiz-meta">
+        <div class="meta-item">Q <span class="meta-val" id="q-num">1</span>/10</div>
+        <div class="meta-item">Score <span class="meta-val score-chip" id="score-display">0</span></div>
+        <span class="streak-chip" id="streak-display">&#x1F525; x0</span>
+      </div>
+    </div>
+
+    <!-- progress dots -->
+    <div class="q-progress" id="q-progress"></div>
+
+    <!-- timer -->
+    <div class="timer-wrap">
+      <div class="timer-text" id="timer-text">20s</div>
+      <div class="timer-bar"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
+    </div>
+
+    <div class="card" id="q-container">
+      <div class="q-card-meta">
+        <span class="q-topic" id="q-topic"></span>
+        <span class="q-diff" id="q-diff"></span>
+      </div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="options-grid"></div>
+      <div class="explanation" id="explanation">
+        <div id="result-badge-wrap"></div>
+        <div class="expl-label">EXPLANATION</div>
+        <div id="expl-text"></div>
+      </div>
+      <div style="text-align:right;margin-top:.8rem">
+        <button class="btn btn-purple" id="next-btn" style="display:none">Next Question &#x2192;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End screen -->
+  <div id="battle-end">
+    <div id="end-icon" style="font-size:3rem;margin-bottom:.5rem"></div>
+    <div class="end-score" id="end-score">0</div>
+    <div class="end-sub" id="end-sub">points earned</div>
+    <div class="end-stats">
+      <div class="end-stat"><div class="end-stat-val" id="end-acc">0%</div><div class="end-stat-lbl">Accuracy</div></div>
+      <div class="end-stat"><div class="end-stat-val" id="end-streak">0</div><div class="end-stat-lbl">Best Streak</div></div>
+      <div class="end-stat"><div class="end-stat-val" id="end-time">0s</div><div class="end-stat-lbl">Time Used</div></div>
+    </div>
+    <div class="gap-row" style="justify-content:center;margin-top:1rem">
+      <button class="btn btn-purple" id="play-again-btn">&#x1F504; Play Again</button>
+      <button class="btn btn-outline" onclick="switchTab('leaderboard')">&#x1F3C6; Leaderboard</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== TOPICS ===== -->
+<div class="page" id="page-topics">
+  <div class="sec-title">Browse All Questions</div>
+  <div class="topic-filter" id="topic-filter"></div>
+  <div class="diff-row" id="topics-diff-filter">
+    <button class="tf-btn active" data-fd="all">All Difficulty</button>
+    <button class="tf-btn" data-fd="easy">Easy</button>
+    <button class="tf-btn" data-fd="medium">Medium</button>
+    <button class="tf-btn" data-fd="hard">Hard</button>
+  </div>
+  <div id="topics-list" class="mt-2"></div>
+</div>
+
+<!-- ===== LEADERBOARD ===== -->
+<div class="page" id="page-leaderboard">
+  <div class="sec-title">Personal Best</div>
+  <div class="card mb-2">
+    <div style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">Your top 5 rounds — sorted by score</div>
+    <div id="lb-content"></div>
+  </div>
+  <button class="btn btn-outline" id="clear-lb-btn" style="font-size:.8rem">&#x1F5D1; Clear History</button>
+</div>
+
+<!-- ===== STATS ===== -->
+<div class="page" id="page-stats">
+  <div class="sec-title">Your Stats</div>
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <div class="sec-title mt-2">Accuracy by Topic</div>
+  <div class="topic-bar-wrap" id="topic-acc-bars"></div>
+
+  <div class="sec-title mt-2">Weakest Topic</div>
+  <div class="card" id="weakest-card"></div>
+</div>
+
+<footer>
+  <a href="https://hhanng.github.io" target="_blank">hhanng.github.io</a> &nbsp;·&nbsp;
+  Agent #68 of the 100 AI Agents Challenge
+</footer>
+
+<script>
+// ===================== QUESTIONS =====================
+const QUESTIONS = [
+  // ---- PYTHON (10) ----
+  {id:1,topic:"Python",diff:"easy",q:"What is the output of: print(type([]))?",opts:["<class 'list'>","<class 'array'>","<type 'list'>","list"],ans:0,expl:"In Python 3, type([]) returns <class 'list'>. Python's built-in types are accessed via the 'class' namespace."},
+  {id:2,topic:"Python",diff:"easy",q:"Which keyword is used to define a function in Python?",opts:["function","func","def","fn"],ans:2,expl:"Python uses 'def' to define functions: def my_func(): ..."},
+  {id:3,topic:"Python",diff:"easy",q:"What does the len() function return for the string 'hello'?",opts:["4","5","6","It returns an error"],ans:1,expl:"len('hello') returns 5 — the number of characters in the string."},
+  {id:4,topic:"Python",diff:"medium",q:"What is the output of: print(2 ** 3)?",opts:["6","8","9","5"],ans:1,expl:"** is Python's exponentiation operator. 2 ** 3 = 2³ = 8."},
+  {id:5,topic:"Python",diff:"medium",q:"Which of these creates a shallow copy of a list named 'lst'?",opts:["lst.copy()","list(lst)","lst[:]","All of the above"],ans:3,expl:"All three — .copy(), list(), and [:] — create a shallow copy of a list."},
+  {id:6,topic:"Python",diff:"medium",q:"What does the 'pass' statement do in Python?",opts:["Exits the function","Skips the current iteration","Is a null operation (does nothing)","Raises an exception"],ans:2,expl:"'pass' is a null operation — it's used as a placeholder where code is syntactically required but no action is needed."},
+  {id:7,topic:"Python",diff:"hard",q:"What is the output of: print([i*2 for i in range(3)])?",opts:["[0,2,4]","[2,4,6]","[0,1,2]","[1,2,3]"],ans:0,expl:"range(3) generates 0,1,2. Multiplied by 2: 0,2,4. Result: [0, 2, 4]."},
+  {id:8,topic:"Python",diff:"hard",q:"Which Python decorator marks a method as a class method?",opts:["@staticmethod","@classmethod","@property","@method"],ans:1,expl:"@classmethod marks a method that receives the class (cls) as its first argument instead of an instance (self)."},
+  {id:9,topic:"Python",diff:"hard",q:"What does 'yield' do in a Python function?",opts:["Returns a value and terminates the function","Pauses execution and returns a value (generator)","Declares a variable","Imports a module"],ans:1,expl:"'yield' turns a function into a generator. It pauses execution and returns a value, resuming from where it left off on the next call."},
+  {id:10,topic:"Python",diff:"medium",q:"What is the difference between a list and a tuple in Python?",opts:["Lists use [], tuples use {}","Lists are mutable, tuples are immutable","Lists can hold more items","Tuples are faster to iterate"],ans:1,expl:"The key difference: lists are mutable (can be changed after creation), while tuples are immutable (cannot be changed)."},
+
+  // ---- JAVASCRIPT (10) ----
+  {id:11,topic:"JavaScript",diff:"easy",q:"Which operator checks both value and type in JavaScript?",opts:["==","===","!=","="],ans:1,expl:"=== is the strict equality operator — it checks both value and type. == only checks value (with type coercion)."},
+  {id:12,topic:"JavaScript",diff:"easy",q:"What does 'typeof null' return in JavaScript?",opts:["'null'","'undefined'","'object'","'boolean'"],ans:2,expl:"typeof null returns 'object' — this is a well-known JavaScript bug that was never fixed for backward compatibility."},
+  {id:13,topic:"JavaScript",diff:"easy",q:"Which method adds an element to the end of an array?",opts:["push()","pop()","shift()","unshift()"],ans:0,expl:"push() adds one or more elements to the end of an array and returns the new length."},
+  {id:14,topic:"JavaScript",diff:"medium",q:"What is the output of: console.log(0.1 + 0.2 === 0.3)?",opts:["true","false","undefined","NaN"],ans:1,expl:"false — floating-point arithmetic: 0.1 + 0.2 = 0.30000000000000004 due to IEEE 754 representation issues."},
+  {id:15,topic:"JavaScript",diff:"medium",q:"What is a closure in JavaScript?",opts:["A way to close the browser","A function with access to its outer scope's variables","A method to end a loop","A built-in array method"],ans:1,expl:"A closure is a function that retains access to variables from its enclosing scope even after the outer function has finished executing."},
+  {id:16,topic:"JavaScript",diff:"medium",q:"What does 'use strict' do in JavaScript?",opts:["Makes code run faster","Enables ES6 features","Enforces stricter parsing and error handling","Disables all warnings"],ans:2,expl:"'use strict' enables strict mode which catches common coding mistakes, prevents use of undeclared variables, and disables some confusing features."},
+  {id:17,topic:"JavaScript",diff:"hard",q:"What is the output of: console.log(1 + '2' + 3)?",opts:["6","123","'123'","'12' + 3"],ans:1,expl:"1 + '2' performs string concatenation giving '12', then '12' + 3 gives '123'. Number + String = String concatenation."},
+  {id:18,topic:"JavaScript",diff:"hard",q:"What does Promise.all() do when one promise rejects?",opts:["Waits for all promises","Rejects immediately with the first rejection","Ignores the rejection","Returns undefined"],ans:1,expl:"Promise.all() rejects immediately when any promise in the array rejects. Use Promise.allSettled() if you want to wait for all."},
+  {id:19,topic:"JavaScript",diff:"hard",q:"What is the event loop in JavaScript?",opts:["A loop for handling DOM events","Mechanism that allows JS to perform non-blocking operations","A for loop inside addEventListener","A browser rendering cycle"],ans:1,expl:"The event loop allows JavaScript (single-threaded) to perform non-blocking operations by offloading operations to the browser and executing callbacks when the call stack is empty."},
+  {id:20,topic:"JavaScript",diff:"medium",q:"Which of these is NOT a falsy value in JavaScript?",opts:["0","''","'false'","null"],ans:2,expl:"'false' (a non-empty string) is truthy in JavaScript. The falsy values are: false, 0, '', null, undefined, NaN, and 0n."},
+
+  // ---- DATA STRUCTURES (10) ----
+  {id:21,topic:"Data Structures",diff:"easy",q:"What data structure operates on a LIFO (Last In, First Out) principle?",opts:["Queue","Stack","Linked List","Tree"],ans:1,expl:"A Stack operates on LIFO — the last item pushed is the first to be popped. Think of a stack of plates."},
+  {id:22,topic:"Data Structures",diff:"easy",q:"In a singly linked list, what does each node contain?",opts:["Data only","A pointer only","Data and a pointer to the next node","Data and pointers to next and previous nodes"],ans:2,expl:"A singly linked list node holds data and a single pointer to the next node. Doubly linked lists have both next and previous pointers."},
+  {id:23,topic:"Data Structures",diff:"easy",q:"What is the time complexity of accessing an element by index in an array?",opts:["O(n)","O(log n)","O(1)","O(n²)"],ans:2,expl:"Array access by index is O(1) — constant time — because arrays store elements in contiguous memory and the address is computed directly."},
+  {id:24,topic:"Data Structures",diff:"medium",q:"What is a hash table collision?",opts:["When the table is full","When two keys hash to the same index","When a key is not found","When the hash function fails"],ans:1,expl:"A collision occurs when two different keys produce the same hash index. Common resolution strategies: chaining (linked lists) and open addressing (linear probing)."},
+  {id:25,topic:"Data Structures",diff:"medium",q:"Which data structure is used for BFS (Breadth-First Search)?",opts:["Stack","Queue","Heap","Tree"],ans:1,expl:"BFS uses a Queue (FIFO). The starting node is enqueued, then its neighbors are added to the queue as they're discovered."},
+  {id:26,topic:"Data Structures",diff:"medium",q:"What is the worst-case time complexity for searching a balanced BST?",opts:["O(1)","O(log n)","O(n)","O(n log n)"],ans:1,expl:"A balanced Binary Search Tree has height O(log n), so search is O(log n). An unbalanced BST degrades to O(n)."},
+  {id:27,topic:"Data Structures",diff:"hard",q:"In a min-heap, which element is always at the root?",opts:["The largest element","The smallest element","The most recently inserted","The median element"],ans:1,expl:"In a min-heap, the root always holds the minimum element. Every parent node is less than or equal to its children."},
+  {id:28,topic:"Data Structures",diff:"hard",q:"What is the amortized time complexity of appending to a dynamic array?",opts:["O(n)","O(log n)","O(1)","O(n²)"],ans:2,expl:"Although occasional resizing costs O(n), amortized over many appends it averages to O(1). Each element is moved at most O(log n) times across all resizes."},
+  {id:29,topic:"Data Structures",diff:"hard",q:"What distinguishes a graph from a tree?",opts:["Graphs have no nodes","Trees can have cycles, graphs cannot","Graphs can have cycles; trees cannot","Trees can have multiple roots"],ans:2,expl:"A tree is an acyclic connected graph. A graph can have cycles (edges forming loops) and disconnected components."},
+  {id:30,topic:"Data Structures",diff:"medium",q:"What does a deque (double-ended queue) allow?",opts:["Insertion only at the front","Deletion only at the rear","Insertion and deletion at both ends","Random access by index"],ans:2,expl:"A deque (double-ended queue) supports insertion and deletion from both ends in O(1) time, combining stack and queue functionality."},
+
+  // ---- ALGORITHMS (10) ----
+  {id:31,topic:"Algorithms",diff:"easy",q:"What does O(log n) time complexity mean?",opts:["The algorithm runs in constant time","The problem is halved with each step","The algorithm runs proportionally to n","The algorithm uses n log n operations"],ans:1,expl:"O(log n) means the work roughly halves with each step — typically seen in binary search and balanced tree operations."},
+  {id:32,topic:"Algorithms",diff:"easy",q:"What is the time complexity of bubble sort in the worst case?",opts:["O(n)","O(n log n)","O(n²)","O(log n)"],ans:2,expl:"Bubble sort compares every pair of adjacent elements and repeats up to n times, giving O(n²) worst-case performance."},
+  {id:33,topic:"Algorithms",diff:"medium",q:"Which sorting algorithm uses a divide-and-conquer strategy and has O(n log n) average case?",opts:["Bubble Sort","Selection Sort","Merge Sort","Insertion Sort"],ans:2,expl:"Merge Sort divides the array in half recursively then merges sorted halves, achieving O(n log n) in all cases (best, avg, worst)."},
+  {id:34,topic:"Algorithms",diff:"medium",q:"What is the key property of a greedy algorithm?",opts:["It tries all possible solutions","It makes the locally optimal choice at each step","It uses dynamic programming","It backtracks when it fails"],ans:1,expl:"Greedy algorithms make the locally optimal choice at each step hoping to reach a global optimum. They don't reconsider past choices."},
+  {id:35,topic:"Algorithms",diff:"medium",q:"Binary search requires the input array to be:",opts:["Sorted","Unsorted","A linked list","A hash table"],ans:0,expl:"Binary search requires a sorted array. It repeatedly halves the search space by comparing the target with the middle element."},
+  {id:36,topic:"Algorithms",diff:"hard",q:"What is dynamic programming's core principle?",opts:["Divide into independent subproblems","Memoize overlapping subproblems to avoid recomputation","Always use recursion","Use the greedy approach"],ans:1,expl:"Dynamic programming solves problems by breaking them into overlapping subproblems and storing results (memoization/tabulation) to avoid redundant computation."},
+  {id:37,topic:"Algorithms",diff:"hard",q:"What is the space complexity of a recursive depth-first search on a graph with n nodes?",opts:["O(1)","O(n)","O(n²)","O(log n)"],ans:1,expl:"Recursive DFS uses the call stack, which in the worst case (e.g., a path graph) can grow to O(n) depth."},
+  {id:38,topic:"Algorithms",diff:"hard",q:"Which algorithm finds the shortest path in a weighted graph with non-negative edges?",opts:["BFS","DFS","Dijkstra's","Bellman-Ford"],ans:2,expl:"Dijkstra's algorithm finds shortest paths in graphs with non-negative edge weights using a greedy approach with a priority queue."},
+  {id:39,topic:"Algorithms",diff:"medium",q:"What is the best-case time complexity of insertion sort?",opts:["O(n²)","O(n log n)","O(n)","O(1)"],ans:2,expl:"Insertion sort is O(n) in the best case when the array is already sorted — it only does one comparison per element."},
+  {id:40,topic:"Algorithms",diff:"hard",q:"What does it mean for an algorithm to be 'in-place'?",opts:["It runs in constant time","It uses O(1) extra memory (aside from input)","It modifies the input array","It doesn't use recursion"],ans:1,expl:"An in-place algorithm uses O(1) or O(log n) extra memory. It may modify the input. Merge sort is NOT in-place; quicksort typically is."},
+
+  // ---- OOP (10) ----
+  {id:41,topic:"OOP",diff:"easy",q:"What does 'encapsulation' mean in OOP?",opts:["Inheriting from a parent class","Bundling data and methods that operate on it into a single unit","Overriding parent class methods","Using multiple inheritance"],ans:1,expl:"Encapsulation bundles data (attributes) and methods (functions) into a class, hiding internal implementation details from the outside."},
+  {id:42,topic:"OOP",diff:"easy",q:"What is 'inheritance' in OOP?",opts:["Creating an instance of a class","A class acquiring properties and behavior from another class","Defining multiple methods with the same name","Hiding class details"],ans:1,expl:"Inheritance lets a subclass acquire attributes and methods from a parent class, enabling code reuse and establishing an is-a relationship."},
+  {id:43,topic:"OOP",diff:"easy",q:"What is 'polymorphism' in OOP?",opts:["Having multiple constructors","Multiple classes treated as instances of a common parent","A class with no methods","Private access modifier"],ans:1,expl:"Polymorphism allows objects of different classes to be treated as instances of the same class through a common interface, enabling different behaviors for the same method call."},
+  {id:44,topic:"OOP",diff:"medium",q:"What is the difference between an abstract class and an interface?",opts:["No difference","Abstract class can have implementations; interface traditionally cannot","Interface can have implementations; abstract class cannot","Abstract classes support multiple inheritance"],ans:1,expl:"Abstract classes can have concrete methods; interfaces (in most languages) only define method signatures. A class can implement multiple interfaces but extend only one abstract class."},
+  {id:45,topic:"OOP",diff:"medium",q:"What is method overloading?",opts:["A subclass providing a different implementation of a parent method","Multiple methods with the same name but different parameters","Calling a parent class method","Using the 'super' keyword"],ans:1,expl:"Method overloading (compile-time polymorphism) defines multiple methods with the same name but different parameter types or counts."},
+  {id:46,topic:"OOP",diff:"medium",q:"What does the 'super' keyword do?",opts:["Creates a superclass","Calls the parent class constructor or methods","Marks a method as static","Hides the parent class"],ans:1,expl:"'super' is used to call the parent class constructor (super()) or access parent class methods (super.method()), enabling subclass to build on parent behavior."},
+  {id:47,topic:"OOP",diff:"hard",q:"What design pattern ensures only one instance of a class exists?",opts:["Factory","Observer","Singleton","Strategy"],ans:2,expl:"The Singleton pattern restricts a class to a single instance, providing a global access point. Common in logging, config management, and connection pools."},
+  {id:48,topic:"OOP",diff:"hard",q:"What is the SOLID principle 'L' (Liskov Substitution Principle)?",opts:["Classes should be open for extension, closed for modification","Subclasses should be substitutable for their base classes","Depend on abstractions, not concretions","Interface segregation"],ans:1,expl:"LSP states that objects of a subclass should be replaceable for objects of the parent class without altering program correctness."},
+  {id:49,topic:"OOP",diff:"hard",q:"What is the 'Dependency Injection' pattern?",opts:["A class creating its own dependencies","Passing dependencies into a class from outside","A class inheriting dependencies","Using static methods for dependencies"],ans:1,expl:"Dependency Injection means a class receives its dependencies from an external source rather than creating them itself, improving testability and loose coupling."},
+  {id:50,topic:"OOP",diff:"medium",q:"What is 'abstraction' in OOP?",opts:["Hiding the implementation details, exposing only the interface","Copying code from one class to another","Using multiple inheritance","Making all attributes public"],ans:0,expl:"Abstraction hides complex implementation details and shows only the essential features. Abstract classes and interfaces are tools for abstraction."},
+
+  // ---- WEB DEV (10) ----
+  {id:51,topic:"Web Dev",diff:"easy",q:"Which HTTP method is idempotent and used to retrieve data?",opts:["POST","PUT","GET","DELETE"],ans:2,expl:"GET is idempotent (multiple identical requests have the same effect as one) and is used to retrieve data without side effects."},
+  {id:52,topic:"Web Dev",diff:"easy",q:"What does CSS stand for?",opts:["Computer Style Sheets","Cascading Style Sheets","Creative Style Sheets","Colorful Style Sheets"],ans:1,expl:"CSS stands for Cascading Style Sheets. The 'cascading' refers to how styles are applied — later rules override earlier ones based on specificity."},
+  {id:53,topic:"Web Dev",diff:"easy",q:"What HTML tag is used to link an external CSS file?",opts:["<style>","<script>","<link>","<css>"],ans:2,expl:"<link rel='stylesheet' href='style.css'> is used in the <head> to link external CSS files."},
+  {id:54,topic:"Web Dev",diff:"medium",q:"What is the purpose of the HTTP status code 404?",opts:["Server error","Unauthorized","Resource not found","Request successful"],ans:2,expl:"404 Not Found means the server couldn't find the requested resource. It's a client-side error (4xx range)."},
+  {id:55,topic:"Web Dev",diff:"medium",q:"What does REST stand for in web development?",opts:["Remote Execution State Transfer","Representational State Transfer","Remote Server Technology","Reliable Server Testing"],ans:1,expl:"REST (Representational State Transfer) is an architectural style for distributed hypermedia systems, commonly used for web APIs."},
+  {id:56,topic:"Web Dev",diff:"medium",q:"What is the difference between localStorage and sessionStorage?",opts:["localStorage is faster","sessionStorage persists indefinitely; localStorage is session-only","localStorage persists indefinitely; sessionStorage is cleared when the tab closes","They are identical"],ans:2,expl:"localStorage persists data across sessions (until explicitly cleared). sessionStorage is cleared when the browser tab/session ends."},
+  {id:57,topic:"Web Dev",diff:"hard",q:"What is CORS and why is it needed?",opts:["A CSS feature","A security mechanism controlling cross-origin HTTP requests","A JavaScript framework","A database access protocol"],ans:1,expl:"CORS (Cross-Origin Resource Sharing) is a browser security mechanism that controls which external origins can access your server's resources, preventing unauthorized cross-site requests."},
+  {id:58,topic:"Web Dev",diff:"hard",q:"What is the purpose of Content Security Policy (CSP)?",opts:["Speed up page load","Prevent XSS and injection attacks by specifying allowed content sources","Enable HTTPS","Compress images"],ans:1,expl:"CSP is a security header that tells the browser which content sources are trusted, significantly reducing the risk of XSS attacks."},
+  {id:59,topic:"Web Dev",diff:"hard",q:"What is the difference between authentication and authorization?",opts:["They are the same thing","Authentication verifies identity; authorization determines permissions","Authorization verifies identity; authentication grants permissions","Authentication is for APIs only"],ans:1,expl:"Authentication = verifying WHO you are (login). Authorization = determining WHAT you're allowed to do (permissions). Auth comes first, then authz."},
+  {id:60,topic:"Web Dev",diff:"medium",q:"What does 'async/await' do in JavaScript?",opts:["Creates multi-threaded code","Makes asynchronous code look and behave like synchronous code","Speeds up network requests","Replaces callbacks and promises entirely"],ans:1,expl:"async/await is syntactic sugar over Promises. An async function returns a Promise; await pauses execution within the function until the Promise resolves."},
+
+  // ---- DATABASES (10) ----
+  {id:61,topic:"Databases",diff:"easy",q:"What does SQL stand for?",opts:["Structured Query Language","Simple Query Language","Standard Query Logic","Stored Query List"],ans:0,expl:"SQL stands for Structured Query Language — the standard language for managing and querying relational databases."},
+  {id:62,topic:"Databases",diff:"easy",q:"Which SQL clause filters rows after grouping?",opts:["WHERE","HAVING","ORDER BY","GROUP BY"],ans:1,expl:"HAVING filters groups after GROUP BY (like WHERE but for aggregated data). WHERE filters rows before grouping."},
+  {id:63,topic:"Databases",diff:"easy",q:"What is a PRIMARY KEY in a database?",opts:["The first column in a table","A column that uniquely identifies each row","A foreign key reference","An auto-incremented number"],ans:1,expl:"A PRIMARY KEY uniquely identifies each record in a table. It must be unique and NOT NULL. A table can have only one primary key."},
+  {id:64,topic:"Databases",diff:"medium",q:"What is database normalization?",opts:["Speeding up queries","Organizing data to reduce redundancy and improve integrity","Adding indexes to tables","Backing up the database"],ans:1,expl:"Normalization organizes database tables to reduce data redundancy and improve data integrity by following normal forms (1NF, 2NF, 3NF, etc.)."},
+  {id:65,topic:"Databases",diff:"medium",q:"What is the difference between an INNER JOIN and a LEFT JOIN?",opts:["No difference","INNER JOIN returns only matching rows; LEFT JOIN returns all left rows + matches","LEFT JOIN returns only left table rows","INNER JOIN is faster than LEFT JOIN"],ans:1,expl:"INNER JOIN returns rows with matches in BOTH tables. LEFT JOIN returns ALL rows from the left table and matching rows from the right (NULLs for no match)."},
+  {id:66,topic:"Databases",diff:"medium",q:"What does ACID stand for in database transactions?",opts:["Atomicity, Consistency, Isolation, Durability","Access, Control, Integrity, Data","Atomicity, Control, Isolation, Data","Access, Consistency, Integrity, Durability"],ans:0,expl:"ACID: Atomicity (all or nothing), Consistency (valid state before/after), Isolation (concurrent transactions don't interfere), Durability (committed data persists)."},
+  {id:67,topic:"Databases",diff:"hard",q:"What is a database index and what is its trade-off?",opts:["A backup of the database","A data structure that speeds up reads but slows down writes","A sorted copy of the database","A way to encrypt data"],ans:1,expl:"An index (commonly a B-tree) speeds up SELECT queries but adds overhead to INSERT/UPDATE/DELETE operations (must update the index). Also uses extra storage."},
+  {id:68,topic:"Databases",diff:"hard",q:"What is the N+1 query problem in ORMs?",opts:["Querying n tables at once","Fetching 1 parent + n separate queries for each child (instead of JOIN)","Normalizing to 3rd normal form","A SQL syntax error"],ans:1,expl:"N+1 problem: fetching a list of N records then making N additional queries to fetch related data. Fix with eager loading (JOINs or .includes() in ORMs)."},
+  {id:69,topic:"Databases",diff:"hard",q:"What is the difference between a relational and a NoSQL database?",opts:["No practical difference","Relational uses tables+SQL with strict schema; NoSQL uses flexible schemas (documents, key-value, etc.)","NoSQL is always faster","Relational databases can't scale"],ans:1,expl:"Relational DBs (MySQL, PostgreSQL) use structured tables with ACID guarantees. NoSQL DBs (MongoDB, Redis) offer flexible schemas and horizontal scalability, often trading consistency for performance."},
+  {id:70,topic:"Databases",diff:"medium",q:"What does SELECT DISTINCT do?",opts:["Selects different tables","Removes duplicate rows from the result","Selects the first unique row","Selects rows with a DISTINCT constraint"],ans:1,expl:"SELECT DISTINCT removes duplicate rows from the result set, returning only unique values for the specified columns."},
+
+  // ---- GIT (10) ----
+  {id:71,topic:"Git",diff:"easy",q:"What command creates a new Git repository?",opts:["git new","git start","git init","git create"],ans:2,expl:"'git init' initializes a new empty Git repository in the current directory, creating a .git/ folder."},
+  {id:72,topic:"Git",diff:"easy",q:"What does 'git status' show?",opts:["Commit history","Staged changes, unstaged changes, and untracked files","Branch list","Remote repository info"],ans:1,expl:"git status shows the current state of the working directory and staging area — modified files, staged files, and untracked files."},
+  {id:73,topic:"Git",diff:"easy",q:"What is the purpose of 'git add'?",opts:["Creates a commit","Stages changes to be included in the next commit","Pushes changes to remote","Creates a new branch"],ans:1,expl:"git add stages changes (adds them to the index/staging area) so they'll be included in the next commit."},
+  {id:74,topic:"Git",diff:"medium",q:"What does 'git rebase' do?",opts:["Merges two branches","Moves or replays commits onto a new base commit","Reverts the last commit","Stashes current changes"],ans:1,expl:"git rebase moves a branch's commits to start from a different base commit, creating a linear history (unlike merge which creates a merge commit)."},
+  {id:75,topic:"Git",diff:"medium",q:"What is the difference between 'git merge' and 'git rebase'?",opts:["No difference","Merge preserves history with a merge commit; rebase creates a linear history","Rebase preserves history; merge doesn't","Merge is only for hotfixes"],ans:1,expl:"Merge combines branches with a new merge commit (preserves branch topology). Rebase replays commits on top of another branch creating a clean, linear history."},
+  {id:76,topic:"Git",diff:"medium",q:"What does 'git stash' do?",opts:["Permanently deletes changes","Temporarily shelves uncommitted changes so you can switch branches","Commits changes with no message","Creates a backup branch"],ans:1,expl:"git stash temporarily saves uncommitted changes to a stack so you can work on something else, then restore them later with 'git stash pop'."},
+  {id:77,topic:"Git",diff:"hard",q:"What is a 'detached HEAD' state in Git?",opts:["A corrupted repository","HEAD points to a commit directly, not a branch","A merge conflict","A failed rebase"],ans:1,expl:"Detached HEAD means HEAD points to a specific commit SHA instead of a branch reference. Commits made here won't belong to any branch unless a new branch is created."},
+  {id:78,topic:"Git",diff:"hard",q:"What does 'git cherry-pick <hash>' do?",opts:["Merges an entire branch","Applies the changes from a specific commit onto the current branch","Deletes a commit","Copies a branch"],ans:1,expl:"git cherry-pick applies the changes introduced by a specific commit onto the current branch, creating a new commit with those changes."},
+  {id:79,topic:"Git",diff:"hard",q:"What is a 'force push' and why is it dangerous?",opts:["A push that bypasses review","A push that overwrites remote history, potentially deleting others' commits","A push with a tag","A push to a protected branch"],ans:1,expl:"git push --force rewrites remote history by replacing it with your local version. Dangerous on shared branches as it can overwrite teammates' committed work."},
+  {id:80,topic:"Git",diff:"medium",q:"What does '.gitignore' do?",opts:["Lists team members","Specifies intentionally untracked files that Git should ignore","Configures Git settings","Lists remote repositories"],ans:1,expl:".gitignore lists files and patterns that Git should not track (e.g., node_modules/, .env, *.log). Files already tracked by Git are not affected."},
+
+  // ---- LINUX (10) ----
+  {id:81,topic:"Linux",diff:"easy",q:"What command lists files in a directory?",opts:["dir","list","ls","show"],ans:2,expl:"'ls' lists directory contents. Common flags: ls -la (all files, long format), ls -lh (human-readable sizes)."},
+  {id:82,topic:"Linux",diff:"easy",q:"What does 'chmod 755 file.sh' do?",opts:["Deletes the file","Changes file ownership","Sets permissions: owner rwx, group rx, others rx","Moves the file"],ans:2,expl:"chmod 755 sets: owner=7 (rwx=4+2+1), group=5 (r-x=4+1), others=5 (r-x). The owner can read/write/execute; group and others can read/execute."},
+  {id:83,topic:"Linux",diff:"easy",q:"Which command shows the current working directory?",opts:["pwd","cwd","dir","where"],ans:0,expl:"'pwd' (print working directory) displays the full path of the current directory."},
+  {id:84,topic:"Linux",diff:"medium",q:"What does the 'grep' command do?",opts:["Opens a text editor","Searches for patterns in text/files","Copies files","Lists processes"],ans:1,expl:"grep searches text using patterns (regex). Example: grep 'error' log.txt finds all lines containing 'error'. Use -r for recursive search."},
+  {id:85,topic:"Linux",diff:"medium",q:"What is a pipe (|) in Linux?",opts:["A special file type","Sends output of one command as input to another","A network protocol","A file permission"],ans:1,expl:"The pipe | chains commands: output of the left command becomes input for the right. Example: ls -la | grep '.txt' filters ls output."},
+  {id:86,topic:"Linux",diff:"medium",q:"What does 'ps aux' display?",opts:["Network connections","Disk usage","Running processes with details","Memory usage"],ans:2,expl:"'ps aux' shows all running processes: user, PID, CPU%, memory%, command. Combine with grep: ps aux | grep python."},
+  {id:87,topic:"Linux",diff:"hard",q:"What is the difference between a hard link and a symbolic link?",opts:["No difference","Hard link points to inode (same file); symlink points to a path (can break)","Symlinks are faster","Hard links work across filesystems"],ans:1,expl:"Hard link: another reference to the same inode (file data). Symlink: a pointer to a path (breaks if target moves). Hard links can't cross filesystems."},
+  {id:88,topic:"Linux",diff:"hard",q:"What does 'kill -9 PID' do?",opts:["Pauses the process","Sends SIGTERM (graceful stop)","Sends SIGKILL (immediate, uncatchable termination)","Restarts the process"],ans:2,expl:"kill -9 sends SIGKILL, which immediately and forcefully terminates a process — it cannot be caught or ignored. Use kill (SIGTERM) first for graceful shutdown."},
+  {id:89,topic:"Linux",diff:"hard",q:"What is a cron job?",opts:["A background service","A scheduled task that runs automatically at specified times","A log rotation utility","A process manager"],ans:1,expl:"Cron is a time-based job scheduler. Cron jobs are commands scheduled to run at specific times/intervals using crontab syntax: minute hour day month weekday command."},
+  {id:90,topic:"Linux",diff:"medium",q:"What does 'sudo' stand for and do?",opts:["System Update and Download Operations","Super User Do — runs a command with superuser/root privileges","Software Update Driver Operator","Secure User Data Operation"],ans:1,expl:"sudo (Super User Do) allows a permitted user to run a command as the superuser or another user, as specified in the sudoers file."},
+
+  // ---- GENERAL CS (10) ----
+  {id:91,topic:"General CS",diff:"easy",q:"What does CPU stand for?",opts:["Central Processing Unit","Computer Program Unit","Central Program Utility","Core Processing Utility"],ans:0,expl:"CPU (Central Processing Unit) is the primary component that executes instructions in a computer program — the 'brain' of the computer."},
+  {id:92,topic:"General CS",diff:"easy",q:"What is a compiler?",opts:["A program that runs code line by line","A program that translates source code to machine code","A text editor for code","A program that debugs code"],ans:1,expl:"A compiler translates the entire source code into machine code (or bytecode) before execution. Interpreters execute code line by line at runtime."},
+  {id:93,topic:"General CS",diff:"easy",q:"What is the difference between RAM and ROM?",opts:["RAM is read-only; ROM is read-write","RAM is volatile (temporary) storage; ROM is non-volatile (permanent)","RAM stores the OS; ROM stores user data","They are interchangeable terms"],ans:1,expl:"RAM (Random Access Memory) is volatile — loses data when powered off. ROM (Read-Only Memory) is non-volatile — retains data without power. RAM holds running programs; ROM holds firmware."},
+  {id:94,topic:"General CS",diff:"medium",q:"What is a race condition?",opts:["A performance benchmark","A bug where behavior depends on unpredictable timing/ordering of concurrent events","A fast sorting algorithm","A network protocol"],ans:1,expl:"A race condition occurs when multiple threads/processes access shared data concurrently and the outcome depends on execution order — a common source of bugs in concurrent programming."},
+  {id:95,topic:"General CS",diff:"medium",q:"What does 'Big O notation' describe?",opts:["The size of a program in bytes","The worst-case time or space complexity of an algorithm","The number of bugs in code","The memory an algorithm uses"],ans:1,expl:"Big O notation describes the upper bound on algorithm complexity (time or space) as input size grows, typically describing worst-case behavior."},
+  {id:96,topic:"General CS",diff:"medium",q:"What is a deadlock?",opts:["A program that runs indefinitely","When two or more processes wait for each other's resources, none can proceed","A corrupted file","A network timeout"],ans:1,expl:"Deadlock occurs when two or more processes are each waiting for a resource held by the other, causing all to block indefinitely. Prevention strategies include resource ordering and timeouts."},
+  {id:97,topic:"General CS",diff:"hard",q:"What is the difference between TCP and UDP?",opts:["No difference","TCP guarantees delivery and order; UDP is faster but unreliable","UDP is more secure than TCP","TCP is only for web browsing"],ans:1,expl:"TCP: connection-oriented, guarantees delivery, order, and error checking. UDP: connectionless, no delivery guarantee, faster. Use TCP for reliability (HTTP); UDP for speed (gaming, video)."},
+  {id:98,topic:"General CS",diff:"hard",q:"What is virtual memory?",opts:["A type of RAM","Disk space used as additional RAM by the OS","A virtual machine","Cloud storage"],ans:1,expl:"Virtual memory uses disk space to extend apparent RAM. The OS swaps pages between RAM and disk (paging/swapping), allowing programs to use more memory than physically available."},
+  {id:99,topic:"General CS",diff:"hard",q:"What is the purpose of a mutex?",opts:["A network router","A synchronization primitive that prevents concurrent access to shared resources","A data compression algorithm","A type of encryption"],ans:1,expl:"A mutex (mutual exclusion) lock ensures only one thread accesses a critical section at a time, preventing race conditions. One thread acquires the lock; others wait."},
+  {id:100,topic:"General CS",diff:"medium",q:"What does 'refactoring' mean in software development?",opts:["Adding new features","Rewriting code to a different language","Restructuring existing code without changing its behavior","Fixing bugs"],ans:2,expl:"Refactoring improves code structure, readability, and maintainability without changing external behavior. Goal: clean code, not new features."}
+];
+
+// ===================== APP STATE =====================
+const STORAGE_KEY = 'quiz68_';
+const LS = {
+  get: k => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY+k)) } catch { return null } },
+  set: (k,v) => localStorage.setItem(STORAGE_KEY+k, JSON.stringify(v)),
+};
+
+let state = {
+  diff: 'easy',
+  round: null, // current round data
+};
+
+// ===================== TABS =====================
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-'+tab));
+  if (tab === 'topics') renderTopics();
+  if (tab === 'leaderboard') renderLeaderboard();
+  if (tab === 'stats') renderStats();
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+// ===================== DIFFICULTY SELECT =====================
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    state.diff = btn.dataset.d;
+  });
+});
+
+// ===================== BATTLE LOGIC =====================
+let timerInterval = null;
+let timeLeft = 20;
+let roundStartTime = 0;
+
+function getPool() {
+  const d = state.diff;
+  if (d === 'all') return [...QUESTIONS];
+  return QUESTIONS.filter(q => q.diff === d);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+document.getElementById('start-btn').addEventListener('click', startBattle);
+document.getElementById('play-again-btn').addEventListener('click', () => {
+  document.getElementById('battle-end').style.display = 'none';
+  document.getElementById('battle-setup').style.display = 'block';
+});
+
+function startBattle() {
+  const pool = getPool();
+  if (pool.length < 10) {
+    alert('Not enough questions for that difficulty. Try "All".'); return;
+  }
+  const qs = shuffle(pool).slice(0, 10);
+  state.round = {
+    questions: qs, idx: 0,
+    score: 0, streak: 0, bestStreak: 0,
+    correct: 0, totalTime: 0,
+    answers: [], // {qid, correct, timeTaken}
+  };
+  roundStartTime = Date.now();
+  document.getElementById('battle-setup').style.display = 'none';
+  document.getElementById('battle-end').style.display = 'none';
+  document.getElementById('battle-quiz').style.display = 'block';
+  buildProgressDots();
+  showQuestion();
+}
+
+function buildProgressDots() {
+  const wrap = document.getElementById('q-progress');
+  wrap.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.id = 'dot-'+i;
+    wrap.appendChild(d);
+  }
+}
+
+function showQuestion() {
+  const r = state.round;
+  const q = r.questions[r.idx];
+
+  document.getElementById('q-num').textContent = r.idx+1;
+  document.getElementById('score-display').textContent = r.score;
+  const sc = document.getElementById('streak-display');
+  if (r.streak >= 2) { sc.classList.add('show'); sc.textContent = '🔥 x'+r.streak; }
+  else { sc.classList.remove('show'); }
+
+  // dots
+  for (let i = 0; i < 10; i++) {
+    const d = document.getElementById('dot-'+i);
+    if (i < r.idx) { /* already set */ }
+    else if (i === r.idx) { d.className = 'q-dot current'; }
+    else { d.className = 'q-dot'; }
+  }
+
+  // question content
+  document.getElementById('q-topic').textContent = q.topic;
+  const diffEl = document.getElementById('q-diff');
+  diffEl.textContent = q.diff.charAt(0).toUpperCase() + q.diff.slice(1);
+  diffEl.className = 'q-diff ' + q.diff;
+  document.getElementById('q-text').textContent = q.q;
+
+  // options
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  const keys = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="opt-key">${keys[i]}</span><span>${opt}</span>`;
+    btn.addEventListener('click', () => selectAnswer(i));
+    grid.appendChild(btn);
+  });
+
+  // explanation
+  const expl = document.getElementById('explanation');
+  expl.classList.remove('show');
+
+  document.getElementById('next-btn').style.display = 'none';
+
+  // timer
+  startTimer(q);
+}
+
+function startTimer(q) {
+  clearInterval(timerInterval);
+  timeLeft = 20;
+  const fill = document.getElementById('timer-fill');
+  const text = document.getElementById('timer-text');
+  fill.style.width = '100%';
+  fill.style.background = 'var(--green)';
+  text.style.color = 'var(--green)';
+
+  timerInterval = setInterval(() => {
+    timeLeft -= 0.1;
+    const pct = (timeLeft / 20) * 100;
+    fill.style.width = pct + '%';
+
+    const color = timeLeft > 10 ? 'var(--green)' : timeLeft > 5 ? 'var(--orange)' : 'var(--red)';
+    fill.style.background = color;
+    text.style.color = color;
+    text.textContent = Math.ceil(timeLeft) + 's';
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timeExpired(q);
+    }
+  }, 100);
+}
+
+function timeExpired(q) {
+  // treat as wrong
+  revealAnswer(-1, q, 20 - Math.max(0, timeLeft));
+}
+
+function selectAnswer(chosen) {
+  clearInterval(timerInterval);
+  const q = state.round.questions[state.round.idx];
+  const timeTaken = 20 - Math.max(0, timeLeft);
+  revealAnswer(chosen, q, timeTaken);
+}
+
+function revealAnswer(chosen, q, timeTaken) {
+  const r = state.round;
+  const correct = chosen === q.ans;
+
+  // disable options
+  document.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.ans) btn.classList.add('correct');
+    else if (i === chosen && !correct) btn.classList.add('wrong');
+  });
+
+  // scoring
+  if (correct) {
+    r.streak++;
+    if (r.streak > r.bestStreak) r.bestStreak = r.streak;
+    const bonus = Math.max(0, r.streak - 1) * 2;
+    r.score += 10 + bonus;
+    r.correct++;
+  } else {
+    r.streak = 0;
+  }
+
+  // update dot
+  const dot = document.getElementById('dot-'+r.idx);
+  dot.className = 'q-dot answered-' + (correct ? 'correct' : 'wrong');
+
+  // record
+  r.answers.push({ qid: q.id, topic: q.topic, correct, timeTaken });
+
+  // update display
+  document.getElementById('score-display').textContent = r.score;
+  const sc = document.getElementById('streak-display');
+  if (r.streak >= 2) { sc.classList.add('show'); sc.textContent = '🔥 x'+r.streak; }
+  else { sc.classList.remove('show'); }
+
+  // explanation
+  const expl = document.getElementById('explanation');
+  const badge = document.getElementById('result-badge-wrap');
+  badge.innerHTML = correct
+    ? '<div class="result-badge correct-badge">✅ Correct! ' + (r.streak >= 2 ? '🔥 Streak x'+r.streak : '') + '</div>'
+    : (chosen === -1 ? '<div class="result-badge wrong-badge">⏰ Time\'s up!</div>'
+                     : '<div class="result-badge wrong-badge">❌ Wrong! Correct: ' + ['A','B','C','D'][q.ans] + '</div>');
+  document.getElementById('expl-text').textContent = q.expl;
+  expl.classList.add('show');
+
+  r.totalTime += timeTaken;
+  r.idx++;
+
+  if (r.idx >= 10) {
+    document.getElementById('next-btn').style.display = 'none';
+    // auto-advance to end after short delay
+    setTimeout(endRound, 1800);
+  } else {
+    document.getElementById('next-btn').style.display = 'inline-flex';
+  }
+}
+
+document.getElementById('next-btn').addEventListener('click', () => {
+  document.getElementById('next-btn').style.display = 'none';
+  showQuestion();
+});
+
+function endRound() {
+  const r = state.round;
+  const acc = Math.round((r.correct / 10) * 100);
+
+  document.getElementById('battle-quiz').style.display = 'none';
+  const endEl = document.getElementById('battle-end');
+  endEl.style.display = 'block';
+
+  document.getElementById('end-score').textContent = r.score;
+  document.getElementById('end-sub').textContent = `${r.correct}/10 correct · ${acc}% accuracy`;
+  document.getElementById('end-acc').textContent = acc + '%';
+  document.getElementById('end-streak').textContent = r.bestStreak;
+  document.getElementById('end-time').textContent = Math.round(r.totalTime) + 's';
+
+  const icon = r.correct >= 9 ? '🏆' : r.correct >= 7 ? '⭐' : r.correct >= 5 ? '👍' : '💪';
+  document.getElementById('end-icon').textContent = icon;
+
+  if (r.score >= 100) launchConfetti();
+
+  // save to leaderboard
+  saveResult({ score: r.score, acc, streak: r.bestStreak, diff: state.diff, date: new Date().toLocaleDateString(), answers: r.answers });
+}
+
+function saveResult(result) {
+  let lb = LS.get('lb') || [];
+  lb.push(result);
+  lb.sort((a,b) => b.score - a.score);
+  lb = lb.slice(0, 5);
+  LS.set('lb', lb);
+
+  // update cumulative stats
+  let stats = LS.get('stats') || { rounds:0, totalScore:0, totalAcc:0, totalQs:0, bestStreak:0, topicWrong:{} };
+  stats.rounds++;
+  stats.totalScore += result.score;
+  stats.totalAcc += result.acc;
+  stats.totalQs += 10;
+  if (result.streak > stats.bestStreak) stats.bestStreak = result.streak;
+  result.answers.forEach(a => {
+    if (!a.correct) {
+      stats.topicWrong[a.topic] = (stats.topicWrong[a.topic] || 0) + 1;
+    }
+  });
+  LS.set('stats', stats);
+}
+
+// ===================== TOPICS PAGE =====================
+const TOPICS = [...new Set(QUESTIONS.map(q => q.topic))];
+
+let topicFilter = 'all';
+let diffFilter = 'all';
+
+function renderTopics() {
+  // build topic filter buttons
+  const tf = document.getElementById('topic-filter');
+  if (!tf.hasChildNodes()) {
+    ['all', ...TOPICS].forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'tf-btn' + (t === 'all' ? ' active' : '');
+      btn.textContent = t === 'all' ? 'All Topics' : t;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#topic-filter .tf-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        topicFilter = t;
+        renderTopicsList();
+      });
+      tf.appendChild(btn);
+    });
+  }
+
+  // diff filter
+  document.querySelectorAll('#topics-diff-filter .tf-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#topics-diff-filter .tf-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      diffFilter = btn.dataset.fd;
+      renderTopicsList();
+    });
+  });
+
+  renderTopicsList();
+}
+
+function renderTopicsList() {
+  const container = document.getElementById('topics-list');
+  container.innerHTML = '';
+
+  const filtered = QUESTIONS.filter(q =>
+    (topicFilter === 'all' || q.topic === topicFilter) &&
+    (diffFilter === 'all' || q.diff === diffFilter)
+  );
+
+  const grouped = {};
+  filtered.forEach(q => {
+    if (!grouped[q.topic]) grouped[q.topic] = [];
+    grouped[q.topic].push(q);
+  });
+
+  Object.entries(grouped).forEach(([topic, qs]) => {
+    const grp = document.createElement('div');
+    grp.className = 'topic-group';
+    grp.innerHTML = `<div class="topic-head">${topic} <span class="topic-count">(${qs.length} questions)</span></div>`;
+    qs.forEach(q => {
+      const card = document.createElement('div');
+      card.className = 'q-card';
+      card.innerHTML = `
+        <div class="q-card-meta">
+          <span class="q-diff ${q.diff}">${q.diff}</span>
+          <span style="font-size:.75rem;color:var(--muted)">Q#${q.id}</span>
+        </div>
+        <div class="q-card-q">${q.q}</div>
+        <div class="q-card-ans" id="ans-${q.id}">✅ ${q.opts[q.ans]}</div>
+        <div class="q-card-expl" id="expl-${q.id}">${q.expl}</div>
+      `;
+      card.addEventListener('click', () => {
+        document.getElementById('ans-'+q.id).classList.toggle('show');
+        document.getElementById('expl-'+q.id).classList.toggle('show');
+      });
+      grp.appendChild(card);
+    });
+    container.appendChild(grp);
+  });
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty-state"><div class="es-icon">🔍</div>No questions match your filters.</div>';
+  }
+}
+
+// ===================== LEADERBOARD =====================
+function renderLeaderboard() {
+  const lb = LS.get('lb') || [];
+  const cont = document.getElementById('lb-content');
+  if (!lb.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="es-icon">🏆</div><div>No rounds played yet.<br>Start a battle to appear here!</div></div>';
+    return;
+  }
+  const rankClasses = ['rank-1','rank-2','rank-3','rank-n','rank-n'];
+  cont.innerHTML = `
+    <table class="lb-table">
+      <thead><tr><th>Rank</th><th>Score</th><th>Accuracy</th><th>Streak</th><th>Difficulty</th><th>Date</th></tr></thead>
+      <tbody>
+        ${lb.map((r,i) => `
+          <tr>
+            <td><span class="rank-badge ${rankClasses[i]}">${i+1}</span></td>
+            <td><strong>${r.score}</strong></td>
+            <td>${r.acc}%</td>
+            <td>🔥 ${r.streak}</td>
+            <td>${r.diff}</td>
+            <td>${r.date}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+document.getElementById('clear-lb-btn').addEventListener('click', () => {
+  if (confirm('Clear all leaderboard history?')) {
+    LS.set('lb', []);
+    LS.set('stats', null);
+    renderLeaderboard();
+  }
+});
+
+// ===================== STATS =====================
+function renderStats() {
+  const stats = LS.get('stats') || { rounds:0, totalScore:0, totalAcc:0, totalQs:0, bestStreak:0, topicWrong:{} };
+  const avgScore = stats.rounds ? Math.round(stats.totalScore / stats.rounds) : 0;
+  const avgAcc = stats.rounds ? Math.round(stats.totalAcc / stats.rounds) : 0;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${stats.rounds}</div><div class="stat-lbl">Rounds Played</div></div>
+    <div class="stat-card"><div class="stat-val">${avgScore}</div><div class="stat-lbl">Avg Score</div></div>
+    <div class="stat-card"><div class="stat-val">${avgAcc}%</div><div class="stat-lbl">Avg Accuracy</div></div>
+    <div class="stat-card"><div class="stat-val">${stats.bestStreak}</div><div class="stat-lbl">Best Streak</div></div>
+    <div class="stat-card"><div class="stat-val">${stats.totalQs}</div><div class="stat-lbl">Questions Answered</div></div>
+  `;
+
+  // topic accuracy bars (wrong count)
+  const tw = stats.topicWrong;
+  const maxWrong = Math.max(1, ...Object.values(tw));
+  const barsEl = document.getElementById('topic-acc-bars');
+  if (!Object.keys(tw).length) {
+    barsEl.innerHTML = '<div class="text-muted" style="font-size:.9rem">No data yet — play some rounds!</div>';
+  } else {
+    barsEl.innerHTML = TOPICS.filter(t => tw[t]).sort((a,b) => tw[b]-tw[a]).map(t => `
+      <div class="topic-bar-row">
+        <div class="topic-bar-name">${t}</div>
+        <div class="topic-bar"><div class="topic-bar-fill" style="width:${(tw[t]/maxWrong)*100}%;background:var(--red)"></div></div>
+        <div class="topic-bar-pct">${tw[t]} ❌</div>
+      </div>
+    `).join('');
+  }
+
+  // weakest topic
+  const weakCard = document.getElementById('weakest-card');
+  const weakTopic = Object.entries(tw).sort((a,b)=>b[1]-a[1])[0];
+  if (weakTopic) {
+    weakCard.innerHTML = `
+      <div style="font-size:1.5rem;font-weight:900;color:var(--red);margin-bottom:.3rem">${weakTopic[0]}</div>
+      <div style="color:var(--muted);font-size:.9rem">${weakTopic[1]} wrong answers — needs the most work</div>
+      <button class="btn btn-outline mt-2" onclick="switchTab('topics'); setTimeout(()=>{
+        document.querySelectorAll('#topic-filter .tf-btn').forEach(b=>{
+          if(b.textContent==='${weakTopic[0]}'){b.click();}
+        });
+      }, 50)" style="font-size:.8rem">📚 Study ${weakTopic[0]}</button>
+    `;
+  } else {
+    weakCard.innerHTML = '<div class="text-muted" style="font-size:.9rem">Play more rounds to discover your weak spots!</div>';
+  }
+}
+
+// ===================== CONFETTI =====================
+function launchConfetti() {
+  const colors = ['#a855f7','#f97316','#22c55e','#3b82f6','#f59e0b','#ef4444'];
+  for (let i = 0; i < 50; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.cssText = `
+        left:${Math.random()*100}vw;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        border-radius:${Math.random()>0.5?'50%':'2px'};
+        animation-duration:${1+Math.random()*1.5}s;
+        animation-delay:${Math.random()*0.5}s;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }, i * 30);
+  }
+}
+</script>
+</body>
+</html>
