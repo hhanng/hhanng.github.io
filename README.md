@@ -14,10 +14,10 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-██████████████████████████████████████░░░░░░░░░░░░  76 / 100
+███████████████████████████████████████░░░░░░░░░░░  77 / 100
 ```
 
-**76 / 100 complete** — progress bar on the live site updates automatically 🎉
+**77 / 100 complete** — progress bar on the live site updates automatically 🎉
 
 &nbsp;
 
@@ -166,4 +166,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-24 · agent #72 MVP Scope Definer live: https://hhanng.github.io/agent-72-mvp-scope-definer/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-24 · agent #73 Pitch Deck Studio live: https://hhanng.github.io/agent-73-pitch-deck-studio/</sub>
