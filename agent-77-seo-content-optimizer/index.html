@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent #77 — SEO Content Optimizer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --border: #e2e8f0;
+    --border2: #cbd5e1;
+    --text: #0f172a;
+    --muted: #64748b;
+    --accent: #0ea5e9;
+    --accent-bg: #e0f2fe;
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+    --amber: #d97706;
+    --amber-bg: #fef3c7;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; }
+  .logo { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; flex-shrink: 0; }
+  .header-info h1 { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+  .header-info p { font-size: 0.75rem; color: var(--muted); }
+  .badge { margin-left: auto; background: var(--accent-bg); color: var(--accent); font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; font-weight: 700; white-space: nowrap; }
+
+  nav { background: var(--surface); border-bottom: 2px solid var(--border); display: flex; padding: 0 24px; }
+  .tab { padding: 12px 18px; font-size: 0.82rem; font-weight: 700; color: var(--muted); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; letter-spacing: 0.06em; transition: all .15s; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .page { display: none; padding: 24px; max-width: 980px; }
+  .page.active { display: block; }
+
+  label { font-size: 0.78rem; color: var(--muted); font-weight: 600; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+  input, select, textarea { width: 100%; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); border-radius: 7px; padding: 9px 12px; font-size: 0.88rem; font-family: inherit; outline: none; transition: border-color .15s; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; }
+
+  .card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 0.75rem; font-weight: 800; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 7px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; transition: all .15s; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #0284c7; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-group { margin-bottom: 14px; }
+
+  /* Score badge */
+  .score-ring { width: 96px; height: 96px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 4px solid var(--border); flex-shrink: 0; }
+  .score-num { font-size: 2rem; font-weight: 900; line-height: 1; }
+  .score-label { font-size: 0.65rem; color: var(--muted); font-weight: 600; }
+
+  /* Check items */
+  .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .check-item:last-child { border-bottom: none; }
+  .check-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+  .check-icon.pass { background: var(--green-bg); color: var(--green); }
+  .check-icon.warn { background: var(--amber-bg); color: var(--amber); }
+  .check-icon.fail { background: var(--red-bg); color: var(--red); }
+  .check-item-body { flex: 1; }
+  .check-name { font-size: 0.85rem; font-weight: 600; }
+  .check-tip { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  /* Pill badge */
+  .pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+  .pill-green { background: var(--green-bg); color: var(--green); }
+  .pill-red { background: var(--red-bg); color: var(--red); }
+  .pill-amber { background: var(--amber-bg); color: var(--amber); }
+  .pill-blue { background: var(--accent-bg); color: var(--accent); }
+  .pill-gray { background: var(--surface2); color: var(--muted); }
+
+  /* Progress bar */
+  .progress-bar { height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; margin-top: 6px; }
+  .progress-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width .4s; }
+
+  /* Char counter */
+  .char-counter { font-size: 0.75rem; margin-top: 5px; font-weight: 600; }
+  .char-ok { color: var(--green); }
+  .char-warn { color: var(--amber); }
+  .char-over { color: var(--red); }
+
+  /* Intent badge */
+  .intent-info { background: var(--accent-bg); color: var(--accent); }
+  .intent-nav { background: #ede9fe; color: #7c3aed; }
+  .intent-trans { background: var(--green-bg); color: var(--green); }
+  .intent-comm { background: var(--amber-bg); color: var(--amber); }
+
+  /* Keyword row */
+  .kw-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .kw-row:last-child { border-bottom: none; }
+  .kw-text { font-size: 0.88rem; font-weight: 600; flex: 1; }
+  .lsi-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .lsi-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-size: 0.73rem; color: var(--muted); }
+
+  /* Heading structure */
+  .heading-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .heading-row:last-child { border-bottom: none; }
+  .heading-tag { font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 4px; min-width: 32px; text-align: center; }
+  .h1-tag { background: #dbeafe; color: #1d4ed8; }
+  .h2-tag { background: var(--accent-bg); color: var(--accent); }
+  .h3-tag { background: #e0e7ff; color: #4338ca; }
+
+  /* Checklist */
+  .cl-group { margin-bottom: 20px; }
+  .cl-group-title { font-size: 0.82rem; font-weight: 800; color: var(--text); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; display: flex; justify-content: space-between; align-items: center; }
+  .cl-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .cl-item:last-child { border-bottom: none; }
+  .cl-item input[type=checkbox] { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; }
+  .cl-item-body { flex: 1; }
+  .cl-item-name { font-size: 0.85rem; font-weight: 600; }
+  .cl-item-tip { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+  /* Outline */
+  .outline-item { padding: 5px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .outline-item:last-child { border-bottom: none; }
+  .outline-h1 { font-weight: 800; color: var(--text); }
+  .outline-h2 { padding-left: 16px; font-weight: 600; color: #334155; }
+  .outline-h3 { padding-left: 32px; color: var(--muted); }
+
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .section-header h2 { font-size: 1rem; font-weight: 800; }
+
+  .faq-item { padding: 8px 12px; background: var(--surface2); border-radius: 6px; margin-bottom: 6px; font-size: 0.85rem; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: #f8fafc; padding: 10px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; z-index: 999; opacity: 0; transform: translateY(10px); transition: all .3s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+
+  @media (max-width: 640px) {
+    .form-row { grid-template-columns: 1fr; }
+    nav { overflow-x: auto; }
+    .score-ring { width: 76px; height: 76px; }
+    .score-num { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🔍</div>
+  <div class="header-info">
+    <h1>SEO Content Optimizer</h1>
+    <p>Write for humans. Rank for Google. Optimize every piece before it goes live.</p>
+  </div>
+  <div class="badge">#77 / 100</div>
+</header>
+
+<nav>
+  <button class="tab active" onclick="switchTab('analyze')">ANALYZE</button>
+  <button class="tab" onclick="switchTab('keywords')">KEYWORDS</button>
+  <button class="tab" onclick="switchTab('structure')">STRUCTURE</button>
+  <button class="tab" onclick="switchTab('checklist')">CHECKLIST</button>
+</nav>
+
+<!-- ═══════════ ANALYZE TAB ═══════════ -->
+<div class="page active" id="page-analyze">
+  <div class="section-header">
+    <h2>Content Analysis</h2>
+    <button class="btn btn-secondary btn-sm" onclick="clearAnalyze()">Clear</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Your Content</div>
+    <div class="form-group">
+      <label>Target Keyword</label>
+      <input id="a-keyword" type="text" placeholder="e.g. best running shoes for beginners">
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label>Paste Article / Page Content</label>
+      <textarea id="a-content" rows="12" placeholder="Paste your full article or page copy here..."></textarea>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="analyzeContent()" style="width:100%; margin-bottom:16px">Analyze Content</button>
+
+  <div id="analyze-output" style="display:none">
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap">
+        <div class="score-ring" id="score-ring">
+          <span class="score-num" id="score-num">—</span>
+          <span class="score-label">SEO SCORE</span>
+        </div>
+        <div style="flex:1; min-width:200px">
+          <div id="score-label-text" style="font-size:1.1rem; font-weight:800; margin-bottom:4px"></div>
+          <div id="score-sub" style="font-size:0.82rem; color:var(--muted)"></div>
+          <div class="progress-bar" style="margin-top:10px; height:8px">
+            <div class="progress-fill" id="score-bar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Checks</div>
+      <div id="checks-list"></div>
+    </div>
+  </div>
+
+  <div id="analyze-empty" class="empty-state">
+    <div style="font-size:2.5rem; margin-bottom:10px">📝</div>
+    <p style="color:var(--text); font-weight:600; margin-bottom:6px">Paste your content and target keyword above</p>
+    <p>The analyzer runs entirely in your browser — nothing is sent anywhere.</p>
+  </div>
+</div>
+
+<!-- ═══════════ KEYWORDS TAB ═══════════ -->
+<div class="page" id="page-keywords">
+  <div class="section-header"><h2>Keyword Planner</h2></div>
+
+  <div class="card">
+    <div class="card-title">Keyword List</div>
+    <div style="display:flex; gap:8px; margin-bottom:14px">
+      <input id="kw-input" type="text" placeholder="Add a keyword or phrase..." style="flex:1" onkeydown="if(event.key==='Enter')addKeyword()">
+      <button class="btn btn-primary" onclick="addKeyword()">Add</button>
+    </div>
+    <div id="kw-list"><div class="empty-state" style="padding:20px"><p>Add keywords above to see intent + LSI suggestions</p></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Meta Title Builder</div>
+    <div class="form-group">
+      <label>Primary Keyword</label>
+      <input id="meta-kw" type="text" placeholder="e.g. best running shoes" oninput="updateMeta()">
+    </div>
+    <div class="form-group">
+      <label>Brand Name</label>
+      <input id="meta-brand" type="text" placeholder="e.g. RunnerHub" oninput="updateMeta()">
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label>Meta Title Preview</label>
+      <input id="meta-title-preview" type="text" placeholder="Your meta title will appear here..." oninput="updateMetaCounter()">
+      <div class="char-counter" id="meta-title-counter">0 characters</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Meta Description Builder</div>
+    <div class="form-group">
+      <label>Main CTA / Benefit</label>
+      <input id="meta-cta" type="text" placeholder="e.g. Find the perfect fit for your training style" oninput="updateMetaDesc()">
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label>Meta Description Preview</label>
+      <textarea id="meta-desc-preview" rows="3" placeholder="Your meta description will appear here..." oninput="updateMetaDescCounter()"></textarea>
+      <div class="char-counter" id="meta-desc-counter">0 characters</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ STRUCTURE TAB ═══════════ -->
+<div class="page" id="page-structure">
+  <div class="section-header"><h2>Content Structure</h2></div>
+
+  <div class="card">
+    <div class="card-title">Heading Builder</div>
+    <div class="form-group">
+      <label>Target Keyword (for H1 check)</label>
+      <input id="s-keyword" type="text" placeholder="e.g. best running shoes for beginners">
+    </div>
+    <div class="form-group">
+      <label>H1 — Page Title (exactly one)</label>
+      <input id="s-h1" type="text" placeholder="Your main page title..." oninput="updateOutline()">
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+        <label style="margin-bottom:0">H2 — Section Headings (at least 3)</label>
+        <button class="btn btn-secondary btn-sm" onclick="addH2()">+ Add H2</button>
+      </div>
+      <div id="h2-list"></div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+        <label style="margin-bottom:0">H3 — Subsection Headings (optional)</label>
+        <button class="btn btn-secondary btn-sm" onclick="addH3()">+ Add H3</button>
+      </div>
+      <div id="h3-list"></div>
+    </div>
+    <button class="btn btn-primary" onclick="validateStructure()" style="width:100%">Validate Structure</button>
+  </div>
+
+  <div id="structure-output" style="display:none">
+    <div class="card">
+      <div class="card-title">Validation Results</div>
+      <div id="structure-checks"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Content Outline</div>
+      <div id="outline-display"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Suggested FAQ Section</div>
+      <div id="faq-display"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CHECKLIST TAB ═══════════ -->
+<div class="page" id="page-checklist">
+  <div class="section-header">
+    <h2>SEO Pre-Publish Checklist</h2>
+    <button class="btn btn-secondary btn-sm" onclick="resetChecklist()">Reset</button>
+  </div>
+
+  <div id="checklist-overall" class="card" style="margin-bottom:16px">
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px">
+      <div>
+        <div style="font-size:1rem; font-weight:800; margin-bottom:2px">Overall Progress</div>
+        <div id="cl-overall-text" style="font-size:0.82rem; color:var(--muted)">0 / 30 items complete</div>
+      </div>
+      <div class="score-ring" id="cl-ring" style="width:72px; height:72px; border-color:var(--border)">
+        <span class="score-num" id="cl-pct" style="font-size:1.4rem">0%</span>
+      </div>
+    </div>
+    <div class="progress-bar" style="margin-top:12px; height:8px">
+      <div class="progress-fill" id="cl-overall-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div id="checklist-groups"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Tabs ────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('page-' + name).classList.add('active');
+  if (name === 'structure') { if (!document.querySelector('#h2-list .h2-input')) addH2(); addH2(); addH2(); }
+  if (name === 'checklist') renderChecklist();
+}
+
+// ─── ANALYZE ─────────────────────────────────────────────────────────────────
+function analyzeContent() {
+  const content = document.getElementById('a-content').value.trim();
+  const keyword = document.getElementById('a-keyword').value.trim().toLowerCase();
+  if (!content) { showToast('Paste your content first'); return; }
+
+  const words = content.split(/\s+/).filter(w => w.length > 0);
+  const wordCount = words.length;
+  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 2);
+  const sentenceCount = sentences.length;
+  const avgSentLen = sentenceCount > 0 ? wordCount / sentenceCount : 0;
+
+  // Keyword density
+  const contentLower = content.toLowerCase();
+  const kwMatches = keyword ? (contentLower.match(new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length : 0;
+  const kwDensity = wordCount > 0 ? (kwMatches / wordCount * 100) : 0;
+
+  // Keyword in first 100 words
+  const first100 = words.slice(0, 100).join(' ').toLowerCase();
+  const kwInFirst100 = keyword ? first100.includes(keyword) : false;
+
+  // Flesch-Kincaid readability approximation
+  // Count syllables simply by vowel groups
+  function countSyllables(word) {
+    word = word.toLowerCase().replace(/[^a-z]/g, '');
+    if (word.length <= 3) return 1;
+    const matches = word.match(/[aeiouy]+/g);
+    let count = matches ? matches.length : 1;
+    if (word.endsWith('e')) count--;
+    return Math.max(1, count);
+  }
+  const totalSyllables = words.reduce((acc, w) => acc + countSyllables(w), 0);
+  const avgSyllables = wordCount > 0 ? totalSyllables / wordCount : 0;
+  const fk = 206.835 - 1.015 * avgSentLen - 84.6 * avgSyllables;
+  const readability = Math.max(0, Math.min(100, fk));
+
+  // Passive voice heuristic
+  const passivePatterns = /\b(is|are|was|were|be|been|being)\s+\w+ed\b/gi;
+  const passiveMatches = (content.match(passivePatterns) || []).length;
+
+  // Internal links (href patterns without http)
+  const internalLinks = (content.match(/href=["'][^"']*["']/gi) || []).filter(h => !h.includes('http')).length;
+
+  // Image alt text
+  const imgTags = (content.match(/<img[^>]*>/gi) || []);
+  const imgsWithAlt = imgTags.filter(t => /alt=["'][^"']+["']/.test(t)).length;
+  const allImgsHaveAlt = imgTags.length === 0 || imgsWithAlt === imgTags.length;
+
+  // Build checks
+  const checks = [];
+
+  // Word count
+  let wcStatus = wordCount >= 1000 && wordCount <= 2500 ? 'pass' : wordCount >= 300 ? 'warn' : 'fail';
+  checks.push({ name: `Word Count: ${wordCount.toLocaleString()} words`, status: wcStatus,
+    tip: wcStatus === 'fail' ? 'Under 300 words is too thin for most topics. Aim for at least 600–1000 words.' :
+         wcStatus === 'warn' ? `${wordCount < 1000 ? 'Under 1000 words — expand for better depth.' : 'Over 2500 words — consider splitting into multiple posts.'}` :
+         'Great length for a comprehensive blog post.' });
+
+  // Keyword density
+  const kdStatus = !keyword ? 'warn' : kwDensity >= 1 && kwDensity <= 2 ? 'pass' : kwDensity < 0.5 ? 'fail' : 'warn';
+  checks.push({ name: `Keyword Density: ${kwDensity.toFixed(2)}% (${kwMatches} mentions)`, status: kdStatus,
+    tip: !keyword ? 'Enter a target keyword to check density.' :
+         kdStatus === 'fail' ? `Keyword appears too rarely. Target 1–2% density (about ${Math.round(wordCount * 0.015)} mentions).` :
+         kdStatus === 'warn' ? (kwDensity > 2 ? 'Keyword stuffing risk! Reduce mentions for a more natural flow.' : 'Slightly low. Add a few more natural mentions.') :
+         'Keyword density is in the ideal 1–2% range.' });
+
+  // Keyword in first 100 words
+  const kFirst = !keyword ? 'warn' : kwInFirst100 ? 'pass' : 'fail';
+  checks.push({ name: `Keyword in First 100 Words: ${!keyword ? 'no keyword set' : kwInFirst100 ? 'Yes' : 'No'}`, status: kFirst,
+    tip: !keyword ? 'Set a target keyword to check.' : kwInFirst100 ? 'Great — your keyword appears early, signaling relevance.' : 'Add your keyword within the first paragraph to signal the topic to search engines.' });
+
+  // Readability
+  const rdStatus = readability >= 60 ? 'pass' : readability >= 40 ? 'warn' : 'fail';
+  checks.push({ name: `Readability Score: ${readability.toFixed(0)}/100 (Flesch-Kincaid approx.)`, status: rdStatus,
+    tip: rdStatus === 'pass' ? 'Easy to read — great for broad audiences.' :
+         rdStatus === 'warn' ? 'Moderately readable. Shorten sentences and use simpler words.' :
+         'Very difficult to read. Break long sentences, use active voice, and avoid jargon.' });
+
+  // Passive voice
+  const pvStatus = passiveMatches === 0 ? 'pass' : passiveMatches <= 3 ? 'warn' : 'fail';
+  checks.push({ name: `Passive Voice: ${passiveMatches} instance${passiveMatches !== 1 ? 's' : ''}`, status: pvStatus,
+    tip: pvStatus === 'pass' ? 'No passive voice detected. Active writing is clear and direct.' :
+         pvStatus === 'warn' ? 'A few passive sentences. Rewrite as: "Subject did X" instead of "X was done by subject."' :
+         'Too much passive voice. Active voice is more engaging and easier to read.' });
+
+  // Avg sentence length
+  const slStatus = avgSentLen <= 20 ? 'pass' : avgSentLen <= 25 ? 'warn' : 'fail';
+  checks.push({ name: `Avg Sentence Length: ${avgSentLen.toFixed(1)} words`, status: slStatus,
+    tip: slStatus === 'pass' ? 'Short, digestible sentences. Readers will stay engaged.' :
+         slStatus === 'warn' ? 'Getting long. Aim for under 20 words per sentence.' :
+         'Sentences are too long. Split them up — readers scan, not read.' });
+
+  // Internal links
+  const ilStatus = internalLinks >= 2 ? 'pass' : internalLinks === 1 ? 'warn' : 'fail';
+  checks.push({ name: `Internal Links: ${internalLinks} found`, status: ilStatus,
+    tip: ilStatus === 'pass' ? 'Good internal linking helps crawlability and distributes page authority.' :
+         ilStatus === 'warn' ? 'Add at least 2–3 internal links to related content.' :
+         'No internal links found. Link to 2–5 related pages on your site.' });
+
+  // Image alt text
+  const imgStatus = imgTags.length === 0 ? 'warn' : allImgsHaveAlt ? 'pass' : 'fail';
+  checks.push({ name: `Image Alt Text: ${imgTags.length === 0 ? 'No images found' : `${imgsWithAlt}/${imgTags.length} images have alt`}`, status: imgStatus,
+    tip: imgTags.length === 0 ? 'Consider adding images with descriptive alt text for better SEO.' :
+         allImgsHaveAlt ? 'All images have alt text.' :
+         'Some images missing alt text. Add descriptive alt attributes for accessibility and SEO.' });
+
+  // Score calculation
+  const passCount = checks.filter(c => c.status === 'pass').length;
+  const warnCount = checks.filter(c => c.status === 'warn').length;
+  const score = Math.round((passCount * 12.5) + (warnCount * 4));
+
+  // Render
+  const scoreEl = document.getElementById('score-num');
+  const ringEl = document.getElementById('score-ring');
+  scoreEl.textContent = score;
+  const scoreColor = score >= 70 ? 'var(--green)' : score >= 40 ? 'var(--amber)' : 'var(--red)';
+  scoreEl.style.color = scoreColor;
+  ringEl.style.borderColor = scoreColor;
+  document.getElementById('score-bar').style.width = score + '%';
+  document.getElementById('score-bar').style.background = scoreColor;
+  document.getElementById('score-label-text').textContent = score >= 70 ? '✅ Good — ready to publish' : score >= 40 ? '⚠️ Needs some work' : '❌ Needs significant improvements';
+  document.getElementById('score-sub').textContent = `${passCount} checks passed · ${warnCount} warnings · ${checks.length - passCount - warnCount} issues`;
+
+  document.getElementById('checks-list').innerHTML = checks.map(c => `
+    <div class="check-item">
+      <div class="check-icon ${c.status}">${c.status === 'pass' ? '✓' : c.status === 'warn' ? '!' : '✗'}</div>
+      <div class="check-item-body">
+        <div class="check-name">${c.name}</div>
+        <div class="check-tip">${c.tip}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('analyze-output').style.display = 'block';
+  document.getElementById('analyze-empty').style.display = 'none';
+}
+
+function clearAnalyze() {
+  document.getElementById('a-keyword').value = '';
+  document.getElementById('a-content').value = '';
+  document.getElementById('analyze-output').style.display = 'none';
+  document.getElementById('analyze-empty').style.display = 'block';
+}
+
+// ─── KEYWORDS ────────────────────────────────────────────────────────────────
+const LSI_MAP = {
+  'running shoes': ['athletic footwear','trail running','cushioning','pronation','shoe fit','midsole','outsole','arch support'],
+  'running': ['jogging','marathon','5k training','cardio','endurance','pace','stride','treadmill'],
+  'seo': ['search engine optimization','keywords','backlinks','on-page seo','serp','meta tags','crawling','indexing'],
+  'marketing': ['digital marketing','brand awareness','content strategy','social media','roi','conversion','funnel','engagement'],
+  'email': ['email marketing','newsletter','open rate','click rate','subject line','unsubscribe','inbox','deliverability'],
+  'website': ['web design','ux','landing page','responsive','page speed','bounce rate','conversion rate','cta'],
+  'fitness': ['exercise','workout','gym','strength training','calories','nutrition','health','wellness'],
+  'coffee': ['espresso','brewing','beans','roast','barista','café','caffeine','arabica'],
+  'travel': ['destination','itinerary','hotel','flight','backpacking','tourism','adventure','passport'],
+  'coding': ['programming','developer','software','github','debugging','algorithms','frameworks','open source'],
+  'python': ['programming language','django','flask','data science','machine learning','pandas','numpy','scripting'],
+  'javascript': ['react','vue','node.js','frontend','web development','typescript','framework','async'],
+  'health': ['wellness','nutrition','diet','mental health','exercise','sleep','vitamins','self-care'],
+  'business': ['startup','entrepreneur','revenue','strategy','growth','b2b','funding','roi'],
+  'social media': ['instagram','twitter','tiktok','content creation','engagement','followers','reach','algorithm'],
+  'productivity': ['time management','focus','workflow','tools','efficiency','habits','planning','organization'],
+  'finance': ['investing','budgeting','savings','stocks','cryptocurrency','financial planning','retirement','income'],
+  'food': ['recipe','ingredients','cooking','nutrition','meal prep','dietary','flavors','cuisine'],
+  'photography': ['camera','lens','composition','lighting','editing','portrait','landscape','aperture'],
+  'gaming': ['video games','console','esports','streaming','multiplayer','fps','rpg','indie games'],
+};
+
+const INTENT_WORDS = {
+  informational: ['how','what','why','when','who','which','guide','tutorial','explain','learn','definition','meaning','tips','examples'],
+  navigational: ['login','sign in','sign up','official','website','homepage','download','app','platform'],
+  transactional: ['buy','purchase','order','shop','deal','discount','price','cheap','affordable','sale','coupon'],
+  commercial: ['best','top','review','vs','compare','comparison','alternative','rated','recommend','pros cons'],
+};
+
+let kwList = [];
+function addKeyword() {
+  const kw = document.getElementById('kw-input').value.trim();
+  if (!kw) return;
+  if (kwList.length >= 10) { showToast('Max 10 keywords'); return; }
+  if (kwList.includes(kw)) { showToast('Already added'); return; }
+  kwList.push(kw);
+  document.getElementById('kw-input').value = '';
+  renderKwList();
+}
+
+function removeKw(i) { kwList.splice(i, 1); renderKwList(); }
+
+function getIntent(kw) {
+  const words = kw.toLowerCase().split(/\s+/);
+  for (const [intent, triggers] of Object.entries(INTENT_WORDS)) {
+    if (words.some(w => triggers.some(t => w.includes(t)))) return intent;
+  }
+  return 'informational';
+}
+
+function getLSI(kw) {
+  const kwLower = kw.toLowerCase();
+  for (const [key, vals] of Object.entries(LSI_MAP)) {
+    if (kwLower.includes(key) || key.includes(kwLower)) return vals;
+  }
+  // Generate from keyword words
+  const words = kwLower.split(/\s+/).filter(w => w.length > 3);
+  for (const [key, vals] of Object.entries(LSI_MAP)) {
+    if (words.some(w => key.includes(w))) return vals;
+  }
+  return ['related term', 'synonym phrase', 'topic cluster', 'long-tail variant'];
+}
+
+function renderKwList() {
+  const el = document.getElementById('kw-list');
+  if (!kwList.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:20px"><p>Add keywords above to see intent + LSI suggestions</p></div>';
+    return;
+  }
+  el.innerHTML = kwList.map((kw, i) => {
+    const intent = getIntent(kw);
+    const lsi = getLSI(kw).slice(0, 6);
+    const intentClass = `intent-${intent}`;
+    const intentLabel = intent.charAt(0).toUpperCase() + intent.slice(1);
+    return `<div class="kw-row" style="flex-direction:column; align-items:flex-start; gap:6px">
+      <div style="display:flex; align-items:center; gap:8px; width:100%">
+        <span class="kw-text">${kw}</span>
+        <span class="pill ${intentClass}">${intentLabel}</span>
+        <button class="btn btn-secondary btn-sm" onclick="removeKw(${i})" style="margin-left:auto">✕</button>
+      </div>
+      <div class="lsi-chips">${lsi.map(l => `<span class="lsi-chip">${l}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateMeta() {
+  const kw = document.getElementById('meta-kw').value.trim();
+  const brand = document.getElementById('meta-brand').value.trim();
+  const title = kw && brand ? `${kw.charAt(0).toUpperCase() + kw.slice(1)} | ${brand}` : kw || brand || '';
+  document.getElementById('meta-title-preview').value = title;
+  updateMetaCounter();
+}
+
+function updateMetaCounter() {
+  const len = document.getElementById('meta-title-preview').value.length;
+  const el = document.getElementById('meta-title-counter');
+  el.textContent = `${len} characters ${len >= 50 && len <= 60 ? '✓ ideal' : len < 50 ? '(too short — aim for 50–60)' : '(too long — trim to under 60)'}`;
+  el.className = 'char-counter ' + (len >= 50 && len <= 60 ? 'char-ok' : len < 30 || len > 70 ? 'char-over' : 'char-warn');
+}
+
+function updateMetaDesc() {
+  const cta = document.getElementById('meta-cta').value.trim();
+  const kw = document.getElementById('meta-kw').value.trim();
+  const desc = cta ? (kw ? `${cta}. Learn everything about ${kw} with expert tips and proven strategies.` : cta) : '';
+  document.getElementById('meta-desc-preview').value = desc;
+  updateMetaDescCounter();
+}
+
+function updateMetaDescCounter() {
+  const len = document.getElementById('meta-desc-preview').value.length;
+  const el = document.getElementById('meta-desc-counter');
+  el.textContent = `${len} characters ${len >= 140 && len <= 160 ? '✓ ideal' : len < 140 ? '(too short — aim for 140–160)' : '(too long — trim to under 160)'}`;
+  el.className = 'char-counter ' + (len >= 140 && len <= 160 ? 'char-ok' : len < 100 || len > 175 ? 'char-over' : 'char-warn');
+}
+
+// ─── STRUCTURE ────────────────────────────────────────────────────────────────
+function addH2() {
+  const list = document.getElementById('h2-list');
+  const div = document.createElement('div');
+  div.className = 'form-group';
+  div.style.display = 'flex';
+  div.style.gap = '8px';
+  div.style.marginBottom = '8px';
+  div.innerHTML = `<input class="h2-input" type="text" placeholder="Section heading..." oninput="updateOutline()" style="flex:1">
+    <button class="btn btn-secondary btn-sm" onclick="this.parentNode.remove(); updateOutline()">✕</button>`;
+  list.appendChild(div);
+}
+function addH3() {
+  const list = document.getElementById('h3-list');
+  const div = document.createElement('div');
+  div.className = 'form-group';
+  div.style.display = 'flex';
+  div.style.gap = '8px';
+  div.style.marginBottom = '8px';
+  div.innerHTML = `<input class="h3-input" type="text" placeholder="Subsection heading..." oninput="updateOutline()" style="flex:1; padding-left:24px;">
+    <button class="btn btn-secondary btn-sm" onclick="this.parentNode.remove(); updateOutline()">✕</button>`;
+  list.appendChild(div);
+}
+
+function updateOutline() {
+  // Live update outline if visible
+  const out = document.getElementById('structure-output');
+  if (out.style.display !== 'none') validateStructure();
+}
+
+function validateStructure() {
+  const keyword = document.getElementById('s-keyword').value.trim().toLowerCase();
+  const h1 = document.getElementById('s-h1').value.trim();
+  const h2s = Array.from(document.querySelectorAll('.h2-input')).map(i => i.value.trim()).filter(v => v);
+  const h3s = Array.from(document.querySelectorAll('.h3-input')).map(i => i.value.trim()).filter(v => v);
+
+  const checks = [];
+
+  const h1Count = h1 ? 1 : 0;
+  checks.push({ name: `H1 count: ${h1Count}`, status: h1Count === 1 ? 'pass' : h1Count === 0 ? 'fail' : 'fail',
+    tip: h1Count === 1 ? 'Exactly one H1 — perfect.' : 'You need exactly one H1 tag per page.' });
+
+  const kwInH1 = keyword && h1 ? h1.toLowerCase().includes(keyword) : false;
+  checks.push({ name: `Keyword in H1: ${!keyword ? 'no keyword set' : !h1 ? 'no H1' : kwInH1 ? 'Yes' : 'No'}`, status: !keyword ? 'warn' : kwInH1 ? 'pass' : 'fail',
+    tip: !keyword ? 'Set a target keyword to check.' : kwInH1 ? 'Keyword in H1 tells search engines exactly what the page is about.' : `Add "${keyword}" to your H1 heading.` });
+
+  checks.push({ name: `H2 sections: ${h2s.length}`, status: h2s.length >= 3 ? 'pass' : h2s.length >= 1 ? 'warn' : 'fail',
+    tip: h2s.length >= 3 ? 'Good structure — enough sections for comprehensive coverage.' : h2s.length > 0 ? 'Add at least 3 H2 sections to organize your content.' : 'No H2 headings. Add sections to break up content.' });
+
+  const hasH3WithoutH2 = h3s.length > 0 && h2s.length === 0;
+  checks.push({ name: `Heading hierarchy: ${hasH3WithoutH2 ? 'Invalid' : 'Valid'}`, status: hasH3WithoutH2 ? 'fail' : 'pass',
+    tip: hasH3WithoutH2 ? 'H3 headings should be under H2 headings. Add H2 sections first.' : 'Heading hierarchy is correct.' });
+
+  document.getElementById('structure-checks').innerHTML = checks.map(c => `
+    <div class="check-item">
+      <div class="check-icon ${c.status}">${c.status === 'pass' ? '✓' : c.status === 'warn' ? '!' : '✗'}</div>
+      <div class="check-item-body">
+        <div class="check-name">${c.name}</div>
+        <div class="check-tip">${c.tip}</div>
+      </div>
+    </div>`).join('');
+
+  // Outline
+  let outlineHtml = '';
+  if (h1) outlineHtml += `<div class="outline-item outline-h1"><span class="heading-tag h1-tag">H1</span> ${h1}</div>`;
+  h2s.forEach(h => { outlineHtml += `<div class="outline-item outline-h2"><span class="heading-tag h2-tag">H2</span> ${h}</div>`; });
+  h3s.forEach(h => { outlineHtml += `<div class="outline-item outline-h3"><span class="heading-tag h3-tag">H3</span> ${h}</div>`; });
+  document.getElementById('outline-display').innerHTML = outlineHtml || '<p style="color:var(--muted); font-size:0.85rem">Add headings above to see the outline.</p>';
+
+  // FAQ suggestions
+  const baseKw = document.getElementById('s-keyword').value.trim() || h1 || 'this topic';
+  const faqs = [
+    `What is ${baseKw}?`,
+    `How to ${baseKw.replace(/^(the |a |an )/i, '')}?`,
+    `Why does ${baseKw} matter?`,
+    `Best way to approach ${baseKw}`,
+    `Is ${baseKw} worth it in ${new Date().getFullYear()}?`,
+  ];
+  document.getElementById('faq-display').innerHTML = faqs.map(q => `<div class="faq-item">❓ ${q}</div>`).join('');
+
+  document.getElementById('structure-output').style.display = 'block';
+}
+
+// ─── CHECKLIST ────────────────────────────────────────────────────────────────
+const CHECKLIST_DATA = [
+  { group: 'On-Page', items: [
+    { name: 'Target keyword in title tag', tip: 'Place the primary keyword at the beginning of the title tag for maximum weight.' },
+    { name: 'Target keyword in H1', tip: 'Your H1 and title tag can match, but the H1 should feel natural for readers.' },
+    { name: 'Keyword appears in first 100 words', tip: 'Early keyword placement confirms relevance to crawlers.' },
+    { name: 'Meta description written (140–160 chars)', tip: 'Include your keyword and a compelling CTA to improve click-through rate.' },
+    { name: 'Title tag is 50–60 characters', tip: 'Longer titles get cut off in SERPs — stay under 60 characters.' },
+    { name: 'URL is short and keyword-rich', tip: 'Use hyphens, lowercase, and include the main keyword. Remove stop words.' },
+  ]},
+  { group: 'Technical', items: [
+    { name: 'Page loads in under 3 seconds', tip: 'Use Google PageSpeed Insights to check — slow pages hurt rankings and UX.' },
+    { name: 'Page is mobile-friendly', tip: 'Test with Google Mobile-Friendly Test. Mobile-first indexing is now the standard.' },
+    { name: 'HTTPS is enabled', tip: 'Google confirmed HTTPS as a ranking signal. Secure your site with SSL.' },
+    { name: 'Canonical tag set correctly', tip: 'Prevents duplicate content issues. Points to the preferred version of the page.' },
+    { name: 'Structured data (Schema) added', tip: 'JSON-LD schema helps Google understand your content and enables rich snippets.' },
+    { name: 'XML sitemap includes this page', tip: 'Ensure your sitemap is submitted to Google Search Console.' },
+  ]},
+  { group: 'Content Quality', items: [
+    { name: 'Content is 1000+ words for main topics', tip: 'Longer content tends to rank higher, but focus on depth over padding.' },
+    { name: 'No duplicate content on the page', tip: 'Use Copyscape or Grammarly to check for unintentional duplication.' },
+    { name: 'Keyword density is 1–2%', tip: 'Avoid keyword stuffing — write naturally and use LSI keywords.' },
+    { name: 'Content includes images or media', tip: 'Visual content increases dwell time and breaks up dense text.' },
+    { name: 'All images have descriptive alt text', tip: 'Helps accessibility and allows images to rank in Google Image Search.' },
+    { name: 'Content answers the search intent', tip: 'Match informational, navigational, or transactional intent of the target keyword.' },
+  ]},
+  { group: 'Links', items: [
+    { name: 'At least 2–3 internal links added', tip: 'Link to relevant pages on your site to distribute authority and aid navigation.' },
+    { name: 'External links open in new tab', tip: 'Prevents users from leaving your site accidentally — add target="_blank".' },
+    { name: 'No broken links on the page', tip: 'Use a tool like Screaming Frog or Ahrefs Site Audit to find dead links.' },
+    { name: 'External links use rel="nofollow" if paid', tip: 'Paid or sponsored links must use nofollow/sponsored to comply with Google guidelines.' },
+    { name: 'Target page is linked from high-authority pages', tip: 'Internal links from popular pages pass more authority to new content.' },
+    { name: 'Anchor text is descriptive (not "click here")', tip: 'Use keyword-rich, descriptive anchor text for both internal and external links.' },
+  ]},
+  { group: 'User Experience', items: [
+    { name: 'Content has a clear table of contents', tip: 'TOC links improve navigation and can appear as sitelinks in search results.' },
+    { name: 'Sentences average under 20 words', tip: 'Short sentences are easier to read on mobile and improve engagement.' },
+    { name: 'Paragraphs are 2–4 sentences max', tip: 'White space makes content scannable — break up dense walls of text.' },
+    { name: 'No excessive pop-ups or interstitials', tip: 'Google penalizes intrusive interstitials that hide content, especially on mobile.' },
+    { name: 'CTA is clear and above the fold', tip: 'Primary call-to-action should be visible without scrolling for maximum conversion.' },
+    { name: 'Reading level is appropriate for audience', tip: 'Use tools like Hemingway App. General audiences read at a Grade 8 level.' },
+  ]},
+];
+
+const STORE_CL = 'seo77_cl_';
+
+function renderChecklist() {
+  const container = document.getElementById('checklist-groups');
+  container.innerHTML = CHECKLIST_DATA.map((group, gi) => {
+    const items = group.items.map((item, ii) => {
+      const key = STORE_CL + gi + '_' + ii;
+      const checked = localStorage.getItem(key) === '1';
+      return `<div class="cl-item">
+        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleCl(${gi},${ii},this.checked)">
+        <div class="cl-item-body">
+          <div class="cl-item-name">${item.name}</div>
+          <div class="cl-item-tip">${item.tip}</div>
+        </div>
+      </div>`;
+    }).join('');
+    const done = group.items.filter((_, ii) => localStorage.getItem(STORE_CL + gi + '_' + ii) === '1').length;
+    const pct = Math.round(done / group.items.length * 100);
+    return `<div class="cl-group card">
+      <div class="cl-group-title">
+        <span>${group.group}</span>
+        <span style="color:${pct === 100 ? 'var(--green)' : 'var(--muted)'}">${done}/${group.items.length}</span>
+      </div>
+      <div class="progress-bar" style="margin-bottom:12px">
+        <div class="progress-fill" style="width:${pct}%; background:${pct === 100 ? 'var(--green)' : 'var(--accent)'}"></div>
+      </div>
+      ${items}
+    </div>`;
+  }).join('');
+  updateOverallProgress();
+}
+
+function toggleCl(gi, ii, val) {
+  localStorage.setItem(STORE_CL + gi + '_' + ii, val ? '1' : '0');
+  // Re-render progress bars without full rebuild
+  const done = CHECKLIST_DATA[gi].items.filter((_, i2) => localStorage.getItem(STORE_CL + gi + '_' + i2) === '1').length;
+  updateOverallProgress();
+  renderChecklist();
+}
+
+function updateOverallProgress() {
+  let total = 0, done = 0;
+  CHECKLIST_DATA.forEach((g, gi) => {
+    g.items.forEach((_, ii) => {
+      total++;
+      if (localStorage.getItem(STORE_CL + gi + '_' + ii) === '1') done++;
+    });
+  });
+  const pct = Math.round(done / total * 100);
+  document.getElementById('cl-overall-text').textContent = `${done} / ${total} items complete`;
+  document.getElementById('cl-pct').textContent = pct + '%';
+  document.getElementById('cl-pct').style.color = pct === 100 ? 'var(--green)' : pct >= 50 ? 'var(--accent)' : 'var(--amber)';
+  document.getElementById('cl-ring').style.borderColor = pct === 100 ? 'var(--green)' : pct >= 50 ? 'var(--accent)' : 'var(--amber)';
+  document.getElementById('cl-overall-bar').style.width = pct + '%';
+  document.getElementById('cl-overall-bar').style.background = pct === 100 ? 'var(--green)' : 'var(--accent)';
+}
+
+function resetChecklist() {
+  if (!confirm('Reset all checklist items?')) return;
+  CHECKLIST_DATA.forEach((g, gi) => { g.items.forEach((_, ii) => localStorage.removeItem(STORE_CL + gi + '_' + ii)); });
+  renderChecklist();
+  showToast('Checklist reset');
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+// Add initial H2 rows for structure tab
+(function initStructure() {
+  addH2(); addH2(); addH2();
+})();
+updateOverallProgress();
+</script>
+</body>
+</html>
