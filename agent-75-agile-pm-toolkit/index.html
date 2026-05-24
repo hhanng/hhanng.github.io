@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent #75 — Agile PM Toolkit</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--orange:#fb923c;
+    --text:#fff;--muted:#94a3b8;--border:#334155;--green:#34d399;--red:#f87171;--purple:#a78bfa;
+  }
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+  header{background:linear-gradient(135deg,#1e293b,#0f172a);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;gap:12px}
+  header .logo{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+  header h1{font-size:18px;font-weight:700}
+  header span{font-size:12px;color:var(--muted);display:block;margin-top:2px}
+  .tabs{display:flex;background:#0a1120;border-bottom:1px solid var(--border);overflow-x:auto}
+  .tab{padding:14px 20px;font-size:13px;font-weight:600;letter-spacing:.05em;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;transition:.2s}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab:hover:not(.active){color:var(--text)}
+  .panel{display:none;padding:20px;max-width:1100px;margin:0 auto}
+  .panel.active{display:block}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+  input,select,textarea{width:100%;background:#0a1120;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;outline:none;transition:.2s;font-family:inherit}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.15)}
+  select option{background:#0f172a}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.2s}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#0284c7);color:#0f172a}
+  .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+  .btn-secondary{background:var(--card);border:1px solid var(--border);color:var(--text)}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-danger{background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);color:var(--red)}
+  .btn-sm{padding:5px 10px;font-size:12px}
+  .btn-orange{background:linear-gradient(135deg,var(--orange),#ea580c);color:#fff}
+
+  /* ══ BOARD ══ */
+  .board{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;min-height:500px}
+  @media(max-width:800px){.board{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:500px){.board{grid-template-columns:1fr}}
+  .column{background:#0a1120;border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;flex-direction:column;min-height:400px}
+  .col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  .col-title{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .col-title.backlog{color:#94a3b8}
+  .col-title.todo{color:var(--accent)}
+  .col-title.inprog{color:var(--orange)}
+  .col-title.done{color:var(--green)}
+  .col-pts{font-size:11px;font-weight:700;background:#1e293b;padding:2px 8px;border-radius:12px}
+  .tickets{flex:1;display:flex;flex-direction:column;gap:8px;min-height:60px}
+  .ticket{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:grab;transition:.2s;position:relative}
+  .ticket:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .ticket.blocker{border-color:var(--orange);background:#1c1008}
+  .ticket.dragging{opacity:.5;cursor:grabbing}
+  .ticket-title{font-size:13px;font-weight:600;margin-bottom:6px}
+  .ticket-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .pts-badge{font-size:11px;font-weight:700;background:#0f172a;border:1px solid var(--border);padding:2px 7px;border-radius:10px;color:var(--accent)}
+  .pri-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+  .pri-low{background:#14532d;color:#4ade80}
+  .pri-med{background:#713f12;color:#fbbf24}
+  .pri-high{background:#7f1d1d;color:#f87171}
+  .pri-blocker{background:var(--orange);color:#fff}
+  .assignee{font-size:11px;color:var(--muted);margin-left:auto}
+  .ticket-del{position:absolute;top:6px;right:6px;opacity:0;font-size:14px;cursor:pointer;color:var(--red);transition:.2s;background:none;border:none;padding:2px 4px}
+  .ticket:hover .ticket-del{opacity:.7}
+  .ticket-del:hover{opacity:1}
+  .drop-zone{border:2px dashed var(--border);border-radius:8px;height:60px;display:none;align-items:center;justify-content:center;font-size:12px;color:var(--muted);margin-top:auto}
+  .drop-zone.active{display:flex;border-color:var(--accent);color:var(--accent)}
+  .add-ticket-form{background:#0a1120;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px}
+  .form-row{display:flex;gap:8px;margin-bottom:8px}
+  .form-row input,.form-row select{flex:1;min-width:0}
+
+  /* ══ SPRINTS ══ */
+  .sprint-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+  .sprint-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .sprint-name{font-size:16px;font-weight:700}
+  .sprint-goal{font-size:13px;color:var(--muted);margin-bottom:10px;font-style:italic}
+  .sprint-meta{display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+  .sprint-meta-item{font-size:12px;color:var(--muted)}
+  .sprint-meta-item strong{color:var(--text)}
+  .progress-bar{height:8px;background:#0a1120;border-radius:4px;overflow:hidden;margin-bottom:8px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:4px;transition:.3s}
+  .sprint-tickets{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .sprint-ticket-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#0a1120;border-radius:8px;font-size:13px}
+  .burndown-table{width:100%;border-collapse:collapse;margin-top:10px}
+  .burndown-table th,.burndown-table td{text-align:left;padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border)}
+  .burndown-table th{color:var(--muted);font-weight:600}
+  .days-badge{background:#0a1120;border:1px solid var(--border);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700;color:var(--accent)}
+
+  /* ══ RETRO ══ */
+  .retro-board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:700px){.retro-board{grid-template-columns:1fr}}
+  .retro-col{background:#0a1120;border:1px solid var(--border);border-radius:12px;padding:12px}
+  .retro-col-header{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid}
+  .retro-col.went-well .retro-col-header{color:var(--green);border-color:var(--green)}
+  .retro-col.didnt .retro-col-header{color:var(--red);border-color:var(--red)}
+  .retro-col.actions .retro-col-header{color:var(--accent);border-color:var(--accent)}
+  .sticky{padding:10px;border-radius:8px;margin-bottom:8px;font-size:13px;line-height:1.4;position:relative}
+  .sticky.green{background:#14532d;color:#dcfce7}
+  .sticky.red{background:#450a0a;color:#fee2e2}
+  .sticky.blue{background:#0c4a6e;color:#e0f2fe}
+  .sticky-del{position:absolute;top:6px;right:6px;font-size:14px;cursor:pointer;opacity:.5;background:none;border:none;color:inherit;padding:0}
+  .sticky-del:hover{opacity:1}
+  .retro-input-row{display:flex;gap:6px;margin-top:8px}
+  .retro-input-row input{flex:1;min-width:0}
+
+  /* ══ VELOCITY ══ */
+  .velocity-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+  @media(max-width:600px){.velocity-stats{grid-template-columns:1fr}}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+  .stat-num{font-size:32px;font-weight:800;color:var(--accent)}
+  .stat-label{font-size:12px;color:var(--muted);margin-top:4px}
+  .chart-container{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+  .bar-chart{display:flex;align-items:flex-end;gap:8px;height:160px;padding:0 4px}
+  .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+  .bar-inner{width:100%;display:flex;flex-direction:column;justify-content:flex-end;flex:1}
+  .bar{background:linear-gradient(180deg,var(--accent),var(--purple));border-radius:4px 4px 0 0;transition:.5s;min-height:4px}
+  .bar-label{font-size:10px;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px}
+  .bar-val{font-size:11px;font-weight:700;color:var(--accent)}
+  .x-axis{height:1px;background:var(--border);margin:0 4px}
+  .velocity-log{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+  .log-row{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .log-row:last-child{border-bottom:none}
+  .forecast-box{background:linear-gradient(135deg,rgba(56,189,248,.1),rgba(167,139,250,.1));border:1px solid rgba(56,189,248,.3);border-radius:10px;padding:16px;text-align:center;margin-top:16px}
+  .forecast-num{font-size:40px;font-weight:800;color:var(--accent)}
+  .forecast-label{font-size:13px;color:var(--muted);margin-top:4px}
+
+  /* ══ misc ══ */
+  .section-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .row-between{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .mt-8{margin-top:8px}
+  .mt-12{margin-top:12px}
+  .mt-16{margin-top:16px}
+  .text-muted{color:var(--muted);font-size:12px}
+  .empty{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+  .footer{text-align:center;padding:24px;font-size:12px;color:var(--muted)}
+  .footer a{color:var(--accent);text-decoration:none}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;width:90%;max-width:420px}
+  .modal h3{font-size:16px;font-weight:700;margin-bottom:16px}
+  .modal-row{margin-bottom:12px}
+  .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🏃</div>
+  <div>
+    <h1>Agile PM Toolkit</h1>
+    <span>Agent #75 · 100 AI Agents Challenge</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('board')">BOARD</div>
+  <div class="tab" onclick="switchTab('sprints')">SPRINTS</div>
+  <div class="tab" onclick="switchTab('retro')">RETRO</div>
+  <div class="tab" onclick="switchTab('velocity')">VELOCITY</div>
+</div>
+
+<!-- ═══════════════════════════════ BOARD ═══════════════════════════════ -->
+<div id="panel-board" class="panel active">
+  <div class="card" style="margin-bottom:16px">
+    <div class="section-title" style="margin-bottom:8px">Add Ticket</div>
+    <div class="form-row">
+      <input type="text" id="new-title" placeholder="Ticket title…">
+      <select id="new-pts" style="max-width:90px">
+        <option value="1">1 pt</option><option value="2">2 pts</option><option value="3" selected>3 pts</option>
+        <option value="5">5 pts</option><option value="8">8 pts</option><option value="13">13 pts</option>
+      </select>
+      <select id="new-pri" style="max-width:110px">
+        <option value="Low">Low</option><option value="Med" selected>Med</option>
+        <option value="High">High</option><option value="Blocker">Blocker</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <input type="text" id="new-assignee" placeholder="Assignee (optional)">
+      <button class="btn btn-primary" onclick="addTicket()">+ Add Ticket</button>
+    </div>
+  </div>
+
+  <div class="board">
+    <div class="column" id="col-backlog" ondragover="allowDrop(event)" ondrop="dropTicket(event,'backlog')">
+      <div class="col-header">
+        <span class="col-title backlog">Backlog</span>
+        <span class="col-pts" id="pts-backlog">0 pts</span>
+      </div>
+      <div class="tickets" id="tickets-backlog"></div>
+      <div class="drop-zone" id="dz-backlog">Drop here</div>
+    </div>
+    <div class="column" id="col-todo" ondragover="allowDrop(event)" ondrop="dropTicket(event,'todo')">
+      <div class="col-header">
+        <span class="col-title todo">To Do</span>
+        <span class="col-pts" id="pts-todo">0 pts</span>
+      </div>
+      <div class="tickets" id="tickets-todo"></div>
+      <div class="drop-zone" id="dz-todo">Drop here</div>
+    </div>
+    <div class="column" id="col-inprog" ondragover="allowDrop(event)" ondrop="dropTicket(event,'inprog')">
+      <div class="col-header">
+        <span class="col-title inprog">In Progress</span>
+        <span class="col-pts" id="pts-inprog">0 pts</span>
+      </div>
+      <div class="tickets" id="tickets-inprog"></div>
+      <div class="drop-zone" id="dz-inprog">Drop here</div>
+    </div>
+    <div class="column" id="col-done" ondragover="allowDrop(event)" ondrop="dropTicket(event,'done')">
+      <div class="col-header">
+        <span class="col-title done">Done</span>
+        <span class="col-pts" id="pts-done">0 pts</span>
+      </div>
+      <div class="tickets" id="tickets-done"></div>
+      <div class="drop-zone" id="dz-done">Drop here</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ SPRINTS ═══════════════════════════════ -->
+<div id="panel-sprints" class="panel">
+  <div class="row-between" style="margin-bottom:16px">
+    <div>
+      <h2 style="font-size:18px;font-weight:700">Sprints</h2>
+      <p class="text-muted mt-8">Plan, track, and review your sprints.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openNewSprintModal()">+ New Sprint</button>
+  </div>
+  <div id="sprints-list"></div>
+</div>
+
+<!-- ═══════════════════════════════ RETRO ═══════════════════════════════ -->
+<div id="panel-retro" class="panel">
+  <div class="row-between" style="margin-bottom:16px">
+    <div>
+      <h2 style="font-size:18px;font-weight:700">Sprint Retrospective</h2>
+      <p class="text-muted mt-8">Reflect, learn, improve.</p>
+    </div>
+    <div class="row">
+      <select id="retro-sprint-select" onchange="switchRetro()" style="width:auto">
+        <option value="">-- Select Sprint --</option>
+      </select>
+      <button class="btn btn-primary" onclick="newRetroSprint()">+ New Retro</button>
+    </div>
+  </div>
+  <div id="retro-board-area">
+    <div class="empty">Select a sprint or create a new retro to begin.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ VELOCITY ═══════════════════════════════ -->
+<div id="panel-velocity" class="panel">
+  <div class="row-between" style="margin-bottom:16px">
+    <div>
+      <h2 style="font-size:18px;font-weight:700">Velocity Tracker</h2>
+      <p class="text-muted mt-8">Log completed story points per sprint and track trends.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openLogModal()">+ Log Sprint</button>
+  </div>
+  <div class="velocity-stats">
+    <div class="stat-card"><div class="stat-num" id="vel-avg">—</div><div class="stat-label">Avg Velocity</div></div>
+    <div class="stat-card"><div class="stat-num" id="vel-high">—</div><div class="stat-label">Highest Sprint</div></div>
+    <div class="stat-card"><div class="stat-num" id="vel-low">—</div><div class="stat-label">Lowest Sprint</div></div>
+  </div>
+  <div class="chart-container">
+    <div class="section-title" style="margin-bottom:12px">Last 8 Sprints</div>
+    <div class="bar-chart" id="vel-chart"></div>
+    <div class="x-axis"></div>
+  </div>
+  <div class="velocity-log card">
+    <div class="section-title" style="margin-bottom:8px">Sprint History</div>
+    <div id="vel-log-list"></div>
+  </div>
+  <div class="forecast-box">
+    <div class="forecast-num" id="vel-forecast">—</div>
+    <div class="forecast-label" id="vel-forecast-label">Log at least one sprint to see your velocity forecast</div>
+  </div>
+</div>
+
+<!-- Sprint Modal -->
+<div class="modal-overlay" id="sprint-modal">
+  <div class="modal">
+    <h3>New Sprint</h3>
+    <div class="modal-row"><label>Sprint Name</label><input type="text" id="sprint-name-input" placeholder="Sprint 1 — Auth & Onboarding"></div>
+    <div class="modal-row"><label>Goal</label><input type="text" id="sprint-goal-input" placeholder="Ship user login and signup flow"></div>
+    <div class="form-row">
+      <div class="modal-row" style="flex:1"><label>Start Date</label><input type="date" id="sprint-start-input"></div>
+      <div class="modal-row" style="flex:1"><label>End Date</label><input type="date" id="sprint-end-input"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('sprint-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createSprint()">Create Sprint</button>
+    </div>
+  </div>
+</div>
+
+<!-- Velocity Log Modal -->
+<div class="modal-overlay" id="vel-modal">
+  <div class="modal">
+    <h3>Log Sprint Velocity</h3>
+    <div class="modal-row"><label>Sprint Name</label><input type="text" id="vel-sprint-name" placeholder="Sprint 1"></div>
+    <div class="modal-row"><label>Completed Story Points</label><input type="number" id="vel-pts-input" placeholder="32" min="0"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('vel-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="logVelocity()">Log</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Agent #75 · <a href="https://hhanng.github.io" target="_blank">100 AI Agents Challenge</a> · All data stays in your browser
+</div>
+
+<script>
+// ══════════════ STORAGE HELPERS ══════════════
+const S={
+  get:(k,d)=>{try{return JSON.parse(localStorage.getItem('agile75_'+k))||d}catch{return d}},
+  set:(k,v)=>localStorage.setItem('agile75_'+k,JSON.stringify(v))
+};
+
+// ══════════════ TABS ══════════════
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['board','sprints','retro','velocity'][i]===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='velocity')renderVelocity();
+  if(name==='sprints')renderSprints();
+  if(name==='retro')renderRetroSelect();
+}
+
+// ══════════════ BOARD ══════════════
+let tickets=S.get('tickets',[]);
+let draggingId=null;
+const COLS=['backlog','todo','inprog','done'];
+
+function saveTickets(){S.set('tickets',tickets)}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+
+function addTicket(){
+  const title=document.getElementById('new-title').value.trim();
+  if(!title){alert('Enter a ticket title.');return;}
+  tickets.push({
+    id:genId(),
+    title,
+    pts:parseInt(document.getElementById('new-pts').value),
+    pri:document.getElementById('new-pri').value,
+    assignee:document.getElementById('new-assignee').value.trim(),
+    col:'backlog'
+  });
+  document.getElementById('new-title').value='';
+  document.getElementById('new-assignee').value='';
+  saveTickets();
+  renderBoard();
+}
+
+function deleteTicket(id){
+  tickets=tickets.filter(t=>t.id!==id);
+  saveTickets();
+  renderBoard();
+}
+
+function renderBoard(){
+  COLS.forEach(col=>{
+    const colTickets=tickets.filter(t=>t.col===col);
+    const pts=colTickets.reduce((s,t)=>s+t.pts,0);
+    document.getElementById('pts-'+col).textContent=pts+' pts';
+    const container=document.getElementById('tickets-'+col);
+    container.innerHTML=colTickets.map(t=>`
+      <div class="ticket${t.pri==='Blocker'?' blocker':''}" draggable="true"
+        ondragstart="startDrag(event,'${t.id}')" ondragend="endDrag()">
+        <button class="ticket-del" onclick="deleteTicket('${t.id}')" title="Delete">×</button>
+        <div class="ticket-title">${escHtml(t.title)}</div>
+        <div class="ticket-meta">
+          <span class="pts-badge">${t.pts}pt</span>
+          <span class="pri-badge pri-${t.pri.toLowerCase()}">${t.pri}</span>
+          ${t.assignee?`<span class="assignee">${escHtml(t.assignee)}</span>`:''}
+        </div>
+      </div>
+    `).join('');
+  });
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function startDrag(e,id){
+  draggingId=id;
+  setTimeout(()=>{const el=e.target;if(el)el.classList.add('dragging')},0);
+  COLS.forEach(c=>{document.getElementById('dz-'+c).classList.add('active')});
+}
+function endDrag(){
+  draggingId=null;
+  document.querySelectorAll('.ticket').forEach(t=>t.classList.remove('dragging'));
+  COLS.forEach(c=>{document.getElementById('dz-'+c).classList.remove('active')});
+}
+function allowDrop(e){e.preventDefault()}
+function dropTicket(e,col){
+  e.preventDefault();
+  if(!draggingId)return;
+  const t=tickets.find(t=>t.id===draggingId);
+  if(t)t.col=col;
+  saveTickets();
+  renderBoard();
+}
+
+// ══════════════ SPRINTS ══════════════
+let sprints=S.get('sprints',[]);
+function saveSprints(){S.set('sprints',sprints)}
+
+function openNewSprintModal(){
+  document.getElementById('sprint-name-input').value='';
+  document.getElementById('sprint-goal-input').value='';
+  document.getElementById('sprint-start-input').value=new Date().toISOString().slice(0,10);
+  const end=new Date();end.setDate(end.getDate()+14);
+  document.getElementById('sprint-end-input').value=end.toISOString().slice(0,10);
+  document.getElementById('sprint-modal').classList.add('open');
+}
+
+function createSprint(){
+  const name=document.getElementById('sprint-name-input').value.trim();
+  if(!name){alert('Enter a sprint name.');return;}
+  sprints.push({
+    id:genId(),
+    name,
+    goal:document.getElementById('sprint-goal-input').value.trim(),
+    start:document.getElementById('sprint-start-input').value,
+    end:document.getElementById('sprint-end-input').value,
+    ticketIds:[],
+    burndown:[]
+  });
+  saveSprints();
+  closeModal('sprint-modal');
+  renderSprints();
+  renderRetroSelect();
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+
+function daysRemaining(endDate){
+  if(!endDate)return'—';
+  const d=Math.ceil((new Date(endDate)-new Date())/(1000*60*60*24));
+  return d<0?'Ended':d===0?'Today':d+' days';
+}
+
+function sprintProgress(sprint){
+  const ids=sprint.ticketIds||[];
+  const total=ids.reduce((s,id)=>{const t=tickets.find(t=>t.id===id);return s+(t?t.pts:0)},0);
+  const done=ids.reduce((s,id)=>{const t=tickets.find(t=>t.id===id&&t.col==='done');return s+(t?t.pts:0)},0);
+  return{total,done,pct:total?Math.round(done/total*100):0};
+}
+
+function toggleSprintTicket(sprintId,ticketId){
+  const sp=sprints.find(s=>s.id===sprintId);
+  if(!sp)return;
+  if(sp.ticketIds.includes(ticketId))sp.ticketIds=sp.ticketIds.filter(id=>id!==ticketId);
+  else sp.ticketIds.push(ticketId);
+  saveSprints();
+  renderSprints();
+}
+
+function addBurndownRow(sprintId){
+  const sp=sprints.find(s=>s.id===sprintId);
+  if(!sp)return;
+  const dayInput=document.getElementById('bd-day-'+sprintId);
+  const ptsInput=document.getElementById('bd-pts-'+sprintId);
+  const day=dayInput.value.trim();
+  const pts=parseInt(ptsInput.value);
+  if(!day||isNaN(pts))return;
+  sp.burndown.push({day,pts});
+  saveSprints();
+  renderSprints();
+}
+
+function renderSprints(){
+  const c=document.getElementById('sprints-list');
+  if(!sprints.length){c.innerHTML=`<div class="empty">No sprints yet. Create your first sprint to get started.</div>`;return;}
+  const backlogTickets=tickets.filter(t=>t.col==='backlog');
+  c.innerHTML=sprints.map(sp=>{
+    const prog=sprintProgress(sp);
+    return`<div class="sprint-card">
+      <div class="sprint-header">
+        <div>
+          <div class="sprint-name">${escHtml(sp.name)}</div>
+          ${sp.goal?`<div class="sprint-goal">"${escHtml(sp.goal)}"</div>`:''}
+        </div>
+        <span class="days-badge">${daysRemaining(sp.end)}</span>
+      </div>
+      <div class="sprint-meta">
+        <div class="sprint-meta-item">${sp.start?'Start: <strong>'+sp.start+'</strong>':''}</div>
+        <div class="sprint-meta-item">${sp.end?'End: <strong>'+sp.end+'</strong>':''}</div>
+        <div class="sprint-meta-item">Points: <strong>${prog.done} / ${prog.total}</strong></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${prog.pct}%"></div></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${prog.pct}% complete</div>
+
+      <details>
+        <summary style="cursor:pointer;font-size:13px;color:var(--accent);font-weight:600;margin-bottom:8px">Tickets in Sprint (${sp.ticketIds.length})</summary>
+        <div class="sprint-tickets">
+          ${sp.ticketIds.map(id=>{
+            const t=tickets.find(t=>t.id===id);
+            return t?`<div class="sprint-ticket-row">
+              <span class="pts-badge">${t.pts}pt</span>
+              <span style="flex:1">${escHtml(t.title)}</span>
+              <span class="pri-badge pri-${t.pri.toLowerCase()}">${t.pri}</span>
+              <span style="color:${t.col==='done'?'var(--green)':'var(--muted)';};font-size:11px">${t.col}</span>
+              <button class="btn btn-sm btn-danger" onclick="toggleSprintTicket('${sp.id}','${id}')">Remove</button>
+            </div>`:''}).join('')}
+        </div>
+        <div style="margin-top:8px">
+          <div class="section-title" style="margin-bottom:6px">Add from Backlog</div>
+          ${backlogTickets.filter(t=>!sp.ticketIds.includes(t.id)).map(t=>`
+            <div class="sprint-ticket-row">
+              <span class="pts-badge">${t.pts}pt</span>
+              <span style="flex:1">${escHtml(t.title)}</span>
+              <button class="btn btn-sm btn-primary" onclick="toggleSprintTicket('${sp.id}','${t.id}')">Add</button>
+            </div>
+          `).join('')||'<div class="empty" style="padding:8px">No backlog tickets available.</div>'}
+        </div>
+      </details>
+
+      <details style="margin-top:8px">
+        <summary style="cursor:pointer;font-size:13px;color:var(--orange);font-weight:600;margin-bottom:8px">Burndown (${sp.burndown.length} entries)</summary>
+        <table class="burndown-table">
+          <thead><tr><th>Day</th><th>Points Remaining</th></tr></thead>
+          <tbody>${sp.burndown.map(r=>`<tr><td>${escHtml(r.day)}</td><td>${r.pts}</td></tr>`).join('')}</tbody>
+        </table>
+        <div class="form-row mt-8">
+          <input type="text" id="bd-day-${sp.id}" placeholder="Day / Date">
+          <input type="number" id="bd-pts-${sp.id}" placeholder="Pts remaining" min="0" style="max-width:120px">
+          <button class="btn btn-secondary btn-sm" onclick="addBurndownRow('${sp.id}')">Add</button>
+        </div>
+      </details>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════ RETRO ══════════════
+let retros=S.get('retros',{});
+function saveRetros(){S.set('retros',retros)}
+
+function renderRetroSelect(){
+  const sel=document.getElementById('retro-sprint-select');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">-- Select Sprint --</option>'+sprints.map(s=>`<option value="${s.id}">${escHtml(s.name)}</option>`).join('');
+  if(cur)sel.value=cur;
+}
+
+function newRetroSprint(){
+  const name=prompt('Retro for sprint:');
+  if(!name)return;
+  const id=genId();
+  sprints.push({id,name,goal:'',start:'',end:'',ticketIds:[],burndown:[]});
+  saveSprints();
+  if(!retros[id])retros[id]={well:[],bad:[],actions:[]};
+  saveRetros();
+  renderRetroSelect();
+  document.getElementById('retro-sprint-select').value=id;
+  switchRetro();
+}
+
+function switchRetro(){
+  const id=document.getElementById('retro-sprint-select').value;
+  const area=document.getElementById('retro-board-area');
+  if(!id){area.innerHTML='<div class="empty">Select a sprint.</div>';return;}
+  if(!retros[id])retros[id]={well:[],bad:[],actions:[]};
+  renderRetroBoard(id);
+}
+
+function addSticky(sprintId,col){
+  const input=document.getElementById('retro-input-'+sprintId+'-'+col);
+  const text=input.value.trim();
+  if(!text)return;
+  retros[sprintId][col].push({id:genId(),text});
+  saveRetros();
+  renderRetroBoard(sprintId);
+  input.value='';
+}
+
+function deleteSticky(sprintId,col,stickyId){
+  retros[sprintId][col]=retros[sprintId][col].filter(s=>s.id!==stickyId);
+  saveRetros();
+  renderRetroBoard(sprintId);
+}
+
+function renderRetroBoard(id){
+  const r=retros[id]||{well:[],bad:[],actions:[]};
+  const cols=[
+    {key:'well',label:'What went well',cls:'went-well green',color:'green'},
+    {key:'bad',label:"What didn't",cls:'didnt red',color:'red'},
+    {key:'actions',label:'Action items',cls:'actions blue',color:'blue'}
+  ];
+  document.getElementById('retro-board-area').innerHTML=`
+    <div class="retro-board">
+      ${cols.map(c=>`
+        <div class="retro-col ${c.cls}">
+          <div class="retro-col-header">${c.label} (${(r[c.key]||[]).length})</div>
+          ${(r[c.key]||[]).map(s=>`
+            <div class="sticky ${c.color}">
+              ${escHtml(s.text)}
+              <button class="sticky-del" onclick="deleteSticky('${id}','${c.key}','${s.id}')">×</button>
+            </div>
+          `).join('')}
+          <div class="retro-input-row">
+            <input type="text" id="retro-input-${id}-${c.key}" placeholder="Add note…" onkeydown="if(event.key==='Enter')addSticky('${id}','${c.key}')">
+            <button class="btn btn-secondary btn-sm" onclick="addSticky('${id}','${c.key}')">+</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ══════════════ VELOCITY ══════════════
+let velLog=S.get('velocity',[]);
+function saveVel(){S.set('velocity',velLog)}
+
+function openLogModal(){
+  document.getElementById('vel-sprint-name').value='';
+  document.getElementById('vel-pts-input').value='';
+  document.getElementById('vel-modal').classList.add('open');
+}
+
+function logVelocity(){
+  const name=document.getElementById('vel-sprint-name').value.trim();
+  const pts=parseInt(document.getElementById('vel-pts-input').value);
+  if(!name||isNaN(pts)||pts<0){alert('Enter a sprint name and valid points.');return;}
+  velLog.push({id:genId(),name,pts,date:new Date().toISOString().slice(0,10)});
+  saveVel();
+  closeModal('vel-modal');
+  renderVelocity();
+}
+
+function deleteVelEntry(id){
+  velLog=velLog.filter(v=>v.id!==id);
+  saveVel();
+  renderVelocity();
+}
+
+function renderVelocity(){
+  const last8=velLog.slice(-8);
+  const pts=last8.map(v=>v.pts);
+  const avg=pts.length?Math.round(pts.reduce((a,b)=>a+b,0)/pts.length):0;
+  const high=pts.length?Math.max(...pts):0;
+  const low=pts.length?Math.min(...pts):0;
+  document.getElementById('vel-avg').textContent=avg||'—';
+  document.getElementById('vel-high').textContent=high||'—';
+  document.getElementById('vel-low').textContent=low||'—';
+
+  // Bar chart
+  const maxPts=Math.max(...pts,1);
+  document.getElementById('vel-chart').innerHTML=last8.length
+    ?last8.map(v=>`
+      <div class="bar-wrap">
+        <div class="bar-inner">
+          <div class="bar" style="height:${Math.max(Math.round(v.pts/maxPts*140),4)}px"></div>
+        </div>
+        <div class="bar-val">${v.pts}</div>
+        <div class="bar-label">${escHtml(v.name)}</div>
+      </div>
+    `).join('')
+    :`<div class="empty" style="width:100%">Log sprints to see chart</div>`;
+
+  // Log list
+  document.getElementById('vel-log-list').innerHTML=velLog.length
+    ?[...velLog].reverse().map(v=>`
+      <div class="log-row">
+        <span style="flex:1;font-weight:600">${escHtml(v.name)}</span>
+        <span class="pts-badge">${v.pts} pts</span>
+        <span class="text-muted">${v.date}</span>
+        <button class="btn btn-danger btn-sm" onclick="deleteVelEntry('${v.id}')">✕</button>
+      </div>
+    `).join('')
+    :`<div class="empty">No velocity logs yet.</div>`;
+
+  // Forecast
+  if(avg){
+    document.getElementById('vel-forecast').textContent=avg;
+    document.getElementById('vel-forecast-label').textContent=`Forecasted story points for next sprint (based on avg of last ${pts.length} sprint${pts.length>1?'s':''})`;
+  }else{
+    document.getElementById('vel-forecast').textContent='—';
+    document.getElementById('vel-forecast-label').textContent='Log at least one sprint to see your velocity forecast';
+  }
+}
+
+// ══════════════ INIT ══════════════
+renderBoard();
+renderSprints();
+renderRetroSelect();
+renderVelocity();
+
+// Seed data for first-time users
+if(!tickets.length&&!sprints.length){
+  tickets=[
+    {id:genId(),title:'Set up project repo and CI pipeline',pts:3,pri:'High',assignee:'Alex',col:'done'},
+    {id:genId(),title:'Design system tokens (colors, typography)',pts:5,pri:'Med',assignee:'Sam',col:'done'},
+    {id:genId(),title:'User auth — login & signup',pts:8,pri:'High',assignee:'Alex',col:'inprog'},
+    {id:genId(),title:'Onboarding flow — 3 steps',pts:5,pri:'Med',assignee:'Sam',col:'inprog'},
+    {id:genId(),title:'Dashboard skeleton',pts:3,pri:'Med',assignee:'',col:'todo'},
+    {id:genId(),title:'Write API docs',pts:2,pri:'Low',assignee:'',col:'todo'},
+    {id:genId(),title:'Integrate payment gateway',pts:13,pri:'High',assignee:'',col:'backlog'},
+    {id:genId(),title:'Push notifications',pts:5,pri:'Low',assignee:'',col:'backlog'},
+    {id:genId(),title:'Fix login redirect bug',pts:1,pri:'Blocker',assignee:'Alex',col:'inprog'},
+  ];
+  saveTickets();
+  renderBoard();
+}
+</script>
+</body>
+</html>
