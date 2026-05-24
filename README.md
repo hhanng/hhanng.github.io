@@ -14,10 +14,10 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-███████████████████████████████████████░░░░░░░░░░░  78 / 100
+████████████████████████████████████████░░░░░░░░░░  79 / 100
 ```
 
-**78 / 100 complete** — progress bar on the live site updates automatically 🎉
+**79 / 100 complete** — progress bar on the live site updates automatically 🎉
 
 &nbsp;
 
@@ -126,6 +126,7 @@ for founders, indie hackers, and anyone shipping something
 | [#72](https://hhanng.github.io/agent-72-mvp-scope-definer/) | MVP Scope Definer | scope verdict + MoSCoW prioritizer + one-page MVP canvas |
 | [#73](https://hhanng.github.io/agent-73-pitch-deck-studio/) | Pitch Deck Studio | 10-slide investor deck wizard with pro tips and markdown export |
 | [#74](https://hhanng.github.io/agent-74-app-store-optimization-suite/) | App Store Optimization Suite | ASO score analyzer, keyword string builder, iOS & Play preview, launch checklist |
+| [#75](https://hhanng.github.io/agent-75-agile-pm-toolkit/) | Agile PM Toolkit | drag-and-drop Kanban, sprint planner with burndown, retro board, velocity chart + forecast |
 
 &nbsp;
 
@@ -180,4 +181,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-24 · agent #74 App Store Optimization Suite live: https://hhanng.github.io/agent-74-app-store-optimization-suite/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-24 · agent #75 Agile PM Toolkit live: https://hhanng.github.io/agent-75-agile-pm-toolkit/</sub>
