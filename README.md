@@ -14,10 +14,10 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-███████████████████████████████████████░░░░░░░░░░░  77 / 100
+███████████████████████████████████████░░░░░░░░░░░  78 / 100
 ```
 
-**77 / 100 complete** — progress bar on the live site updates automatically 🎉
+**78 / 100 complete** — progress bar on the live site updates automatically 🎉
 
 &nbsp;
 
@@ -115,6 +115,20 @@ for when you need a break from studying lol
 | [#36](https://hhanng.github.io/agent-36-recipe-remix-bot/) | Recipe Remix Bot | remix any recipe — healthier, fusion, or budget-friendly |
 | [#37](https://hhanng.github.io/agent-37-this-day-in-history/) | This Day in History Bot | fascinating stories for any date + Vietnam connection mode |
 
+### 📱 product & startup tools
+for founders, indie hackers, and anyone shipping something
+
+| # | Agent | What it does |
+|---|-------|-------------|
+| [#69](https://hhanng.github.io/agent-69-saas-pricing-page-builder/) | SaaS Pricing Page Builder | design tiered pricing tables with toggle, feature grid, and copy |
+| [#70](https://hhanng.github.io/agent-70-tech-career-roadmap-planner/) | Tech Career Roadmap Planner | 8 career tracks with step-by-step skill checklists from beginner to senior |
+| [#71](https://hhanng.github.io/agent-71-landing-page-copywriter/) | Landing Page Copywriter | 3 headline variants, hero copy, features, testimonials, CTAs, and FAQs |
+| [#72](https://hhanng.github.io/agent-72-mvp-scope-definer/) | MVP Scope Definer | scope verdict + MoSCoW prioritizer + one-page MVP canvas |
+| [#73](https://hhanng.github.io/agent-73-pitch-deck-studio/) | Pitch Deck Studio | 10-slide investor deck wizard with pro tips and markdown export |
+| [#74](https://hhanng.github.io/agent-74-app-store-optimization-suite/) | App Store Optimization Suite | ASO score analyzer, keyword string builder, iOS & Play preview, launch checklist |
+
+&nbsp;
+
 ---
 
 ## 🎀 special projects — TTTT
@@ -166,4 +180,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-24 · agent #73 Pitch Deck Studio live: https://hhanng.github.io/agent-73-pitch-deck-studio/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-24 · agent #74 App Store Optimization Suite live: https://hhanng.github.io/agent-74-app-store-optimization-suite/</sub>
