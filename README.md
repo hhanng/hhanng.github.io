@@ -14,10 +14,10 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-███████████████████████████████████████████░░░░░░░  85 / 100
+████████████████████████████████████████████░░░░░░  86 / 100
 ```
 
-**85 / 100 complete** — progress bar on the live site updates automatically 🎉
+**86 / 100 complete** — progress bar on the live site updates automatically 🎉
 
 &nbsp;
 
@@ -133,6 +133,7 @@ for founders, indie hackers, and anyone shipping something
 | [#79](https://hhanng.github.io/agent-79-product-launch-war-room/) | Product Launch War Room | 30-item checklist with critical blockers, countdown timer, drag-and-drop timeline, 10-channel tracker, debrief logger |
 | [#84](https://hhanng.github.io/agent-84-coders-hiit-timer/) | Coder's HIIT Timer | Pomodoro-HIIT hybrid timer, Tabata & Pure HIIT modes, 10 desk-friendly routines, SVG ring countdown, session history with streak tracking |
 | [#85](https://hhanng.github.io/agent-85-pr-strength-tracker/) | PR & Strength Tracker | workout log with auto-PR detection, e1RM estimates, plateau detector, progress charts, 4-week Big 3 progression planner |
+| [#86](https://hhanng.github.io/agent-86-period-cycle-tracker/) | Period & Cycle Tracker | cycle calendar with period prediction, fertile window & phase tracker, 20-symptom log with phase patterns, bilingual EN/VI vocab, doctor visit script generator |
 
 &nbsp;
 
@@ -187,4 +188,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-25 · agent #85 PR & Strength Tracker live: https://hhanng.github.io/agent-85-pr-strength-tracker/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-25 · agent #86 Period & Cycle Tracker live: https://hhanng.github.io/agent-86-period-cycle-tracker/</sub>
