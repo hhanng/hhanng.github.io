@@ -14,10 +14,10 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-████████████████████████████████████████████░░░░░░  86 / 100
+█████████████████████████████████████████████░░░░░  87 / 100
 ```
 
-**86 / 100 complete** — progress bar on the live site updates automatically 🎉
+**87 / 100 complete** — progress bar on the live site updates automatically 🎉
 
 &nbsp;
 
@@ -134,6 +134,7 @@ for founders, indie hackers, and anyone shipping something
 | [#84](https://hhanng.github.io/agent-84-coders-hiit-timer/) | Coder's HIIT Timer | Pomodoro-HIIT hybrid timer, Tabata & Pure HIIT modes, 10 desk-friendly routines, SVG ring countdown, session history with streak tracking |
 | [#85](https://hhanng.github.io/agent-85-pr-strength-tracker/) | PR & Strength Tracker | workout log with auto-PR detection, e1RM estimates, plateau detector, progress charts, 4-week Big 3 progression planner |
 | [#86](https://hhanng.github.io/agent-86-period-cycle-tracker/) | Period & Cycle Tracker | cycle calendar with period prediction, fertile window & phase tracker, 20-symptom log with phase patterns, bilingual EN/VI vocab, doctor visit script generator |
+| [#87](https://hhanng.github.io/agent-87-skincare-routine-tracker/) | Skincare Routine Tracker | AM/PM routine builder with streaks, ingredient decoder (50 terms EN/VI), Vietnamese skin in America guide, 15 brand reviews, 30-day skin log |
 
 &nbsp;
 
@@ -188,4 +189,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-25 · agent #86 Period & Cycle Tracker live: https://hhanng.github.io/agent-86-period-cycle-tracker/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-25 · agent #87 Skincare Routine Tracker live: https://hhanng.github.io/agent-87-skincare-routine-tracker/</sub>
