@@ -14,10 +14,10 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-██████████████████████████████████████████░░░░░░░░  83 / 100
+██████████████████████████████████████████░░░░░░░░  84 / 100
 ```
 
-**83 / 100 complete** — progress bar on the live site updates automatically 🎉
+**84 / 100 complete** — progress bar on the live site updates automatically 🎉
 
 &nbsp;
 
@@ -131,6 +131,7 @@ for founders, indie hackers, and anyone shipping something
 | [#77](https://hhanng.github.io/agent-77-seo-content-optimizer/) | SEO Content Optimizer | content analyzer with SEO score, meta builder, intent classifier, heading validator, 30-item checklist |
 | [#78](https://hhanng.github.io/agent-78-brand-identity-builder/) | Brand Identity Builder | 12-archetype picker with tone auto-fill, voice sliders, color palette + WCAG contrast, 10 font pairings, markdown export |
 | [#79](https://hhanng.github.io/agent-79-product-launch-war-room/) | Product Launch War Room | 30-item checklist with critical blockers, countdown timer, drag-and-drop timeline, 10-channel tracker, debrief logger |
+| [#84](https://hhanng.github.io/agent-84-coders-hiit-timer/) | Coder's HIIT Timer | Pomodoro-HIIT hybrid timer, Tabata & Pure HIIT modes, 10 desk-friendly routines, SVG ring countdown, session history with streak tracking |
 
 &nbsp;
 
@@ -185,4 +186,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-25 · agent #79 Product Launch War Room live: https://hhanng.github.io/agent-79-product-launch-war-room/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-25 · agent #84 Coder's HIIT Timer live: https://hhanng.github.io/agent-84-coders-hiit-timer/</sub>
