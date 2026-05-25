@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand Identity Builder — Agent #78</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a0a2e;
+    --card: #2d1854;
+    --card2: #3d2266;
+    --purple: #c084fc;
+    --rose: #fb7185;
+    --text: #f8f8ff;
+    --muted: #a89bc4;
+    --border: #4a2d7a;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --input-bg: #1e0d3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Header */
+  header { background: linear-gradient(135deg, #2d1854 0%, #1a0a2e 100%); border-bottom: 1px solid var(--border); padding: 20px 32px; display: flex; align-items: center; gap: 16px; }
+  header .logo { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; }
+  header .logo span { color: var(--purple); }
+  header .badge { background: var(--purple); color: #1a0a2e; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; }
+  header .subtitle { color: var(--muted); font-size: 13px; margin-left: auto; }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); background: #1a0a2e; padding: 0 32px; gap: 4px; }
+  .tab { padding: 14px 22px; font-size: 13px; font-weight: 600; letter-spacing: 0.8px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); transition: all 0.2s; text-transform: uppercase; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+  /* Main */
+  main { max-width: 1100px; margin: 0 auto; padding: 32px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Sections */
+  .section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--purple); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Form */
+  .field { margin-bottom: 18px; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  input[type="text"], textarea, select {
+    width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; padding: 10px 14px;
+    transition: border-color 0.2s; outline: none;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus { border-color: var(--purple); }
+  textarea { resize: vertical; min-height: 80px; }
+  .counter { font-size: 11px; color: var(--muted); text-align: right; margin-top: 4px; }
+  .counter.warn { color: var(--rose); }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* Archetype Picker */
+  .archetype-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media(max-width: 800px) { .archetype-grid { grid-template-columns: repeat(2, 1fr); } }
+  .archetype-card { background: var(--input-bg); border: 2px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer; transition: all 0.2s; }
+  .archetype-card:hover { border-color: var(--purple); }
+  .archetype-card.selected { border-color: var(--purple); background: rgba(192,132,252,0.1); }
+  .archetype-card .arch-icon { font-size: 22px; margin-bottom: 6px; }
+  .archetype-card .arch-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .archetype-card .arch-brand { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .archetype-info { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 14px; display: none; }
+  .archetype-info.show { display: block; }
+  .archetype-info .ai-title { font-size: 14px; font-weight: 600; color: var(--purple); margin-bottom: 8px; }
+  .archetype-info .ai-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 10px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { background: rgba(192,132,252,0.15); color: var(--purple); font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+  .tag.rose { background: rgba(251,113,133,0.15); color: var(--rose); }
+
+  /* Values */
+  .value-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+  .value-row input { flex: 1; }
+  .value-row .val-desc { flex: 2; }
+  .btn-icon { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); cursor: pointer; padding: 8px 10px; font-size: 14px; transition: all 0.2s; }
+  .btn-icon:hover { border-color: var(--rose); color: var(--rose); }
+
+  /* Buttons */
+  .btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+  .btn-primary { background: var(--purple); color: #1a0a2e; }
+  .btn-primary:hover { background: #d8a4fd; }
+  .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-secondary:hover { border-color: var(--purple); color: var(--purple); }
+  .btn-rose { background: var(--rose); color: #1a0a2e; }
+
+  /* Sliders */
+  .slider-row { margin-bottom: 24px; }
+  .slider-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+  .slider-labels .left { color: var(--rose); }
+  .slider-labels .right { color: var(--purple); }
+  input[type="range"] { width: 100%; appearance: none; height: 4px; border-radius: 2px; background: var(--border); outline: none; cursor: pointer; }
+  input[type="range"]::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--purple); cursor: pointer; border: 2px solid #1a0a2e; }
+  .slider-val { text-align: center; font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* Voice Summary */
+  .voice-summary { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .voice-summary p { font-size: 14px; color: var(--text); line-height: 1.7; }
+
+  /* Word Lists */
+  .word-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .word-list { background: var(--input-bg); border-radius: 10px; padding: 16px; }
+  .word-list h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .word-list h4.green { color: var(--green); }
+  .word-list h4.red { color: var(--rose); }
+  .word-pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; margin: 3px; }
+  .word-pill.yes { background: rgba(74,222,128,0.15); color: var(--green); }
+  .word-pill.no { background: rgba(251,113,133,0.15); color: var(--rose); }
+
+  /* Before/After */
+  .ba-pair { background: var(--input-bg); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+  .ba-pair .ba-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .ba-pair .ba-label.good { color: var(--green); }
+  .ba-pair .ba-label.bad { color: var(--rose); }
+  .ba-pair p { font-size: 13px; line-height: 1.6; color: var(--text); }
+
+  /* Color Palette */
+  .color-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  input[type="color"] { width: 44px; height: 44px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; background: none; padding: 2px; }
+  .swatch-group { display: flex; gap: 6px; }
+  .swatch { width: 36px; height: 36px; border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+  .swatch:hover::after { content: attr(data-hex); position: absolute; bottom: 42px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; font-size: 10px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; pointer-events: none; }
+  .contrast-badge { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+  .contrast-badge.pass { background: rgba(74,222,128,0.15); color: var(--green); }
+  .contrast-badge.fail { background: rgba(251,113,133,0.15); color: var(--rose); }
+
+  /* Font Pairings */
+  .font-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media(max-width: 700px) { .font-grid { grid-template-columns: 1fr; } }
+  .font-card { background: var(--input-bg); border: 2px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; }
+  .font-card:hover { border-color: var(--purple); }
+  .font-card.selected { border-color: var(--purple); background: rgba(192,132,252,0.08); }
+  .font-card .pair-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .font-card .pair-heading { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .font-card .pair-body { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .font-card .pair-tag { font-size: 11px; margin-top: 10px; }
+
+  /* Logo Concepts */
+  .logo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media(max-width: 700px) { .logo-grid { grid-template-columns: 1fr; } }
+  .logo-card { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .logo-card .lg-icon { font-size: 28px; margin-bottom: 10px; }
+  .logo-card .lg-type { font-size: 13px; font-weight: 700; color: var(--purple); margin-bottom: 6px; }
+  .logo-card .lg-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* Export */
+  .export-card { background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .export-card h2 { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: var(--purple); margin-bottom: 4px; }
+  .export-card .tagline-ex { font-size: 15px; color: var(--muted); font-style: italic; margin-bottom: 20px; }
+  .ex-section { margin-bottom: 16px; }
+  .ex-section h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--purple); margin-bottom: 6px; }
+  .ex-section p { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .ex-colors { display: flex; gap: 8px; }
+  .ex-swatch { width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
+  .ex-font-preview { font-size: 15px; font-weight: 700; }
+  .copy-area { width: 100%; height: 280px; background: #0d0620; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-family: monospace; font-size: 12px; padding: 14px; resize: none; margin-top: 14px; }
+
+  /* Utility */
+  .flex-row { display: flex; gap: 12px; align-items: center; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .saved-note { font-size: 12px; color: var(--green); display: none; }
+  .saved-note.show { display: inline; }
+
+  /* Print */
+  @media print {
+    header, .tabs, .btn { display: none !important; }
+    body { background: white; color: black; }
+    .section { border: 1px solid #ccc; background: white; }
+    .export-card { background: white; border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>✦</span> Brand Identity Builder</div>
+  <div class="badge">#78</div>
+  <div class="subtitle">100 AI Agents Challenge</div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('identity')">Identity</div>
+  <div class="tab" onclick="switchTab('voice')">Voice</div>
+  <div class="tab" onclick="switchTab('visuals')">Visuals</div>
+  <div class="tab" onclick="switchTab('export')">Export</div>
+</div>
+
+<main>
+
+<!-- ═══════════════════════════════════ IDENTITY ═══════════════════════════════════ -->
+<div class="panel active" id="panel-identity">
+
+  <div class="section">
+    <div class="section-title">Brand Foundation</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Brand Name</label>
+        <input type="text" id="brandName" placeholder="e.g. Luminary" oninput="save('brandName',this.value)">
+      </div>
+      <div class="field">
+        <label>Tagline <span id="taglineCount" class="counter">0 / 50</span></label>
+        <input type="text" id="brandTagline" placeholder="e.g. Clarity for complex decisions" maxlength="50" oninput="updateTagline(this)">
+      </div>
+    </div>
+    <div class="field">
+      <label>Mission Statement — What you do, for whom, and why it matters</label>
+      <textarea id="brandMission" rows="3" placeholder="We help [audience] achieve [outcome] by [method], because [belief]." oninput="save('brandMission',this.value)"></textarea>
+    </div>
+    <div class="field">
+      <label>Vision Statement — Where you're going in 5 years</label>
+      <textarea id="brandVision" rows="3" placeholder="By 2030, we will be..." oninput="save('brandVision',this.value)"></textarea>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Core Values</div>
+    <div id="valuesContainer"></div>
+    <button class="btn btn-secondary mt-12" onclick="addValue()" id="addValueBtn">+ Add Value</button>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px;">Maximum 5 values</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Brand Archetype</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Your archetype defines your brand's personality and shapes everything from tone of voice to visual identity. Select the one that resonates most.</p>
+    <div class="archetype-grid" id="archetypeGrid"></div>
+    <div class="archetype-info" id="archetypeInfo"></div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════ VOICE ═══════════════════════════════════ -->
+<div class="panel" id="panel-voice">
+
+  <div class="section">
+    <div class="section-title">Brand Voice Sliders</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Drag each slider to define where your brand sits on each spectrum. Your voice profile is generated automatically.</p>
+
+    <div id="slidersContainer"></div>
+
+    <div class="section-title mt-16">Your Voice Profile</div>
+    <div class="voice-summary"><p id="voiceSummary">Complete the sliders above to generate your voice profile.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Vocabulary Guide</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Based on your selected archetype. <span id="vocabArchNote" style="color:var(--purple);">Select an archetype in the Identity tab first.</span></p>
+    <div class="word-grid" id="wordGrid">
+      <div class="word-list">
+        <h4 class="green">✓ Use These Words</h4>
+        <div id="wordsYes"><span style="font-size:13px;color:var(--muted);">Select an archetype to see word suggestions.</span></div>
+      </div>
+      <div class="word-list">
+        <h4 class="red">✗ Avoid These Words</h4>
+        <div id="wordsNo"><span style="font-size:13px;color:var(--muted);">Select an archetype to see word suggestions.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">On-Brand vs Off-Brand Copy</div>
+    <div id="baPairsContainer"></div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════ VISUALS ═══════════════════════════════════ -->
+<div class="panel" id="panel-visuals">
+
+  <div class="section">
+    <div class="section-title">Color Palette</div>
+    <div class="grid-2">
+      <div>
+        <div class="color-row">
+          <div>
+            <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:0.5px;">PRIMARY</label>
+            <input type="color" id="colorPrimary" value="#c084fc" oninput="updatePalette()">
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:0.5px;">SECONDARY</label>
+            <input type="color" id="colorSecondary" value="#fb7185" oninput="updatePalette()">
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:0.5px;">ACCENT</label>
+            <input type="color" id="colorAccent" value="#4ade80" oninput="updatePalette()">
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:0.5px;">BACKGROUND</label>
+            <input type="color" id="colorBg" value="#1a0a2e" oninput="updatePalette()">
+          </div>
+        </div>
+        <div id="paletteSwatches"></div>
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Contrast Check (WCAG AA)</label>
+        <div id="contrastResults"></div>
+      </div>
+    </div>
+    <div class="mt-16">
+      <label>Palette Name</label>
+      <input type="text" id="paletteName" placeholder="e.g. Midnight Bloom" oninput="save('paletteName',this.value)">
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Typography Pairings</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Select the pairing that best expresses your brand personality.</p>
+    <div class="font-grid" id="fontGrid"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Logo Concept Guide</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Based on your archetype, here's how to brief a designer on your logo style.</p>
+    <div class="logo-grid" id="logoGrid"></div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════ EXPORT ═══════════════════════════════════ -->
+<div class="panel" id="panel-export">
+
+  <div class="section">
+    <div class="section-title">Brand Kit Preview</div>
+    <div class="export-card" id="exportCard">
+      <h2 id="ex-name">Your Brand Name</h2>
+      <div class="tagline-ex" id="ex-tagline">Your tagline here</div>
+      <div class="grid-2">
+        <div>
+          <div class="ex-section">
+            <h4>Mission</h4>
+            <p id="ex-mission">—</p>
+          </div>
+          <div class="ex-section">
+            <h4>Vision</h4>
+            <p id="ex-vision">—</p>
+          </div>
+          <div class="ex-section">
+            <h4>Core Values</h4>
+            <p id="ex-values">—</p>
+          </div>
+          <div class="ex-section">
+            <h4>Archetype</h4>
+            <p id="ex-archetype">—</p>
+          </div>
+        </div>
+        <div>
+          <div class="ex-section">
+            <h4>Voice Profile</h4>
+            <p id="ex-voice">—</p>
+          </div>
+          <div class="ex-section">
+            <h4>Color Palette</h4>
+            <div id="ex-colors" class="ex-colors"></div>
+          </div>
+          <div class="ex-section">
+            <h4>Typography</h4>
+            <p id="ex-typography">—</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Export Options</div>
+    <div class="flex-row" style="flex-wrap:wrap;gap:10px;">
+      <button class="btn btn-primary" onclick="copyMarkdown()">Copy as Markdown</button>
+      <button class="btn btn-secondary" onclick="window.print()">Print / Save PDF</button>
+    </div>
+    <textarea class="copy-area" id="markdownOutput" readonly placeholder="Click 'Copy as Markdown' to generate your brand kit document..."></textarea>
+  </div>
+
+</div>
+
+</main>
+
+<script>
+// ═══════════════════ DATA ═══════════════════
+
+const ARCHETYPES = [
+  { id:'hero', icon:'⚔️', name:'Hero', brands:'Nike, FedEx, Army', desc:'Champions overcoming obstacles and achieving greatness through courage and determination.', traits:['Courageous','Determined','Inspiring','Competent','Bold'] },
+  { id:'sage', icon:'🔭', name:'Sage', brands:'Google, BBC, Mayo Clinic', desc:'Values wisdom, knowledge, and truth. Helps people understand the world through expertise.', traits:['Knowledgeable','Analytical','Expert','Trustworthy','Thoughtful'] },
+  { id:'explorer', icon:'🧭', name:'Explorer', brands:'REI, Jeep, Indiana Jones', desc:'Driven by freedom and discovery. Breaks new ground and encourages independence.', traits:['Independent','Adventurous','Ambitious','Self-reliant','Authentic'] },
+  { id:'creator', icon:'🎨', name:'Creator', brands:'Apple, LEGO, Adobe', desc:'Innovative and expressive. Helps people create something meaningful and lasting.', traits:['Creative','Visionary','Imaginative','Expressive','Original'] },
+  { id:'ruler', icon:'👑', name:'Ruler', brands:'Mercedes, Rolex, Microsoft', desc:'Commands authority and prestige. Helps people feel powerful, organized, and in control.', traits:['Authoritative','Commanding','Polished','Confident','Sophisticated'] },
+  { id:'caregiver', icon:'💛', name:'Caregiver', brands:'Johnson & Johnson, UNICEF, Dove', desc:'Nurturing and protective. Puts others first and inspires generosity and compassion.', traits:['Warm','Nurturing','Generous','Compassionate','Protective'] },
+  { id:'jester', icon:'🎭', name:'Jester', brands:'Old Spice, M&Ms, Skittles', desc:'Brings joy and lightness. Lives in the moment and connects through humor and wit.', traits:['Playful','Humorous','Spontaneous','Fun','Irreverent'] },
+  { id:'lover', icon:'💎', name:'Lover', brands:'Chanel, Victoria\'s Secret, Häagen-Dazs', desc:'Creates intimate relationships. Makes people feel special, beautiful, and deeply desired.', traits:['Passionate','Sensual','Elegant','Intimate','Indulgent'] },
+  { id:'everyman', icon:'🤝', name:'Everyman', brands:'IKEA, Target, Levi\'s', desc:'Belongs to everyone. Relatable, friendly, and down-to-earth. No pretension.', traits:['Relatable','Honest','Grounded','Authentic','Friendly'] },
+  { id:'magician', icon:'✨', name:'Magician', brands:'Disney, Apple, Dyson', desc:'Transforms reality. Makes dreams come true through vision, imagination, and transformation.', traits:['Transformative','Imaginative','Visionary','Charismatic','Inspiring'] },
+  { id:'outlaw', icon:'🔥', name:'Outlaw', brands:'Harley-Davidson, Virgin, Red Bull', desc:'Disrupts the status quo. Challenges rules and gives voice to the radical or unconventional.', traits:['Rebellious','Bold','Disruptive','Provocative','Liberating'] },
+  { id:'innocent', icon:'🌸', name:'Innocent', brands:'Dove, Whole Foods, Aveeno', desc:'Pure, optimistic, and good. Radiates hope, simplicity, and trust in a complicated world.', traits:['Pure','Optimistic','Simple','Sincere','Wholesome'] }
+];
+
+const VOICE_SLIDERS = [
+  { id:'formal', left:'Formal', right:'Casual' },
+  { id:'serious', left:'Serious', right:'Playful' },
+  { id:'bold', left:'Bold', right:'Subtle' },
+  { id:'technical', left:'Technical', right:'Simple' },
+  { id:'distant', left:'Distant', right:'Warm' }
+];
+
+const VOICE_DESCRIPTIONS = {
+  formal: {
+    low: 'structured, professional language with industry terminology',
+    mid: 'a balanced professional-yet-approachable tone',
+    high: 'conversational, everyday language your audience uses naturally'
+  },
+  serious: {
+    low: 'earnest and purposeful communication — every word carries weight',
+    mid: 'grounded but not stiff, occasionally lightening the mood',
+    high: 'fun and light-hearted, never taking itself too seriously'
+  },
+  bold: {
+    low: 'confident and direct statements that command attention',
+    mid: 'clear and assured without being aggressive',
+    high: 'gentle and understated — lets the work speak for itself'
+  },
+  technical: {
+    low: 'detailed, precise language for a knowledgeable audience',
+    mid: 'clear explanations that bridge expert and lay understanding',
+    high: 'jargon-free language anyone can understand on first read'
+  },
+  distant: {
+    low: 'authoritative and objective — keeps professional distance',
+    mid: 'professional yet personable, addressing the reader directly',
+    high: 'intimate and human — speaks like a trusted friend'
+  }
+};
+
+const ARCHETYPE_WORDS = {
+  hero:      { yes:['champion','achieve','overcome','bold','strength','win','rise','unstoppable','prove','excel'], no:['easy','simple','just','average','good enough','basic','fine','comfortable','soft','quit'] },
+  sage:      { yes:['insight','evidence','discover','understand','research','expertise','clarity','proven','learn','perspective'], no:['feel','guess','hype','trend','buzz','viral','secret','trick','hack','shortcut'] },
+  explorer:  { yes:['discover','venture','beyond','freedom','explore','uncharted','horizon','journey','bold','pioneer'], no:['safe','standard','expected','conventional','usual','ordinary','routine','typical','normal','follow'] },
+  creator:   { yes:['imagine','craft','design','build','original','vision','create','express','innovate','shape'], no:['copy','generic','template','standard','ordinary','reproduce','same','typical','common','mass'] },
+  ruler:     { yes:['premium','excellence','command','authority','lead','masterful','prestige','superior','established','refined'], no:['cheap','bargain','good enough','average','basic','discount','affordable','simple','okay','fine'] },
+  caregiver: { yes:['care','support','nurture','protect','family','gentle','kindness','together','trust','healing'], no:['competitive','win','dominate','beat','crush','outperform','aggressive','hustle','grind','achieve'] },
+  jester:    { yes:['fun','laugh','enjoy','play','surprising','delight','unexpected','colorful','cheerful','spark'], no:['serious','formal','professional','strict','proper','refined','polished','corporate','structured','solemn'] },
+  lover:     { yes:['beautiful','sensory','desire','indulge','luxury','intimate','enchanting','devoted','captivating','exquisite'], no:['practical','functional','efficient','utilitarian','basic','affordable','simple','standard','ordinary','plain'] },
+  everyman:  { yes:['real','honest','everyday','together','community','genuine','simple','reliable','friendly','down-to-earth'], no:['exclusive','premium','elite','luxurious','superior','sophisticated','prestige','refined','distinguished','select'] },
+  magician:  { yes:['transform','possibility','imagine','believe','wonder','manifest','vision','enchant','shift','awe'], no:['realistic','practical','straightforward','simple','basic','ordinary','expected','predictable','conventional','linear'] },
+  outlaw:    { yes:['rebel','challenge','break','disrupt','refuse','defy','raw','real','fierce','authentic'], no:['conform','rules','standard','expected','approved','corporate','safe','conventional','compliant','polished'] },
+  innocent:  { yes:['pure','simple','natural','honest','wholesome','gentle','trust','hope','clean','kind'], no:['complex','edgy','dark','provocative','controversial','aggressive','intense','bold','confrontational','raw'] }
+};
+
+const BA_PAIRS = [
+  { bad:'Experience our comprehensive suite of integrated solutions.', good:'Everything you need, in one place.' },
+  { bad:'Leverage synergistic frameworks for maximum stakeholder value.', good:'Work together better. Deliver results faster.' },
+  { bad:'We are pleased to announce the availability of our new product offering.', good:'It\'s here. Meet [Product Name].' }
+];
+
+const FONT_PAIRINGS = [
+  { id:'f1', heading:'Playfair Display', body:'Lato', hClass:'playfair', bClass:'lato', label:'Editorial Classic', personality:'Sophisticated · Timeless · Literary' },
+  { id:'f2', heading:'Space Grotesk', body:'Inter', hClass:'space', bClass:'inter', label:'Modern Tech', personality:'Clean · Forward-thinking · Precise' },
+  { id:'f3', heading:'Merriweather', body:'Open Sans', hClass:'merriweather', bClass:'opensans', label:'Trusted Authority', personality:'Reliable · Readable · Professional' },
+  { id:'f4', heading:'Raleway', body:'Lato', hClass:'raleway', bClass:'lato', label:'Elegant Contemporary', personality:'Stylish · Refined · Approachable' },
+  { id:'f5', heading:'Oswald', body:'Source Sans Pro', hClass:'oswald', bClass:'sourcesans', label:'Bold Statement', personality:'Strong · Direct · Commanding' },
+  { id:'f6', heading:'DM Serif Display', body:'DM Sans', hClass:'dmserif', bClass:'dmsans', label:'Balanced Contrast', personality:'Warm · Creative · Versatile' },
+  { id:'f7', heading:'Poppins', body:'Nunito', hClass:'poppins', bClass:'nunito', label:'Friendly Modern', personality:'Playful · Accessible · Youthful' },
+  { id:'f8', heading:'Cormorant Garamond', body:'Proza Libre', hClass:'cormorant', bClass:'proza', label:'Heritage Luxury', personality:'Prestigious · Elegant · Timeless' },
+  { id:'f9', heading:'Exo 2', body:'Roboto', hClass:'exo', bClass:'roboto', label:'Tech Precision', personality:'Innovative · Structured · Confident' },
+  { id:'f10', heading:'Abril Fatface', body:'Nunito', hClass:'abril', bClass:'nunito', label:'Bold Creative', personality:'Expressive · Energetic · Memorable' }
+];
+
+const LOGO_STYLES = {
+  hero:      [{ icon:'⚔️', type:'Emblem', desc:'A bold shield or crest. Conveys strength, achievement, and legacy. Brief: heraldic shape, strong weight, no gradients.' }, { icon:'🔤', type:'Wordmark', desc:'Your name rendered in a strong, confident typeface. Brief: extended tracking, uppercase, geometric.' }],
+  sage:      [{ icon:'🔤', type:'Wordmark', desc:'Clean, authoritative letterforms. Brief: serif or geometric sans, balanced weight, minimal decoration.' }, { icon:'📐', type:'Abstract', desc:'A minimal symbol representing knowledge or insight. Brief: circle, lens, or constellation motif.' }],
+  explorer:  [{ icon:'🧭', type:'Abstract', desc:'A compass, horizon, or navigation mark. Brief: clean lines, open space, sense of direction.' }, { icon:'🔤', type:'Wordmark', desc:'Slightly irregular or hand-crafted feel. Brief: weight variation, subtle imperfection.' }],
+  creator:   [{ icon:'🎨', type:'Abstract', desc:'An original mark that shows craft. Brief: custom illustration, unique shape, expressive line work.' }, { icon:'🔤', type:'Wordmark', desc:'Custom lettering with personality. Brief: slightly varied letterforms, hand-feel if appropriate.' }],
+  ruler:     [{ icon:'👑', type:'Emblem', desc:'A monogram or crest that signals prestige. Brief: symmetrical, fine detail, minimal color.' }, { icon:'🔤', type:'Lettermark', desc:'Initials in a refined treatment. Brief: custom ligature, gold or single color.' }],
+  caregiver: [{ icon:'💛', type:'Abstract', desc:'A soft, organic shape suggesting warmth. Brief: rounded corners, gentle curves, no sharp angles.' }, { icon:'🎭', type:'Mascot', desc:'A friendly character that feels approachable. Brief: hand-illustrated, warm colors, relatable expression.' }],
+  jester:    [{ icon:'🎭', type:'Mascot', desc:'A lively character with personality. Brief: expressive, colorful, slightly exaggerated features.' }, { icon:'🔤', type:'Wordmark', desc:'Fun, unexpected letterforms. Brief: mixed weights, playful bounce or tilt.' }],
+  lover:     [{ icon:'📐', type:'Abstract', desc:'A sensuous, flowing symbol. Brief: curves, soft edges, single elegant motif.' }, { icon:'🔤', type:'Wordmark', desc:'Flowing script or refined serif. Brief: delicate weight, optional flourish, lowercase.' }],
+  everyman:  [{ icon:'🔤', type:'Wordmark', desc:'Honest, unadorned lettering. Brief: geometric sans, even weight, no decoration.' }, { icon:'📐', type:'Abstract', desc:'A simple, universal mark. Brief: basic geometry, one color, instantly readable at any size.' }],
+  magician:  [{ icon:'✨', type:'Abstract', desc:'A transformative symbol — star, spark, or metamorphosis. Brief: custom mark with a sense of wonder, may use gradient.' }, { icon:'🔤', type:'Wordmark', desc:'Letterforms with a magical quality. Brief: unique treatment, possibly dissolving or transforming letterform.' }],
+  outlaw:    [{ icon:'🔥', type:'Abstract', desc:'A raw, unconventional mark. Brief: distressed edges, imperfect shapes, high contrast.' }, { icon:'🎭', type:'Mascot', desc:'A bold character with attitude. Brief: strong silhouette, edgy illustration style.' }],
+  innocent:  [{ icon:'🌸', type:'Abstract', desc:'A pure, simple shape. Brief: organic, natural motif — leaf, sun, or simple bloom. No complexity.' }, { icon:'🔤', type:'Wordmark', desc:'Clean, wholesome letterforms. Brief: rounded sans, lowercase, friendly weight.' }]
+};
+
+const PREFIX = 'brand78_';
+
+// ═══════════════════ STATE ═══════════════════
+let state = {
+  selectedArchetype: null,
+  selectedFont: null,
+  values: [],
+  sliders: { formal:5, serious:5, bold:5, technical:5, distant:5 },
+  colorPrimary: '#c084fc',
+  colorSecondary: '#fb7185',
+  colorAccent: '#4ade80',
+  colorBg: '#1a0a2e'
+};
+
+// ═══════════════════ STORAGE ═══════════════════
+function save(key, val) {
+  localStorage.setItem(PREFIX + key, typeof val === 'object' ? JSON.stringify(val) : val);
+}
+function load(key, def='') {
+  const v = localStorage.getItem(PREFIX + key);
+  if (v === null) return def;
+  try { return JSON.parse(v); } catch { return v; }
+}
+
+function loadAll() {
+  document.getElementById('brandName').value = load('brandName');
+  document.getElementById('brandTagline').value = load('brandTagline');
+  updateTagline(document.getElementById('brandTagline'));
+  document.getElementById('brandMission').value = load('brandMission');
+  document.getElementById('brandVision').value = load('brandVision');
+  document.getElementById('paletteName').value = load('paletteName');
+
+  state.values = load('values', []);
+  state.selectedArchetype = load('selectedArchetype', null);
+  state.selectedFont = load('selectedFont', null);
+  state.sliders = load('sliders', { formal:5, serious:5, bold:5, technical:5, distant:5 });
+
+  const cp = load('colorPrimary','#c084fc');
+  const cs = load('colorSecondary','#fb7185');
+  const ca = load('colorAccent','#4ade80');
+  const cb = load('colorBg','#1a0a2e');
+  document.getElementById('colorPrimary').value = cp;
+  document.getElementById('colorSecondary').value = cs;
+  document.getElementById('colorAccent').value = ca;
+  document.getElementById('colorBg').value = cb;
+  state.colorPrimary = cp; state.colorSecondary = cs; state.colorAccent = ca; state.colorBg = cb;
+
+  renderValues();
+  renderArchetypeGrid();
+  renderSliders();
+  updateVoiceSummary();
+  updateWordLists();
+  renderBAPairs();
+  updatePalette();
+  renderFontGrid();
+  renderLogoGrid();
+  updateExport();
+}
+
+// ═══════════════════ TABS ═══════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const tabs = ['identity','voice','visuals','export'];
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'export') updateExport();
+}
+
+// ═══════════════════ TAGLINE ═══════════════════
+function updateTagline(el) {
+  const len = el.value.length;
+  const counter = document.getElementById('taglineCount');
+  counter.textContent = len + ' / 50';
+  counter.className = 'counter' + (len > 45 ? ' warn' : '');
+  save('brandTagline', el.value);
+}
+
+// ═══════════════════ VALUES ═══════════════════
+function renderValues() {
+  const c = document.getElementById('valuesContainer');
+  c.innerHTML = '';
+  state.values.forEach((v, i) => {
+    const row = document.createElement('div');
+    row.className = 'value-row';
+    row.innerHTML = `
+      <input type="text" class="val-name" value="${escHtml(v.name)}" placeholder="Value name" oninput="updateValue(${i},'name',this.value)">
+      <input type="text" class="val-desc" value="${escHtml(v.desc)}" placeholder="One-sentence description..." oninput="updateValue(${i},'desc',this.value)">
+      <button class="btn-icon" onclick="removeValue(${i})">✕</button>`;
+    c.appendChild(row);
+  });
+  document.getElementById('addValueBtn').style.display = state.values.length >= 5 ? 'none' : 'inline-flex';
+}
+function addValue() {
+  if (state.values.length >= 5) return;
+  state.values.push({ name:'', desc:'' });
+  save('values', state.values);
+  renderValues();
+}
+function updateValue(i, field, val) {
+  state.values[i][field] = val;
+  save('values', state.values);
+}
+function removeValue(i) {
+  state.values.splice(i, 1);
+  save('values', state.values);
+  renderValues();
+}
+
+// ═══════════════════ ARCHETYPES ═══════════════════
+function renderArchetypeGrid() {
+  const g = document.getElementById('archetypeGrid');
+  g.innerHTML = '';
+  ARCHETYPES.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'archetype-card' + (state.selectedArchetype === a.id ? ' selected' : '');
+    card.innerHTML = `<div class="arch-icon">${a.icon}</div><div class="arch-name">${a.name}</div><div class="arch-brand">${a.brands}</div>`;
+    card.onclick = () => selectArchetype(a.id);
+    g.appendChild(card);
+  });
+  showArchetypeInfo();
+}
+function selectArchetype(id) {
+  state.selectedArchetype = id;
+  save('selectedArchetype', id);
+  renderArchetypeGrid();
+  updateWordLists();
+  renderLogoGrid();
+  updateVoiceSummary();
+  updateExport();
+}
+function showArchetypeInfo() {
+  const info = document.getElementById('archetypeInfo');
+  if (!state.selectedArchetype) { info.classList.remove('show'); return; }
+  const a = ARCHETYPES.find(x => x.id === state.selectedArchetype);
+  if (!a) return;
+  info.classList.add('show');
+  info.innerHTML = `<div class="ai-title">${a.icon} ${a.name} Archetype</div>
+    <div class="ai-desc">${a.desc}</div>
+    <div class="tags">${a.traits.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    <div class="tags" style="margin-top:8px;"><span class="tag rose">Examples: ${a.brands}</span></div>`;
+}
+
+// ═══════════════════ SLIDERS ═══════════════════
+function renderSliders() {
+  const c = document.getElementById('slidersContainer');
+  c.innerHTML = '';
+  VOICE_SLIDERS.forEach(s => {
+    const val = state.sliders[s.id] || 5;
+    const row = document.createElement('div');
+    row.className = 'slider-row';
+    row.innerHTML = `
+      <div class="slider-labels"><span class="left">${s.left}</span><span class="right">${s.right}</span></div>
+      <input type="range" min="1" max="10" value="${val}" id="slider-${s.id}" oninput="updateSlider('${s.id}', this.value)">
+      <div class="slider-val" id="sliderval-${s.id}">${getSliderLabel(s.id, val)}</div>`;
+    c.appendChild(row);
+  });
+}
+function getSliderLabel(id, v) {
+  const n = parseInt(v);
+  const desc = VOICE_DESCRIPTIONS[id];
+  if (n <= 3) return desc.low;
+  if (n <= 7) return desc.mid;
+  return desc.high;
+}
+function updateSlider(id, val) {
+  state.sliders[id] = parseInt(val);
+  document.getElementById('sliderval-' + id).textContent = getSliderLabel(id, val);
+  save('sliders', state.sliders);
+  updateVoiceSummary();
+  updateExport();
+}
+function updateVoiceSummary() {
+  const s = state.sliders;
+  const parts = [];
+  if (s.formal <= 3) parts.push('professional and polished');
+  else if (s.formal >= 8) parts.push('casual and conversational');
+  else parts.push('balanced between formal and accessible');
+
+  if (s.serious <= 3) parts.push('serious and purposeful');
+  else if (s.serious >= 8) parts.push('playful and fun');
+  else parts.push('grounded with occasional lightness');
+
+  if (s.bold <= 3) parts.push('bold and direct');
+  else if (s.bold >= 8) parts.push('subtle and understated');
+  else parts.push('confident without being forceful');
+
+  if (s.technical <= 3) parts.push('technically precise');
+  else if (s.technical >= 8) parts.push('simple and clear for any reader');
+  else parts.push('clear enough for non-experts without dumbing down');
+
+  if (s.distant <= 3) parts.push('authoritative and objective');
+  else if (s.distant >= 8) parts.push('warm and intimate — like a trusted friend');
+  else parts.push('personable yet professional');
+
+  const arch = ARCHETYPES.find(x => x.id === state.selectedArchetype);
+  const archNote = arch ? ` This aligns with the <strong>${arch.name}</strong> archetype — ${arch.traits.slice(0,3).join(', ')}.` : '';
+
+  document.getElementById('voiceSummary').innerHTML =
+    `Your brand voice is <strong>${parts[0]}</strong>, <strong>${parts[1]}</strong>, and <strong>${parts[2]}</strong>. ` +
+    `The language is <strong>${parts[3]}</strong>, and the brand feels <strong>${parts[4]}</strong>.${archNote}`;
+}
+
+// ═══════════════════ WORD LISTS ═══════════════════
+function updateWordLists() {
+  const arch = state.selectedArchetype;
+  const note = document.getElementById('vocabArchNote');
+  if (!arch || !ARCHETYPE_WORDS[arch]) {
+    note.textContent = 'Select an archetype in the Identity tab first.';
+    document.getElementById('wordsYes').innerHTML = '<span style="font-size:13px;color:var(--muted);">Select an archetype to see word suggestions.</span>';
+    document.getElementById('wordsNo').innerHTML = '<span style="font-size:13px;color:var(--muted);">Select an archetype to see word suggestions.</span>';
+    return;
+  }
+  const a = ARCHETYPES.find(x => x.id === arch);
+  note.textContent = `Showing vocabulary for the ${a.name} archetype.`;
+  const words = ARCHETYPE_WORDS[arch];
+  document.getElementById('wordsYes').innerHTML = words.yes.map(w=>`<span class="word-pill yes">${w}</span>`).join('');
+  document.getElementById('wordsNo').innerHTML = words.no.map(w=>`<span class="word-pill no">${w}</span>`).join('');
+}
+
+// ═══════════════════ BEFORE / AFTER ═══════════════════
+function renderBAPairs() {
+  const c = document.getElementById('baPairsContainer');
+  c.innerHTML = BA_PAIRS.map(p => `
+    <div class="ba-pair">
+      <div class="ba-label bad">✗ Off-Brand</div>
+      <p>${p.bad}</p>
+    </div>
+    <div class="ba-pair" style="margin-top:-8px;border-top:1px solid var(--border);">
+      <div class="ba-label good">✓ On-Brand</div>
+      <p>${p.good}</p>
+    </div>
+    <div style="margin-bottom:12px;"></div>`).join('');
+}
+
+// ═══════════════════ COLOR PALETTE ═══════════════════
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return { r, g, b };
+}
+function getLuminance(hex) {
+  const { r, g, b } = hexToRgb(hex);
+  const srgb = [r,g,b].map(c => {
+    c /= 255;
+    return c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4);
+  });
+  return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
+}
+function getContrastRatio(h1, h2) {
+  const l1 = getLuminance(h1), l2 = getLuminance(h2);
+  const lighter = Math.max(l1,l2), darker = Math.min(l1,l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+function adjustBrightness(hex, factor) {
+  let { r, g, b } = hexToRgb(hex);
+  r = Math.min(255, Math.max(0, Math.round(r * factor)));
+  g = Math.min(255, Math.max(0, Math.round(g * factor)));
+  b = Math.min(255, Math.max(0, Math.round(b * factor)));
+  return '#' + [r,g,b].map(c=>c.toString(16).padStart(2,'0')).join('');
+}
+function blendWithWhite(hex, factor) {
+  let { r, g, b } = hexToRgb(hex);
+  r = Math.round(r + (255-r)*factor);
+  g = Math.round(g + (255-g)*factor);
+  b = Math.round(b + (255-b)*factor);
+  return '#' + [r,g,b].map(c=>c.toString(16).padStart(2,'0')).join('');
+}
+
+function updatePalette() {
+  const cp = document.getElementById('colorPrimary').value;
+  const cs = document.getElementById('colorSecondary').value;
+  const ca = document.getElementById('colorAccent').value;
+  const cb = document.getElementById('colorBg').value;
+  state.colorPrimary = cp; state.colorSecondary = cs; state.colorAccent = ca; state.colorBg = cb;
+  save('colorPrimary', cp); save('colorSecondary', cs); save('colorAccent', ca); save('colorBg', cb);
+
+  const swatches = document.getElementById('paletteSwatches');
+  const groups = [
+    { label:'Primary', base:cp },
+    { label:'Secondary', base:cs },
+    { label:'Accent', base:ca },
+    { label:'Background', base:cb }
+  ];
+
+  swatches.innerHTML = groups.map(g => {
+    const tint1 = blendWithWhite(g.base, 0.5);
+    const tint2 = blendWithWhite(g.base, 0.8);
+    const shade1 = adjustBrightness(g.base, 0.7);
+    const shade2 = adjustBrightness(g.base, 0.4);
+    const variants = [shade2, shade1, g.base, tint1, tint2];
+    return `<div style="margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600;">${g.label}</div>
+      <div style="display:flex;gap:6px;">
+        ${variants.map((c,i) => `<div title="${c}" data-hex="${c}" class="swatch" style="background:${c};cursor:pointer;" onclick="copyHex('${c}')" title="Click to copy ${c}"></div>`).join('')}
+        <span style="font-size:12px;color:var(--muted);align-self:center;margin-left:6px;">${g.base}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Contrast check
+  const cr = document.getElementById('contrastResults');
+  const checks = [
+    { fg:'#ffffff', bg:cp, label:'White on Primary' },
+    { fg:'#000000', bg:cp, label:'Black on Primary' },
+    { fg:'#ffffff', bg:cb, label:'White on Background' },
+    { fg:cp, bg:cb, label:'Primary on Background' },
+    { fg:cs, bg:cb, label:'Secondary on Background' }
+  ];
+  cr.innerHTML = checks.map(c => {
+    const ratio = getContrastRatio(c.fg, c.bg);
+    const pass = ratio >= 4.5;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-size:12px;color:var(--muted);">${c.label}</div>
+      <span class="contrast-badge ${pass?'pass':'fail'}">${pass?'AA ✓':'Fail ✗'} ${ratio.toFixed(1)}:1</span>
+    </div>`;
+  }).join('');
+
+  updateExport();
+}
+
+function copyHex(hex) {
+  navigator.clipboard.writeText(hex).catch(()=>{});
+}
+
+// ═══════════════════ FONTS ═══════════════════
+function renderFontGrid() {
+  const fontUrl = 'https://fonts.googleapis.com/css2?family=' +
+    'Playfair+Display:wght@700&family=Lato:wght@400;700&family=Space+Grotesk:wght@700&family=Inter:wght@400&' +
+    'Merriweather:wght@700&family=Open+Sans:wght@400&family=Raleway:wght@700&family=Oswald:wght@700&' +
+    'Source+Sans+Pro:wght@400&family=DM+Serif+Display&family=DM+Sans:wght@400&family=Poppins:wght@700&' +
+    'Nunito:wght@400&family=Cormorant+Garamond:wght@700&family=Proza+Libre:wght@400&family=Exo+2:wght@700&' +
+    'Roboto:wght@400&family=Abril+Fatface&display=swap';
+  if (!document.getElementById('fontLink')) {
+    const link = document.createElement('link');
+    link.id = 'fontLink';
+    link.rel = 'stylesheet';
+    link.href = fontUrl;
+    document.head.appendChild(link);
+  }
+
+  const fontFamilies = {
+    playfair:'"Playfair Display",serif', lato:'"Lato",sans-serif', space:'"Space Grotesk",sans-serif',
+    inter:'"Inter",sans-serif', merriweather:'"Merriweather",serif', opensans:'"Open Sans",sans-serif',
+    raleway:'"Raleway",sans-serif', oswald:'"Oswald",sans-serif', sourcesans:'"Source Sans Pro",sans-serif',
+    dmserif:'"DM Serif Display",serif', dmsans:'"DM Sans",sans-serif', poppins:'"Poppins",sans-serif',
+    nunito:'"Nunito",sans-serif', cormorant:'"Cormorant Garamond",serif', proza:'"Proza Libre",sans-serif',
+    exo:'"Exo 2",sans-serif', roboto:'"Roboto",sans-serif', abril:'"Abril Fatface",display'
+  };
+
+  const g = document.getElementById('fontGrid');
+  g.innerHTML = '';
+  FONT_PAIRINGS.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'font-card' + (state.selectedFont === f.id ? ' selected' : '');
+    const hf = fontFamilies[f.hClass] || f.heading;
+    const bf = fontFamilies[f.bClass] || f.body;
+    card.innerHTML = `
+      <div class="pair-label">${f.heading} + ${f.body}</div>
+      <div class="pair-heading" style="font-family:${hf}">${f.label}</div>
+      <div class="pair-body" style="font-family:${bf}">The quick brown fox jumps over the lazy dog.</div>
+      <div class="pair-tag"><span class="tag">${f.personality}</span></div>`;
+    card.onclick = () => { state.selectedFont = f.id; save('selectedFont', f.id); renderFontGrid(); updateExport(); };
+    g.appendChild(card);
+  });
+}
+
+// ═══════════════════ LOGO ═══════════════════
+function renderLogoGrid() {
+  const g = document.getElementById('logoGrid');
+  const arch = state.selectedArchetype;
+  if (!arch || !LOGO_STYLES[arch]) {
+    g.innerHTML = '<p style="font-size:13px;color:var(--muted);">Select an archetype in the Identity tab to see logo concepts.</p>';
+    return;
+  }
+  const styles = LOGO_STYLES[arch];
+  const allLogos = [
+    { icon:'🔤', type:'Wordmark', desc:'Your brand name as the logo. Works when you have a strong name. Brief: custom typeface, specific tracking and weight.' },
+    { icon:'🔡', type:'Lettermark', desc:'Your initials as a compact mark. Brief: 1-3 letters, custom ligature or treatment, scales to icon size.' },
+    { icon:'📐', type:'Abstract Mark', desc:'A unique symbol with no literal meaning. Brief: ownable shape, simple geometry, works at 16px.' },
+    { icon:'🎭', type:'Mascot', desc:'A character that embodies your brand personality. Brief: illustration style guide, expression set, color-on-dark and light versions.' },
+    { icon:'🛡️', type:'Emblem', desc:'Text inside a badge or crest shape. Brief: contained within shape, small detail limit, one-color version required.' }
+  ];
+  const priority = styles.map(s => allLogos.find(l => l.type.includes(s.type.split(' ')[0])) || s);
+  const rest = allLogos.filter(l => !priority.find(p => p.type === l.type));
+  const final = [...priority, ...rest].slice(0, 5);
+  g.innerHTML = final.map((l, i) => `
+    <div class="logo-card" style="${i < 2 ? 'border-color:var(--purple);' : ''}">
+      ${i === 0 ? '<div style="font-size:10px;font-weight:700;color:var(--purple);margin-bottom:6px;">★ RECOMMENDED FOR YOUR ARCHETYPE</div>' : ''}
+      <div class="lg-icon">${l.icon}</div>
+      <div class="lg-type">${l.type}</div>
+      <div class="lg-desc">${l.desc}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════ EXPORT ═══════════════════
+function updateExport() {
+  const name = document.getElementById('brandName').value || 'Your Brand';
+  const tagline = document.getElementById('brandTagline').value || '';
+  const mission = document.getElementById('brandMission').value || '—';
+  const vision = document.getElementById('brandVision').value || '—';
+  const valStr = state.values.filter(v=>v.name).map(v=>`${v.name}: ${v.desc||'...'}`).join(' · ') || '—';
+  const arch = ARCHETYPES.find(x=>x.id===state.selectedArchetype);
+  const font = FONT_PAIRINGS.find(x=>x.id===state.selectedFont);
+
+  document.getElementById('ex-name').textContent = name;
+  document.getElementById('ex-tagline').textContent = tagline || 'No tagline set';
+  document.getElementById('ex-mission').textContent = mission;
+  document.getElementById('ex-vision').textContent = vision;
+  document.getElementById('ex-values').textContent = valStr;
+  document.getElementById('ex-archetype').textContent = arch ? `${arch.icon} ${arch.name} — ${arch.desc.split('.')[0]}.` : '—';
+  document.getElementById('ex-typography').textContent = font ? `${font.heading} (headings) + ${font.body} (body) — ${font.personality}` : '—';
+
+  const el = document.getElementById('voiceSummary');
+  document.getElementById('ex-voice').textContent = el ? el.innerText : '—';
+
+  const colors = [state.colorPrimary, state.colorSecondary, state.colorAccent, state.colorBg];
+  document.getElementById('ex-colors').innerHTML = colors.map(c =>
+    `<div class="ex-swatch" style="background:${c}" title="${c}"></div>`).join('') +
+    `<span style="font-size:11px;color:var(--muted);align-self:center;margin-left:6px;">${colors.join(' · ')}</span>`;
+}
+
+function copyMarkdown() {
+  const name = document.getElementById('brandName').value || 'Brand Name';
+  const tagline = document.getElementById('brandTagline').value || '';
+  const mission = document.getElementById('brandMission').value || '—';
+  const vision = document.getElementById('brandVision').value || '—';
+  const arch = ARCHETYPES.find(x=>x.id===state.selectedArchetype);
+  const font = FONT_PAIRINGS.find(x=>x.id===state.selectedFont);
+  const s = state.sliders;
+  const valStr = state.values.filter(v=>v.name).map(v=>`- **${v.name}**: ${v.desc||'...'}`).join('\n') || '— (none set)';
+  const archWords = state.selectedArchetype && ARCHETYPE_WORDS[state.selectedArchetype] ?
+    `\n**Use:** ${ARCHETYPE_WORDS[state.selectedArchetype].yes.join(', ')}\n**Avoid:** ${ARCHETYPE_WORDS[state.selectedArchetype].no.join(', ')}` : '';
+
+  const md = `# ${name} — Brand Identity Kit
+${tagline ? `> *${tagline}*` : ''}
+
+---
+
+## Mission
+${mission}
+
+## Vision
+${vision}
+
+## Core Values
+${valStr}
+
+## Brand Archetype
+${arch ? `**${arch.name}** — ${arch.desc}\n\nTraits: ${arch.traits.join(', ')}` : '—'}
+
+## Brand Voice
+- Formal ↔ Casual: ${s.formal}/10
+- Serious ↔ Playful: ${s.serious}/10
+- Bold ↔ Subtle: ${s.bold}/10
+- Technical ↔ Simple: ${s.technical}/10
+- Distant ↔ Warm: ${s.distant}/10
+${archWords}
+
+## Color Palette
+- Primary: \`${state.colorPrimary}\`
+- Secondary: \`${state.colorSecondary}\`
+- Accent: \`${state.colorAccent}\`
+- Background: \`${state.colorBg}\`
+
+## Typography
+${font ? `**Headings:** ${font.heading}\n**Body:** ${font.body}\n**Personality:** ${font.personality}` : '—'}
+
+---
+*Generated with Brand Identity Builder — Agent #78*
+`;
+  document.getElementById('markdownOutput').value = md;
+  navigator.clipboard.writeText(md).catch(()=>{});
+  const btn = document.querySelector('.btn-primary');
+  btn.textContent = 'Copied!';
+  setTimeout(()=>{ btn.textContent = 'Copy as Markdown'; }, 2000);
+}
+
+// ═══════════════════ UTILS ═══════════════════
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════ INIT ═══════════════════
+document.addEventListener('DOMContentLoaded', loadAll);
+</script>
+</body>
+</html>
