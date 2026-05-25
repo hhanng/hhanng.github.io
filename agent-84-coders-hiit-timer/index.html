@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coder's HIIT Timer — Agent #84</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0f0a1a;--card:#1a1030;--accent:#a78bfa;--pink:#f472b6;
+    --green:#4ade80;--yellow:#fbbf24;--text:#fff;--muted:#8b7aa8;
+    --border:#2d1f4e;--danger:#f87171;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  /* HEADER */
+  .header{background:linear-gradient(135deg,#1a0a3a,#0f0a1a);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+  .header h1{font-size:1.2rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .badge{background:var(--border);color:var(--muted);font-size:.7rem;padding:3px 8px;border-radius:99px}
+  /* TABS */
+  .tabs{display:flex;background:#12082a;border-bottom:1px solid var(--border);overflow-x:auto}
+  .tab{padding:14px 24px;cursor:pointer;font-size:.85rem;font-weight:600;letter-spacing:.05em;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab:hover:not(.active){color:var(--text)}
+  /* PANELS */
+  .panel{display:none;padding:24px;max-width:800px;margin:0 auto}
+  .panel.active{display:block}
+  /* TIMER PANEL */
+  .mode-btns{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .mode-btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s}
+  .mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  /* SVG RING */
+  .timer-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;margin:20px 0}
+  .ring-container{position:relative;width:260px;height:260px}
+  .ring-container svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ring-bg{fill:none;stroke:#1e1040;stroke-width:14}
+  .ring-fg{fill:none;stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset .5s linear,stroke .5s}
+  .ring-fg.work{stroke:var(--pink)}
+  .ring-fg.rest{stroke:var(--accent)}
+  .ring-fg.focus{stroke:var(--green)}
+  .ring-fg.pulse{animation:ringPulse 1s ease-in-out infinite}
+  @keyframes ringPulse{0%,100%{filter:drop-shadow(0 0 8px var(--pink))}50%{filter:drop-shadow(0 0 20px var(--pink))}}
+  .timer-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .phase-icon{font-size:2rem;margin-bottom:4px}
+  .timer-display{font-size:3rem;font-weight:800;letter-spacing:-2px;font-variant-numeric:tabular-nums}
+  .phase-label{font-size:.85rem;font-weight:600;color:var(--muted);margin-top:4px;letter-spacing:.1em;text-transform:uppercase}
+  /* exercise display */
+  .exercise-display{text-align:center;margin:10px 0 20px;min-height:50px}
+  .exercise-name{font-size:1.8rem;font-weight:800;color:var(--pink);letter-spacing:-1px;opacity:0;transition:opacity .3s}
+  .exercise-name.show{opacity:1}
+  .exercise-count{font-size:.85rem;color:var(--muted);margin-top:4px}
+  /* CONTROLS */
+  .controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+  .btn{padding:10px 24px;border-radius:8px;border:none;cursor:pointer;font-size:.9rem;font-weight:700;transition:all .2s}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#8b5cf6}
+  .btn-danger{background:var(--pink);color:#fff}
+  .btn-danger:hover{background:#e2438b}
+  .btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border)}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-sm{padding:7px 14px;font-size:.8rem}
+  /* session info */
+  .session-info{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center;margin-bottom:16px}
+  .info-val{font-size:1.3rem;font-weight:800;color:var(--accent)}
+  .info-label{font-size:.7rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+  /* active routine banner */
+  .routine-banner{background:linear-gradient(135deg,#2a1050,#1a0a40);border:1px solid #4c2a9a;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+  .routine-banner span{font-size:.9rem;font-weight:600;color:var(--accent)}
+  .routine-banner small{font-size:.75rem;color:var(--muted)}
+  /* CARDS */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+  .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+  .card-title{font-size:1.05rem;font-weight:700}
+  .badge-pill{padding:3px 10px;border-radius:99px;font-size:.72rem;font-weight:700}
+  .badge-easy{background:#14532d;color:#4ade80}
+  .badge-medium{background:#451a03;color:#fbbf24}
+  .badge-hard{background:#450a0a;color:#f87171}
+  .badge-pr{background:#7c1a3a;color:var(--pink)}
+  /* exercise list */
+  .ex-list{display:flex;flex-direction:column;gap:6px}
+  .ex-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#0f0a1a;border-radius:8px;font-size:.85rem}
+  .ex-item .ex-name{font-weight:600}
+  .ex-item .ex-dur{color:var(--muted)}
+  /* section title */
+  .section-title{font-size:1.1rem;font-weight:700;color:var(--accent);margin:20px 0 12px;letter-spacing:.02em}
+  /* history */
+  .history-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .history-card .h-mode{font-weight:700;font-size:.9rem}
+  .history-card .h-meta{font-size:.78rem;color:var(--muted)}
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+  @media(min-width:480px){.stat-grid{grid-template-columns:repeat(4,1fr)}}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+  .stat-val{font-size:1.6rem;font-weight:800}
+  .stat-label{font-size:.7rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+  .streak-fire{color:var(--pink)}
+  /* settings */
+  .setting-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+  .setting-label{font-size:.85rem;font-weight:700;margin-bottom:10px;color:var(--accent)}
+  .toggle-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.85rem}
+  .toggle{position:relative;display:inline-block;width:44px;height:24px}
+  .toggle input{opacity:0;width:0;height:0}
+  .slider-t{position:absolute;cursor:pointer;inset:0;background:#2a1a4a;border-radius:24px;transition:.3s}
+  .slider-t:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:var(--muted);border-radius:50%;transition:.3s}
+  input:checked+.slider-t{background:var(--accent)}
+  input:checked+.slider-t:before{transform:translateX(20px);background:#fff}
+  .radio-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .radio-opt{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s}
+  .radio-opt.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
+  /* toast */
+  .toast{position:fixed;top:20px;right:20px;background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;font-size:.85rem;font-weight:700;z-index:999;opacity:0;transform:translateY(-10px);transition:all .3s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateY(0)}
+  /* phase transition overlay */
+  .phase-flash{position:fixed;inset:0;background:var(--pink);opacity:0;pointer-events:none;z-index:998;transition:opacity .3s}
+  .phase-flash.flash{opacity:.15}
+  /* empty state */
+  .empty{text-align:center;padding:40px;color:var(--muted);font-size:.9rem}
+  .empty .empty-icon{font-size:2.5rem;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚡ Coder's HIIT Timer</h1>
+  <span class="badge">Agent #84</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="timer">⏱ TIMER</div>
+  <div class="tab" data-tab="routines">🔥 ROUTINES</div>
+  <div class="tab" data-tab="history">📊 HISTORY</div>
+  <div class="tab" data-tab="settings">⚙️ SETTINGS</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="phase-flash" id="phaseFlash"></div>
+
+<!-- TIMER PANEL -->
+<div class="panel active" id="panel-timer">
+  <div class="mode-btns">
+    <button class="mode-btn active" data-mode="pomodoro">🧠 Pomodoro-HIIT</button>
+    <button class="mode-btn" data-mode="hiit">🔥 Pure HIIT</button>
+    <button class="mode-btn" data-mode="tabata">⚡ Tabata</button>
+  </div>
+
+  <div id="routineBanner" class="routine-banner" style="display:none">
+    <div><span id="bannerName">—</span><br><small>Active Routine</small></div>
+    <button class="btn btn-ghost btn-sm" onclick="clearRoutine()">✕ Clear</button>
+  </div>
+
+  <div class="timer-wrap">
+    <div class="ring-container">
+      <svg viewBox="0 0 260 260">
+        <circle class="ring-bg" cx="130" cy="130" r="116"/>
+        <circle class="ring-fg focus" id="ringFg" cx="130" cy="130" r="116"
+          stroke-dasharray="729" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-center">
+        <div class="phase-icon" id="phaseIcon">🧠</div>
+        <div class="timer-display" id="timerDisplay">25:00</div>
+        <div class="phase-label" id="phaseLabel">Deep Work</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="exercise-display" id="exerciseDisplay" style="display:none">
+    <div class="exercise-name" id="exerciseName"></div>
+    <div class="exercise-count" id="exerciseCount"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">▶ Start</button>
+    <button class="btn btn-ghost" onclick="skipPhase()">⏭ Skip Phase</button>
+    <button class="btn btn-ghost" onclick="resetTimer()">↺ Reset</button>
+  </div>
+
+  <div class="session-info">
+    <div><div class="info-val" id="infoRound">1</div><div class="info-label">Round</div></div>
+    <div><div class="info-val" id="infoPhase">Focus</div><div class="info-label">Phase</div></div>
+    <div><div class="info-val" id="infoFocusMin">0</div><div class="info-label">Focus min</div></div>
+    <div><div class="info-val" id="infoHiitMin">0</div><div class="info-label">HIIT min</div></div>
+  </div>
+</div>
+
+<!-- ROUTINES PANEL -->
+<div class="panel" id="panel-routines">
+  <div id="routinesList"></div>
+</div>
+
+<!-- HISTORY PANEL -->
+<div class="panel" id="panel-history">
+  <div class="stat-grid" id="historyStats"></div>
+  <div class="section-title">Recent Sessions</div>
+  <div id="historyList"></div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="panel" id="panel-settings">
+  <div class="setting-row">
+    <div class="setting-label">Focus Duration (minutes)</div>
+    <div class="radio-group" id="focusDurGroup">
+      <div class="radio-opt" data-group="focusDur" data-val="15">15</div>
+      <div class="radio-opt selected" data-group="focusDur" data-val="25">25</div>
+      <div class="radio-opt" data-group="focusDur" data-val="30">30</div>
+      <div class="radio-opt" data-group="focusDur" data-val="45">45</div>
+    </div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-label">HIIT Duration (minutes)</div>
+    <div class="radio-group" id="hiitDurGroup">
+      <div class="radio-opt" data-group="hiitDur" data-val="2">2</div>
+      <div class="radio-opt selected" data-group="hiitDur" data-val="4">4</div>
+      <div class="radio-opt" data-group="hiitDur" data-val="6">6</div>
+      <div class="radio-opt" data-group="hiitDur" data-val="8">8</div>
+    </div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-label">Rest Duration (minutes)</div>
+    <div class="radio-group" id="restDurGroup">
+      <div class="radio-opt selected" data-group="restDur" data-val="5">5</div>
+      <div class="radio-opt" data-group="restDur" data-val="10">10</div>
+      <div class="radio-opt" data-group="restDur" data-val="15">15</div>
+    </div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-label">Pure HIIT — Work Interval (seconds)</div>
+    <div class="radio-group">
+      <div class="radio-opt" data-group="hiitWork" data-val="20">20s</div>
+      <div class="radio-opt selected" data-group="hiitWork" data-val="30">30s</div>
+      <div class="radio-opt" data-group="hiitWork" data-val="40">40s</div>
+      <div class="radio-opt" data-group="hiitWork" data-val="45">45s</div>
+    </div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-label">Pure HIIT — Rest Interval (seconds)</div>
+    <div class="radio-group">
+      <div class="radio-opt selected" data-group="hiitRest" data-val="10">10s</div>
+      <div class="radio-opt" data-group="hiitRest" data-val="15">15s</div>
+      <div class="radio-opt" data-group="hiitRest" data-val="20">20s</div>
+    </div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-label">Notifications</div>
+    <div class="toggle-row">
+      <span>Sound on phase transition</span>
+      <label class="toggle"><input type="checkbox" id="soundToggle" checked onchange="saveSetting('sound',this.checked)"><span class="slider-t"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span>Countdown beeps (last 3 seconds)</span>
+      <label class="toggle"><input type="checkbox" id="countdownToggle" checked onchange="saveSetting('countdown',this.checked)"><span class="slider-t"></span></label>
+    </div>
+  </div>
+</div>
+
+<script>
+const PREFIX = 'hiit84_';
+const S = k => localStorage.getItem(PREFIX+k);
+const SS = (k,v) => localStorage.setItem(PREFIX+k, typeof v==='object'?JSON.stringify(v):v);
+
+// ─── ROUTINES DATA ─────────────────────────────────────────────────────────
+const ROUTINES = [
+  {
+    id:1, name:'Desk Warrior', duration:'4 min', difficulty:'easy',
+    equipment:'None (standing only)', category:'Desk-Friendly',
+    desc:'Standing-only moves you can do right at your desk without disturbing anyone.',
+    exercises:[
+      {name:'Standing March in Place',dur:'40s'},{name:'Desk Push-Ups',dur:'30s'},
+      {name:'Standing Oblique Crunches',dur:'40s'},{name:'Calf Raises',dur:'30s'},
+      {name:'Standing Hip Circles',dur:'40s'},{name:'Arm Circles',dur:'30s'},
+      {name:'Standing Side Kicks',dur:'40s'}
+    ]
+  },
+  {
+    id:2, name:'Chair Cardio', duration:'4 min', difficulty:'easy',
+    equipment:'Chair', category:'Desk-Friendly',
+    desc:'Seated and standing alternating movements — no floor required.',
+    exercises:[
+      {name:'Seated Leg Raises',dur:'40s'},{name:'Chair Squats',dur:'30s'},
+      {name:'Seated Torso Twists',dur:'40s'},{name:'Standing Wall Push',dur:'30s'},
+      {name:'Seated Heel Taps',dur:'40s'},{name:'Chair Dips',dur:'30s'},
+      {name:'Seated Knee Hugs',dur:'40s'}
+    ]
+  },
+  {
+    id:3, name:'Full Burn', duration:'6 min', difficulty:'hard',
+    equipment:'Floor space', category:'High Intensity',
+    desc:'Full-intensity workout — floor work included. Clear a small space.',
+    exercises:[
+      {name:'Burpees',dur:'40s'},{name:'Mountain Climbers',dur:'40s'},
+      {name:'Jump Squats',dur:'40s'},{name:'Push-Ups',dur:'40s'},
+      {name:'High Knees',dur:'40s'},{name:'Plank Hold',dur:'40s'},
+      {name:'Jumping Jacks',dur:'40s'},{name:'Floor Bicycle Crunches',dur:'40s'},
+      {name:'Squat Jumps',dur:'40s'}
+    ]
+  },
+  {
+    id:4, name:'Silent Mode', duration:'4 min', difficulty:'medium',
+    equipment:'None', category:'Apartment-Friendly',
+    desc:'Zero jumping, zero impact — completely silent. Perfect for apartments.',
+    exercises:[
+      {name:'Standing Wall Sits',dur:'40s'},{name:'Slow Push-Ups',dur:'30s'},
+      {name:'Silent Squats',dur:'40s'},{name:'Plank Hold',dur:'30s'},
+      {name:'Slow Arm Circles',dur:'40s'},{name:'Standing Glute Squeeze',dur:'30s'},
+      {name:'Deep Breathing Stretch',dur:'40s'}
+    ]
+  },
+  {
+    id:5, name:'Morning Activation', duration:'5 min', difficulty:'easy',
+    equipment:'None', category:'Wake-Up',
+    desc:'Gentle full-body wake-up to get blood flowing without spiking your heart rate.',
+    exercises:[
+      {name:'Neck Rolls',dur:'30s'},{name:'Shoulder Rolls',dur:'30s'},
+      {name:'Torso Twists',dur:'40s'},{name:'Leg Swings',dur:'40s'},
+      {name:'Hip Circles',dur:'40s'},{name:'Gentle Marching',dur:'40s'},
+      {name:'Cat-Cow Stretches',dur:'40s'},{name:'Wrist Circles',dur:'30s'},
+      {name:'Deep Breathing',dur:'40s'}
+    ]
+  },
+  {
+    id:6, name:'Eye + Wrist Reset', duration:'2 min', difficulty:'easy',
+    equipment:'None', category:'Micro-Break',
+    desc:'Screen fatigue killer. 2 minutes to reset your eyes and hands.',
+    exercises:[
+      {name:'20-20-20 Eye Focus',dur:'30s'},{name:'Eye Circles',dur:'20s'},
+      {name:'Wrist Rotations',dur:'20s'},{name:'Finger Stretches',dur:'20s'},
+      {name:'Palming Eyes',dur:'20s'},{name:'Neck Side Stretch',dur:'20s'}
+    ]
+  },
+  {
+    id:7, name:'Lunch Break Blast', duration:'8 min', difficulty:'medium',
+    equipment:'None', category:'Midday',
+    desc:'8-minute energizer for your lunch break — enough to shake off the fog.',
+    exercises:[
+      {name:'Jumping Jacks',dur:'40s'},{name:'Squat Hold',dur:'40s'},
+      {name:'Push-Ups',dur:'40s'},{name:'High Knees',dur:'40s'},
+      {name:'Lateral Lunges',dur:'40s'},{name:'Tricep Dips on Chair',dur:'40s'},
+      {name:'Plank to Downward Dog',dur:'40s'},{name:'Reverse Lunges',dur:'40s'},
+      {name:'Jump Rope Simulation',dur:'40s'},{name:'Standing Cobra Stretch',dur:'40s'},
+      {name:'Child's Pose',dur:'40s'}
+    ]
+  },
+  {
+    id:8, name:'Pre-Interview Pump', duration:'3 min', difficulty:'medium',
+    equipment:'None', category:'Confidence',
+    desc:'Quick confidence-boosting routine before any interview or big meeting.',
+    exercises:[
+      {name:'Power Pose Hold',dur:'30s'},{name:'Shoulder Rolls Back',dur:'20s'},
+      {name:'Wall Push-Ups',dur:'30s'},{name:'Deep Breathing (4-7-8)',dur:'30s'},
+      {name:'Chest Opener Stretch',dur:'30s'},{name:'Shake Out Hands',dur:'15s'},
+      {name:'Confident Standing Posture',dur:'25s'}
+    ]
+  },
+  {
+    id:9, name:'Study Break Sprint', duration:'4 min', difficulty:'hard',
+    equipment:'Small space', category:'Focus Reset',
+    desc:'High-intensity 4-minute blast to reset your brain after deep work.',
+    exercises:[
+      {name:'Burpees',dur:'40s'},{name:'High Knees',dur:'40s'},
+      {name:'Jump Squats',dur:'40s'},{name:'Push-Up Variations',dur:'40s'},
+      {name:'Mountain Climbers',dur:'40s'},{name:'Jumping Jacks',dur:'40s'}
+    ]
+  },
+  {
+    id:10, name:'End-of-Day Decompress', duration:'5 min', difficulty:'easy',
+    equipment:'Floor mat optional', category:'Wind-Down',
+    desc:'Stretch and breathe to close out the workday and de-stress.',
+    exercises:[
+      {name:'Standing Forward Fold',dur:'40s'},{name:'Seated Spinal Twist',dur:'40s'},
+      {name:'Figure-Four Hip Stretch',dur:'40s'},{name:'Cat-Cow Flow',dur:'40s'},
+      {name:'Child\'s Pose',dur:'40s'},{name:'Supine Knee Hug',dur:'40s'},
+      {name:'Legs Up the Wall',dur:'40s'},{name:'Savasana Breathing',dur:'40s'}
+    ]
+  }
+];
+
+// ─── SETTINGS ──────────────────────────────────────────────────────────────
+let cfg = {
+  focusDur: 25, hiitDur: 4, restDur: 5,
+  hiitWork: 30, hiitRest: 10,
+  sound: true, countdown: true
+};
+function loadCfg(){
+  const saved = S('cfg');
+  if(saved) try{cfg=JSON.parse(saved)}catch(e){}
+  // apply to UI
+  document.querySelectorAll('[data-group]').forEach(el=>{
+    const g=el.dataset.group, v=parseInt(el.dataset.val);
+    el.classList.toggle('selected', cfg[g]===v);
+  });
+  document.getElementById('soundToggle').checked = cfg.sound;
+  document.getElementById('countdownToggle').checked = cfg.countdown;
+}
+function saveSetting(k,v){cfg[k]=v;SS('cfg',cfg)}
+
+document.querySelectorAll('[data-group]').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const g=el.dataset.group, v=el.dataset.val;
+    const num = parseInt(v);
+    cfg[g]=num;
+    SS('cfg',cfg);
+    document.querySelectorAll(`[data-group="${g}"]`).forEach(x=>x.classList.remove('selected'));
+    el.classList.add('selected');
+    if(g==='focusDur'||g==='hiitDur'||g==='restDur') resetTimer();
+  });
+});
+
+// ─── AUDIO ─────────────────────────────────────────────────────────────────
+let audioCtx = null;
+function getCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function beep(freq=880, dur=0.15, type='sine', vol=0.3){
+  if(!cfg.sound) return;
+  try{
+    const ctx=getCtx(), o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+dur);
+    o.start(ctx.currentTime); o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function phaseTransitionSound(phase){
+  if(!cfg.sound) return;
+  if(phase==='focus'){beep(523,.15);setTimeout(()=>beep(659,.15),180);setTimeout(()=>beep(784,.3),360)}
+  else if(phase==='hiit'){beep(880,.1);setTimeout(()=>beep(1047,.1),120);setTimeout(()=>beep(1319,.2),240)}
+  else if(phase==='rest'){beep(392,.3,'triangle');setTimeout(()=>beep(329,.4,'triangle'),350)}
+}
+function countdownBeep(n){
+  if(!cfg.countdown) return;
+  beep(440+n*40, 0.12, 'square', 0.2);
+}
+
+// ─── TIMER STATE ───────────────────────────────────────────────────────────
+let mode = 'pomodoro';
+let running = false, interval = null;
+let timeLeft = 0, totalTime = 0;
+let phase = 'focus'; // focus | hiit | rest | work | tabwork | tabrest
+let round = 1, exIndex = 0;
+let focusMinutes = 0, hiitMinutes = 0, sessionStart = null;
+let activeRoutine = null;
+let tabataRound = 1, tabataPhase = 'work';
+
+function getModeConfig(){
+  if(mode==='pomodoro') return {focus:cfg.focusDur*60, hiit:cfg.hiitDur*60, rest:cfg.restDur*60};
+  if(mode==='hiit') return {work:cfg.hiitWork, rest:cfg.hiitRest};
+  if(mode==='tabata') return {work:20, rest:10, rounds:8};
+}
+
+function resetTimer(){
+  clearInterval(interval); running=false;
+  round=1; exIndex=0; tabataRound=1; tabataPhase='work';
+  focusMinutes=0; hiitMinutes=0; sessionStart=null;
+  document.getElementById('startBtn').textContent='▶ Start';
+  const mc=getModeConfig();
+  if(mode==='pomodoro'){phase='focus'; timeLeft=mc.focus; totalTime=mc.focus; updatePhaseUI('focus')}
+  else if(mode==='hiit'){phase='work'; timeLeft=mc.work; totalTime=mc.work; updatePhaseUI('work')}
+  else{tabataPhase='work'; phase='work'; timeLeft=20; totalTime=20; updatePhaseUI('tabwork')}
+  updateDisplay();
+  document.getElementById('infoRound').textContent=round;
+  document.getElementById('infoPhase').textContent=phaseName(phase);
+  document.getElementById('infoFocusMin').textContent=0;
+  document.getElementById('infoHiitMin').textContent=0;
+}
+
+function phaseName(p){
+  if(p==='focus') return 'Focus';
+  if(p==='hiit') return 'HIIT';
+  if(p==='rest') return 'Rest';
+  if(p==='work') return 'Work';
+  return p;
+}
+
+function updatePhaseUI(p){
+  const icon=document.getElementById('phaseIcon');
+  const label=document.getElementById('phaseLabel');
+  const ring=document.getElementById('ringFg');
+  const exDisp=document.getElementById('exerciseDisplay');
+  const exName=document.getElementById('exerciseName');
+  const exCount=document.getElementById('exerciseCount');
+  ring.classList.remove('focus','work','rest','pulse');
+  if(p==='focus'){icon.textContent='🧠';label.textContent='Deep Work';ring.classList.add('focus');exDisp.style.display='none'}
+  else if(p==='hiit'||p==='work'||p==='tabwork'){
+    icon.textContent='🔥';label.textContent=p==='tabwork'?'TABATA WORK':'HIIT';
+    ring.classList.add('work','pulse');
+    if(activeRoutine&&activeRoutine.exercises.length){
+      const ex=activeRoutine.exercises[exIndex%activeRoutine.exercises.length];
+      exDisp.style.display='block';
+      exName.textContent=ex.name;
+      exName.classList.remove('show');
+      setTimeout(()=>exName.classList.add('show'),50);
+      exCount.textContent=`Exercise ${(exIndex%activeRoutine.exercises.length)+1} of ${activeRoutine.exercises.length}`;
+    } else {exDisp.style.display='none'}
+  }
+  else if(p==='rest'||p==='tabrest'){
+    icon.textContent='😮‍💨';label.textContent=p==='tabrest'?'TABATA REST':'Rest';
+    ring.classList.add('rest');exDisp.style.display='none';
+  }
+  flashPhase(p);
+}
+
+function flashPhase(p){
+  const flash=document.getElementById('phaseFlash');
+  flash.classList.add('flash');
+  setTimeout(()=>flash.classList.remove('flash'),400);
+}
+
+function updateDisplay(){
+  const m=Math.floor(timeLeft/60), s=timeLeft%60;
+  document.getElementById('timerDisplay').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const pct=totalTime>0?timeLeft/totalTime:1;
+  const circ=2*Math.PI*116;
+  document.getElementById('ringFg').style.strokeDashoffset=circ*(1-pct);
+}
+
+function toggleTimer(){
+  if(running){
+    clearInterval(interval); running=false;
+    document.getElementById('startBtn').textContent='▶ Resume';
+  } else {
+    if(!sessionStart) sessionStart=Date.now();
+    running=true;
+    document.getElementById('startBtn').textContent='⏸ Pause';
+    interval=setInterval(tick, 1000);
+  }
+}
+
+function tick(){
+  if(timeLeft===3&&cfg.countdown){countdownBeep(3)}
+  if(timeLeft===2&&cfg.countdown){countdownBeep(2)}
+  if(timeLeft===1&&cfg.countdown){countdownBeep(1)}
+  timeLeft--;
+  if(mode==='pomodoro') focusMinutes+=phase==='focus'?1/60:0, hiitMinutes+=phase==='hiit'?1/60:0;
+  else if(mode==='hiit') hiitMinutes+=phase==='work'?1/60:0;
+  else hiitMinutes+=tabataPhase==='work'?1/60:0;
+  document.getElementById('infoFocusMin').textContent=Math.floor(focusMinutes);
+  document.getElementById('infoHiitMin').textContent=Math.floor(hiitMinutes);
+  if(timeLeft<=0) nextPhase();
+  else updateDisplay();
+}
+
+function nextPhase(){
+  const mc=getModeConfig();
+  if(mode==='pomodoro'){
+    if(phase==='focus'){
+      phase='hiit'; timeLeft=mc.hiit; totalTime=mc.hiit;
+      phaseTransitionSound('hiit'); updatePhaseUI('hiit');
+    } else if(phase==='hiit'){
+      exIndex++;
+      phase='rest'; timeLeft=mc.rest; totalTime=mc.rest;
+      phaseTransitionSound('rest'); updatePhaseUI('rest');
+    } else {
+      round++; phase='focus'; timeLeft=mc.focus; totalTime=mc.focus;
+      phaseTransitionSound('focus'); updatePhaseUI('focus');
+      document.getElementById('infoRound').textContent=round;
+      if(round>1&&phase==='focus') saveSession();
+    }
+  } else if(mode==='hiit'){
+    if(phase==='work'){
+      phase='rest'; timeLeft=mc.rest; totalTime=mc.rest;
+      exIndex++; phaseTransitionSound('rest'); updatePhaseUI('rest');
+    } else {
+      phase='work'; timeLeft=mc.work; totalTime=mc.work;
+      round++; phaseTransitionSound('hiit'); updatePhaseUI('work');
+      document.getElementById('infoRound').textContent=round;
+    }
+  } else { // tabata
+    if(tabataPhase==='work'){
+      tabataPhase='rest'; timeLeft=10; totalTime=10;
+      phaseTransitionSound('rest'); updatePhaseUI('tabrest');
+    } else {
+      tabataRound++;
+      if(tabataRound>8){
+        clearInterval(interval); running=false;
+        document.getElementById('startBtn').textContent='▶ Start';
+        showToast('🎉 Tabata Complete!');
+        saveSession(); return;
+      }
+      tabataPhase='work'; timeLeft=20; totalTime=20;
+      exIndex++; round=tabataRound;
+      phaseTransitionSound('hiit'); updatePhaseUI('tabwork');
+      document.getElementById('infoRound').textContent=tabataRound+'/8';
+    }
+  }
+  document.getElementById('infoPhase').textContent=phaseName(phase);
+  updateDisplay();
+}
+
+function skipPhase(){ if(running||timeLeft>0){timeLeft=0} }
+
+function saveSession(){
+  const sessions = JSON.parse(S('sessions')||'[]');
+  sessions.unshift({
+    date: new Date().toLocaleDateString(),
+    mode: mode==='pomodoro'?'Pomodoro-HIIT':mode==='hiit'?'Pure HIIT':'Tabata',
+    routine: activeRoutine?activeRoutine.name:'None',
+    focusMin: Math.round(focusMinutes),
+    hiitMin: Math.round(hiitMinutes),
+    total: Math.round((Date.now()-sessionStart)/60000),
+    ts: Date.now()
+  });
+  SS('sessions', sessions.slice(0,100));
+  showToast('Session saved!');
+}
+
+// ─── ROUTINES PANEL ────────────────────────────────────────────────────────
+function renderRoutines(){
+  const el = document.getElementById('routinesList');
+  const diffColors = {easy:'badge-easy',medium:'badge-medium',hard:'badge-hard'};
+  el.innerHTML = ROUTINES.map(r=>`
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">${r.name}</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:3px">${r.category} · ${r.duration}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-direction:column;align-items:flex-end">
+          <span class="badge-pill ${diffColors[r.difficulty]}">${r.difficulty.toUpperCase()}</span>
+          <span style="font-size:.72rem;color:var(--muted)">${r.equipment}</span>
+        </div>
+      </div>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px">${r.desc}</p>
+      <div class="ex-list">
+        ${r.exercises.map(e=>`<div class="ex-item"><span class="ex-name">${e.name}</span><span class="ex-dur">${e.dur}</span></div>`).join('')}
+      </div>
+      <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="startRoutine(${r.id})">▶ Start Routine</button>
+    </div>
+  `).join('');
+}
+
+function startRoutine(id){
+  activeRoutine = ROUTINES.find(r=>r.id===id);
+  exIndex=0;
+  document.getElementById('bannerName').textContent=activeRoutine.name;
+  document.getElementById('routineBanner').style.display='flex';
+  switchTab('timer');
+  resetTimer();
+  showToast(`Loaded: ${activeRoutine.name}`);
+}
+
+function clearRoutine(){
+  activeRoutine=null;
+  document.getElementById('routineBanner').style.display='none';
+  document.getElementById('exerciseDisplay').style.display='none';
+}
+
+// ─── HISTORY PANEL ─────────────────────────────────────────────────────────
+function renderHistory(){
+  const sessions = JSON.parse(S('sessions')||'[]');
+  // stats
+  const now = new Date(), weekAgo = new Date(now.getTime()-7*86400000);
+  const thisWeek = sessions.filter(s=>new Date(s.date)>=weekAgo);
+  const focusTotal = thisWeek.reduce((a,s)=>a+(s.focusMin||0),0);
+  const hiitTotal = thisWeek.reduce((a,s)=>a+(s.hiitMin||0),0);
+  // streak
+  const streak = calcStreak(sessions);
+  document.getElementById('historyStats').innerHTML=`
+    <div class="stat-card"><div class="stat-val">${thisWeek.length}</div><div class="stat-label">This Week</div></div>
+    <div class="stat-card"><div class="stat-val">${hiitTotal}</div><div class="stat-label">HIIT Min</div></div>
+    <div class="stat-card"><div class="stat-val">${focusTotal}</div><div class="stat-label">Focus Min</div></div>
+    <div class="stat-card"><div class="stat-val streak-fire">${streak.current}🔥</div><div class="stat-label">Streak (best ${streak.best})</div></div>
+  `;
+  const el=document.getElementById('historyList');
+  if(!sessions.length){el.innerHTML='<div class="empty"><div class="empty-icon">📊</div>No sessions yet. Start your first timer!</div>';return}
+  el.innerHTML=sessions.slice(0,30).map(s=>`
+    <div class="history-card">
+      <div>
+        <div class="h-mode">${s.mode} ${s.routine&&s.routine!=='None'?'· '+s.routine:''}</div>
+        <div class="h-meta">${s.date} · ${s.total||0} min total</div>
+      </div>
+      <div style="text-align:right;font-size:.78rem">
+        <div style="color:var(--green)">${s.focusMin||0}m focus</div>
+        <div style="color:var(--pink)">${s.hiitMin||0}m HIIT</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function calcStreak(sessions){
+  if(!sessions.length) return {current:0,best:0};
+  const dates=[...new Set(sessions.map(s=>s.date))].sort((a,b)=>new Date(b)-new Date(a));
+  let cur=0,best=0,prev=null;
+  for(const d of dates){
+    const dt=new Date(d);
+    if(!prev){cur=1}
+    else{
+      const diff=(prev-dt)/86400000;
+      if(diff<=1.5) cur++;
+      else break;
+    }
+    prev=dt; best=Math.max(best,cur);
+  }
+  return {current:cur,best:best};
+}
+
+// ─── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.tab===t));
+  document.querySelectorAll('.panel').forEach(el=>el.classList.toggle('active',el.id===`panel-${t}`));
+  if(t==='routines') renderRoutines();
+  if(t==='history') renderHistory();
+}
+document.querySelectorAll('.tab').forEach(el=>el.addEventListener('click',()=>switchTab(el.dataset.tab)));
+
+// ─── MODE BUTTONS ──────────────────────────────────────────────────────────
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mode=btn.dataset.mode;
+    resetTimer();
+  });
+});
+
+// ─── TOAST ─────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+loadCfg();
+resetTimer();
+</script>
+</body>
+</html>
