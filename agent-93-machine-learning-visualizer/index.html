@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agent #93 — Machine Learning Visualizer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f0a1e;color:#e2e8f0;min-height:100vh}
+header{background:#1a1535;border-bottom:1px solid #2d1f5e;padding:13px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.15rem;font-weight:700;color:#e040fb}
+.badge{background:#e040fb;color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px}
+.tabs{display:flex;background:#0f0a1e;border-bottom:2px solid #2d1f5e;padding:0 24px;gap:2px;overflow-x:auto}
+.tab{padding:11px 18px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .2s}
+.tab.active{color:#e040fb;border-bottom-color:#e040fb}
+.tab:hover{color:#f0abfc}
+.content{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.content.active{display:block}
+.card{background:#1a1535;border:1px solid #2d1f5e;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h3{color:#e040fb;margin-bottom:12px;font-size:.95rem}
+.btn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s}
+.btn-purple{background:#e040fb;color:#000}
+.btn-purple:hover{background:#c026d3}
+.btn-cyan{background:#00e5ff;color:#000}
+.btn-cyan:hover{background:#00bcd4}
+.btn-ghost{background:transparent;border:1px solid #2d1f5e;color:#9ca3af}
+.btn-ghost:hover{border-color:#e040fb;color:#e040fb}
+.btn-sm{padding:4px 10px;font-size:.73rem}
+label{display:block;font-size:.78rem;color:#9ca3af;margin-bottom:4px;margin-top:10px}
+input[type=range]{width:100%;accent-color:#e040fb}
+select{background:#0f0a1e;border:1px solid #2d1f5e;border-radius:8px;padding:6px 10px;color:#e2e8f0;font-size:.82rem;width:100%}
+canvas{border-radius:8px;background:#0a0818;display:block;max-width:100%}
+.viz-selector{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.viz-btn{padding:6px 14px;border-radius:20px;border:1px solid #2d1f5e;background:transparent;color:#9ca3af;font-size:.75rem;cursor:pointer;transition:all .2s}
+.viz-btn.active{background:#e040fb;color:#000;border-color:#e040fb}
+.algo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.algo-card{background:#1a1535;border:1px solid #2d1f5e;border-radius:10px;padding:16px}
+.algo-card h4{color:#00e5ff;margin-bottom:8px;font-size:.9rem}
+.algo-card p{font-size:.78rem;color:#9ca3af;margin-bottom:6px;line-height:1.5}
+.tag{display:inline-block;padding:2px 7px;border-radius:8px;font-size:.68rem;font-weight:600;margin-right:4px;margin-bottom:4px}
+.tag-p{background:rgba(224,64,251,.15);color:#e040fb}
+.tag-c{background:rgba(0,229,255,.15);color:#00e5ff}
+.tag-g{background:rgba(16,185,129,.15);color:#10b981}
+.concept-card{background:#1a1535;border:1px solid #2d1f5e;border-radius:10px;margin-bottom:12px;overflow:hidden}
+.concept-header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.concept-header h4{color:#e2e8f0;font-size:.9rem}
+.concept-body{padding:0 16px 16px;display:none}
+.concept-body.open{display:block}
+.qa-flip{perspective:600px;margin-bottom:8px;height:100px;cursor:pointer}
+.qa-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.qa-flip.flipped .qa-inner{transform:rotateY(180deg)}
+.qa-front,.qa-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:10px;padding:14px 16px;display:flex;align-items:center;font-size:.82rem}
+.qa-front{background:#1a1535;border:1px solid #2d1f5e;color:#e2e8f0}
+.qa-back{background:rgba(224,64,251,.08);border:1px solid #e040fb;color:#9ca3af;transform:rotateY(180deg);font-size:.75rem;overflow:auto}
+.status-btn{padding:3px 8px;border-radius:6px;border:none;cursor:pointer;font-size:.7rem;font-weight:600;margin-top:6px}
+.got-it{background:rgba(16,185,129,.2);color:#10b981}
+.review{background:rgba(251,191,36,.2);color:#fbbf24}
+.compare-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.78rem}
+.compare-table th{background:#2d1f5e;padding:8px 10px;text-align:left;color:#e040fb}
+.compare-table td{padding:7px 10px;border-bottom:1px solid #1a1535}
+.controls-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.controls-row label{margin:0;white-space:nowrap}
+</style>
+</head>
+<body>
+<header>
+  <span class="badge">#93</span>
+  <h1>🧠 Machine Learning Visualizer</h1>
+  <span style="font-size:.82rem;color:#6b7280">Stop memorizing ML. Start seeing it.</span>
+</header>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('visualize',this)">VISUALIZE</button>
+  <button class="tab" onclick="showTab('algorithms',this)">ALGORITHMS</button>
+  <button class="tab" onclick="showTab('concepts',this)">CONCEPTS</button>
+  <button class="tab" onclick="showTab('interview',this)">INTERVIEW</button>
+</div>
+
+<!-- VISUALIZE -->
+<div id="tab-visualize" class="content active">
+  <div class="viz-selector" id="viz-selector"></div>
+  <div id="viz-container"></div>
+</div>
+
+<!-- ALGORITHMS -->
+<div id="tab-algorithms" class="content">
+  <div class="algo-grid" id="algo-grid"></div>
+  <div class="card" style="margin-top:16px">
+    <h3>Algorithm Comparison</h3>
+    <table class="compare-table">
+      <tr><th>Algorithm</th><th>Type</th><th>Parametric</th><th>Interpretable</th><th>Time Complexity</th></tr>
+      <tr><td>Linear Regression</td><td class="tag tag-p">Supervised</td><td style="color:#10b981">Yes</td><td style="color:#10b981">High</td><td>O(n·d)</td></tr>
+      <tr><td>Logistic Regression</td><td class="tag tag-p">Supervised</td><td style="color:#10b981">Yes</td><td style="color:#10b981">High</td><td>O(n·d)</td></tr>
+      <tr><td>Decision Tree</td><td class="tag tag-p">Supervised</td><td style="color:#ef4444">No</td><td style="color:#10b981">High</td><td>O(n·d·log n)</td></tr>
+      <tr><td>Random Forest</td><td class="tag tag-p">Supervised</td><td style="color:#ef4444">No</td><td style="color:#fbbf24">Medium</td><td>O(k·n·d·log n)</td></tr>
+      <tr><td>SVM</td><td class="tag tag-p">Supervised</td><td style="color:#fbbf24">Depends</td><td style="color:#ef4444">Low</td><td>O(n²~n³)</td></tr>
+      <tr><td>K-Means</td><td class="tag tag-c">Unsupervised</td><td style="color:#ef4444">No</td><td style="color:#10b981">High</td><td>O(k·n·i)</td></tr>
+      <tr><td>KNN</td><td class="tag tag-p">Supervised</td><td style="color:#ef4444">No</td><td style="color:#fbbf24">Medium</td><td>O(n·d) per query</td></tr>
+      <tr><td>Neural Network</td><td class="tag tag-p">Supervised</td><td style="color:#ef4444">No</td><td style="color:#ef4444">Black box</td><td>O(epochs·n·layers)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- CONCEPTS -->
+<div id="tab-concepts" class="content">
+  <div id="concepts-list"></div>
+</div>
+
+<!-- INTERVIEW -->
+<div id="tab-interview" class="content">
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" onclick="filterQA('all')">All</button>
+    <button class="btn btn-ghost btn-sm" onclick="filterQA('review')">Needs Review</button>
+    <button class="btn btn-ghost btn-sm" onclick="filterQA('got')">Got It</button>
+    <span id="qa-stats" style="font-size:.75rem;color:#6b7280;align-self:center"></span>
+  </div>
+  <div id="qa-list"></div>
+</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ─── VISUALIZATIONS ──────────────────────────────────────────────────────
+const VIZS = ['Linear Regression','Logistic Regression','K-Nearest Neighbors','K-Means Clustering','Neural Network','Decision Tree'];
+let activeViz = 0;
+
+function renderVizSelector() {
+  document.getElementById('viz-selector').innerHTML = VIZS.map((v,i)=>
+    `<button class="viz-btn${i===activeViz?' active':''}" onclick="setViz(${i})">${v}</button>`
+  ).join('');
+}
+
+function setViz(i) {
+  activeViz = i;
+  renderVizSelector();
+  renderViz();
+}
+
+function renderViz() {
+  const c = document.getElementById('viz-container');
+  c.innerHTML = '';
+  const fns = [renderLinReg, renderLogReg, renderKNN, renderKMeans, renderNeuralNet, renderDecisionTree];
+  fns[activeViz]();
+}
+
+// Seeded random
+function seededRand(seed) {
+  let s = seed;
+  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+
+// Linear Regression
+function renderLinReg() {
+  const rand = seededRand(42);
+  const pts = Array.from({length:30},(_,i)=>({ x:i*10+rand()*20, y:i*8+rand()*60-30+(rand()>0.5?20:-20) }));
+  const div = document.createElement('div');
+  div.innerHTML = `<div class="card">
+    <h3>Linear Regression</h3>
+    <div class="controls-row">
+      <label>Learning Rate: <span id="lr-val">0.05</span></label>
+      <input type="range" min="1" max="10" value="5" id="lr-slider" oninput="updateLinReg()" style="width:160px">
+      <button class="btn btn-purple btn-sm" onclick="animateLinReg()">▶ Animate Fit</button>
+    </div>
+    <canvas id="linreg-canvas" width="600" height="300"></canvas>
+    <div style="margin-top:8px;font-size:.78rem;color:#9ca3af" id="linreg-loss">Loss: —</div>
+  </div>`;
+  document.getElementById('viz-container').appendChild(div);
+  window._lrPts = pts; window._lrM = 0; window._lrB = 200;
+  drawLinReg();
+}
+
+function drawLinReg() {
+  const canvas = document.getElementById('linreg-canvas');
+  if (!canvas) return;
+  canvas.width = Math.min(600, canvas.parentElement.clientWidth - 40);
+  const ctx = canvas.getContext('2d');
+  const W=canvas.width, H=300;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0a0818'; ctx.fillRect(0,0,W,H);
+  const pts = window._lrPts;
+  // scale
+  const maxX=310, maxY=300;
+  const sx=x=>20+x/maxX*(W-40);
+  const sy=y=>H-10-y/maxY*(H-20);
+  // axes
+  ctx.strokeStyle='#2d1f5e'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(20,H-10); ctx.lineTo(W-10,H-10); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(20,10); ctx.lineTo(20,H-10); ctx.stroke();
+  // points
+  pts.forEach(p=>{ ctx.fillStyle='#00e5ff'; ctx.beginPath(); ctx.arc(sx(p.x),sy(p.y),4,0,Math.PI*2); ctx.fill(); });
+  // line
+  const m=window._lrM, b=window._lrB;
+  ctx.strokeStyle='#e040fb'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(sx(0),sy(b)); ctx.lineTo(sx(maxX),sy(m*maxX+b)); ctx.stroke();
+  // loss
+  const loss = pts.reduce((acc,p)=>acc+Math.pow(m*p.x+b-p.y,2),0)/pts.length;
+  const el = document.getElementById('linreg-loss');
+  if(el) el.textContent='MSE Loss: '+loss.toFixed(1);
+}
+
+function updateLinReg() {
+  const lr = document.getElementById('lr-slider').value/100000;
+  document.getElementById('lr-val').textContent=(lr*1000).toFixed(3);
+}
+
+let _lrAnim = null;
+function animateLinReg() {
+  if(_lrAnim) { clearInterval(_lrAnim); _lrAnim=null; return; }
+  window._lrM=0; window._lrB=200;
+  const lr = 0.000005;
+  _lrAnim = setInterval(()=>{
+    const pts=window._lrPts; let gm=0,gb=0;
+    pts.forEach(p=>{ const err=window._lrM*p.x+window._lrB-p.y; gm+=err*p.x; gb+=err; });
+    window._lrM -= lr*gm/pts.length; window._lrB -= lr*gb/pts.length;
+    drawLinReg();
+    const loss=pts.reduce((a,p)=>a+Math.pow(window._lrM*p.x+window._lrB-p.y,2),0)/pts.length;
+    if(loss<100) { clearInterval(_lrAnim); _lrAnim=null; }
+  }, 50);
+}
+
+// Logistic Regression
+function renderLogReg() {
+  const rand = seededRand(99);
+  const pts = [];
+  for(let i=0;i<40;i++) pts.push({x:80+rand()*120,y:100+rand()*120,c:0});
+  for(let i=0;i<40;i++) pts.push({x:200+rand()*120,y:200+rand()*120,c:1});
+  window._logPts=pts;
+  const div=document.createElement('div');
+  div.innerHTML=`<div class="card"><h3>Logistic Regression — Decision Boundary</h3>
+    <div class="controls-row">
+      <label>Threshold: <span id="thresh-val">0.50</span></label>
+      <input type="range" min="10" max="90" value="50" id="thresh-slider" oninput="drawLogReg()" style="width:160px">
+    </div>
+    <canvas id="logreg-canvas" width="500" height="350"></canvas>
+    <div style="margin-top:8px;font-size:.78rem;color:#9ca3af">Blue = Class 0 · Purple = Class 1 · Line = decision boundary at threshold</div>
+  </div>`;
+  document.getElementById('viz-container').appendChild(div);
+  drawLogReg();
+}
+
+function drawLogReg() {
+  const canvas=document.getElementById('logreg-canvas'); if(!canvas) return;
+  canvas.width=Math.min(500,canvas.parentElement.clientWidth-40);
+  const ctx=canvas.getContext('2d'), W=canvas.width, H=350;
+  ctx.fillStyle='#0a0818'; ctx.fillRect(0,0,W,H);
+  const thresh=+document.getElementById('thresh-slider').value/100;
+  document.getElementById('thresh-val').textContent=thresh.toFixed(2);
+  const pts=window._logPts;
+  pts.forEach(p=>{
+    ctx.fillStyle=p.c===0?'#00e5ff':'#e040fb';
+    ctx.beginPath(); ctx.arc(p.x/400*W,p.y/400*H,5,0,Math.PI*2); ctx.fill();
+  });
+  // simple linear boundary
+  const bx = thresh*400;
+  ctx.strokeStyle='#fbbf24'; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.moveTo(bx/400*W,0); ctx.lineTo(bx/400*W,H); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// KNN
+function renderKNN() {
+  const rand=seededRand(7);
+  const trainPts=[];
+  for(let i=0;i<25;i++) trainPts.push({x:50+rand()*150,y:50+rand()*150,c:0});
+  for(let i=0;i<25;i++) trainPts.push({x:200+rand()*150,y:200+rand()*150,c:1});
+  window._knnPts=trainPts; window._knnTest=null;
+  const div=document.createElement('div');
+  div.innerHTML=`<div class="card"><h3>K-Nearest Neighbors — Click to classify a point</h3>
+    <div class="controls-row">
+      <label>K: <span id="k-val">3</span></label>
+      <input type="range" min="1" max="9" step="2" value="3" id="k-slider" oninput="drawKNN()" style="width:120px">
+    </div>
+    <canvas id="knn-canvas" width="500" height="380" style="cursor:crosshair"></canvas>
+    <div style="margin-top:8px;font-size:.78rem;color:#9ca3af" id="knn-pred">Click the canvas to place a test point</div>
+  </div>`;
+  document.getElementById('viz-container').appendChild(div);
+  document.getElementById('knn-canvas').onclick = e => {
+    const r=e.target.getBoundingClientRect();
+    window._knnTest={x:(e.clientX-r.left)/e.target.width*400,y:(e.clientY-r.top)/e.target.height*380};
+    drawKNN();
+  };
+  drawKNN();
+}
+
+function drawKNN() {
+  const canvas=document.getElementById('knn-canvas'); if(!canvas) return;
+  canvas.width=Math.min(500,canvas.parentElement.clientWidth-40);
+  const ctx=canvas.getContext('2d'), W=canvas.width, H=380;
+  const K=+document.getElementById('k-slider').value;
+  document.getElementById('k-val').textContent=K;
+  ctx.fillStyle='#0a0818'; ctx.fillRect(0,0,W,H);
+  const pts=window._knnPts;
+  const sx=x=>x/400*W, sy=y=>y/380*H;
+  pts.forEach(p=>{
+    ctx.fillStyle=p.c===0?'#00e5ff':'#e040fb';
+    ctx.beginPath(); ctx.arc(sx(p.x),sy(p.y),5,0,Math.PI*2); ctx.fill();
+  });
+  const test=window._knnTest;
+  if(test){
+    const dists=pts.map((p,i)=>({d:Math.hypot(p.x-test.x,p.y-test.y),i,c:p.c})).sort((a,b)=>a.d-b.d).slice(0,K);
+    dists.forEach(n=>{
+      ctx.strokeStyle='rgba(251,191,36,0.4)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(sx(test.x),sy(test.y)); ctx.lineTo(sx(pts[n.i].x),sy(pts[n.i].y)); ctx.stroke();
+    });
+    const vote=dists.reduce((a,n)=>a+n.c,0)/K;
+    const pred=vote>0.5?1:0;
+    ctx.fillStyle=pred===0?'#00e5ff':'#e040fb';
+    ctx.beginPath(); ctx.arc(sx(test.x),sy(test.y),8,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+    document.getElementById('knn-pred').textContent=`Predicted: Class ${pred} (${K} nearest neighbors: ${dists.filter(n=>n.c===0).length} blue, ${dists.filter(n=>n.c===1).length} purple)`;
+  }
+}
+
+// K-Means
+function renderKMeans() {
+  const rand=seededRand(123);
+  const pts=Array.from({length:60},()=>({x:30+rand()*440,y:30+rand()*320}));
+  window._kmPts=pts; window._kmCentroids=[]; window._kmAssign=[];
+  const div=document.createElement('div');
+  div.innerHTML=`<div class="card"><h3>K-Means Clustering</h3>
+    <div class="controls-row">
+      <label>K: <span id="km-k-val">3</span></label>
+      <input type="range" min="2" max="6" value="3" id="km-k" oninput="initKMeans()" style="width:100px">
+      <button class="btn btn-purple btn-sm" onclick="stepKMeans()">Step</button>
+      <button class="btn btn-cyan btn-sm" onclick="runKMeans()">▶ Run All</button>
+      <button class="btn btn-ghost btn-sm" onclick="initKMeans()">Reset</button>
+    </div>
+    <canvas id="kmeans-canvas" width="500" height="360"></canvas>
+    <div style="margin-top:8px;font-size:.78rem;color:#9ca3af" id="km-status">Click Reset to initialize centroids</div>
+  </div>`;
+  document.getElementById('viz-container').appendChild(div);
+  initKMeans();
+}
+
+function initKMeans() {
+  const K=+document.getElementById('km-k').value;
+  document.getElementById('km-k-val').textContent=K;
+  const rand=seededRand(Date.now()&0xffff);
+  window._kmCentroids=Array.from({length:K},()=>({x:30+rand()*440,y:30+rand()*320}));
+  window._kmAssign=window._kmPts.map(()=>0);
+  drawKMeans();
+  document.getElementById('km-status').textContent=`K=${K} initialized. Click Step or Run All.`;
+}
+
+function assignKMeans() {
+  window._kmPts.forEach((p,i)=>{
+    let minD=Infinity,best=0;
+    window._kmCentroids.forEach((c,ci)=>{ const d=Math.hypot(p.x-c.x,p.y-c.y); if(d<minD){minD=d;best=ci;} });
+    window._kmAssign[i]=best;
+  });
+}
+
+function updateCentroids() {
+  const K=window._kmCentroids.length;
+  const newC=Array.from({length:K},()=>({x:0,y:0,n:0}));
+  window._kmPts.forEach((p,i)=>{ const a=window._kmAssign[i]; newC[a].x+=p.x; newC[a].y+=p.y; newC[a].n++; });
+  newC.forEach((c,i)=>{ if(c.n>0){window._kmCentroids[i]={x:c.x/c.n,y:c.y/c.n};} });
+}
+
+function stepKMeans() { assignKMeans(); updateCentroids(); drawKMeans(); }
+
+let _kmRunInterval=null;
+function runKMeans() {
+  if(_kmRunInterval){clearInterval(_kmRunInterval);_kmRunInterval=null;return;}
+  let iters=0;
+  _kmRunInterval=setInterval(()=>{
+    assignKMeans(); updateCentroids(); drawKMeans(); iters++;
+    document.getElementById('km-status').textContent=`Iteration ${iters}`;
+    if(iters>=20){clearInterval(_kmRunInterval);_kmRunInterval=null;document.getElementById('km-status').textContent=`Converged after ${iters} iterations`;}
+  },200);
+}
+
+function drawKMeans() {
+  const canvas=document.getElementById('kmeans-canvas'); if(!canvas) return;
+  canvas.width=Math.min(500,canvas.parentElement.clientWidth-40);
+  const ctx=canvas.getContext('2d'), W=canvas.width, H=360;
+  ctx.fillStyle='#0a0818'; ctx.fillRect(0,0,W,H);
+  const K=window._kmCentroids.length;
+  const colors=['#e040fb','#00e5ff','#10b981','#fbbf24','#f97316','#a78bfa'];
+  const sx=x=>x/500*W, sy=y=>y/400*H;
+  window._kmPts.forEach((p,i)=>{
+    const a=window._kmAssign[i];
+    ctx.fillStyle=colors[a]+'88';
+    ctx.beginPath(); ctx.arc(sx(p.x),sy(p.y),4,0,Math.PI*2); ctx.fill();
+  });
+  window._kmCentroids.forEach((c,i)=>{
+    ctx.strokeStyle=colors[i]; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(sx(c.x)-8,sy(c.y)); ctx.lineTo(sx(c.x)+8,sy(c.y)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx(c.x),sy(c.y)-8); ctx.lineTo(sx(c.x),sy(c.y)+8); ctx.stroke();
+    ctx.beginPath(); ctx.arc(sx(c.x),sy(c.y),12,0,Math.PI*2); ctx.stroke();
+  });
+}
+
+// Neural Network Diagram
+function renderNeuralNet() {
+  const div=document.createElement('div');
+  div.innerHTML=`<div class="card"><h3>Neural Network — Forward Pass Visualization</h3>
+    <div class="controls-row">
+      <label>Activation:</label>
+      <select id="act-fn" onchange="drawNN()" style="width:auto">
+        <option value="relu">ReLU</option>
+        <option value="sigmoid">Sigmoid</option>
+        <option value="tanh">Tanh</option>
+      </select>
+      <button class="btn btn-purple btn-sm" onclick="animateNN()">▶ Animate Forward Pass</button>
+    </div>
+    <canvas id="nn-canvas" width="580" height="320"></canvas>
+  </div>`;
+  document.getElementById('viz-container').appendChild(div);
+  window._nnActive=-1;
+  drawNN();
+}
+
+function drawNN() {
+  const canvas=document.getElementById('nn-canvas'); if(!canvas) return;
+  canvas.width=Math.min(580,canvas.parentElement.clientWidth-40);
+  const ctx=canvas.getContext('2d'), W=canvas.width, H=320;
+  ctx.fillStyle='#0a0818'; ctx.fillRect(0,0,W,H);
+  const act=document.getElementById('act-fn').value;
+  const actColor={relu:'#e040fb',sigmoid:'#00e5ff',tanh:'#10b981'};
+  const layers=[4,6,5,3];
+  const layerX=[0.12,0.37,0.63,0.88].map(f=>f*W);
+  const neurons=[];
+  layers.forEach((n,li)=>{
+    const col=[];
+    for(let ni=0;ni<n;ni++){
+      const y=H/2+(ni-(n-1)/2)*50;
+      col.push({x:layerX[li],y,li,ni,active:window._nnActive>=li});
+    }
+    neurons.push(col);
+  });
+  // connections
+  for(let li=0;li<layers.length-1;li++){
+    neurons[li].forEach(a=>{
+      neurons[li+1].forEach(b=>{
+        const alpha=window._nnActive>=li?0.3:0.1;
+        ctx.strokeStyle=`rgba(150,100,200,${alpha})`; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+      });
+    });
+  }
+  // neurons
+  neurons.forEach((col,li)=>{
+    col.forEach(n=>{
+      const active=window._nnActive>=li;
+      ctx.fillStyle=active?actColor[act]:'#2d1f5e';
+      ctx.strokeStyle=active?actColor[act]:'#4b5563';
+      ctx.lineWidth=active?2:1;
+      ctx.beginPath(); ctx.arc(n.x,n.y,12,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    });
+  });
+  const names=['Input','Hidden 1','Hidden 2','Output'];
+  names.forEach((name,li)=>{
+    ctx.fillStyle='#6b7280'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(name,layerX[li],H-8);
+    ctx.fillText(`(${layers[li]})`,layerX[li],H+6);
+  });
+  // activation label
+  ctx.fillStyle=actColor[act]; ctx.font='12px sans-serif'; ctx.textAlign='left';
+  ctx.fillText(`Activation: ${act.toUpperCase()}`,10,18);
+}
+
+let _nnAnim=null;
+function animateNN() {
+  if(_nnAnim){clearInterval(_nnAnim);_nnAnim=null;window._nnActive=-1;drawNN();return;}
+  window._nnActive=-1;
+  _nnAnim=setInterval(()=>{
+    window._nnActive++;
+    drawNN();
+    if(window._nnActive>=3){clearInterval(_nnAnim);_nnAnim=null;setTimeout(()=>{window._nnActive=-1;drawNN();},800);}
+  },500);
+}
+
+// Decision Tree
+function renderDecisionTree() {
+  const div=document.createElement('div');
+  div.innerHTML=`<div class="card"><h3>Decision Tree</h3>
+    <div style="font-size:.78rem;color:#9ca3af;margin-bottom:12px">Iris-like dataset. Select a sample to highlight its decision path.</div>
+    <select id="dt-sample" onchange="drawDT()" style="width:auto;margin-bottom:12px">
+      <option value="0">Sample A: Sepal=5.1, Petal=1.4</option>
+      <option value="1">Sample B: Sepal=6.4, Petal=4.5</option>
+      <option value="2">Sample C: Sepal=6.7, Petal=5.6</option>
+    </select>
+    <div id="dt-tree" style="font-size:.82rem"></div>
+    <div style="margin-top:12px;font-size:.8rem;color:#9ca3af" id="dt-path"></div>
+  </div>`;
+  document.getElementById('viz-container').appendChild(div);
+  drawDT();
+}
+
+function drawDT() {
+  const sample=+document.getElementById('dt-sample').value;
+  const paths=[
+    ['Petal Length ≤ 2.45?','YES → Setosa','',''],
+    ['Petal Length ≤ 2.45?','NO','Petal Width ≤ 1.75?','YES → Versicolor'],
+    ['Petal Length ≤ 2.45?','NO','Petal Width ≤ 1.75?','NO → Virginica'],
+  ];
+  const results=['Iris Setosa (Class 0)','Iris Versicolor (Class 1)','Iris Virginica (Class 2)'];
+  const p=paths[sample];
+
+  function node(text,active,indent=0){
+    return `<div style="margin-left:${indent*24}px;margin-bottom:6px;padding:8px 12px;background:${active?'rgba(224,64,251,0.15)':'#1a1535'};border:1px solid ${active?'#e040fb':'#2d1f5e'};border-radius:8px;display:inline-block;min-width:200px">${text}</div>`;
+  }
+  const html=node(p[0],true,0)+'<br/>'+
+    (sample===0?node('→ '+p[1],true,1):node('→ NO',false,1)+'<br/>'+node(p[2],true,2)+'<br/>'+node('→ '+p[3],true,3));
+  document.getElementById('dt-tree').innerHTML=html;
+  document.getElementById('dt-path').textContent='Prediction: '+results[sample];
+}
+
+// ─── ALGORITHMS ─────────────────────────────────────────────────────────
+const ALGOS=[
+  {name:'Linear Regression',what:'Fits a line (or hyperplane) to predict a continuous output.',when:'Predict house prices, salary from experience, stock trends.',assumptions:'Linear relationship, homoscedasticity, no multicollinearity.',pros:'Fast, interpretable, no hyperparameters',cons:'Fails with non-linear data, sensitive to outliers',complex:'O(n·d) training',example:'Predict salary from years of experience'},
+  {name:'Logistic Regression',what:'Predicts binary probability using sigmoid function. Despite the name, it\'s a classifier.',when:'Spam detection, disease diagnosis, click prediction.',assumptions:'Linear decision boundary, features independent.',pros:'Fast, probabilistic output, interpretable coefficients',cons:'Linear boundary only, needs feature engineering for complex data',complex:'O(n·d) per epoch',example:'Email spam / not spam'},
+  {name:'Decision Tree',what:'Recursively splits data on the best feature threshold (max information gain / min Gini).',when:'Interpretable decisions needed, mixed feature types.',assumptions:'None! Non-parametric.',pros:'Human-readable, handles missing values, non-linear',cons:'Overfits easily, unstable to small data changes',complex:'O(n·d·log n) build, O(depth) predict',example:'Loan approval decisions'},
+  {name:'Random Forest',what:'Ensemble of decision trees, each trained on random subset of data + features. Majority vote.',when:'General-purpose classification/regression. Strong baseline.',assumptions:'None. Non-parametric.',pros:'Robust, handles overfitting, feature importance',cons:'Slow to predict, black box, large memory',complex:'O(k·n·d·log n)',example:'Medical diagnosis, fraud detection'},
+  {name:'SVM',what:'Finds the maximum-margin hyperplane between classes. Kernel trick extends to non-linear.',when:'High-dimensional data (text), small-medium datasets.',assumptions:'Features should be normalized.',pros:'Works in high dims, robust to outliers (margin)',cons:'Slow on large datasets, kernel choice is tricky',complex:'O(n²) to O(n³)',example:'Text classification, image recognition (pre-deep learning)'},
+  {name:'K-Means',what:'Partitions data into K clusters by iteratively assigning points to nearest centroid and updating centroids.',when:'Customer segmentation, document clustering, image compression.',assumptions:'Clusters are spherical, similar size.',pros:'Simple, fast, scales well',cons:'Must choose K, sensitive to initialization, fails with non-spherical clusters',complex:'O(k·n·i) per iteration',example:'Customer segments by purchase behavior'},
+  {name:'K-NN',what:'Classifies by majority vote of K nearest training examples by distance.',when:'Small datasets, baseline classifier, when simplicity matters.',assumptions:'None. Lazy learner — stores all data.',pros:'Simple, no training, naturally multi-class',cons:'Slow prediction O(n), high memory, sensitive to irrelevant features',complex:'O(n·d) per query',example:'Recommendation: users similar to you also bought...'},
+  {name:'Neural Network',what:'Layers of interconnected neurons. Each layer learns hierarchical representations via backpropagation.',when:'Images, text, speech, complex non-linear patterns.',assumptions:'Lots of data, compute available.',pros:'State-of-the-art on complex data, flexible architecture',cons:'Black box, data hungry, needs tuning, expensive',complex:'O(epochs × n × parameters)',example:'Image classification, language translation, ChatGPT'},
+];
+
+function renderAlgos() {
+  document.getElementById('algo-grid').innerHTML=ALGOS.map(a=>`
+    <div class="algo-card">
+      <h4>${a.name}</h4>
+      <p><strong style="color:#e040fb">What:</strong> ${a.what}</p>
+      <p><strong style="color:#00e5ff">When:</strong> ${a.when}</p>
+      <p><strong style="color:#10b981">Pros:</strong> ${a.pros}</p>
+      <p><strong style="color:#ef4444">Cons:</strong> ${a.cons}</p>
+      <div style="margin-top:6px">
+        <span class="tag tag-g">⏱ ${a.complex}</span>
+        <div style="margin-top:6px;font-size:.73rem;color:#6b7280">Example: ${a.example}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── CONCEPTS ────────────────────────────────────────────────────────────
+const CONCEPTS=[
+  {title:'Confusion Matrix Calculator',desc:'Input TP/FP/TN/FN to compute all metrics.',
+   html:`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+    <div><label>True Positives (TP)</label><input type="number" id="cm-tp" value="85" oninput="calcCM()"></div>
+    <div><label>False Positives (FP)</label><input type="number" id="cm-fp" value="10" oninput="calcCM()"></div>
+    <div><label>False Negatives (FN)</label><input type="number" id="cm-fn" value="5" oninput="calcCM()"></div>
+    <div><label>True Negatives (TN)</label><input type="number" id="cm-tn" value="100" oninput="calcCM()"></div>
+   </div><div id="cm-results" style="font-size:.82rem"></div>`,
+   init:`calcCM()`},
+  {title:'Gradient Descent Animation',desc:'Watch the ball roll down the loss curve.',
+   html:`<div class="controls-row">
+    <label>Step Size: <span id="gd-step-val">0.05</span></label>
+    <input type="range" min="1" max="20" value="5" id="gd-step" style="width:120px" oninput="document.getElementById('gd-step-val').textContent=(this.value/100).toFixed(2)">
+    <button class="btn btn-purple btn-sm" onclick="animateGD()">▶ Run</button>
+    <button class="btn btn-ghost btn-sm" onclick="resetGD()">Reset</button>
+   </div><canvas id="gd-canvas" width="500" height="220"></canvas>`,
+   init:`resetGD()`},
+  {title:'Bias-Variance Tradeoff',desc:'Move the slider to see underfitting → overfitting.',
+   html:`<div class="controls-row">
+    <label>Model Complexity: <span id="bv-deg-val">1</span></label>
+    <input type="range" min="1" max="10" value="1" id="bv-deg" style="width:160px" oninput="drawBV()">
+   </div><canvas id="bv-canvas" width="500" height="250"></canvas>
+   <div style="margin-top:8px;font-size:.78rem;color:#9ca3af" id="bv-label"></div>`,
+   init:`drawBV()`},
+];
+
+function calcCM() {
+  const tp=+document.getElementById('cm-tp')?.value||0;
+  const fp=+document.getElementById('cm-fp')?.value||0;
+  const fn=+document.getElementById('cm-fn')?.value||0;
+  const tn=+document.getElementById('cm-tn')?.value||0;
+  const total=tp+fp+fn+tn;
+  const acc=total?(tp+tn)/total*100:0;
+  const prec=tp+fp?tp/(tp+fp)*100:0;
+  const rec=tp+fn?tp/(tp+fn)*100:0;
+  const f1=prec+rec?2*prec*rec/(prec+rec):0;
+  const el=document.getElementById('cm-results');
+  if(el) el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+    ${[['Accuracy',acc],['Precision',prec],['Recall',rec],['F1 Score',f1]].map(([n,v])=>`
+    <div style="background:#0a0818;border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:.7rem;color:#6b7280;margin-bottom:4px">${n}</div>
+      <div style="font-size:1.2rem;font-weight:700;color:#e040fb">${v.toFixed(1)}%</div>
+    </div>`).join('')}
+   </div>`;
+}
+
+let _gdX=3,_gdAnim=null;
+function resetGD() {
+  _gdX=3.0; if(_gdAnim){clearInterval(_gdAnim);_gdAnim=null;} drawGD();
+}
+function animateGD() {
+  if(_gdAnim){clearInterval(_gdAnim);_gdAnim=null;return;}
+  _gdAnim=setInterval(()=>{
+    const lr=+document.getElementById('gd-step').value/100;
+    const grad=2*_gdX;
+    _gdX-=lr*grad; drawGD();
+    if(Math.abs(_gdX)<0.05){clearInterval(_gdAnim);_gdAnim=null;}
+  },80);
+}
+function drawGD() {
+  const canvas=document.getElementById('gd-canvas'); if(!canvas)return;
+  canvas.width=Math.min(500,canvas.parentElement.clientWidth-40);
+  const ctx=canvas.getContext('2d'),W=canvas.width,H=220;
+  ctx.fillStyle='#0a0818'; ctx.fillRect(0,0,W,H);
+  const fn=x=>x*x;
+  const sx=x=>(x+4)/8*W, sy=y=>H-20-y/18*(H-40);
+  ctx.strokeStyle='#2d1f5e'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,sy(0)); ctx.lineTo(W,sy(0)); ctx.stroke();
+  ctx.strokeStyle='#00e5ff'; ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let x=-4;x<=4;x+=0.05){ const y=fn(x); if(x===-4) ctx.moveTo(sx(x),sy(y)); else ctx.lineTo(sx(x),sy(y)); }
+  ctx.stroke();
+  const y=fn(_gdX);
+  ctx.fillStyle='#e040fb';
+  ctx.beginPath(); ctx.arc(sx(_gdX),sy(y),8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#9ca3af'; ctx.font='11px sans-serif'; ctx.textAlign='left';
+  ctx.fillText(`x=${_gdX.toFixed(3)}  loss=${y.toFixed(3)}`,6,16);
+}
+
+function drawBV() {
+  const deg=+document.getElementById('bv-deg').value;
+  document.getElementById('bv-deg-val').textContent=deg;
+  const canvas=document.getElementById('bv-canvas'); if(!canvas)return;
+  canvas.width=Math.min(500,canvas.parentElement.clientWidth-40);
+  const ctx=canvas.getContext('2d'),W=canvas.width,H=250;
+  ctx.fillStyle='#0a0818'; ctx.fillRect(0,0,W,H);
+  const pts=[];
+  const rand=seededRand(55);
+  for(let i=0;i<20;i++){const x=i/19;pts.push({x,y:Math.sin(x*Math.PI*2)*0.4+0.5+rand()*0.15-0.075});}
+  const sx=x=>x*W,sy=y=>(1-y)*H;
+  ctx.strokeStyle='#00e5ff'; ctx.lineWidth=1;
+  ctx.beginPath();
+  for(let i=0;i<=100;i++){const x=i/100,y=Math.sin(x*Math.PI*2)*0.4+0.5;if(i===0)ctx.moveTo(sx(x),sy(y));else ctx.lineTo(sx(x),sy(y));}
+  ctx.stroke();
+  pts.forEach(p=>{ ctx.fillStyle='#e040fb'; ctx.beginPath(); ctx.arc(sx(p.x),sy(p.y),3,0,Math.PI*2); ctx.fill(); });
+  // Fitted curve (Lagrange-like, simplified)
+  ctx.strokeStyle='#fbbf24'; ctx.lineWidth=2;
+  ctx.beginPath();
+  const step=W/200;
+  for(let px=0;px<=W;px+=step){
+    const x=px/W;
+    let y=0;
+    if(deg<=2){y=Math.sin(x*Math.PI*2)*0.4*Math.min(deg/2,1)+0.5;}
+    else if(deg<=5){const noise=deg/20;y=Math.sin(x*Math.PI*2)*0.4+0.5+Math.sin(x*Math.PI*deg*0.5)*noise;}
+    else{const noise=deg/15;y=Math.sin(x*Math.PI*2)*0.4+0.5+Math.sin(x*Math.PI*deg)*noise+Math.cos(x*Math.PI*deg*0.7)*noise*0.5;}
+    y=Math.max(0.05,Math.min(0.95,y));
+    if(px===0)ctx.moveTo(px,sy(y));else ctx.lineTo(px,sy(y));
+  }
+  ctx.stroke();
+  const labels=['','Underfitting','Underfitting','Good fit','Good fit','Slight overfit','Overfit','High overfit','High overfit','Very overfit','Extreme overfit'];
+  const colors=['','#10b981','#10b981','#10b981','#10b981','#fbbf24','#f97316','#ef4444','#ef4444','#ef4444','#ef4444'];
+  document.getElementById('bv-label').textContent=`Complexity ${deg}: ${labels[deg]}`;
+  document.getElementById('bv-label').style.color=colors[deg];
+}
+
+function renderConcepts() {
+  document.getElementById('concepts-list').innerHTML=CONCEPTS.map((c,i)=>`
+    <div class="concept-card">
+      <div class="concept-header" onclick="toggleConcept(${i})">
+        <h4>${c.title}</h4>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.75rem;color:#6b7280">${c.desc}</span>
+          <span id="ctoggle-${i}" style="color:#6b7280">▼</span>
+        </div>
+      </div>
+      <div class="concept-body" id="cbody-${i}">
+        <div style="padding:0 16px 16px">${c.html}</div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleConcept(i) {
+  const body=document.getElementById('cbody-'+i);
+  const arrow=document.getElementById('ctoggle-'+i);
+  body.classList.toggle('open');
+  arrow.textContent=body.classList.contains('open')?'▲':'▼';
+  if(body.classList.contains('open') && CONCEPTS[i].init) eval(CONCEPTS[i].init);
+}
+
+// ─── INTERVIEW Q&A ───────────────────────────────────────────────────────
+const QA_ML=[
+  ['What\'s the difference between L1 and L2 regularization?','L1 (Lasso) adds sum of |weights| — sparse solutions, drives some weights to exactly zero (feature selection). L2 (Ridge) adds sum of weights² — shrinks weights toward zero but rarely exactly zero. L1 for sparse models, L2 for general regularization.'],
+  ['Explain the bias-variance tradeoff.','Bias: error from wrong assumptions (underfitting). Variance: error from sensitivity to training data fluctuations (overfitting). Complex models: low bias, high variance. Simple models: high bias, low variance. Goal: minimize total error = bias² + variance + irreducible noise.'],
+  ['How do you handle overfitting?','More data, regularization (L1/L2), dropout (neural nets), cross-validation, simpler model, early stopping, ensemble methods (bagging). Diagnose: training accuracy >> validation accuracy.'],
+  ['Random Forest vs Gradient Boosting — when to use which?','Random Forest: parallel trees, bagging, low variance, fast, robust to outliers. Use for general baseline. Gradient Boosting (XGBoost/LightGBM): sequential trees, each correcting previous. Higher accuracy but slower, more hyperparameters. Use when you need max performance.'],
+  ['What is gradient descent? Name the variants.','Optimization algorithm minimizing loss by moving in the direction of steepest descent. Variants: Batch GD (all data per step, slow), SGD (one sample, noisy but fast), Mini-batch (most common, balance). Adaptive: Adam, RMSprop, AdaGrad — adjust learning rate per parameter.'],
+  ['How do you handle class imbalance?','Resampling: oversample minority (SMOTE) or undersample majority. Class weights: penalize misclassification of minority class. Use precision/recall/F1 instead of accuracy. Threshold tuning. Ensemble methods. Generate synthetic samples.'],
+  ['What is precision vs recall? When to prioritize each?','Precision = TP/(TP+FP) — of predicted positives, how many are correct. Recall = TP/(TP+FN) — of actual positives, how many did we catch. Precision priority: spam filter (don\'t block real emails). Recall priority: cancer detection (don\'t miss real cases).'],
+  ['What is backpropagation?','Algorithm for computing gradients in neural networks using chain rule. Forward pass computes predictions. Backward pass propagates error gradient layer by layer, computing how much each weight contributed to the error. Used with gradient descent to update weights.'],
+  ['What is the vanishing gradient problem?','In deep networks with sigmoid/tanh, gradients get multiplied by small values (<1) at each layer during backprop. Gradients shrink exponentially to near zero in early layers — they don\'t learn. Fix: use ReLU activations, batch normalization, residual connections (skip connections).'],
+  ['Explain batch normalization.','Normalizes activations within each mini-batch (zero mean, unit variance) + learnable scale/shift. Benefits: allows higher learning rates, reduces sensitivity to initialization, slight regularization effect. Applied before or after activation functions.'],
+  ['What is dropout?','Regularization technique: randomly zero out neuron activations with probability p during training. Forces network to learn redundant representations. At inference, scale activations by (1-p). Effective against overfitting in deep networks.'],
+  ['CNN vs RNN — when to use each?','CNNs: spatial data (images, video). Uses convolutional filters to detect local patterns. Translation invariant. RNNs/LSTMs: sequential data (text, time series). Maintains hidden state across time steps. Transformer architectures now dominate both domains.'],
+  ['What is cross-entropy loss?','Loss function for classification: -sum(y_true * log(y_pred)). Penalizes confident wrong predictions heavily (log of small number is large negative). For binary: -(y*log(p) + (1-y)*log(1-p)). Maximizes likelihood of correct class.'],
+  ['Why normalize/standardize features?','Gradient descent converges faster when features are on similar scales. Distance-based algorithms (KNN, SVM, K-Means) are sensitive to scale — a feature with large range dominates. Neural networks train better. Regularization penalizes features equally.'],
+  ['What is data leakage?','Leakage: information from outside training data contaminates the model. Examples: normalizing on full dataset before split (validation stats leak into training), using future data to predict past. Fix: always fit preprocessors on training set only, apply to val/test.'],
+  ['What is the attention mechanism?','Allows models to focus on relevant parts of input when producing each output token. Attention(Q,K,V) = softmax(QK^T/√d)V. Self-attention in Transformers: Q=K=V come from same sequence. Enables capturing long-range dependencies without RNN sequential constraints.'],
+  ['What is transfer learning?','Use a model pre-trained on large dataset, fine-tune on your task. The model has learned general features (edges, textures for images; syntax, semantics for text). Fine-tune last layers or all layers with small learning rate. Requires much less data. Foundation of modern NLP (BERT, GPT) and vision (ResNet).'],
+  ['What is the difference between generative and discriminative models?','Discriminative: learn P(y|x) — decision boundary. Examples: logistic regression, SVM, neural networks. Generative: learn P(x,y) — full data distribution. Examples: Naive Bayes, GMM, GANs, VAEs. Generative can generate new data and handle missing features.'],
+  ['What is feature importance in Random Forest?','Measures how much each feature reduces impurity (Gini/entropy) across all trees. Alternatives: permutation importance (shuffle feature, measure accuracy drop — more reliable). SHAP values: game-theory based, local explanations per prediction.'],
+  ['Explain ensemble methods.','Combine multiple models for better performance. Bagging (Random Forest): parallel, reduces variance. Boosting (XGBoost): sequential, reduces bias. Stacking: train meta-model on predictions of base models. Voting: majority or average. Ensembles usually outperform any single model.'],
+];
+
+let qaFilter='all';
+const qaStatus = {};
+
+function renderQA() {
+  const qaStats = document.getElementById('qa-stats');
+  const got=Object.values(qaStatus).filter(v=>v==='got').length;
+  const rev=Object.values(qaStatus).filter(v=>v==='review').length;
+  if(qaStats) qaStats.textContent=`${got} got it · ${rev} needs review · ${QA_ML.length-got-rev} untouched`;
+
+  const list=QA_ML.map((qa,i)=>{
+    if(qaFilter==='got'&&qaStatus[i]!=='got') return '';
+    if(qaFilter==='review'&&qaStatus[i]!=='review') return '';
+    const status=qaStatus[i];
+    return `<div class="qa-flip${status?' ':''}" id="qa-flip-${i}" onclick="flipQA(${i})">
+      <div class="qa-inner">
+        <div class="qa-front"><div style="flex:1">${qa[0]}</div><span style="color:#6b7280;margin-left:8px">↻</span></div>
+        <div class="qa-back">
+          <div style="flex:1">
+            <div>${qa[1]}</div>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="status-btn got-it" onclick="event.stopPropagation();markQA(${i},'got')">✓ Got it</button>
+              <button class="status-btn review" onclick="event.stopPropagation();markQA(${i},'review')">↺ Review</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('qa-list').innerHTML=list||'<div style="color:#6b7280;padding:20px">No cards match this filter.</div>';
+}
+
+function flipQA(i) { document.getElementById('qa-flip-'+i)?.classList.toggle('flipped'); }
+function markQA(i,status) { qaStatus[i]=status; renderQA(); }
+function filterQA(f) { qaFilter=f; renderQA(); }
+
+// Init
+renderVizSelector();
+renderViz();
+renderAlgos();
+renderConcepts();
+renderQA();
+</script>
+</body>
+</html>

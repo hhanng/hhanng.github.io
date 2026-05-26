@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agent #95 — Cloud Architecture Designer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a1020;color:#e2e8f0;min-height:100vh}
+header{background:#0f1e40;border-bottom:1px solid #1e3a6e;padding:13px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.15rem;font-weight:700;color:#3b82f6}
+.badge{background:#3b82f6;color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px}
+.tabs{display:flex;background:#0a1020;border-bottom:2px solid #1e3a6e;padding:0 24px;gap:2px;overflow-x:auto}
+.tab{padding:11px 18px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .2s}
+.tab.active{color:#3b82f6;border-bottom-color:#3b82f6}
+.tab:hover{color:#93c5fd}
+.content{display:none}
+.content.active{display:block}
+.btn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s}
+.btn-blue{background:#3b82f6;color:#fff}
+.btn-blue:hover{background:#2563eb}
+.btn-amber{background:#f59e0b;color:#000}
+.btn-amber:hover{background:#d97706}
+.btn-ghost{background:transparent;border:1px solid #1e3a6e;color:#9ca3af}
+.btn-ghost:hover{border-color:#3b82f6;color:#3b82f6}
+.btn-sm{padding:4px 10px;font-size:.73rem}
+.btn-danger{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.tag{display:inline-block;padding:2px 7px;border-radius:8px;font-size:.68rem;font-weight:600;margin-right:4px}
+.tag-b{background:rgba(59,130,246,.15);color:#3b82f6}
+.tag-a{background:rgba(245,158,11,.15);color:#f59e0b}
+.tag-g{background:rgba(16,185,129,.15);color:#10b981}
+.tag-r{background:rgba(239,68,68,.15);color:#ef4444}
+
+/* CANVAS TAB */
+#tab-canvas{display:grid;grid-template-columns:180px 1fr;height:calc(100vh - 90px)}
+.palette{background:#0f1e40;border-right:1px solid #1e3a6e;padding:12px;overflow-y:auto}
+.palette h4{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin:8px 0 6px}
+.palette-item{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;cursor:grab;font-size:.78rem;color:#e2e8f0;border:1px solid transparent;transition:all .15s;user-select:none;margin-bottom:3px}
+.palette-item:hover{background:#1e3a6e;border-color:#3b82f6}
+.canvas-area{position:relative;overflow:hidden;background:#070f1e}
+.canvas-area svg.connections{position:absolute;inset:0;pointer-events:none;z-index:1;width:100%;height:100%}
+.canvas-toolbar{position:absolute;top:8px;left:8px;display:flex;gap:6px;z-index:10}
+.component-node{position:absolute;background:#0f1e40;border:1px solid #1e3a6e;border-radius:8px;padding:8px 10px;cursor:move;user-select:none;z-index:5;min-width:80px;text-align:center;transition:box-shadow .15s;font-size:.75rem}
+.component-node:hover{border-color:#3b82f6;box-shadow:0 0 8px rgba(59,130,246,.4)}
+.component-node.selected{border-color:#f59e0b;box-shadow:0 0 10px rgba(245,158,11,.4)}
+.component-node .node-icon{font-size:1.2rem;display:block;margin-bottom:2px}
+.component-node .node-label{color:#e2e8f0;font-size:.72rem}
+.component-node .node-delete{position:absolute;top:-6px;right:-6px;width:16px;height:16px;background:#ef4444;border-radius:50%;border:none;cursor:pointer;font-size:.7rem;color:#fff;display:none;align-items:center;justify-content:center}
+.component-node:hover .node-delete{display:flex}
+.empty-canvas{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#1e3a6e;pointer-events:none}
+.empty-canvas .icon{font-size:3rem;margin-bottom:8px}
+
+/* COMPONENTS TAB */
+#tab-components{padding:24px;max-width:1100px;margin:0 auto;overflow-y:auto}
+.comp-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.comp-table th{background:#0f1e40;padding:8px 12px;text-align:left;color:#6b7280;font-size:.72rem;position:sticky;top:0}
+.comp-table td{padding:8px 12px;border-bottom:1px solid #0f1e40;vertical-align:top}
+.comp-table tr:hover td{background:rgba(59,130,246,.04)}
+.comp-table td:first-child{color:#e2e8f0;font-weight:600}
+.cloud-name{font-size:.8rem;color:#9ca3af}
+.cost-badge{padding:1px 6px;border-radius:6px;font-size:.65rem;font-weight:700}
+.cost-free{background:rgba(16,185,129,.15);color:#10b981}
+.cost-low{background:rgba(59,130,246,.15);color:#60a5fa}
+.cost-med{background:rgba(245,158,11,.15);color:#f59e0b}
+.cost-high{background:rgba(239,68,68,.15);color:#ef4444}
+
+/* PATTERNS TAB */
+#tab-patterns{padding:24px;max-width:1100px;margin:0 auto;overflow-y:auto}
+.pattern-card{background:#0f1e40;border:1px solid #1e3a6e;border-radius:12px;margin-bottom:14px;overflow:hidden}
+.pattern-header{padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px}
+.pattern-header h4{color:#e2e8f0;font-size:.92rem;flex:1}
+.pattern-body{padding:0 18px 18px;display:none;font-size:.82rem}
+.pattern-body.open{display:block}
+.arch-diagram{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:12px 0;padding:12px;background:#070f1e;border-radius:8px}
+.arch-box{background:#1e3a6e;border:1px solid #2d5299;border-radius:6px;padding:5px 10px;font-size:.72rem;color:#e2e8f0;white-space:nowrap}
+.arch-arrow{color:#3b82f6;font-size:.9rem}
+.tradeoff-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
+.tradeoff-box{background:#070f1e;border-radius:7px;padding:8px 10px;font-size:.75rem}
+.tradeoff-box label{font-size:.68rem;color:#6b7280;display:block;margin-bottom:3px;text-transform:uppercase}
+
+/* ESTIMATE TAB */
+#tab-estimate{padding:24px;max-width:900px;margin:0 auto;overflow-y:auto}
+.estimate-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.estimate-table th{background:#0f1e40;padding:8px 12px;text-align:center;color:#6b7280;font-size:.75rem}
+.estimate-table td{padding:8px 12px;border-bottom:1px solid #0f1e40;text-align:center}
+.estimate-table td:first-child{text-align:left;color:#e2e8f0}
+.est-total{font-size:1.2rem;font-weight:700;color:#3b82f6}
+.slider-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.slider-row label{min-width:200px;font-size:.82rem;color:#9ca3af}
+.slider-row input[type=range]{flex:1;accent-color:#3b82f6;min-width:120px}
+.slider-row span{min-width:80px;font-size:.82rem;color:#e2e8f0;text-align:right}
+@media(max-width:700px){#tab-canvas{grid-template-columns:1fr}
+.palette{display:none}
+.tradeoff-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <span class="badge">#95</span>
+  <h1>☁️ Cloud Architecture Designer</h1>
+  <span style="font-size:.82rem;color:#6b7280">Drag, drop, and design systems at scale.</span>
+</header>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('canvas',this)">CANVAS</button>
+  <button class="tab" onclick="showTab('components',this)">COMPONENTS</button>
+  <button class="tab" onclick="showTab('patterns',this)">PATTERNS</button>
+  <button class="tab" onclick="showTab('estimate',this)">ESTIMATE</button>
+</div>
+
+<!-- CANVAS -->
+<div id="tab-canvas" class="content active">
+  <div class="palette" id="palette"></div>
+  <div class="canvas-area" id="canvas-area">
+    <div class="canvas-toolbar">
+      <button class="btn btn-blue btn-sm" onclick="newDiagram()">New</button>
+      <button class="btn btn-blue btn-sm" onclick="saveDiagram()">Save</button>
+      <button class="btn btn-amber btn-sm" onclick="loadDiagram()">Load</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearCanvas()">Clear</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportDiagram()">Export Text</button>
+    </div>
+    <svg class="connections" id="svg-connections"></svg>
+    <div class="empty-canvas" id="empty-hint">
+      <div class="icon">☁️</div>
+      <div style="font-size:.9rem">Drag components from the left panel</div>
+      <div style="font-size:.75rem;margin-top:4px;color:#374151">Click two nodes to connect them</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPONENTS -->
+<div id="tab-components" class="content">
+  <div style="padding:16px 24px 0;font-size:.82rem;color:#6b7280">30 cloud components — AWS, GCP, and Azure equivalents side by side.</div>
+  <table class="comp-table">
+    <thead><tr><th>Component</th><th>AWS</th><th>GCP</th><th>Azure</th><th>When to use</th><th>Cost</th></tr></thead>
+    <tbody id="comp-tbody"></tbody>
+  </table>
+</div>
+
+<!-- PATTERNS -->
+<div id="tab-patterns" class="content">
+  <div style="font-size:.82rem;color:#6b7280;margin-bottom:16px">10 FAANG-scale reference architectures. Click any to expand design decisions and tradeoffs.</div>
+  <div id="patterns-list"></div>
+</div>
+
+<!-- ESTIMATE -->
+<div id="tab-estimate" class="content">
+  <div style="background:#0f1e40;border:1px solid #1e3a6e;border-radius:12px;padding:20px;margin-bottom:16px">
+    <h3 style="color:#3b82f6;margin-bottom:16px;font-size:.95rem">Cost Estimator — 3-Tier Web App</h3>
+    <div id="sliders"></div>
+  </div>
+  <div style="background:#0f1e40;border:1px solid #1e3a6e;border-radius:12px;padding:20px">
+    <h3 style="color:#3b82f6;margin-bottom:12px;font-size:.95rem">Monthly Cost Comparison</h3>
+    <table class="estimate-table" id="estimate-table">
+      <thead><tr><th>Service</th><th>AWS</th><th>GCP</th><th>Azure</th></tr></thead>
+      <tbody id="estimate-tbody"></tbody>
+    </table>
+    <div style="margin-top:16px;font-size:.72rem;color:#6b7280;background:#070f1e;border-radius:8px;padding:10px">
+      ⚠️ These are rough estimates for planning purposes only. Always check official pricing calculators (aws.amazon.com/pricing, cloud.google.com/pricing, azure.microsoft.com/en-us/pricing/) for accurate quotes.
+    </div>
+  </div>
+</div>
+
+<script>
+const LS='cloud95_';
+const get=k=>JSON.parse(localStorage.getItem(LS+k)||'null');
+const set=(k,v)=>localStorage.setItem(LS+k,JSON.stringify(v));
+
+function showTab(id,btn){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+// ─── CANVAS ──────────────────────────────────────────────────────────────
+const PALETTE_ITEMS=[
+  {cat:'Compute',items:[{e:'🖥️',n:'EC2/VM'},{e:'⚡',n:'Lambda'},{e:'📦',n:'Container'},{e:'☸️',n:'Kubernetes'}]},
+  {cat:'Storage',items:[{e:'🗄️',n:'S3/Blob'},{e:'💾',n:'RDS/SQL'},{e:'📊',n:'NoSQL'},{e:'⚡',n:'Redis/Cache'}]},
+  {cat:'Network',items:[{e:'⚖️',n:'Load Balancer'},{e:'🌐',n:'CDN'},{e:'🔀',n:'API Gateway'},{e:'🔒',n:'VPN'},{e:'🛡️',n:'Firewall'}]},
+  {cat:'Integration',items:[{e:'📨',n:'Message Queue'},{e:'🔔',n:'Event Bus'},{e:'📡',n:'Pub/Sub'}]},
+  {cat:'Security',items:[{e:'👤',n:'IAM'},{e:'🛡️',n:'WAF'},{e:'🔑',n:'Secrets'}]},
+  {cat:'Monitoring',items:[{e:'📈',n:'Metrics'},{e:'📋',n:'Logging'}]},
+];
+
+let nodes=[];
+let connections=[];
+let selectedNodeId=null;
+let connecting=null;
+let nodeIdCounter=0;
+
+function renderPalette(){
+  const p=document.getElementById('palette');
+  p.innerHTML='<div style="font-size:.7rem;font-weight:700;color:#3b82f6;margin-bottom:8px;text-transform:uppercase">Components</div>';
+  PALETTE_ITEMS.forEach(cat=>{
+    p.innerHTML+=`<h4>${cat.cat}</h4>`;
+    cat.items.forEach(item=>{
+      const d=document.createElement('div');
+      d.className='palette-item';
+      d.draggable=true;
+      d.innerHTML=`<span>${item.e}</span><span>${item.n}</span>`;
+      d.addEventListener('dragstart',e=>{ e.dataTransfer.setData('nodeType',JSON.stringify(item)); });
+      p.appendChild(d);
+    });
+  });
+}
+
+const canvasArea=document.getElementById('canvas-area');
+canvasArea.addEventListener('dragover',e=>e.preventDefault());
+canvasArea.addEventListener('drop',e=>{
+  e.preventDefault();
+  const item=JSON.parse(e.dataTransfer.getData('nodeType')||'null');
+  if(!item)return;
+  const rect=canvasArea.getBoundingClientRect();
+  addNode(item.e,item.n,e.clientX-rect.left-40,e.clientY-rect.top-30);
+});
+
+function addNode(emoji,label,x,y){
+  const id='node_'+(++nodeIdCounter);
+  nodes.push({id,emoji,label,x,y});
+  renderCanvas();
+}
+
+function renderCanvas(){
+  document.getElementById('empty-hint').style.display=nodes.length?'none':'block';
+  // Remove existing nodes
+  canvasArea.querySelectorAll('.component-node').forEach(n=>n.remove());
+  nodes.forEach(node=>{
+    const el=document.createElement('div');
+    el.className='component-node'+(node.id===selectedNodeId?' selected':'');
+    el.id='dom_'+node.id;
+    el.style.left=node.x+'px';
+    el.style.top=node.y+'px';
+    el.innerHTML=`<button class="node-delete" onclick="deleteNode('${node.id}')">×</button>
+      <span class="node-icon">${node.emoji}</span>
+      <span class="node-label" contenteditable="true" onclick="event.stopPropagation()">${node.label}</span>`;
+    el.addEventListener('click',e=>{ if(e.target.classList.contains('node-label'))return; selectNode(node.id); });
+    makeDraggable(el,node);
+    canvasArea.appendChild(el);
+  });
+  drawConnections();
+}
+
+function makeDraggable(el,node){
+  let ox,oy;
+  el.addEventListener('mousedown',e=>{
+    if(e.target.classList.contains('node-delete')||e.target.classList.contains('node-label'))return;
+    ox=e.clientX-node.x; oy=e.clientY-node.y;
+    const mm=ev=>{ node.x=ev.clientX-ox; node.y=ev.clientY-oy; el.style.left=node.x+'px'; el.style.top=node.y+'px'; drawConnections(); };
+    const mu=()=>{ document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); };
+    document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);
+  });
+}
+
+function selectNode(id){
+  if(connecting && connecting!==id){
+    connections.push({from:connecting,to:id});
+    connecting=null;
+    selectedNodeId=null;
+  } else if(connecting===id){
+    connecting=null; selectedNodeId=null;
+  } else {
+    connecting=id; selectedNodeId=id;
+  }
+  renderCanvas();
+}
+
+function deleteNode(id){
+  nodes=nodes.filter(n=>n.id!==id);
+  connections=connections.filter(c=>c.from!==id&&c.to!==id);
+  if(selectedNodeId===id){selectedNodeId=null;connecting=null;}
+  renderCanvas();
+}
+
+function drawConnections(){
+  const svg=document.getElementById('svg-connections');
+  svg.innerHTML='<defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3b82f6"/></marker></defs>';
+  connections.forEach(conn=>{
+    const from=nodes.find(n=>n.id===conn.from);
+    const to=nodes.find(n=>n.id===conn.to);
+    if(!from||!to)return;
+    const x1=from.x+45,y1=from.y+35,x2=to.x+45,y2=to.y+35;
+    svg.innerHTML+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#3b82f6" stroke-width="1.5" stroke-opacity="0.6" marker-end="url(#arrowhead)"/>`;
+  });
+}
+
+function clearCanvas(){nodes=[];connections=[];selectedNodeId=null;connecting=null;renderCanvas();}
+function newDiagram(){if(confirm('Start a new diagram? Current diagram will be cleared.'))clearCanvas();}
+
+function saveDiagram(){
+  const name=prompt('Diagram name:','My Architecture');
+  if(!name)return;
+  const saved=get('diagrams')||{};
+  saved[name]={nodes,connections};
+  set('diagrams',saved);
+  alert('Saved: '+name);
+}
+
+function loadDiagram(){
+  const saved=get('diagrams')||{};
+  const names=Object.keys(saved);
+  if(!names.length){alert('No saved diagrams');return;}
+  const name=prompt('Which diagram? Options:\n'+names.join('\n'));
+  if(!name||!saved[name])return;
+  nodes=saved[name].nodes||[];
+  connections=saved[name].connections||[];
+  nodeIdCounter=nodes.reduce((max,n)=>Math.max(max,+n.id.split('_')[1]||0),0);
+  renderCanvas();
+}
+
+function exportDiagram(){
+  const compList=nodes.map(n=>`- ${n.emoji} ${n.label}`).join('\n');
+  const connList=connections.map(c=>{
+    const f=nodes.find(n=>n.id===c.from),t=nodes.find(n=>n.id===c.to);
+    return f&&t?`- ${f.label} → ${t.label}`:'';
+  }).filter(Boolean).join('\n');
+  const text=`## Architecture Diagram\n\n### Components:\n${compList||'(none)'}\n\n### Connections:\n${connList||'(none)'}`;
+  navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard!')).catch(()=>{alert(text);});
+}
+
+// ─── COMPONENTS ──────────────────────────────────────────────────────────
+const CLOUD_COMPS=[
+  {name:'Virtual Machine',aws:'EC2',gcp:'Compute Engine',az:'Azure VM',when:'Long-running services, lift-and-shift migrations',cost:'med'},
+  {name:'Serverless Function',aws:'Lambda',gcp:'Cloud Functions',az:'Azure Functions',when:'Event-driven tasks, short-lived compute, APIs',cost:'low'},
+  {name:'Container Service',aws:'ECS/Fargate',gcp:'Cloud Run',az:'Azure Container Apps',when:'Containerized apps without K8s overhead',cost:'low'},
+  {name:'Kubernetes',aws:'EKS',gcp:'GKE',az:'AKS',when:'Microservices at scale, custom orchestration',cost:'med'},
+  {name:'Object Storage',aws:'S3',gcp:'Cloud Storage',az:'Azure Blob Storage',when:'Images, videos, backups, static files, logs',cost:'low'},
+  {name:'Relational DB',aws:'RDS',gcp:'Cloud SQL',az:'Azure SQL Database',when:'Structured data, ACID transactions, JOINs',cost:'med'},
+  {name:'NoSQL / Document DB',aws:'DynamoDB',gcp:'Firestore',az:'Cosmos DB',when:'High-scale, flexible schema, low-latency lookups',cost:'med'},
+  {name:'In-Memory Cache',aws:'ElastiCache',gcp:'Memorystore',az:'Azure Cache for Redis',when:'Session storage, leaderboards, hot data',cost:'low'},
+  {name:'CDN',aws:'CloudFront',gcp:'Cloud CDN',az:'Azure CDN',when:'Static assets, reduce latency globally, DDoS protection',cost:'low'},
+  {name:'DNS',aws:'Route 53',gcp:'Cloud DNS',az:'Azure DNS',when:'Domain management, traffic routing, health checks',cost:'free'},
+  {name:'Load Balancer',aws:'ELB/ALB',gcp:'Cloud Load Balancing',az:'Azure Load Balancer',when:'Distribute traffic, high availability, auto-scaling',cost:'low'},
+  {name:'Message Queue',aws:'SQS',gcp:'Pub/Sub',az:'Azure Service Bus',when:'Decouple services, async processing, fan-out',cost:'low'},
+  {name:'Event Bus',aws:'EventBridge',gcp:'Eventarc',az:'Azure Event Grid',when:'Event-driven architectures, service integration',cost:'low'},
+  {name:'API Gateway',aws:'API Gateway',gcp:'Cloud Endpoints/Apigee',az:'Azure API Management',when:'REST/WebSocket APIs, auth, rate limiting, caching',cost:'low'},
+  {name:'CI/CD',aws:'CodePipeline',gcp:'Cloud Build',az:'Azure DevOps',when:'Automated build, test, deploy pipelines',cost:'free'},
+  {name:'Monitoring',aws:'CloudWatch',gcp:'Cloud Monitoring',az:'Azure Monitor',when:'Metrics, logs, alerts, dashboards',cost:'low'},
+  {name:'Identity/Auth',aws:'IAM',gcp:'Cloud IAM',az:'Azure Active Directory',when:'Access control, service-to-service auth, SSO',cost:'free'},
+  {name:'Secrets Manager',aws:'Secrets Manager',gcp:'Secret Manager',az:'Azure Key Vault',when:'API keys, DB passwords, certificates',cost:'free'},
+  {name:'Virtual Network',aws:'VPC',gcp:'VPC',az:'Azure Virtual Network',when:'Network isolation, private subnets, security groups',cost:'free'},
+  {name:'Auth for Users',aws:'Cognito',gcp:'Firebase Auth',az:'Azure AD B2C',when:'User authentication, social login, JWT issuance',cost:'free'},
+  {name:'Search',aws:'OpenSearch',gcp:'Cloud Search',az:'Azure Cognitive Search',when:'Full-text search, log analysis, typeahead',cost:'med'},
+  {name:'Data Pipeline',aws:'Glue/EMR',gcp:'Dataflow',az:'Azure Data Factory',when:'ETL, batch data processing, data lake ingestion',cost:'med'},
+  {name:'Data Warehouse',aws:'Redshift',gcp:'BigQuery',az:'Azure Synapse',when:'Analytics, large-scale SQL queries, BI tools',cost:'high'},
+  {name:'ML Platform',aws:'SageMaker',gcp:'Vertex AI',az:'Azure ML',when:'Train/deploy ML models at scale',cost:'high'},
+  {name:'Email Service',aws:'SES',gcp:'SendGrid (via Marketplace)',az:'Azure Communication Services',when:'Transactional email, notifications, marketing',cost:'low'},
+  {name:'WAF',aws:'AWS WAF',gcp:'Cloud Armor',az:'Azure WAF',when:'Block SQL injection, XSS, DDoS at edge',cost:'low'},
+  {name:'Workflow Orchestration',aws:'Step Functions',gcp:'Cloud Workflows',az:'Azure Logic Apps',when:'Multi-step workflows, saga pattern, approvals',cost:'low'},
+  {name:'Direct Connectivity',aws:'Direct Connect',gcp:'Cloud Interconnect',az:'ExpressRoute',when:'Dedicated private connection from on-prem to cloud',cost:'high'},
+  {name:'Notifications',aws:'SNS',gcp:'Firebase Cloud Messaging',az:'Azure Notification Hubs',when:'Push notifications, SMS, email fan-out',cost:'low'},
+  {name:'Blockchain/Ledger',aws:'Managed Blockchain / QLDB',gcp:'BigTable (append-only)',az:'Azure Confidential Ledger',when:'Immutable audit logs, supply chain, financial records',cost:'med'},
+];
+const costClass={free:'cost-free',low:'cost-low',med:'cost-med',high:'cost-high'};
+const costLabel={free:'Free tier',low:'$',med:'$$',high:'$$$'};
+
+function renderComponents(){
+  document.getElementById('comp-tbody').innerHTML=CLOUD_COMPS.map(c=>`
+    <tr>
+      <td>${c.name}</td>
+      <td><span class="cloud-name">${c.aws}</span></td>
+      <td><span class="cloud-name">${c.gcp}</span></td>
+      <td><span class="cloud-name">${c.az}</span></td>
+      <td style="color:#9ca3af;font-size:.76rem">${c.when}</td>
+      <td><span class="cost-badge ${costClass[c.cost]}">${costLabel[c.cost]}</span></td>
+    </tr>`).join('');
+}
+
+// ─── PATTERNS ────────────────────────────────────────────────────────────
+const PATTERNS=[
+  {title:'URL Shortener',icon:'🔗',components:['User','Load Balancer','Web Server','Redis Cache','PostgreSQL','CDN'],connections:['User→LB','LB→Web Server','Web Server→Redis (read)','Web Server→PostgreSQL (write)','CDN→User (static)'],
+   decisions:['Hash function: MD5, SHA-256, or counter-based (use counter for collision-free)','Cache hot URLs in Redis with TTL','Sharding PostgreSQL by hash range for scale','CDN caches redirect responses'],
+   tradeoffs:{consistency:'Counter-based hashing needs distributed counter (Redis INCR)',availability:'Redis down → fallback to DB (slower but available)',scale:'At 100K req/s: partition Redis + DB sharding required'}},
+  {title:'Social Media Feed (Twitter-style)',icon:'🐦',components:['Client','API Gateway','Feed Service','Message Queue','Fan-out Workers','Redis (User feeds)','NoSQL (Posts)'],connections:['Client→API GW','API GW→Feed Service','New Post→Message Queue','Queue→Fan-out Workers','Workers→Redis (write feeds)','Redis→Client (read timeline)'],
+   decisions:['Fan-out on write: pre-compute timelines for followers (works for <1M followers)','Fan-out on read: for celebrities with >1M followers (hybrid)','Redis sorted sets for timelines: ZADD timeline userId postId'],
+   tradeoffs:{consistency:'Timeline lag of seconds acceptable — eventual consistency',availability:'Redis cluster with replication, message queue for durability',scale:'Sharding by userId, celebrity accounts handled differently'}},
+  {title:'Video Streaming (Netflix-style)',icon:'🎬',components:['Upload Service','Encoding Pipeline','Blob Storage (S3)','CDN','Adaptive Bitrate Logic','Client Player'],connections:['Upload→Encoding Pipeline','Pipeline→Blob Storage (multiple qualities)','Blob→CDN','CDN→Client','Client→Adaptive Bitrate'],
+   decisions:['Transcode to multiple bitrates: 360p/720p/1080p/4K','HLS/DASH protocol for adaptive streaming','CDN edge caching closest to user','Pre-warm CDN for popular content'],
+   tradeoffs:{consistency:'Users may see different quality based on network — acceptable',availability:'CDN multi-region failover, S3 cross-region replication',scale:'CDN handles 99% of traffic load; origin barely touched'}},
+  {title:'Ride Sharing (Uber-style)',icon:'🚗',components:['Driver App','Rider App','WebSocket Server','Location Service','Geo DB (PostGIS)','Matching Service','Message Queue'],connections:['Driver→WebSocket (location updates)','WebSocket→Location Service','Rider requests→Matching Service','Matching→Geo DB (nearest drivers)','Match result→Message Queue→Apps'],
+   decisions:['WebSocket for real-time bidirectional communication','Geo DB with geospatial indexes (PostGIS, Elasticsearch)','Matching service: dispatch algorithm (proximity + rating + ETA)','Surge pricing service reads supply/demand from separate analytics'],
+   tradeoffs:{consistency:'Location data stale by 5s acceptable','availability:'GPS fallback to cell triangulation; multiple WS servers with sticky sessions',scale:'Shard geo DB by region; separate matching workers per city'}},
+  {title:'Chat App (WhatsApp-style)',icon:'💬',components:['Client','WebSocket Server','Chat Service','Message Queue','NoSQL (Messages)','Push Notification Service','Presence Service'],connections:['Client↔WebSocket (online)','WS→Chat Service','Chat→Message Queue','Queue→NoSQL (persist)','Queue→Push Notifications (offline users)'],
+   decisions:['Messages stored in Cassandra (append-only, time-ordered by chat_id + timestamp)','Message queue ensures delivery even if recipient is offline','End-to-end encryption: keys exchanged at session start (Signal Protocol)','Presence service: heartbeat every 30s to track online status'],
+   tradeoffs:{consistency:'Message ordering within chat guaranteed; across chats eventual',availability:'Multi-region Cassandra replication, WS reconnect logic',scale:'WS servers shard by user range; Cassandra horizontal scaling'}},
+  {title:'E-commerce Checkout',icon:'🛒',components:['Cart Service','Inventory DB','Payment Service','Order Service','Message Queue','Notification Service','Fulfillment Service'],connections:['Cart→Inventory (reserve)','Cart→Payment Service','Payment→Order Service (on success)','Order→Message Queue','Queue→Notification + Fulfillment'],
+   decisions:['Distributed transaction via saga pattern: compensating transactions on failure','Inventory reservation with TTL (hold for 15 min, release on timeout)','Payment service calls external PSP (Stripe/Braintree)','Idempotency keys prevent duplicate charges on retry'],
+   tradeoffs:{consistency:'Strong consistency for inventory (prevent overselling) vs eventual for notifications',availability:'Circuit breaker on payment service; fallback: queue for retry',scale:'Read replicas for product catalog; write DB for inventory'}},
+  {title:'Rate Limiter Service',icon:'🚦',components:['Client','API Gateway','Rate Limit Service','Redis (counters)','Backend Service'],connections:['Client→API GW','API GW→Rate Limit Service','Rate Limiter→Redis (INCR+EXPIRE)','Rate Limiter→API GW (allow/deny)','API GW→Backend (if allowed)'],
+   decisions:['Algorithm: sliding window log (accurate) vs fixed window (simple) vs token bucket (bursty)','Redis INCR + EXPIRE for per-user/IP/endpoint counters','Key design: ratelimit:{userId}:{endpoint}:{window}','Lua script in Redis for atomic check-and-increment'],
+   tradeoffs:{consistency:'Slight over-limit possible with distributed Redis (accept for non-critical)',availability:'If Redis down: fail open (allow all) or fail closed (deny all)',scale:'Redis cluster sharded by user; local cache for 99th percentile'}},
+  {title:'Search Autocomplete',icon:'🔍',components:['Client','CDN (cache queries)','Typeahead API','Trie (Redis)','Elasticsearch','Analytics Service'],connections:['Client types→CDN (cached popular queries)','Cache miss→Typeahead API','API→Redis Trie (top suggestions)','API→Elasticsearch (full search)','Searches→Analytics→Trie update'],
+   decisions:['Trie stored in Redis with sorted sets per prefix','Cache top 1000 queries by prefix on CDN','Elasticsearch for long-tail queries not in trie','Analytics pipeline updates trie daily with trending terms'],
+   tradeoffs:{consistency:'Trie is eventually consistent — OK for suggestions',availability:'CDN absorbs 95%+ of traffic; Redis cluster replicated',scale:'Shard trie by first 2 chars of prefix; CDN eliminates most DB load'}},
+  {title:'CI/CD Pipeline',icon:'⚙️',components:['GitHub','Webhook','Build Server','Test Runner','Container Registry','K8s Deploy','Monitoring/Alerts'],connections:['Push→GitHub','GitHub→Webhook','Webhook→Build Server','Build→Test Runner','Tests pass→Container Registry (push image)','Registry→K8s (rolling deploy)','K8s→Monitoring'],
+   decisions:['Immutable images: build once, deploy anywhere','Blue/green or canary deployment for zero-downtime','Rollback: previous image tag always retained in registry','Quality gates: unit tests + integration tests + security scan (SAST/DAST)'],
+   tradeoffs:{consistency:'Tests must be deterministic — flaky tests are a deployment blocker',availability:'Build farm horizontally scaled; queue build jobs',scale:'Parallel test execution, caching npm/pip dependencies'}},
+  {title:'Multi-Region High Availability',icon:'🌍',components:['Global Load Balancer','Region A (Primary)','Region B (Replica)','Primary DB','Read Replica','Failover Controller','Health Checks'],connections:['Users→Global LB','Global LB→Active Region','Region A→Region B (async replication)','Failover Controller→Health Checks','Health Check fail→Failover Controller promotes Region B'],
+   decisions:['Active-passive vs active-active (active-active is harder but no failover delay)','Async DB replication: RPO = seconds of data loss','Automatic failover: health check fails 3× → promote replica → update DNS','DNS TTL: keep low (30–60s) for fast failover'],
+   tradeoffs:{consistency:'Async replication: seconds of data loss on failover (RPO)',availability:'RTO (recovery time) depends on failover automation speed — target <1 min',scale:'Active-active: both regions serve traffic, more complex but 2× capacity'}},
+];
+
+function renderPatterns(){
+  document.getElementById('patterns-list').innerHTML=PATTERNS.map((p,i)=>`
+    <div class="pattern-card">
+      <div class="pattern-header" onclick="togglePattern(${i})">
+        <span style="font-size:1.3rem">${p.icon}</span>
+        <h4>${i+1}. ${p.title}</h4>
+        <span id="ptoggle-${i}" style="color:#6b7280">▼</span>
+      </div>
+      <div class="pattern-body" id="pbody-${i}">
+        <div style="font-size:.75rem;color:#6b7280;margin-bottom:8px">Architecture:</div>
+        <div class="arch-diagram">
+          ${p.components.map((c,ci)=>`<span class="arch-box">${c}</span>${ci<p.components.length-1?'<span class="arch-arrow">→</span>':''}`).join('')}
+        </div>
+        <div style="font-size:.75rem;color:#6b7280;margin:10px 0 4px">Key Design Decisions:</div>
+        <ul style="font-size:.78rem;color:#9ca3af;padding-left:16px;line-height:1.8">
+          ${p.decisions.map(d=>`<li>${d}</li>`).join('')}
+        </ul>
+        <div class="tradeoff-grid">
+          <div class="tradeoff-box"><label>Consistency</label>${p.tradeoffs.consistency}</div>
+          <div class="tradeoff-box"><label>Availability</label>${p.tradeoffs.availability}</div>
+          <div class="tradeoff-box"><label>Scale</label>${p.tradeoffs.scale}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function togglePattern(i){
+  const b=document.getElementById('pbody-'+i);
+  const a=document.getElementById('ptoggle-'+i);
+  b.classList.toggle('open');
+  a.textContent=b.classList.contains('open')?'▲':'▼';
+}
+
+// ─── ESTIMATE ────────────────────────────────────────────────────────────
+const SLIDERS=[
+  {id:'mau',label:'Monthly Active Users',min:1,max:1000,value:100,unit:'K',fmt:v=>v+'K'},
+  {id:'req',label:'Requests per Day',min:10,max:10000,value:1000,unit:'K',fmt:v=>v+'K'},
+  {id:'storage',label:'Storage (GB)',min:1,max:1000,value:50,unit:'GB',fmt:v=>v+'GB'},
+  {id:'bw',label:'Bandwidth (GB/mo)',min:1,max:500,value:100,unit:'GB',fmt:v=>v+'GB'},
+];
+
+function renderSliders(){
+  document.getElementById('sliders').innerHTML=SLIDERS.map(s=>`
+    <div class="slider-row">
+      <label>${s.label}</label>
+      <input type="range" min="${s.min}" max="${s.max}" value="${s.value}" id="sl-${s.id}" oninput="calcEstimate()">
+      <span id="sl-val-${s.id}">${s.fmt(s.value)}</span>
+    </div>`).join('');
+}
+
+function calcEstimate(){
+  SLIDERS.forEach(s=>{
+    const v=+document.getElementById('sl-'+s.id).value;
+    document.getElementById('sl-val-'+s.id).textContent=s.fmt(v);
+  });
+  const mau=+document.getElementById('sl-mau').value;
+  const req=+document.getElementById('sl-req').value;
+  const storage=+document.getElementById('sl-storage').value;
+  const bw=+document.getElementById('sl-bw').value;
+
+  // Compute tier selection
+  const computeTier=req<100?0:req<1000?1:2;
+  const dbTier=mau<50?0:mau<500?1:2;
+
+  const pricing={
+    aws:{compute:[30,120,480],db:[25,100,400],storage:0.023,bw:0.085,cdn:0.085},
+    gcp:{compute:[25,100,400],db:[25,95,380],storage:0.020,bw:0.08,cdn:0.08},
+    az:{compute:[35,140,560],db:[30,120,480],storage:0.018,bw:0.075,cdn:0.075},
+  };
+
+  const clouds=['aws','gcp','az'];
+  const services=['Compute','Database','Storage','Bandwidth','CDN'];
+  const rows=[];
+
+  const vals={};
+  clouds.forEach(c=>{
+    const p=pricing[c];
+    vals[c]={
+      compute:p.compute[computeTier],
+      db:p.db[dbTier],
+      storage:storage*p.storage,
+      bw:bw*p.bw,
+      cdn:bw*p.cdn*0.5,
+    };
+    vals[c].total=Object.values(vals[c]).reduce((a,b)=>a+b,0);
+  });
+
+  const fmt=n=>'$'+Math.round(n).toLocaleString();
+  const tbody=document.getElementById('estimate-tbody');
+  tbody.innerHTML=['Compute','Database','Storage','Bandwidth','CDN'].map(svc=>`
+    <tr>
+      <td>${svc}</td>
+      ${clouds.map(c=>`<td>${fmt(vals[c][svc.toLowerCase()])}</td>`).join('')}
+    </tr>`).join('') +
+    `<tr style="font-weight:700;border-top:2px solid #1e3a6e">
+      <td>Total / Month</td>
+      ${clouds.map(c=>`<td class="est-total">${fmt(vals[c].total)}</td>`).join('')}
+    </tr>`;
+}
+
+// Init
+renderPalette();
+renderComponents();
+renderPatterns();
+renderSliders();
+calcEstimate();
+</script>
+</body>
+</html>

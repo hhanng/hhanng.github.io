@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agent #92 — React Component Playground</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a1628;color:#e2e8f0;min-height:100vh}
+header{background:#0d1f3c;border-bottom:1px solid #1e3a5f;padding:13px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.15rem;font-weight:700;color:#61dafb}
+header span{font-size:.82rem;color:#6b7280}
+.badge{background:#61dafb;color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px}
+.tabs{display:flex;background:#0a1628;border-bottom:2px solid #1e3a5f;padding:0 24px;gap:2px;overflow-x:auto}
+.tab{padding:11px 18px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .2s}
+.tab.active{color:#61dafb;border-bottom-color:#61dafb}
+.tab:hover{color:#93e6ff}
+.content{display:none;padding:24px;max-width:1200px;margin:0 auto}
+.content.active{display:block}
+.card{background:#0d1f3c;border:1px solid #1e3a5f;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h3{color:#61dafb;margin-bottom:12px;font-size:.95rem}
+.btn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s}
+.btn-cyan{background:#61dafb;color:#000}
+.btn-cyan:hover{background:#21c8f0}
+.btn-orange{background:#f97316;color:#fff}
+.btn-orange:hover{background:#ea6c0a}
+.btn-ghost{background:transparent;border:1px solid #1e3a5f;color:#9ca3af}
+.btn-ghost:hover{border-color:#61dafb;color:#61dafb}
+.btn-sm{padding:4px 10px;font-size:.73rem}
+/* PLAYGROUND */
+.playground-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:520px}
+.editor-pane{display:flex;flex-direction:column;background:#060f1e;border:1px solid #1e3a5f;border-radius:10px;overflow:hidden}
+.editor-toolbar{background:#0d1f3c;padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1e3a5f;flex-wrap:wrap}
+.editor-toolbar span{font-size:.75rem;color:#6b7280;flex:1}
+.editor-body{display:flex;flex:1;overflow:hidden}
+.line-nums{background:#060f1e;color:#374151;font-family:monospace;font-size:.8rem;padding:10px 8px;text-align:right;user-select:none;min-width:36px;overflow:hidden;line-height:1.5}
+textarea#code-editor{flex:1;background:#060f1e;color:#e2e8f0;border:none;outline:none;padding:10px;font-family:'Cascadia Code','Fira Code','Courier New',monospace;font-size:.82rem;resize:none;line-height:1.5;tab-size:2}
+.preview-pane{display:flex;flex-direction:column;background:#060f1e;border:1px solid #1e3a5f;border-radius:10px;overflow:hidden}
+.preview-toolbar{background:#0d1f3c;padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1e3a5f}
+.preview-toolbar span{font-size:.75rem;color:#61dafb}
+iframe#preview{flex:1;border:none;background:#fff}
+.error-box{background:rgba(239,68,68,.15);border:1px solid #ef4444;border-radius:8px;padding:10px;margin-top:10px;font-family:monospace;font-size:.78rem;color:#ef4444;white-space:pre-wrap;max-height:100px;overflow-y:auto}
+/* COMPONENTS */
+.comp-cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.comp-cat-btn{padding:5px 12px;border-radius:16px;border:1px solid #1e3a5f;background:transparent;color:#9ca3af;font-size:.75rem;cursor:pointer;transition:all .2s}
+.comp-cat-btn.active{background:#61dafb;color:#000;border-color:#61dafb}
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.comp-card{background:#0d1f3c;border:1px solid #1e3a5f;border-radius:10px;overflow:hidden}
+.comp-card-header{padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.comp-card-header h4{font-size:.88rem;color:#e2e8f0}
+.comp-cat-tag{font-size:.68rem;padding:2px 7px;border-radius:8px;background:rgba(97,218,251,.15);color:#61dafb}
+.comp-card-body{padding:0 14px 12px;font-size:.75rem;color:#9ca3af}
+.comp-actions{padding:10px 14px;background:#060f1e;display:flex;gap:8px}
+.code-snippet{background:#060f1e;border:1px solid #1e3a5f;border-radius:6px;padding:10px;font-family:monospace;font-size:.73rem;color:#a5f3fc;overflow-x:auto;white-space:pre;max-height:0;overflow:hidden;transition:max-height .3s}
+.code-snippet.expanded{max-height:400px;overflow:auto}
+/* PATTERNS */
+.pattern-card{background:#0d1f3c;border:1px solid #1e3a5f;border-radius:10px;margin-bottom:12px}
+.pattern-header{padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.pattern-header h4{color:#e2e8f0;font-size:.92rem}
+.pattern-body{padding:0 16px 16px;display:none}
+.pattern-body.open{display:block}
+.pattern-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.pattern-meta div{background:#060f1e;border-radius:7px;padding:8px 10px;font-size:.75rem}
+.pattern-meta div label{font-size:.68rem;color:#6b7280;display:block;margin-bottom:3px}
+.code-block{background:#060f1e;border:1px solid #1e3a5f;border-radius:8px;padding:12px;font-family:monospace;font-size:.78rem;color:#a5f3fc;overflow-x:auto;white-space:pre;max-height:280px;overflow-y:auto;margin-top:10px}
+/* REFERENCE */
+.hook-card{background:#060f1e;border:1px solid #1e3a5f;border-radius:10px;padding:14px;margin-bottom:10px}
+.hook-card h4{color:#61dafb;font-size:.92rem;margin-bottom:4px}
+.hook-sig{font-family:monospace;font-size:.78rem;color:#f97316;margin-bottom:6px;background:rgba(249,115,22,.08);padding:4px 8px;border-radius:4px}
+.hook-desc{font-size:.8rem;color:#9ca3af;margin-bottom:8px}
+.hook-example{font-family:monospace;font-size:.73rem;color:#a5f3fc;background:#0a1628;padding:8px;border-radius:6px;overflow-x:auto;white-space:pre}
+.qa-card{background:#0d1f3c;border:1px solid #1e3a5f;border-radius:10px;margin-bottom:8px;overflow:hidden;cursor:pointer}
+.qa-q{padding:12px 16px;font-size:.85rem;color:#e2e8f0;display:flex;justify-content:space-between;align-items:center}
+.qa-a{padding:12px 16px;font-size:.82rem;color:#9ca3af;background:#060f1e;display:none;border-top:1px solid #1e3a5f;line-height:1.6}
+.qa-a.show{display:block}
+.lifecycle-diagram{display:flex;gap:0;overflow-x:auto;margin-top:12px}
+.lifecycle-phase{min-width:120px;padding:12px;text-align:center;font-size:.75rem}
+.lifecycle-arrow{display:flex;align-items:center;padding:0 4px;color:#374151;font-size:1.2rem}
+@media(max-width:700px){.playground-wrap{grid-template-columns:1fr;height:auto}.playground-wrap>div{height:280px}}
+</style>
+</head>
+<body>
+<header>
+  <span class="badge">#92</span>
+  <h1>⚛️ React Component Playground</h1>
+  <span>Write it. See it. Ship it.</span>
+</header>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('playground',this)">PLAYGROUND</button>
+  <button class="tab" onclick="showTab('components',this)">COMPONENTS</button>
+  <button class="tab" onclick="showTab('patterns',this)">PATTERNS</button>
+  <button class="tab" onclick="showTab('reference',this)">REFERENCE</button>
+</div>
+
+<!-- PLAYGROUND -->
+<div id="tab-playground" class="content active">
+  <div class="playground-wrap">
+    <div class="editor-pane">
+      <div class="editor-toolbar">
+        <span>JSX Editor</span>
+        <button class="btn btn-cyan btn-sm" onclick="runCode()">▶ Run</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyCode()">Copy</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetCode()">Reset</button>
+        <span style="font-size:.7rem;color:#4b5563">Ctrl+Enter to run</span>
+      </div>
+      <div class="editor-body">
+        <div class="line-nums" id="line-nums">1</div>
+        <textarea id="code-editor" spellcheck="false" oninput="updateLineNums()" onkeydown="handleKey(event)"></textarea>
+      </div>
+    </div>
+    <div class="preview-pane">
+      <div class="preview-toolbar">
+        <span>⚛️ Live Preview</span>
+        <span style="font-size:.7rem;color:#6b7280;margin-left:auto" id="preview-status">Click Run to render</span>
+      </div>
+      <iframe id="preview"></iframe>
+    </div>
+  </div>
+  <div id="error-display" style="display:none" class="error-box"></div>
+</div>
+
+<!-- COMPONENTS -->
+<div id="tab-components" class="content">
+  <div class="comp-cat-tabs" id="comp-cats"></div>
+  <div class="comp-grid" id="comp-grid"></div>
+</div>
+
+<!-- PATTERNS -->
+<div id="tab-patterns" class="content">
+  <div style="font-size:.82rem;color:#6b7280;margin-bottom:16px">10 essential React patterns — each with explanation + loadable code example.</div>
+  <div id="patterns-list"></div>
+</div>
+
+<!-- REFERENCE -->
+<div id="tab-reference" class="content">
+  <div class="card">
+    <h3>React Lifecycle (Hooks)</h3>
+    <div class="lifecycle-diagram">
+      <div class="lifecycle-phase" style="background:rgba(97,218,251,.1);border-radius:8px">
+        <div style="font-size:1.2rem;margin-bottom:6px">🌱</div>
+        <div style="color:#61dafb;font-weight:700;margin-bottom:4px">Mount</div>
+        <div style="color:#9ca3af">Component created</div>
+        <div style="margin-top:8px;color:#f97316;font-size:.68rem">useState(initial)</div>
+        <div style="color:#f97316;font-size:.68rem">Render JSX</div>
+        <div style="color:#f97316;font-size:.68rem">useEffect(fn,[])</div>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-phase" style="background:rgba(249,115,22,.1);border-radius:8px">
+        <div style="font-size:1.2rem;margin-bottom:6px">🔄</div>
+        <div style="color:#f97316;font-weight:700;margin-bottom:4px">Update</div>
+        <div style="color:#9ca3af">State/props change</div>
+        <div style="margin-top:8px;color:#f97316;font-size:.68rem">setState() call</div>
+        <div style="color:#f97316;font-size:.68rem">Re-render JSX</div>
+        <div style="color:#f97316;font-size:.68rem">useEffect(fn,[dep])</div>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-phase" style="background:rgba(239,68,68,.1);border-radius:8px">
+        <div style="font-size:1.2rem;margin-bottom:6px">💀</div>
+        <div style="color:#ef4444;font-weight:700;margin-bottom:4px">Unmount</div>
+        <div style="color:#9ca3af">Component removed</div>
+        <div style="margin-top:8px;color:#f97316;font-size:.68rem">Cleanup function</div>
+        <div style="color:#f97316;font-size:.68rem">return () =&gt; {}</div>
+        <div style="color:#f97316;font-size:.68rem">inside useEffect</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Hooks Quick Reference</h3>
+    <div id="hooks-ref"></div>
+  </div>
+  <div class="card">
+    <h3>React Interview Q&amp;A</h3>
+    <div style="font-size:.78rem;color:#6b7280;margin-bottom:12px">Click any question to reveal the answer.</div>
+    <div id="qa-list"></div>
+  </div>
+</div>
+
+<script>
+const LS = 'react92_';
+const get = k => localStorage.getItem(LS+k);
+const set = (k,v) => localStorage.setItem(LS+k, v);
+
+const STARTER = `function Counter() {
+  const [count, setCount] = React.useState(0);
+  return (
+    <div style={{
+      fontFamily: 'sans-serif',
+      padding: '32px',
+      textAlign: 'center',
+      background: '#0a1628',
+      minHeight: '100vh',
+      color: 'white'
+    }}>
+      <h1 style={{color: '#61dafb', marginBottom: '24px'}}>
+        ⚛️ React Counter
+      </h1>
+      <div style={{fontSize: '4rem', fontWeight: 'bold', margin: '20px 0'}}>
+        {count}
+      </div>
+      <div style={{display: 'flex', gap: '12px', justifyContent: 'center'}}>
+        <button
+          onClick={() => setCount(c => c - 1)}
+          style={{padding:'10px 24px',background:'#f97316',color:'white',border:'none',borderRadius:'8px',fontSize:'1.2rem',cursor:'pointer'}}
+        >−</button>
+        <button
+          onClick={() => setCount(0)}
+          style={{padding:'10px 24px',background:'#374151',color:'white',border:'none',borderRadius:'8px',fontSize:'1rem',cursor:'pointer'}}
+        >Reset</button>
+        <button
+          onClick={() => setCount(c => c + 1)}
+          style={{padding:'10px 24px',background:'#61dafb',color:'black',border:'none',borderRadius:'8px',fontSize:'1.2rem',cursor:'pointer'}}
+        >+</button>
+      </div>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Counter />);`;
+
+const COMPONENTS = [
+  { name:'Button', cat:'Forms', desc:'Primary/secondary/danger variants with disabled state.',
+    code:`function Button({ variant='primary', children, disabled, onClick }) {
+  const styles = {
+    primary: { background: '#61dafb', color: '#000' },
+    secondary: { background: '#374151', color: '#fff' },
+    danger: { background: '#ef4444', color: '#fff' },
+  };
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        ...styles[variant],
+        padding: '8px 18px', borderRadius: '8px', border: 'none',
+        cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1,
+        fontWeight: 600, fontSize: '0.9rem', transition: 'opacity 0.2s'
+      }}
+    >{children}</button>
+  );
+}
+function App() {
+  return (
+    <div style={{padding:24,display:'flex',gap:12,flexWrap:'wrap',background:'#0a1628',minHeight:'100vh',alignItems:'flex-start'}}>
+      <Button variant="primary">Primary</Button>
+      <Button variant="secondary">Secondary</Button>
+      <Button variant="danger">Danger</Button>
+      <Button disabled>Disabled</Button>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { name:'Input', cat:'Forms', desc:'Controlled input with label, placeholder, and error state.',
+    code:`function Input({ label, placeholder, error, value, onChange }) {
+  return (
+    <div style={{marginBottom:16}}>
+      {label && <label style={{display:'block',marginBottom:4,fontSize:'0.8rem',color:'#9ca3af'}}>{label}</label>}
+      <input
+        value={value} onChange={onChange} placeholder={placeholder}
+        style={{
+          width:'100%', padding:'8px 12px', background:'#0d1f3c',
+          border:\`1px solid \${error ? '#ef4444' : '#1e3a5f'}\`,
+          borderRadius:8, color:'#e2e8f0', fontSize:'0.9rem', outline:'none'
+        }}
+      />
+      {error && <div style={{color:'#ef4444',fontSize:'0.75rem',marginTop:4}}>{error}</div>}
+    </div>
+  );
+}
+function App() {
+  const [val, setVal] = React.useState('');
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh'}}>
+      <Input label="Email" placeholder="you@example.com" value={val} onChange={e=>setVal(e.target.value)} />
+      <Input label="Password" placeholder="min 8 chars" error={val.length>0&&val.length<8?"Too short":null} value={val} onChange={e=>setVal(e.target.value)} />
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { name:'Toggle', cat:'Forms', desc:'Animated toggle switch with on/off state.',
+    code:`function Toggle({ checked, onChange, label }) {
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:12,cursor:'pointer'}} onClick={()=>onChange(!checked)}>
+      <div style={{
+        width:48, height:26, borderRadius:13, background: checked ? '#61dafb' : '#374151',
+        position:'relative', transition:'background 0.2s'
+      }}>
+        <div style={{
+          width:20, height:20, borderRadius:'50%', background:'white',
+          position:'absolute', top:3, left: checked ? 25 : 3, transition:'left 0.2s'
+        }}/>
+      </div>
+      {label && <span style={{color:'#e2e8f0',fontSize:'0.9rem'}}>{label}</span>}
+    </div>
+  );
+}
+function App() {
+  const [dark, setDark] = React.useState(true);
+  const [notifs, setNotifs] = React.useState(false);
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh',display:'flex',flexDirection:'column',gap:16}}>
+      <Toggle checked={dark} onChange={setDark} label="Dark Mode" />
+      <Toggle checked={notifs} onChange={setNotifs} label="Notifications" />
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { name:'Card', cat:'Layout', desc:'Flexible card with header, body, and footer slots.',
+    code:`function Card({ title, children, footer, accent }) {
+  return (
+    <div style={{
+      background:'#0d1f3c', border:\`1px solid \${accent || '#1e3a5f'}\`,
+      borderRadius:12, overflow:'hidden', marginBottom:16
+    }}>
+      {title && <div style={{padding:'12px 16px',borderBottom:'1px solid #1e3a5f',color:'#61dafb',fontWeight:700}}>{title}</div>}
+      <div style={{padding:16}}>{children}</div>
+      {footer && <div style={{padding:'10px 16px',borderTop:'1px solid #1e3a5f',fontSize:'0.8rem',color:'#6b7280'}}>{footer}</div>}
+    </div>
+  );
+}
+function App() {
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh'}}>
+      <Card title="Basic Card" footer="Last updated today">
+        <p style={{color:'#9ca3af',fontSize:'0.9rem'}}>Card content goes here.</p>
+      </Card>
+      <Card title="Accented Card" accent="#61dafb">
+        <p style={{color:'#9ca3af',fontSize:'0.9rem'}}>This card has a cyan border accent.</p>
+      </Card>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { name:'Modal', cat:'Layout', desc:'Overlay modal with backdrop click to close.',
+    code:`function Modal({ open, onClose, title, children }) {
+  if (!open) return null;
+  return (
+    <div style={{
+      position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',
+      display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000
+    }} onClick={onClose}>
+      <div style={{
+        background:'#0d1f3c',border:'1px solid #1e3a5f',borderRadius:12,
+        padding:24,maxWidth:480,width:'90%',maxHeight:'80vh',overflow:'auto'
+      }} onClick={e=>e.stopPropagation()}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <h3 style={{color:'#61dafb'}}>{title}</h3>
+          <button onClick={onClose} style={{background:'none',border:'none',color:'#9ca3af',fontSize:'1.2rem',cursor:'pointer'}}>×</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+function App() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh'}}>
+      <button onClick={()=>setOpen(true)} style={{padding:'8px 18px',background:'#61dafb',color:'#000',border:'none',borderRadius:8,cursor:'pointer',fontWeight:600}}>Open Modal</button>
+      <Modal open={open} onClose={()=>setOpen(false)} title="Example Modal">
+        <p style={{color:'#9ca3af'}}>This is the modal body. Click outside or × to close.</p>
+      </Modal>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { name:'Alert', cat:'Feedback', desc:'Info/success/warning/error alert variants.',
+    code:`function Alert({ type='info', children }) {
+  const styles = {
+    info:    { bg:'rgba(97,218,251,0.1)',  border:'#61dafb', color:'#61dafb',  icon:'ℹ️' },
+    success: { bg:'rgba(16,185,129,0.1)', border:'#10b981', color:'#10b981', icon:'✅' },
+    warning: { bg:'rgba(251,191,36,0.1)', border:'#fbbf24', color:'#fbbf24', icon:'⚠️' },
+    error:   { bg:'rgba(239,68,68,0.1)',  border:'#ef4444', color:'#ef4444',  icon:'❌' },
+  };
+  const s = styles[type];
+  return (
+    <div style={{background:s.bg,border:\`1px solid \${s.border}\`,borderRadius:8,padding:'10px 14px',marginBottom:10,display:'flex',gap:8,alignItems:'flex-start'}}>
+      <span>{s.icon}</span>
+      <span style={{color:'#e2e8f0',fontSize:'0.85rem'}}>{children}</span>
+    </div>
+  );
+}
+function App() {
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh'}}>
+      <Alert type="info">This is an informational alert.</Alert>
+      <Alert type="success">Your changes have been saved successfully.</Alert>
+      <Alert type="warning">This action cannot be undone.</Alert>
+      <Alert type="error">Something went wrong. Please try again.</Alert>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { name:'Badge', cat:'Feedback', desc:'Status and label badges with multiple variants.',
+    code:`function Badge({ color='blue', children }) {
+  const colors = {
+    blue:   { bg:'rgba(97,218,251,0.15)',  text:'#61dafb' },
+    green:  { bg:'rgba(16,185,129,0.15)', text:'#10b981' },
+    yellow: { bg:'rgba(251,191,36,0.15)', text:'#fbbf24' },
+    red:    { bg:'rgba(239,68,68,0.15)',  text:'#ef4444' },
+    purple: { bg:'rgba(167,139,250,0.15)',text:'#a78bfa' },
+  };
+  const c = colors[color]||colors.blue;
+  return (
+    <span style={{
+      background:c.bg, color:c.text, padding:'2px 8px',
+      borderRadius:12, fontSize:'0.72rem', fontWeight:700
+    }}>{children}</span>
+  );
+}
+function App() {
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh',display:'flex',gap:8,flexWrap:'wrap',alignItems:'flex-start'}}>
+      <Badge color="blue">New</Badge>
+      <Badge color="green">Active</Badge>
+      <Badge color="yellow">Pending</Badge>
+      <Badge color="red">Error</Badge>
+      <Badge color="purple">Beta</Badge>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { name:'Spinner', cat:'Feedback', desc:'CSS-animated loading spinner with size variants.',
+    code:`function Spinner({ size=32, color='#61dafb' }) {
+  return (
+    <div style={{
+      width:size, height:size, borderRadius:'50%',
+      border:\`3px solid rgba(97,218,251,0.2)\`,
+      borderTopColor: color,
+      animation:'spin 0.7s linear infinite'
+    }}>
+      <style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style>
+    </div>
+  );
+}
+function App() {
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh',display:'flex',gap:24,alignItems:'center'}}>
+      <Spinner size={24}/>
+      <Spinner size={40}/>
+      <Spinner size={64} color="#f97316"/>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { name:'ProgressBar', cat:'Feedback', desc:'Animated progress bar with percentage label.',
+    code:`function ProgressBar({ value, max=100, color='#61dafb', label }) {
+  const pct = Math.min(Math.max(value/max*100,0),100);
+  return (
+    <div style={{marginBottom:16}}>
+      {label && <div style={{display:'flex',justifyContent:'space-between',marginBottom:4,fontSize:'0.8rem',color:'#9ca3af'}}>
+        <span>{label}</span><span style={{color}}>{pct.toFixed(0)}%</span>
+      </div>}
+      <div style={{height:8,background:'#1e3a5f',borderRadius:4,overflow:'hidden'}}>
+        <div style={{height:'100%',width:pct+'%',background:color,borderRadius:4,transition:'width 0.5s'}}/>
+      </div>
+    </div>
+  );
+}
+function App() {
+  const [v, setV] = React.useState(65);
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh',maxWidth:400}}>
+      <ProgressBar value={v} label="Upload progress" />
+      <ProgressBar value={90} color="#10b981" label="Storage used" />
+      <ProgressBar value={30} color="#ef4444" label="Battery" />
+      <input type="range" min={0} max={100} value={v} onChange={e=>setV(+e.target.value)} style={{width:'100%',marginTop:16,accentColor:'#61dafb'}}/>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { name:'Avatar', cat:'Data', desc:'User avatar with initials fallback and size variants.',
+    code:`function Avatar({ name, src, size=40, color='#61dafb' }) {
+  const initials = name ? name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : '?';
+  return (
+    <div style={{
+      width:size, height:size, borderRadius:'50%',
+      background:src?'transparent':color+'22',
+      border:\`2px solid \${color}\`,
+      display:'flex',alignItems:'center',justifyContent:'center',
+      fontSize:size*0.35, fontWeight:700, color, overflow:'hidden', flexShrink:0
+    }}>
+      {src ? <img src={src} style={{width:'100%',height:'100%',objectFit:'cover'}}/> : initials}
+    </div>
+  );
+}
+function App() {
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh',display:'flex',gap:16,alignItems:'center',flexWrap:'wrap'}}>
+      <Avatar name="Han Han" size={32}/>
+      <Avatar name="John Doe" size={48} color="#f97316"/>
+      <Avatar name="A B C" size={64} color="#10b981"/>
+      <Avatar name="React Dev" size={80} color="#a78bfa"/>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+];
+
+const PATTERNS = [
+  { title:'useState Basics', when:'Manage any local UI state: counters, form values, toggles, etc.', mistake:'Don\'t mutate state directly — always use the setter function. React won\'t re-render otherwise.', faang:'Fundamentals. Expect questions on batching and functional updates.',
+    code:`function Counter() {
+  const [count, setCount] = React.useState(0);
+  const [text, setText] = React.useState('');
+  // Functional update: use when new state depends on old state
+  const increment = () => setCount(prev => prev + 1);
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh',color:'white'}}>
+      <h2 style={{color:'#61dafb',marginBottom:16}}>useState Basics</h2>
+      <div style={{marginBottom:16}}>
+        <button onClick={increment} style={{padding:'8px 16px',background:'#61dafb',color:'#000',border:'none',borderRadius:8,cursor:'pointer',fontWeight:600}}>
+          Count: {count}
+        </button>
+      </div>
+      <input value={text} onChange={e=>setText(e.target.value)} placeholder="Controlled input..."
+        style={{padding:'8px 12px',background:'#0d1f3c',border:'1px solid #1e3a5f',borderRadius:8,color:'white',outline:'none'}}/>
+      <div style={{marginTop:8,color:'#9ca3af'}}>You typed: {text || '(nothing yet)'}</div>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Counter />);` },
+  { title:'useEffect with Cleanup', when:'Side effects: timers, subscriptions, data fetching, DOM manipulation.', mistake:'Forgetting cleanup causes memory leaks and double-firing in StrictMode. Always return cleanup.', faang:'Very common. Know the difference between [], [dep], and no deps array.',
+    code:`function Timer() {
+  const [time, setTime] = React.useState(0);
+  const [running, setRunning] = React.useState(false);
+  React.useEffect(() => {
+    if (!running) return;
+    // Start a side effect
+    const id = setInterval(() => setTime(t => t + 1), 1000);
+    // Cleanup function — runs when component unmounts or deps change
+    return () => clearInterval(id);
+  }, [running]); // Re-runs when 'running' changes
+  const fmt = s => \`\${Math.floor(s/60).toString().padStart(2,'0')}:\${(s%60).toString().padStart(2,'0')}\`;
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh',color:'white',textAlign:'center'}}>
+      <h2 style={{color:'#61dafb',marginBottom:16}}>useEffect + Cleanup</h2>
+      <div style={{fontSize:'3rem',fontWeight:'bold',fontVariantNumeric:'tabular-nums',margin:'24px 0'}}>{fmt(time)}</div>
+      <div style={{display:'flex',gap:12,justifyContent:'center'}}>
+        <button onClick={()=>setRunning(r=>!r)} style={{padding:'8px 18px',background:running?'#ef4444':'#10b981',color:'white',border:'none',borderRadius:8,cursor:'pointer',fontWeight:600}}>
+          {running ? 'Pause' : 'Start'}
+        </button>
+        <button onClick={()=>{setRunning(false);setTime(0)}} style={{padding:'8px 18px',background:'#374151',color:'white',border:'none',borderRadius:8,cursor:'pointer'}}>
+          Reset
+        </button>
+      </div>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Timer />);` },
+  { title:'Custom Hooks', when:'Extract reusable stateful logic shared between components.', mistake:'Custom hooks must start with "use". Don\'t call hooks conditionally.', faang:'Expect to write a custom hook live. Common examples: useLocalStorage, useDebounce, useFetch.',
+    code:`// Custom hook — extracted reusable logic
+function useLocalStorage(key, initial) {
+  const [value, setValue] = React.useState(() => {
+    try { return JSON.parse(localStorage.getItem(key)) ?? initial; }
+    catch { return initial; }
+  });
+  const set = (v) => {
+    setValue(v);
+    localStorage.setItem(key, JSON.stringify(v));
+  };
+  return [value, set];
+}
+function useToggle(initial = false) {
+  const [on, setOn] = React.useState(initial);
+  const toggle = React.useCallback(() => setOn(v => !v), []);
+  return [on, toggle];
+}
+function App() {
+  const [name, setName] = useLocalStorage('react92_name', '');
+  const [dark, toggleDark] = useToggle(true);
+  return (
+    <div style={{padding:24,background: dark ? '#0a1628' : '#f0f9ff',minHeight:'100vh',color: dark ? 'white' : '#1e3a5f',transition:'background 0.3s'}}>
+      <h2 style={{color:'#61dafb',marginBottom:16}}>Custom Hooks</h2>
+      <div style={{marginBottom:12}}>
+        <input value={name} onChange={e=>setName(e.target.value)} placeholder="Saved to localStorage..."
+          style={{padding:'8px 12px',background: dark ? '#0d1f3c' : 'white',border:'1px solid #1e3a5f',borderRadius:8,color: dark ? 'white' : '#1e3a5f',outline:'none',marginRight:8}}/>
+        <span style={{color:'#9ca3af'}}>Persists on reload!</span>
+      </div>
+      <button onClick={toggleDark} style={{padding:'8px 16px',background:'#61dafb',color:'#000',border:'none',borderRadius:8,cursor:'pointer',fontWeight:600}}>
+        Toggle: {dark ? 'Dark' : 'Light'}
+      </button>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { title:'Lifting State Up', when:'Two sibling components need to share the same state.', mistake:'Lifting too high creates prop drilling. Too low causes sync issues. Find the nearest common ancestor.', faang:'Classic system design + React question. Also sets up context/Redux discussion.',
+    code:`// State is lifted to parent — siblings share it
+function Slider({ value, onChange }) {
+  return (
+    <div>
+      <input type="range" min={0} max={100} value={value} onChange={e=>onChange(+e.target.value)}
+        style={{width:'100%',accentColor:'#61dafb'}}/>
+    </div>
+  );
+}
+function Display({ value }) {
+  const hue = Math.round(value * 2.4);
+  return (
+    <div style={{
+      height:80, borderRadius:8, marginBottom:12,
+      background:\`hsl(\${hue},80%,50%)\`,
+      display:'flex',alignItems:'center',justifyContent:'center',
+      fontWeight:'bold', fontSize:'1.2rem', color:'white'
+    }}>
+      Value: {value}
+    </div>
+  );
+}
+function App() {
+  const [val, setVal] = React.useState(50); // Shared state lives here
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh',color:'white',maxWidth:400}}>
+      <h2 style={{color:'#61dafb',marginBottom:16}}>Lifting State Up</h2>
+      <Display value={val}/>  {/* sibling 1 */}
+      <Slider value={val} onChange={setVal}/>  {/* sibling 2 */}
+      <p style={{color:'#9ca3af',fontSize:'0.8rem',marginTop:8}}>Both components share state from their parent.</p>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);` },
+  { title:'List Rendering with Keys', when:'Rendering arrays of items. Keys help React track additions, removals, reorders.', mistake:'Never use array index as key if the list can reorder. Use stable unique IDs.', faang:'Keys are almost always asked. Know why index keys cause bugs.',
+    code:`function TodoList() {
+  const [items, setItems] = React.useState([
+    {id:1, text:'Learn React', done:true},
+    {id:2, text:'Build something', done:false},
+    {id:3, text:'Ship it', done:false},
+  ]);
+  const [input, setInput] = React.useState('');
+  const toggle = id => setItems(prev => prev.map(item => item.id===id ? {...item,done:!item.done} : item));
+  const add = () => {
+    if (!input.trim()) return;
+    setItems(prev => [...prev, {id:Date.now(), text:input, done:false}]);
+    setInput('');
+  };
+  const remove = id => setItems(prev => prev.filter(item => item.id !== id));
+  return (
+    <div style={{padding:24,background:'#0a1628',minHeight:'100vh',color:'white',maxWidth:400}}>
+      <h2 style={{color:'#61dafb',marginBottom:16}}>List + Keys</h2>
+      <div style={{display:'flex',gap:8,marginBottom:16}}>
+        <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder="Add item..."
+          style={{flex:1,padding:'7px 10px',background:'#0d1f3c',border:'1px solid #1e3a5f',borderRadius:8,color:'white',outline:'none'}}/>
+        <button onClick={add} style={{padding:'7px 14px',background:'#61dafb',color:'#000',border:'none',borderRadius:8,cursor:'pointer',fontWeight:600}}>Add</button>
+      </div>
+      {items.map(item => ( // Key must be stable + unique
+        <div key={item.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:'1px solid #1e3a5f'}}>
+          <input type="checkbox" checked={item.done} onChange={()=>toggle(item.id)} style={{accentColor:'#61dafb'}}/>
+          <span style={{flex:1,textDecoration:item.done?'line-through':'none',color:item.done?'#4b5563':'#e2e8f0'}}>{item.text}</span>
+          <button onClick={()=>remove(item.id)} style={{background:'none',border:'none',color:'#ef4444',cursor:'pointer',fontSize:'1rem'}}>×</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<TodoList />);` },
+];
+
+const HOOKS_REF = [
+  { name:'useState', sig:'const [state, setState] = useState(initialValue)', desc:'Returns stateful value and a setter. Triggers re-render when state changes.', ex:`const [count, setCount] = useState(0);\nsetCount(c => c + 1); // functional update` },
+  { name:'useEffect', sig:'useEffect(fn, deps?)', desc:'Run side effects after render. Return cleanup function to run on unmount/re-run.', ex:`useEffect(() => {\n  const id = setInterval(tick, 1000);\n  return () => clearInterval(id);\n}, [dep]);` },
+  { name:'useContext', sig:'const value = useContext(MyContext)', desc:'Subscribe to a context value without prop drilling.', ex:`const theme = useContext(ThemeContext);\n// re-renders when context value changes` },
+  { name:'useRef', sig:'const ref = useRef(initialValue)', desc:'Persist a mutable value without triggering re-renders. Also used for DOM refs.', ex:`const inputRef = useRef(null);\ninputRef.current.focus();` },
+  { name:'useMemo', sig:'const memoized = useMemo(() => compute(a, b), [a, b])', desc:'Memoize expensive calculations. Recomputes only when deps change.', ex:`const sorted = useMemo(() =>\n  data.sort(compareFn), [data]);` },
+  { name:'useCallback', sig:'const memoFn = useCallback(fn, deps)', desc:'Memoize a function reference. Use when passing callbacks to memoized children.', ex:`const handleClick = useCallback(() => {\n  doSomething(id);\n}, [id]);` },
+  { name:'useReducer', sig:'const [state, dispatch] = useReducer(reducer, initial)', desc:'useState alternative for complex state logic. Predictable state transitions.', ex:`dispatch({ type: 'INCREMENT', payload: 1 });` },
+];
+
+const QA = [
+  ['What is the Virtual DOM and why does React use it?', 'The Virtual DOM is an in-memory representation of the real DOM. When state changes, React re-renders to a virtual tree, diffs it against the previous one (reconciliation), and applies only the minimal real DOM changes. This batches and optimizes DOM operations, which are expensive.'],
+  ['Explain React\'s reconciliation algorithm.', 'When re-rendering, React walks both the old and new virtual DOM trees simultaneously. It uses heuristics: (1) Different element types = destroy + rebuild. (2) Same type = update in place. (3) Lists use keys to match elements. This makes it O(n) instead of O(n³).'],
+  ['When should you use useMemo vs useCallback?', 'useMemo memoizes a computed value (expensive calculation). useCallback memoizes a function reference. Use useCallback when passing callbacks to React.memo children to prevent unnecessary re-renders. Don\'t overuse — the memoization itself has cost.'],
+  ['What is the purpose of the key prop?', 'Keys help React identify which items in a list have changed, been added, or removed. Use stable, unique IDs — not array indexes. Wrong keys cause bugs: wrong component state persisting after reorder.'],
+  ['What is React.memo and when should you use it?', 'React.memo is a HOC that memoizes a component — it skips re-rendering if props haven\'t changed (shallow comparison). Use it when a component renders frequently with the same props. Pair with useCallback for callback props.'],
+  ['Controlled vs uncontrolled inputs — what\'s the difference?', 'Controlled: input value is driven by React state. You have full control and can validate on every keystroke. Uncontrolled: DOM manages the value; you read it via ref when needed. Controlled is preferred for forms that need validation or dynamic interaction.'],
+  ['What happens if you put a function inside useEffect deps?', 'The function is recreated on every render, so useEffect will fire every render. Fix by wrapping the function in useCallback, or moving it inside the effect. This is a common cause of infinite loops.'],
+  ['What is React Strict Mode?', 'A dev-only feature that double-invokes render, state initializers, and effects to surface impurity bugs. It intentionally mounts, unmounts, and remounts components — explains why your console.log appears twice in dev.'],
+  ['What is the difference between state and props?', 'Props are read-only inputs passed from parent to child. State is internal, mutable data managed by the component. Think: props = parameters, state = local variables. State changes trigger re-renders; prop changes come from the parent re-rendering.'],
+  ['Explain the concept of lifting state up.', 'When siblings need to share state, move it to their nearest common ancestor. The parent holds the state and passes it down as props + setter callbacks. Avoids sync issues between siblings.'],
+  ['What are React Portals?', 'Portals render children into a different DOM node than the parent component\'s DOM hierarchy (e.g., modals, tooltips that need to escape overflow:hidden). Use ReactDOM.createPortal(child, domNode).'],
+  ['What is the useLayoutEffect hook?', 'Like useEffect but fires synchronously after all DOM mutations and before the browser paints. Use for DOM measurements (getBoundingClientRect) or synchronous re-renders that must happen before paint to avoid flicker. Prefer useEffect for almost everything.'],
+  ['How does React handle events differently from native DOM?', 'React uses synthetic events — cross-browser wrappers around native events with the same interface. Events are registered at the root (event delegation) rather than individual elements, improving performance. Event pooling was removed in React 17.'],
+  ['What is code splitting in React?', 'Splitting your JS bundle into smaller chunks loaded on demand. Use React.lazy() + Suspense for component-level code splitting: const LazyComp = React.lazy(() => import(\'./Comp\')). Reduces initial bundle size.'],
+  ['What is the difference between useEffect and componentDidMount?', 'componentDidMount runs once after mount. useEffect with [] also runs once after mount. Key difference: useEffect runs after the browser has painted (async), while componentDidMount runs synchronously after DOM insertion. Also, useEffect\'s cleanup is equivalent to componentWillUnmount.'],
+];
+
+// ─── TABS ─────────────────────────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ─── PLAYGROUND ──────────────────────────────────────────────────────────
+const editor = document.getElementById('code-editor');
+editor.value = get('code') || STARTER;
+updateLineNums();
+
+function updateLineNums() {
+  const lines = editor.value.split('\n').length;
+  document.getElementById('line-nums').innerHTML = Array.from({length:lines},(_,i)=>i+1).join('<br/>');
+  set('code', editor.value);
+}
+
+function handleKey(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s=editor.selectionStart, end=editor.selectionEnd;
+    editor.value = editor.value.substring(0,s)+'  '+editor.value.substring(end);
+    editor.selectionStart = editor.selectionEnd = s+2;
+    updateLineNums();
+  }
+  if (e.ctrlKey && e.key === 'Enter') runCode();
+}
+
+function buildIframeDoc(code) {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<script src="https://unpkg.com/react@18/umd/react.development.js"><\/script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#0a1628}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">${code.replace(/<\/script>/g,'<\\/script>')}<\/script>
+</body></html>`;
+}
+
+function runCode() {
+  const code = editor.value;
+  document.getElementById('error-display').style.display='none';
+  document.getElementById('preview-status').textContent='Running...';
+  try {
+    const iframe = document.getElementById('preview');
+    iframe.srcdoc = buildIframeDoc(code);
+    iframe.onload = () => { document.getElementById('preview-status').textContent='✓ Live'; };
+  } catch(e) {
+    document.getElementById('preview-status').textContent='Error';
+    document.getElementById('error-display').style.display='block';
+    document.getElementById('error-display').textContent = e.message;
+  }
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(editor.value).catch(()=>{});
+  const btn = event.target;
+  btn.textContent='Copied!';
+  setTimeout(()=>btn.textContent='Copy',1500);
+}
+
+function resetCode() {
+  editor.value = STARTER;
+  updateLineNums();
+}
+
+function loadCode(code) {
+  editor.value = code;
+  updateLineNums();
+  showTab('playground', document.querySelector('.tab'));
+  document.querySelectorAll('.tab')[0].classList.add('active');
+}
+
+// ─── COMPONENTS ──────────────────────────────────────────────────────────
+let activeCompCat = 'All';
+const cats = ['All','Forms','Layout','Feedback','Data'];
+function renderComponents() {
+  document.getElementById('comp-cats').innerHTML = cats.map(c=>
+    `<button class="comp-cat-btn${activeCompCat===c?' active':''}" onclick="setCompCat('${c}')">${c}</button>`
+  ).join('');
+  const list = activeCompCat==='All' ? COMPONENTS : COMPONENTS.filter(c=>c.cat===activeCompCat);
+  document.getElementById('comp-grid').innerHTML = list.map((c,i)=>`
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <h4>${c.name}</h4>
+        <span class="comp-cat-tag">${c.cat}</span>
+      </div>
+      <div class="comp-card-body">${c.desc}</div>
+      <div class="code-snippet" id="comp-code-${i}"><code>${c.code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></div>
+      <div class="comp-actions">
+        <button class="btn btn-cyan btn-sm" onclick="loadCompCode(${i})">▶ Load in Playground</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleCompCode(${i})">View Code</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyCompCode(${i})">Copy</button>
+      </div>
+    </div>`).join('');
+}
+
+function setCompCat(c) { activeCompCat=c; renderComponents(); }
+function toggleCompCode(i) { document.getElementById('comp-code-'+i).classList.toggle('expanded'); }
+function loadCompCode(i) {
+  const filteredList = activeCompCat==='All' ? COMPONENTS : COMPONENTS.filter(c=>c.cat===activeCompCat);
+  loadCode(filteredList[i].code);
+}
+function copyCompCode(i) {
+  const filteredList = activeCompCat==='All' ? COMPONENTS : COMPONENTS.filter(c=>c.cat===activeCompCat);
+  navigator.clipboard.writeText(filteredList[i].code).catch(()=>{});
+}
+
+// ─── PATTERNS ────────────────────────────────────────────────────────────
+function renderPatterns() {
+  document.getElementById('patterns-list').innerHTML = PATTERNS.map((p,i)=>`
+    <div class="pattern-card">
+      <div class="pattern-header" onclick="togglePattern(${i})">
+        <h4>${i+1}. ${p.title}</h4>
+        <span style="color:#6b7280;font-size:.9rem" id="ptoggle-${i}">▼</span>
+      </div>
+      <div class="pattern-body" id="pbody-${i}">
+        <div class="pattern-meta">
+          <div><label>When to use</label>${p.when}</div>
+          <div><label>Common mistake</label>${p.mistake}</div>
+          <div><label>FAANG note</label>${p.faang}</div>
+        </div>
+        <button class="btn btn-cyan btn-sm" onclick="loadCode(PATTERNS[${i}].code)">▶ Load in Playground</button>
+        <div class="code-block">${p.code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      </div>
+    </div>`).join('');
+}
+
+function togglePattern(i) {
+  const body = document.getElementById('pbody-'+i);
+  const arrow = document.getElementById('ptoggle-'+i);
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open')?'▲':'▼';
+}
+
+// ─── REFERENCE ───────────────────────────────────────────────────────────
+function renderReference() {
+  document.getElementById('hooks-ref').innerHTML = HOOKS_REF.map(h=>`
+    <div class="hook-card">
+      <h4>${h.name}</h4>
+      <div class="hook-sig">${h.sig.replace(/</g,'&lt;')}</div>
+      <div class="hook-desc">${h.desc}</div>
+      <div class="hook-example">${h.ex.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    </div>`).join('');
+
+  document.getElementById('qa-list').innerHTML = QA.map((qa,i)=>`
+    <div class="qa-card" onclick="toggleQA(${i})">
+      <div class="qa-q">${qa[0]}<span id="qa-arrow-${i}">▼</span></div>
+      <div class="qa-a" id="qa-ans-${i}">${qa[1]}</div>
+    </div>`).join('');
+}
+
+function toggleQA(i) {
+  const ans = document.getElementById('qa-ans-'+i);
+  const arrow = document.getElementById('qa-arrow-'+i);
+  ans.classList.toggle('show');
+  arrow.textContent = ans.classList.contains('show')?'▲':'▼';
+}
+
+// Init
+runCode();
+renderComponents();
+renderPatterns();
+renderReference();
+</script>
+</body>
+</html>

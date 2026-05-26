@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agent #91 — Coder's Workout Split Planner</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0f1a;color:#e2e8f0;min-height:100vh}
+header{background:#131c2e;border-bottom:1px solid #1e2d45;padding:14px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.15rem;font-weight:700;color:#38bdf8}
+header span{font-size:.82rem;color:#6b7280}
+.badge{background:#38bdf8;color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px;flex-shrink:0}
+.tabs{display:flex;background:#0a0f1a;border-bottom:2px solid #1e2d45;padding:0 24px;gap:2px;overflow-x:auto}
+.tab{padding:11px 18px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .2s}
+.tab.active{color:#38bdf8;border-bottom-color:#38bdf8}
+.tab:hover{color:#7dd3fc}
+.content{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.content.active{display:block}
+.card{background:#131c2e;border:1px solid #1e2d45;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h3{color:#38bdf8;margin-bottom:12px;font-size:1rem;display:flex;align-items:center;gap:8px}
+.card h4{color:#a3e635;margin-bottom:8px;font-size:.9rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+label{display:block;font-size:.78rem;color:#9ca3af;margin-bottom:4px;margin-top:10px}
+select,input{width:100%;background:#0a0f1a;border:1px solid #1e2d45;border-radius:8px;padding:8px 10px;color:#e2e8f0;font-size:.85rem}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .2s}
+.btn-primary{background:#38bdf8;color:#000}
+.btn-primary:hover{background:#0ea5e9}
+.btn-lime{background:#a3e635;color:#000}
+.btn-lime:hover{background:#84cc16}
+.btn-ghost{background:transparent;color:#38bdf8;border:1px solid #38bdf8}
+.btn-ghost:hover{background:#38bdf8;color:#000}
+.btn-sm{padding:4px 10px;font-size:.72rem}
+.split-card{background:#131c2e;border:1px solid #1e2d45;border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;position:relative}
+.split-card:hover{border-color:#38bdf8;transform:translateY(-2px)}
+.split-card.selected{border-color:#a3e635;background:#0e1a0a}
+.split-meta{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+.tag-blue{background:rgba(56,189,248,.15);color:#38bdf8}
+.tag-lime{background:rgba(163,230,53,.15);color:#a3e635}
+.tag-orange{background:rgba(251,146,60,.15);color:#fb923c}
+.tag-red{background:rgba(239,68,68,.15);color:#ef4444}
+.tag-purple{background:rgba(167,139,250,.15);color:#a78bfa}
+.diff-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px}
+.day-col{background:#131c2e;border:1px solid #1e2d45;border-radius:10px;padding:14px;min-height:200px}
+.day-col h4{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #1e2d45}
+.day-col.rest-day{background:#0d1526;border-color:#0e1f3a}
+.day-col.rest-day h4{color:#6b7280}
+.ex-row{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;border-radius:6px;transition:all .15s}
+.ex-row:hover{background:rgba(56,189,248,.05);padding-left:4px}
+.ex-check{width:16px;height:16px;border-radius:4px;border:2px solid #374151;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s}
+.ex-check.done{background:#a3e635;border-color:#a3e635;color:#000}
+.ex-check.skip{background:#374151;border-color:#374151;color:#9ca3af}
+.ex-text{font-size:.78rem;color:#cbd5e1;flex:1}
+.ex-text.done{text-decoration:line-through;color:#4b5563}
+.prehab-block{background:rgba(163,230,53,.05);border:1px solid rgba(163,230,53,.2);border-radius:8px;padding:10px;margin-top:10px}
+.prehab-block h5{font-size:.72rem;color:#a3e635;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.streak-bar{background:#1e2d45;height:6px;border-radius:3px;margin-top:4px;overflow:hidden}
+.streak-fill{height:100%;background:linear-gradient(90deg,#38bdf8,#a3e635);border-radius:3px;transition:width .5s}
+.ex-lib-card{background:#131c2e;border:1px solid #1e2d45;border-radius:10px;padding:14px;margin-bottom:10px}
+.ex-lib-card h4{font-size:.88rem;color:#e2e8f0;margin-bottom:6px}
+.ex-note{font-size:.75rem;color:#38bdf8;font-style:italic;margin-top:6px;padding:6px 8px;background:rgba(56,189,248,.07);border-radius:6px}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.filter-btn{padding:5px 12px;border-radius:20px;border:1px solid #1e2d45;background:transparent;color:#9ca3af;font-size:.75rem;cursor:pointer;transition:all .2s}
+.filter-btn.active{background:#38bdf8;color:#000;border-color:#38bdf8}
+.recovery-section{margin-bottom:24px}
+.recovery-section h3{font-size:.95rem;color:#38bdf8;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.rec-card{background:#131c2e;border:1px solid #1e2d45;border-radius:10px;padding:14px;margin-bottom:8px}
+.rec-card h4{font-size:.85rem;color:#a3e635;margin-bottom:4px}
+.rec-card .meta{font-size:.75rem;color:#6b7280;margin-bottom:6px}
+.rec-card p{font-size:.8rem;color:#9ca3af;line-height:1.5}
+.why-coder{font-size:.75rem;color:#38bdf8;margin-top:6px;font-style:italic}
+.timer-box{background:#0f1f34;border:2px solid #38bdf8;border-radius:16px;padding:24px;text-align:center;max-width:280px;margin:0 auto}
+.timer-display{font-size:3rem;font-weight:700;color:#38bdf8;font-variant-numeric:tabular-nums}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat-box{background:#0f1f34;border-radius:8px;padding:12px;text-align:center}
+.stat-box .num{font-size:1.6rem;font-weight:700;color:#38bdf8}
+.stat-box .lbl{font-size:.72rem;color:#6b7280;margin-top:2px}
+@media(max-width:700px){.week-grid{grid-template-columns:repeat(3,1fr)}.grid2,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <span class="badge">#91</span>
+  <h1>🏋️ Coder's Workout Split Planner</h1>
+  <span>Finally, a plan that understands you sit for 8 hours a day.</span>
+</header>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('splits',this)">SPLITS</button>
+  <button class="tab" onclick="showTab('schedule',this)">SCHEDULE</button>
+  <button class="tab" onclick="showTab('exercises',this)">EXERCISES</button>
+  <button class="tab" onclick="showTab('recovery',this)">RECOVERY</button>
+</div>
+
+<!-- SPLITS -->
+<div id="tab-splits" class="content active">
+  <div style="margin-bottom:16px;font-size:.85rem;color:#6b7280">Choose the split that fits your life right now. You can change it anytime.</div>
+  <div class="grid2" id="splits-grid"></div>
+</div>
+
+<!-- SCHEDULE -->
+<div id="tab-schedule" class="content">
+  <div id="no-split-msg" style="text-align:center;padding:60px 20px;color:#6b7280;display:none">
+    <div style="font-size:2rem;margin-bottom:12px">📋</div>
+    <div>No split selected yet. Go to <strong>SPLITS</strong> and choose one.</div>
+  </div>
+  <div id="schedule-view">
+    <div class="stat-grid">
+      <div class="stat-box"><div class="num" id="stat-active">—</div><div class="lbl">Active Split</div></div>
+      <div class="stat-box"><div class="num" id="stat-streak">0🔥</div><div class="lbl">Week Streak</div></div>
+      <div class="stat-box"><div class="num" id="stat-completion">0%</div><div class="lbl">This Week</div></div>
+    </div>
+    <div class="week-grid" id="week-grid"></div>
+    <div style="margin-top:16px;font-size:.75rem;color:#6b7280">Click any exercise to toggle ✓ done / — skip. Streak awards for 80%+ completion weeks.</div>
+  </div>
+</div>
+
+<!-- EXERCISES -->
+<div id="tab-exercises" class="content">
+  <div class="filter-bar" id="muscle-filters"></div>
+  <div class="filter-bar" id="equip-filters"></div>
+  <div id="ex-library"></div>
+</div>
+
+<!-- RECOVERY -->
+<div id="tab-recovery" class="content">
+  <div class="recovery-section">
+    <h3>🤲 Wrist &amp; Hand — RSI Prevention</h3>
+    <div id="recovery-wrist"></div>
+  </div>
+  <div class="recovery-section">
+    <h3>🧍 Neck &amp; Shoulders — Posture Reset</h3>
+    <div id="recovery-neck"></div>
+  </div>
+  <div class="recovery-section">
+    <h3>🦵 Hips &amp; Lower Back — Sitting Antidote</h3>
+    <div id="recovery-hips"></div>
+  </div>
+  <div class="recovery-section">
+    <h3>👁️ Eyes — Screen Fatigue Relief</h3>
+    <div id="recovery-eyes"></div>
+    <div class="timer-box" style="margin-top:16px">
+      <div style="font-size:.8rem;color:#9ca3af;margin-bottom:8px">20-20-20 Rule Timer</div>
+      <div class="timer-display" id="timer-display">20:00</div>
+      <div style="font-size:.75rem;color:#6b7280;margin:8px 0">Every 20 min → look 20 ft away for 20 sec</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+        <button class="btn btn-primary" onclick="startTimer()">Start</button>
+        <button class="btn btn-ghost" onclick="resetTimer()">Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS = 'split91_';
+const get = k => JSON.parse(localStorage.getItem(LS+k)||'null');
+const set = (k,v) => localStorage.setItem(LS+k, JSON.stringify(v));
+
+const SPLITS = [
+  { id:'2day', name:'2-Day Full Body', emoji:'💪', days:2, focus:'Full Body', diff:1, who:'Perfect for crunch weeks, exam season, or when life gets in the way. Minimum viable fitness.',
+    tags:['2 days/week','Full Body','Beginner-friendly','Crunch week survival'],
+    schedule:[
+      { day:'Monday', label:'Full Body A', duration:'45 min', exercises:['Squat 3×8','Push-up 3×12','Dumbbell Row 3×10','Dumbbell Shoulder Press 3×10','Plank 3×30s','Glute Bridge 3×15'] },
+      { day:'Tuesday', label:'Rest', duration:'', exercises:[] },
+      { day:'Wednesday', label:'Rest', duration:'', exercises:[] },
+      { day:'Thursday', label:'Full Body B', duration:'45 min', exercises:['Deadlift 3×6','Dumbbell Bench Press 3×10','Lat Pulldown 3×10','Lunges 3×10/leg','Side Plank 2×30s/side','Hip Thrust 3×12'] },
+      { day:'Friday', label:'Rest', duration:'', exercises:[] },
+      { day:'Saturday', label:'Active Recovery', duration:'20 min', exercises:['Walk 20 min or foam roll'] },
+      { day:'Sunday', label:'Rest', duration:'', exercises:[] },
+    ]},
+  { id:'3day', name:'3-Day Push / Pull / Legs', emoji:'🔁', days:3, focus:'Push · Pull · Legs', diff:2, who:'Classic split. Full recovery between sessions. Excellent for intermediate lifters with a busy schedule.',
+    tags:['3 days/week','PPL','Intermediate','Balanced'],
+    schedule:[
+      { day:'Monday', label:'Push', duration:'50 min', exercises:['Barbell Bench Press 4×6','Overhead Press 3×8','Incline Dumbbell Press 3×10','Lateral Raise 3×15','Tricep Pushdown 3×12','Close-Grip Push-up 2×15'] },
+      { day:'Tuesday', label:'Rest', duration:'', exercises:[] },
+      { day:'Wednesday', label:'Pull', duration:'50 min', exercises:['Deadlift 3×5','Pull-up or Lat Pulldown 4×8','Cable Row 3×10','Face Pull 3×15','Barbell Curl 3×10','Hammer Curl 3×12'] },
+      { day:'Thursday', label:'Rest', duration:'', exercises:[] },
+      { day:'Friday', label:'Legs', duration:'55 min', exercises:['Squat 4×6','Romanian Deadlift 3×8','Leg Press 3×12','Leg Curl 3×12','Calf Raise 4×15','Ab Wheel Rollout 3×8'] },
+      { day:'Saturday', label:'Active Recovery', duration:'20 min', exercises:['Walk / light bike / foam roll'] },
+      { day:'Sunday', label:'Rest', duration:'', exercises:[] },
+    ]},
+  { id:'4day', name:'4-Day Upper / Lower A/B', emoji:'⬆️', days:4, focus:'Upper · Lower (A/B)', diff:2, who:'Great balance of volume and recovery. Ideal for someone consistent 4 days/week.',
+    tags:['4 days/week','Upper/Lower','Intermediate','Strength focus'],
+    schedule:[
+      { day:'Monday', label:'Upper A', duration:'55 min', exercises:['Barbell Bench Press 4×5','Bent-Over Row 4×5','Overhead Press 3×8','Pull-up 3×8','Tricep Dip 3×10','Dumbbell Curl 3×10'] },
+      { day:'Tuesday', label:'Lower A', duration:'55 min', exercises:['Squat 4×5','Romanian Deadlift 3×8','Leg Press 3×12','Leg Curl 3×10','Calf Raise 4×15','Ab Rollout 3×8'] },
+      { day:'Wednesday', label:'Rest', duration:'', exercises:[] },
+      { day:'Thursday', label:'Upper B', duration:'55 min', exercises:['Incline Dumbbell Press 4×8','Cable Row 4×8','Lateral Raise 3×12','Face Pull 3×15','Skull Crusher 3×10','Preacher Curl 3×10'] },
+      { day:'Friday', label:'Lower B', duration:'55 min', exercises:['Deadlift 4×4','Front Squat 3×6','Walking Lunges 3×12/leg','Nordic Curl 3×6','Standing Calf Raise 4×15','Pallof Press 3×10'] },
+      { day:'Saturday', label:'Active Recovery', duration:'', exercises:['Walk / stretch / foam roll'] },
+      { day:'Sunday', label:'Rest', duration:'', exercises:[] },
+    ]},
+  { id:'5day', name:'5-Day Classic Bro Split', emoji:'💥', days:5, focus:'Chest·Back·Legs·Shoulders·Arms', diff:3, who:'High volume per muscle group. You have the time and the dedication. Builds that classic physique.',
+    tags:['5 days/week','Bodybuilder','Intermediate-Advanced','High volume'],
+    schedule:[
+      { day:'Monday', label:'Chest', duration:'60 min', exercises:['Barbell Bench Press 5×5','Incline DB Press 4×8','Cable Fly 3×12','Decline Push-up 3×15','Chest Dip 3×10'] },
+      { day:'Tuesday', label:'Back', duration:'60 min', exercises:['Deadlift 4×4','Pull-up 4×8','Barbell Row 4×6','Cable Row 3×10','Straight-Arm Pulldown 3×12','Shrug 3×15'] },
+      { day:'Wednesday', label:'Legs', duration:'65 min', exercises:['Squat 5×5','Leg Press 4×12','Romanian Deadlift 3×8','Leg Extension 3×15','Leg Curl 3×12','Calf Raise 5×15','Ab Crunch 3×20'] },
+      { day:'Thursday', label:'Shoulders', duration:'55 min', exercises:['Overhead Press 4×6','Lateral Raise 4×15','Front Raise 3×12','Face Pull 3×15','Rear Delt Fly 3×12','Upright Row 3×10'] },
+      { day:'Friday', label:'Arms', duration:'55 min', exercises:['Barbell Curl 4×8','Hammer Curl 3×10','Incline DB Curl 3×12','Tricep Pushdown 4×10','Skull Crusher 3×8','Overhead Tricep Ext 3×12'] },
+      { day:'Saturday', label:'Active Recovery', duration:'', exercises:['Walk / bike / foam roll'] },
+      { day:'Sunday', label:'Rest', duration:'', exercises:[] },
+    ]},
+  { id:'6day', name:'6-Day PPL ×2', emoji:'🔥', days:6, focus:'Push·Pull·Legs × 2', diff:4, who:'Advanced. You are consistent, recovered well, and want maximum volume. For those chasing serious progress.',
+    tags:['6 days/week','PPL x2','Advanced','Max volume'],
+    schedule:[
+      { day:'Monday', label:'Push (Heavy)', duration:'60 min', exercises:['Bench Press 5×5','OHP 4×6','Incline DB Press 3×8','Lateral Raise 4×15','Tricep Pushdown 3×12'] },
+      { day:'Tuesday', label:'Pull (Heavy)', duration:'60 min', exercises:['Deadlift 4×4','Weighted Pull-up 4×6','Barbell Row 4×6','Face Pull 3×15','Barbell Curl 3×8'] },
+      { day:'Wednesday', label:'Legs (Heavy)', duration:'65 min', exercises:['Squat 5×5','RDL 4×6','Leg Press 3×10','Leg Curl 3×10','Calf Raise 5×12'] },
+      { day:'Thursday', label:'Push (Volume)', duration:'60 min', exercises:['Incline Bench 4×10','Cable Fly 3×12','DB Shoulder Press 4×10','Lateral Raise 4×15','Tricep Dip 3×15'] },
+      { day:'Friday', label:'Pull (Volume)', duration:'60 min', exercises:['Pull-up 4×10','Cable Row 4×10','DB Row 3×12','Hammer Curl 3×12','Preacher Curl 3×10'] },
+      { day:'Saturday', label:'Legs (Volume)', duration:'65 min', exercises:['Front Squat 4×8','Walking Lunge 3×12','Hack Squat 3×10','Leg Extension 4×15','Seated Calf 4×15'] },
+      { day:'Sunday', label:'Rest', duration:'', exercises:[] },
+    ]},
+  { id:'mobility', name:'Daily Mobility Only', emoji:'🧘', days:7, focus:'Mobility · Flexibility', diff:1, who:'Finals / deadline survival mode. Keeps you from seizing up at your desk. 15 min/day, no excuses.',
+    tags:['7 days/week','Mobility only','All levels','Finals survival'],
+    schedule:[
+      { day:'Monday', label:'Morning Mobility', duration:'15 min', exercises:['Cat-Cow 2×10','World\'s Greatest Stretch 5/side','Hip 90/90 Stretch 2 min/side','Thoracic Rotation 10/side','Shoulder Circle 10/direction'] },
+      { day:'Tuesday', label:'Desk Break', duration:'10 min', exercises:['Wrist Circles 1 min','Chin Tuck 10 reps','Hip Flexor Stretch 90s/side','Neck Side Stretch 30s/side','Chest Opener Stretch 60s'] },
+      { day:'Wednesday', label:'Morning Mobility', duration:'15 min', exercises:['Leg Swings 10/direction','Pigeon Pose 2 min/side','Wall Angels 2×10','Dead Bug 2×8/side','Glute Bridge 2×15'] },
+      { day:'Thursday', label:'Desk Break', duration:'10 min', exercises:['Prayer Stretch 4×30s','Levator Scapulae Stretch 30s/side','Couch Stretch 90s/side','Cat-Cow 2×10','Eye Circles 30s'] },
+      { day:'Friday', label:'Morning Mobility', duration:'15 min', exercises:['Spiderman Lunge 5/side','Thread the Needle 8/side','Child\'s Pose 2 min','Doorway Chest Stretch 60s','Standing Hip Circle 10/direction'] },
+      { day:'Saturday', label:'Full Mobility Flow', duration:'20 min', exercises:['Full Sun Salutation ×3','Pigeon 2 min/side','Couch Stretch 90s/side','Wall Angels 3×10','Thoracic Rotation 10/side','Neck circles slow 2 min'] },
+      { day:'Sunday', label:'Gentle Recovery', duration:'10 min', exercises:['Legs Up the Wall 5 min','Supine Twist 2 min/side','Diaphragmatic Breathing 5 min'] },
+    ]},
+];
+
+const EXERCISES = [
+  // Push
+  {name:'Barbell Bench Press',cat:'Push',muscles:'Chest, triceps, front delt',rec:'4×5–8',equip:'Barbell',note:'Keep shoulder blades retracted — counters rounded posture from typing all day'},
+  {name:'Overhead Press',cat:'Push',muscles:'Shoulders, triceps, upper chest',rec:'3×6–8',equip:'Barbell',note:'Builds overhead strength that directly fights forward head posture'},
+  {name:'Incline Dumbbell Press',cat:'Push',muscles:'Upper chest, front delt',rec:'3×8–12',equip:'Dumbbells',note:'Unilateral loading corrects left-right imbalances from asymmetric mouse use'},
+  {name:'Push-up',cat:'Push',muscles:'Chest, triceps, core',rec:'3×12–20',equip:'None',note:'Can be done between coding sessions. Perfect desk break exercise'},
+  {name:'Lateral Raise',cat:'Push',muscles:'Side delts',rec:'3×12–15',equip:'Dumbbells',note:'Builds cap shoulders. Great for posture — wide shoulders naturally pull back'},
+  {name:'Tricep Pushdown',cat:'Push',muscles:'Triceps',rec:'3×10–15',equip:'Cables',note:'Elbow health — strengthens the antagonist to constant wrist flexion at keyboard'},
+  {name:'Dips',cat:'Push',muscles:'Chest, triceps, front delt',rec:'3×8–12',equip:'None',note:'Bodyweight powerhouse. Use parallel bars or two chairs at your desk'},
+  {name:'Cable Fly',cat:'Push',muscles:'Chest (stretch)',rec:'3×12–15',equip:'Cables',note:'Stretches the pec minor — key muscle that pulls shoulders forward when hunching'},
+  {name:'Pike Push-up',cat:'Push',muscles:'Shoulders, triceps',rec:'3×8–12',equip:'None',note:'Shoulder press substitute with zero equipment'},
+  {name:'Close-Grip Bench Press',cat:'Push',muscles:'Triceps, chest',rec:'3×8–10',equip:'Barbell',note:'Tricep dominant. Elbow-friendly when kept tucked'},
+  // Pull
+  {name:'Deadlift',cat:'Pull',muscles:'Entire posterior chain',rec:'4×3–5',equip:'Barbell',note:'Single best exercise for countering hours of sitting. Strengthens everything compression destroys'},
+  {name:'Pull-up',cat:'Pull',muscles:'Lats, biceps, rear delts',rec:'4×5–10',equip:'None',note:'Decompresses spine. Every pull-up undoes some of the damage from slouching at your desk'},
+  {name:'Barbell Row',cat:'Pull',muscles:'Back, biceps, rear delts',rec:'4×5–8',equip:'Barbell',note:'Builds the muscles that hold your shoulders back during long coding sessions'},
+  {name:'Face Pull',cat:'Pull',muscles:'Rear delts, external rotators',rec:'3×15–20',equip:'Cables',note:'#1 prehab exercise for coders. Directly counteracts internal rotation from keyboard use'},
+  {name:'Cable Row',cat:'Pull',muscles:'Mid back, lats, biceps',rec:'3×10–12',equip:'Cables',note:'Neutral grip is easy on wrists. Full stretch engages thoracic extensors'},
+  {name:'Hammer Curl',cat:'Pull',muscles:'Biceps, brachialis, brachioradialis',rec:'3×10–12',equip:'Dumbbells',note:'Neutral grip reduces wrist strain vs supinated curl — better for heavy keyboard users'},
+  {name:'Barbell Curl',cat:'Pull',muscles:'Biceps, forearms',rec:'3×8–10',equip:'Barbell',note:'Builds forearm resilience. Supination at top counteracts pronated typing posture'},
+  {name:'Lat Pulldown',cat:'Pull',muscles:'Lats, biceps',rec:'3×10–12',equip:'Cables',note:'Pull-up alternative. Wide lats visually widen your frame and improve posture passively'},
+  {name:'Inverted Row',cat:'Pull',muscles:'Back, biceps, rear delts',rec:'3×10–15',equip:'None',note:'Under a desk or using a table edge. Zero-equipment pull work'},
+  {name:'Straight-Arm Pulldown',cat:'Pull',muscles:'Lats, teres major',rec:'3×12–15',equip:'Cables',note:'Isolated lat work. Improves shoulder stability for healthy arm positioning at keyboard'},
+  // Legs
+  {name:'Squat',cat:'Legs',muscles:'Quads, glutes, hamstrings',rec:'4×4–6',equip:'Barbell',note:'Hip flexors are chronically tight from sitting. Squatting through full depth restores mobility'},
+  {name:'Romanian Deadlift',cat:'Legs',muscles:'Hamstrings, glutes',rec:'3×8–10',equip:'Barbell',note:'Stretches tight hamstrings and glutes — classic sitting compensation muscles'},
+  {name:'Leg Press',cat:'Legs',muscles:'Quads, glutes, hamstrings',rec:'3×10–15',equip:'None',note:'Joint-friendly quad builder. Push through heels to keep glutes engaged'},
+  {name:'Walking Lunge',cat:'Legs',muscles:'Quads, glutes, hip flexors',rec:'3×10/leg',equip:'None',note:'Hip flexor stretch on the trailing leg. Exactly what sitting all day destroys'},
+  {name:'Hip Thrust',cat:'Legs',muscles:'Glutes, hamstrings',rec:'4×10–12',equip:'Barbell',note:'Glutes are the most inhibited muscle for desk workers. This directly fixes it'},
+  {name:'Leg Curl',cat:'Legs',muscles:'Hamstrings',rec:'3×10–12',equip:'None',note:'Isolated hamstring work for balanced knee health under a desk or leg curl machine'},
+  {name:'Calf Raise',cat:'Legs',muscles:'Calves',rec:'4×15–20',equip:'None',note:'Poor circulation from sitting. Calf pumps act as a second heart for blood return'},
+  {name:'Nordic Curl',cat:'Legs',muscles:'Hamstrings (eccentric)',rec:'3×5–8',equip:'None',note:'Highest ROI for hamstring injury prevention. Brutal but effective'},
+  {name:'Front Squat',cat:'Legs',muscles:'Quads, upper back, core',rec:'3×5–8',equip:'Barbell',note:'Forces upright torso — builds the thoracic strength you lose from hunching over a monitor'},
+  {name:'Glute Bridge',cat:'Legs',muscles:'Glutes, core',rec:'3×15',equip:'None',note:'Floor-based glute activation. Perfect 2-minute desk break exercise'},
+  // Core
+  {name:'Plank',cat:'Core',muscles:'Core, shoulders, glutes',rec:'3×30–60s',equip:'None',note:'Builds anti-extension core strength. Helps you sit tall without slumping'},
+  {name:'Ab Wheel Rollout',cat:'Core',muscles:'Core, lats, shoulders',rec:'3×6–10',equip:'None',note:'Advanced anti-extension. Pairs perfectly with the constant spinal flexion from slouching'},
+  {name:'Dead Bug',cat:'Core',muscles:'Deep core, anti-rotation',rec:'3×8/side',equip:'None',note:'Reconnects brain-to-core firing pattern. Excellent before long coding sessions'},
+  {name:'Pallof Press',cat:'Core',muscles:'Obliques, anti-rotation',rec:'3×10/side',equip:'Cables',note:'Anti-rotation stability. The type of core work that actually transfers to posture'},
+  {name:'Hanging Knee Raise',cat:'Core',muscles:'Hip flexors, lower abs',rec:'3×10–15',equip:'None',note:'Stretches and strengthens hip flexors — a two-for-one for desk workers'},
+  {name:'Russian Twist',cat:'Core',muscles:'Obliques, transverse abdominis',rec:'3×15/side',equip:'None',note:'Rotational core. Counteracts the static locked position of coding'},
+  {name:'Bicycle Crunch',cat:'Core',muscles:'Obliques, rectus abdominis',rec:'3×20',equip:'None',note:'High EMG activation. No equipment, can be done on a yoga mat beside your desk'},
+  {name:'L-Sit Hold',cat:'Core',muscles:'Core, hip flexors, triceps',rec:'3×10–20s',equip:'None',note:'Builds hip flexor and core endurance simultaneously'},
+  // Mobility
+  {name:'Cat-Cow',cat:'Mobility',muscles:'Spine, core',rec:'2×10 breaths',equip:'None',note:'Spinal joint nutrition. Should be done every 2 hours at your desk minimum'},
+  {name:'World\'s Greatest Stretch',cat:'Mobility',muscles:'Hip flexors, thoracic spine, hamstrings',rec:'5 reps/side',equip:'None',note:'Addresses 3 of the top problem areas for coders in one movement'},
+  {name:'Couch Stretch',cat:'Mobility',muscles:'Hip flexors, quads',rec:'90s/side',equip:'None',note:'Best hip flexor stretch for desk workers. Directly undoes sitting'},
+  {name:'Pigeon Pose',cat:'Mobility',muscles:'Piriformis, hip external rotators',rec:'2 min/side',equip:'None',note:'Hip rotators lock up from sitting. This unlocks them better than any exercise'},
+  {name:'Thoracic Rotation',cat:'Mobility',muscles:'Thoracic spine, obliques',rec:'10/side',equip:'None',note:'T-spine mobility is the #1 casualty of monitor staring. Do this daily'},
+  {name:'Hip 90/90',cat:'Mobility',muscles:'Hip internal+external rotators',rec:'2 min/side',equip:'None',note:'Comprehensive hip rotation work that sitting destroys'},
+  {name:'Child\'s Pose',cat:'Mobility',muscles:'Back, lats, hips',rec:'2 min',equip:'None',note:'Decompresses lumbar spine after long sitting sessions'},
+  {name:'Wall Angel',cat:'Mobility',muscles:'Shoulders, thoracic spine, rotator cuff',rec:'2×10',equip:'None',note:'Improves shoulder mobility and thoracic extension simultaneously'},
+  {name:'Doorway Chest Stretch',cat:'Mobility',muscles:'Pectorals, anterior shoulders',rec:'3×30s',equip:'None',note:'Opens up the chest that closes up from forward arm position at keyboard'},
+  {name:'Hip Flexor Lunge Stretch',cat:'Mobility',muscles:'Hip flexors, quads',rec:'90s/side',equip:'None',note:'Addresses the #1 muscle shortened by sitting — iliopsoas'},
+];
+
+const PREHAB = [
+  'Wrist flexor/extensor stretch × 2 min',
+  'Thoracic spine rotation × 2 min',
+  'Hip flexor lunge stretch × 2 min',
+  'Neck side stretch × 1 min',
+];
+
+const RECOVERY_DATA = {
+  wrist:[
+    {name:'Wrist Flexor Stretch',reps:'30s each side × 3',inst:'Extend arm, palm up, gently pull fingers back with other hand.',why:'Stretches the muscles you\'ve been contracting for hours of typing. Critical for preventing carpal tunnel.'},
+    {name:'Prayer Stretch',reps:'30s × 3',inst:'Press palms together in prayer position at chest. Slowly lower hands while keeping palms together until you feel the stretch.',why:'Stretches wrist flexors and forearm fascia — the tissue thickened by continuous keyboard use.'},
+    {name:'Finger Extensions',reps:'10 reps × 3',inst:'Spread fingers as wide as possible, hold 2s, relax. Repeat.',why:'Activates extensors that are chronically weak vs. the flexors that do all the keyboard work.'},
+    {name:'Grip Squeezes',reps:'20 reps × 3',inst:'Use a stress ball or grip trainer. Squeeze fully, release fully.',why:'Strengthens grip and forearm to handle the repetitive load of typing and mouse use.'},
+    {name:'Wrist Circles',reps:'10 each direction',inst:'Extend arms. Rotate wrists in full circles — slow and controlled.',why:'Lubricates the wrist joint. Synovial fluid distribution reduces stiffness from static positions.'},
+    {name:'Tendon Glide',reps:'5 reps each position',inst:'Straight fingers → hook fist → full fist → tabletop → straight again. Slowly.',why:'Maintains tendon health and reduces RSI risk. The gold standard for programmers\' wrist health.'},
+    {name:'Reverse Prayer',reps:'30s × 2',inst:'Bring backs of hands together behind your back. Gently press.',why:'Stretches the wrist in the opposite direction from all your keyboard flexion.'},
+    {name:'Rubber Band Extension',reps:'20 reps × 3',inst:'Place rubber band around fingers, open hand against resistance.',why:'Directly strengthens wrist extensors — the muscle most neglected and most needed for balance.'},
+  ],
+  neck:[
+    {name:'Chin Tuck',reps:'10 reps × 3',inst:'Sitting tall, tuck chin straight back (not down). Hold 2s. Feel stretch at base of skull.',why:'Resets forward head posture. Each centimeter the head juts forward adds ~10 lbs of effective neck load.'},
+    {name:'Levator Scapulae Stretch',reps:'30s each side × 2',inst:'Tilt head 45° down and to one side, gently pull with hand. Stretch opposite to the side you\'re pulling toward.',why:'The levator scapulae locks up from monitor craning. This is the source of most programmer neck pain.'},
+    {name:'Wall Angel',reps:'10 reps × 2',inst:'Stand with back flat on wall, arms at 90° (goalpost). Slowly slide arms up and down while keeping contact with wall.',why:'Retrains scapular movement and thoracic extension lost from keyboard/mouse posture.'},
+    {name:'Band Pull-Apart',reps:'15 reps × 3',inst:'Hold resistance band at shoulder width. Pull apart to full arm span, squeeze rear delts at end.',why:'Directly counteracts the internal rotation that forward-reaching for keyboard creates.'},
+    {name:'Upper Trap Stretch',reps:'30s each side × 2',inst:'Sit on one hand. Tilt head to opposite shoulder. Gently increase with other hand.',why:'Upper traps are chronically elevated and tight from stress + hunching. This provides immediate relief.'},
+    {name:'Doorway Chest Opener',reps:'60s × 2',inst:'Stand in doorway, arms at 90°, lean forward through the door.',why:'Opens the anterior shoulder capsule tightened from reaching forward to a keyboard all day.'},
+  ],
+  hips:[
+    {name:'Couch Stretch',reps:'90s each side',inst:'Back foot up on couch/chair, front leg at 90°. Keep tall spine, squeeze rear glute to deepen stretch.',why:'Best hip flexor stretch available. Sitting 8+ hours creates severe iliopsoas shortening.'},
+    {name:'Pigeon Pose',reps:'2 min each side',inst:'Front shin parallel to mat, back leg extended. Fold forward for deeper stretch.',why:'Hip external rotators lock up from 90° seated position. This restores rotation lost from sitting.'},
+    {name:'Cat-Cow',reps:'10 breaths × 2',inst:'On hands and knees. Exhale: arch back, drop head (cat). Inhale: drop belly, lift head (cow).',why:'Spinal joint nutrition. The joints between your vertebrae need movement to stay healthy — sitting deprives them.'},
+    {name:'Dead Bug',reps:'8 each side × 3',inst:'Lying on back, arms up, knees at 90°. Lower opposite arm+leg while keeping lower back pressed to floor.',why:'Reconnects deep core stabilizers. The first exercise to do when your back hurts from sitting too long.'},
+    {name:'Glute Bridge',reps:'15 reps × 3',inst:'Lying on back, knees bent. Drive hips up, squeeze glutes hard at top.',why:'Glutes become inhibited from sitting. Activated glutes naturally take load off the lower back.'},
+  ],
+  eyes:[
+    {name:'20-20-20 Rule',reps:'Every 20 min',inst:'Every 20 minutes, look at something 20 feet away for 20 seconds.',why:'Ciliary muscle fatigue is the cause of digital eye strain. Distance viewing fully relaxes it.'},
+    {name:'Eye Circles',reps:'5 circles each direction',inst:'Without moving your head, slowly trace a large circle with your eyes. Go full range.',why:'Moves all 6 extraocular muscles through their full range — like stretching for your eye muscles.'},
+    {name:'Palming',reps:'1 min × 2',inst:'Rub palms together to warm them. Cup over closed eyes, no pressure. Breathe.',why:'Complete darkness + warmth relaxes the ciliary muscle and reduces retinal fatigue.'},
+    {name:'Near-Far Focus',reps:'10 reps',inst:'Hold finger 6 inches from face. Alternate focus: finger → something 20ft away. 2s each.',why:'Forces the lens to accommodate — prevents the lens from locking in \"near\" mode after hours of screen time.'},
+  ],
+};
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let activeSplitId = get('activeSplit');
+let schedule = get('schedule') || {};
+let streak = get('streak') || 0;
+let activeFilters = { muscle:'All', equip:'All' };
+
+// ─── SPLITS TAB ─────────────────────────────────────────────────────────────
+function renderSplits() {
+  const grid = document.getElementById('splits-grid');
+  const diffColors = ['','#a3e635','#38bdf8','#fb923c','#ef4444','#a78bfa'];
+  const diffNames = ['','Beginner','Intermediate','Intermediate+','Advanced','Elite'];
+  grid.innerHTML = '';
+  SPLITS.forEach(s => {
+    const d = document.createElement('div');
+    d.className = 'split-card' + (activeSplitId===s.id?' selected':'');
+    d.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <h3 style="color:#e2e8f0;font-size:1rem;display:flex;align-items:center;gap:8px;margin:0">${s.emoji} ${s.name}</h3>
+        ${activeSplitId===s.id?'<span class="tag tag-lime">✓ Active</span>':''}
+      </div>
+      <div style="font-size:.78rem;color:#9ca3af;margin-bottom:10px">${s.who}</div>
+      <div class="split-meta">
+        <span class="tag tag-blue">${s.days} days/wk</span>
+        <span class="tag tag-purple">${s.focus}</span>
+        <span style="font-size:.72rem;color:${diffColors[s.diff]};font-weight:600">
+          ${'●'.repeat(s.diff)}${'○'.repeat(5-s.diff)} ${diffNames[s.diff]}
+        </span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">
+        ${s.tags.map(t=>`<span style="font-size:.68rem;background:#1e2d45;color:#9ca3af;padding:2px 6px;border-radius:4px">${t}</span>`).join('')}
+      </div>
+      <button class="btn ${activeSplitId===s.id?'btn-lime':'btn-primary'} btn-sm" onclick="selectSplit('${s.id}')">
+        ${activeSplitId===s.id?'✓ Active Split':'Select This Split'}
+      </button>`;
+    grid.appendChild(d);
+  });
+}
+
+function selectSplit(id) {
+  activeSplitId = id;
+  set('activeSplit', id);
+  schedule = {};
+  set('schedule', {});
+  renderSplits();
+  renderSchedule();
+}
+
+// ─── SCHEDULE TAB ───────────────────────────────────────────────────────────
+function renderSchedule() {
+  const noMsg = document.getElementById('no-split-msg');
+  const view = document.getElementById('schedule-view');
+  if (!activeSplitId) { noMsg.style.display='block'; view.style.display='none'; return; }
+  noMsg.style.display='none'; view.style.display='block';
+
+  const split = SPLITS.find(s=>s.id===activeSplitId);
+  document.getElementById('stat-active').textContent = split.emoji;
+  document.getElementById('stat-streak').textContent = streak + '🔥';
+
+  let totalEx = 0, doneEx = 0;
+  const weekKey = getCurrentWeekKey();
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+
+  split.schedule.forEach((day, di) => {
+    const isRest = day.exercises.length === 0 || day.label === 'Rest';
+    const isActive = day.label !== 'Rest' && day.exercises.length > 0;
+    const col = document.createElement('div');
+    col.className = 'day-col' + (isRest?' rest-day':'');
+    const dayColor = isRest ? '#6b7280' : '#38bdf8';
+    col.innerHTML = `<h4 style="color:${dayColor}">${day.day.slice(0,3).toUpperCase()}<br/><span style="font-size:.65rem;font-weight:400;color:#9ca3af">${day.label}</span>${day.duration?`<br/><span style="font-size:.62rem;color:#6b7280">⏱ ${day.duration}</span>`:''}</h4>`;
+
+    if (isActive) {
+      // Prehab block
+      if (split.id !== 'mobility') {
+        const phDiv = document.createElement('div');
+        phDiv.className = 'prehab-block';
+        phDiv.innerHTML = `<h5>🟢 Coder's Prehab</h5>` +
+          PREHAB.map((p,pi) => {
+            const key = `${weekKey}_${di}_prehab_${pi}`;
+            const state = schedule[key] || 'none';
+            totalEx++; if(state==='done') doneEx++;
+            return `<div class="ex-row" onclick="toggleEx('${key}',this)">
+              <div class="ex-check ${state}">${state==='done'?'✓':state==='skip'?'—':''}</div>
+              <div class="ex-text ${state==='done'?'done':''}">${p}</div>
+            </div>`;
+          }).join('');
+        col.appendChild(phDiv);
+      }
+      // Main exercises
+      day.exercises.forEach((ex, ei) => {
+        const key = `${weekKey}_${di}_ex_${ei}`;
+        const state = schedule[key] || 'none';
+        totalEx++; if(state==='done') doneEx++;
+        const row = document.createElement('div');
+        row.className = 'ex-row';
+        row.setAttribute('onclick', `toggleEx('${key}',this)`);
+        row.innerHTML = `<div class="ex-check ${state}">${state==='done'?'✓':state==='skip'?'—':''}</div>
+          <div class="ex-text ${state==='done'?'done':''}">${ex}</div>`;
+        col.appendChild(row);
+      });
+    } else if (day.label === 'Active Recovery') {
+      col.innerHTML += `<div style="font-size:.75rem;color:#6b7280;margin-top:8px;line-height:1.6">
+        ${day.exercises.map(e=>`<div>• ${e}</div>`).join('')}
+        <div style="margin-top:8px;color:#38bdf8;font-size:.7rem">Movement keeps soreness away. Walk, stretch, foam roll.</div>
+      </div>`;
+    } else {
+      col.innerHTML += `<div style="font-size:.75rem;color:#4b5563;margin-top:8px;font-style:italic">Rest day — let your muscles grow</div>`;
+    }
+
+    grid.appendChild(col);
+  });
+
+  const pct = totalEx ? Math.round(doneEx/totalEx*100) : 0;
+  document.getElementById('stat-completion').textContent = pct + '%';
+  if (pct >= 80 && totalEx > 0) updateStreak();
+}
+
+function toggleEx(key, rowEl) {
+  const states = ['none','done','skip'];
+  const cur = schedule[key] || 'none';
+  const next = states[(states.indexOf(cur)+1)%3];
+  schedule[key] = next;
+  set('schedule', schedule);
+  const check = rowEl.querySelector('.ex-check');
+  const text = rowEl.querySelector('.ex-text');
+  check.className = 'ex-check ' + next;
+  check.textContent = next==='done'?'✓':next==='skip'?'—':'';
+  text.className = 'ex-text ' + (next==='done'?'done':'');
+  updateCompletionStat();
+}
+
+function updateCompletionStat() {
+  const weekKey = getCurrentWeekKey();
+  let t=0,d=0;
+  for (const [k,v] of Object.entries(schedule)) {
+    if (k.startsWith(weekKey)) { t++; if(v==='done') d++; }
+  }
+  const pct = t ? Math.round(d/t*100) : 0;
+  document.getElementById('stat-completion').textContent = pct + '%';
+}
+
+function getCurrentWeekKey() {
+  const now = new Date();
+  const day = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day===0?6:day-1));
+  return monday.toISOString().slice(0,10);
+}
+
+function updateStreak() {
+  const key = 'streakWeek';
+  const lastWeek = get(key);
+  const cur = getCurrentWeekKey();
+  if (lastWeek !== cur) { streak++; set('streak', streak); set(key, cur); document.getElementById('stat-streak').textContent = streak + '🔥'; }
+}
+
+// ─── EXERCISES TAB ──────────────────────────────────────────────────────────
+function renderExercises() {
+  const cats = ['All','Push','Pull','Legs','Core','Mobility'];
+  const equips = ['All','None','Dumbbells','Barbell','Cables'];
+
+  document.getElementById('muscle-filters').innerHTML = '<span style="font-size:.72rem;color:#6b7280;margin-right:4px;align-self:center">Muscle:</span>' +
+    cats.map(c=>`<button class="filter-btn${activeFilters.muscle===c?' active':''}" onclick="setFilter('muscle','${c}')">${c}</button>`).join('');
+  document.getElementById('equip-filters').innerHTML = '<span style="font-size:.72rem;color:#6b7280;margin-right:4px;align-self:center">Equipment:</span>' +
+    equips.map(e=>`<button class="filter-btn${activeFilters.equip===e?' active':''}" onclick="setFilter('equip','${e}')">${e}</button>`).join('');
+
+  const filtered = EXERCISES.filter(e =>
+    (activeFilters.muscle==='All'||e.cat===activeFilters.muscle) &&
+    (activeFilters.equip==='All'||e.equip===activeFilters.equip)
+  );
+
+  const container = document.getElementById('ex-library');
+  container.innerHTML = `<div style="font-size:.8rem;color:#6b7280;margin-bottom:12px">${filtered.length} exercises</div>`;
+  const catColors = {Push:'tag-blue',Pull:'tag-lime',Legs:'tag-orange',Core:'tag-purple',Mobility:'tag-red'};
+  filtered.forEach(ex => {
+    container.innerHTML += `<div class="ex-lib-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <h4>${ex.name} <span class="tag ${catColors[ex.cat]||'tag-blue'}">${ex.cat}</span></h4>
+          <div style="font-size:.75rem;color:#6b7280">Muscles: ${ex.muscles} · Sets/Reps: ${ex.rec} · Equipment: ${ex.equip}</div>
+        </div>
+      </div>
+      <div class="ex-note">💡 For coders: ${ex.note}</div>
+    </div>`;
+  });
+}
+
+function setFilter(type, val) {
+  activeFilters[type] = val;
+  renderExercises();
+}
+
+// ─── RECOVERY TAB ───────────────────────────────────────────────────────────
+function renderRecovery() {
+  ['wrist','neck','hips','eyes'].forEach(section => {
+    const container = document.getElementById('recovery-'+section);
+    if (!container) return;
+    container.innerHTML = '';
+    RECOVERY_DATA[section].forEach(ex => {
+      container.innerHTML += `<div class="rec-card">
+        <h4>${ex.name}</h4>
+        <div class="meta">⏱ ${ex.reps}</div>
+        <p>${ex.inst}</p>
+        <div class="why-coder">🖥️ Why this matters for coders: ${ex.why}</div>
+      </div>`;
+    });
+  });
+}
+
+// 20-20-20 Timer
+let timerInterval = null;
+let timerSeconds = 20 * 60;
+function startTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; return; }
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval); timerInterval = null;
+      timerSeconds = 20; // 20 seconds to look away
+      document.getElementById('timer-display').style.color = '#a3e635';
+      setTimeout(() => { timerSeconds = 20*60; document.getElementById('timer-display').style.color = '#38bdf8'; updateTimerDisplay(); }, 20000);
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+function resetTimer() { clearInterval(timerInterval); timerInterval = null; timerSeconds = 20*60; updateTimerDisplay(); document.getElementById('timer-display').style.color='#38bdf8'; }
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds/60), s = timerSeconds%60;
+  document.getElementById('timer-display').textContent = m+':'+(s<10?'0':'')+s;
+}
+
+// ─── TABS ───────────────────────────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// Init
+renderSplits();
+renderSchedule();
+renderExercises();
+renderRecovery();
+updateTimerDisplay();
+</script>
+</body>
+</html>

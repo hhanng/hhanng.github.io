@@ -139,6 +139,16 @@ for founders, indie hackers, and anyone shipping something
 | [#85](https://hhanng.github.io/agent-85-pr-strength-tracker/) | PR & Strength Tracker | workout log with auto-PR detection, e1RM estimates, plateau detector, progress charts, 4-week Big 3 progression planner |
 | [#86](https://hhanng.github.io/agent-86-period-cycle-tracker/) | Period & Cycle Tracker | cycle calendar with period prediction, fertile window & phase tracker, 20-symptom log with phase patterns, bilingual EN/VI vocab, doctor visit script generator |
 | [#87](https://hhanng.github.io/agent-87-skincare-routine-tracker/) | Skincare Routine Tracker | AM/PM routine builder with streaks, ingredient decoder (50 terms EN/VI), Vietnamese skin in America guide, 15 brand reviews, 30-day skin log |
+| [#88](https://hhanng.github.io/agent-88-glowup-tracker-vision-board/) | Glow-Up Tracker & Vision Board | vision board across 6 life categories, 30 "First Year in America" milestone cards, bilingual EN/VI journal, weekly radar glow chart |
+| [#89](https://hhanng.github.io/agent-89-meal-macro-tracker/) | Vietnamese-American Meal & Macro Tracker | 40 Vietnamese + 40 American foods with real macros, traditional recipes with US pantry substitutions, bilingual EN/VI nutrition vocab, daily calorie tracking |
+| [#90](https://hhanng.github.io/agent-90-body-composition-tracker/) | Body Composition Tracker | weekly check-in log with Cut/Bulk/Maintain/Recomp modes, lean/fat mass dashboard, trend chart with moving average, TDEE calc, US Navy body fat estimator |
+| [#91](https://hhanng.github.io/agent-91-workout-split-planner/) | Coder's Workout Split Planner | 6 splits (2-day to 6-day PPL), weekly calendar, 50 exercises with filters, recovery routines for wrist/neck/hips/eyes, 20-20-20 eye strain timer |
+| [#92](https://hhanng.github.io/agent-92-react-component-playground/) | React Component Playground | live JSX editor (Ctrl+Enter), 10 pre-built components, 5 React patterns, hooks reference, 15 interview Q&As, React 18 + Babel in srcdoc iframe |
+| [#93](https://hhanng.github.io/agent-93-machine-learning-visualizer/) | Machine Learning Visualizer | 6 Canvas visualizations (Linear Regression, Logistic, KNN, K-Means, Neural Net, Decision Tree), 8 algo cards, confusion matrix calc, 20 flip-card Q&As |
+| [#94](https://hhanng.github.io/agent-94-cybersecurity-basics-trainer/) | Cybersecurity Basics Trainer | 10 challenges (Caesar cipher, hash ID, SQL injection, password entropy, Base64), OWASP Top 10, 20 security tools comparison, 20 interview Q&As |
+| [#95](https://hhanng.github.io/agent-95-cloud-architecture-designer/) | Cloud Architecture Designer | drag-and-drop canvas with SVG connections, 30 multi-cloud components, 10 system design patterns, cost estimator comparing AWS/GCP/Azure |
+| [#96](https://hhanng.github.io/agent-96-personal-finance-cs-students/) | Personal Finance for CS Students | TC calculator with vesting & COL adjuster, 50/30/20 budget, compound interest chart, 401k/RSU/HSA guides, 5-stage roadmap with net worth tracker |
+| [#97](https://hhanng.github.io/agent-97-build-in-public-playbook/) | Build in Public Playbook | platform matcher, 50 content templates, weekly planner with streak tracker, GitHub README generator, Twitter bio scorer, LinkedIn headline builder |
 
 &nbsp;
 
@@ -193,4 +203,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · agent #88 Glow-Up Tracker & Vision Board live: https://hhanng.github.io/agent-88-glowup-tracker-vision-board/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · agent #97 Build in Public Playbook live: https://hhanng.github.io/agent-97-build-in-public-playbook/</sub>
