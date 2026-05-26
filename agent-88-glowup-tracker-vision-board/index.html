@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ Glow-Up Tracker & Vision Board — Agent #88</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #1a0f14;
+    --card: #2d1a24;
+    --card2: #3d2535;
+    --rose: #fb7185;
+    --rose-light: #fda4af;
+    --amber: #fbbf24;
+    --amber-light: #fcd34d;
+    --text: #fff;
+    --text-muted: #c4a4b0;
+    --border: #4a2d3a;
+    --success: #4ade80;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #2d1a24 0%, #1a0f14 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 20px 16px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--rose), var(--amber));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 100px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--rose), #e11d48);
+    color: white;
+  }
+
+  .tab-content {
+    display: none;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+
+  .tab-content.active { display: block; }
+
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--rose);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  input[type="text"], textarea, select, input[type="date"], input[type="number"] {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--rose);
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 100px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-rose {
+    background: linear-gradient(135deg, var(--rose), #e11d48);
+    color: white;
+  }
+
+  .btn-amber {
+    background: linear-gradient(135deg, var(--amber), #d97706);
+    color: #1a0f14;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+
+  .progress-bar {
+    background: var(--card2);
+    border-radius: 100px;
+    height: 8px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--rose), var(--amber));
+    border-radius: 100px;
+    transition: width 0.5s ease;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .badge-rose { background: rgba(251,113,133,0.15); color: var(--rose); border: 1px solid rgba(251,113,133,0.3); }
+  .badge-amber { background: rgba(251,191,36,0.15); color: var(--amber); border: 1px solid rgba(251,191,36,0.3); }
+  .badge-green { background: rgba(74,222,128,0.15); color: var(--success); border: 1px solid rgba(74,222,128,0.3); }
+
+  /* ====== VISION BOARD ====== */
+  .vision-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .vision-card {
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .vision-card:hover { border-color: var(--rose); transform: translateY(-2px); }
+
+  .vision-icon { font-size: 2rem; margin-bottom: 10px; }
+  .vision-cat { font-size: 0.8rem; font-weight: 600; color: var(--rose); margin-bottom: 6px; }
+  .vision-stmt { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+  .vision-goals { font-size: 0.75rem; color: var(--amber); margin-top: 8px; }
+
+  .vision-editor {
+    background: var(--card);
+    border: 1px solid var(--rose);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .goal-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    align-items: center;
+  }
+
+  .goal-item input { margin-bottom: 0; flex: 1; }
+
+  .goal-remove {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0 4px;
+  }
+
+  /* ====== MILESTONES ====== */
+  .milestone-group { margin-bottom: 24px; }
+
+  .group-header {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--amber);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .milestone-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  .milestone-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .milestone-card.done {
+    border-color: var(--success);
+    background: linear-gradient(135deg, #0a2a18, #0f3d24);
+  }
+
+  .milestone-card:hover { border-color: var(--rose); }
+
+  .milestone-emoji { font-size: 1.4rem; margin-bottom: 6px; }
+  .milestone-text { font-size: 0.8rem; line-height: 1.4; }
+  .milestone-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    transition: all 0.2s;
+  }
+
+  .milestone-card.done .milestone-check {
+    background: var(--success);
+    border-color: var(--success);
+  }
+
+  @keyframes confetti-pop {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.08); }
+    60% { transform: scale(0.96); }
+    100% { transform: scale(1); }
+  }
+
+  .milestone-card.celebrating { animation: confetti-pop 0.5s ease; }
+
+  .confetti-burst {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    animation: confetti-fall 1s ease-out forwards;
+  }
+
+  @keyframes confetti-fall {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) rotate(720deg); opacity: 0; }
+  }
+
+  /* ====== JOURNAL ====== */
+  .journal-date-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .journal-mode-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .journal-mode-btn.active {
+    background: var(--card2);
+    color: var(--rose);
+    border-color: var(--rose);
+  }
+
+  .quote-card {
+    background: linear-gradient(135deg, #3d1a2a, #2d1a24);
+    border: 1px solid rgba(251,113,133,0.3);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .quote-en { font-size: 0.95rem; font-style: italic; color: var(--rose-light); line-height: 1.5; }
+  .quote-vi { font-size: 0.82rem; color: var(--text-muted); margin-top: 6px; }
+
+  .journal-log {
+    margin-top: 24px;
+  }
+
+  .journal-entry-item {
+    background: var(--card2);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--rose);
+  }
+
+  .entry-date { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px; }
+  .entry-text { font-size: 0.82rem; line-height: 1.5; }
+
+  /* ====== GLOW CHECK ====== */
+  .rating-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .rating-label {
+    min-width: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .star-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .star {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card2);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .star.active {
+    background: linear-gradient(135deg, var(--rose), #e11d48);
+    color: white;
+    border-color: var(--rose);
+  }
+
+  canvas { border-radius: 12px; background: var(--card); }
+
+  .glow-message {
+    background: linear-gradient(135deg, #2d1a24, #3d1a2a);
+    border: 1px solid rgba(251,113,133,0.3);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    text-align: center;
+    color: var(--rose-light);
+  }
+
+  .streak-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+
+  .streak-num {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--amber), var(--rose));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+
+  label { font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 4px; }
+
+  .flex { display: flex; gap: 10px; align-items: center; }
+  .flex-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mb-8 { margin-bottom: 8px; }
+
+  .text-muted { color: var(--text-muted); font-size: 0.82rem; }
+
+  .overall-progress {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .chart-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0;
+  }
+
+  @media (max-width: 500px) {
+    .vision-grid { grid-template-columns: 1fr 1fr; }
+    .milestone-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✨ Glow-Up Tracker</h1>
+  <p>Every big life starts with a small win. Track yours.</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="switchTab('vision')">🌟 Vision</button>
+  <button class="tab-btn" onclick="switchTab('milestones')">🏆 Milestones</button>
+  <button class="tab-btn" onclick="switchTab('journal')">📝 Journal</button>
+  <button class="tab-btn" onclick="switchTab('glow')">💖 Glow Check</button>
+</nav>
+
+<!-- ============================== VISION ============================== -->
+<div class="tab-content active" id="tab-vision">
+  <div class="section-title">🌟 Your Vision Board</div>
+  <p class="text-muted mb-8">Click a category to write your vision and set goals. Your board will come alive below.</p>
+
+  <div class="vision-editor" id="vision-editor" style="display:none;">
+    <div class="card-title" id="editor-title">Edit Vision</div>
+    <label>Your vision statement — what does this area of your life look like in 1 year?</label>
+    <textarea id="vision-stmt-input" placeholder="I see myself..." rows="3"></textarea>
+    <label>Your specific goals (up to 5):</label>
+    <div id="goals-list"></div>
+    <button class="btn btn-ghost mt-8" onclick="addGoalField()" style="font-size:0.8rem; padding:7px 14px;">+ Add goal</button>
+    <div class="flex mt-12">
+      <button class="btn btn-rose" onclick="saveVision()">Save Vision</button>
+      <button class="btn btn-ghost" onclick="closeEditor()">Cancel</button>
+    </div>
+  </div>
+
+  <div class="vision-grid" id="vision-grid"></div>
+</div>
+
+<!-- ============================== MILESTONES ============================== -->
+<div class="tab-content" id="tab-milestones">
+  <div class="section-title">🏆 First Year in America</div>
+
+  <div class="overall-progress">
+    <div class="flex" style="justify-content:space-between; margin-bottom:6px;">
+      <span class="text-muted">Overall Progress</span>
+      <span id="overall-pct" style="font-weight:600; color:var(--rose);">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="overall-fill" style="width:0%"></div>
+    </div>
+    <div class="text-muted mt-8" id="overall-label">0 of 30 milestones achieved</div>
+  </div>
+
+  <div id="milestones-container"></div>
+</div>
+
+<!-- ============================== JOURNAL ============================== -->
+<div class="tab-content" id="tab-journal">
+  <div class="section-title">📝 Daily Journal</div>
+
+  <div class="quote-card" id="quote-card">
+    <div class="quote-en" id="quote-en">Loading quote...</div>
+    <div class="quote-vi" id="quote-vi"></div>
+  </div>
+
+  <div class="journal-date-bar">
+    <input type="date" id="journal-date" style="width:auto; margin-bottom:0;" />
+    <div class="flex">
+      <button class="journal-mode-btn active" id="mode-prompted" onclick="setMode('prompted')">Prompted</button>
+      <button class="journal-mode-btn" id="mode-free" onclick="setMode('free')">Free Write</button>
+    </div>
+  </div>
+
+  <div id="prompted-section">
+    <div class="card mb-8">
+      <div class="card-title">💬 What English win did you have today (even a tiny one)?</div>
+      <textarea id="j1" placeholder="Today I understood when..." rows="3"></textarea>
+    </div>
+    <div class="card mb-8">
+      <div class="card-title">💭 What was hard today? What would you say differently next time?</div>
+      <textarea id="j2" placeholder="It was hard when... Next time I would..." rows="3"></textarea>
+    </div>
+    <div class="card mb-8">
+      <div class="card-title">⭐ One thing you're proud of today:</div>
+      <textarea id="j3" placeholder="I'm proud that today I..." rows="2"></textarea>
+    </div>
+  </div>
+
+  <div id="free-section" style="display:none;">
+    <div class="card mb-8">
+      <div class="card-title">✍️ Free Write</div>
+      <textarea id="j-free" placeholder="Write whatever's on your heart..." rows="8"></textarea>
+    </div>
+  </div>
+
+  <button class="btn btn-rose" onclick="saveJournalEntry()">Save Entry ✨</button>
+
+  <div class="journal-log" id="journal-log">
+    <div class="section-title mt-16" style="margin-top:24px;">Past Entries</div>
+    <div id="entries-list"></div>
+  </div>
+</div>
+
+<!-- ============================== GLOW CHECK ============================== -->
+<div class="tab-content" id="tab-glow">
+  <div class="section-title">💖 Weekly Glow Check</div>
+
+  <div class="streak-badge">
+    <span class="streak-num" id="streak-num">0</span>
+    <div>
+      <div style="font-weight:600; font-size:0.9rem;">Week Streak 🔥</div>
+      <div class="text-muted">consecutive check-ins</div>
+    </div>
+  </div>
+
+  <div class="card" id="checkin-form">
+    <div class="card-title">✨ This Week's Check-In</div>
+    <p class="text-muted mb-8">Rate yourself honestly — growth isn't always a straight line.</p>
+
+    <div id="rating-rows"></div>
+
+    <button class="btn btn-rose mt-12" onclick="saveGlowCheckin()">Save Glow Check 💫</button>
+  </div>
+
+  <div class="glow-message" id="glow-message" style="display:none;"></div>
+
+  <div class="card mt-16" id="radar-section">
+    <div class="card-title">📊 This Week vs Last Week</div>
+    <div class="chart-wrap">
+      <canvas id="radar-canvas" width="280" height="280"></canvas>
+    </div>
+  </div>
+
+  <div class="card mt-16">
+    <div class="card-title">📈 Glow Score Over Time</div>
+    <div class="chart-wrap">
+      <canvas id="line-canvas" width="340" height="160"></canvas>
+    </div>
+  </div>
+
+  <div class="card mt-16">
+    <div class="card-title">📅 Check-In History</div>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const KEY = 'glowup88_';
+const get = k => JSON.parse(localStorage.getItem(KEY+k) || 'null');
+const set = (k, v) => localStorage.setItem(KEY+k, JSON.stringify(v));
+
+// ===================== TABS =====================
+function switchTab(t) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  event.target.classList.add('active');
+  if (t === 'milestones') renderMilestones();
+  if (t === 'journal') renderJournal();
+  if (t === 'glow') renderGlow();
+}
+
+// ===================== VISION =====================
+const VISION_CATS = [
+  { id:'school',   icon:'🎓', title:'School',    hint:'GPA goals, classes, clubs, studying' },
+  { id:'social',   icon:'👯', title:'Social',    hint:'Friendships, fitting in, English conversations' },
+  { id:'health',   icon:'💪', title:'Health',    hint:'Fitness, skincare, sleep, self-care' },
+  { id:'creative', icon:'🎨', title:'Creative',  hint:'Hobbies, skills, art, music, writing' },
+  { id:'identity', icon:'🌍', title:'Identity',  hint:'Culture, language, who you want to be' },
+  { id:'dream',    icon:'✨', title:'Dream Life', hint:'Where you want to be in 1 year' },
+];
+
+let editingCat = null;
+
+function renderVision() {
+  const grid = document.getElementById('vision-grid');
+  grid.innerHTML = VISION_CATS.map(cat => {
+    const saved = get('vision_'+cat.id) || { stmt: '', goals: [] };
+    const filled = saved.stmt || saved.goals.length > 0;
+    return `<div class="vision-card" onclick="openEditor('${cat.id}')">
+      ${filled ? `<span class="badge badge-rose" style="position:absolute;top:10px;right:10px;font-size:0.65rem;">✓ Set</span>` : ''}
+      <div class="vision-icon">${cat.icon}</div>
+      <div class="vision-cat">${cat.title.toUpperCase()}</div>
+      ${filled
+        ? `<div class="vision-stmt">${saved.stmt || cat.hint}</div>
+           ${saved.goals.length ? `<div class="vision-goals">📌 ${saved.goals.filter(g=>g).length} goal${saved.goals.length!==1?'s':''} set</div>` : ''}`
+        : `<div class="vision-stmt" style="font-style:italic;">${cat.hint}</div>`}
+    </div>`;
+  }).join('');
+}
+
+function openEditor(catId) {
+  editingCat = catId;
+  const cat = VISION_CATS.find(c => c.id === catId);
+  const saved = get('vision_'+catId) || { stmt: '', goals: [] };
+  document.getElementById('editor-title').textContent = `${cat.icon} ${cat.title}`;
+  document.getElementById('vision-stmt-input').value = saved.stmt || '';
+  renderGoalFields(saved.goals);
+  const ed = document.getElementById('vision-editor');
+  ed.style.display = 'block';
+  ed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderGoalFields(goals) {
+  const list = document.getElementById('goals-list');
+  const arr = goals.length ? goals : [''];
+  list.innerHTML = arr.map((g, i) => `
+    <div class="goal-item">
+      <input type="text" placeholder="Goal ${i+1}..." value="${g}" oninput="updateGoalField(${i}, this.value)">
+      ${arr.length > 1 ? `<button class="goal-remove" onclick="removeGoalField(${i})">×</button>` : ''}
+    </div>
+  `).join('');
+}
+
+let tempGoals = [];
+function openEditorInit(catId) {
+  const saved = get('vision_'+catId) || { stmt: '', goals: [] };
+  tempGoals = [...(saved.goals.length ? saved.goals : [''])];
+}
+
+function updateGoalField(i, val) {
+  const inputs = document.querySelectorAll('#goals-list .goal-item input');
+  tempGoals = Array.from(inputs).map(inp => inp.value);
+}
+
+function addGoalField() {
+  const inputs = document.querySelectorAll('#goals-list .goal-item input');
+  tempGoals = Array.from(inputs).map(inp => inp.value);
+  if (tempGoals.length >= 5) return;
+  tempGoals.push('');
+  renderGoalFields(tempGoals);
+}
+
+function removeGoalField(i) {
+  const inputs = document.querySelectorAll('#goals-list .goal-item input');
+  tempGoals = Array.from(inputs).map(inp => inp.value);
+  tempGoals.splice(i, 1);
+  if (!tempGoals.length) tempGoals = [''];
+  renderGoalFields(tempGoals);
+}
+
+function saveVision() {
+  const inputs = document.querySelectorAll('#goals-list .goal-item input');
+  const goals = Array.from(inputs).map(inp => inp.value).filter(g => g.trim());
+  const stmt = document.getElementById('vision-stmt-input').value.trim();
+  set('vision_'+editingCat, { stmt, goals });
+  closeEditor();
+  renderVision();
+}
+
+function closeEditor() {
+  document.getElementById('vision-editor').style.display = 'none';
+  editingCat = null;
+  tempGoals = [];
+}
+
+// override openEditor to init tempGoals
+const _origOpen = openEditor;
+// eslint-disable-next-line no-global-assign
+window.openEditor = function(catId) {
+  editingCat = catId;
+  const cat = VISION_CATS.find(c => c.id === catId);
+  const saved = get('vision_'+catId) || { stmt: '', goals: [] };
+  document.getElementById('editor-title').textContent = `${cat.icon} ${cat.title}`;
+  document.getElementById('vision-stmt-input').value = saved.stmt || '';
+  tempGoals = saved.goals.length ? [...saved.goals] : [''];
+  renderGoalFields(tempGoals);
+  const ed = document.getElementById('vision-editor');
+  ed.style.display = 'block';
+  ed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// ===================== MILESTONES =====================
+const MILESTONE_GROUPS = [
+  {
+    id: 'english',
+    label: '🗣️ English Wins',
+    items: [
+      { id: 'e1', emoji: '💬', text: 'Had a full conversation in English' },
+      { id: 'e2', emoji: '😂', text: 'Understood a joke (and laughed!)' },
+      { id: 'e3', emoji: '✍️', text: 'Wrote an essay all by myself' },
+      { id: 'e4', emoji: '📖', text: 'Read a full book in English' },
+      { id: 'e5', emoji: '🎤', text: 'Gave a class presentation in English' },
+      { id: 'e6', emoji: '📞', text: 'Made a phone call in English' },
+    ]
+  },
+  {
+    id: 'school',
+    label: '🎓 School Wins',
+    items: [
+      { id: 's1', emoji: '💯', text: 'Got an A on a test or assignment' },
+      { id: 's2', emoji: '🤝', text: 'Joined a school club' },
+      { id: 's3', emoji: '🙋', text: 'Asked a teacher for help' },
+      { id: 's4', emoji: '📚', text: 'Made a study group with classmates' },
+      { id: 's5', emoji: '⭐', text: 'Got a compliment from a teacher' },
+      { id: 's6', emoji: '🎒', text: 'Navigated the school building alone' },
+    ]
+  },
+  {
+    id: 'social',
+    label: '👯 Social Wins',
+    items: [
+      { id: 'so1', emoji: '🌟', text: 'Made a genuine friend' },
+      { id: 'so2', emoji: '🍱', text: 'Sat with someone new at lunch' },
+      { id: 'so3', emoji: '🎉', text: 'Went to a school event' },
+      { id: 'so4', emoji: '📱', text: 'Added someone on social media' },
+      { id: 'so5', emoji: '💌', text: 'Got invited somewhere by a friend' },
+      { id: 'so6', emoji: '🗺️', text: 'Explored a new neighborhood solo' },
+    ]
+  },
+  {
+    id: 'personal',
+    label: '🌸 Personal Wins',
+    items: [
+      { id: 'p1', emoji: '🍔', text: 'Tried a new American food' },
+      { id: 'p2', emoji: '🛒', text: 'Navigated a store alone' },
+      { id: 'p3', emoji: '🚌', text: 'Used public transport by myself' },
+      { id: 'p4', emoji: '🍕', text: 'Ordered at a restaurant in English' },
+      { id: 'p5', emoji: '💊', text: 'Handled a personal errand alone' },
+      { id: 'p6', emoji: '🌞', text: 'Had a genuinely happy day in America' },
+    ]
+  },
+  {
+    id: 'big',
+    label: '🏆 Big Wins',
+    items: [
+      { id: 'b1', emoji: '🎊', text: 'Completed my first school year!' },
+      { id: 'b2', emoji: '🏦', text: 'Opened a bank account' },
+      { id: 'b3', emoji: '💼', text: 'Got a job or internship' },
+      { id: 'b4', emoji: '❤️', text: 'Helped a family member with English' },
+      { id: 'b5', emoji: '🏠', text: 'Felt truly at home in America' },
+      { id: 'b6', emoji: '💌', text: 'Helped a friend or classmate' },
+    ]
+  }
+];
+
+function getMilestoneDone() {
+  return get('milestones') || {};
+}
+
+function renderMilestones() {
+  const done = getMilestoneDone();
+  const total = MILESTONE_GROUPS.reduce((sum, g) => sum + g.items.length, 0);
+  const totalDone = Object.values(done).filter(Boolean).length;
+  const pct = Math.round((totalDone / total) * 100);
+
+  document.getElementById('overall-pct').textContent = pct + '%';
+  document.getElementById('overall-fill').style.width = pct + '%';
+  document.getElementById('overall-label').textContent = `${totalDone} of ${total} milestones achieved`;
+
+  const container = document.getElementById('milestones-container');
+  container.innerHTML = MILESTONE_GROUPS.map(group => {
+    const groupDone = group.items.filter(it => done[it.id]).length;
+    const groupPct = Math.round((groupDone / group.items.length) * 100);
+    return `
+      <div class="milestone-group">
+        <div class="group-header">
+          <span>${group.label}</span>
+          <span class="badge badge-amber">${groupDone}/${group.items.length} · ${groupPct}%</span>
+        </div>
+        <div class="progress-bar" style="margin-bottom:12px;">
+          <div class="progress-fill" style="width:${groupPct}%; background:linear-gradient(135deg,#fbbf24,#f97316);"></div>
+        </div>
+        <div class="milestone-grid">
+          ${group.items.map(it => `
+            <div class="milestone-card ${done[it.id] ? 'done' : ''}" id="mc-${it.id}" onclick="toggleMilestone('${it.id}', event)">
+              <div class="milestone-check">${done[it.id] ? '✓' : ''}</div>
+              <div class="milestone-emoji">${it.emoji}</div>
+              <div class="milestone-text">${it.text}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleMilestone(id, e) {
+  const done = getMilestoneDone();
+  const wasUndone = !done[id];
+  done[id] = wasUndone;
+  set('milestones', done);
+  if (wasUndone) {
+    const card = document.getElementById('mc-'+id);
+    card.classList.add('celebrating');
+    setTimeout(() => card.classList.remove('celebrating'), 600);
+    spawnConfetti(e.clientX, e.clientY);
+  }
+  renderMilestones();
+}
+
+function spawnConfetti(x, y) {
+  const colors = ['#fb7185','#fbbf24','#4ade80','#60a5fa','#c084fc','#f9a8d4'];
+  const burst = document.createElement('div');
+  burst.className = 'confetti-burst';
+  burst.style.left = x + 'px';
+  burst.style.top = y + 'px';
+  for (let i = 0; i < 20; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    const angle = (Math.random() * 360) * Math.PI / 180;
+    const dist = 60 + Math.random() * 80;
+    piece.style.setProperty('--dx', Math.cos(angle)*dist + 'px');
+    piece.style.setProperty('--dy', Math.sin(angle)*dist + 'px');
+    piece.style.left = (Math.random()*20-10) + 'px';
+    piece.style.top = (Math.random()*20-10) + 'px';
+    burst.appendChild(piece);
+  }
+  document.body.appendChild(burst);
+  setTimeout(() => burst.remove(), 1200);
+}
+
+// ===================== JOURNAL =====================
+const QUOTES = [
+  { en: "You belong here.", vi: "Bạn thuộc về nơi này." },
+  { en: "Every mistake is a lesson in disguise.", vi: "Mỗi lần sai là một bài học ẩn náu." },
+  { en: "Your accent is proof of your courage.", vi: "Giọng của bạn là bằng chứng của lòng dũng cảm." },
+  { en: "Small steps every day add up to big change.", vi: "Mỗi bước nhỏ mỗi ngày tạo nên sự thay đổi lớn." },
+  { en: "You are braver than you believe.", vi: "Bạn dũng cảm hơn những gì bạn nghĩ." },
+  { en: "Being different is your superpower.", vi: "Sự khác biệt là siêu năng lực của bạn." },
+  { en: "Two cultures = double the perspective.", vi: "Hai nền văn hóa = gấp đôi góc nhìn." },
+  { en: "Confusion means you're learning.", vi: "Bối rối có nghĩa là bạn đang học hỏi." },
+  { en: "Your story is worth telling.", vi: "Câu chuyện của bạn đáng để kể lại." },
+  { en: "It's okay to miss home and love it here.", vi: "Không sao khi nhớ nhà mà vẫn yêu nơi này." },
+  { en: "Progress, not perfection.", vi: "Tiến bộ, không phải hoàn hảo." },
+  { en: "Ask for help — it takes strength.", vi: "Nhờ giúp đỡ — điều đó cần rất nhiều dũng cảm." },
+  { en: "You have already overcome so much.", vi: "Bạn đã vượt qua quá nhiều rồi." },
+  { en: "Your hard work is being recorded by the universe.", vi: "Vũ trụ đang ghi lại mọi nỗ lực của bạn." },
+  { en: "Fluency takes time. Kindness to yourself is free.", vi: "Thành thạo cần thời gian. Sự nhẹ nhàng với bản thân thì không tốn gì." },
+  { en: "One brave conversation at a time.", vi: "Từng cuộc trò chuyện dũng cảm một." },
+  { en: "You are not behind — you are on your own timeline.", vi: "Bạn không đi chậm — bạn đang đi theo timeline của riêng mình." },
+  { en: "Your English is good enough for today.", vi: "Tiếng Anh của bạn đủ tốt cho hôm nay." },
+  { en: "Every expert was once a beginner.", vi: "Mọi chuyên gia từng là người mới bắt đầu." },
+  { en: "Home is inside you, wherever you go.", vi: "Quê hương ở trong bạn, dù đi đâu." },
+  { en: "Make a mistake, then make it again better.", vi: "Mắc lỗi, rồi làm lại tốt hơn." },
+  { en: "You are allowed to take up space.", vi: "Bạn được phép chiếm không gian của mình." },
+  { en: "Your voice matters — use it.", vi: "Tiếng nói của bạn quan trọng — hãy dùng nó." },
+  { en: "Be curious, not afraid.", vi: "Hãy tò mò, đừng sợ hãi." },
+  { en: "Celebrate every tiny win.", vi: "Hãy ăn mừng từng chiến thắng nhỏ nhoi." },
+  { en: "Bilingual is a gift, not a burden.", vi: "Song ngữ là món quà, không phải gánh nặng." },
+  { en: "You are building something beautiful — your life.", vi: "Bạn đang xây dựng điều đẹp đẽ — cuộc đời của bạn." },
+  { en: "Keep going. Your future self will thank you.", vi: "Cứ tiếp tục. Bản thân tương lai của bạn sẽ biết ơn bạn." },
+  { en: "You are seen. You are valued. You are enough.", vi: "Bạn được nhìn nhận. Bạn có giá trị. Bạn là đủ." },
+  { en: "Today's effort is tomorrow's confidence.", vi: "Nỗ lực hôm nay là sự tự tin của ngày mai." },
+];
+
+let journalMode = 'prompted';
+
+function setMode(mode) {
+  journalMode = mode;
+  document.getElementById('prompted-section').style.display = mode === 'prompted' ? 'block' : 'none';
+  document.getElementById('free-section').style.display = mode === 'free' ? 'block' : 'none';
+  document.getElementById('mode-prompted').classList.toggle('active', mode === 'prompted');
+  document.getElementById('mode-free').classList.toggle('active', mode === 'free');
+}
+
+function renderJournal() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('journal-date').value = today;
+
+  const q = QUOTES[Math.floor(Date.now() / 86400000) % QUOTES.length];
+  document.getElementById('quote-en').textContent = '"' + q.en + '"';
+  document.getElementById('quote-vi').textContent = q.vi;
+
+  renderEntries();
+}
+
+function saveJournalEntry() {
+  const date = document.getElementById('journal-date').value;
+  let content;
+  if (journalMode === 'prompted') {
+    const j1 = document.getElementById('j1').value.trim();
+    const j2 = document.getElementById('j2').value.trim();
+    const j3 = document.getElementById('j3').value.trim();
+    if (!j1 && !j2 && !j3) { alert('Write at least one thing! 💕'); return; }
+    content = { mode: 'prompted', j1, j2, j3 };
+  } else {
+    const jf = document.getElementById('j-free').value.trim();
+    if (!jf) { alert('Write something first! 💕'); return; }
+    content = { mode: 'free', text: jf };
+  }
+  const entries = get('journal') || {};
+  entries[date] = content;
+  set('journal', entries);
+  document.getElementById('j1').value = '';
+  document.getElementById('j2').value = '';
+  document.getElementById('j3').value = '';
+  document.getElementById('j-free').value = '';
+  renderEntries();
+  alert('✨ Entry saved! You showed up today — that matters.');
+}
+
+function renderEntries() {
+  const entries = get('journal') || {};
+  const dates = Object.keys(entries).sort().reverse();
+  const list = document.getElementById('entries-list');
+  if (!dates.length) {
+    list.innerHTML = '<p class="text-muted">No entries yet — write your first one today! 💕</p>';
+    return;
+  }
+  list.innerHTML = dates.map(date => {
+    const e = entries[date];
+    let text;
+    if (e.mode === 'free') {
+      text = e.text;
+    } else {
+      const parts = [];
+      if (e.j1) parts.push('Win: ' + e.j1);
+      if (e.j2) parts.push('Hard: ' + e.j2);
+      if (e.j3) parts.push('Proud: ' + e.j3);
+      text = parts.join(' · ');
+    }
+    return `
+      <div class="journal-entry-item">
+        <div class="entry-date">${date} ${e.mode === 'free' ? '✍️ Free Write' : '💬 Prompted'}</div>
+        <div class="entry-text">${text.length > 180 ? text.slice(0,180)+'…' : text}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===================== GLOW CHECK =====================
+const GLOW_AREAS = [
+  { id: 'confidence', label: '✨ Confidence' },
+  { id: 'english',    label: '🗣️ English' },
+  { id: 'school',     label: '🎓 School' },
+  { id: 'social',     label: '👯 Social' },
+  { id: 'happiness',  label: '💖 Happiness' },
+];
+
+let currentRatings = {};
+
+function renderGlow() {
+  renderRatingRows();
+  renderGlowCharts();
+  renderHistory();
+  updateStreak();
+}
+
+function renderRatingRows() {
+  currentRatings = {};
+  GLOW_AREAS.forEach(a => currentRatings[a.id] = 0);
+  const container = document.getElementById('rating-rows');
+  container.innerHTML = GLOW_AREAS.map(area => `
+    <div class="rating-row">
+      <div class="rating-label">${area.label}</div>
+      <div class="star-row" id="stars-${area.id}">
+        ${[1,2,3,4,5].map(n => `
+          <div class="star" onclick="setRating('${area.id}', ${n})" id="star-${area.id}-${n}">${n}</div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function setRating(area, val) {
+  currentRatings[area] = val;
+  const row = document.getElementById('stars-'+area);
+  row.querySelectorAll('.star').forEach((s, i) => {
+    s.classList.toggle('active', i < val);
+  });
+}
+
+function saveGlowCheckin() {
+  const vals = Object.values(currentRatings);
+  if (vals.every(v => v === 0)) { alert('Rate at least one area first! 💕'); return; }
+  const week = getWeekKey();
+  const history = get('glow_history') || {};
+  history[week] = { ...currentRatings, date: new Date().toISOString() };
+  set('glow_history', history);
+
+  const avg = vals.filter(v=>v>0).reduce((a,b)=>a+b,0) / vals.filter(v=>v>0).length;
+  showGlowMessage(avg);
+  renderGlowCharts();
+  renderHistory();
+  updateStreak();
+}
+
+function getWeekKey() {
+  const d = new Date();
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+  return `${d.getFullYear()}-W${String(week).padStart(2,'0')}`;
+}
+
+function showGlowMessage(avg) {
+  const messages = [
+    { max: 1.5, msg: "💕 Rough week — that's okay. Every hard week teaches you something. You showed up just by checking in. That's enough." },
+    { max: 2.5, msg: "🌸 A tough stretch, but you're still here, still trying. Rest when you need to. Tomorrow is a new start." },
+    { max: 3.5, msg: "✨ A steady week. You're doing the work. Keep showing up — consistency builds everything." },
+    { max: 4.5, msg: "🌟 A great week, girl! You're glowing up for real. Keep this energy going strong!" },
+    { max: 5.1, msg: "🔥 Absolutely thriving! This is your era. Screenshot this feeling — you've earned it!" },
+  ];
+  const m = messages.find(m => avg <= m.max) || messages[messages.length-1];
+  const el = document.getElementById('glow-message');
+  el.textContent = m.msg;
+  el.style.display = 'block';
+}
+
+function updateStreak() {
+  const history = get('glow_history') || {};
+  const weeks = Object.keys(history).sort();
+  let streak = 0;
+  let w = getWeekKey();
+  for (let i = weeks.length-1; i >= 0; i--) {
+    if (weeks[i] === w) {
+      streak++;
+      w = getPrevWeek(w);
+    } else break;
+  }
+  document.getElementById('streak-num').textContent = streak;
+}
+
+function getPrevWeek(wk) {
+  const [yr, w] = wk.split('-W').map(Number);
+  if (w <= 1) return `${yr-1}-W52`;
+  return `${yr}-W${String(w-1).padStart(2,'0')}`;
+}
+
+function renderHistory() {
+  const history = get('glow_history') || {};
+  const weeks = Object.keys(history).sort().reverse();
+  const list = document.getElementById('history-list');
+  if (!weeks.length) {
+    list.innerHTML = '<p class="text-muted">No check-ins yet.</p>';
+    return;
+  }
+  list.innerHTML = weeks.slice(0, 8).map(wk => {
+    const h = history[wk];
+    const vals = GLOW_AREAS.map(a => h[a.id] || 0).filter(v=>v>0);
+    const avg = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : '—';
+    return `
+      <div class="history-item">
+        <span>${wk}</span>
+        <div class="flex">
+          ${GLOW_AREAS.map(a => `<span style="font-size:0.7rem; color:var(--text-muted);">${a.label.split(' ')[0]}${h[a.id]||'—'}</span>`).join('')}
+          <span class="badge badge-rose">avg ${avg}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderGlowCharts() {
+  drawRadar();
+  drawLine();
+}
+
+function drawRadar() {
+  const canvas = document.getElementById('radar-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, R = Math.min(W,H)/2 - 30;
+  ctx.clearRect(0,0,W,H);
+
+  const history = get('glow_history') || {};
+  const weeks = Object.keys(history).sort();
+  const thisWk = history[weeks[weeks.length-1]];
+  const lastWk = history[weeks[weeks.length-2]];
+  const n = GLOW_AREAS.length;
+
+  function toXY(i, val) {
+    const angle = (i / n) * 2 * Math.PI - Math.PI/2;
+    return {
+      x: cx + (val/5) * R * Math.cos(angle),
+      y: cy + (val/5) * R * Math.sin(angle),
+    };
+  }
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  for (let r = 1; r <= 5; r++) {
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const a = (i/n)*2*Math.PI - Math.PI/2;
+      const x = cx + (r/5)*R*Math.cos(a);
+      const y = cy + (r/5)*R*Math.sin(a);
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  // Spokes + labels
+  GLOW_AREAS.forEach((area, i) => {
+    const a = (i/n)*2*Math.PI - Math.PI/2;
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + R*Math.cos(a), cy + R*Math.sin(a));
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = '11px Poppins';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const lx = cx + (R+18)*Math.cos(a);
+    const ly = cy + (R+18)*Math.sin(a);
+    ctx.fillText(area.label.split(' ')[0], lx, ly);
+  });
+
+  function drawPoly(data, color, alpha) {
+    if (!data) return;
+    ctx.beginPath();
+    GLOW_AREAS.forEach((area, i) => {
+      const val = data[area.id] || 0;
+      const p = toXY(i, val);
+      i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+    });
+    ctx.closePath();
+    ctx.fillStyle = color.replace('1)', alpha+')');
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  if (lastWk) drawPoly(lastWk, 'rgba(251,191,36,1)', '0.2');
+  if (thisWk) drawPoly(thisWk, 'rgba(251,113,133,1)', '0.25');
+
+  // Legend
+  ctx.font = '10px Poppins';
+  if (thisWk) {
+    ctx.fillStyle = 'rgba(251,113,133,0.8)';
+    ctx.fillRect(10, H-30, 12, 10);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.textAlign = 'left';
+    ctx.fillText('This week', 26, H-22);
+  }
+  if (lastWk) {
+    ctx.fillStyle = 'rgba(251,191,36,0.8)';
+    ctx.fillRect(100, H-30, 12, 10);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fillText('Last week', 116, H-22);
+  }
+}
+
+function drawLine() {
+  const canvas = document.getElementById('line-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const history = get('glow_history') || {};
+  const weeks = Object.keys(history).sort();
+  if (weeks.length < 2) {
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '12px Poppins';
+    ctx.textAlign = 'center';
+    ctx.fillText('Check in for 2+ weeks to see your trend', W/2, H/2);
+    return;
+  }
+
+  const avgs = weeks.map(wk => {
+    const h = history[wk];
+    const vals = GLOW_AREAS.map(a => h[a.id]||0).filter(v=>v>0);
+    return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+  });
+
+  const pad = 30;
+  const gW = W - pad*2;
+  const gH = H - pad*2;
+  const maxVal = 5;
+
+  function px(i) { return pad + (i/(avgs.length-1))*gW; }
+  function py(v) { return pad + gH - (v/maxVal)*gH; }
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  [1,2,3,4,5].forEach(v => {
+    ctx.beginPath();
+    ctx.moveTo(pad, py(v));
+    ctx.lineTo(W-pad, py(v));
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '9px Poppins';
+    ctx.textAlign = 'right';
+    ctx.fillText(v, pad-4, py(v)+4);
+  });
+
+  // Line
+  const grad = ctx.createLinearGradient(pad, 0, W-pad, 0);
+  grad.addColorStop(0, '#fb7185');
+  grad.addColorStop(1, '#fbbf24');
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  avgs.forEach((v, i) => {
+    i === 0 ? ctx.moveTo(px(i), py(v)) : ctx.lineTo(px(i), py(v));
+  });
+  ctx.stroke();
+
+  // Dots
+  avgs.forEach((v, i) => {
+    ctx.beginPath();
+    ctx.arc(px(i), py(v), 4, 0, Math.PI*2);
+    ctx.fillStyle = '#fb7185';
+    ctx.fill();
+  });
+
+  // Week labels
+  const labelStep = Math.ceil(weeks.length / 4);
+  weeks.forEach((wk, i) => {
+    if (i % labelStep === 0 || i === weeks.length-1) {
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '8px Poppins';
+      ctx.textAlign = 'center';
+      ctx.fillText(wk.slice(-3), px(i), H-4);
+    }
+  });
+}
+
+// ===================== INIT =====================
+renderVision();
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderVision();
+});
+</script>
+</body>
+</html>
