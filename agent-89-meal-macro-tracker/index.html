@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍜 Vietnamese-American Meal & Macro Tracker — Agent #89</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #1a1000;
+    --card: #2d1e00;
+    --card2: #3d2a00;
+    --orange: #f97316;
+    --orange-light: #fb923c;
+    --lime: #84cc16;
+    --lime-light: #a3e635;
+    --text: #fff;
+    --text-muted: #c4a875;
+    --border: #4a3500;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #2d1e00 0%, #1a1000 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 20px 16px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--orange), var(--lime));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 100px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--orange), #c2410c);
+    color: white;
+  }
+
+  .tab-content {
+    display: none;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+
+  .tab-content.active { display: block; }
+
+  .section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--orange);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, select:focus, textarea:focus { border-color: var(--orange); }
+
+  textarea { resize: vertical; min-height: 70px; }
+
+  .btn {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 100px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-orange {
+    background: linear-gradient(135deg, var(--orange), #c2410c);
+    color: white;
+  }
+
+  .btn-lime {
+    background: linear-gradient(135deg, var(--lime), #65a30d);
+    color: #1a1000;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+
+  .progress-bar {
+    background: var(--card2);
+    border-radius: 100px;
+    height: 10px;
+    overflow: hidden;
+    margin: 6px 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--orange), var(--lime));
+    border-radius: 100px;
+    transition: width 0.5s ease;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .badge-orange { background: rgba(249,115,22,0.15); color: var(--orange); border: 1px solid rgba(249,115,22,0.3); }
+  .badge-lime { background: rgba(132,204,22,0.15); color: var(--lime); border: 1px solid rgba(132,204,22,0.3); }
+  .badge-blue { background: rgba(96,165,250,0.15); color: #60a5fa; border: 1px solid rgba(96,165,250,0.3); }
+
+  label { font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px; }
+
+  .text-muted { color: var(--text-muted); font-size: 0.82rem; }
+  .flex { display: flex; gap: 10px; align-items: center; }
+  .flex-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+
+  /* ===== LOG TAB ===== */
+  .search-wrap { position: relative; margin-bottom: 12px; }
+  .search-wrap input { padding-right: 80px; }
+
+  .meal-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .meal-tab-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .meal-tab-btn.active {
+    background: var(--orange);
+    color: white;
+    border-color: var(--orange);
+  }
+
+  .food-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--card2);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .food-result:hover { border-color: var(--orange); }
+  .food-name { font-size: 0.85rem; font-weight: 500; }
+  .food-macros { font-size: 0.72rem; color: var(--text-muted); }
+
+  .daily-summary {
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .macro-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+    align-items: center;
+  }
+
+  .macro-pill {
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--card2);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    font-size: 0.82rem;
+  }
+
+  .log-remove {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 4px;
+    transition: color 0.15s;
+  }
+
+  .log-remove:hover { color: #fb7185; }
+
+  canvas { display: block; border-radius: 10px; }
+
+  /* ===== RECIPES TAB ===== */
+  .recipe-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .recipe-card:hover { border-color: var(--orange); }
+
+  .recipe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .recipe-name { font-size: 0.95rem; font-weight: 600; }
+  .recipe-body { display: none; margin-top: 12px; }
+  .recipe-body.open { display: block; }
+
+  .recipe-macro-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .recipe-macro-box {
+    background: var(--card2);
+    border-radius: 10px;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .recipe-macro-box .num { font-size: 1.1rem; font-weight: 700; color: var(--orange); }
+  .recipe-macro-box .lbl { font-size: 0.65rem; color: var(--text-muted); }
+
+  .sub-card {
+    background: var(--card2);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  .sub-label { font-size: 0.72rem; font-weight: 600; color: var(--lime); margin-bottom: 4px; }
+
+  /* ===== LEARN TAB ===== */
+  .vocab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .vocab-card {
+    background: var(--card2);
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .vocab-en { font-size: 0.85rem; font-weight: 600; }
+  .vocab-vi { font-size: 0.78rem; color: var(--lime); margin-top: 2px; }
+  .vocab-def { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
+  .grocery-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.83rem;
+    gap: 12px;
+  }
+
+  .grocery-vi { color: var(--text-muted); }
+  .grocery-us { color: var(--lime); font-weight: 500; text-align: right; }
+
+  .label-guide-step {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.83rem;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--orange), #c2410c);
+    color: white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ===== GOALS TAB ===== */
+  .goal-stat {
+    background: var(--card2);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .goal-stat .num { font-size: 1.6rem; font-weight: 700; color: var(--orange); }
+  .goal-stat .lbl { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .tip-card {
+    background: linear-gradient(135deg, var(--card2), var(--card));
+    border: 1px solid rgba(132,204,22,0.2);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 0.83rem;
+    line-height: 1.5;
+    color: var(--lime-light);
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 500px) {
+    .vocab-grid { grid-template-columns: 1fr 1fr; }
+    .recipe-macro-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍜 Meal & Macro Tracker</h1>
+  <p>Track your Phở and your protein. Both count.</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="switchTab('log')">📋 Log</button>
+  <button class="tab-btn" onclick="switchTab('recipes')">🍳 Recipes</button>
+  <button class="tab-btn" onclick="switchTab('learn')">📖 Learn</button>
+  <button class="tab-btn" onclick="switchTab('goals')">🎯 Goals</button>
+</nav>
+
+<!-- ========================= LOG ========================= -->
+<div class="tab-content active" id="tab-log">
+
+  <div class="daily-summary" id="daily-summary">
+    <div class="flex mb-8" style="justify-content:space-between;">
+      <span style="font-weight:600;">Today's Totals</span>
+      <input type="date" id="log-date" style="width:auto; margin-bottom:0; padding:6px 10px; font-size:0.78rem;">
+    </div>
+
+    <div class="macro-row">
+      <span>🔥 Calories</span>
+      <div class="flex">
+        <span id="cal-total" style="font-weight:700; font-size:1.1rem;">0</span>
+        <span class="text-muted">/ <span id="cal-goal-display">2000</span> kcal</span>
+      </div>
+    </div>
+    <div class="progress-bar mb-8">
+      <div class="progress-fill" id="cal-bar" style="width:0%; background:linear-gradient(135deg,#f97316,#84cc16);"></div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px;">
+      <div style="text-align:center;">
+        <div style="font-weight:700; color:#60a5fa; font-size:1.1rem;" id="prot-total">0g</div>
+        <div class="text-muted" style="font-size:0.7rem;">Protein</div>
+        <div class="progress-bar"><div class="progress-fill" id="prot-bar" style="width:0%; background:#60a5fa;"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-weight:700; color:#fbbf24; font-size:1.1rem;" id="carb-total">0g</div>
+        <div class="text-muted" style="font-size:0.7rem;">Carbs</div>
+        <div class="progress-bar"><div class="progress-fill" id="carb-bar" style="width:0%; background:#fbbf24;"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-weight:700; color:#f9a8d4; font-size:1.1rem;" id="fat-total">0g</div>
+        <div class="text-muted" style="font-size:0.7rem;">Fat</div>
+        <div class="progress-bar"><div class="progress-fill" id="fat-bar" style="width:0%; background:#f9a8d4;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔍 Add Food</div>
+    <input type="text" id="food-search" placeholder="Search Vietnamese or American food..." oninput="searchFood(this.value)">
+    <div id="search-results"></div>
+  </div>
+
+  <div class="meal-tabs">
+    <button class="meal-tab-btn active" onclick="setMeal('Breakfast')">🌅 Breakfast</button>
+    <button class="meal-tab-btn" onclick="setMeal('Lunch')">☀️ Lunch</button>
+    <button class="meal-tab-btn" onclick="setMeal('Dinner')">🌙 Dinner</button>
+    <button class="meal-tab-btn" onclick="setMeal('Snacks')">🍎 Snacks</button>
+  </div>
+
+  <div id="meals-display"></div>
+</div>
+
+<!-- ========================= RECIPES ========================= -->
+<div class="tab-content" id="tab-recipes">
+  <div class="section-title">🍳 Vietnamese Family Recipes</div>
+  <p class="text-muted mb-12">Nutrition per serving + American pantry substitutions</p>
+  <div id="recipes-container"></div>
+
+  <div class="section-title mt-16">🥡 Vietnamese-Inspired Lunchbox Ideas</div>
+  <p class="text-muted mb-12">10 school-lunch ideas using US grocery store items</p>
+  <div id="lunchbox-container"></div>
+
+  <div class="section-title mt-16">💡 Healthy Tips for Vietnamese Food in America</div>
+  <div id="health-tips-container"></div>
+</div>
+
+<!-- ========================= LEARN ========================= -->
+<div class="tab-content" id="tab-learn">
+  <div class="section-title">📚 Bilingual Nutrition Vocabulary</div>
+  <p class="text-muted mb-12">40 terms — English / Tiếng Việt</p>
+
+  <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;" id="vocab-filter-btns">
+    <button class="btn btn-orange" onclick="filterVocab('all')">All</button>
+    <button class="btn btn-ghost" onclick="filterVocab('macro')">Macros</button>
+    <button class="btn btn-ghost" onclick="filterVocab('label')">Food Labels</button>
+    <button class="btn btn-ghost" onclick="filterVocab('health')">Health</button>
+  </div>
+
+  <div class="vocab-grid" id="vocab-grid"></div>
+
+  <div class="section-title mt-16">🛒 US Grocery Guide for Vietnamese Families</div>
+  <p class="text-muted mb-12">Which US brands are closest to Vietnamese staples</p>
+  <div id="grocery-guide"></div>
+
+  <div class="section-title mt-16">🏷️ Reading a US Nutrition Label</div>
+  <p class="text-muted mb-12">Step-by-step guide — English / Tiếng Việt</p>
+  <div id="label-guide"></div>
+</div>
+
+<!-- ========================= GOALS ========================= -->
+<div class="tab-content" id="tab-goals">
+  <div class="section-title">🎯 Daily Goals</div>
+
+  <div class="card mb-12">
+    <div class="card-title">Set Your Targets</div>
+    <label>Daily Calorie Goal (kcal)</label>
+    <input type="number" id="goal-cal" placeholder="e.g. 2000" min="1000" max="5000">
+    <label>Daily Protein Goal (g)</label>
+    <input type="number" id="goal-prot" placeholder="e.g. 120" min="30" max="300">
+    <button class="btn btn-orange" onclick="saveGoals()">Save Goals</button>
+  </div>
+
+  <div id="goal-progress-section" style="display:none;">
+    <div class="card mb-12">
+      <div class="card-title">Today's Progress</div>
+      <div class="macro-row mb-8">
+        <span>Calories remaining</span>
+        <span id="cal-remaining" style="color:var(--lime); font-weight:600;">—</span>
+      </div>
+      <div class="progress-bar mb-8"><div class="progress-fill" id="goal-cal-bar" style="width:0%;"></div></div>
+      <div class="macro-row mb-8">
+        <span>Protein progress</span>
+        <span id="prot-progress" style="color:#60a5fa; font-weight:600;">—</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="goal-prot-bar" style="width:0%; background:#60a5fa;"></div></div>
+    </div>
+  </div>
+
+  <div class="section-title mt-16">📊 Weekly Summary</div>
+  <div class="stats-grid" id="weekly-stats">
+    <div class="goal-stat"><div class="num" id="wk-avg-cal">—</div><div class="lbl">Avg Cal/day</div></div>
+    <div class="goal-stat"><div class="num" id="wk-days-on">—</div><div class="lbl">Days on target</div></div>
+    <div class="goal-stat"><div class="num" id="wk-best">—</div><div class="lbl">Best day cal</div></div>
+  </div>
+
+  <div class="section-title mt-16">💡 Nutrition Tips</div>
+  <div id="tips-container"></div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const KEY = 'meal89_';
+const get = k => JSON.parse(localStorage.getItem(KEY+k) || 'null');
+const set = (k, v) => localStorage.setItem(KEY+k, JSON.stringify(v));
+
+const FOODS = [
+  // ---- Vietnamese (40) ----
+  { id:'vn01', name:'Phở bò (Beef Noodle Soup)', vi:'Phở bò', cat:'vn', serving:'1 bowl (500ml)', cal:450, prot:28, carb:52, fat:12 },
+  { id:'vn02', name:'Bún bò Huế', vi:'Bún bò Huế', cat:'vn', serving:'1 bowl', cal:480, prot:25, carb:55, fat:14 },
+  { id:'vn03', name:'Bánh mì (Sandwich)', vi:'Bánh mì', cat:'vn', serving:'1 sandwich', cal:380, prot:18, carb:42, fat:14 },
+  { id:'vn04', name:'Cơm tấm (Broken Rice)', vi:'Cơm tấm', cat:'vn', serving:'1 plate', cal:550, prot:32, carb:65, fat:16 },
+  { id:'vn05', name:'Gỏi cuốn (Fresh Spring Rolls)', vi:'Gỏi cuốn', cat:'vn', serving:'2 rolls', cal:180, prot:10, carb:26, fat:3 },
+  { id:'vn06', name:'Bún chả (Grilled Pork Noodles)', vi:'Bún chả', cat:'vn', serving:'1 bowl', cal:520, prot:30, carb:58, fat:15 },
+  { id:'vn07', name:'Bánh xèo (Sizzling Crepe)', vi:'Bánh xèo', cat:'vn', serving:'1 crepe', cal:310, prot:14, carb:38, fat:11 },
+  { id:'vn08', name:'Cháo (Rice Porridge)', vi:'Cháo', cat:'vn', serving:'1 bowl', cal:220, prot:12, carb:35, fat:4 },
+  { id:'vn09', name:'Hủ tiếu (Southern Noodle Soup)', vi:'Hủ tiếu', cat:'vn', serving:'1 bowl', cal:430, prot:22, carb:50, fat:12 },
+  { id:'vn10', name:'Canh chua (Sour Soup)', vi:'Canh chua', cat:'vn', serving:'1 bowl', cal:160, prot:12, carb:18, fat:5 },
+  { id:'vn11', name:'Cá kho tộ (Braised Fish)', vi:'Cá kho tộ', cat:'vn', serving:'1 portion', cal:280, prot:28, carb:8, fat:14 },
+  { id:'vn12', name:'Thịt kho (Braised Pork & Egg)', vi:'Thịt kho', cat:'vn', serving:'1 portion', cal:420, prot:24, carb:10, fat:28 },
+  { id:'vn13', name:'Bún riêu (Crab Noodle Soup)', vi:'Bún riêu', cat:'vn', serving:'1 bowl', cal:400, prot:22, carb:48, fat:12 },
+  { id:'vn14', name:'Mì Quảng (Quang Noodles)', vi:'Mì Quảng', cat:'vn', serving:'1 bowl', cal:470, prot:24, carb:55, fat:14 },
+  { id:'vn15', name:'Cơm chiên (Fried Rice)', vi:'Cơm chiên', cat:'vn', serving:'1 plate', cal:480, prot:18, carb:62, fat:16 },
+  { id:'vn16', name:'Bánh cuốn (Steamed Rice Rolls)', vi:'Bánh cuốn', cat:'vn', serving:'4 rolls', cal:280, prot:14, carb:40, fat:7 },
+  { id:'vn17', name:'Nem rán / Chả giò (Fried Spring Rolls)', vi:'Nem rán', cat:'vn', serving:'3 rolls', cal:320, prot:12, carb:30, fat:16 },
+  { id:'vn18', name:'Bún thịt nướng (BBQ Pork Rice Noodles)', vi:'Bún thịt nướng', cat:'vn', serving:'1 bowl', cal:510, prot:26, carb:60, fat:14 },
+  { id:'vn19', name:'Chè ba màu (Three Color Dessert)', vi:'Chè ba màu', cat:'vn', serving:'1 cup', cal:240, prot:4, carb:52, fat:4 },
+  { id:'vn20', name:'Xôi (Sticky Rice)', vi:'Xôi', cat:'vn', serving:'1 portion', cal:360, prot:8, carb:72, fat:6 },
+  { id:'vn21', name:'Lẩu (Hot Pot)', vi:'Lẩu', cat:'vn', serving:'1 serving', cal:380, prot:30, carb:28, fat:16 },
+  { id:'vn22', name:'Gà nướng (Grilled Chicken)', vi:'Gà nướng', cat:'vn', serving:'1 thigh', cal:280, prot:32, carb:4, fat:14 },
+  { id:'vn23', name:'Rau muống xào tỏi (Water Spinach)', vi:'Rau muống', cat:'vn', serving:'1 plate', cal:110, prot:6, carb:10, fat:6 },
+  { id:'vn24', name:'Đậu phụ sốt cà chua (Tofu Tomato)', vi:'Đậu phụ sốt cà', cat:'vn', serving:'1 portion', cal:180, prot:12, carb:14, fat:9 },
+  { id:'vn25', name:'Trứng chiên (Fried Egg)', vi:'Trứng chiên', cat:'vn', serving:'2 eggs', cal:200, prot:14, carb:2, fat:16 },
+  { id:'vn26', name:'Bánh flan (Vietnamese Flan)', vi:'Bánh flan', cat:'vn', serving:'1 piece', cal:190, prot:6, carb:28, fat:6 },
+  { id:'vn27', name:'Mì xào (Stir-fried Noodles)', vi:'Mì xào', cat:'vn', serving:'1 plate', cal:440, prot:18, carb:58, fat:14 },
+  { id:'vn28', name:'Bò lúc lắc (Shaking Beef)', vi:'Bò lúc lắc', cat:'vn', serving:'1 plate', cal:420, prot:36, carb:12, fat:22 },
+  { id:'vn29', name:'Cơm gà (Hainanese Chicken Rice)', vi:'Cơm gà', cat:'vn', serving:'1 plate', cal:490, prot:34, carb:56, fat:12 },
+  { id:'vn30', name:'Bánh tráng trộn (Mixed Rice Paper)', vi:'Bánh tráng trộn', cat:'vn', serving:'1 bag', cal:260, prot:6, carb:42, fat:8 },
+  { id:'vn31', name:'Súp gà (Chicken Soup)', vi:'Súp gà', cat:'vn', serving:'1 bowl', cal:200, prot:18, carb:16, fat:6 },
+  { id:'vn32', name:'Đồ chua (Pickled Daikon & Carrot)', vi:'Đồ chua', cat:'vn', serving:'½ cup', cal:30, prot:0, carb:7, fat:0 },
+  { id:'vn33', name:'Chả cá (Fish Cake)', vi:'Chả cá', cat:'vn', serving:'2 pieces', cal:160, prot:18, carb:8, fat:6 },
+  { id:'vn34', name:'Bánh bao (Steamed Bun)', vi:'Bánh bao', cat:'vn', serving:'1 bun', cal:280, prot:14, carb:36, fat:8 },
+  { id:'vn35', name:'Nước mía (Sugarcane Juice)', vi:'Nước mía', cat:'vn', serving:'1 cup', cal:180, prot:0, carb:44, fat:0 },
+  { id:'vn36', name:'Cà phê sữa đá (Iced Coffee)', vi:'Cà phê sữa đá', cat:'vn', serving:'1 cup', cal:140, prot:2, carb:20, fat:4 },
+  { id:'vn37', name:'Miến gà (Glass Noodle Chicken)', vi:'Miến gà', cat:'vn', serving:'1 bowl', cal:340, prot:20, carb:45, fat:8 },
+  { id:'vn38', name:'Sườn nướng (Grilled Pork Ribs)', vi:'Sườn nướng', cat:'vn', serving:'2 ribs', cal:380, prot:28, carb:6, fat:24 },
+  { id:'vn39', name:'Rau sống (Fresh Herb Plate)', vi:'Rau sống', cat:'vn', serving:'1 plate', cal:35, prot:2, carb:6, fat:0 },
+  { id:'vn40', name:'Chao (Rice Porridge Plain)', vi:'Cháo trắng', cat:'vn', serving:'1 bowl', cal:140, prot:4, carb:28, fat:1 },
+
+  // ---- American (40) ----
+  { id:'am01', name:"McDonald's Big Mac", cat:'am', serving:'1 burger', cal:550, prot:25, carb:46, fat:30 },
+  { id:'am02', name:'Chipotle Burrito Bowl (chicken)', cat:'am', serving:'1 bowl', cal:650, prot:45, carb:68, fat:16 },
+  { id:'am03', name:'Subway 6" Turkey Sub', cat:'am', serving:'6 inch', cal:280, prot:18, carb:38, fat:5 },
+  { id:'am04', name:'School Cafeteria Pizza (2 slices)', cat:'am', serving:'2 slices', cal:480, prot:20, carb:56, fat:18 },
+  { id:'am05', name:'School Cafeteria Burger', cat:'am', serving:'1 burger', cal:420, prot:22, carb:38, fat:18 },
+  { id:'am06', name:'School Salad Bar (w/ dressing)', cat:'am', serving:'1 plate', cal:220, prot:8, carb:20, fat:12 },
+  { id:'am07', name:"Chick-fil-A Chicken Sandwich", cat:'am', serving:'1 sandwich', cal:440, prot:28, carb:40, fat:18 },
+  { id:'am08', name:'Starbucks Frappuccino (Grande)', cat:'am', serving:'16 oz', cal:380, prot:5, carb:64, fat:14 },
+  { id:'am09', name:'Starbucks Iced Latte (Grande)', cat:'am', serving:'16 oz', cal:130, prot:7, carb:14, fat:5 },
+  { id:'am10', name:'Doritos (1 bag)', cat:'am', serving:'1 oz (28g)', cal:140, prot:2, carb:18, fat:7 },
+  { id:'am11', name:'Cheetos (1 bag)', cat:'am', serving:'1 oz (28g)', cal:160, prot:2, carb:15, fat:10 },
+  { id:'am12', name:'Cereal (Frosted Flakes)', cat:'am', serving:'¾ cup', cal:130, prot:1, carb:31, fat:0 },
+  { id:'am13', name:'Scrambled Eggs (2 eggs)', cat:'am', serving:'2 eggs', cal:180, prot:12, carb:2, fat:14 },
+  { id:'am14', name:'Toast w/ Butter', cat:'am', serving:'2 slices', cal:200, prot:5, carb:28, fat:8 },
+  { id:'am15', name:'Pancakes (3 stack)', cat:'am', serving:'3 pancakes', cal:340, prot:8, carb:56, fat:10 },
+  { id:'am16', name:'Greek Yogurt (plain)', cat:'am', serving:'1 cup', cal:120, prot:20, carb:8, fat:0 },
+  { id:'am17', name:'Banana', cat:'am', serving:'1 medium', cal:105, prot:1, carb:27, fat:0 },
+  { id:'am18', name:'Apple', cat:'am', serving:'1 medium', cal:95, prot:0, carb:25, fat:0 },
+  { id:'am19', name:'Peanut Butter & Jelly Sandwich', cat:'am', serving:'1 sandwich', cal:370, prot:12, carb:48, fat:16 },
+  { id:'am20', name:"Taco Bell Crunchy Taco", cat:'am', serving:'1 taco', cal:170, prot:8, carb:13, fat:9 },
+  { id:'am21', name:'Instant Ramen (Maruchan)', cat:'am', serving:'1 pack', cal:380, prot:10, carb:52, fat:14 },
+  { id:'am22', name:'Cheese Pizza (frozen, 2 slices)', cat:'am', serving:'2 slices', cal:420, prot:16, carb:52, fat:16 },
+  { id:'am23', name:"Panda Express Orange Chicken", cat:'am', serving:'1 serving', cal:420, prot:15, carb:43, fat:21 },
+  { id:'am24', name:'Milk (whole, 1 cup)', cat:'am', serving:'1 cup', cal:150, prot:8, carb:12, fat:8 },
+  { id:'am25', name:'Orange Juice (1 cup)', cat:'am', serving:'1 cup', cal:110, prot:2, carb:26, fat:0 },
+  { id:'am26', name:'White Rice (cooked)', cat:'am', serving:'1 cup', cal:210, prot:4, carb:46, fat:0 },
+  { id:'am27', name:'Grilled Chicken Breast', cat:'am', serving:'4 oz', cal:185, prot:35, carb:0, fat:4 },
+  { id:'am28', name:'Broccoli (steamed)', cat:'am', serving:'1 cup', cal:55, prot:4, carb:11, fat:0 },
+  { id:'am29', name:'Sweet Potato (baked)', cat:'am', serving:'1 medium', cal:115, prot:2, carb:27, fat:0 },
+  { id:'am30', name:'Protein Bar (Quest)', cat:'am', serving:'1 bar', cal:200, prot:21, carb:22, fat:8 },
+  { id:'am31', name:'Corn Dog', cat:'am', serving:'1 corn dog', cal:260, prot:8, carb:28, fat:13 },
+  { id:'am32', name:'French Fries (medium, fast food)', cat:'am', serving:'medium', cal:320, prot:4, carb:43, fat:15 },
+  { id:'am33', name:'Chocolate Milk (school carton)', cat:'am', serving:'8 oz', cal:160, prot:8, carb:26, fat:3 },
+  { id:'am34', name:'Gatorade (20 oz)', cat:'am', serving:'20 oz', cal:130, prot:0, carb:34, fat:0 },
+  { id:'am35', name:'Lays Original Chips', cat:'am', serving:'1 oz (28g)', cal:160, prot:2, carb:15, fat:10 },
+  { id:'am36', name:'Granola Bar (Nature Valley)', cat:'am', serving:'1 bar', cal:190, prot:4, carb:29, fat:7 },
+  { id:'am37', name:'Bagel with Cream Cheese', cat:'am', serving:'1 bagel', cal:350, prot:12, carb:52, fat:10 },
+  { id:'am38', name:'Soda (Coca-Cola, 12 oz)', cat:'am', serving:'12 oz', cal:140, prot:0, carb:39, fat:0 },
+  { id:'am39', name:'Chocolate Chip Cookies (3)', cat:'am', serving:'3 cookies', cal:210, prot:2, carb:30, fat:10 },
+  { id:'am40', name:'Popcorn (microwave, 2 cups)', cat:'am', serving:'2 cups', cal:110, prot:2, carb:14, fat:5 },
+];
+
+const RECIPES = [
+  {
+    name:'Phở bò (Beef Noodle Soup)', emoji:'🍜',
+    per:'1 bowl', cal:450, prot:28, carb:52, fat:12,
+    trad:'Rice noodles, beef bones, star anise, fish sauce, hoisin, bean sprouts, lime, herbs',
+    american:'Replace hoisin → Worcestershire sauce + a bit of soy sauce. Fish sauce → soy sauce. Bean sprouts from any Asian grocery. Noodles → Mahatma brand or rice vermicelli from Walmart.',
+    tip:'To reduce sodium: use low-sodium soy sauce and skip adding extra hoisin at the table.'
+  },
+  {
+    name:'Canh chua (Sour Soup)', emoji:'🍲',
+    per:'1 bowl', cal:160, prot:12, carb:18, fat:5,
+    trad:'Catfish, bạc hà (taro stem), tomatoes, pineapple, me chua (tamarind), rau om',
+    american:'Replace bạc hà → celery or zucchini. Tamarind paste → lemon juice + brown sugar. Catfish → tilapia from Walmart. Rau om → skip or use cilantro.',
+    tip:'A low-calorie, protein-rich soup. Great for weight management.'
+  },
+  {
+    name:'Bún chả (Grilled Pork Noodles)', emoji:'🥩',
+    per:'1 bowl', cal:520, prot:30, carb:58, fat:15,
+    trad:'Ground pork patties + sliced pork belly, fish sauce dipping broth, rice vermicelli, herbs',
+    american:'Pork belly → regular pork shoulder from any grocery. Fish sauce → soy sauce + lime juice. Vermicelli → Walmart or Asian section.',
+    tip:'To reduce fat: use ground pork loin instead of belly.'
+  },
+  {
+    name:'Cơm tấm (Broken Rice Plate)', emoji:'🍚',
+    per:'1 plate', cal:550, prot:32, carb:65, fat:16,
+    trad:'Broken jasmine rice, sườn nướng (grilled pork chop), bì (shredded pork), chả trứng, nước chấm',
+    american:'Broken rice → regular jasmine rice (Mahatma brand). Soy sauce + lemongrass + garlic for marinade. Shredded pork → pork shoulder slow-cooked.',
+    tip:'Add more steamed vegetables to boost fiber without many calories.'
+  },
+  {
+    name:'Gỏi cuốn (Fresh Spring Rolls)', emoji:'🌿',
+    per:'2 rolls', cal:180, prot:10, carb:26, fat:3,
+    trad:'Rice paper, shrimp, pork belly, rice vermicelli, lettuce, herbs, hoisin-peanut sauce',
+    american:'Rice paper → Spring Roll Wrappers (Asian section). Shrimp from any grocery. Replace pork belly → turkey deli meat for lower fat. Peanut sauce → peanut butter + soy sauce + lime.',
+    tip:'One of the healthiest Vietnamese foods — low fat, high protein. Perfect lunchbox item.'
+  },
+  {
+    name:'Thịt kho (Braised Pork & Egg)', emoji:'🥚',
+    per:'1 serving', cal:420, prot:24, carb:10, fat:28,
+    trad:'Pork belly, hard-boiled eggs, coconut water, fish sauce, sugar',
+    american:'Coconut water → regular water + a bit of brown sugar. Fish sauce → soy sauce + a dash of Worcestershire.',
+    tip:'High in fat. Use pork shoulder instead of belly to reduce by ~30%.'
+  },
+  {
+    name:'Bánh mì (Vietnamese Sandwich)', emoji:'🥖',
+    per:'1 sandwich', cal:380, prot:18, carb:42, fat:14,
+    trad:'French baguette, pâté, Vietnamese mayo, chả lụa, đồ chua, jalapeños, cilantro',
+    american:'Baguette → French bread from Walmart. Pâté → liverwurst from grocery deli. Chả lụa → turkey + ham. Đồ chua: shred carrots + daikon + white vinegar + sugar.',
+    tip:'Swap mayo for Greek yogurt spread to add protein and cut fat.'
+  },
+  {
+    name:'Cá kho tộ (Braised Fish)', emoji:'🐟',
+    per:'1 serving', cal:280, prot:28, carb:8, fat:14,
+    trad:'Catfish, caramel sauce, fish sauce, garlic, ginger, chili',
+    american:'Catfish → tilapia or salmon. Fish sauce → soy sauce. Clay pot → regular saucepan is fine.',
+    tip:'High protein, low carb. Great for protein goals without heavy carbs.'
+  },
+  {
+    name:'Bún riêu (Crab Noodle Soup)', emoji:'🦀',
+    per:'1 bowl', cal:400, prot:22, carb:48, fat:12,
+    trad:'Rice vermicelli, crab paste, pork, tomatoes, mắm ruốc, tofu, rau sống',
+    american:'Crab paste → imitation crab meat blended or canned crab. Mắm ruốc → small amount of fish sauce + anchovy paste. Fresh tofu from Asian grocery.',
+    tip:'High in vitamins from tomatoes. Low calorie for a noodle soup.'
+  },
+  {
+    name:'Miến gà (Glass Noodle Chicken Soup)', emoji:'🍗',
+    per:'1 bowl', cal:340, prot:20, carb:45, fat:8,
+    trad:'Glass noodles (mung bean), chicken thighs, ginger, mushrooms, green onion, fish sauce',
+    american:'Glass noodles → cellophane noodles (Asian section or Amazon). Chicken thighs → store brand. Wood ear mushrooms → dried from Asian grocery.',
+    tip:'Light and nourishing. Great sick-day food. Lower calorie than phở.'
+  },
+  {
+    name:'Rau muống xào tỏi (Garlic Water Spinach)', emoji:'🥬',
+    per:'1 plate', cal:110, prot:6, carb:10, fat:6,
+    trad:'Water spinach (rau muống), garlic, fish sauce, oil',
+    american:'Water spinach → bok choy or regular spinach. Fish sauce → soy sauce.',
+    tip:'One of the best side dishes nutrition-wise. High iron and fiber.'
+  },
+  {
+    name:'Chả cá (Vietnamese Fish Cake)', emoji:'🐠',
+    per:'2 pieces', cal:160, prot:18, carb:8, fat:6,
+    trad:'Minced fish, dill, turmeric, galangal, shrimp paste, vermicelli',
+    american:'Fresh fish → canned tuna or pollock. Dill is available everywhere. Galangal → ginger.',
+    tip:'High protein, moderate calorie. Great with vermicelli salad.'
+  },
+  {
+    name:'Đậu phụ sốt cà chua (Tofu Tomato)', emoji:'🍅',
+    per:'1 portion', cal:180, prot:12, carb:14, fat:9,
+    trad:'Firm tofu, tomatoes, scallion, fish sauce, oil',
+    american:'Firm tofu → Nasoya brand at Walmart. Soy sauce instead of fish sauce.',
+    tip:'Excellent plant-based protein option. Very cheap and quick to make.'
+  },
+  {
+    name:'Trứng chiên (Fried Egg Vietnamese Style)', emoji:'🍳',
+    per:'2 eggs', cal:200, prot:14, carb:2, fat:16,
+    trad:'Eggs, cooking oil, fish sauce, scallion',
+    american:'Any eggs work. Skip fish sauce or use soy sauce.',
+    tip:'For lower calories: pan-fry with cooking spray instead of oil.'
+  },
+  {
+    name:'Xôi (Savory Sticky Rice)', emoji:'🍱',
+    per:'1 cup', cal:360, prot:8, carb:72, fat:6,
+    trad:'Sweet rice, mung bean, coconut milk, pandan, dried shrimp',
+    american:'Sweet rice → glutinous rice at any Asian grocery or Amazon. Canned coconut milk → Chaokoh brand.',
+    tip:'High carb — eat as a full breakfast, not a side. Great pre-workout fuel.'
+  },
+];
+
+const LUNCHBOX_IDEAS = [
+  { name:'Mini Bánh mì wraps', desc:'Turkey + shredded carrots + cilantro in flour tortillas with a soy-lime dip.' },
+  { name:'Sticky rice + grilled chicken', desc:'Glutinous rice + marinated chicken thigh + cucumber slices. Pack sauce separately.' },
+  { name:'Vermicelli salad bowl', desc:'Cold rice vermicelli + rotisserie chicken + shredded lettuce + peanut dressing.' },
+  { name:'Vietnamese-style egg fried rice', desc:'Leftover rice + scrambled egg + frozen corn + soy sauce. Reheat at school.' },
+  { name:'Gỏi cuốn with peanut sauce', desc:'2 fresh spring rolls with lettuce, shrimp, cucumber. Sauce on the side.' },
+  { name:'Instant phở cup + protein', desc:'Add hard-boiled egg and pre-cooked beef strips to instant phở noodle cup.' },
+  { name:'Tofu & rice box', desc:'Pan-fried tofu + jasmine rice + steamed broccoli + soy-ginger sauce.' },
+  { name:'Chả giò lettuce wraps', desc:'Pre-fried spring rolls + lettuce + mint + fish sauce dip in separate container.' },
+  { name:'Cháo (rice porridge) thermos', desc:'Pre-cooked rice porridge with chicken + ginger in a thermos. Warm all day.' },
+  { name:'Peanut noodles box', desc:'Rice noodles + peanut butter-soy sauce + cucumber + carrots. No reheating needed.' },
+];
+
+const HEALTH_TIPS = [
+  '🧂 **Lower sodium:** Use low-sodium soy sauce instead of regular fish sauce. Vietnamese food averages 800–1500mg sodium per dish — aim to reduce by half.',
+  '🫒 **Swap oils:** Use avocado oil or olive oil instead of vegetable oil for stir-fries. Better fat quality without changing the taste.',
+  '🥦 **Add US vegetables:** Broccoli, spinach, and kale are cheap and nutrient-dense. Add them to canh soups — they absorb flavors well.',
+  '🍚 **Rice portions:** US portions tend to be larger. A Vietnamese rice bowl = ¾ cup cooked rice. Use a smaller bowl to naturally portion.',
+  '🌿 **Herbs are free calories:** Rau sống (herb plate) adds almost no calories but tons of fiber and micronutrients. Eat as much as you want.',
+  '❄️ **Meal prep hacks:** Cook a big pot of rice and cháo on Sunday. Freeze portions to reheat during the week.',
+  '🐟 **US protein swaps:** Tilapia ≈ cá basa. Turkey ≈ chả lụa. Greek yogurt ≈ good protein snack to add to any meal.',
+];
+
+const VOCAB = [
+  { en:'Protein', vi:'Đạm / Chất đạm', cat:'macro', def:'Builds muscle and repairs tissue. Found in meat, fish, eggs, beans.' },
+  { en:'Carbohydrates', vi:'Tinh bột / Carb', cat:'macro', def:'Main energy source. Found in rice, bread, noodles, fruit.' },
+  { en:'Fat', vi:'Chất béo', cat:'macro', def:'Provides energy, supports hormones. Found in oils, meat, dairy.' },
+  { en:'Calories', vi:'Calo / Năng lượng', cat:'macro', def:'Units of energy in food. Not all calories are equal.' },
+  { en:'Fiber', vi:'Chất xơ', cat:'macro', def:'Keeps digestion healthy. Found in vegetables, beans, whole grains.' },
+  { en:'Cholesterol', vi:'Cholesterol', cat:'macro', def:'Found in animal products. High amounts may affect heart health.' },
+  { en:'Sugar', vi:'Đường', cat:'macro', def:'Simple carbohydrate. Natural (fruit) vs added (candy, soda).' },
+  { en:'Sodium', vi:'Muối / Natri', cat:'macro', def:'Mineral found in salt. High amounts can raise blood pressure.' },
+  { en:'Serving Size', vi:'Khẩu phần', cat:'label', def:'How much the nutrition info applies to — always check this first!' },
+  { en:'Daily Value (%DV)', vi:'Giá trị hàng ngày', cat:'label', def:'5% = low, 20% = high. Based on a 2000 calorie diet.' },
+  { en:'Ingredients', vi:'Thành phần', cat:'label', def:'Listed from most to least by weight. First ingredient = most of the food.' },
+  { en:'Added Sugar', vi:'Đường bổ sung', cat:'label', def:'Sugar added during processing — different from natural sugar in fruit.' },
+  { en:'Total Fat', vi:'Tổng chất béo', cat:'label', def:'Includes saturated fat, unsaturated fat, and trans fat.' },
+  { en:'Saturated Fat', vi:'Chất béo bão hòa', cat:'label', def:'Solid at room temperature (butter, coconut oil). Limit intake.' },
+  { en:'Trans Fat', vi:'Chất béo trans', cat:'label', def:'Artificial fat — avoid. Found in some fried and packaged foods.' },
+  { en:'Net Weight', vi:'Khối lượng tịnh', cat:'label', def:'Weight of the food itself, not the package.' },
+  { en:'Enriched', vi:'Tăng cường', cat:'label', def:'Vitamins/minerals added back after processing (enriched flour, milk).' },
+  { en:'Fortified', vi:'Tăng cường dinh dưỡng', cat:'label', def:'Extra nutrients added that weren\'t there naturally (e.g. Vitamin D in milk).' },
+  { en:'Balanced diet', vi:'Chế độ ăn cân bằng', cat:'health', def:'Eating a variety of foods in right proportions for good health.' },
+  { en:'Nutrients', vi:'Chất dinh dưỡng', cat:'health', def:'Vitamins, minerals, protein, fat, carbs — all needed by your body.' },
+  { en:'Portion', vi:'Phần ăn', cat:'health', def:'The amount of food you actually eat (may differ from serving size).' },
+  { en:'Calorie deficit', vi:'Thiếu hụt calo', cat:'health', def:'Eating fewer calories than you burn. Leads to weight loss.' },
+  { en:'Calorie surplus', vi:'Thặng dư calo', cat:'health', def:'Eating more calories than you burn. Leads to weight gain.' },
+  { en:'Metabolism', vi:'Trao đổi chất', cat:'health', def:'How fast your body converts food to energy.' },
+  { en:'Hydration', vi:'Bổ sung nước', cat:'health', def:'Drinking enough water for proper body function.' },
+  { en:'BMI', vi:'Chỉ số khối cơ thể', cat:'health', def:'Body Mass Index — weight divided by height squared. A rough guide, not perfect.' },
+  { en:'Whole grain', vi:'Ngũ cốc nguyên cám', cat:'health', def:'Grain with all parts intact — more fiber and nutrients than refined.' },
+  { en:'Lean protein', vi:'Protein ít béo', cat:'health', def:'High protein, low fat. Examples: chicken breast, fish, Greek yogurt.' },
+  { en:'Antioxidant', vi:'Chất chống oxy hóa', cat:'health', def:'Protects cells from damage. Found in colorful fruits and vegetables.' },
+  { en:'Iron', vi:'Sắt', cat:'health', def:'Mineral for healthy blood. Found in red meat, spinach, beans.' },
+  { en:'Calcium', vi:'Canxi', cat:'health', def:'For strong bones. Found in dairy, tofu, broccoli, fortified plant milk.' },
+  { en:'Vitamin D', vi:'Vitamin D', cat:'health', def:'For bone health and immunity. Most Americans are deficient — get sunlight or supplements.' },
+  { en:'Probiotic', vi:'Lợi khuẩn', cat:'health', def:'Live bacteria that benefit gut health. Found in yogurt, kimchi, fermented foods.' },
+  { en:'Glycemic index', vi:'Chỉ số đường huyết', cat:'health', def:'How fast a food raises blood sugar. Lower = more stable energy.' },
+  { en:'Macros', vi:'Chất dinh dưỡng đa lượng', cat:'macro', def:'Shorthand for macronutrients: protein, carbs, and fat.' },
+  { en:'Micronutrients', vi:'Vi chất dinh dưỡng', cat:'health', def:'Vitamins and minerals needed in small amounts but vital for health.' },
+  { en:'Processed food', vi:'Thức ăn chế biến sẵn', cat:'health', def:'Food changed from its natural state, often with added salt/sugar/preservatives.' },
+  { en:'Organic', vi:'Hữu cơ', cat:'label', def:'Grown without synthetic pesticides or fertilizers — costs more, not always necessary.' },
+  { en:'Non-GMO', vi:'Không biến đổi gen', cat:'label', def:'Not genetically modified. Marketing label — safety similar to conventional.' },
+  { en:'Calorie-dense', vi:'Nhiều calo', cat:'health', def:'High calories in a small amount of food. Examples: nuts, oils, cheese.' },
+];
+
+const GROCERY_GUIDE = [
+  { vi:'Nước mắm (fish sauce)', us:'Tiparos Fish Sauce (Amazon/Asian grocery) or soy sauce as sub' },
+  { vi:'Nước tương (soy sauce)', us:'Kikkoman Soy Sauce — at Walmart, Target, everywhere' },
+  { vi:'Gạo jasmine (jasmine rice)', us:'Mahatma Jasmine Rice — Walmart, ~$5/5lb bag' },
+  { vi:'Gạo nếp (sticky rice)', us:'Koda Farms Mochiko or Lotus Foods Glutinous Rice (Asian grocery)' },
+  { vi:'Mì gói (instant noodles)', us:'Nissin, Maruchan, or Mama brand (Asian grocery or Amazon)' },
+  { vi:'Bún / Bánh phở (rice noodles)', us:'Thai Kitchen Rice Noodles at Walmart/Target — very close' },
+  { vi:'Đậu hũ (tofu)', us:'Nasoya Extra Firm Tofu — Walmart, HEB, Whole Foods' },
+  { vi:'Miến (glass noodles)', us:'Saifun Bean Threads — Asian grocery or Amazon' },
+  { vi:'Sả (lemongrass)', us:'Fresh lemongrass at Asian grocery or frozen at Walmart' },
+  { vi:'Gừng (ginger)', us:'Fresh ginger everywhere, or McCormick Ground Ginger for cooking' },
+  { vi:'Rau muống (water spinach)', us:'Asian grocery (H Mart, 99 Ranch). Sub: baby spinach or bok choy' },
+  { vi:'Dầu hào (oyster sauce)', us:'Lee Kum Kee Oyster Sauce — Walmart Asian section or Amazon' },
+  { vi:'Tương hoisin (hoisin sauce)', us:'Kikkoman or Lee Kum Kee Hoisin — most grocery stores' },
+  { vi:'Đường thốt nốt (palm sugar)', us:'Brown sugar or coconut sugar as substitute' },
+  { vi:'Nước cốt dừa (coconut milk)', us:'Chaokoh or Thai Kitchen Coconut Milk — Walmart, everywhere' },
+  { vi:'Giấm gạo (rice vinegar)', us:'Marukan Rice Vinegar — most grocery stores' },
+  { vi:'Mè (sesame seeds)', us:'McCormick Sesame Seeds or bulk section at Whole Foods' },
+  { vi:'Hoa hồi (star anise)', us:'McCormick whole star anise — most spice aisles' },
+  { vi:'Quế (cinnamon stick)', us:'McCormick Cinnamon Sticks — everywhere' },
+  { vi:'Tương ớt Sriracha', us:'Huy Fong Foods Sriracha — Walmart, Target, every grocery' },
+];
+
+const LABEL_GUIDE = [
+  { step:1, en:'Check the Serving Size first', vi:'Kiểm tra Khẩu phần trước', detail:'Everything on the label is for THIS amount. If you eat 2 servings, double all numbers.' },
+  { step:2, en:'Look at Calories', vi:'Xem số Calo', detail:'Under 100 kcal = light. 300–500 = moderate meal. Over 600 = heavy meal.' },
+  { step:3, en:'Check % Daily Value (%DV)', vi:'Kiểm tra % Giá trị hàng ngày', detail:'5% or less = low. 20% or more = high. Used for fat, sodium, fiber, vitamins.' },
+  { step:4, en:'Limit: Saturated Fat, Sodium, Added Sugar', vi:'Hạn chế: Chất béo bão hòa, Muối, Đường bổ sung', detail:'These contribute to heart disease and weight gain. Keep %DV low for these.' },
+  { step:5, en:'Prioritize: Fiber, Protein, Vitamins', vi:'Ưu tiên: Chất xơ, Đạm, Vitamin', detail:'Higher is better for these. Protein keeps you full; fiber helps digestion.' },
+  { step:6, en:'Read the Ingredients List', vi:'Đọc danh sách thành phần', detail:'First ingredient = largest amount. If sugar is #1 or #2, reconsider.' },
+  { step:7, en:'Understand "Natural Flavors"', vi:'Hiểu "Hương liệu tự nhiên"', detail:'Sounds healthy but is highly processed. Not inherently bad, just don\'t be fooled.' },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let currentMeal = 'Breakfast';
+
+function getToday() {
+  return document.getElementById('log-date')?.value || new Date().toISOString().split('T')[0];
+}
+
+function getLog() { return get('log') || {}; }
+function saveLog(log) { set('log', log); }
+
+function getGoals() { return get('goals') || { cal: 2000, prot: 120 }; }
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(t) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  event.target.classList.add('active');
+  if (t === 'recipes') renderRecipes();
+  if (t === 'learn') renderLearn();
+  if (t === 'goals') renderGoals();
+}
+
+function setMeal(meal) {
+  currentMeal = meal;
+  document.querySelectorAll('.meal-tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderMeals();
+}
+
+// ============================================================
+// LOG TAB
+// ============================================================
+function searchFood(q) {
+  const container = document.getElementById('search-results');
+  q = q.trim().toLowerCase();
+  if (!q) { container.innerHTML = ''; return; }
+  const results = FOODS.filter(f =>
+    f.name.toLowerCase().includes(q) ||
+    (f.vi && f.vi.toLowerCase().includes(q))
+  ).slice(0, 8);
+  if (!results.length) {
+    container.innerHTML = '<p class="text-muted" style="padding:8px;">No results found.</p>';
+    return;
+  }
+  container.innerHTML = results.map(f => `
+    <div class="food-result" onclick="addFood('${f.id}')">
+      <div>
+        <div class="food-name">${f.name} ${f.cat==='vn'?'🇻🇳':'🇺🇸'}</div>
+        <div class="food-macros">${f.serving} · ${f.cal} kcal · P${f.prot}g · C${f.carb}g · F${f.fat}g</div>
+      </div>
+      <span class="badge badge-orange">+ Add</span>
+    </div>
+  `).join('');
+}
+
+function addFood(foodId) {
+  const food = FOODS.find(f => f.id === foodId);
+  if (!food) return;
+  const date = getToday();
+  const log = getLog();
+  if (!log[date]) log[date] = { Breakfast:[], Lunch:[], Dinner:[], Snacks:[] };
+  log[date][currentMeal].push({ ...food, addedAt: Date.now() });
+  saveLog(log);
+  document.getElementById('food-search').value = '';
+  document.getElementById('search-results').innerHTML = '';
+  renderMeals();
+  updateSummary();
+}
+
+function removeFood(meal, idx) {
+  const date = getToday();
+  const log = getLog();
+  if (log[date]?.[meal]) {
+    log[date][meal].splice(idx, 1);
+    saveLog(log);
+    renderMeals();
+    updateSummary();
+  }
+}
+
+function renderMeals() {
+  const date = getToday();
+  const log = getLog();
+  const dayLog = log[date] || { Breakfast:[], Lunch:[], Dinner:[], Snacks:[] };
+  const container = document.getElementById('meals-display');
+  const meals = ['Breakfast','Lunch','Dinner','Snacks'];
+  const icons = { Breakfast:'🌅', Lunch:'☀️', Dinner:'🌙', Snacks:'🍎' };
+  container.innerHTML = meals.map(meal => {
+    const items = dayLog[meal] || [];
+    if (!items.length && meal !== currentMeal) return '';
+    return `
+      <div class="card mb-8">
+        <div class="card-title">${icons[meal]} ${meal}</div>
+        ${items.length ? items.map((item, i) => `
+          <div class="log-item">
+            <div>
+              <span style="font-weight:500;">${item.name}</span>
+              <span class="text-muted" style="margin-left:8px;">${item.cal} kcal · P${item.prot}g</span>
+            </div>
+            <button class="log-remove" onclick="removeFood('${meal}', ${i})">✕</button>
+          </div>
+        `).join('') : `<p class="text-muted" style="font-size:0.8rem;">No foods added yet.</p>`}
+      </div>
+    `;
+  }).join('');
+  updateSummary();
+}
+
+function updateSummary() {
+  const date = getToday();
+  const log = getLog();
+  const dayLog = log[date] || {};
+  const goals = getGoals();
+  let cal = 0, prot = 0, carb = 0, fat = 0;
+  ['Breakfast','Lunch','Dinner','Snacks'].forEach(meal => {
+    (dayLog[meal] || []).forEach(item => {
+      cal += item.cal; prot += item.prot; carb += item.carb; fat += item.fat;
+    });
+  });
+  document.getElementById('cal-total').textContent = cal;
+  document.getElementById('prot-total').textContent = prot + 'g';
+  document.getElementById('carb-total').textContent = carb + 'g';
+  document.getElementById('fat-total').textContent = fat + 'g';
+  document.getElementById('cal-goal-display').textContent = goals.cal;
+  document.getElementById('cal-bar').style.width = Math.min((cal/goals.cal)*100, 100) + '%';
+  document.getElementById('prot-bar').style.width = Math.min((prot/goals.prot)*100, 100) + '%';
+  document.getElementById('carb-bar').style.width = Math.min((carb/300)*100, 100) + '%';
+  document.getElementById('fat-bar').style.width = Math.min((fat/80)*100, 100) + '%';
+}
+
+// ============================================================
+// RECIPES TAB
+// ============================================================
+function renderRecipes() {
+  const container = document.getElementById('recipes-container');
+  container.innerHTML = RECIPES.map((r, i) => `
+    <div class="recipe-card" onclick="toggleRecipe(${i})">
+      <div class="recipe-header">
+        <div class="recipe-name">${r.emoji} ${r.name}</div>
+        <div class="flex">
+          <span class="badge badge-orange">${r.cal} kcal</span>
+          <span class="badge badge-lime" style="margin-left:4px;">P${r.prot}g</span>
+          <span id="recipe-arrow-${i}" style="color:var(--text-muted); margin-left:8px;">▼</span>
+        </div>
+      </div>
+      <div class="recipe-body" id="recipe-body-${i}">
+        <div class="recipe-macro-grid">
+          <div class="recipe-macro-box"><div class="num">${r.cal}</div><div class="lbl">Calories</div></div>
+          <div class="recipe-macro-box"><div class="num">${r.prot}g</div><div class="lbl">Protein</div></div>
+          <div class="recipe-macro-box"><div class="num">${r.carb}g</div><div class="lbl">Carbs</div></div>
+          <div class="recipe-macro-box"><div class="num">${r.fat}g</div><div class="lbl">Fat</div></div>
+        </div>
+        <div class="sub-card">
+          <div class="sub-label">🇻🇳 Traditional Ingredients</div>
+          ${r.trad}
+        </div>
+        <div class="sub-card">
+          <div class="sub-label">🇺🇸 American Pantry Version</div>
+          ${r.american}
+        </div>
+        <div class="sub-card" style="border:1px solid rgba(132,204,22,0.2);">
+          <div class="sub-label">💡 Health Tip</div>
+          ${r.tip}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  const lunchbox = document.getElementById('lunchbox-container');
+  lunchbox.innerHTML = LUNCHBOX_IDEAS.map(idea => `
+    <div class="sub-card" style="margin-bottom:8px;">
+      <div class="sub-label">🥡 ${idea.name}</div>
+      ${idea.desc}
+    </div>
+  `).join('');
+
+  const tips = document.getElementById('health-tips-container');
+  tips.innerHTML = HEALTH_TIPS.map(tip => `
+    <div class="sub-card" style="margin-bottom:8px; border:1px solid rgba(249,115,22,0.2);">
+      ${tip.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}
+    </div>
+  `).join('');
+}
+
+function toggleRecipe(i) {
+  const body = document.getElementById('recipe-body-'+i);
+  const arrow = document.getElementById('recipe-arrow-'+i);
+  const open = body.classList.toggle('open');
+  arrow.textContent = open ? '▲' : '▼';
+}
+
+// ============================================================
+// LEARN TAB
+// ============================================================
+let vocabFilter = 'all';
+
+function filterVocab(cat) {
+  vocabFilter = cat;
+  document.querySelectorAll('#vocab-filter-btns .btn').forEach(b => {
+    b.className = 'btn btn-ghost';
+  });
+  event.target.className = 'btn btn-orange';
+  renderVocabGrid();
+}
+
+function renderLearn() {
+  renderVocabGrid();
+  renderGroceryGuide();
+  renderLabelGuide();
+}
+
+function renderVocabGrid() {
+  const grid = document.getElementById('vocab-grid');
+  const filtered = vocabFilter === 'all' ? VOCAB : VOCAB.filter(v => v.cat === vocabFilter);
+  grid.innerHTML = filtered.map(v => `
+    <div class="vocab-card">
+      <div class="vocab-en">${v.en}</div>
+      <div class="vocab-vi">${v.vi}</div>
+      <div class="vocab-def">${v.def}</div>
+    </div>
+  `).join('');
+}
+
+function renderGroceryGuide() {
+  const el = document.getElementById('grocery-guide');
+  el.innerHTML = GROCERY_GUIDE.map(g => `
+    <div class="grocery-item">
+      <div class="grocery-vi">${g.vi}</div>
+      <div class="grocery-us">→ ${g.us}</div>
+    </div>
+  `).join('');
+}
+
+function renderLabelGuide() {
+  const el = document.getElementById('label-guide');
+  el.innerHTML = LABEL_GUIDE.map(s => `
+    <div class="label-guide-step">
+      <div class="step-num">${s.step}</div>
+      <div>
+        <div style="font-weight:600; font-size:0.85rem;">${s.en}</div>
+        <div style="color:var(--lime); font-size:0.75rem; margin:2px 0;">${s.vi}</div>
+        <div class="text-muted">${s.detail}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// GOALS TAB
+// ============================================================
+const TIPS = [
+  'Add eggs or Greek yogurt to breakfast — both are under $0.50/serving and hit 12–20g protein.',
+  'Rotisserie chicken ($5–7 at Walmart) = 3–4 high-protein meals. Best protein value in any US grocery.',
+  'Canned tuna (79¢ a can) = 25g protein per serving. Mix with rice for a quick Vietnamese-style bowl.',
+  'Drinking enough water? Aim for 2L/day. Often mistaken for hunger when you\'re just thirsty.',
+  'Eating phở or bún for lunch? Great choice — most Vietnamese noodle soups are under 500 cal with 20+ g protein.',
+  'Greek yogurt (Chobani, Walmart brand) ≈ sữa chua Hy-Lạp. High protein, great with rice or as a snack.',
+  'Frozen edamame (Walmart, $2/bag) = 9g protein per ½ cup. Microwave in 3 minutes, eat as a snack.',
+  'Broccoli + chicken + rice = the most complete macro meal you can make in 10 minutes.',
+  'Fruit juice has as much sugar as soda. Eat the fruit itself — more fiber, same vitamins.',
+  'Eating late? It\'s not the time that matters — it\'s total daily calories. Eat dinner, just not a second one.',
+];
+
+function saveGoals() {
+  const cal = parseInt(document.getElementById('goal-cal').value) || 2000;
+  const prot = parseInt(document.getElementById('goal-prot').value) || 120;
+  set('goals', { cal, prot });
+  document.getElementById('cal-goal-display').textContent = cal;
+  renderGoals();
+  alert('Goals saved! 🎯');
+}
+
+function renderGoals() {
+  const goals = getGoals();
+  document.getElementById('goal-cal').value = goals.cal;
+  document.getElementById('goal-prot').value = goals.prot;
+
+  const date = getToday();
+  const log = getLog();
+  const dayLog = log[date] || {};
+  let cal = 0, prot = 0;
+  ['Breakfast','Lunch','Dinner','Snacks'].forEach(meal => {
+    (dayLog[meal] || []).forEach(item => { cal += item.cal; prot += item.prot; });
+  });
+
+  document.getElementById('goal-progress-section').style.display = 'block';
+  document.getElementById('cal-remaining').textContent = Math.max(0, goals.cal - cal) + ' kcal left';
+  document.getElementById('prot-progress').textContent = prot + ' / ' + goals.prot + 'g';
+  document.getElementById('goal-cal-bar').style.width = Math.min((cal/goals.cal)*100, 100) + '%';
+  document.getElementById('goal-prot-bar').style.width = Math.min((prot/goals.prot)*100, 100) + '%';
+
+  renderWeeklyStats(goals);
+  renderTips(prot, goals.prot);
+}
+
+function renderWeeklyStats(goals) {
+  const log = getLog();
+  const today = new Date();
+  const week = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    week.push(d.toISOString().split('T')[0]);
+  }
+  const dayCals = week.map(date => {
+    const dayLog = log[date] || {};
+    let cal = 0;
+    ['Breakfast','Lunch','Dinner','Snacks'].forEach(meal => {
+      (dayLog[meal] || []).forEach(item => { cal += item.cal; });
+    });
+    return cal;
+  }).filter(c => c > 0);
+
+  const avgCal = dayCals.length ? Math.round(dayCals.reduce((a,b)=>a+b,0)/dayCals.length) : 0;
+  const daysOn = dayCals.filter(c => Math.abs(c - goals.cal) < 200).length;
+  const best = dayCals.length ? Math.max(...dayCals) : 0;
+
+  document.getElementById('wk-avg-cal').textContent = avgCal || '—';
+  document.getElementById('wk-days-on').textContent = daysOn;
+  document.getElementById('wk-best').textContent = best || '—';
+}
+
+function renderTips(currentProt, goalProt) {
+  const container = document.getElementById('tips-container');
+  const log = getLog();
+  const today = new Date();
+  let lowProtDays = 0;
+  for (let i = 0; i < 3; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const date = d.toISOString().split('T')[0];
+    const dayLog = log[date] || {};
+    let p = 0;
+    ['Breakfast','Lunch','Dinner','Snacks'].forEach(meal => {
+      (dayLog[meal] || []).forEach(item => { p += item.prot; });
+    });
+    if (p < goalProt * 0.7) lowProtDays++;
+  }
+
+  const showTips = lowProtDays >= 2 ? TIPS.slice(0, 3) : TIPS.slice(3, 6);
+  container.innerHTML = showTips.map(tip => `
+    <div class="tip-card">💡 ${tip}</div>
+  `).join('');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('log-date').addEventListener('change', () => {
+    renderMeals();
+    updateSummary();
+  });
+  renderMeals();
+  updateSummary();
+});
+</script>
+</body>
+</html>
