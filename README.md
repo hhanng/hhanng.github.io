@@ -14,10 +14,10 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-███████████████████████████████████████████████░░░  94 / 100
+████████████████████████████████████████████████░░  98 / 100
 ```
 
-**94 / 100 complete** — progress bar on the live site updates automatically 🎉
+**98 / 100 complete** — progress bar on the live site updates automatically 🎉
 
 &nbsp;
 
@@ -149,6 +149,7 @@ for founders, indie hackers, and anyone shipping something
 | [#95](https://hhanng.github.io/agent-95-cloud-architecture-designer/) | Cloud Architecture Designer | drag-and-drop canvas with SVG connections, 30 multi-cloud components, 10 system design patterns, cost estimator comparing AWS/GCP/Azure |
 | [#96](https://hhanng.github.io/agent-96-personal-finance-cs-students/) | Personal Finance for CS Students | TC calculator with vesting & COL adjuster, 50/30/20 budget, compound interest chart, 401k/RSU/HSA guides, 5-stage roadmap with net worth tracker |
 | [#97](https://hhanng.github.io/agent-97-build-in-public-playbook/) | Build in Public Playbook | platform matcher, 50 content templates, weekly planner with streak tracker, GitHub README generator, Twitter bio scorer, LinkedIn headline builder |
+| [#98](https://hhanng.github.io/agent-98-graph-algorithms-visualizer/) | Graph Algorithms Visualizer | 9 algorithms animated step by step (BFS, DFS, Dijkstra, Bellman-Ford, Prim's, Kruskal's, Topo Sort, Cycle Detection, Bipartite), 6 example graphs, 15 challenges, 20 flip-card Q&As |
 
 &nbsp;
 
@@ -203,4 +204,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · agent #97 Build in Public Playbook live: https://hhanng.github.io/agent-97-build-in-public-playbook/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · agent #98 Graph Algorithms Visualizer live: https://hhanng.github.io/agent-98-graph-algorithms-visualizer/</sub>
