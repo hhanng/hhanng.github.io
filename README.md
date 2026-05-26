@@ -150,6 +150,7 @@ for founders, indie hackers, and anyone shipping something
 | [#96](https://hhanng.github.io/agent-96-personal-finance-cs-students/) | Personal Finance for CS Students | TC calculator with vesting & COL adjuster, 50/30/20 budget, compound interest chart, 401k/RSU/HSA guides, 5-stage roadmap with net worth tracker |
 | [#97](https://hhanng.github.io/agent-97-build-in-public-playbook/) | Build in Public Playbook | platform matcher, 50 content templates, weekly planner with streak tracker, GitHub README generator, Twitter bio scorer, LinkedIn headline builder |
 | [#98](https://hhanng.github.io/agent-98-graph-algorithms-visualizer/) | Graph Algorithms Visualizer | 9 algorithms animated step by step (BFS, DFS, Dijkstra, Bellman-Ford, Prim's, Kruskal's, Topo Sort, Cycle Detection, Bipartite), 6 example graphs, 15 challenges, 20 flip-card Q&As |
+| [#99](https://hhanng.github.io/agent-99-llm-generative-ai-roadmap/) | LLM & Generative AI Roadmap | 6-stage roadmap from foundations to production, 20 concept explainers (self-attention, RAG, RLHF, temperature, LoRA, quantization), prompt builder, token counter, 40 curated resources |
 
 &nbsp;
 
@@ -204,4 +205,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · agent #98 Graph Algorithms Visualizer live: https://hhanng.github.io/agent-98-graph-algorithms-visualizer/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · agent #99 LLM & Generative AI Roadmap live: https://hhanng.github.io/agent-99-llm-generative-ai-roadmap/</sub>
