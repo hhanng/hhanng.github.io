@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Competitive Analysis Tool · Agent #81</title>
+<style>
+  :root {
+    --bg: #0a1a1a;
+    --card: #0f2d2d;
+    --card2: #122828;
+    --border: #1e4040;
+    --teal: #2dd4bf;
+    --teal2: #14b8a6;
+    --amber: #f59e0b;
+    --amber2: #d97706;
+    --red: #f87171;
+    --green: #4ade80;
+    --blue: #60a5fa;
+    --text: #e2f8f5;
+    --muted: #6b9e98;
+    --tag-bg: #0d2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 1.2rem; font-weight: 700; color: var(--teal); }
+  header .badge { background: var(--teal); color: var(--bg); font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
+  header .sub { font-size: 0.8rem; color: var(--muted); margin-left: auto; }
+
+  nav { display: flex; background: var(--card2); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { padding: 14px 22px; background: none; border: none; color: var(--muted); font-size: 0.88rem; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: all .2s; }
+  nav button.active { color: var(--teal); border-bottom-color: var(--teal); }
+  nav button:hover:not(.active) { color: var(--text); }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+  .tab { display: none; } .tab.active { display: block; }
+
+  h2 { font-size: 1.1rem; font-weight: 700; color: var(--teal); margin-bottom: 4px; }
+  h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; }
+  p.sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 20px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+  .row label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 4px; }
+  input[type=text], textarea, select {
+    background: var(--tag-bg); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); padding: 9px 12px; font-size: 0.88rem; width: 100%;
+    outline: none; transition: border .2s;
+  }
+  input[type=text]:focus, textarea:focus, select:focus { border-color: var(--teal); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .btn { padding: 9px 18px; border-radius: 8px; border: none; font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+  .btn.teal { background: var(--teal); color: var(--bg); }
+  .btn.teal:hover { background: var(--teal2); }
+  .btn.amber { background: var(--amber); color: #1a0a00; }
+  .btn.amber:hover { background: var(--amber2); }
+  .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn.ghost:hover { border-color: var(--teal); color: var(--teal); }
+  .btn.danger { background: transparent; border: 1px solid #4d1515; color: var(--red); }
+  .btn.danger:hover { background: #1a0a0a; }
+  .btn.sm { padding: 5px 12px; font-size: 0.78rem; }
+
+  /* === MATRIX TAB === */
+  .criteria-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .criteria-row { display: flex; align-items: center; gap: 8px; }
+  .criteria-row input { flex: 1; }
+  .criteria-row .weight { width: 70px; }
+  .criteria-row .del-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1rem; padding: 4px; }
+
+  .competitors-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .comp-name { font-size: 0.8rem; font-weight: 700; color: var(--amber); background: #1a1000; border-radius: 6px; padding: 3px 8px; }
+
+  .matrix-table-wrap { overflow-x: auto; margin-top: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 600px; }
+  th { background: var(--card2); color: var(--muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: .07em; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr.winner td { background: rgba(45,212,191,.05); }
+
+  .score-input { width: 54px; padding: 5px 8px; text-align: center; background: var(--tag-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.83rem; }
+  .score-input:focus { border-color: var(--teal); outline: none; }
+  .total-score { font-weight: 700; color: var(--teal); }
+  .winner-badge { background: var(--teal); color: var(--bg); font-size: 0.65rem; font-weight: 800; padding: 2px 7px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
+
+  /* bar fill for scores */
+  .bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .bar { height: 8px; border-radius: 4px; background: var(--teal); flex-shrink: 0; }
+  .bar.amber { background: var(--amber); }
+  .bar.blue { background: var(--blue); }
+  .bar.red { background: var(--red); }
+  .bar.green { background: var(--green); }
+
+  /* === SWOT TAB === */
+  .swot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .swot-block { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .swot-block.s { border-top: 3px solid var(--green); }
+  .swot-block.w { border-top: 3px solid var(--red); }
+  .swot-block.o { border-top: 3px solid var(--teal); }
+  .swot-block.t { border-top: 3px solid var(--amber); }
+  .swot-block h3 { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; }
+  .swot-block.s h3 { color: var(--green); }
+  .swot-block.w h3 { color: var(--red); }
+  .swot-block.o h3 { color: var(--teal); }
+  .swot-block.t h3 { color: var(--amber); }
+  .swot-items { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .swot-item { display: flex; align-items: center; gap: 6px; background: var(--tag-bg); border-radius: 6px; padding: 7px 10px; font-size: 0.82rem; }
+  .swot-item .del-btn { background: none; border: none; color: var(--muted); cursor: pointer; margin-left: auto; font-size: 0.8rem; }
+  .swot-item .del-btn:hover { color: var(--red); }
+  .swot-add { display: flex; gap: 6px; }
+  .swot-add input { flex: 1; }
+  .swot-select { margin-bottom: 12px; }
+
+  /* === POSITIONING TAB === */
+  .pos-controls { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .pos-control { flex: 1; min-width: 180px; }
+  .canvas-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  #posCanvas { display: block; margin: 0 auto; cursor: crosshair; border-radius: 8px; }
+  .pos-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+  .pos-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+  .pos-item { font-size: 0.8rem; color: var(--text); display: flex; align-items: center; }
+  .pos-comp-list { margin-top: 14px; }
+  .pos-comp-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tag-bg); border-radius: 8px; margin-bottom: 6px; font-size: 0.82rem; }
+  .pos-comp-row .axis-inputs { display: flex; gap: 8px; margin-left: auto; }
+  .pos-comp-row .axis-inputs input { width: 60px; }
+
+  /* === REPORT TAB === */
+  .report-box { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; font-size: 0.84rem; line-height: 1.7; white-space: pre-wrap; font-family: monospace; color: var(--text); max-height: 500px; overflow-y: auto; }
+  .report-actions { display: flex; gap: 10px; margin-bottom: 14px; }
+
+  .empty { text-align: center; color: var(--muted); padding: 40px; font-size: 0.88rem; }
+  .chip { display: inline-block; background: var(--tag-bg); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; color: var(--muted); margin: 2px; }
+
+  @media(max-width:600px) {
+    .swot-grid { grid-template-columns: 1fr; }
+    .pos-controls { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="badge">#81</span>
+  <h1>Competitive Analysis Tool</h1>
+  <span class="sub">map the battlefield 🎯</span>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('matrix')">⚔️ MATRIX</button>
+  <button onclick="switchTab('swot')">🔲 SWOT</button>
+  <button onclick="switchTab('positioning')">📍 POSITIONING</button>
+  <button onclick="switchTab('report')">📋 REPORT</button>
+</nav>
+
+<main>
+
+<!-- ===== MATRIX TAB ===== -->
+<div id="tab-matrix" class="tab active">
+  <h2>Competitive Matrix</h2>
+  <p class="sub">Score each competitor on weighted criteria to find the overall winner.</p>
+
+  <div class="card">
+    <h3>Your Company</h3>
+    <div class="row">
+      <div style="flex:1">
+        <label>Company Name</label>
+        <input type="text" id="myCompany" placeholder="e.g. Acme Inc." oninput="save()">
+      </div>
+      <div style="flex:2">
+        <label>Industry / Niche</label>
+        <input type="text" id="myIndustry" placeholder="e.g. B2B SaaS project management" oninput="save()">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Competitors</h3>
+    <div class="competitors-header" id="compHeader"></div>
+    <div class="row" style="gap:8px">
+      <input type="text" id="newCompName" placeholder="Competitor name" style="flex:1;max-width:260px" onkeydown="if(event.key==='Enter')addComp()">
+      <button class="btn teal sm" onclick="addComp()">+ Add Competitor</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Evaluation Criteria</h3>
+    <p class="sub" style="margin-top:-8px;margin-bottom:12px">Add criteria and assign weights (1–10). Higher weight = more important.</p>
+    <div class="criteria-list" id="criteriaList"></div>
+    <div class="row" style="gap:8px;margin-top:8px">
+      <input type="text" id="newCritName" placeholder="Criteria name" style="flex:1;max-width:220px" onkeydown="if(event.key==='Enter')addCriteria()">
+      <input type="number" id="newCritWeight" placeholder="Weight" min="1" max="10" style="width:80px" value="5">
+      <button class="btn teal sm" onclick="addCriteria()">+ Add</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Score Matrix <span style="font-size:.75rem;color:var(--muted);font-weight:400">(score each competitor 1–10 per criterion)</span></h3>
+    <div class="matrix-table-wrap" id="matrixWrap">
+      <div class="empty">Add competitors and criteria above to start scoring.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SWOT TAB ===== -->
+<div id="tab-swot" class="tab">
+  <h2>SWOT Analysis</h2>
+  <p class="sub">Analyze any company's Strengths, Weaknesses, Opportunities, and Threats.</p>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="row" style="align-items:center">
+      <div style="flex:1">
+        <label>Analyzing company:</label>
+        <select id="swotSubject" class="swot-select" onchange="renderSwot()" style="margin-top:4px">
+          <option value="__self__">My Company</option>
+        </select>
+      </div>
+      <div style="color:var(--muted);font-size:.8rem;margin-left:auto">Click a quadrant to add items</div>
+    </div>
+  </div>
+
+  <div class="swot-grid" id="swotGrid"></div>
+</div>
+
+<!-- ===== POSITIONING TAB ===== -->
+<div id="tab-positioning" class="tab">
+  <h2>Positioning Map</h2>
+  <p class="sub">Place competitors on a 2-axis map to visualize market positioning.</p>
+
+  <div class="card">
+    <div class="pos-controls">
+      <div class="pos-control">
+        <label>X-Axis Label (left → right)</label>
+        <input type="text" id="xLabel" value="Price: Low → High" oninput="drawMap()">
+      </div>
+      <div class="pos-control">
+        <label>Y-Axis Label (bottom → top)</label>
+        <input type="text" id="yLabel" value="Quality: Low → High" oninput="drawMap()">
+      </div>
+    </div>
+
+    <div class="pos-comp-list" id="posCompList"></div>
+    <p class="sub" style="margin-top:8px;margin-bottom:0">X and Y values: 0–100</p>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="posCanvas" width="640" height="420"></canvas>
+    <div class="pos-legend" id="posLegend"></div>
+  </div>
+</div>
+
+<!-- ===== REPORT TAB ===== -->
+<div id="tab-report" class="tab">
+  <h2>Analysis Report</h2>
+  <p class="sub">Auto-generated markdown report from your matrix, SWOT, and positioning data.</p>
+  <div class="report-actions">
+    <button class="btn teal" onclick="genReport()">🔄 Generate Report</button>
+    <button class="btn ghost" onclick="copyReport()">📋 Copy Markdown</button>
+  </div>
+  <div class="report-box" id="reportBox">Click "Generate Report" to build your competitive analysis report.</div>
+</div>
+
+</main>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+const S_KEY = 'comp81_state';
+let state = {
+  myCompany: '', myIndustry: '',
+  competitors: [],   // [{name, color}]
+  criteria: [],      // [{name, weight}]
+  scores: {},        // {compIdx: {critIdx: score}}
+  swot: {},          // {compKey: {S:[], W:[], O:[], T:[]}}
+  posX: {},          // {compKey: val}
+  posY: {}           // {compKey: val}
+};
+
+const COLORS = ['#2dd4bf','#f59e0b','#f87171','#60a5fa','#a78bfa','#4ade80','#fb923c','#e879f9'];
+
+function save() {
+  state.myCompany = document.getElementById('myCompany').value;
+  state.myIndustry = document.getElementById('myIndustry').value;
+  localStorage.setItem(S_KEY, JSON.stringify(state));
+}
+function load() {
+  const d = localStorage.getItem(S_KEY);
+  if (d) state = {...state, ...JSON.parse(d)};
+}
+
+function compKey(i) { return `comp_${i}`; }
+function selfKey() { return '__self__'; }
+
+// ── Boot ──────────────────────────────────────────────────────────────
+load();
+renderAll();
+if (document.getElementById('myCompany')) document.getElementById('myCompany').value = state.myCompany;
+if (document.getElementById('myIndustry')) document.getElementById('myIndustry').value = state.myIndustry;
+
+function renderAll() {
+  renderCompHeader();
+  renderCriteriaList();
+  renderMatrix();
+  renderSwotSelect();
+  renderSwot();
+  renderPosCompList();
+  drawMap();
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'positioning') drawMap();
+}
+
+// ── Competitors ────────────────────────────────────────────────────────
+function addComp() {
+  const n = document.getElementById('newCompName').value.trim();
+  if (!n) return;
+  state.competitors.push({ name: n, color: COLORS[state.competitors.length % COLORS.length] });
+  document.getElementById('newCompName').value = '';
+  save(); renderAll();
+}
+function removeComp(i) {
+  state.competitors.splice(i, 1);
+  // reindex scores
+  const ns = {};
+  Object.keys(state.scores).forEach(k => {
+    const oi = parseInt(k.replace('comp_',''));
+    if (oi < i) ns[compKey(oi)] = state.scores[k];
+    else if (oi > i) ns[compKey(oi-1)] = state.scores[k];
+  });
+  state.scores = ns;
+  save(); renderAll();
+}
+function renderCompHeader() {
+  const el = document.getElementById('compHeader');
+  if (!el) return;
+  el.innerHTML = state.competitors.length === 0
+    ? '<span style="color:var(--muted);font-size:.82rem">No competitors yet</span>'
+    : state.competitors.map((c,i) =>
+        `<span class="comp-name" style="background:${c.color}22;border:1px solid ${c.color}44;color:${c.color}">${c.name}
+          <button onclick="removeComp(${i})" style="background:none;border:none;color:${c.color};cursor:pointer;margin-left:4px;font-size:.8rem">✕</button>
+        </span>`).join('');
+}
+
+// ── Criteria ───────────────────────────────────────────────────────────
+function addCriteria() {
+  const n = document.getElementById('newCritName').value.trim();
+  const w = parseInt(document.getElementById('newCritWeight').value) || 5;
+  if (!n) return;
+  state.criteria.push({ name: n, weight: Math.min(10, Math.max(1, w)) });
+  document.getElementById('newCritName').value = '';
+  save(); renderAll();
+}
+function removeCrit(i) {
+  state.criteria.splice(i, 1);
+  save(); renderAll();
+}
+function updateCritWeight(i, v) {
+  state.criteria[i].weight = Math.min(10, Math.max(1, parseInt(v)||1));
+  save(); renderMatrix();
+}
+function renderCriteriaList() {
+  const el = document.getElementById('criteriaList');
+  if (!el) return;
+  if (state.criteria.length === 0) { el.innerHTML = '<div class="empty" style="padding:16px">No criteria yet.</div>'; return; }
+  el.innerHTML = state.criteria.map((c,i) => `
+    <div class="criteria-row">
+      <input type="text" value="${esc(c.name)}" onchange="state.criteria[${i}].name=this.value;save();renderMatrix()" style="flex:1">
+      <input type="number" class="weight" value="${c.weight}" min="1" max="10" onchange="updateCritWeight(${i},this.value)">
+      <button class="del-btn" onclick="removeCrit(${i})">✕</button>
+    </div>`).join('');
+}
+
+// ── Matrix ─────────────────────────────────────────────────────────────
+function getScore(ci, ki) {
+  const v = (state.scores[compKey(ci)] || {})[ki];
+  return v !== undefined ? v : '';
+}
+function setScore(ci, ki, v) {
+  if (!state.scores[compKey(ci)]) state.scores[compKey(ci)] = {};
+  const n = parseFloat(v);
+  state.scores[compKey(ci)][ki] = isNaN(n) ? 0 : Math.min(10, Math.max(0, n));
+  save(); renderMatrix();
+}
+function calcTotal(ci) {
+  if (!state.criteria.length) return 0;
+  return state.criteria.reduce((sum, c, ki) => {
+    const s = parseFloat(getScore(ci, ki)) || 0;
+    return sum + s * c.weight;
+  }, 0);
+}
+function renderMatrix() {
+  const el = document.getElementById('matrixWrap');
+  if (!el) return;
+  if (!state.competitors.length || !state.criteria.length) {
+    el.innerHTML = '<div class="empty">Add competitors and criteria above to start scoring.</div>';
+    return;
+  }
+  const totals = state.competitors.map((_,ci) => calcTotal(ci));
+  const maxTotal = Math.max(...totals);
+  const maxW = state.criteria.reduce((s,c) => s + c.weight * 10, 0);
+
+  el.innerHTML = `<table>
+    <thead><tr>
+      <th>Criterion</th><th>Weight</th>
+      ${state.competitors.map((c,i)=>`<th style="color:${c.color}">${esc(c.name)}</th>`).join('')}
+    </tr></thead>
+    <tbody>
+    ${state.criteria.map((c,ki) => `<tr>
+      <td>${esc(c.name)}</td>
+      <td><span class="chip">${c.weight}</span></td>
+      ${state.competitors.map((_,ci) => `<td>
+        <input class="score-input" type="number" min="0" max="10" step="0.5"
+          value="${getScore(ci,ki)}" placeholder="—"
+          onchange="setScore(${ci},${ki},this.value)">
+      </td>`).join('')}
+    </tr>`).join('')}
+    <tr style="background:var(--card2)">
+      <td colspan="2" style="font-weight:700;color:var(--muted);font-size:.8rem;text-transform:uppercase">WEIGHTED TOTAL</td>
+      ${totals.map((t,ci) => `<td>
+        <div class="bar-wrap">
+          <div class="bar" style="width:${Math.round(t/maxW*80)}px;background:${state.competitors[ci].color}"></div>
+          <span class="total-score" style="color:${state.competitors[ci].color}">${t.toFixed(1)}
+            ${t === maxTotal && maxTotal > 0 ? '<span class="winner-badge">WINNER</span>' : ''}
+          </span>
+        </div>
+      </td>`).join('')}
+    </tr>
+    </tbody>
+  </table>`;
+}
+
+// ── SWOT ───────────────────────────────────────────────────────────────
+function swotSubjectKey() {
+  const sel = document.getElementById('swotSubject');
+  return sel ? sel.value : '__self__';
+}
+function ensureSwot(k) {
+  if (!state.swot[k]) state.swot[k] = {S:[],W:[],O:[],T:[]};
+}
+function renderSwotSelect() {
+  const sel = document.getElementById('swotSubject');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = `<option value="__self__">${esc(state.myCompany||'My Company')}</option>`
+    + state.competitors.map((c,i) => `<option value="${compKey(i)}">${esc(c.name)}</option>`).join('');
+  sel.value = cur && [...sel.options].find(o=>o.value===cur) ? cur : '__self__';
+}
+function renderSwot() {
+  const k = swotSubjectKey();
+  ensureSwot(k);
+  const el = document.getElementById('swotGrid');
+  if (!el) return;
+  const quads = [
+    {id:'S', label:'💪 Strengths', cls:'s'},
+    {id:'W', label:'⚠️ Weaknesses', cls:'w'},
+    {id:'O', label:'🚀 Opportunities', cls:'o'},
+    {id:'T', label:'🔥 Threats', cls:'t'}
+  ];
+  el.innerHTML = quads.map(q => `
+    <div class="swot-block ${q.cls}">
+      <h3>${q.label}</h3>
+      <div class="swot-items">
+        ${(state.swot[k][q.id]||[]).map((item,ii) => `
+          <div class="swot-item">
+            <span>${esc(item)}</span>
+            <button class="del-btn" onclick="delSwotItem('${q.id}',${ii})">✕</button>
+          </div>`).join('')}
+        ${!(state.swot[k][q.id]||[]).length ? '<div style="color:var(--muted);font-size:.8rem;padding:4px 0">None yet</div>' : ''}
+      </div>
+      <div class="swot-add">
+        <input type="text" id="swotIn_${q.id}" placeholder="Add item..." onkeydown="if(event.key==='Enter')addSwotItem('${q.id}')">
+        <button class="btn teal sm" onclick="addSwotItem('${q.id}')">+</button>
+      </div>
+    </div>`).join('');
+}
+function addSwotItem(quad) {
+  const k = swotSubjectKey(); ensureSwot(k);
+  const inp = document.getElementById(`swotIn_${quad}`);
+  const v = inp.value.trim(); if (!v) return;
+  state.swot[k][quad].push(v);
+  inp.value = '';
+  save(); renderSwot();
+}
+function delSwotItem(quad, ii) {
+  const k = swotSubjectKey(); ensureSwot(k);
+  state.swot[k][quad].splice(ii,1);
+  save(); renderSwot();
+}
+
+// ── Positioning Map ────────────────────────────────────────────────────
+function renderPosCompList() {
+  const el = document.getElementById('posCompList');
+  if (!el) return;
+  const allKeys = [{key:'__self__', name: state.myCompany||'My Company', color:'#fff'}]
+    .concat(state.competitors.map((c,i) => ({key: compKey(i), name:c.name, color:c.color})));
+  el.innerHTML = allKeys.map(item => `
+    <div class="pos-comp-row">
+      <span class="pos-dot" style="background:${item.color}"></span>
+      <span style="font-weight:600">${esc(item.name||'(unnamed)')}</span>
+      <div class="axis-inputs">
+        <div><label style="font-size:.7rem;color:var(--muted)">X</label>
+          <input type="number" min="0" max="100" placeholder="50"
+            value="${state.posX[item.key]??50}"
+            onchange="state.posX['${item.key}']=+this.value;save();drawMap()">
+        </div>
+        <div><label style="font-size:.7rem;color:var(--muted)">Y</label>
+          <input type="number" min="0" max="100" placeholder="50"
+            value="${state.posY[item.key]??50}"
+            onchange="state.posY['${item.key}']=+this.value;save();drawMap()">
+        </div>
+      </div>
+    </div>`).join('');
+
+  // legend
+  const leg = document.getElementById('posLegend');
+  if (leg) leg.innerHTML = allKeys.map(item =>
+    `<span class="pos-item"><span class="pos-dot" style="background:${item.color}"></span>${esc(item.name||'(unnamed)')}</span>`).join('');
+}
+function drawMap() {
+  const canvas = document.getElementById('posCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const pad = 54;
+
+  ctx.clearRect(0,0,W,H);
+  // bg
+  ctx.fillStyle = '#0a1a1a';
+  ctx.fillRect(0,0,W,H);
+
+  // quadrant fills
+  const cx = W/2, cy = H/2;
+  ctx.fillStyle = 'rgba(74,222,128,.04)'; ctx.fillRect(cx,pad,W-pad-cx,cy-pad);
+  ctx.fillStyle = 'rgba(248,113,113,.04)'; ctx.fillRect(pad,pad,cx-pad,cy-pad);
+  ctx.fillStyle = 'rgba(45,212,191,.04)'; ctx.fillRect(cx,cy,W-pad-cx,H-pad-cy);
+  ctx.fillStyle = 'rgba(245,158,11,.04)'; ctx.fillRect(pad,cy,cx-pad,H-pad-cy);
+
+  // grid lines
+  ctx.strokeStyle = '#1e4040'; ctx.lineWidth = 1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(cx,pad); ctx.lineTo(cx,H-pad); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad,cy); ctx.lineTo(W-pad,cy); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // axes
+  ctx.strokeStyle = '#2dd4bf88'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(pad,pad); ctx.stroke();
+
+  // axis labels
+  ctx.fillStyle = '#6b9e98'; ctx.font = '12px Segoe UI,sans-serif'; ctx.textAlign='center';
+  const xLbl = document.getElementById('xLabel')?.value || 'X Axis';
+  const yLbl = document.getElementById('yLabel')?.value || 'Y Axis';
+  ctx.fillText(xLbl, W/2, H-10);
+  ctx.save(); ctx.translate(14, H/2); ctx.rotate(-Math.PI/2); ctx.fillText(yLbl, 0, 0); ctx.restore();
+
+  // plot dots
+  const allKeys = [{key:'__self__', name: state.myCompany||'Me', color:'#ffffff'}]
+    .concat(state.competitors.map((c,i)=>({key:compKey(i),name:c.name,color:c.color})));
+  allKeys.forEach(item => {
+    const xv = state.posX[item.key]??50, yv = state.posY[item.key]??50;
+    const px = pad + (xv/100) * (W-2*pad);
+    const py = (H-pad) - (yv/100) * (H-2*pad);
+    ctx.beginPath(); ctx.arc(px,py,8,0,2*Math.PI);
+    ctx.fillStyle = item.color; ctx.fill();
+    ctx.strokeStyle = '#0a1a1a'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle = '#e2f8f5'; ctx.font='bold 11px Segoe UI,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(item.name.length>12?item.name.slice(0,11)+'…':item.name, px, py-13);
+  });
+}
+
+// ── Report ─────────────────────────────────────────────────────────────
+function genReport() {
+  const co = state.myCompany || 'My Company';
+  const ind = state.myIndustry || 'N/A';
+  let r = `# Competitive Analysis Report\n**Company:** ${co}\n**Industry:** ${ind}\n**Date:** ${new Date().toLocaleDateString()}\n\n`;
+
+  // Matrix summary
+  if (state.competitors.length && state.criteria.length) {
+    r += `## Competitive Matrix\n\n`;
+    const header = `| Criterion | Weight | ${state.competitors.map(c=>c.name).join(' | ')} |\n`;
+    const sep = `|---|---|${state.competitors.map(()=>'---').join('|')}|\n`;
+    const rows = state.criteria.map((c,ki) =>
+      `| ${c.name} | ${c.weight} | ${state.competitors.map((_,ci)=>getScore(ci,ki)||'—').join(' | ')} |`).join('\n');
+    const totals = state.competitors.map((_,ci)=>calcTotal(ci).toFixed(1));
+    r += header + sep + rows + `\n| **TOTAL** | — | ${totals.join(' | ')} |\n\n`;
+    const maxT = Math.max(...totals.map(Number));
+    const winner = state.competitors[totals.map(Number).indexOf(maxT)];
+    if (winner) r += `**Strongest competitor overall:** ${winner.name} (score: ${maxT})\n\n`;
+  }
+
+  // SWOT summary
+  const swotSubjects = [
+    {key:'__self__', name: co},
+    ...state.competitors.map((c,i)=>({key:compKey(i),name:c.name}))
+  ].filter(s => state.swot[s.key]);
+  if (swotSubjects.length) {
+    r += `## SWOT Analyses\n\n`;
+    swotSubjects.forEach(s => {
+      const sw = state.swot[s.key];
+      if (!sw) return;
+      r += `### ${s.name}\n`;
+      if (sw.S?.length) r += `**Strengths:** ${sw.S.join(', ')}\n`;
+      if (sw.W?.length) r += `**Weaknesses:** ${sw.W.join(', ')}\n`;
+      if (sw.O?.length) r += `**Opportunities:** ${sw.O.join(', ')}\n`;
+      if (sw.T?.length) r += `**Threats:** ${sw.T.join(', ')}\n`;
+      r += '\n';
+    });
+  }
+
+  // Positioning
+  if (state.competitors.length) {
+    r += `## Positioning Map Summary\n`;
+    const xLbl = document.getElementById('xLabel')?.value || 'X';
+    const yLbl = document.getElementById('yLabel')?.value || 'Y';
+    r += `Axes: X = ${xLbl} · Y = ${yLbl}\n\n`;
+    const allKeys = [{key:'__self__',name:co}].concat(state.competitors.map((c,i)=>({key:compKey(i),name:c.name})));
+    allKeys.forEach(item => {
+      r += `- **${item.name}**: X=${state.posX[item.key]??50}, Y=${state.posY[item.key]??50}\n`;
+    });
+    r += '\n';
+  }
+
+  r += `---\n*Generated by Competitive Analysis Tool · Agent #81 · hhanng.github.io*`;
+  document.getElementById('reportBox').textContent = r;
+}
+function copyReport() {
+  const txt = document.getElementById('reportBox').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn = event.currentTarget;
+    const orig = btn.textContent; btn.textContent='✅ Copied!';
+    setTimeout(()=>btn.textContent=orig, 2000);
+  });
+}
+
+// ── Utils ──────────────────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Seed with sample data if empty
+if (!state.competitors.length && !state.criteria.length) {
+  state.competitors = [
+    {name:'Competitor A', color: COLORS[0]},
+    {name:'Competitor B', color: COLORS[1]},
+    {name:'Competitor C', color: COLORS[2]}
+  ];
+  state.criteria = [
+    {name:'Product Quality', weight:9},
+    {name:'Pricing', weight:7},
+    {name:'Customer Support', weight:6},
+    {name:'Brand Awareness', weight:5},
+    {name:'Innovation', weight:8}
+  ];
+  state.scores = {
+    comp_0: {0:8,1:6,2:7,3:9,4:8},
+    comp_1: {0:7,1:9,2:6,3:7,4:6},
+    comp_2: {0:6,1:8,2:9,3:5,4:7}
+  };
+  save(); renderAll();
+}
+</script>
+</body>
+</html>

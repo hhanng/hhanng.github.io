@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Marketing Suite · Agent #82</title>
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --card: #151929;
+    --card2: #111422;
+    --border: #1e2540;
+    --indigo: #6366f1;
+    --indigo2: #4f46e5;
+    --emerald: #34d399;
+    --emerald2: #10b981;
+    --rose: #fb7185;
+    --amber: #fbbf24;
+    --blue: #60a5fa;
+    --text: #e8eaf6;
+    --muted: #6472a0;
+    --tag-bg: #0d1024;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 1.2rem; font-weight: 700; color: var(--indigo); }
+  .badge { background: var(--indigo); color: #fff; font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
+  header .sub { font-size: .8rem; color: var(--muted); margin-left: auto; }
+
+  nav { display: flex; background: var(--card2); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { padding: 14px 22px; background: none; border: none; color: var(--muted); font-size: .88rem; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: all .2s; }
+  nav button.active { color: var(--indigo); border-bottom-color: var(--indigo); }
+  nav button:hover:not(.active) { color: var(--text); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  .tab { display: none; } .tab.active { display: block; }
+
+  h2 { font-size: 1.05rem; font-weight: 700; color: var(--indigo); margin-bottom: 4px; }
+  h3 { font-size: .93rem; font-weight: 600; margin-bottom: 10px; }
+  p.sub { font-size: .82rem; color: var(--muted); margin-bottom: 18px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 4px; }
+  input[type=text], input[type=email], input[type=number], textarea, select {
+    background: var(--tag-bg); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); padding: 9px 12px; font-size: .88rem; width: 100%;
+    outline: none; transition: border .2s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--indigo); }
+  textarea { resize: vertical; }
+
+  .row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .col { flex: 1; min-width: 180px; }
+
+  .btn { padding: 9px 18px; border-radius: 8px; border: none; font-size: .84rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+  .btn.indigo { background: var(--indigo); color: #fff; }
+  .btn.indigo:hover { background: var(--indigo2); }
+  .btn.emerald { background: var(--emerald); color: #011a0e; }
+  .btn.emerald:hover { background: var(--emerald2); }
+  .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn.ghost:hover { border-color: var(--indigo); color: var(--indigo); }
+  .btn.danger { background: transparent; border: 1px solid #3d1020; color: var(--rose); }
+  .btn.danger:hover { background: #1a0810; }
+  .btn.sm { padding: 5px 12px; font-size: .76rem; }
+
+  /* ── COMPOSE ── */
+  .preview-panel { background: #ffffff; border-radius: 10px; padding: 32px 28px; color: #1a1a2e; font-family: Georgia, serif; line-height: 1.7; font-size: .9rem; min-height: 200px; }
+  .preview-panel h2 { color: #1a1a2e; font-size: 1.1rem; }
+  .preview-subject { font-weight: 700; font-size: 1rem; color: #1a1a2e; margin-bottom: 4px; }
+  .preview-preheader { font-size: .8rem; color: #888; margin-bottom: 16px; }
+  .preview-body { white-space: pre-wrap; }
+  .preview-cta { display: inline-block; background: var(--indigo); color: #fff; padding: 10px 24px; border-radius: 6px; font-family: sans-serif; font-weight: 700; font-size: .88rem; text-decoration: none; margin-top: 12px; }
+  .preview-footer { font-size: .75rem; color: #aaa; font-family: sans-serif; margin-top: 20px; border-top: 1px solid #eee; padding-top: 12px; }
+
+  /* stats */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: 12px; margin-bottom: 16px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat .val { font-size: 1.5rem; font-weight: 800; color: var(--indigo); }
+  .stat .lbl { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+
+  /* sequences */
+  .seq-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .seq-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .seq-header { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .seq-header .name { font-weight: 700; flex: 1; }
+  .seq-header .email-count { font-size: .75rem; color: var(--muted); background: var(--tag-bg); border-radius: 6px; padding: 2px 8px; }
+  .seq-header .toggle { color: var(--muted); transition: transform .2s; }
+  .seq-header .toggle.open { transform: rotate(90deg); }
+  .seq-body { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .seq-body.open { display: block; }
+  .email-step { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+  .step-num { background: var(--indigo); color: #fff; width: 24px; height: 24px; border-radius: 50%; font-size: .72rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-info { flex: 1; font-size: .83rem; }
+  .step-info .subject { font-weight: 600; }
+  .step-info .delay { color: var(--muted); font-size: .75rem; }
+
+  /* analyze */
+  .analyze-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 12px; margin-bottom: 16px; }
+  .metric-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .metric-card .metric-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  .metric-card .metric-val { font-size: 1.6rem; font-weight: 800; }
+  .metric-card .metric-bar-track { background: var(--border); border-radius: 4px; height: 6px; margin-top: 8px; }
+  .metric-card .metric-bar { height: 6px; border-radius: 4px; transition: width .5s; }
+  .benchmark { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+
+  /* templates */
+  .tmpl-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 14px; }
+  .tmpl-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; cursor: pointer; transition: border-color .2s; }
+  .tmpl-card:hover { border-color: var(--indigo); }
+  .tmpl-card .tmpl-type { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+  .tmpl-card h3 { font-size: .9rem; margin-bottom: 6px; }
+  .tmpl-card p { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+  .tmpl-card .use-btn { margin-top: 12px; }
+  .tag { display: inline-block; background: var(--tag-bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: .72rem; color: var(--muted); margin: 2px; }
+
+  .empty { text-align: center; padding: 40px; color: var(--muted); font-size: .88rem; }
+
+  @media(max-width:600px){
+    .row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="badge">#82</span>
+  <h1>Email Marketing Suite</h1>
+  <span class="sub">draft · sequence · analyze · ship ✉️</span>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('compose')">✉️ COMPOSE</button>
+  <button onclick="switchTab('sequences')">🔄 SEQUENCES</button>
+  <button onclick="switchTab('analyze')">📊 ANALYZE</button>
+  <button onclick="switchTab('templates')">📂 TEMPLATES</button>
+</nav>
+
+<main>
+
+<!-- ===== COMPOSE ===== -->
+<div id="tab-compose" class="tab active">
+  <h2>Email Composer</h2>
+  <p class="sub">Write and preview a single campaign email. All fields update the live preview.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div>
+      <div class="card">
+        <h3>Email Details</h3>
+        <div class="row">
+          <div class="col">
+            <label>From Name</label>
+            <input type="text" id="fromName" placeholder="Han Han" oninput="updatePreview()">
+          </div>
+          <div class="col">
+            <label>From Email</label>
+            <input type="email" id="fromEmail" placeholder="hello@example.com" oninput="updatePreview()">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Subject Line</label>
+            <input type="text" id="subjectLine" placeholder="Your subject here..." oninput="updatePreview();updateSubjectScore()">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Preheader Text</label>
+            <input type="text" id="preheaderText" placeholder="Preview text shown in inbox..." oninput="updatePreview()">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Email Body</h3>
+        <div class="row">
+          <div class="col">
+            <label>Opening (personalize with {{first_name}})</label>
+            <textarea id="emailOpening" rows="2" placeholder="Hi {{first_name}}," oninput="updatePreview()"></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Body Copy</label>
+            <textarea id="emailBody" rows="6" placeholder="Your main message..." oninput="updatePreview()"></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>CTA Button Text</label>
+            <input type="text" id="ctaText" placeholder="Get Started →" oninput="updatePreview()">
+          </div>
+          <div class="col">
+            <label>CTA URL</label>
+            <input type="text" id="ctaUrl" placeholder="https://..." oninput="updatePreview()">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Closing / Signature</label>
+            <textarea id="emailClosing" rows="2" placeholder="Best,&#10;Han Han" oninput="updatePreview()"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="subjectScore" style="font-size:.82rem;color:var(--muted)">Type a subject line to get tips.</div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn indigo" onclick="saveEmail()">💾 Save Draft</button>
+          <button class="btn ghost" onclick="copyHtml()">📋 Copy HTML</button>
+        </div>
+        <div id="saveMsg" style="color:var(--emerald);font-size:.8rem;margin-top:8px;display:none">✅ Draft saved!</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>Live Preview</h3>
+        <div class="preview-panel" id="previewPanel">
+          <div class="preview-subject" id="prev-subject">Your Subject Here</div>
+          <div class="preview-preheader" id="prev-preheader">Preheader text...</div>
+          <hr style="border:none;border-top:1px solid #e5e5e5;margin-bottom:16px">
+          <div class="preview-body" id="prev-body"></div>
+          <div id="prev-cta-wrap"></div>
+          <div class="preview-body" id="prev-closing"></div>
+          <div class="preview-footer" id="prev-footer">
+            Sent by — · <a href="#" style="color:#aaa">Unsubscribe</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Subject Line Analyzer</h3>
+        <div id="subjectTips" style="font-size:.83rem;line-height:1.7;color:var(--muted)">
+          Start typing your subject line...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SEQUENCES ===== -->
+<div id="tab-sequences" class="tab">
+  <h2>Email Sequences</h2>
+  <p class="sub">Build multi-step drip campaigns with timed delays between emails.</p>
+
+  <div class="card">
+    <h3>Create New Sequence</h3>
+    <div class="row">
+      <div class="col">
+        <label>Sequence Name</label>
+        <input type="text" id="seqName" placeholder="e.g. Welcome Series">
+      </div>
+      <div class="col">
+        <label>Type</label>
+        <select id="seqType">
+          <option>Welcome Series</option>
+          <option>Nurture Campaign</option>
+          <option>Re-engagement</option>
+          <option>Onboarding</option>
+          <option>Sales Funnel</option>
+          <option>Event Follow-up</option>
+        </select>
+      </div>
+      <div style="align-self:flex-end">
+        <button class="btn indigo" onclick="addSequence()">+ Add Sequence</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="seqList" class="seq-list"></div>
+
+  <!-- Add email step modal-like inline form -->
+  <div id="addStepForm" class="card" style="display:none;border-color:var(--indigo)">
+    <h3>Add Email to Sequence: <span id="addStepSeqName" style="color:var(--indigo)"></span></h3>
+    <div class="row">
+      <div class="col">
+        <label>Subject Line</label>
+        <input type="text" id="stepSubject" placeholder="Email #N subject">
+      </div>
+      <div class="col">
+        <label>Send Delay (days after previous)</label>
+        <input type="number" id="stepDelay" value="1" min="0">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <label>Body Preview</label>
+        <textarea id="stepBody" rows="3" placeholder="Brief description of this email's content..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn indigo sm" onclick="saveStep()">Add Email</button>
+      <button class="btn ghost sm" onclick="cancelStep()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ANALYZE ===== -->
+<div id="tab-analyze" class="tab">
+  <h2>Campaign Analyzer</h2>
+  <p class="sub">Enter your campaign stats to get benchmarked insights and improvement tips.</p>
+
+  <div class="card">
+    <h3>Enter Campaign Metrics</h3>
+    <div class="analyze-grid">
+      <div>
+        <label>Sent</label>
+        <input type="number" id="mSent" placeholder="10000" oninput="calcMetrics()">
+      </div>
+      <div>
+        <label>Delivered</label>
+        <input type="number" id="mDelivered" placeholder="9800" oninput="calcMetrics()">
+      </div>
+      <div>
+        <label>Opens</label>
+        <input type="number" id="mOpens" placeholder="2400" oninput="calcMetrics()">
+      </div>
+      <div>
+        <label>Clicks</label>
+        <input type="number" id="mClicks" placeholder="350" oninput="calcMetrics()">
+      </div>
+      <div>
+        <label>Unsubscribes</label>
+        <input type="number" id="mUnsubs" placeholder="28" oninput="calcMetrics()">
+      </div>
+      <div>
+        <label>Bounces</label>
+        <input type="number" id="mBounces" placeholder="200" oninput="calcMetrics()">
+      </div>
+    </div>
+  </div>
+
+  <div id="metricsResults" style="display:none">
+    <div class="analyze-grid" id="metricsCards"></div>
+    <div class="card" id="analysisTips"></div>
+  </div>
+  <div class="empty" id="metricsEmpty">Enter your campaign data above to see analysis.</div>
+</div>
+
+<!-- ===== TEMPLATES ===== -->
+<div id="tab-templates" class="tab">
+  <h2>Email Templates</h2>
+  <p class="sub">Pre-written templates for common email types. Click "Use Template" to load into Compose.</p>
+  <div class="tmpl-grid" id="tmplGrid"></div>
+</div>
+
+</main>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+const S_KEY = 'email82_state';
+let state = { sequences: [], drafts: [] };
+
+function save() { localStorage.setItem(S_KEY, JSON.stringify(state)); }
+function load() { const d = localStorage.getItem(S_KEY); if(d) state = {...state,...JSON.parse(d)}; }
+load();
+
+// ── Tabs ───────────────────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='sequences') renderSeqList();
+  if(id==='templates') renderTemplates();
+}
+
+// ── Compose ────────────────────────────────────────────────────────────
+function g(id) { return document.getElementById(id)?.value||''; }
+
+function updatePreview() {
+  const subj = g('subjectLine')||'Your Subject Here';
+  const pre  = g('preheaderText')||'Preheader text...';
+  const open = g('emailOpening')||'Hi {{first_name}},';
+  const body = g('emailBody');
+  const cta  = g('ctaText'); const ctaUrl = g('ctaUrl')||'#';
+  const close = g('emailClosing');
+  const from = g('fromName')||'The Team';
+
+  document.getElementById('prev-subject').textContent = subj;
+  document.getElementById('prev-preheader').textContent = pre;
+  document.getElementById('prev-body').textContent = open + (body ? '\n\n' + body : '');
+  document.getElementById('prev-closing').textContent = close ? '\n\n' + close : '';
+  document.getElementById('prev-cta-wrap').innerHTML = cta
+    ? `<a class="preview-cta" href="${ctaUrl}">${cta}</a>` : '';
+  document.getElementById('prev-footer').innerHTML =
+    `Sent by ${from} · <a href="#" style="color:#aaa">Unsubscribe</a>`;
+}
+
+function updateSubjectScore() {
+  const subj = g('subjectLine');
+  if (!subj) {
+    document.getElementById('subjectTips').innerHTML = 'Start typing your subject line...';
+    return;
+  }
+  const tips = [];
+  const score_items = [];
+
+  if (subj.length < 30) score_items.push({pass:true, text:'✅ Good length (under 30 chars) — shows fully on mobile'});
+  else if (subj.length < 50) score_items.push({pass:true, text:'✅ Acceptable length (30–50 chars)'});
+  else score_items.push({pass:false, text:'⚠️ Subject is long ('+subj.length+' chars) — may get cut off on mobile (aim for <50)'});
+
+  const powerWords = ['free','now','new','limited','exclusive','secret','proven','instant','guaranteed','you','your'];
+  const found = powerWords.filter(w => subj.toLowerCase().includes(w));
+  if (found.length) score_items.push({pass:true, text:`✅ Power word(s) detected: ${found.join(', ')}`});
+  else score_items.push({pass:false, text:'💡 Consider adding a power word (e.g. "free", "exclusive", "new", "you")'});
+
+  const hasQ = subj.includes('?');
+  if (hasQ) score_items.push({pass:true, text:'✅ Question format — encourages curiosity'});
+
+  const hasNum = /\d/.test(subj);
+  if (hasNum) score_items.push({pass:true, text:'✅ Number in subject — increases open rates by ~15%'});
+  else score_items.push({pass:false, text:'💡 Try including a number (e.g. "5 ways...", "Save 20%...")'});
+
+  const emojiRx = /\p{Emoji}/u;
+  if (emojiRx.test(subj)) score_items.push({pass:true, text:'✅ Emoji present — can boost open rate by ~6%'});
+
+  const spamWords = ['win','winner','cash','prize','click here','act now','order now','100% free','no cost','risk free'];
+  const spamFound = spamWords.filter(w => subj.toLowerCase().includes(w));
+  if (spamFound.length) score_items.push({pass:false, text:`🚫 Possible spam trigger words: ${spamFound.join(', ')}`});
+
+  const score = score_items.filter(s=>s.pass).length;
+  const total = score_items.length;
+  const pct = Math.round(score/total*100);
+  const color = pct>=70?'var(--emerald)':pct>=40?'var(--amber)':'var(--rose)';
+
+  document.getElementById('subjectTips').innerHTML =
+    `<div style="font-weight:700;font-size:.95rem;color:${color};margin-bottom:8px">Score: ${pct}% (${score}/${total})</div>`
+    + score_items.map(s=>`<div style="margin-bottom:4px;color:${s.pass?'var(--text)':'var(--muted)'}">${s.text}</div>`).join('');
+}
+
+function saveEmail() {
+  const draft = {
+    id: Date.now(),
+    subject: g('subjectLine'),
+    from: g('fromName'),
+    body: g('emailBody'),
+    ts: new Date().toLocaleDateString()
+  };
+  state.drafts.push(draft);
+  save();
+  const msg = document.getElementById('saveMsg');
+  msg.style.display = 'block';
+  setTimeout(()=>msg.style.display='none', 2500);
+}
+
+function copyHtml() {
+  const subj = g('subjectLine')||'Subject';
+  const open = g('emailOpening')||'Hi {{first_name}},';
+  const body = g('emailBody')||'';
+  const cta = g('ctaText'); const ctaUrl = g('ctaUrl')||'#';
+  const close = g('emailClosing')||'Best';
+  const html = `<html><body style="font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:20px">
+<h2>${subj}</h2><p>${open}</p><p>${body.replace(/\n/g,'<br>')}</p>
+${cta?`<a href="${ctaUrl}" style="display:inline-block;background:#6366f1;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:bold">${cta}</a>`:''}
+<p>${close.replace(/\n/g,'<br>')}</p></body></html>`;
+  navigator.clipboard.writeText(html);
+  event.currentTarget.textContent = '✅ Copied!';
+  setTimeout(()=>event.currentTarget.textContent='📋 Copy HTML',2000);
+}
+
+// ── Sequences ─────────────────────────────────────────────────────────
+let addingToSeq = null;
+
+function addSequence() {
+  const name = document.getElementById('seqName').value.trim();
+  const type = document.getElementById('seqType').value;
+  if (!name) return;
+  state.sequences.push({ id: Date.now(), name, type, emails: [] });
+  document.getElementById('seqName').value = '';
+  save(); renderSeqList();
+}
+function deleteSeq(id) {
+  state.sequences = state.sequences.filter(s=>s.id!==id);
+  save(); renderSeqList();
+}
+function openAddStep(seqId) {
+  addingToSeq = seqId;
+  const seq = state.sequences.find(s=>s.id===seqId);
+  document.getElementById('addStepSeqName').textContent = seq.name;
+  document.getElementById('addStepForm').style.display = 'block';
+  document.getElementById('stepSubject').value = '';
+  document.getElementById('stepBody').value = '';
+  document.getElementById('stepDelay').value = seq.emails.length === 0 ? 0 : 1;
+  document.getElementById('stepSubject').focus();
+}
+function cancelStep() {
+  addingToSeq = null;
+  document.getElementById('addStepForm').style.display = 'none';
+}
+function saveStep() {
+  if (!addingToSeq) return;
+  const subj = document.getElementById('stepSubject').value.trim();
+  if (!subj) return;
+  const seq = state.sequences.find(s=>s.id===addingToSeq);
+  seq.emails.push({ subject: subj, delay: parseInt(document.getElementById('stepDelay').value)||0, body: document.getElementById('stepBody').value.trim() });
+  document.getElementById('addStepForm').style.display = 'none';
+  addingToSeq = null;
+  save(); renderSeqList();
+}
+function delStep(seqId, ei) {
+  const seq = state.sequences.find(s=>s.id===seqId);
+  seq.emails.splice(ei,1);
+  save(); renderSeqList();
+}
+function toggleSeq(id) {
+  const body = document.getElementById('seqBody_'+id);
+  const tog = document.getElementById('seqTog_'+id);
+  body.classList.toggle('open');
+  tog.classList.toggle('open');
+}
+function renderSeqList() {
+  const el = document.getElementById('seqList');
+  if (!el) return;
+  if (!state.sequences.length) { el.innerHTML = '<div class="empty">No sequences yet. Create one above.</div>'; return; }
+  el.innerHTML = state.sequences.map(seq => `
+    <div class="seq-card">
+      <div class="seq-header" onclick="toggleSeq(${seq.id})">
+        <div class="seq-name">${esc(seq.name)}</div>
+        <span class="tag">${esc(seq.type)}</span>
+        <span class="email-count">${seq.emails.length} email${seq.emails.length!==1?'s':''}</span>
+        <button class="btn danger sm" onclick="event.stopPropagation();deleteSeq(${seq.id})">Delete</button>
+        <span class="toggle" id="seqTog_${seq.id}">▶</span>
+      </div>
+      <div class="seq-body" id="seqBody_${seq.id}">
+        ${seq.emails.length ? seq.emails.map((e,ei)=>`
+          <div class="email-step">
+            <div class="step-num">${ei+1}</div>
+            <div class="step-info">
+              <div class="subject">${esc(e.subject)}</div>
+              <div class="delay">${ei===0?'Send immediately':'Send '+e.delay+' day'+(e.delay!==1?'s':'')+' after email #'+ei}</div>
+              ${e.body?`<div style="font-size:.8rem;color:var(--muted);margin-top:2px">${esc(e.body)}</div>`:''}
+            </div>
+            <button class="btn danger sm" onclick="delStep(${seq.id},${ei})">✕</button>
+          </div>`).join('') : '<div style="color:var(--muted);font-size:.82rem">No emails yet.</div>'}
+        <button class="btn ghost sm" style="margin-top:8px" onclick="openAddStep(${seq.id})">+ Add Email</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── Analyze ────────────────────────────────────────────────────────────
+const BENCHMARKS = {
+  deliveryRate: {label:'Delivery Rate', good:97, unit:'%', bench:'Industry avg: 97%', color:'#6366f1'},
+  openRate:     {label:'Open Rate',     good:21, unit:'%', bench:'Industry avg: 21%', color:'#34d399'},
+  ctr:          {label:'Click Rate',    good:2.5,unit:'%', bench:'Industry avg: 2.5%', color:'#60a5fa'},
+  ctor:         {label:'CTOR',          good:10, unit:'%', bench:'Click-to-open ratio avg: 10%', color:'#fbbf24'},
+  unsubRate:    {label:'Unsub Rate',    good:0.5,unit:'%', bench:'Good: <0.5%', color:'#fb7185'},
+  bounceRate:   {label:'Bounce Rate',  good:2,  unit:'%', bench:'Good: <2%', color:'#a78bfa'}
+};
+
+function calcMetrics() {
+  const sent = +document.getElementById('mSent').value||0;
+  const del  = +document.getElementById('mDelivered').value||0;
+  const open = +document.getElementById('mOpens').value||0;
+  const clk  = +document.getElementById('mClicks').value||0;
+  const unsub= +document.getElementById('mUnsubs').value||0;
+  const boun = +document.getElementById('mBounces').value||0;
+  if (!sent) return;
+
+  const metrics = {
+    deliveryRate: del/sent*100,
+    openRate:     open/(del||sent)*100,
+    ctr:          clk/(del||sent)*100,
+    ctor:         open>0?clk/open*100:0,
+    unsubRate:    unsub/(del||sent)*100,
+    bounceRate:   boun/sent*100
+  };
+
+  document.getElementById('metricsEmpty').style.display='none';
+  document.getElementById('metricsResults').style.display='block';
+
+  const cards = document.getElementById('metricsCards');
+  cards.innerHTML = Object.entries(metrics).map(([k,v])=>{
+    const b = BENCHMARKS[k];
+    const lower = ['unsubRate','bounceRate'].includes(k);
+    const good = lower ? v <= b.good : v >= b.good;
+    const fill = Math.min(100, lower ? Math.max(0,100-(v/b.good*100)):Math.min(100,v/b.good*100));
+    const col = good ? b.color : 'var(--rose)';
+    return `<div class="metric-card">
+      <div class="metric-label">${b.label}</div>
+      <div class="metric-val" style="color:${col}">${v.toFixed(1)}${b.unit}</div>
+      <div class="metric-bar-track"><div class="metric-bar" style="width:${fill}%;background:${col}"></div></div>
+      <div class="benchmark">${b.bench}</div>
+      <div style="font-size:.72rem;margin-top:4px;color:${good?'var(--emerald)':'var(--rose)'}">${good?'✅ On target':'⚠️ Below benchmark'}</div>
+    </div>`;
+  }).join('');
+
+  // tips
+  const tips = [];
+  if (metrics.openRate < 15) tips.push('📧 Low open rate: test different subject lines, send time (Tue–Thu 10am), and clean inactive subscribers.');
+  if (metrics.openRate > 35) tips.push('🎉 Excellent open rate! Consider A/B testing your CTA to lift CTR.');
+  if (metrics.ctr < 1) tips.push('🖱️ Low click rate: make your CTA more prominent, reduce friction (single CTA), and align content with the offer.');
+  if (metrics.unsubRate > 0.5) tips.push('⚠️ High unsubscribes: check sending frequency, list hygiene, and whether content matches subscriber expectations.');
+  if (metrics.bounceRate > 2) tips.push('📉 High bounce rate: run list hygiene, remove invalid emails, and verify email addresses at sign-up.');
+  if (metrics.ctor > 20) tips.push('🚀 Great CTOR! Openers are highly engaged — focus on growing your list quality.');
+  if (!tips.length) tips.push('✅ All metrics look healthy! Keep testing subject lines and send times to push further.');
+
+  document.getElementById('analysisTips').innerHTML = `<h3>💡 Recommendations</h3><div style="margin-top:8px">`+tips.map(t=>`<div style="margin-bottom:8px;font-size:.84rem">${t}</div>`).join('')+'</div>';
+}
+
+// ── Templates ─────────────────────────────────────────────────────────
+const TEMPLATES = [
+  { type:'Welcome', color:'var(--emerald)', subject:'Welcome to {{company}} — you\'re in! 🎉',
+    preheader:'Here\'s everything you need to get started.',
+    opening:'Hi {{first_name}},', cta:'Get Started →', ctaUrl:'https://example.com',
+    body:`Welcome aboard! We're so excited to have you.
+
+Here's what you can do right now:
+• Complete your profile
+• Explore the dashboard
+• Check out our getting started guide
+
+We'll send you 1–2 emails per week with tips and updates. No spam, ever.`,
+    closing:'Talk soon,\n{{company}} Team',
+    tags:['Onboarding','Nurture'] },
+
+  { type:'Newsletter', color:'var(--blue)', subject:'{{month}} digest: top picks for you 📬',
+    preheader:'Your curated roundup is here.',
+    opening:'Hey {{first_name}},', cta:'Read More →', ctaUrl:'https://example.com',
+    body:`Here's what's been happening this month:
+
+🔥 Featured story: [Headline]
+📖 Article 2: [Headline]
+💡 Quick tip: [Tip of the month]
+
+That's a wrap for this month. Hit reply — we read every response.`,
+    closing:'See you next month,\n{{author}}',
+    tags:['Newsletter','Engagement'] },
+
+  { type:'Promotional', color:'var(--amber)', subject:'{{discount}}% off — today only ⚡',
+    preheader:'Your exclusive discount expires at midnight.',
+    opening:'Hi {{first_name}},', cta:'Claim Your Discount →', ctaUrl:'https://example.com',
+    body:`For the next 24 hours, get {{discount}}% off everything in the store.
+
+Use code: FLASH{{discount}} at checkout.
+
+✅ No minimum order
+✅ Applies to all products
+✅ Expires tonight at 11:59 PM
+
+Don't miss this — we only do this a few times a year.`,
+    closing:'Happy saving,\n{{company}}',
+    tags:['Promo','Flash Sale'] },
+
+  { type:'Re-engagement', color:'var(--rose)', subject:'We miss you, {{first_name}} 👋',
+    preheader:'It\'s been a while — here\'s what\'s new.',
+    opening:'Hi {{first_name}},', cta:'Come Back →', ctaUrl:'https://example.com',
+    body:`It looks like we haven't seen you in a while, and we wanted to reach out.
+
+A lot has changed since you last visited:
+• [New feature / product]
+• [Improvement]
+• [Special offer]
+
+If you're still interested, we'd love to have you back. If not, no hard feelings — you can unsubscribe below.`,
+    closing:'Hope to see you soon,\n{{company}}',
+    tags:['Re-engagement','Win-back'] },
+
+  { type:'Abandoned Cart', color:'var(--indigo)', subject:'You left something behind 🛒',
+    preheader:'Your cart is waiting — items are going fast.',
+    opening:'Hi {{first_name}},', cta:'Complete Your Purchase →', ctaUrl:'https://example.com',
+    body:`Good news: your cart is saved!
+
+You left these items behind:
+• {{item_1}}
+• {{item_2}}
+
+They're still available, but we can't guarantee stock. Complete your purchase now before they sell out.
+
+As a little nudge: use code COMEBACK10 for 10% off.`,
+    closing:'See you at checkout,\n{{company}}',
+    tags:['E-commerce','Cart Recovery'] },
+
+  { type:'Event Invite', color:'var(--teal2||#14b8a6)', subject:'You\'re invited: {{event_name}} 🎟️',
+    preheader:'Reserve your free spot before it fills up.',
+    opening:'Hi {{first_name}},', cta:'Save My Spot →', ctaUrl:'https://example.com',
+    body:`We're hosting an exclusive event and you're on the guest list!
+
+📅 Date: {{event_date}}
+🕐 Time: {{event_time}}
+📍 Where: {{event_location}}
+
+What to expect:
+• [Topic / Speaker 1]
+• [Topic / Speaker 2]
+• Live Q&A session
+
+Seats are limited — reserve yours now.`,
+    closing:'See you there,\n{{company}} Events Team',
+    tags:['Event','Invite'] }
+];
+
+function renderTemplates() {
+  const el = document.getElementById('tmplGrid');
+  if (!el) return;
+  el.innerHTML = TEMPLATES.map((t,i)=>`
+    <div class="tmpl-card" style="border-top:3px solid ${t.color}">
+      <div class="tmpl-type" style="color:${t.color}">${t.type}</div>
+      <h3>${t.subject.slice(0,50)}${t.subject.length>50?'…':''}</h3>
+      <p>${t.preheader}</p>
+      <div style="margin-top:8px">${(t.tags||[]).map(tag=>`<span class="tag">${tag}</span>`).join('')}</div>
+      <button class="btn ghost sm use-btn" onclick="useTemplate(${i})">Use Template</button>
+    </div>`).join('');
+}
+function useTemplate(i) {
+  const t = TEMPLATES[i];
+  document.getElementById('subjectLine').value  = t.subject;
+  document.getElementById('preheaderText').value= t.preheader;
+  document.getElementById('emailOpening').value = t.opening;
+  document.getElementById('emailBody').value    = t.body;
+  document.getElementById('ctaText').value      = t.cta;
+  document.getElementById('ctaUrl').value       = t.ctaUrl;
+  document.getElementById('emailClosing').value = t.closing;
+  updatePreview(); updateSubjectScore();
+  // switch to compose
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-compose').classList.add('active');
+  document.querySelector('nav button').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Utils ──────────────────────────────────────────────────────────────
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// Init
+renderSeqList();
+renderTemplates();
+updatePreview();
+</script>
+</body>
+</html>

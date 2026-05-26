@@ -14,10 +14,10 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-████████████████████████████████████████████░░░░░░  88 / 100
+██████████████████████████████████████████████░░░░  92 / 100
 ```
 
-**88 / 100 complete** — progress bar on the live site updates automatically 🎉
+**92 / 100 complete** — progress bar on the live site updates automatically 🎉
 
 &nbsp;
 
@@ -131,8 +131,14 @@ for founders, indie hackers, and anyone shipping something
 | [#77](https://hhanng.github.io/agent-77-seo-content-optimizer/) | SEO Content Optimizer | content analyzer with SEO score, meta builder, intent classifier, heading validator, 30-item checklist |
 | [#78](https://hhanng.github.io/agent-78-brand-identity-builder/) | Brand Identity Builder | 12-archetype picker with tone auto-fill, voice sliders, color palette + WCAG contrast, 10 font pairings, markdown export |
 | [#79](https://hhanng.github.io/agent-79-product-launch-war-room/) | Product Launch War Room | 30-item checklist with critical blockers, countdown timer, drag-and-drop timeline, 10-channel tracker, debrief logger |
+| [#80](https://hhanng.github.io/agent-80-business-model-canvas/) | Business Model Canvas | interactive 9-block BMC with multi-canvas, 3 pre-filled examples, guide, and markdown export |
+| [#81](https://hhanng.github.io/agent-81-competitive-analysis-tool/) | Competitive Analysis Tool | weighted scoring matrix, SWOT builder, positioning map, auto-generated report |
+| [#82](https://hhanng.github.io/agent-82-email-marketing-suite/) | Email Marketing Suite | email composer with live preview, subject scorer, drip sequences, campaign analyzer, 6 templates |
+| [#83](https://hhanng.github.io/agent-83-cs-student-fitness-os/) | CS Student Fitness OS | 3 workout plans, 8 desk breaks, rest timer, session tracker, streak + weekly stats |
 | [#84](https://hhanng.github.io/agent-84-coders-hiit-timer/) | Coder's HIIT Timer | Pomodoro-HIIT hybrid timer, Tabata & Pure HIIT modes, 10 desk-friendly routines, SVG ring countdown, session history with streak tracking |
 | [#85](https://hhanng.github.io/agent-85-pr-strength-tracker/) | PR & Strength Tracker | workout log with auto-PR detection, e1RM estimates, plateau detector, progress charts, 4-week Big 3 progression planner |
+| [#86](https://hhanng.github.io/agent-86-period-cycle-tracker/) | Period & Cycle Tracker | cycle calendar with period prediction, fertile window & phase tracker, 20-symptom log with phase patterns, bilingual EN/VI vocab, doctor visit script generator |
+| [#87](https://hhanng.github.io/agent-87-skincare-routine-tracker/) | Skincare Routine Tracker | AM/PM routine builder with streaks, ingredient decoder (50 terms EN/VI), Vietnamese skin in America guide, 15 brand reviews, 30-day skin log |
 
 &nbsp;
 
@@ -187,4 +193,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · agent #85 PR & Strength Tracker live: https://hhanng.github.io/agent-85-pr-strength-tracker/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · agent #88 Glow-Up Tracker & Vision Board live: https://hhanng.github.io/agent-88-glowup-tracker-vision-board/</sub>
