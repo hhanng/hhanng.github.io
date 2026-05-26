@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS Student Fitness OS · Agent #83</title>
+<style>
+  :root {
+    --bg: #0a1a0a;
+    --card: #0f2010;
+    --card2: #0c1a0c;
+    --border: #1a3520;
+    --green: #4ade80;
+    --green2: #22c55e;
+    --yellow: #facc15;
+    --yellow2: #eab308;
+    --red: #f87171;
+    --blue: #60a5fa;
+    --purple: #a78bfa;
+    --text: #e8f5e9;
+    --muted: #5a7a5a;
+    --tag-bg: #081408;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 1.2rem; font-weight: 700; color: var(--green); }
+  .badge { background: var(--green); color: #001a00; font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
+  header .sub { font-size: .8rem; color: var(--muted); margin-left: auto; }
+
+  nav { display: flex; background: var(--card2); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { padding: 14px 22px; background: none; border: none; color: var(--muted); font-size: .88rem; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: all .2s; }
+  nav button.active { color: var(--green); border-bottom-color: var(--green); }
+  nav button:hover:not(.active) { color: var(--text); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  .tab { display: none; } .tab.active { display: block; }
+
+  h2 { font-size: 1.05rem; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+  h3 { font-size: .93rem; font-weight: 600; margin-bottom: 10px; }
+  p.sub { font-size: .82rem; color: var(--muted); margin-bottom: 18px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 4px; }
+  input[type=text], input[type=number], textarea, select {
+    background: var(--tag-bg); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); padding: 9px 12px; font-size: .88rem; width: 100%;
+    outline: none; transition: border .2s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--green); }
+  textarea { resize: vertical; }
+
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .col { flex: 1; min-width: 160px; }
+
+  .btn { padding: 9px 18px; border-radius: 8px; border: none; font-size: .84rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+  .btn.green { background: var(--green); color: #001a00; }
+  .btn.green:hover { background: var(--green2); }
+  .btn.yellow { background: var(--yellow); color: #1a1000; }
+  .btn.yellow:hover { background: var(--yellow2); }
+  .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn.ghost:hover { border-color: var(--green); color: var(--green); }
+  .btn.danger { background: transparent; border: 1px solid #3d1010; color: var(--red); }
+  .btn.danger:hover { background: #1a0808; }
+  .btn.sm { padding: 5px 12px; font-size: .76rem; }
+  .btn.xs { padding: 3px 8px; font-size: .72rem; }
+
+  /* ── WORKOUT ── */
+  .workout-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .wtab { padding: 7px 16px; border-radius: 99px; border: 1px solid var(--border); background: var(--tag-bg); color: var(--muted); font-size: .82rem; cursor: pointer; transition: all .2s; }
+  .wtab.active { background: var(--green); color: #001a00; border-color: var(--green); font-weight: 700; }
+
+  .workout-plan { display: none; } .workout-plan.active { display: block; }
+  .day-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+  .day-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .day-label { font-weight: 800; font-size: .85rem; color: var(--yellow); text-transform: uppercase; letter-spacing: .06em; }
+  .day-focus { font-size: .8rem; color: var(--muted); }
+  .exercise-list { display: flex; flex-direction: column; gap: 6px; }
+  .exercise { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tag-bg); border-radius: 8px; }
+  .exercise input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--green); flex-shrink: 0; cursor: pointer; }
+  .exercise .ex-name { font-size: .83rem; flex: 1; }
+  .exercise .ex-sets { font-size: .75rem; color: var(--green); font-weight: 600; }
+  .exercise .ex-rest { font-size: .72rem; color: var(--muted); }
+  .day-progress { height: 6px; background: var(--border); border-radius: 3px; margin-top: 10px; }
+  .day-progress-bar { height: 6px; background: var(--green); border-radius: 3px; transition: width .3s; }
+  .rest-day { color: var(--muted); font-size: .88rem; text-align: center; padding: 20px; }
+
+  /* timer */
+  .timer-display { font-size: 3rem; font-weight: 900; color: var(--green); font-variant-numeric: tabular-nums; text-align: center; }
+  .timer-label { text-align: center; font-size: .88rem; color: var(--muted); margin-top: 4px; margin-bottom: 16px; }
+  .timer-btns { display: flex; gap: 10px; justify-content: center; }
+
+  /* ── DESK BREAKS ── */
+  .break-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 14px; }
+  .break-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .break-card .break-title { font-weight: 700; font-size: .9rem; margin-bottom: 4px; }
+  .break-card .break-dur { font-size: .75rem; color: var(--green); margin-bottom: 8px; }
+  .break-card .steps { font-size: .8rem; color: var(--muted); line-height: 1.6; }
+  .break-card .do-btn { margin-top: 12px; width: 100%; }
+  .break-reminder { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+  /* ── TRACKER ── */
+  .tracker-form { display: flex; flex-direction: column; gap: 10px; }
+  .session-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .session-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+  .session-item .s-date { font-size: .75rem; color: var(--muted); width: 80px; flex-shrink: 0; }
+  .session-item .s-type { font-weight: 700; font-size: .85rem; flex: 1; }
+  .session-item .s-dur { font-size: .8rem; color: var(--green); }
+  .session-item .s-note { font-size: .78rem; color: var(--muted); }
+  .session-item .s-del { margin-left: auto; }
+
+  /* ── STATS ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-box .sv { font-size: 1.6rem; font-weight: 900; color: var(--green); }
+  .stat-box .sl { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+  .streak-fire { font-size: 2rem; }
+  canvas { display: block; width: 100%; border-radius: 8px; }
+
+  .empty { text-align: center; padding: 40px; color: var(--muted); font-size: .88rem; }
+  .chip { display: inline-block; background: var(--tag-bg); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; font-size: .75rem; color: var(--muted); margin: 2px; }
+
+  @media(max-width:600px){ .row{flex-direction:column}; .break-grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="badge">#83</span>
+  <h1>CS Student Fitness OS</h1>
+  <span class="sub">no gym needed 💻💪</span>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('workout')">🏋️ WORKOUT</button>
+  <button onclick="switchTab('desk')">🖥️ DESK BREAKS</button>
+  <button onclick="switchTab('tracker')">📝 TRACKER</button>
+  <button onclick="switchTab('stats')">📊 STATS</button>
+</nav>
+
+<main>
+
+<!-- ===== WORKOUT ===== -->
+<div id="tab-workout" class="tab active">
+  <h2>Workout Plans</h2>
+  <p class="sub">3 full programs for CS students — dorm room, gym, or hybrid. No equipment needed for the first two.</p>
+
+  <div class="card" style="margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div class="timer-display" id="timerDisplay">00:00</div>
+      <div>
+        <div class="timer-label" id="timerLabel">Rest Timer</div>
+        <div class="timer-btns">
+          <button class="btn green sm" id="timerBtn" onclick="toggleTimer()">▶ Start</button>
+          <button class="btn ghost sm" onclick="resetTimer()">↺ Reset</button>
+          <select id="timerPreset" onchange="setTimerPreset()" style="width:auto;margin-left:8px">
+            <option value="60">1 min rest</option>
+            <option value="90" selected>90s rest</option>
+            <option value="120">2 min rest</option>
+            <option value="180">3 min rest</option>
+            <option value="30">30s HIIT</option>
+            <option value="45">45s HIIT</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="workout-tabs">
+    <div class="wtab active" onclick="switchWorkout('dorm',this)">🛏️ Dorm Room</div>
+    <div class="wtab" onclick="switchWorkout('gym',this)">🏋️ Gym</div>
+    <div class="wtab" onclick="switchWorkout('hiit',this)">⚡ HIIT Cardio</div>
+  </div>
+
+  <div id="plan-dorm" class="workout-plan active" id="plan-dorm"></div>
+  <div id="plan-gym"  class="workout-plan" id="plan-gym"></div>
+  <div id="plan-hiit" class="workout-plan" id="plan-hiit"></div>
+</div>
+
+<!-- ===== DESK BREAKS ===== -->
+<div id="tab-desk" class="tab">
+  <h2>Desk Breaks</h2>
+  <p class="sub">Quick movement breaks for long coding sessions. Fight the sitting disease! 🧘</p>
+
+  <div class="break-reminder">
+    <span style="font-size:1.5rem">⏰</span>
+    <div style="flex:1">
+      <div style="font-weight:700;font-size:.9rem">Pomodoro Break Reminder</div>
+      <div style="font-size:.8rem;color:var(--muted)">Set a reminder to move every 25–50 minutes.</div>
+    </div>
+    <select id="reminderInterval" style="width:auto">
+      <option value="25">Every 25 min</option>
+      <option value="30" selected>Every 30 min</option>
+      <option value="45">Every 45 min</option>
+      <option value="50">Every 50 min</option>
+    </select>
+    <button class="btn green sm" onclick="startReminder()">Set Reminder</button>
+    <span id="reminderStatus" style="font-size:.8rem;color:var(--green);display:none">✅ Active</span>
+  </div>
+
+  <div class="break-grid" id="breakGrid"></div>
+</div>
+
+<!-- ===== TRACKER ===== -->
+<div id="tab-tracker" class="tab">
+  <h2>Session Tracker</h2>
+  <p class="sub">Log every workout, desk break, or active moment to build your habit.</p>
+
+  <div class="card">
+    <h3>Log a Session</h3>
+    <div class="row" style="margin-bottom:12px">
+      <div class="col">
+        <label>Date</label>
+        <input type="text" id="logDate" placeholder="2026-05-25">
+      </div>
+      <div class="col">
+        <label>Activity Type</label>
+        <select id="logType">
+          <option>Dorm Room Workout</option>
+          <option>Gym Session</option>
+          <option>HIIT Cardio</option>
+          <option>Desk Breaks</option>
+          <option>Walk / Run</option>
+          <option>Yoga / Stretch</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="col">
+        <label>Duration (min)</label>
+        <input type="number" id="logDur" placeholder="30" min="1">
+      </div>
+    </div>
+    <div class="row" style="margin-bottom:12px">
+      <div class="col">
+        <label>Energy Level (1–5)</label>
+        <input type="number" id="logEnergy" min="1" max="5" placeholder="3">
+      </div>
+      <div class="col">
+        <label>Notes</label>
+        <input type="text" id="logNote" placeholder="PRs hit, how you felt...">
+      </div>
+    </div>
+    <button class="btn green" onclick="logSession()">➕ Log Session</button>
+  </div>
+
+  <div id="sessionLog"></div>
+</div>
+
+<!-- ===== STATS ===== -->
+<div id="tab-stats" class="tab">
+  <h2>Your Stats</h2>
+  <p class="sub">Progress overview based on your logged sessions.</p>
+  <div class="stat-grid" id="statsGrid"></div>
+  <div class="card">
+    <h3>Weekly Activity (last 8 weeks)</h3>
+    <canvas id="statsChart" height="200"></canvas>
+  </div>
+  <div class="card">
+    <h3>Workout Type Breakdown</h3>
+    <div id="typeBreakdown"></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+const S_KEY = 'fitness83_state';
+let state = { sessions: [], checks: {} };
+
+function save() { localStorage.setItem(S_KEY, JSON.stringify(state)); }
+function load() { const d=localStorage.getItem(S_KEY); if(d) state={...state,...JSON.parse(d)}; }
+load();
+
+// ── Tabs ───────────────────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='tracker') renderLog();
+  if(id==='stats') renderStats();
+}
+
+// ── Timer ──────────────────────────────────────────────────────────────
+let timerSeconds = 90, timerMax = 90, timerInterval = null, timerRunning = false;
+function setTimerPreset() {
+  const v = parseInt(document.getElementById('timerPreset').value);
+  timerMax = v; timerSeconds = v; timerRunning = false;
+  clearInterval(timerInterval); timerInterval = null;
+  document.getElementById('timerBtn').textContent = '▶ Start';
+  updateTimerDisplay();
+}
+function toggleTimer() {
+  if (timerRunning) { clearInterval(timerInterval); timerRunning = false; document.getElementById('timerBtn').textContent = '▶ Start'; }
+  else { timerRunning = true; document.getElementById('timerBtn').textContent = '⏸ Pause'; timerInterval = setInterval(tickTimer, 1000); }
+}
+function resetTimer() { clearInterval(timerInterval); timerRunning=false; timerSeconds=timerMax; document.getElementById('timerBtn').textContent='▶ Start'; updateTimerDisplay(); }
+function tickTimer() {
+  timerSeconds--;
+  updateTimerDisplay();
+  if(timerSeconds<=0) { clearInterval(timerInterval); timerRunning=false; document.getElementById('timerBtn').textContent='▶ Start'; document.getElementById('timerLabel').textContent='✅ Rest done!'; setTimeout(()=>{ document.getElementById('timerLabel').textContent='Rest Timer'; timerSeconds=timerMax; updateTimerDisplay(); },2000); }
+}
+function updateTimerDisplay() {
+  const m=Math.floor(timerSeconds/60), s=timerSeconds%60;
+  document.getElementById('timerDisplay').textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const color = timerSeconds<=10?'var(--red)':timerSeconds<=30?'var(--yellow)':'var(--green)';
+  document.getElementById('timerDisplay').style.color=color;
+}
+
+// ── Workout Plans ──────────────────────────────────────────────────────
+const PLANS = {
+  dorm: [
+    { day:'Monday', focus:'Push (Chest + Tris)', exercises:[
+      {n:'Push-Ups',s:'4×12-15',r:'90s'}, {n:'Diamond Push-Ups',s:'3×10',r:'90s'},
+      {n:'Pike Push-Ups',s:'3×10',r:'90s'}, {n:'Tricep Dips (chair)',s:'3×12',r:'60s'},
+      {n:'Plank',s:'3×45s',r:'45s'} ]},
+    { day:'Tuesday', focus:'Pull (Back + Bis)', exercises:[
+      {n:'Door-Frame Rows',s:'4×10',r:'90s'}, {n:'Superman Hold',s:'3×30s',r:'60s'},
+      {n:'Towel Bicep Curls',s:'3×12',r:'60s'}, {n:'Reverse Plank',s:'3×30s',r:'45s'} ]},
+    { day:'Wednesday', focus:'REST / Walk', rest:true},
+    { day:'Thursday', focus:'Legs + Glutes', exercises:[
+      {n:'Bodyweight Squats',s:'4×20',r:'60s'}, {n:'Lunges',s:'3×12 each',r:'60s'},
+      {n:'Glute Bridges',s:'4×15',r:'60s'}, {n:'Calf Raises',s:'3×20',r:'45s'},
+      {n:'Wall Sit',s:'3×45s',r:'60s'} ]},
+    { day:'Friday', focus:'Core + Cardio', exercises:[
+      {n:'Crunches',s:'3×20',r:'45s'}, {n:'Bicycle Crunches',s:'3×16',r:'45s'},
+      {n:'Mountain Climbers',s:'3×30s',r:'45s'}, {n:'Burpees',s:'3×10',r:'90s'},
+      {n:'V-Sits',s:'3×15',r:'60s'} ]},
+    { day:'Saturday', focus:'Full Body Circuit', exercises:[
+      {n:'Jumping Jacks',s:'2min',r:'—'}, {n:'Push-Up to Row',s:'3×10',r:'60s'},
+      {n:'Squat Jumps',s:'3×12',r:'90s'}, {n:'Plank-to-Downdog',s:'3×10',r:'60s'},
+      {n:'Burpees',s:'3×8',r:'90s'} ]},
+    { day:'Sunday', focus:'REST / Stretch', rest:true}
+  ],
+  gym: [
+    { day:'Monday', focus:'Chest + Tris', exercises:[
+      {n:'Bench Press',s:'4×8-10',r:'2min'}, {n:'Incline Dumbbell Press',s:'3×10',r:'90s'},
+      {n:'Cable Flyes',s:'3×12',r:'60s'}, {n:'Tricep Pushdown',s:'3×12',r:'60s'},
+      {n:'Skull Crushers',s:'3×10',r:'90s'} ]},
+    { day:'Tuesday', focus:'Back + Bis', exercises:[
+      {n:'Pull-Ups / Lat Pulldown',s:'4×8',r:'2min'}, {n:'Barbell Row',s:'4×8',r:'2min'},
+      {n:'Seated Cable Row',s:'3×12',r:'90s'}, {n:'Barbell Curl',s:'3×10',r:'60s'},
+      {n:'Hammer Curl',s:'3×12',r:'60s'} ]},
+    { day:'Wednesday', focus:'REST / Light Cardio', rest:true},
+    { day:'Thursday', focus:'Legs', exercises:[
+      {n:'Barbell Squat',s:'4×8',r:'2min'}, {n:'Romanian Deadlift',s:'3×10',r:'2min'},
+      {n:'Leg Press',s:'3×12',r:'90s'}, {n:'Leg Curl',s:'3×12',r:'60s'},
+      {n:'Standing Calf Raise',s:'4×15',r:'60s'} ]},
+    { day:'Friday', focus:'Shoulders + Abs', exercises:[
+      {n:'Overhead Press',s:'4×8',r:'2min'}, {n:'Lateral Raises',s:'3×12',r:'60s'},
+      {n:'Face Pulls',s:'3×15',r:'60s'}, {n:'Hanging Leg Raise',s:'3×12',r:'60s'},
+      {n:'Ab Wheel',s:'3×10',r:'60s'} ]},
+    { day:'Saturday', focus:'Deadlifts + Accessories', exercises:[
+      {n:'Conventional Deadlift',s:'4×5',r:'3min'}, {n:'Good Mornings',s:'3×10',r:'90s'},
+      {n:'Dumbbell Shrugs',s:'3×15',r:'60s'}, {n:'Incline Dumbbell Curl',s:'3×12',r:'60s'} ]},
+    { day:'Sunday', focus:'REST', rest:true}
+  ],
+  hiit: [
+    { day:'Monday', focus:'20-Min Fat Burn', exercises:[
+      {n:'Jumping Jacks',s:'40s ON / 20s rest',r:'—'}, {n:'High Knees',s:'40s ON / 20s rest',r:'—'},
+      {n:'Burpees',s:'30s ON / 30s rest',r:'—'}, {n:'Squat Jumps',s:'40s ON / 20s rest',r:'—'},
+      {n:'Mountain Climbers',s:'40s ON / 20s rest',r:'—'}, {n:'Rest 2min then repeat 2×',s:'',r:'—'} ]},
+    { day:'Tuesday', focus:'REST', rest:true},
+    { day:'Wednesday', focus:'Tabata Core', exercises:[
+      {n:'Crunches (Tabata: 20s on/10s off ×8)',s:'4min',r:'1min'}, {n:'Plank Jacks (Tabata)',s:'4min',r:'1min'},
+      {n:'V-Ups (Tabata)',s:'4min',r:'1min'}, {n:'Bicycle Crunches (Tabata)',s:'4min',r:'—'} ]},
+    { day:'Thursday', focus:'REST', rest:true},
+    { day:'Friday', focus:'30-Min Total Body', exercises:[
+      {n:'Jump Rope / Jacks Warm-Up',s:'3min',r:'—'}, {n:'Push-Up Burpees',s:'4×8',r:'60s'},
+      {n:'Squat-to-Overhead Press',s:'4×12',r:'60s'}, {n:'Plank-to-Row',s:'3×10',r:'60s'},
+      {n:'Sprint Intervals (30s fast/30s walk)',s:'6 rounds',r:'—'} ]},
+    { day:'Saturday', focus:'Active Recovery', exercises:[
+      {n:'10-min walk',s:'easy pace',r:'—'}, {n:'Hip flexor stretch',s:'60s each',r:'—'},
+      {n:'Chest stretch',s:'60s',r:'—'}, {n:'Hamstring stretch',s:'60s each',r:'—'} ]},
+    { day:'Sunday', focus:'REST', rest:true}
+  ]
+};
+
+function switchWorkout(id, el) {
+  document.querySelectorAll('.workout-plan').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.wtab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('plan-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+function renderWorkouts() {
+  ['dorm','gym','hiit'].forEach(planId=>{
+    const days = PLANS[planId];
+    const el = document.getElementById('plan-'+planId);
+    el.innerHTML = days.map((day,di)=>{
+      if(day.rest) return `<div class="day-card"><div class="day-header"><span class="day-label">${day.day}</span><span class="day-focus">${day.focus}</span></div><div class="rest-day">😴 Rest up and recover. Your muscles grow during rest!</div></div>`;
+      const exs = day.exercises;
+      const checkKeys = exs.map((_,ei)=>`${planId}_${di}_${ei}`);
+      const checked = checkKeys.filter(k=>state.checks[k]).length;
+      const pct = Math.round(checked/exs.length*100);
+      return `<div class="day-card">
+        <div class="day-header"><span class="day-label">${day.day}</span><span class="day-focus">${day.focus}</span>${pct===100?'<span class="chip" style="color:var(--green);border-color:var(--green)">✅ Done</span>':''}</div>
+        <div class="exercise-list">
+          ${exs.map((ex,ei)=>{const k=`${planId}_${di}_${ei}`;return `<div class="exercise">
+            <input type="checkbox" ${state.checks[k]?'checked':''} onchange="toggleCheck('${k}',this.checked,'${planId}','${di}')">
+            <span class="ex-name">${ex.n}</span>
+            ${ex.s?`<span class="ex-sets">${ex.s}</span>`:''}
+            ${ex.r&&ex.r!=='—'?`<span class="ex-rest">rest ${ex.r}</span>`:''}
+          </div>`;}).join('')}
+        </div>
+        <div class="day-progress"><div class="day-progress-bar" id="prog_${planId}_${di}" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+  });
+}
+function toggleCheck(k, val, planId, di) {
+  state.checks[k] = val;
+  save();
+  // update progress bar
+  const exs = PLANS[planId][di].exercises;
+  const checkKeys = exs.map((_,ei)=>`${planId}_${di}_${ei}`);
+  const checked = checkKeys.filter(ck=>state.checks[ck]).length;
+  const pct = Math.round(checked/exs.length*100);
+  const bar = document.getElementById(`prog_${planId}_${di}`);
+  if(bar) bar.style.width=pct+'%';
+}
+
+// ── Desk Breaks ────────────────────────────────────────────────────────
+const BREAKS = [
+  { title:'Eye Relief', dur:'1 min', emoji:'👁️', steps:'1. Look 20 feet away for 20 seconds.\n2. Roll eyes slowly in circles.\n3. Blink rapidly 10 times.\n4. Close eyes and breathe.' },
+  { title:'Neck & Shoulder Reset', dur:'3 min', emoji:'🧘', steps:'1. Tilt head left, hold 20s.\n2. Tilt right, hold 20s.\n3. Roll shoulders back 10×.\n4. Chest opener: clasp hands behind back and lift.' },
+  { title:'Hip Flexor Stretch', dur:'2 min', emoji:'🦵', steps:'1. Stand up.\n2. Step one foot back into a lunge.\n3. Sink hips forward, hold 30s.\n4. Switch sides. Repeat twice.' },
+  { title:'Wrist Mobility', dur:'1 min', emoji:'🤲', steps:'1. Extend arms forward.\n2. Make fists, rotate wrists 10× each way.\n3. Open hands wide, fingers spread.\n4. Prayer stretch — press palms, hold 20s.' },
+  { title:'Standing Cardio Burst', dur:'2 min', emoji:'⚡', steps:'1. Jump jacks × 20.\n2. High knees × 20.\n3. Squat × 10.\n4. Shake it out and sit back down.' },
+  { title:'Spinal Twist', dur:'2 min', emoji:'🌀', steps:'1. Sit up straight.\n2. Twist torso to the right, hold 20s.\n3. Twist to left, hold 20s.\n4. Repeat twice each side.' },
+  { title:'Box Breathing', dur:'3 min', emoji:'💨', steps:'1. Inhale for 4 counts.\n2. Hold for 4 counts.\n3. Exhale for 4 counts.\n4. Hold for 4 counts. Repeat 5 times.' },
+  { title:'Calf Raise Desk Set', dur:'1 min', emoji:'👟', steps:'1. Stay seated or stand at desk.\n2. Do 30 calf raises.\n3. Hold the last one for 10 seconds.\n4. Bonus: do while waiting for builds!' }
+];
+
+let reminderTimer = null;
+function startReminder() {
+  if(reminderTimer) clearInterval(reminderTimer);
+  const mins = parseInt(document.getElementById('reminderInterval').value);
+  reminderTimer = setInterval(()=>{
+    if('Notification' in window && Notification.permission==='granted') {
+      new Notification('🏃 Move your body!', {body:`Time for a ${mins}-min break. Pick a desk exercise!`});
+    } else { alert('🏃 Break time! Pick a desk exercise.'); }
+  }, mins*60000);
+  document.getElementById('reminderStatus').style.display='inline';
+  if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
+}
+
+function renderBreaks() {
+  const el = document.getElementById('breakGrid');
+  if(!el) return;
+  el.innerHTML = BREAKS.map((b,i)=>`
+    <div class="break-card">
+      <div style="font-size:1.5rem">${b.emoji}</div>
+      <div class="break-title">${b.title}</div>
+      <div class="break-dur">⏱ ${b.dur}</div>
+      <div class="steps">${b.steps.split('\n').join('<br>')}</div>
+      <button class="btn green sm do-btn" onclick="logBreak('${b.title}','${b.dur}')">✅ Done!</button>
+    </div>`).join('');
+}
+function logBreak(title, dur) {
+  const mins = parseInt(dur)||1;
+  state.sessions.push({ id:Date.now(), date:today(), type:'Desk Breaks', dur:mins, energy:3, note:title });
+  save(); event.currentTarget.textContent='🎉 Logged!';
+  setTimeout(()=>event.currentTarget.textContent='✅ Done!',2000);
+}
+
+// ── Tracker ────────────────────────────────────────────────────────────
+function today() { return new Date().toISOString().slice(0,10); }
+
+document.addEventListener('DOMContentLoaded', ()=>{ const d=document.getElementById('logDate'); if(d) d.value=today(); });
+
+function logSession() {
+  const date = document.getElementById('logDate').value || today();
+  const type = document.getElementById('logType').value;
+  const dur  = parseInt(document.getElementById('logDur').value)||0;
+  const energy = parseInt(document.getElementById('logEnergy').value)||3;
+  const note = document.getElementById('logNote').value.trim();
+  if(!dur) { alert('Enter a duration!'); return; }
+  state.sessions.push({ id:Date.now(), date, type, dur, energy, note });
+  save(); renderLog();
+  document.getElementById('logDur').value='';
+  document.getElementById('logNote').value='';
+  document.getElementById('logDate').value=today();
+}
+function deleteSession(id) {
+  state.sessions = state.sessions.filter(s=>s.id!==id);
+  save(); renderLog();
+}
+function renderLog() {
+  const el = document.getElementById('sessionLog');
+  if(!el) return;
+  const sorted = [...state.sessions].sort((a,b)=>b.date.localeCompare(a.date));
+  if(!sorted.length) { el.innerHTML='<div class="empty">No sessions logged yet. Hit the gym (or dorm)!</div>'; return; }
+  el.innerHTML = `<h3 style="margin-bottom:10px">Recent Sessions (${sorted.length} total)</h3>`
+    + `<div class="session-list">`
+    + sorted.slice(0,30).map(s=>`<div class="session-item">
+      <span class="s-date">${s.date}</span>
+      <span class="s-type">${s.type}</span>
+      <span class="s-dur">${s.dur} min</span>
+      <span class="s-note">${'⭐'.repeat(s.energy)} ${s.note||''}</span>
+      <button class="btn danger xs s-del" onclick="deleteSession(${s.id})">✕</button>
+    </div>`).join('')+'</div>';
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────
+function renderStats() {
+  const sessions = state.sessions;
+  const totalMin = sessions.reduce((s,e)=>s+e.dur,0);
+  const totalSessions = sessions.length;
+
+  // streak
+  let streak = 0;
+  const d = new Date(today());
+  while(true) {
+    const ds = d.toISOString().slice(0,10);
+    if(sessions.some(s=>s.date===ds)) { streak++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+
+  // this week
+  const weekStart = new Date(); weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+  const thisWeekSessions = sessions.filter(s=>s.date>=weekStart.toISOString().slice(0,10)).length;
+
+  const grid = document.getElementById('statsGrid');
+  if(grid) grid.innerHTML = `
+    <div class="stat-box"><div class="sv">${totalSessions}</div><div class="sl">Total Sessions</div></div>
+    <div class="stat-box"><div class="sv">${Math.round(totalMin/60*10)/10}</div><div class="sl">Total Hours</div></div>
+    <div class="stat-box"><div class="sv streak-fire">${streak > 0 ? '🔥' : '—'}<span style="font-size:1.2rem">${streak}</span></div><div class="sl">Day Streak</div></div>
+    <div class="stat-box"><div class="sv">${thisWeekSessions}</div><div class="sl">This Week</div></div>
+    <div class="stat-box"><div class="sv">${totalSessions?Math.round(totalMin/totalSessions):0}</div><div class="sl">Avg Duration (min)</div></div>
+  `;
+
+  // Weekly chart
+  const canvas = document.getElementById('statsChart');
+  if(canvas) {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.offsetWidth||600, H = 200;
+    canvas.width = W; canvas.height = H;
+    ctx.clearRect(0,0,W,H);
+    // last 8 weeks
+    const weeks = [];
+    for(let i=7;i>=0;i--) {
+      const wStart = new Date(); wStart.setDate(wStart.getDate() - wStart.getDay() - i*7);
+      const wEnd   = new Date(wStart); wEnd.setDate(wEnd.getDate()+6);
+      const ws = wStart.toISOString().slice(0,10), we = wEnd.toISOString().slice(0,10);
+      const count = sessions.filter(s=>s.date>=ws&&s.date<=we).length;
+      const label = wStart.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      weeks.push({label, count});
+    }
+    const maxC = Math.max(...weeks.map(w=>w.count),1);
+    const pad=40, bw=(W-pad*2)/8-6;
+    ctx.fillStyle='#0a1a0a'; ctx.fillRect(0,0,W,H);
+    weeks.forEach((w,i)=>{
+      const x=pad+i*(bw+6);
+      const barH=Math.round((w.count/maxC)*(H-60));
+      ctx.fillStyle='#4ade8055'; ctx.fillRect(x,H-pad-barH,bw,barH);
+      ctx.fillStyle='var(--green)||#4ade80'; ctx.fillStyle='#4ade80';
+      if(barH>0) ctx.fillRect(x,H-pad-barH,bw,3);
+      ctx.fillStyle='#5a7a5a'; ctx.font='10px Segoe UI'; ctx.textAlign='center';
+      ctx.fillText(w.label,x+bw/2,H-8);
+      if(w.count) { ctx.fillStyle='#4ade80'; ctx.font='bold 11px Segoe UI'; ctx.fillText(w.count,x+bw/2,H-pad-barH-5); }
+    });
+  }
+
+  // Type breakdown
+  const breakdown = {};
+  sessions.forEach(s=>{ breakdown[s.type]=(breakdown[s.type]||0)+s.dur; });
+  const typeEl = document.getElementById('typeBreakdown');
+  if(typeEl) {
+    if(!Object.keys(breakdown).length) { typeEl.innerHTML='<div class="empty">No data yet.</div>'; return; }
+    const total = Object.values(breakdown).reduce((a,b)=>a+b,0);
+    typeEl.innerHTML = Object.entries(breakdown).sort((a,b)=>b[1]-a[1]).map(([type,mins])=>{
+      const pct = Math.round(mins/total*100);
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:4px">
+          <span>${type}</span><span style="color:var(--green)">${mins} min (${pct}%)</span>
+        </div>
+        <div style="background:var(--border);border-radius:4px;height:8px">
+          <div style="width:${pct}%;background:var(--green);height:8px;border-radius:4px;transition:width .5s"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────
+renderWorkouts();
+renderBreaks();
+renderLog();
+updateTimerDisplay();
+document.getElementById('logDate') && (document.getElementById('logDate').value = today());
+</script>
+</body>
+</html>
