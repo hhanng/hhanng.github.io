@@ -14,10 +14,10 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-████████████████████████████████████████████████░░  98 / 100
+████████████████████████████████████████████████████  100 / 100 🏆
 ```
 
-**98 / 100 complete** — progress bar on the live site updates automatically 🎉
+**100 / 100 complete — Challenge done!** 🎉 — progress bar on the live site updates automatically 🎉
 
 &nbsp;
 
@@ -151,6 +151,7 @@ for founders, indie hackers, and anyone shipping something
 | [#97](https://hhanng.github.io/agent-97-build-in-public-playbook/) | Build in Public Playbook | platform matcher, 50 content templates, weekly planner with streak tracker, GitHub README generator, Twitter bio scorer, LinkedIn headline builder |
 | [#98](https://hhanng.github.io/agent-98-graph-algorithms-visualizer/) | Graph Algorithms Visualizer | 9 algorithms animated step by step (BFS, DFS, Dijkstra, Bellman-Ford, Prim's, Kruskal's, Topo Sort, Cycle Detection, Bipartite), 6 example graphs, 15 challenges, 20 flip-card Q&As |
 | [#99](https://hhanng.github.io/agent-99-llm-generative-ai-roadmap/) | LLM & Generative AI Roadmap | 6-stage roadmap from foundations to production, 20 concept explainers (self-attention, RAG, RLHF, temperature, LoRA, quantization), prompt builder, token counter, 40 curated resources |
+| [#100 🏆](https://hhanng.github.io/agent-100-behavioral-interview-star-bank/) | Behavioral Interview STAR Bank | STAR story bank with quality checker, 60 questions across all 16 Amazon LPs + Google/Meta/Apple/Microsoft, answer analyzer (5 dimensions), LP mapper, "tell me about yourself" builder |
 
 &nbsp;
 
@@ -205,4 +206,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · agent #99 LLM & Generative AI Roadmap live: https://hhanng.github.io/agent-99-llm-generative-ai-roadmap/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · 100/100 complete 🏆 · agent #100 Behavioral Interview STAR Bank: https://hhanng.github.io/agent-100-behavioral-interview-star-bank/</sub>

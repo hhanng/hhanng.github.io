@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Behavioral Interview STAR Bank — Agent #100 🏆</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1a1400;--card:#2d2200;--card2:#3d3000;
+  --gold:#fbbf24;--violet:#a78bfa;--green:#4ade80;
+  --red:#f87171;--cyan:#22d3ee;--gray:#94a3b8;
+  --text:#f5f0e0;--border:#4a3800;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+h1{font-size:1.6rem;font-weight:700;color:var(--gold)}
+h2{font-size:1.05rem;font-weight:600;color:var(--gold);margin-bottom:12px}
+h3{font-size:.95rem;font-weight:600}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:16px}
+.badge{background:var(--gold);color:#000;font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:20px}
+.finale-tag{background:rgba(167,139,250,.2);border:1px solid var(--violet);color:var(--violet);font-size:.72rem;padding:3px 10px;border-radius:20px}
+.tabs{display:flex;gap:0;background:var(--card);border-bottom:1px solid var(--border)}
+.tab{padding:12px 22px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--gray);border-bottom:3px solid transparent;transition:.2s;letter-spacing:.5px}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab:hover:not(.active){color:var(--text)}
+.panel{display:none;padding:24px;max-width:1000px;margin:0 auto}
+.panel.active{display:block}
+/* Stories */
+.story-layout{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.story-list{display:flex;flex-direction:column;gap:12px}
+.story-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:.2s}
+.story-card:hover{border-color:var(--gold)}
+.story-card.selected{border-color:var(--gold);background:var(--card2)}
+.quality-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.q-check{font-size:.68rem;padding:2px 7px;border-radius:10px}
+.q-pass{background:#1a2e1a;color:var(--green)}
+.q-fail{background:#2e1a1a;color:var(--red)}
+.quality-badge{font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px}
+.badge-strong{background:rgba(74,222,128,.15);border:1px solid var(--green);color:var(--green)}
+.badge-needs{background:rgba(251,191,36,.15);border:1px solid var(--gold);color:var(--gold)}
+.badge-incomplete{background:rgba(248,113,113,.15);border:1px solid var(--red);color:var(--red)}
+.story-form{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+label{font-size:.75rem;color:var(--gray);display:block;margin-bottom:4px;margin-top:12px}
+label:first-of-type{margin-top:0}
+input[type=text],textarea,select{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:.82rem;outline:none;font-family:inherit}
+input[type=text]:focus,textarea:focus{border-color:var(--gold)}
+textarea{resize:vertical}
+.tag-select{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.skill-tag{padding:5px 10px;border-radius:20px;font-size:.72rem;cursor:pointer;border:1px solid var(--border);background:var(--card2);color:var(--gray);transition:.2s;user-select:none}
+.skill-tag.selected{background:rgba(167,139,250,.2);border-color:var(--violet);color:var(--violet)}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:.82rem;font-weight:600;transition:.2s}
+.btn-primary{background:var(--gold);color:#000}
+.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+.btn-danger{background:#2e1a1a;color:var(--red);border:1px solid var(--red)}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.empty-state{text-align:center;padding:40px;color:var(--gray);font-size:.85rem}
+/* Practice */
+.company-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.co-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card2);color:var(--gray);font-size:.78rem;cursor:pointer;transition:.2s;font-weight:600}
+.co-btn.active{background:rgba(251,191,36,.15);border-color:var(--gold);color:var(--gold)}
+.question-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.timer-ring{width:80px;height:80px;position:relative;flex-shrink:0}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-ring .bg{fill:none;stroke:var(--border);stroke-width:6}
+.timer-ring .fg{fill:none;stroke:var(--gold);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .5s;stroke-dasharray:226;stroke-dashoffset:0}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:var(--gold)}
+.rating-stars{display:flex;gap:6px;margin-top:10px}
+.star{font-size:1.4rem;cursor:pointer;transition:.2s;opacity:.3}
+.star.lit{opacity:1}
+.session-summary{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;display:none}
+.session-summary.visible{display:block}
+.match-card{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:10px;font-size:.78rem;border-left:3px solid var(--violet)}
+/* Company Prep */
+.prep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.prep-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.lp-grid{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.lp-item{background:var(--card2);border-radius:8px;padding:10px;cursor:pointer;transition:.2s;font-size:.78rem}
+.lp-item:hover{border-left:3px solid var(--gold)}
+.lp-item.open{border-left:3px solid var(--gold)}
+.lp-detail{font-size:.73rem;color:var(--gray);line-height:1.5;padding-top:8px;display:none}
+.lp-item.open .lp-detail{display:block}
+/* Story mapper */
+.mapper-result{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:10px;font-size:.78rem;display:none}
+.mapper-result.visible{display:block}
+/* Coach */
+.coach-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.coach-grid{grid-template-columns:1fr}.story-layout{grid-template-columns:1fr}}
+.coach-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.score-dim{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:.8rem}
+.score-bar-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:4px;transition:.5s}
+.score-num{width:30px;text-align:right;font-family:monospace;font-weight:700}
+.weakness-example{padding:10px;border-radius:8px;font-size:.78rem;margin-bottom:8px;border-left:3px solid}
+.weakness-bad{border-color:var(--red);background:rgba(248,113,113,.05)}
+.weakness-good{border-color:var(--green);background:rgba(74,222,128,.05)}
+/* scrollbars */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.word-count{font-size:.68rem;color:var(--gray);text-align:right;margin-top:2px}
+.star-export-row{display:flex;gap:8px;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="badge">#100 🏆</span>
+  <h1>Behavioral Interview STAR Bank</h1>
+  <span class="finale-tag" style="margin-left:8px">Final Agent</span>
+  <span style="color:var(--gray);font-size:.82rem;margin-left:auto">Build your story bank. Ace every behavioral interview.</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('stories')">MY STORIES</div>
+  <div class="tab" onclick="switchTab('practice')">PRACTICE</div>
+  <div class="tab" onclick="switchTab('prep')">COMPANY PREP</div>
+  <div class="tab" onclick="switchTab('coach')">COACH</div>
+</div>
+
+<!-- ═══════════════════════ MY STORIES ═══════════════════════ -->
+<div id="panel-stories" class="panel active">
+  <div class="story-layout">
+    <div>
+      <div class="star-export-row">
+        <button class="btn btn-secondary" onclick="exportStories()">Export JSON</button>
+        <label class="btn btn-secondary" style="cursor:pointer;margin:0">Import JSON<input type="file" accept=".json" style="display:none" onchange="importStories(this)"/></label>
+      </div>
+      <div id="storyList"></div>
+    </div>
+    <div>
+      <div class="story-form" id="storyForm">
+        <h3 style="margin-bottom:14px;color:var(--gold)" id="formTitle">New Story</h3>
+        <input type="hidden" id="editId" value=""/>
+        <label>Story Title</label>
+        <input type="text" id="f-title" placeholder="e.g. Led migration to microservices"/>
+        <label>Situation <span style="color:var(--gray)">(context, what was happening)</span></label>
+        <textarea id="f-sit" rows="3" placeholder="At my internship, our team was facing..."></textarea>
+        <div class="word-count" id="wc-sit">0 words</div>
+        <label>Task <span style="color:var(--gray)">(your responsibility)</span></label>
+        <textarea id="f-task" rows="2" placeholder="I was responsible for..."></textarea>
+        <div class="word-count" id="wc-task">0 words</div>
+        <label>Action <span style="color:var(--gold)">★ Make this the longest section — own every I</span></label>
+        <textarea id="f-action" rows="5" placeholder="I first analyzed... Then I decided to... I collaborated with... I implemented..."></textarea>
+        <div class="word-count" id="wc-action">0 words</div>
+        <label>Result <span style="color:var(--gold)">★ Must include a number</span></label>
+        <textarea id="f-result" rows="3" placeholder="As a result, we reduced latency by 40%, saving $12K/month..."></textarea>
+        <div class="word-count" id="wc-result">0 words</div>
+        <label>Skill Tags (select 3+)</label>
+        <div class="tag-select" id="skillTagsSelect"></div>
+        <div id="qualityPreview" style="margin-top:14px"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="saveStory()">Save Story</button>
+          <button class="btn btn-secondary" onclick="clearForm()">Clear</button>
+          <button class="btn btn-danger" id="deleteBtn" style="display:none" onclick="deleteStory()">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PRACTICE ═══════════════════════ -->
+<div id="panel-practice" class="panel">
+  <div class="company-tabs" id="companyTabs"></div>
+
+  <div id="practiceArea">
+    <div id="questionCard" class="question-card" style="display:none">
+      <div style="display:flex;gap:16px;align-items:flex-start">
+        <div>
+          <div style="font-size:.72rem;color:var(--gray);margin-bottom:6px" id="qNum">Question 1 of 16</div>
+          <div style="font-size:.95rem;font-weight:600;line-height:1.5" id="qText"></div>
+          <div style="font-size:.72rem;color:var(--violet);margin-top:6px" id="qLP"></div>
+        </div>
+        <div class="timer-ring" id="timerRing">
+          <svg viewBox="0 0 80 80" width="80" height="80">
+            <circle class="bg" cx="40" cy="40" r="36"/>
+            <circle class="fg" id="timerArc" cx="40" cy="40" r="36"/>
+          </svg>
+          <div class="timer-num" id="timerNum">2:00</div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label style="font-size:.75rem;color:var(--gray)">Your STAR answer (use your story bank or type freely)</label>
+        <textarea id="practiceAnswer" rows="4" placeholder="Situation: ...\nTask: ...\nAction: ...\nResult: ..."></textarea>
+      </div>
+      <div style="margin-top:12px">
+        <div style="font-size:.75rem;color:var(--gray);margin-bottom:6px">Self-rate your answer</div>
+        <div class="rating-stars" id="ratingStars">
+          <span class="star" onclick="rateAnswer(1)">⭐</span>
+          <span class="star" onclick="rateAnswer(2)">⭐</span>
+          <span class="star" onclick="rateAnswer(3)">⭐</span>
+          <span class="star" onclick="rateAnswer(4)">⭐</span>
+          <span class="star" onclick="rateAnswer(5)">⭐</span>
+        </div>
+      </div>
+      <div id="storyMatch" class="match-card" style="display:none"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnNextQ" onclick="nextQuestion()" style="display:none">Next Question ›</button>
+        <button class="btn btn-secondary" onclick="endSession()">End Session</button>
+      </div>
+    </div>
+
+    <div id="practiceStart" style="text-align:center;padding:40px">
+      <p style="color:var(--gray);margin-bottom:16px">Select a company above to start a mock interview session.</p>
+    </div>
+
+    <div class="session-summary" id="sessionSummary">
+      <h2 style="margin-bottom:14px">Session Complete 🎉</h2>
+      <div id="summaryContent"></div>
+      <button class="btn btn-primary" onclick="restartSession()" style="margin-top:16px">Practice Again</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ COMPANY PREP ═══════════════════════ -->
+<div id="panel-prep" class="panel">
+  <div class="prep-grid" id="prepGrid"></div>
+  <div style="margin-top:24px">
+    <h2>Story → Leadership Principle Mapper</h2>
+    <p style="font-size:.78rem;color:var(--gray);margin-bottom:12px">Select a saved story to see which Amazon LPs it covers.</p>
+    <select id="mapperStorySelect" style="margin-bottom:10px;max-width:400px" onchange="mapStory()">
+      <option value="">Select a story...</option>
+    </select>
+    <div class="mapper-result" id="mapperResult"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ COACH ═══════════════════════ -->
+<div id="panel-coach" class="panel">
+  <div class="coach-grid">
+
+    <div class="coach-card" style="grid-column:1/-1">
+      <h3 style="margin-bottom:10px;color:var(--gold)">Answer Analyzer</h3>
+      <p style="font-size:.75rem;color:var(--gray);margin-bottom:10px">Paste any behavioral answer → get scored on 5 dimensions</p>
+      <textarea id="analyzeInput" rows="6" placeholder="Tell me about a time you led a team through a difficult situation...&#10;&#10;Situation: Our production database was...&#10;Task: I was the on-call engineer responsible for...&#10;Action: I first...&#10;Result: We restored service in 23 minutes, a 60% improvement..."></textarea>
+      <button class="btn btn-primary" onclick="analyzeAnswer()" style="margin-top:10px">Analyze Answer</button>
+      <div id="analyzeResult" style="margin-top:16px;display:none">
+        <div id="scoreDims"></div>
+        <div id="overallScore" style="margin-top:14px;padding:12px;border-radius:8px;text-align:center"></div>
+      </div>
+    </div>
+
+    <div class="coach-card">
+      <h3 style="margin-bottom:10px;color:var(--violet)">"Tell Me About Yourself" Builder</h3>
+      <p style="font-size:.75rem;color:var(--gray);margin-bottom:10px">Past + Present + Future formula → 90-second script</p>
+      <label>Past (background, what led you here)</label>
+      <textarea id="tmay-past" rows="2" placeholder="I studied CS at UT Dallas, where I focused on..."></textarea>
+      <label>Present (what you're doing now, key skills)</label>
+      <textarea id="tmay-present" rows="2" placeholder="Currently I'm a software engineering intern at..."></textarea>
+      <label>Future (why THIS company, what you want to do)</label>
+      <textarea id="tmay-future" rows="2" placeholder="I'm excited about this role at [Company] because..."></textarea>
+      <button class="btn btn-primary" onclick="buildTMAY()" style="margin-top:10px">Generate Script</button>
+      <div id="tmay-result" style="margin-top:12px;background:var(--bg);border-radius:8px;padding:12px;font-size:.8rem;line-height:1.7;display:none;color:var(--text)"></div>
+      <div id="tmay-wc" style="font-size:.7rem;color:var(--gray);margin-top:6px"></div>
+    </div>
+
+    <div class="coach-card">
+      <h3 style="margin-bottom:10px;color:var(--cyan)">Weakness Answer Builder</h3>
+      <p style="font-size:.75rem;color:var(--gray);margin-bottom:10px">Formula: Real weakness + Steps to improve + Evidence of growth</p>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.75rem;font-weight:600;color:var(--red);margin-bottom:6px">❌ Avoid these weakness traps</div>
+        ${['I work too hard / I\'m a perfectionist','I don\'t have any real weaknesses','I\'m too passionate about my work','A strength disguised as a weakness','Something critical to the role'].map(w=>`<div class="weakness-example weakness-bad">✗ "${w}"</div>`).join('')}
+      </div>
+      <div>
+        <div style="font-size:.75rem;font-weight:600;color:var(--green);margin-bottom:6px">✅ Strong weakness examples</div>
+        ${[
+          {w:'Public speaking',fix:'I joined my university\'s Toastmasters club and have given 8 prepared talks. My last presentation got positive feedback from 20+ attendees.'},
+          {w:'Delegation',fix:'I used to try to do everything myself. I\'ve been practicing trust-but-verify: assigning tasks with clear specs and check-ins, not micromanaging.'},
+          {w:'Taking criticism',fix:'I realized feedback is data, not judgment. I now explicitly ask "what\'s one thing I could have done better?" after every project.'},
+          {w:'Switching context quickly',fix:'I built a context-switching ritual: 5-min brain dump before switching tasks. It\'s reduced my ramp-up time by ~50%.'},
+          {w:'Saying no to extra work',fix:'I\'ve learned to quantify tradeoffs: "if I take this, X will be delayed by Y." It\'s made boundary-setting feel objective, not personal.'}
+        ].map(e=>`<div class="weakness-example weakness-good" style="margin-bottom:8px"><b>Weakness:</b> ${e.w}<br><b>What I did:</b> ${e.fix}</div>`).join('')}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const STORAGE='star100_';
+
+// ─────────────────────── TABS ───────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const names=['stories','practice','prep','coach'];
+    t.classList.toggle('active',names[i]===name);
+  });
+  document.querySelectorAll('.panel').forEach(p=>{
+    p.classList.toggle('active',p.id==='panel-'+name);
+  });
+  if(name==='prep') buildMapperSelect();
+}
+
+// ─────────────────────── SKILL TAGS ───────────────────────
+const SKILL_TAGS=['Leadership','Conflict Resolution','Failure & Learning','Ownership','Innovation','Teamwork','Prioritization','Data-Driven','Ambiguity','Communication','Mentorship','Bias for Action','Influence Without Authority','Customer Obsession','Technical Problem Solving'];
+
+function buildSkillTagSelect(){
+  const container=document.getElementById('skillTagsSelect');
+  container.innerHTML=SKILL_TAGS.map(t=>`<span class="skill-tag" onclick="toggleTag(this,'${t}')" data-tag="${t}">${t}</span>`).join('');
+}
+
+function toggleTag(el, tag){
+  el.classList.toggle('selected');
+  updateQualityPreview();
+}
+
+function getSelectedTags(){
+  return [...document.querySelectorAll('.skill-tag.selected')].map(el=>el.dataset.tag);
+}
+
+function setSelectedTags(tags){
+  document.querySelectorAll('.skill-tag').forEach(el=>{
+    el.classList.toggle('selected', tags.includes(el.dataset.tag));
+  });
+}
+
+// ─────────────────────── WORD COUNT ───────────────────────
+function wc(text){ return text.trim().split(/\s+/).filter(Boolean).length; }
+
+function setupWordCounts(){
+  [['f-sit','wc-sit'],['f-task','wc-task'],['f-action','wc-action'],['f-result','wc-result']].forEach(([fid,wid])=>{
+    const f=document.getElementById(fid), w=document.getElementById(wid);
+    f.addEventListener('input',()=>{ w.textContent=wc(f.value)+' words'; updateQualityPreview(); });
+  });
+}
+
+// ─────────────────────── QUALITY CHECKER ───────────────────────
+function checkQuality(){
+  const sit=document.getElementById('f-sit').value;
+  const task=document.getElementById('f-task').value;
+  const action=document.getElementById('f-action').value;
+  const result=document.getElementById('f-result').value;
+  const tags=getSelectedTags();
+  const totalWords=wc(sit)+wc(task)+wc(action)+wc(result);
+  const checks=[
+    {label:'Result has a metric',pass:/\d+[%$kKmM]|\d+\s*(percent|dollars|users|hours|minutes|ms|x\s|times|seconds|points|ms|week)/i.test(result)||(result.match(/\d+/)!==null)},
+    {label:'Action > Situation + Task',pass:wc(action)>wc(sit)+wc(task)},
+    {label:'Under 250 words (2-min story)',pass:totalWords<=260&&totalWords>0},
+    {label:'3+ skill tags',pass:tags.length>=3},
+  ];
+  const passCount=checks.filter(c=>c.pass).length;
+  let badge='Incomplete', badgeClass='badge-incomplete';
+  if(passCount===4){ badge='Strong'; badgeClass='badge-strong'; }
+  else if(passCount>=2){ badge='Needs Work'; badgeClass='badge-needs'; }
+  return {checks, badge, badgeClass, passCount};
+}
+
+function updateQualityPreview(){
+  const {checks,badge,badgeClass}=checkQuality();
+  const preview=document.getElementById('qualityPreview');
+  if(!document.getElementById('f-title').value&&!document.getElementById('f-sit').value){ preview.innerHTML=''; return; }
+  preview.innerHTML=`<div style="margin-bottom:8px"><span class="quality-badge ${badgeClass}">${badge}</span></div>`+
+    `<div class="quality-row">`+checks.map(c=>`<span class="q-check ${c.pass?'q-pass':'q-fail'}">${c.pass?'✓':'✗'} ${c.label}</span>`).join('')+`</div>`;
+}
+
+// ─────────────────────── STORIES CRUD ───────────────────────
+function loadStories(){ return JSON.parse(localStorage.getItem(STORAGE+'stories')||'[]'); }
+function saveStories(arr){ localStorage.setItem(STORAGE+'stories',JSON.stringify(arr)); }
+
+function renderStoryList(){
+  const stories=loadStories();
+  const list=document.getElementById('storyList');
+  if(!stories.length){
+    list.innerHTML=`<div class="empty-state"><div style="font-size:2rem;margin-bottom:8px">📝</div><p>No stories yet. Add your first STAR story using the form →</p><p style="margin-top:8px;font-size:.78rem">Pro tip: Start with a time you solved a hard problem or led under pressure.</p></div>`;
+    return;
+  }
+  list.innerHTML=stories.map((s,i)=>{
+    const q=qualityForStory(s);
+    return `<div class="story-card" id="sc-${i}" onclick="editStory(${i})">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div style="font-weight:600;font-size:.9rem">${s.title||'Untitled Story'}</div>
+        <span class="quality-badge ${q.badgeClass}">${q.badge}</span>
+      </div>
+      <div class="quality-row">
+        ${(s.tags||[]).map(t=>`<span style="background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:var(--violet);border-radius:20px;font-size:.65rem;padding:2px 7px">${t}</span>`).join('')}
+      </div>
+      ${q.checks?`<div class="quality-row" style="margin-top:6px">`+q.checks.map(c=>`<span class="q-check ${c.pass?'q-pass':'q-fail'}">${c.pass?'✓':'✗'} ${c.label}</span>`).join('')+`</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function qualityForStory(s){
+  const totalWords=wc(s.situation||'')+wc(s.task||'')+wc(s.action||'')+wc(s.result||'');
+  const checks=[
+    {label:'Metric in result',pass:/\d/.test(s.result||'')},
+    {label:'Action > Sit+Task',pass:wc(s.action||'')>wc(s.situation||'')+wc(s.task||'')},
+    {label:'Under 250 words',pass:totalWords<=260&&totalWords>0},
+    {label:'3+ tags',pass:(s.tags||[]).length>=3},
+  ];
+  const passCount=checks.filter(c=>c.pass).length;
+  let badge='Incomplete', badgeClass='badge-incomplete';
+  if(passCount===4){ badge='Strong'; badgeClass='badge-strong'; }
+  else if(passCount>=2){ badge='Needs Work'; badgeClass='badge-needs'; }
+  return {checks,badge,badgeClass,passCount};
+}
+
+function saveStory(){
+  const title=document.getElementById('f-title').value.trim();
+  if(!title){ alert('Please add a title.'); return; }
+  const story={
+    id: document.getElementById('editId').value || Date.now().toString(),
+    title,
+    situation:document.getElementById('f-sit').value.trim(),
+    task:document.getElementById('f-task').value.trim(),
+    action:document.getElementById('f-action').value.trim(),
+    result:document.getElementById('f-result').value.trim(),
+    tags:getSelectedTags()
+  };
+  const stories=loadStories();
+  const idx=stories.findIndex(s=>s.id===story.id);
+  if(idx>=0) stories[idx]=story; else stories.unshift(story);
+  saveStories(stories);
+  clearForm();
+  renderStoryList();
+}
+
+function editStory(i){
+  const stories=loadStories();
+  const s=stories[i];
+  document.getElementById('editId').value=s.id;
+  document.getElementById('f-title').value=s.title||'';
+  document.getElementById('f-sit').value=s.situation||'';
+  document.getElementById('f-task').value=s.task||'';
+  document.getElementById('f-action').value=s.action||'';
+  document.getElementById('f-result').value=s.result||'';
+  setSelectedTags(s.tags||[]);
+  document.getElementById('formTitle').textContent='Edit Story';
+  document.getElementById('deleteBtn').style.display='block';
+  ['sit','task','action','result'].forEach(f=>{
+    const el=document.getElementById(`f-${f}`);
+    document.getElementById(`wc-${f}`).textContent=wc(el.value)+' words';
+  });
+  updateQualityPreview();
+  document.getElementById('storyForm').scrollIntoView({behavior:'smooth'});
+}
+
+function deleteStory(){
+  const id=document.getElementById('editId').value;
+  if(!id||!confirm('Delete this story?')) return;
+  const stories=loadStories().filter(s=>s.id!==id);
+  saveStories(stories);
+  clearForm(); renderStoryList();
+}
+
+function clearForm(){
+  document.getElementById('editId').value='';
+  ['f-title','f-sit','f-task','f-action','f-result'].forEach(id=>document.getElementById(id).value='');
+  setSelectedTags([]);
+  document.getElementById('formTitle').textContent='New Story';
+  document.getElementById('deleteBtn').style.display='none';
+  document.getElementById('qualityPreview').innerHTML='';
+  ['sit','task','action','result'].forEach(f=>document.getElementById(`wc-${f}`).textContent='0 words');
+}
+
+function exportStories(){
+  const data=JSON.stringify(loadStories(),null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='star-stories.json'; a.click();
+}
+
+function importStories(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ try{ const data=JSON.parse(e.target.result); saveStories(data); renderStoryList(); alert(`Imported ${data.length} stories.`); } catch(err){ alert('Invalid JSON file.'); } };
+  reader.readAsText(file);
+}
+
+// ─────────────────────── PRACTICE ───────────────────────
+const QUESTIONS={
+  Amazon:[
+    {q:'Tell me about a time you put the customer first, even at a cost to yourself or your team.',lp:'Customer Obsession'},
+    {q:'Describe a time you took ownership of a project beyond your assigned responsibilities.',lp:'Ownership'},
+    {q:'Give an example of a process you simplified or automated.',lp:'Invent & Simplify'},
+    {q:'Tell me about a time you had to make a decision with incomplete data. How did you know you were right?',lp:'Are Right A Lot'},
+    {q:'Describe a time you learned something new quickly to solve a problem.',lp:'Learn & Be Curious'},
+    {q:'Tell me about a time you mentored or coached someone on your team.',lp:'Hire & Develop the Best'},
+    {q:'Describe a time you caught a quality issue before it reached the customer.',lp:'Insist on Highest Standards'},
+    {q:'Tell me about a time you set a bold, ambitious goal. What happened?',lp:'Think Big'},
+    {q:'Give an example of when you took a calculated risk without waiting for full approval.',lp:'Bias for Action'},
+    {q:'Describe a time you accomplished something significant with limited resources.',lp:'Frugality'},
+    {q:'Tell me about a time you admitted a mistake to a customer, manager, or team.',lp:'Earn Trust'},
+    {q:'Describe a time you dug deep into data to solve a problem, going beyond the obvious.',lp:'Dive Deep'},
+    {q:'Tell me about a time you disagreed with a decision and why you still moved forward (or didn\'t).',lp:'Have Backbone; Disagree & Commit'},
+    {q:'What is your most significant professional accomplishment? Walk me through how you delivered it.',lp:'Deliver Results'},
+    {q:'Describe a time you went out of your way to create an inclusive or supportive environment.',lp:"Strive to be Earth's Best Employer"},
+    {q:'Tell me about a time your work created impact at scale — more than just your immediate team.',lp:'Success and Scale Bring Broad Responsibility'}
+  ],
+  Google:[
+    {q:'Tell me about a time you had to make a decision using data, and what the outcome was.',lp:'General Cognitive Ability'},
+    {q:'Describe a time you led a project without formal authority.',lp:'Leadership'},
+    {q:'Tell me about a time you navigated ambiguity — unclear requirements, undefined scope.',lp:'Ambiguity'},
+    {q:'Give an example of a time you collaborated across teams with different priorities.',lp:'Collaboration'},
+    {q:'Describe your most impactful technical contribution. Why does it matter?',lp:'Role-Related Knowledge'},
+    {q:'Tell me about a time you failed. What did you learn, and what did you change?',lp:'Failure & Learning'},
+    {q:'Describe a time you did something unexpected or creative to solve a problem.',lp:'Googleyness — Innovation'},
+    {q:'Tell me about a time you received critical feedback. How did you respond?',lp:'Feedback & Growth'},
+    {q:'Give an example of a time you improved a system or process nobody asked you to.',lp:'Initiative'},
+    {q:'Describe a time you had to balance multiple competing priorities. How did you decide?',lp:'Prioritization'},
+    {q:'Tell me about a time you had to persuade a skeptical stakeholder.',lp:'Influence'},
+    {q:'What is the most complex system you have built or contributed to significantly?',lp:'Technical Depth'}
+  ],
+  Meta:[
+    {q:'Tell me about a time you moved fast on a decision without perfect information.',lp:'Move Fast'},
+    {q:'Describe the boldest product or technical decision you\'ve ever made.',lp:'Be Bold'},
+    {q:'Tell me about something you built from scratch — idea through shipping.',lp:'Build'},
+    {q:'Describe a time you took ownership of a problem that wasn\'t technically yours to solve.',lp:'Ownership'},
+    {q:'Tell me about a time you gave or received feedback that changed the outcome of a project.',lp:'Feedback'},
+    {q:'Describe a time you had to work cross-functionally to ship something.',lp:'Cross-Functional'},
+    {q:'Tell me about the largest user impact you\'ve had. How did you measure it?',lp:'Impact & Scale'},
+    {q:'Describe a time you disagreed with how something was being built and what you did.',lp:'Open'},
+    {q:'Tell me about a time you had to prioritize between several important things.',lp:'Prioritization'},
+    {q:'Give an example of a time you focused on the user over internal processes.',lp:'Focus on Users'}
+  ],
+  Apple:[
+    {q:'Describe a time you were obsessed with a detail that others thought was unimportant.',lp:'Craft & Detail'},
+    {q:'Tell me about a time you pushed for a better user experience when it would have been easier not to.',lp:'Customer Experience'},
+    {q:'Describe a time you iterated significantly on a design or solution. What changed and why?',lp:'Iteration'},
+    {q:'Tell me about a time you influenced a decision without being the decision-maker.',lp:'Influence'},
+    {q:'Describe the most elegant technical or design solution you\'ve shipped. What made it elegant?',lp:'Craft'},
+    {q:'Tell me about a time you had to balance technical constraints with a beautiful user experience.',lp:'Design & Engineering'},
+    {q:'Describe a time you advocated for simplicity when the team was overcomplicating something.',lp:'Simplicity'},
+    {q:'Tell me about a time you went back and made something significantly better after launch.',lp:'Never Satisfied'}
+  ],
+  Microsoft:[
+    {q:'Tell me about a time you had to unlearn something you believed strongly to grow.',lp:'Growth Mindset'},
+    {q:'Describe a time you created an environment where diverse perspectives led to a better outcome.',lp:'Inclusion'},
+    {q:'Tell me about the most impactful work you\'ve done. How did you measure that impact?',lp:'Impact'},
+    {q:'Describe a time you helped a less experienced person grow technically or professionally.',lp:'Develop Others'},
+    {q:'Tell me about a time you led a technically complex project. What made it hard?',lp:'Technical Leadership'},
+    {q:'Describe a time you failed and what you did differently the next time.',lp:'Learn from Failure'},
+    {q:'Tell me about a time you had to work with people who had fundamentally different approaches.',lp:'Collaboration'},
+    {q:'Describe the biggest customer problem you\'ve helped solve.',lp:'Customer Empathy'}
+  ],
+  General:[
+    {q:'Tell me about yourself.',lp:'Opening'},
+    {q:'What is your greatest weakness?',lp:'Self-awareness'},
+    {q:'Where do you see yourself in 5 years?',lp:'Growth'},
+    {q:'Why do you want to work here?',lp:'Motivation'},
+    {q:'What is your proudest professional accomplishment?',lp:'Achievement'},
+    {q:'Tell me about a time you disagreed with your manager.',lp:'Conflict'}
+  ]
+};
+
+let activeCompany='Amazon', sessionQuestions=[], sessionIdx=0, sessionRatings=[], timerInterval=null, timerLeft=0;
+
+function buildCompanyTabs(){
+  const container=document.getElementById('companyTabs');
+  container.innerHTML=Object.keys(QUESTIONS).map(c=>`<button class="co-btn ${c===activeCompany?'active':''}" onclick="selectCompany('${c}')">${c} (${QUESTIONS[c].length})</button>`).join('');
+}
+
+function selectCompany(c){
+  activeCompany=c;
+  buildCompanyTabs();
+  document.getElementById('practiceStart').style.display='block';
+  document.getElementById('questionCard').style.display='none';
+  document.getElementById('sessionSummary').classList.remove('visible');
+  document.getElementById('practiceStart').innerHTML=`<p style="color:var(--gray);margin-bottom:16px">Ready to practice <b style="color:var(--gold)">${c}</b> — ${QUESTIONS[c].length} questions.</p><button class="btn btn-primary" onclick="startSession()">Start Session</button>`;
+}
+
+function startSession(){
+  sessionQuestions=[...QUESTIONS[activeCompany]].sort(()=>Math.random()-.5);
+  sessionIdx=0; sessionRatings=[];
+  document.getElementById('practiceStart').style.display='none';
+  document.getElementById('sessionSummary').classList.remove('visible');
+  showQuestion();
+}
+
+function showQuestion(){
+  if(sessionIdx>=sessionQuestions.length){ endSession(); return; }
+  const q=sessionQuestions[sessionIdx];
+  document.getElementById('questionCard').style.display='block';
+  document.getElementById('qNum').textContent=`Question ${sessionIdx+1} of ${sessionQuestions.length}`;
+  document.getElementById('qText').textContent=q.q;
+  document.getElementById('qLP').textContent=q.lp?`${activeCompany} — ${q.lp}`:'';
+  document.getElementById('practiceAnswer').value='';
+  document.getElementById('storyMatch').style.display='none';
+  document.getElementById('btnNextQ').style.display='none';
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('lit'));
+  startTimer(120);
+}
+
+function startTimer(seconds){
+  clearInterval(timerInterval); timerLeft=seconds;
+  const arc=document.getElementById('timerArc');
+  const circumference=226;
+  function update(){
+    const m=Math.floor(timerLeft/60), s=timerLeft%60;
+    document.getElementById('timerNum').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+    const offset=circumference*(1-timerLeft/120);
+    arc.style.strokeDashoffset=offset;
+    arc.style.stroke=timerLeft<=30?'#f87171':timerLeft<=60?'#fbbf24':'#a78bfa';
+    if(timerLeft<=0){ clearInterval(timerInterval); document.getElementById('timerNum').textContent='Time!'; }
+    timerLeft--;
+  }
+  update();
+  timerInterval=setInterval(update,1000);
+}
+
+function rateAnswer(rating){
+  clearInterval(timerInterval);
+  document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('lit',i<rating));
+  sessionRatings.push({q:sessionQuestions[sessionIdx].q,rating,lp:sessionQuestions[sessionIdx].lp});
+  suggestStory();
+  document.getElementById('btnNextQ').style.display='block';
+}
+
+function suggestStory(){
+  const currentQ=sessionQuestions[sessionIdx];
+  const stories=loadStories();
+  if(!stories.length) return;
+  const tagMap={
+    'Customer Obsession':['Customer Obsession','Leadership'],'Ownership':['Ownership','Bias for Action'],
+    'Learn & Be Curious':['Failure & Learning'],'Earn Trust':['Communication','Conflict Resolution'],
+    'Have Backbone':['Conflict Resolution','Influence Without Authority'],'Think Big':['Innovation','Leadership'],
+    'Dive Deep':['Data-Driven','Technical Problem Solving'],'Bias for Action':['Bias for Action','Prioritization'],
+    'Invent & Simplify':['Innovation','Technical Problem Solving'],'Hire & Develop':['Mentorship','Leadership'],
+    'Deliver Results':['Ownership','Prioritization'],'Frugality':['Prioritization'],
+    'Googleyness':['Innovation','Communication'],'Leadership':['Leadership','Influence Without Authority'],
+    'Growth Mindset':['Failure & Learning'],'Inclusion':['Teamwork','Communication'],
+    'Move Fast':['Bias for Action','Ownership'],'Be Bold':['Innovation','Leadership'],
+    'Craft':['Technical Problem Solving'],'Feedback':['Communication','Conflict Resolution']
+  };
+  const relatedTags=tagMap[currentQ.lp]||['Leadership','Ownership'];
+  const matches=stories.filter(s=>(s.tags||[]).some(t=>relatedTags.includes(t)));
+  if(matches.length){
+    const m=matches[0];
+    const match=document.getElementById('storyMatch');
+    match.style.display='block';
+    match.innerHTML=`<div style="font-size:.7rem;color:var(--violet);margin-bottom:4px">💡 Matching story from your bank:</div><b>${m.title}</b><div style="color:var(--gray);font-size:.73rem;margin-top:4px">${(m.tags||[]).join(', ')}</div>`;
+  }
+}
+
+function nextQuestion(){
+  sessionIdx++;
+  showQuestion();
+}
+
+function endSession(){
+  clearInterval(timerInterval);
+  document.getElementById('questionCard').style.display='none';
+  document.getElementById('practiceStart').style.display='none';
+  const summary=document.getElementById('sessionSummary');
+  summary.classList.add('visible');
+  if(!sessionRatings.length){ document.getElementById('summaryContent').innerHTML='<p style="color:var(--gray)">No questions answered this session.</p>'; return; }
+  const avg=(sessionRatings.reduce((a,b)=>a+b.rating,0)/sessionRatings.length).toFixed(1);
+  const tagsCovered=[...new Set(sessionRatings.map(r=>r.lp))];
+  const weak=sessionRatings.filter(r=>r.rating<=2).map(r=>r.lp);
+  document.getElementById('summaryContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">
+      <div style="text-align:center;background:var(--card2);border-radius:8px;padding:12px"><div style="font-size:1.4rem;font-weight:700;color:var(--gold)">${sessionRatings.length}</div><div style="font-size:.72rem;color:var(--gray)">Questions</div></div>
+      <div style="text-align:center;background:var(--card2);border-radius:8px;padding:12px"><div style="font-size:1.4rem;font-weight:700;color:${avg>=3.5?'var(--green)':avg>=2.5?'var(--gold)':'var(--red)'}">${avg}★</div><div style="font-size:.72rem;color:var(--gray)">Avg Rating</div></div>
+      <div style="text-align:center;background:var(--card2);border-radius:8px;padding:12px"><div style="font-size:1.4rem;font-weight:700;color:var(--violet)">${tagsCovered.length}</div><div style="font-size:.72rem;color:var(--gray)">LPs Covered</div></div>
+    </div>
+    ${weak.length?`<div style="background:rgba(248,113,113,.1);border:1px solid var(--red);border-radius:8px;padding:10px;font-size:.78rem"><div style="color:var(--red);font-weight:600;margin-bottom:4px">Practice more: ${weak.join(', ')}</div></div>`:'<div style="color:var(--green);font-size:.82rem">Great session — no weak areas flagged!</div>'}
+  `;
+}
+
+function restartSession(){ selectCompany(activeCompany); }
+
+// ─────────────────────── COMPANY PREP ───────────────────────
+const AMAZON_LPS=[
+  {lp:'Customer Obsession',what:'Leaders start with the customer and work backwards. They obsess over earning trust, not competitor analysis.',strong:'Specific customer pain point → action you took → measurable outcome for the customer.',mistake:'Talking about what you built without mentioning why the customer needed it.'},
+  {lp:'Ownership',what:'Leaders act on behalf of the entire company, never "that\'s not my job." They don\'t wait to be asked.',strong:'Show you identified a problem, volunteered to fix it, and saw it through without being asked twice.',mistake:'Passive examples where you waited for direction. Use "I" not "we" in the action.'},
+  {lp:'Invent & Simplify',what:'Leaders expect and require innovation, and always find ways to simplify. New is fine, complicated is not.',strong:'A process you automated, simplified, or eliminated — with before/after metrics.',mistake:'Describing a complex solution without showing what you simplified.'},
+  {lp:'Are Right A Lot',what:'Leaders have strong judgment and good instincts. They seek diverse perspectives.',strong:'Show you gathered data, considered other views, made a call, and were vindicated.',mistake:'Examples where you were just lucky — need to show your reasoning process.'},
+  {lp:'Learn & Be Curious',what:'Leaders never stop learning. They seek to improve themselves and explore new ideas.',strong:'A time you proactively learned something new and applied it to real impact.',mistake:'Generic "I love to learn" — must have a concrete example with outcome.'},
+  {lp:'Hire & Develop the Best',what:'Leaders raise the performance bar with every hire, and coach others to succeed.',strong:'A specific person you mentored, the gap you identified, what you did, and their growth.',mistake:'Only talking about technical interviews — they want coaching, not just hiring.'},
+  {lp:'Insist on Highest Standards',what:'Leaders maintain high standards even when they\'re not personally responsible for the output.',strong:'A time you pushed back on a shortcut or caught a quality issue before it shipped.',mistake:'Only describing your own work standards — show you influenced others\'s standards too.'},
+  {lp:'Think Big',what:'Leaders create and communicate a bold direction that inspires results. Small thinking doesn\'t count.',strong:'A vision you set that required cross-team alignment, with measurable long-term impact.',mistake:'Describing incremental improvements as "big" — needs to be 10x, not 10%.'},
+  {lp:'Bias for Action',what:'Speed matters. Many decisions are reversible. They don\'t wait for perfect information.',strong:'A time you moved fast, learned quickly, and course-corrected — with timeline.',mistake:'Describing a fast action without explaining what tradeoffs you consciously made.'},
+  {lp:'Frugality',what:'Do more with less. Constraints breed resourcefulness and innovation.',strong:'A project you shipped under budget with fewer resources than planned, with impact.',mistake:'Vague "we were budget-conscious" — needs a real constraint and creative workaround.'},
+  {lp:'Earn Trust',what:'Leaders listen actively, speak candidly, and acknowledge when they\'re wrong.',strong:'A time you admitted a mistake or publicly changed your position based on new information.',mistake:'Always being right — they want to see intellectual honesty and vulnerability.'},
+  {lp:'Dive Deep',what:'Leaders operate at all levels, stay connected to the details, and audit frequently.',strong:'A time you went beyond the surface to find the real root cause — with data.',mistake:'Only describing high-level observations — need the specific detail that unlocked the solution.'},
+  {lp:'Have Backbone; Disagree & Commit',what:'Leaders challenge decisions they disagree with, but commit fully once a call is made.',strong:'A time you pushed back respectfully, your reasoning, and how you committed after.',mistake:'Always agreeing or giving up immediately — shows lack of conviction.'},
+  {lp:'Deliver Results',what:'Leaders focus on key inputs and deliver with the right quality and time.',strong:'A high-pressure project, what you prioritized, and the concrete results delivered.',mistake:'Focusing on effort over outcome — interviewers care what shipped, not how hard you worked.'},
+  {lp:"Strive to be Earth's Best Employer",what:'Leaders create a safer, more productive, higher-performing, more diverse workplace.',strong:'A team initiative you drove to improve inclusion, morale, or team health.',mistake:'Generic statements — needs a concrete initiative with measurable culture impact.'},
+  {lp:'Success and Scale Bring Broad Responsibility',what:'Amazon\'s scale means choices affect society. Leaders reflect on impact beyond the org.',strong:'A decision where you considered downstream effects on users, society, or the environment.',mistake:'Only thinking about team or business impact — this LP needs broader thinking.'}
+];
+
+const LP_TAG_MAP={
+  'Customer Obsession':['Customer Obsession','Communication'],
+  'Ownership':['Ownership','Bias for Action','Leadership'],
+  'Invent & Simplify':['Innovation','Technical Problem Solving'],
+  'Are Right A Lot':['Data-Driven','Communication'],
+  'Learn & Be Curious':['Failure & Learning'],
+  'Hire & Develop the Best':['Mentorship','Leadership'],
+  'Insist on Highest Standards':['Technical Problem Solving','Ownership'],
+  'Think Big':['Innovation','Leadership'],
+  'Bias for Action':['Bias for Action','Prioritization'],
+  'Frugality':['Prioritization','Ownership'],
+  'Earn Trust':['Communication','Conflict Resolution'],
+  'Dive Deep':['Data-Driven','Technical Problem Solving'],
+  'Have Backbone; Disagree & Commit':['Conflict Resolution','Communication','Influence Without Authority'],
+  'Deliver Results':['Ownership','Prioritization','Bias for Action'],
+  "Strive to be Earth's Best Employer":['Teamwork','Communication','Leadership'],
+  'Success and Scale Bring Broad Responsibility':['Leadership','Communication']
+};
+
+function buildPrepGrid(){
+  const grid=document.getElementById('prepGrid');
+  const companyGuides=[
+    {
+      name:'Amazon',color:'var(--gold)',
+      guide:`Amazon uses the 16 Leadership Principles as the interview rubric. Every behavioral question maps to one or more LPs.\n\n<b>How scoring works:</b> Interviewers fill out an SBI form — Situation/Behavior/Impact — and vote S (strong hire), H (hire), N (no hire), SN (strong no hire). You need strong yeses from most interviewers.\n\n<b>Key advice:</b> Use specific metrics (%, $, time), say "I" not "we," and make the Action section the longest part of your answer.`,
+      special:'Click any LP below for what interviewers look for, a strong answer structure, and common mistakes.'
+    },
+    {
+      name:'Google',color:'#4ade80',
+      guide:`Google evaluates on 4 attributes: General Cognitive Ability (GCA), Leadership, Role Knowledge, and Googleyness.\n\n<b>GCA</b> = how you break down problems. Show structured thinking and data-driven decisions.\n<b>Googleyness</b> = comfort with ambiguity, genuine passion for technology, being ethical and collaborative.\n\n<b>Scoring:</b> Each attribute scored 1-4, target ≥ 3. Interview packets are reviewed by a hiring committee, not just the interviewers.`,
+      special:''
+    },
+    {
+      name:'Meta',color:'#60a5fa',
+      guide:`Meta values Impact and Scale above all. Saying "I shipped a feature" is weak. "I shipped a feature used by 12M users that increased retention by 3%" is what they want.\n\n<b>Move Fast</b> at Meta means calculated speed — making reversible decisions quickly without waiting for perfect information.\n\n<b>Open</b> means giving and receiving critical feedback directly. Show examples where you gave hard feedback and it improved outcomes.`,
+      special:''
+    },
+    {
+      name:'Apple',color:'#f87171',
+      guide:`Apple interviews test for craft and taste — not just technical ability. They want engineers who care deeply about the user experience at a granular level.\n\n<b>What "insanely great" sounds like:</b> Specific detail about what you fought for, why users benefit, and what you had to push through to get it.\n\n<b>Influence without authority</b> is critical at Apple — convincing designers, PMs, or leadership with clear reasoning, not just hierarchy.`,
+      special:''
+    },
+    {
+      name:'Microsoft',color:'#c084fc',
+      guide:`Microsoft's culture centers on Growth Mindset (Satya Nadella's framework). They explicitly want people who believe intelligence and skills can be developed.\n\n<b>How to discuss failure:</b> Real failure + genuine reflection + specific change you made. Bonus points for showing the change stuck over time.\n\n<b>Inclusion:</b> Microsoft asks about creating inclusive environments more than any other company. Prepare a genuine example.`,
+      special:''
+    }
+  ];
+  grid.innerHTML=companyGuides.map(c=>`
+    <div class="prep-card">
+      <h3 style="color:${c.color};margin-bottom:10px">${c.name}</h3>
+      <div style="font-size:.78rem;color:var(--gray);line-height:1.6;margin-bottom:10px">${c.guide}</div>
+      ${c.name==='Amazon'?`<div style="font-size:.73rem;color:var(--gold);margin-bottom:8px">${c.special}</div><div class="lp-grid" id="lp-list">`+AMAZON_LPS.map((lp,i)=>`<div class="lp-item" id="lp-${i}" onclick="toggleLP(${i})"><div style="font-weight:600;color:var(--gold)">${lp.lp}</div><div class="lp-detail"><div style="margin-bottom:4px"><b style="color:var(--text)">What they look for:</b> <span style="color:var(--gray)">${lp.what}</span></div><div style="margin-bottom:4px"><b style="color:var(--green)">Strong answer:</b> <span style="color:var(--gray)">${lp.strong}</span></div><div><b style="color:var(--red)">Common mistake:</b> <span style="color:var(--gray)">${lp.mistake}</span></div></div></div>`).join('')+`</div>`:''}
+    </div>
+  `).join('');
+}
+
+function toggleLP(i){
+  const el=document.getElementById(`lp-${i}`);
+  el.classList.toggle('open');
+}
+
+function buildMapperSelect(){
+  const sel=document.getElementById('mapperStorySelect');
+  const stories=loadStories();
+  sel.innerHTML='<option value="">Select a story...</option>'+stories.map((s,i)=>`<option value="${i}">${s.title}</option>`).join('');
+}
+
+function mapStory(){
+  const idx=document.getElementById('mapperStorySelect').value;
+  const result=document.getElementById('mapperResult');
+  if(idx===''){result.className='mapper-result';return;}
+  const story=loadStories()[idx];
+  const tags=story.tags||[];
+  const strong=[], weak=[];
+  AMAZON_LPS.forEach(lp=>{
+    const relTags=LP_TAG_MAP[lp.lp]||[];
+    const match=relTags.filter(t=>tags.includes(t)).length;
+    if(match>=1) strong.push(lp.lp);
+    else weak.push(lp.lp);
+  });
+  result.className='mapper-result visible';
+  result.innerHTML=`<div style="font-weight:600;color:var(--gold);margin-bottom:8px">"${story.title}"</div>`+
+    `<div style="margin-bottom:10px"><div style="font-size:.72rem;color:var(--green);margin-bottom:4px">Covers (${strong.length} LPs):</div>${strong.map(l=>`<span style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--green);border-radius:20px;font-size:.68rem;padding:2px 8px;margin:2px;display:inline-block">${l}</span>`).join('')}</div>`+
+    (weak.length?`<div><div style="font-size:.72rem;color:var(--red);margin-bottom:4px">Weakly covered (${weak.length} LPs):</div><div style="font-size:.73rem;color:var(--gray)">${weak.slice(0,5).join(', ')}${weak.length>5?'…':''}</div></div>`:'');
+}
+
+// ─────────────────────── ANSWER ANALYZER ───────────────────────
+function analyzeAnswer(){
+  const text=document.getElementById('analyzeInput').value.trim();
+  if(!text){alert('Paste a behavioral answer first.');return;}
+  const sentences=text.split(/[.!?]+/).filter(s=>s.trim().length>2);
+  const words=text.split(/\s+/).filter(Boolean);
+  const lowerText=text.toLowerCase();
+
+  const hasSit=/(situation|context|at the time|background|we were|our team was|i was working)/i.test(text);
+  const hasTask=/(task|responsible|goal|objective|i needed to|my job was|i had to)/i.test(text);
+  const hasAction=/(i (first|then|decided|implemented|built|led|reached out|wrote|created|analyzed|noticed)|action|approach|what i did)/i.test(text);
+  const hasResult=/(result|outcome|impact|as a result|consequently|ultimately|in the end|\d+%|\$\d)/i.test(text);
+  const starScore=([hasSit,hasTask,hasAction,hasResult].filter(Boolean).length/4*100);
+
+  const hasMetric=/\d+([\.,]\d+)?[%$kKmMB]?/.test(text);
+  const hasTimeframe=/(month|week|year|day|hour|quarter|sprint|Q\d)/i.test(text);
+  const hasScope=/(team|org|company|million|thousand|users|customers|engineers)/i.test(text);
+  const resultScore=(hasMetric?40:0)+(hasTimeframe?30:0)+(hasScope?30:0);
+
+  const iCount=(text.match(/\bI\b/g)||[]).length;
+  const weCount=(text.match(/\bwe\b/gi)||[]).length;
+  const total=iCount+weCount;
+  const iRatio=total>0?iCount/total:0;
+  const iWeScore=Math.min(100,Math.round(iRatio*100*1.2));
+
+  const actionRegex=/(i (first|then|analyzed|decided|implemented|built|led|reached|wrote|created|identified|discovered|proposed|suggested|scheduled|called|reviewed|fixed|debugged|shipped))/gi;
+  const actionMatches=(text.match(actionRegex)||[]).length;
+  const actionWords=sentences.filter(s=>/\bI\b/.test(s)).reduce((a,s)=>a+s.split(' ').length,0);
+  const actionScore=Math.min(100,actionMatches*15+(actionWords>50?30:actionWords>30?15:0));
+
+  const avgSentLen=sentences.length>0?words.length/sentences.length:0;
+  const clarityScore=avgSentLen<=20?100:avgSentLen<=25?75:avgSentLen<=30?50:25;
+
+  const dims=[
+    {label:'STAR Completeness',score:Math.round(starScore),color:'var(--gold)',fix:!hasSit?'Missing: Situation context':!hasTask?'Missing: Your task/responsibility':!hasAction?'Missing: Your specific actions':!hasResult?'Missing: Measurable result':'Strong — all 4 STAR parts present'},
+    {label:'Result Specificity',score:Math.round(resultScore),color:'var(--green)',fix:!hasMetric?'Add a number: %, $, time saved, users, errors reduced':!hasTimeframe?'Add a timeframe: "within 2 weeks", "over Q3"':'Good metrics. Add scope (team/company/user count) to strengthen.'},
+    {label:'I vs We Balance',score:Math.round(iWeScore),color:'var(--cyan)',fix:iRatio<0.4?`Too much "we" (${weCount}×) vs "I" (${iCount}×) — own your specific contribution`:iRatio>0.95?'Good ownership, but mentioning team shows collaboration skills too':'Good balance of "I" and "we"'},
+    {label:'Action Detail',score:Math.round(actionScore),color:'var(--violet)',fix:actionMatches<3?'Add more specific action verbs: "I analyzed", "I proposed", "I implemented"':'Good action detail — the "I" part is clear and specific.'},
+    {label:'Clarity (sentence length)',score:Math.round(clarityScore),color:'var(--amber)',fix:avgSentLen>25?`Average sentence: ${avgSentLen.toFixed(1)} words. Break long sentences — keep under 20 for spoken answers.`:`Avg ${avgSentLen.toFixed(1)} words/sentence — clear and concise.`}
+  ];
+
+  const overall=Math.round(dims.reduce((a,d)=>a+d.score,0)/dims.length);
+  document.getElementById('analyzeResult').style.display='block';
+  document.getElementById('scoreDims').innerHTML=dims.map(d=>`
+    <div class="score-dim">
+      <div style="width:150px;font-size:.78rem;color:var(--gray)">${d.label}</div>
+      <div class="score-bar-track"><div class="score-bar-fill" style="width:${d.score}%;background:${d.color}"></div></div>
+      <div class="score-num" style="color:${d.color}">${d.score}</div>
+    </div>
+    <div style="font-size:.71rem;color:var(--gray);margin-bottom:10px;padding-left:160px">${d.fix}</div>
+  `).join('');
+  const overallCol=overall>=80?'var(--green)':overall>=60?'var(--gold)':'var(--red)';
+  document.getElementById('overallScore').style.background=`rgba(${overall>=80?'74,222,128':overall>=60?'251,191,36':'248,113,113'},.1)`;
+  document.getElementById('overallScore').style.border=`1px solid ${overallCol}`;
+  document.getElementById('overallScore').innerHTML=`<div style="font-size:2rem;font-weight:700;color:${overallCol}">${overall}</div><div style="font-size:.8rem;color:var(--gray)">${overall>=80?'Strong answer — ready for FAANG':overall>=60?'Good foundation — address the fixes above':'Needs work — focus on metrics and action detail'}</div>`;
+}
+
+// ─────────────────────── TELL ME ABOUT YOURSELF ───────────────────────
+function buildTMAY(){
+  const past=document.getElementById('tmay-past').value.trim();
+  const present=document.getElementById('tmay-present').value.trim();
+  const future=document.getElementById('tmay-future').value.trim();
+  if(!past&&!present&&!future){alert('Fill in at least one section.');return;}
+  const script=`${past ? past+'.' : ''}
+
+${present ? 'Currently, '+present.charAt(0).toLowerCase()+present.slice(1)+'.' : ''}
+
+${future ? future+'.' : ''}
+
+I\'m excited about the opportunity to bring this experience to your team and continue growing in [role].`;
+  const words=wc(script);
+  const approxSec=Math.round(words/2.5);
+  document.getElementById('tmay-result').style.display='block';
+  document.getElementById('tmay-result').textContent=script.trim();
+  document.getElementById('tmay-wc').textContent=`~${words} words · ~${approxSec} seconds spoken · ${approxSec<=90?'✓ On time':'⚠️ A bit long — trim to under 90s'}`;
+}
+
+// ─────────────────────── INIT ───────────────────────
+buildSkillTagSelect();
+setupWordCounts();
+renderStoryList();
+buildCompanyTabs();
+buildPrepGrid();
+selectCompany('Amazon');
+</script>
+</body>
+</html>
