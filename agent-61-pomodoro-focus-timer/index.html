@@ -126,6 +126,33 @@
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--card); border: 1px solid var(--blue); color: var(--text); padding: 12px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; transition: transform .4s ease; z-index: 999; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
+  /* ── SESSION MODES ── */
+  .session-mode-row { display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
+  .session-mode-label { font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-weight:600; }
+  .session-mode-btn { background:var(--card); border:1px solid var(--border); color:var(--muted); padding:6px 13px; border-radius:20px; cursor:pointer; font-size:.75rem; font-weight:600; transition:all .2s; }
+  .session-mode-btn.active { background:var(--card2); border-color:var(--yellow); color:var(--yellow); }
+  .lc-tag-wrap { margin-bottom:16px; }
+  .lc-tag-wrap label { font-size:.72rem; color:var(--muted); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px; }
+  .lc-tag-wrap input { width:100%; background:var(--card); border:1px solid var(--border); color:var(--text); padding:10px 14px; border-radius:8px; font-size:.88rem; outline:none; transition:border .2s; }
+  .lc-tag-wrap input:focus { border-color:var(--blue); }
+  .lc-tip-card { margin-top:16px; background:var(--card); border:1px solid var(--blue); border-radius:12px; padding:16px 18px; }
+  .lc-tip-card-hdr { font-size:.7rem; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .lc-tip-card-body { font-size:.87rem; line-height:1.65; color:var(--text); }
+  .esl-vocab-panel { margin-top:16px; background:var(--card); border:1px solid var(--green); border-radius:12px; padding:16px 18px; }
+  .esl-vocab-panel-hdr { font-size:.7rem; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .esl-log-row { display:flex; gap:8px; margin-bottom:8px; }
+  .esl-log-row input { flex:1; background:var(--card2); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; font-size:.85rem; outline:none; transition:border .2s; }
+  .esl-log-row input:focus { border-color:var(--green); }
+  .esl-log-btn { background:var(--green); color:#000; border:none; padding:8px 14px; border-radius:8px; font-weight:700; font-size:.82rem; cursor:pointer; white-space:nowrap; }
+  .esl-log-btn:hover { opacity:.85; }
+  .esl-saved-section { margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .esl-saved-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .esl-saved-title { font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+  .vocab-clear-btn { background:none; border:none; color:var(--muted); font-size:.72rem; cursor:pointer; padding:2px 6px; border-radius:4px; }
+  .vocab-clear-btn:hover { color:var(--red); }
+  .vocab-pill { display:inline-block; background:var(--card2); border:1px solid var(--border); border-radius:20px; padding:4px 10px; font-size:.78rem; margin:3px; color:var(--text); }
+  .vocab-empty { font-size:.82rem; color:var(--muted); }
+
   @media (max-width: 480px) {
     .stats-grid { grid-template-columns: 1fr 1fr; }
     .timer-display { font-size: 2.5rem; }
@@ -156,6 +183,12 @@
     <button class="mode-btn short" onclick="setMode('short')">Short Break</button>
     <button class="mode-btn long" onclick="setMode('long')">Long Break</button>
   </div>
+  <div class="session-mode-row">
+    <span class="session-mode-label">Session:</span>
+    <button class="session-mode-btn active" data-sm="standard" onclick="setSessionMode('standard')">Standard</button>
+    <button class="session-mode-btn" data-sm="leetcode" onclick="setSessionMode('leetcode')">💻 LeetCode</button>
+    <button class="session-mode-btn" data-sm="esl" onclick="setSessionMode('esl')">📖 ESL Reading</button>
+  </div>
 
   <div class="timer-ring-wrap">
     <svg viewBox="0 0 240 240">
@@ -173,6 +206,11 @@
     <input type="text" id="current-task" placeholder="What are you working on?" oninput="saveCurrentTask()">
   </div>
 
+  <div class="lc-tag-wrap" id="lc-tag-wrap" style="display:none">
+    <label>Problem Tag / Pattern</label>
+    <input type="text" id="lc-tag-input" placeholder="e.g. Two Pointers, BFS, Dynamic Programming…" />
+  </div>
+
   <div class="ctrl-btns">
     <button class="ctrl-btn start" id="start-btn" onclick="toggleTimer()">Start</button>
     <button class="ctrl-btn reset" onclick="resetTimer()">Reset</button>
@@ -181,6 +219,31 @@
   <div class="session-count">
     <div id="session-label">Session 1 of 4 until long break</div>
     <div class="session-dots" id="session-dots"></div>
+  </div>
+
+  <!-- LeetCode: pattern tip shown during break -->
+  <div class="lc-tip-card" id="lc-tip-card" style="display:none">
+    <div class="lc-tip-card-hdr">💡 Pattern Tip — Review While You Rest</div>
+    <div class="lc-tip-card-body" id="lc-tip-text"></div>
+  </div>
+
+  <!-- ESL: vocab log prompt shown during break -->
+  <div class="esl-vocab-panel" id="esl-vocab-panel" style="display:none">
+    <div class="esl-vocab-panel-hdr">📖 Log New Vocabulary</div>
+    <div class="esl-log-row">
+      <input type="text" id="esl-vocab-input" placeholder="Word or phrase you encountered…" onkeydown="if(event.key==='Enter')logVocab()">
+      <button class="esl-log-btn" onclick="logVocab()">Log</button>
+    </div>
+    <div id="esl-break-recent" style="font-size:.78rem;color:var(--muted)"></div>
+  </div>
+
+  <!-- ESL: saved vocab list always visible in ESL mode -->
+  <div class="esl-saved-section" id="esl-saved-section" style="display:none">
+    <div class="esl-saved-hdr">
+      <span class="esl-saved-title">📚 My Vocabulary (<span id="esl-vocab-count">0</span>)</span>
+      <button class="vocab-clear-btn" onclick="clearVocab()">Clear All</button>
+    </div>
+    <div id="esl-vocab-saved-list"><span class="vocab-empty">No words logged yet — log during breaks!</span></div>
   </div>
 </div>
 
@@ -436,6 +499,77 @@ function resetTimer() {
   updateDisplay();
 }
 
+// ── SESSION MODES ────────────────────────────────────────────
+let sessionMode = 'standard';
+let eslVocab = J('eslVocab') || [];
+
+const PATTERN_TIPS = [
+  { pattern: 'Two Pointers', tip: 'Use when searching for a pair in a sorted array or detecting cycles. Move pointers based on conditions — O(n) time, O(1) space.' },
+  { pattern: 'Sliding Window', tip: 'For contiguous subarray/substring problems. Expand with right pointer, shrink with left when constraint violated. Great for "max/min subarray of size k."' },
+  { pattern: 'Binary Search', tip: 'Works on ANY monotonic function, not just sorted arrays. If a predicate goes false→true, binary search on it. Reduces O(n) to O(log n).' },
+  { pattern: 'BFS / Level Order', tip: 'BFS processes nodes level-by-level using a queue. Perfect for shortest path in unweighted graphs and minimum-steps problems.' },
+  { pattern: 'DFS / Backtracking', tip: 'Add to result before recursing, remove after. Classic for permutations, combinations, subsets, and Sudoku. State: choose → explore → unchoose.' },
+  { pattern: 'Dynamic Programming', tip: 'Start with brute-force recursion → add memoization (top-down) → optimize to table (bottom-up). Define state clearly: dp[i] means…?' },
+  { pattern: 'Merge Intervals', tip: 'Sort by start time. If current start ≤ prev end → merge. Otherwise append. Common in calendar/meeting-room problems.' },
+  { pattern: 'Fast & Slow Pointers', tip: 'Tortoise-and-hare: fast moves 2 steps, slow moves 1. They meet inside a cycle. Reset slow to head, advance both 1 step to find cycle start.' },
+  { pattern: 'Monotonic Stack', tip: 'Maintain a stack with always-increasing or always-decreasing values. Pop when violated. Great for "next greater element" and histogram area.' },
+  { pattern: 'Top-Down DFS (Tree)', tip: 'Pass context (path sum, depth) from parent to child. Use when solving a node requires info from ancestors.' },
+  { pattern: 'Bottom-Up DFS (Tree)', tip: 'Return results from children to parent. Compute subtree height/sum and aggregate. Use for diameter, max path sum, LCA.' },
+  { pattern: 'Hash Map Pattern', tip: 'O(1) lookup of previously seen values: frequencies, indices, or complements. Core of two-sum, anagram groups, subarray-with-sum-k.' },
+  { pattern: 'Heap / Priority Queue', tip: 'Min-heap for "find k-th largest" (keep k elements). Median: max-heap for left half + min-heap for right half — balance sizes each insert.' },
+  { pattern: 'Trie', tip: 'Stores strings by shared prefix. Insert/search in O(L). Each node holds children map + isEnd flag. Great for autocomplete and word search.' },
+  { pattern: 'Union-Find (DSU)', tip: 'Tracks connected components. find() with path compression + union() by rank → nearly O(1) per op. Use for cycle detection and Kruskal\'s MST.' },
+];
+
+function setSessionMode(mode) {
+  sessionMode = mode;
+  document.querySelectorAll('.session-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.sm === mode));
+  document.getElementById('lc-tag-wrap').style.display       = mode === 'leetcode' ? 'block' : 'none';
+  document.getElementById('esl-saved-section').style.display = mode === 'esl'      ? 'block' : 'none';
+  document.getElementById('lc-tip-card').style.display       = 'none';
+  document.getElementById('esl-vocab-panel').style.display   = 'none';
+  if (mode === 'esl') renderVocabList();
+  showToast(mode === 'leetcode' ? '💻 LeetCode Session active' : mode === 'esl' ? '📖 ESL Reading Session active' : 'Standard mode active');
+}
+
+function showPatternTip() {
+  const tip = PATTERN_TIPS[Math.floor(Math.random() * PATTERN_TIPS.length)];
+  document.getElementById('lc-tip-text').innerHTML =
+    `<strong style="color:var(--blue)">${tip.pattern}:</strong> ${tip.tip}`;
+  document.getElementById('lc-tip-card').style.display = 'block';
+}
+
+function showEslVocabPrompt() {
+  document.getElementById('esl-vocab-panel').style.display = 'block';
+  document.getElementById('esl-vocab-input').value = '';
+  document.getElementById('esl-break-recent').textContent = '';
+  setTimeout(() => document.getElementById('esl-vocab-input').focus(), 200);
+}
+
+function logVocab() {
+  const word = document.getElementById('esl-vocab-input').value.trim();
+  if (!word) return;
+  eslVocab.unshift({ word, date: todayStr() });
+  W('eslVocab', eslVocab);
+  document.getElementById('esl-vocab-input').value = '';
+  document.getElementById('esl-break-recent').textContent =
+    `Logged: "${word}" · ${eslVocab.length} word${eslVocab.length !== 1 ? 's' : ''} total`;
+  renderVocabList();
+}
+
+function renderVocabList() {
+  const el = document.getElementById('esl-vocab-saved-list');
+  document.getElementById('esl-vocab-count').textContent = eslVocab.length;
+  el.innerHTML = eslVocab.length
+    ? eslVocab.map(v => `<span class="vocab-pill" title="${v.date}">${escHtml(v.word)}</span>`).join('')
+    : '<span class="vocab-empty">No words logged yet — log during breaks!</span>';
+}
+
+function clearVocab() {
+  if (!eslVocab.length || !confirm('Clear all saved vocabulary?')) return;
+  eslVocab = []; W('eslVocab', eslVocab); renderVocabList();
+}
+
 function onTimerEnd() {
   playSound();
   document.getElementById('start-btn').textContent = 'Start';
@@ -450,15 +584,20 @@ function onTimerEnd() {
     sendNotification('Pomodoro Complete!', 'Great work! Time for a break.');
 
     if (sessionCount >= settings.cycle) {
-      sessionCount = 0;
-      W('sessionCount', 0);
+      sessionCount = 0; W('sessionCount', 0);
       if (settings.autostart) { setMode('long'); setTimeout(toggleTimer, 800); }
       else setMode('long');
     } else {
       if (settings.autostart) { setMode('short'); setTimeout(toggleTimer, 800); }
       else setMode('short');
     }
+    // Show session-mode break content
+    if (sessionMode === 'leetcode') showPatternTip();
+    else if (sessionMode === 'esl')  showEslVocabPrompt();
   } else {
+    // Break ended — hide panels, return to focus
+    document.getElementById('lc-tip-card').style.display     = 'none';
+    document.getElementById('esl-vocab-panel').style.display = 'none';
     showToast('Break over! Time to focus.');
     sendNotification('Break Over!', 'Ready to focus again?');
     if (settings.autostart) { setMode('pomodoro'); setTimeout(toggleTimer, 800); }

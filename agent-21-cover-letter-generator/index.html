@@ -7,7 +7,100 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --pink: #ffb7c5; --pink-dark: #e08da0; --pink-light: #ffe4ec;
+  --pink-xlight: #fff0f4; --cream: #fff9fa; --ink: #1f2a1b;
+  --ink-muted: #6b7c68; --ink-faint: #a8b5a4; --white: #ffffff;
+  --border: #f0dde3; --shadow: 0 2px 16px rgba(224,141,160,.12);
+  --radius: 16px; --font: 'Poppins', sans-serif;
+}
+body { font-family: var(--font); background: var(--cream); color: var(--ink); min-height: 100vh; line-height: 1.6; }
+.topnav { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.back-link { color: var(--pink-dark); text-decoration: none; font-size: .85rem; font-weight: 600; transition: opacity .15s; }
+.back-link:hover { opacity: .7; }
+.nav-badge { background: var(--pink-light); color: var(--pink-dark); font-size: .75rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+.hero { text-align: center; padding: 48px 24px 32px; }
+.hero-icon { font-size: 2.8rem; margin-bottom: 12px; }
+.hero h1 { font-size: 2rem; font-weight: 700; color: var(--ink); letter-spacing: -.03em; margin-bottom: 8px; }
+.hero p { color: var(--ink-muted); font-size: 1rem; max-width: 480px; margin: 0 auto; }
+.container { max-width: 1180px; margin: 0 auto; padding: 0 20px 60px; }
+.card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+.api-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; padding: 16px 20px; }
+.api-bar label { font-size: .82rem; font-weight: 600; color: var(--ink-muted); white-space: nowrap; }
+.api-bar input { flex: 1; min-width: 200px; max-width: 320px; background: var(--cream); border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: .85rem; font-family: var(--font); color: var(--ink); outline: none; transition: border-color .15s; }
+.api-bar input:focus { border-color: var(--pink); }
+.api-saved { font-size: .78rem; color: #6dbf8a; font-weight: 600; }
+.hidden { display: none !important; }
+.main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 860px) { .main-layout { grid-template-columns: 1fr; } }
+.section-title { font-size: 1rem; font-weight: 700; color: var(--ink); margin-bottom: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: .78rem; font-weight: 600; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .05em; }
+.form-group input[type="text"], .form-group textarea {
+  background: var(--cream); border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 10px 14px; font-size: .9rem; font-family: var(--font); color: var(--ink);
+  outline: none; resize: vertical; transition: border-color .15s;
+}
+.form-group input[type="text"]:focus, .form-group textarea:focus { border-color: var(--pink); }
+.form-group textarea { min-height: 100px; }
+.mt-12 { margin-top: 12px; }
+.tone-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tone-btn { padding: 8px 18px; border-radius: 24px; border: 1.5px solid var(--border); background: transparent; color: var(--ink-muted); font-family: var(--font); font-size: .85rem; font-weight: 500; cursor: pointer; transition: all .15s; }
+.tone-btn:hover { border-color: var(--pink); color: var(--pink-dark); }
+.tone-btn.active { background: var(--pink); border-color: var(--pink); color: var(--ink); font-weight: 700; }
+.error-box { background: #fff0f4; border: 1.5px solid var(--pink); border-radius: 10px; padding: 10px 14px; font-size: .85rem; color: #c0395a; margin-top: 12px; }
+.btn-generate { width: 100%; margin-top: 20px; padding: 14px 24px; border-radius: 12px; border: none; background: linear-gradient(135deg,var(--pink) 0%,var(--pink-dark) 100%); color: var(--ink); font-family: var(--font); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(224,141,160,.35); }
+.btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(224,141,160,.45); }
+.btn-generate:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+.btn-icon { font-size: 1.1rem; }
+.output-card { min-height: 400px; display: flex; flex-direction: column; }
+.output-placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; text-align: center; }
+.placeholder-icon { font-size: 3rem; margin-bottom: 16px; opacity: .4; }
+.output-placeholder p { color: var(--ink-faint); font-size: .9rem; }
+.output-content { display: flex; flex-direction: column; gap: 20px; }
+.output-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.word-count-badge { background: var(--pink-xlight); color: var(--pink-dark); font-size: .78rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+.btn-copy { padding: 8px 18px; border-radius: 10px; border: 1.5px solid var(--pink); background: transparent; color: var(--pink-dark); font-family: var(--font); font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-copy:hover { background: var(--pink); color: var(--ink); }
+.btn-copy.copied { background: #e8f8ed; border-color: #6dbf8a; color: #2e7d4f; }
+.letter-body { background: var(--cream); border: 1px solid var(--border); border-radius: 12px; padding: 24px; font-size: .92rem; line-height: 1.85; color: var(--ink); white-space: pre-wrap; word-break: break-word; }
+.letter-body mark { background: #fff3a0; color: var(--ink); border-radius: 3px; padding: 0 2px; font-weight: 600; }
+.keywords-section { border-top: 1px solid var(--border); padding-top: 16px; }
+.kw-title { font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-muted); margin-bottom: 10px; }
+.kw-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.kw-chip { background: var(--pink-light); color: var(--pink-dark); border-radius: 20px; padding: 4px 12px; font-size: .78rem; font-weight: 600; }
+.loading-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; gap: 16px; }
+.spinner { width: 36px; height: 36px; border: 3px solid var(--pink-light); border-top-color: var(--pink-dark); border-radius: 50%; animation: spin .75s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-state p { color: var(--ink-muted); font-size: .9rem; }
+
+/* FAANG SELECTOR */
+.faang-label { font-size: .78rem; font-weight: 600; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+.faang-picks { display: flex; gap: 8px; flex-wrap: wrap; }
+.faang-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; color: var(--ink-muted); font-family: var(--font); font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+.faang-btn:hover { border-color: var(--pink); color: var(--pink-dark); }
+.faang-btn.active { background: var(--pink-light); border-color: var(--pink-dark); color: var(--pink-dark); }
+.faang-btn .f-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.faang-culture-tag { display: inline-block; background: #e8f4fd; color: #1565c0; border-radius: 20px; padding: 3px 10px; font-size: .72rem; font-weight: 600; margin: 2px 3px 0 0; }
+
+/* ATS SCORE */
+.ats-panel { background: var(--cream); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.ats-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.ats-title { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-muted); }
+.ats-score-badge { display: flex; align-items: center; gap: 6px; }
+.ats-num { font-size: 1.6rem; font-weight: 800; }
+.ats-denom { font-size: .85rem; color: var(--ink-muted); }
+.ats-bar-track { height: 10px; background: var(--border); border-radius: 999px; overflow: hidden; margin-bottom: 10px; }
+.ats-bar-fill { height: 100%; border-radius: 999px; transition: width .6s ease; }
+.ats-breakdown { display: flex; flex-direction: column; gap: 6px; }
+.ats-row { display: flex; align-items: center; justify-content: space-between; font-size: .8rem; }
+.ats-row-label { color: var(--ink-muted); }
+.ats-row-val { font-weight: 600; }
+</style>
 </head>
 <body>
 <nav class="topnav">
@@ -18,7 +111,7 @@
 <div class="hero">
   <div class="hero-icon">✉️</div>
   <h1>Cover Letter Generator</h1>
-  <p>Personalized, human-sounding cover letters with JD keyword matching.</p>
+  <p>Personalized, human-sounding cover letters with JD keyword matching + ATS score.</p>
 </div>
 
 <div class="container">
@@ -29,10 +122,32 @@
   </div>
 
   <div class="main-layout">
-    <!-- Left: Inputs -->
     <div class="inputs-col">
       <div class="card">
         <h2 class="section-title">Job Details</h2>
+
+        <!-- FAANG Quick Pick -->
+        <div style="margin-bottom:16px">
+          <div class="faang-label">Quick-fill FAANG Company</div>
+          <div class="faang-picks" id="faangPicks">
+            <button class="faang-btn" data-company="Google" onclick="selectFaang(this)">
+              <span class="f-dot" style="background:#4285f4"></span>Google
+            </button>
+            <button class="faang-btn" data-company="Meta" onclick="selectFaang(this)">
+              <span class="f-dot" style="background:#1877f2"></span>Meta
+            </button>
+            <button class="faang-btn" data-company="Amazon" onclick="selectFaang(this)">
+              <span class="f-dot" style="background:#ff9900"></span>Amazon
+            </button>
+            <button class="faang-btn" data-company="Apple" onclick="selectFaang(this)">
+              <span class="f-dot" style="background:#555"></span>Apple
+            </button>
+            <button class="faang-btn" data-company="Netflix" onclick="selectFaang(this)">
+              <span class="f-dot" style="background:#e50914"></span>Netflix
+            </button>
+          </div>
+          <div id="cultureTagsRow" style="margin-top:8px;min-height:24px"></div>
+        </div>
 
         <div class="form-row">
           <div class="form-group">
@@ -65,14 +180,12 @@
         </div>
 
         <div id="errorBox" class="error-box hidden"></div>
-
         <button class="btn-generate" id="generateBtn">
           <span class="btn-icon">✨</span> Generate Cover Letter
         </button>
       </div>
     </div>
 
-    <!-- Right: Output -->
     <div class="output-col">
       <div class="card output-card" id="outputCard">
         <div class="output-placeholder" id="outputPlaceholder">
@@ -90,6 +203,20 @@
 
           <div class="letter-body" id="letterBody"></div>
 
+          <div class="ats-panel" id="atsPanel" style="display:none">
+            <div class="ats-header">
+              <span class="ats-title">ATS Readability Score</span>
+              <div class="ats-score-badge">
+                <span class="ats-num" id="atsNum">—</span>
+                <span class="ats-denom">/ 100</span>
+              </div>
+            </div>
+            <div class="ats-bar-track">
+              <div class="ats-bar-fill" id="atsBarFill" style="width:0%"></div>
+            </div>
+            <div class="ats-breakdown" id="atsBreakdown"></div>
+          </div>
+
           <div class="keywords-section" id="keywordsSection">
             <h3 class="kw-title">Matched Keywords</h3>
             <div class="kw-chips" id="kwChips"></div>
@@ -105,6 +232,269 @@
   </div>
 </div>
 
-<script src="script.js"></script>
+<script>
+let selectedTone = 'Professional';
+let selectedFaang = null;
+
+const FAANG_CULTURE = {
+  Google: {
+    keywords: ['Googliness', 'user focus', 'innovation at scale', 'data-driven', 'collaboration', 'impact'],
+    hint: 'Emphasize: Googliness, user focus, innovation at scale, data-driven decisions'
+  },
+  Meta: {
+    keywords: ['move fast', 'boldness', 'social impact', 'build things', 'authentic', 'connection'],
+    hint: 'Emphasize: Move fast, boldness, social impact, building things that matter'
+  },
+  Amazon: {
+    keywords: ['Customer Obsession', 'Ownership', 'Bias for Action', 'Deliver Results', 'Invent and Simplify', 'frugality'],
+    hint: 'Emphasize: Customer Obsession, Ownership, Bias for Action, Deliver Results (Leadership Principles)'
+  },
+  Apple: {
+    keywords: ['Think Different', 'craftsmanship', 'privacy-first', 'detail', 'excellence', 'user experience'],
+    hint: 'Emphasize: Think Different, craftsmanship, privacy-first, pursuit of excellence'
+  },
+  Netflix: {
+    keywords: ['context not control', 'high performance', 'radical candor', 'freedom and responsibility', 'impact', 'candor'],
+    hint: 'Emphasize: Context not control, high performance, radical candor, freedom & responsibility'
+  }
+};
+
+const apiKeyInput = document.getElementById('apiKey');
+const apiSaved = document.getElementById('apiSaved');
+const generateBtn = document.getElementById('generateBtn');
+const errorBox = document.getElementById('errorBox');
+const outputPlaceholder = document.getElementById('outputPlaceholder');
+const outputContent = document.getElementById('outputContent');
+const loadingState = document.getElementById('loadingState');
+const letterBody = document.getElementById('letterBody');
+const wordCount = document.getElementById('wordCount');
+const kwChips = document.getElementById('kwChips');
+const copyBtn = document.getElementById('copyBtn');
+
+const saved = localStorage.getItem('geminiKey');
+if (saved) { apiKeyInput.value = saved; apiSaved.classList.remove('hidden'); }
+
+apiKeyInput.addEventListener('input', () => {
+  const v = apiKeyInput.value.trim();
+  if (v) { localStorage.setItem('geminiKey', v); apiSaved.classList.remove('hidden'); }
+  else apiSaved.classList.add('hidden');
+});
+
+document.getElementById('toneTabs').addEventListener('click', e => {
+  const btn = e.target.closest('.tone-btn'); if (!btn) return;
+  document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedTone = btn.dataset.tone;
+});
+
+function selectFaang(btn) {
+  document.querySelectorAll('.faang-btn').forEach(b => b.classList.remove('active'));
+  const company = btn.dataset.company;
+  if (selectedFaang === company) {
+    selectedFaang = null;
+    document.getElementById('cultureTagsRow').innerHTML = '';
+    document.getElementById('company').value = '';
+    return;
+  }
+  btn.classList.add('active');
+  selectedFaang = company;
+  document.getElementById('company').value = company;
+  const culture = FAANG_CULTURE[company];
+  document.getElementById('cultureTagsRow').innerHTML =
+    culture.keywords.map(k => `<span class="faang-culture-tag">${k}</span>`).join('');
+}
+
+async function callGemini(apiKey, prompt) {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}]}) });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.candidates[0].content.parts[0].text;
+}
+
+function extractKeywords(jd) {
+  const stopWords = new Set(['the','and','for','are','with','you','will','have','that','this','your',
+    'our','from','they','been','can','but','not','all','its','who','may','also','any','was','has',
+    'more','their','than','which','would','one','about','we','or','to','in','of','a','an','is','as',
+    'on','at','by','it','be','do','so','if','up','no','my','we','he','she','his','her','us','them','me']);
+  const words = jd.toLowerCase().replace(/[^a-z0-9+#.\- ]/g,' ').split(/\s+/)
+    .filter(w => w.length > 3 && !stopWords.has(w));
+  const freq = {};
+  words.forEach(w => { freq[w] = (freq[w] || 0) + 1; });
+  return Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0,40).map(([w]) => w);
+}
+
+function findMatchedKeywords(keywords, text) {
+  const lower = text.toLowerCase();
+  return keywords.filter(kw => lower.includes(kw));
+}
+
+function highlightKeywords(text, keywords) {
+  if (!keywords.length) return escHtml(text);
+  const sorted = [...keywords].sort((a,b) => b.length - a.length);
+  const escaped = sorted.map(k => k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  const pattern = new RegExp(`\\b(${escaped.join('|')})\\b`,'gi');
+  return escHtml(text).replace(pattern,'<mark>$1</mark>');
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function countWords(text) { return text.trim().split(/\s+/).filter(Boolean).length; }
+
+// ATS readability score (0-100)
+function calcATS(text, matchedKeywords, totalKeywords) {
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 5);
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  const avgSentLen = sentences.length > 0 ? words.length / sentences.length : 0;
+  const hasBullets = /^[\•\-\*]/m.test(text) || text.includes('\n•') || text.includes('\n-');
+
+  // Keyword density score (0-40)
+  const kwDensity = totalKeywords > 0 ? (matchedKeywords / totalKeywords) : 0;
+  const kwScore = Math.min(40, Math.round(kwDensity * 100));
+
+  // Sentence length score (0-35) — shorter avg = better for ATS
+  let sentScore = 0;
+  if (avgSentLen < 18) sentScore = 35;
+  else if (avgSentLen < 22) sentScore = 28;
+  else if (avgSentLen < 28) sentScore = 18;
+  else sentScore = 8;
+
+  // Bullet/structure score (0-25)
+  const bulletScore = hasBullets ? 25 : 10;
+
+  const total = kwScore + sentScore + bulletScore;
+
+  return {
+    total,
+    kwScore,
+    sentScore,
+    bulletScore,
+    avgSentLen: Math.round(avgSentLen),
+    color: total >= 75 ? '#4caf50' : total >= 50 ? '#ff9800' : '#e53935'
+  };
+}
+
+generateBtn.addEventListener('click', async () => {
+  const apiKey = apiKeyInput.value.trim();
+  const company = document.getElementById('company').value.trim();
+  const role = document.getElementById('role').value.trim();
+  const jobDesc = document.getElementById('jobDesc').value.trim();
+  const background = document.getElementById('background').value.trim();
+
+  errorBox.classList.add('hidden');
+  if (!apiKey) { showError('Please enter your Gemini API key.'); return; }
+  if (!company) { showError('Please enter the company name.'); return; }
+  if (!role) { showError('Please enter the role or position.'); return; }
+  if (!jobDesc) { showError('Please paste the job description.'); return; }
+  if (!background) { showError('Please enter your background and skills.'); return; }
+
+  setLoading(true);
+
+  // Build culture injection
+  let cultureNote = '';
+  if (selectedFaang && FAANG_CULTURE[selectedFaang]) {
+    const c = FAANG_CULTURE[selectedFaang];
+    cultureNote = `\n\nIMPORTANT — This is for ${selectedFaang}. You MUST naturally weave in these culture keywords: ${c.keywords.join(', ')}. ${c.hint}.`;
+  }
+
+  const prompt = `Write a ${selectedTone.toLowerCase()}, human-sounding cover letter for the following application. It must be exactly 3 paragraphs and sound like a real person wrote it — not a template.
+
+Company: ${company}
+Role: ${role}
+Tone: ${selectedTone}
+${cultureNote}
+
+Job Description:
+${jobDesc}
+
+Applicant's Background:
+${background}
+
+Instructions:
+- Paragraph 1: Express genuine interest in the specific role and company. Reference something specific from the JD.
+- Paragraph 2: Highlight 2-3 relevant skills from the background that directly match the JD. Be specific.
+- Paragraph 3: Close confidently, express enthusiasm for next steps.
+- Do NOT use generic filler phrases like "I am writing to apply for" or "I believe I am the perfect candidate."
+- Sound ${selectedTone === 'Concise' ? 'brief and punchy — keep each paragraph to 2-3 sentences' : selectedTone === 'Enthusiastic' ? 'warm, energetic, and genuinely excited' : 'professional, confident, and thoughtful'}.
+- Do not include a subject line or salutation. Start directly with the letter body.
+- Return ONLY the cover letter text, no extra commentary.`;
+
+  try {
+    const result = await callGemini(apiKey, prompt);
+    const trimmed = result.trim();
+    const jdKeywords = extractKeywords(jobDesc);
+    const matched = findMatchedKeywords(jdKeywords, trimmed);
+
+    letterBody.innerHTML = highlightKeywords(trimmed, matched);
+    wordCount.textContent = `${countWords(trimmed)} words`;
+
+    kwChips.innerHTML = matched.length
+      ? matched.map(kw => `<span class="kw-chip">${escHtml(kw)}</span>`).join('')
+      : '<span style="color:var(--ink-faint);font-size:.83rem">No keyword matches found.</span>';
+
+    // ATS score
+    const ats = calcATS(trimmed, matched.length, jdKeywords.length);
+    document.getElementById('atsNum').textContent = ats.total;
+    document.getElementById('atsNum').style.color = ats.color;
+    document.getElementById('atsBarFill').style.width = ats.total + '%';
+    document.getElementById('atsBarFill').style.background = ats.color;
+    document.getElementById('atsBreakdown').innerHTML = `
+      <div class="ats-row">
+        <span class="ats-row-label">Keyword density</span>
+        <span class="ats-row-val" style="color:${ats.color}">${ats.kwScore}/40</span>
+      </div>
+      <div class="ats-row">
+        <span class="ats-row-label">Sentence length (avg ${ats.avgSentLen} words)</span>
+        <span class="ats-row-val" style="color:${ats.color}">${ats.sentScore}/35</span>
+      </div>
+      <div class="ats-row">
+        <span class="ats-row-label">Structure / bullets</span>
+        <span class="ats-row-val" style="color:${ats.color}">${ats.bulletScore}/25</span>
+      </div>`;
+    document.getElementById('atsPanel').style.display = 'block';
+
+    outputPlaceholder.classList.add('hidden');
+    loadingState.classList.add('hidden');
+    outputContent.classList.remove('hidden');
+    copyBtn._letterText = trimmed;
+  } catch(err) {
+    setLoading(false);
+    showError('Generation failed: ' + err.message);
+  } finally {
+    generateBtn.disabled = false;
+    generateBtn.innerHTML = '<span class="btn-icon">✨</span> Generate Cover Letter';
+    loadingState.classList.add('hidden');
+  }
+});
+
+copyBtn.addEventListener('click', async () => {
+  const text = copyBtn._letterText || letterBody.innerText;
+  try {
+    await navigator.clipboard.writeText(text);
+    copyBtn.textContent = '✓ Copied!'; copyBtn.classList.add('copied');
+    setTimeout(() => { copyBtn.textContent = 'Copy Letter'; copyBtn.classList.remove('copied'); }, 2000);
+  } catch { copyBtn.textContent = 'Copy failed'; }
+});
+
+function setLoading(on) {
+  if (on) {
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<span class="btn-icon">⏳</span> Generating…';
+    outputPlaceholder.classList.add('hidden');
+    outputContent.classList.add('hidden');
+    loadingState.classList.remove('hidden');
+  } else {
+    generateBtn.disabled = false;
+    generateBtn.innerHTML = '<span class="btn-icon">✨</span> Generate Cover Letter';
+    loadingState.classList.add('hidden');
+  }
+}
+
+function showError(msg) { errorBox.textContent = msg; errorBox.classList.remove('hidden'); }
+</script>
 </body>
 </html>

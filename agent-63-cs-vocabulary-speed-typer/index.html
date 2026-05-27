@@ -88,6 +88,26 @@
   .missed-item .mw{color:#e2e8f0;font-size:.9rem}
   .missed-item .mc{background:#f8717120;color:#f87171;font-size:.78rem;padding:3px 10px;border-radius:20px}
   .no-data{text-align:center;padding:40px;color:#94a3b8}
+
+  /* DECK + MODE SELECTOR */
+  .deck-row,.mode-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+  .deck-btn,.mode-btn{padding:8px 20px;border-radius:20px;border:1px solid #2d3148;background:transparent;color:#94a3b8;cursor:pointer;font-size:.85rem;font-weight:500;transition:all .2s}
+  .deck-btn.active{background:#4f8ef7;border-color:#4f8ef7;color:#fff}
+  .mode-btn.active{background:#7c3aed;border-color:#7c3aed;color:#fff}
+  .deck-btn:hover:not(.active),.mode-btn:hover:not(.active){border-color:#94a3b8;color:#e2e8f0}
+
+  /* KNOWLEDGE MODE */
+  #knowArea{margin-bottom:16px}
+  #knowInput{width:100%;background:#1a1d27;border:2px solid #2d3148;border-radius:10px;padding:12px 16px;font-size:1rem;color:#e2e8f0;outline:none;resize:vertical;min-height:90px;font-family:inherit;transition:border-color .2s}
+  #knowInput:focus{border-color:#7c3aed}
+  #knowInput:disabled{opacity:.6}
+  .know-hint{font-size:.78rem;color:#94a3b8;text-align:center;margin-bottom:8px}
+  .know-score{font-size:.88rem;text-align:center;margin:8px 0;font-weight:600;min-height:22px}
+  .know-score.ok{color:#4ade80}
+  .know-score.partial{color:#fb923c}
+  .know-score.err{color:#f87171}
+  #knowSubmitBtn{display:block;margin:8px auto 0;padding:10px 32px;background:#7c3aed;border:none;border-radius:8px;color:#fff;font-size:.92rem;font-weight:600;cursor:pointer;transition:background .2s}
+  #knowSubmitBtn:hover{background:#6d28d9}
 </style>
 </head>
 <body>
@@ -110,7 +130,15 @@
     <div style="text-align:center;padding:60px 20px">
       <div style="font-size:3rem;margin-bottom:16px">⌨️</div>
       <h2 style="font-size:1.5rem;margin-bottom:8px">CS Vocabulary Speed Typer</h2>
-      <p style="color:#94a3b8;margin-bottom:28px;max-width:480px;margin-left:auto;margin-right:auto">Type CS terms as fast as possible! Terms get harder as your streak grows. You have 60 seconds per round.</p>
+      <p style="color:#94a3b8;margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto">Choose a deck and mode, then race the clock!</p>
+      <div class="deck-row">
+        <button class="deck-btn active" id="deckBtnCs" onclick="selectDeck('cs',this)">CS Terms</button>
+        <button class="deck-btn" id="deckBtnTttt" onclick="selectDeck('tttt',this)">TTTT (8th Grade DS)</button>
+      </div>
+      <div class="mode-row" style="margin-bottom:24px">
+        <button class="mode-btn active" id="modeBtnSpeed" onclick="selectMode('speed',this)">⚡ Speed Mode</button>
+        <button class="mode-btn" id="modeBtnKnow" onclick="selectMode('knowledge',this)">🧠 Knowledge Mode</button>
+      </div>
       <button class="btn btn-primary" onclick="startGame()">Start Round</button>
     </div>
   </div>
@@ -128,8 +156,14 @@
       <div class="term-category" id="termCategory">Category</div>
       <div class="term-display" id="termDisplay">term</div>
     </div>
-    <div class="type-area">
+    <div class="type-area" id="typeArea">
       <input id="typeInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Type the term above...">
+    </div>
+    <div id="knowArea" class="hidden">
+      <div class="know-hint">Describe the term in your own words — hit Submit (or Enter) to check keywords.</div>
+      <textarea id="knowInput" placeholder="Type your definition here..."></textarea>
+      <div class="know-score" id="knowScore"></div>
+      <button id="knowSubmitBtn" onclick="submitKnowledge()">Submit</button>
     </div>
     <div class="feedback" id="feedback"></div>
     <div style="text-align:center">
@@ -330,8 +364,98 @@ const TERMS = [
   {t:"containerization",c:"Web",d:"Packaging an application with its dependencies into a container for consistent deployment."}
 ];
 
+// TTTT deck — data structures explained for 8th graders with real-world analogies
+const TTTT_TERMS = [
+  {t:"array",c:"DS",d:"Like seats in a theater — numbered in order so you can jump straight to any seat without walking past others.",keywords:["numbered","order","index","seat","jump","direct","row"]},
+  {t:"linked list",c:"DS",d:"Like a scavenger hunt — each clue tells you where to find the next one. You must follow the chain from the very start.",keywords:["chain","next","follow","node","pointer","clue","sequence"]},
+  {t:"stack",c:"DS",d:"Like a stack of pancakes — always add and remove from the top. The last pancake added is the first one you eat.",keywords:["top","last","first","LIFO","add","remove","pancake"]},
+  {t:"queue",c:"DS",d:"Like a lunch line — first person in line gets served first. Everyone waits their turn in order.",keywords:["line","first","FIFO","order","front","wait","served"]},
+  {t:"binary tree",c:"DS",d:"Like a family tree where each person can have at most two children. It branches left and right down from the top.",keywords:["tree","children","left","right","branch","root","two"]},
+  {t:"hash table",c:"DS",d:"Like a magic locker room — run your name through a formula and it tells you exactly which locker is yours. Super fast to look up.",keywords:["key","value","formula","locker","fast","lookup","hash"]},
+  {t:"heap",c:"DS",d:"Like a priority line — the most important item always rises to the top. A max-heap keeps the biggest value at the front.",keywords:["priority","top","biggest","smallest","max","min","important"]},
+  {t:"graph",c:"DS",d:"Like a map of cities connected by roads. Cities are called nodes and roads are called edges.",keywords:["node","edge","connection","map","city","road","network"]},
+  {t:"trie",c:"DS",d:"Like an autocomplete tree for words — each branch adds one more letter. Spell down the tree letter by letter to find a word.",keywords:["word","letter","prefix","autocomplete","spell","branch","string"]},
+  {t:"deque",c:"DS",d:"Like a bus with doors at both ends — you can get on or off from the front or the back at any time.",keywords:["both","front","back","end","double","insert","remove"]},
+  {t:"binary search tree",c:"DS",d:"A tree where smaller values always go left and bigger values always go right — keeps things sorted so you can find any item fast.",keywords:["left","right","smaller","bigger","sorted","fast","search"]},
+  {t:"bloom filter",c:"DS",d:"Like a club bouncer with a checklist — very space-efficient but occasionally lets a non-member in by mistake.",keywords:["space","false positive","membership","check","efficient","probable","filter"]},
+  {t:"segment tree",c:"DS",d:"Like a bracket chart for number ranges — helps you quickly find the sum or minimum across any stretch of a list.",keywords:["range","sum","minimum","query","interval","bracket","fast"]},
+  {t:"disjoint set",c:"DS",d:"Like sorting students into friend groups — each group has one leader. When two groups merge, one leader takes over both.",keywords:["group","leader","union","find","merge","connected","partition"]}
+];
+
 const CATEGORIES = [...new Set(TERMS.map(t=>t.c))];
 const LS = 'typer63_';
+
+// Deck & mode state
+let currentDeck = 'cs';
+let gameMode = 'speed';
+let knowWaiting = false;
+
+function activeDeck(){ return currentDeck==='tttt' ? TTTT_TERMS : TERMS; }
+
+function selectDeck(id, btn){
+  currentDeck = id;
+  document.querySelectorAll('.deck-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function selectMode(mode, btn){
+  gameMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function extractKeywords(def){
+  const stops = new Set(['their','there','where','which','other','about','these','those','being','using','after','before','every','often','given','first','second','third','while','since','makes','takes','gives','provides','allows','ensures','requires']);
+  return def.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w=>w.length>4&&!stops.has(w)).slice(0,6);
+}
+
+function getKeywords(term){ return term.keywords || extractKeywords(term.d); }
+
+function submitKnowledge(){
+  if(knowWaiting){ nextKnowledgeTerm(); return; }
+  const answer = document.getElementById('knowInput').value.toLowerCase();
+  const kws = getKeywords(currentTerm);
+  const matched = kws.filter(k=>answer.includes(k));
+  const pct = kws.length ? Math.round(matched.length/kws.length*100) : 50;
+  const correct = pct >= 50;
+
+  if(correct){
+    correctTerms++; currentStreak++;
+    if(currentStreak>bestStreak) bestStreak=currentStreak;
+  } else {
+    incorrectAttempts++; currentStreak=0;
+    const missed=getMissedLocal();
+    missed[currentTerm.t]=(missed[currentTerm.t]||0)+1;
+    missedMap=missed;
+  }
+  updateStats();
+
+  const scoreEl = document.getElementById('knowScore');
+  const missing = kws.filter(k=>!answer.includes(k));
+  if(correct){
+    scoreEl.textContent = `✓ ${pct}% match! Key ideas: ${matched.join(', ')}`;
+    scoreEl.className = 'know-score ok';
+  } else if(pct>=25){
+    scoreEl.textContent = `Partial ${pct}% — missed: ${missing.slice(0,3).join(', ')}`;
+    scoreEl.className = 'know-score partial';
+  } else {
+    scoreEl.textContent = `Try again — key concepts missed: ${missing.slice(0,3).join(', ')}`;
+    scoreEl.className = 'know-score err';
+  }
+  document.getElementById('knowInput').disabled = true;
+  document.getElementById('knowSubmitBtn').textContent = 'Next →';
+  knowWaiting = true;
+}
+
+function nextKnowledgeTerm(){
+  knowWaiting = false;
+  document.getElementById('knowInput').value = '';
+  document.getElementById('knowInput').disabled = false;
+  document.getElementById('knowScore').textContent = '';
+  document.getElementById('knowSubmitBtn').textContent = 'Submit';
+  nextTerm();
+  document.getElementById('knowInput').focus();
+}
 
 // Game state
 let gameTimer = null;
@@ -354,11 +478,11 @@ function getMissed(){return JSON.parse(localStorage.getItem(LS+'missed')||'{}')}
 function saveMissed(m){localStorage.setItem(LS+'missed',JSON.stringify(m))}
 
 function pickTerm(){
-  // harder terms as streak grows
-  let pool = TERMS;
-  if(currentStreak>=10) pool = TERMS.filter(t=>t.t.includes(' ')||t.t.length>10);
-  else if(currentStreak>=5) pool = TERMS.filter(t=>t.t.length>=6);
-  // avoid recent repeats
+  const deck = activeDeck();
+  let pool = deck;
+  if(currentStreak>=10) pool = deck.filter(t=>t.t.includes(' ')||t.t.length>10);
+  else if(currentStreak>=5) pool = deck.filter(t=>t.t.length>=6);
+  if(!pool.length) pool = deck;
   const available = pool.filter(t=>!usedTerms.slice(-20).includes(t.t));
   return available[Math.floor(Math.random()*available.length)]||pool[Math.floor(Math.random()*pool.length)];
 }
@@ -366,14 +490,23 @@ function pickTerm(){
 function startGame(){
   typedChars=0; correctTerms=0; incorrectAttempts=0;
   currentStreak=0; bestStreak=0; timeLeft=60; usedTerms=[]; missedMap={};
+  knowWaiting=false;
   document.getElementById('gameReady').classList.add('hidden');
   document.getElementById('gameOver').classList.add('hidden');
   document.getElementById('gameActive').classList.remove('hidden');
+  const isKnow = gameMode==='knowledge';
+  document.getElementById('typeArea').classList.toggle('hidden', isKnow);
+  document.getElementById('knowArea').classList.toggle('hidden', !isKnow);
+  document.getElementById('knowInput').value='';
+  document.getElementById('knowInput').disabled=false;
+  document.getElementById('knowScore').textContent='';
+  document.getElementById('knowSubmitBtn').textContent='Submit';
   updateStats();
   nextTerm();
   clearInterval(gameTimer);
   gameTimer=setInterval(tick,1000);
-  document.getElementById('typeInput').focus();
+  if(isKnow) document.getElementById('knowInput').focus();
+  else document.getElementById('typeInput').focus();
 }
 
 function tick(){
@@ -400,6 +533,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 function onType(e){
+  if(gameMode!=='speed') return;
   const val=e.target.value.trim().toLowerCase();
   const target=currentTerm.t.toLowerCase();
   if(val===target){
@@ -424,6 +558,11 @@ function onType(e){
 document.addEventListener('keydown',function(e){
   if(document.getElementById('gameActive').classList.contains('hidden')) return;
   if(e.key==='Enter'){
+    if(gameMode==='knowledge'){
+      e.preventDefault();
+      if(knowWaiting) nextKnowledgeTerm(); else submitKnowledge();
+      return;
+    }
     const val=document.getElementById('typeInput').value.trim().toLowerCase();
     if(val!==currentTerm.t.toLowerCase()){
       incorrectAttempts++;
@@ -439,6 +578,20 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Tab'){
     e.preventDefault();
     if(!document.getElementById('gameActive').classList.contains('hidden')){
+      if(gameMode==='knowledge'){
+        const missed=getMissedLocal();
+        missed[currentTerm.t]=(missed[currentTerm.t]||0)+1;
+        missedMap=missed;
+        incorrectAttempts++; currentStreak=0; knowWaiting=false;
+        updateStats();
+        document.getElementById('knowInput').value='';
+        document.getElementById('knowInput').disabled=false;
+        document.getElementById('knowScore').textContent='Skipped: '+currentTerm.t;
+        document.getElementById('knowScore').className='know-score err';
+        document.getElementById('knowSubmitBtn').textContent='Submit';
+        setTimeout(()=>{document.getElementById('knowScore').textContent='';nextTerm();document.getElementById('knowInput').focus();},700);
+        return;
+      }
       const missed=getMissedLocal();
       missed[currentTerm.t]=(missed[currentTerm.t]||0)+1;
       missedMap=missed;

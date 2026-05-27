@@ -111,6 +111,19 @@
   .mi-ans{font-size:.8rem;color:var(--green);font-family:monospace;}
   .retry-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 24px;border-radius:var(--radius-sm);cursor:pointer;font-size:.86rem;font-weight:600;margin-top:16px;transition:all .2s;}
   .retry-btn:hover{border-color:var(--blue);color:var(--blue);}
+  /* ── AUDIO CONTROLS ── */
+  .audio-row{display:flex;gap:7px;align-items:center;margin-top:10px;flex-wrap:wrap;}
+  .btn-speak,.btn-record,.btn-play-rec{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:var(--radius-sm);cursor:pointer;font-size:.74rem;font-weight:600;transition:all .2s;font-family:inherit;white-space:nowrap;}
+  .btn-speak{background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.3);color:var(--blue);}
+  .btn-speak:hover,.btn-speak.speaking{background:var(--blue);color:#fff;}
+  .btn-record{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--red);}
+  .btn-record:hover{background:var(--red);color:#fff;}
+  .btn-record.recording{background:var(--red);color:#fff;animation:recpulse .8s infinite;}
+  .btn-play-rec{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--green);}
+  .btn-play-rec:hover{background:var(--green);color:#fff;}
+  .btn-play-rec.hidden{display:none;}
+  .speech-notice{background:rgba(250,204,21,.06);border:1px solid rgba(250,204,21,.25);border-radius:var(--radius-sm);padding:9px 14px;font-size:.79rem;color:#fde68a;margin-bottom:14px;}
+  @keyframes recpulse{0%,100%{opacity:1;}50%{opacity:.5;}}
   @media(max-width:600px){.sound-grid{grid-template-columns:1fr 1fr;}.tab-btn{padding:10px 9px;font-size:.7rem;}}
 </style>
 </head>
@@ -149,6 +162,7 @@
 <!-- PRACTICE -->
 <div class="tab-panel" id="tab-practice">
   <div class="section-title">Tongue Twisters <span class="pill">40 twisters</span></div>
+  <div id="pron-notice-p"></div>
   <div class="twist-filter" id="twist-filter"></div>
   <div class="twist-list" id="twist-list"></div>
 </div>
@@ -156,6 +170,7 @@
 <!-- WORDS -->
 <div class="tab-panel" id="tab-words">
   <div class="section-title">Commonly Mispronounced Words <span class="pill">100 words</span></div>
+  <div id="pron-notice-w"></div>
   <input class="word-search" id="word-search" placeholder="🔍 Search words..." oninput="filterWords()">
   <div class="word-list" id="word-list"></div>
 </div>
@@ -382,16 +397,20 @@ function showSoundGroup(g,btn){
 }
 function renderSoundGrid(){
   const sounds=SOUNDS[soundGroup];
+  sounds.forEach((s,i)=>{ speakTexts['snd_'+soundGroup+'_'+i]=s.ex.split(',')[0].trim(); });
   document.getElementById('sound-grid').innerHTML=sounds.map((s,i)=>`
     <div class="sound-card" onclick="selectSound(${i})">
       <div class="sound-ipa">${s.ipa}</div>
       <div class="sound-name">${s.name}</div>
       <div class="sound-example">e.g. ${s.ex.split(',')[0].trim()}</div>
       ${s.spell?`<div class="sound-spellings">spellings: ${s.spell}</div>`:''}
+      <button class="btn-speak" style="margin-top:8px;font-size:.7rem;width:100%;justify-content:center;" onclick="event.stopPropagation();speakFromKey('snd_${soundGroup}_${i}',this)">🔊 Hear</button>
     </div>`).join('');
 }
 function selectSound(i){
   const s=SOUNDS[soundGroup][i];
+  const sndKey='snd_'+soundGroup+'_'+i;
+  speakTexts[sndKey]=s.ex.split(',')[0].trim();
   const det=document.getElementById('sound-detail');
   det.style.display='block';
   det.innerHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;">
@@ -401,7 +420,10 @@ function selectSound(i){
   <div class="sd-desc">${s.desc}</div>
   <div style="font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:8px;">EXAMPLE WORDS</div>
   <div class="sd-words">${s.ex.split(',').map(w=>`<div class="sd-word">${w.trim()}</div>`).join('')}</div>
-  ${s.spell?`<div style="font-size:.75rem;color:var(--purple);margin-top:12px;">Common spellings: ${s.spell}</div>`:''}`;
+  ${s.spell?`<div style="font-size:.75rem;color:var(--purple);margin-top:12px;">Common spellings: ${s.spell}</div>`:''}
+  <div class="audio-row" style="margin-top:14px;">
+    <button class="btn-speak" onclick="speakFromKey('${sndKey}',this)">🔊 Hear Example</button>
+  </div>`;
   det.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
@@ -420,6 +442,7 @@ function renderTwisters(){
   const speedColors={slow:'var(--green)',medium:'var(--yellow)',fast:'var(--red)'};
   document.getElementById('twist-list').innerHTML=list.map(t=>{
     const isTried=tried.has(t.i);
+    speakTexts['t'+t.i]=t.text;
     return `<div class="twist-card">
       <div class="twist-target">Target sound: ${t.target}</div>
       <div class="twist-text">${t.text}</div>
@@ -430,6 +453,7 @@ function renderTwisters(){
       <button class="try-btn ${isTried?'tried':''}" onclick="markTried_UI(${t.i},this)">
         ${isTried?'✓ Practiced':'Mark as Practiced'}
       </button>
+      ${audioRow('t'+t.i)}
     </div>`;
   }).join('');
 }
@@ -451,6 +475,7 @@ function renderWords(){
   if(wordSearchVal) words=words.filter(w=>w.word.toLowerCase().includes(wordSearchVal)||w.phonetic.toLowerCase().includes(wordSearchVal));
   document.getElementById('word-list').innerHTML=words.map((w,i)=>{
     const isExp=expandedWord===w.word;
+    speakTexts['w_'+w.word]=w.word;
     return `<div class="word-row ${isExp?'expanded':''}" onclick="toggleWord('${w.word}')">
       <div class="wr-top">
         <div><div class="wr-word">${w.word}</div></div>
@@ -463,6 +488,7 @@ function renderWords(){
         <div class="wr-mistake">❌ Common mistake: <strong>${w.mistake}</strong></div>
         <div class="wr-tip">💡 ${w.tip}</div>
         <div class="wr-example">📝 "${w.ex}"</div>
+        ${audioRow('w_'+w.word)}
       </div>
     </div>`;
   }).join('');
@@ -529,7 +555,81 @@ function finishQuiz(){
 }
 function resetQuiz(){ document.getElementById('quiz-setup').style.display='block'; document.getElementById('quiz-active').style.display='none'; document.getElementById('q-results').style.display='none'; }
 
+// ── SPEECH & RECORDING ──────────────────────────────
+const HAS_SYNTH = 'speechSynthesis' in window;
+const HAS_MEDIA = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+const speakTexts = {};
+const recordings = {};
+let activeRec = null;
+
+function speakFromKey(key, btn) {
+  if (!HAS_SYNTH) return;
+  const text = speakTexts[key];
+  if (!text) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'en-US'; utt.rate = 0.85;
+  if (btn) { btn.classList.add('speaking'); utt.onend = () => btn.classList.remove('speaking'); }
+  window.speechSynthesis.speak(utt);
+}
+
+async function toggleRecord(key) {
+  if (!HAS_MEDIA) { alert('Microphone recording is not supported. Try Chrome or Edge.'); return; }
+  if (activeRec && activeRec.key === key) { activeRec.recorder.stop(); return; }
+  if (activeRec) activeRec.recorder.stop();
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const recorder = new MediaRecorder(stream);
+    const chunks = [];
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      if (chunks.length) {
+        if (recordings[key]) URL.revokeObjectURL(recordings[key]);
+        recordings[key] = URL.createObjectURL(new Blob(chunks, { type: 'audio/webm' }));
+      }
+      activeRec = null;
+      const rb = document.querySelector(`[data-rec="${key}"]`);
+      const pb = document.querySelector(`[data-play="${key}"]`);
+      if (rb) { rb.textContent = '⏺ Record'; rb.classList.remove('recording'); }
+      if (pb && recordings[key]) pb.classList.remove('hidden');
+    };
+    recorder.start();
+    activeRec = { key, recorder };
+    const rb = document.querySelector(`[data-rec="${key}"]`);
+    if (rb) { rb.textContent = '⏹ Stop'; rb.classList.add('recording'); }
+    setTimeout(() => { if (activeRec && activeRec.key === key) recorder.stop(); }, 10000);
+  } catch(e) { alert('Could not access microphone. Please allow microphone permission.'); }
+}
+
+function playRec(key) {
+  const url = recordings[key];
+  if (url) new Audio(url).play();
+}
+
+function audioRow(key) {
+  const hasRec = !!recordings[key];
+  return `<div class="audio-row" onclick="event.stopPropagation()">
+    <button class="btn-speak" onclick="speakFromKey('${key}',this)">🔊 Reference</button>
+    <button class="btn-record" data-rec="${key}" onclick="toggleRecord('${key}')">⏺ Record</button>
+    <button class="btn-play-rec${hasRec?'':' hidden'}" data-play="${key}" onclick="playRec('${key}')">▶ My Recording</button>
+  </div>`;
+}
+
 // ── INIT ────────────────────────────────────────────
+// Show degradation notice if speech APIs unavailable
+(function(){
+  if (HAS_SYNTH && HAS_MEDIA) return;
+  const msgs = [];
+  if (!HAS_SYNTH) msgs.push('Reference playback needs SpeechSynthesis (Chrome/Safari).');
+  if (!HAS_MEDIA) msgs.push('Recording needs microphone permission in Chrome or Edge.');
+  const html = `<div class="speech-notice">ℹ️ ${msgs.join(' ')}</div>`;
+  ['pron-notice-p','pron-notice-w'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  });
+})();
+
 renderSoundGrid();
 renderTwisters();
 renderWords();

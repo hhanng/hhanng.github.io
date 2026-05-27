@@ -525,6 +525,17 @@
 
     .chart-day-lbl.today { color: var(--green); font-weight: 700; }
 
+    /* ── TEMPLATE PICKER ── */
+    .tmpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-top: 0.75rem; }
+    .tmpl-card { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; cursor: pointer; transition: var(--tr); }
+    .tmpl-card:hover { border-color: var(--blue); background: rgba(79,142,247,0.05); }
+    .tmpl-name { font-size: 0.88rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .tmpl-desc { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.35rem; line-height: 1.4; }
+    .tmpl-count { font-size: 0.65rem; color: var(--blue); font-weight: 600; }
+    .tmpl-hint { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.65rem; }
+    .toast-msg { position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 8px; padding: 0.6rem 1.1rem; font-size: 0.82rem; font-weight: 600; color: var(--green); z-index: 999; animation: fadeIn 0.2s ease; pointer-events: none; }
+    @media (max-width: 480px) { .tmpl-grid { grid-template-columns: 1fr; } }
+
     /* Scrollbar */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -612,7 +623,25 @@
   <!-- ══ WEEK ═══════════════════════════════════════════════ -->
   <div class="tab-panel" id="tab-week">
     <div class="card">
-      <div class="section-label">Weekly Overview — <span id="week-range"></span></div>
+      <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem">
+        <span>Weekly Overview — <span id="week-range"></span></span>
+        <button class="btn btn-ghost" id="tmpl-toggle-btn" style="font-size:0.75rem;padding:0.3rem 0.75rem" onclick="toggleTemplatePanel()">📋 Load Template</button>
+      </div>
+      <div id="tmpl-panel" style="display:none;border-top:1px solid var(--border);padding-top:0.85rem;margin-top:0.5rem">
+        <div class="tmpl-hint">Choose a template to pre-fill this week with tasks (adds to existing tasks):</div>
+        <div class="tmpl-grid">
+          <div class="tmpl-card" onclick="loadTemplate('faang')">
+            <div class="tmpl-name">🏢 FAANG Prep Week</div>
+            <div class="tmpl-desc">LeetCode daily · System Design · Company Research · Mock Interviews</div>
+            <div class="tmpl-count">Mon–Sun, 3–4 tasks/day</div>
+          </div>
+          <div class="tmpl-card" onclick="loadTemplate('esl')">
+            <div class="tmpl-name">📚 ESL Student Week</div>
+            <div class="tmpl-desc">Vocabulary 10 words/day · Reading 30 min · Writing practice · Homework</div>
+            <div class="tmpl-count">Mon–Sun, 3–4 tasks/day</div>
+          </div>
+        </div>
+      </div>
       <div class="week-grid" id="week-grid"></div>
     </div>
 
@@ -1148,6 +1177,114 @@ function calcStreak(tasks) {
     d.setDate(d.getDate() - 1);
   }
   return streak;
+}
+
+// ──────────────────────────────────────────────────────────────
+// TEMPLATES
+// ──────────────────────────────────────────────────────────────
+const TEMPLATES = {
+  faang: {
+    tasks: [
+      // Mon
+      [{ title: 'LeetCode: 2 Array / Hash Map problems', priority: 'high', category: 'LeetCode' },
+       { title: 'System Design: Design a URL Shortener', priority: 'high', category: 'System Design' },
+       { title: 'Company Research: Google Engineering Blog', priority: 'medium', category: 'Research' },
+       { title: 'Mock Interview: 45-min timed coding session', priority: 'high', category: 'Mock Interview' }],
+      // Tue
+      [{ title: 'LeetCode: 2 Linked List problems', priority: 'high', category: 'LeetCode' },
+       { title: 'System Design: Design a Social Media Feed', priority: 'high', category: 'System Design' },
+       { title: 'Company Research: Meta Engineering Blog', priority: 'medium', category: 'Research' }],
+      // Wed
+      [{ title: 'LeetCode: 2 Tree / Binary Search problems', priority: 'high', category: 'LeetCode' },
+       { title: 'System Design: Design a Distributed Cache', priority: 'high', category: 'System Design' },
+       { title: 'Company Research: Amazon Leadership Principles', priority: 'medium', category: 'Research' },
+       { title: 'Mock Interview: Behavioral STAR questions', priority: 'medium', category: 'Mock Interview' }],
+      // Thu
+      [{ title: 'LeetCode: 1 Graph BFS + 1 DFS problem', priority: 'high', category: 'LeetCode' },
+       { title: 'System Design: Design a Video Streaming Service', priority: 'high', category: 'System Design' },
+       { title: 'Company Research: Apple Software Engineering', priority: 'medium', category: 'Research' }],
+      // Fri
+      [{ title: 'LeetCode: 2 Dynamic Programming problems', priority: 'high', category: 'LeetCode' },
+       { title: 'System Design: Review week\'s notes', priority: 'medium', category: 'System Design' },
+       { title: 'Company Research: Netflix Tech Blog', priority: 'medium', category: 'Research' },
+       { title: 'Mock Interview: Full peer mock (1 hr)', priority: 'high', category: 'Mock Interview' }],
+      // Sat
+      [{ title: 'LeetCode: Weekly Contest', priority: 'medium', category: 'LeetCode' },
+       { title: 'Review: Patterns & mistakes from the week', priority: 'medium', category: 'Review' }],
+      // Sun
+      [{ title: 'LeetCode: Revisit missed problems', priority: 'low', category: 'LeetCode' },
+       { title: 'Plan: Next week companies & topics', priority: 'medium', category: 'Planning' }],
+    ]
+  },
+  esl: {
+    tasks: [
+      // Mon
+      [{ title: 'English homework: Chapter review', priority: 'high', category: 'Homework' },
+       { title: 'Vocabulary: Learn 10 new words + example sentences', priority: 'high', category: 'Vocabulary' },
+       { title: 'Reading: 30 min — news article or book', priority: 'medium', category: 'Reading' },
+       { title: 'Writing: Journal entry (5+ sentences)', priority: 'medium', category: 'Writing' }],
+      // Tue
+      [{ title: 'English homework: Grammar exercises', priority: 'high', category: 'Homework' },
+       { title: 'Vocabulary: Review Monday\'s 10 words', priority: 'medium', category: 'Vocabulary' },
+       { title: 'Vocabulary: Learn 10 new words', priority: 'high', category: 'Vocabulary' },
+       { title: 'Reading: 30 min — note unfamiliar words', priority: 'medium', category: 'Reading' }],
+      // Wed
+      [{ title: 'English homework: Listening exercise', priority: 'high', category: 'Homework' },
+       { title: 'Vocabulary: Flashcard review (week so far)', priority: 'medium', category: 'Vocabulary' },
+       { title: 'Reading: 30 min article + one-paragraph summary', priority: 'medium', category: 'Reading' },
+       { title: 'Writing: Topic sentence paragraph practice', priority: 'medium', category: 'Writing' }],
+      // Thu
+      [{ title: 'English homework: Speaking prep / oral practice', priority: 'high', category: 'Homework' },
+       { title: 'Vocabulary: 10 new words + use in sentences', priority: 'high', category: 'Vocabulary' },
+       { title: 'Reading: 30 min — challenging text', priority: 'medium', category: 'Reading' },
+       { title: 'Writing: Email or letter practice', priority: 'low', category: 'Writing' }],
+      // Fri
+      [{ title: 'English homework: Submit / review all assignments', priority: 'high', category: 'Homework' },
+       { title: 'Vocabulary: Week recap self-quiz (all 40 words)', priority: 'high', category: 'Vocabulary' },
+       { title: 'Reading: 30 min + notes on new phrases', priority: 'medium', category: 'Reading' },
+       { title: 'Writing: Free write — weekend plans', priority: 'low', category: 'Writing' }],
+      // Sat
+      [{ title: 'Vocabulary: Spaced repetition review (full week)', priority: 'medium', category: 'Vocabulary' },
+       { title: 'Reading: 1 hour — book or magazine', priority: 'low', category: 'Reading' },
+       { title: 'Immersion: Watch English show with subtitles (30 min)', priority: 'low', category: 'Immersion' }],
+      // Sun
+      [{ title: 'Vocabulary: Final spaced repetition pass', priority: 'medium', category: 'Vocabulary' },
+       { title: 'Reading: 30 min — Sunday newspaper or podcast', priority: 'low', category: 'Reading' },
+       { title: 'Writing: Weekly reflection — what did I learn?', priority: 'medium', category: 'Writing' },
+       { title: 'Plan: Next week\'s study topics', priority: 'low', category: 'Planning' }],
+    ]
+  }
+};
+
+function toggleTemplatePanel() {
+  const panel = document.getElementById('tmpl-panel');
+  const btn   = document.getElementById('tmpl-toggle-btn');
+  const open  = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '✕ Close' : '📋 Load Template';
+}
+
+function loadTemplate(id) {
+  const tmpl = TEMPLATES[id]; if (!tmpl) return;
+  const days  = weekDays(new Date());
+  const tasks = getTasks();
+  days.forEach((day, i) => {
+    const ds = toDS(day);
+    (tmpl.tasks[i] || []).forEach(t => {
+      tasks.push({ id: uid(), title: t.title, priority: t.priority,
+        category: t.category, date: ds, completed: false, createdAt: Date.now() });
+    });
+  });
+  setTasks(tasks);
+  toggleTemplatePanel();
+  renderWeek();
+  renderToday();
+  // brief toast
+  const toast = document.createElement('div');
+  toast.className = 'toast-msg';
+  toast.textContent = id === 'faang' ? '🏢 FAANG Prep Week loaded!' : '📚 ESL Student Week loaded!';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
 }
 
 // ──────────────────────────────────────────────────────────────
