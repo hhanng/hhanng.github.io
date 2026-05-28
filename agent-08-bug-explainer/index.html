@@ -193,12 +193,12 @@
   <header>
     <div class="badge">Agent #8 · 100 AI Agents Challenge</div>
     <h1>Dev <span>Workflow</span> Companion</h1>
-    <p>Bug Explainer · PR Description Generator · Changelog Builder</p>
+    <p>Bug Explainer <span style="font-size:11px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#22c55e;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;">⚡ offline</span> · PR Description Generator · Changelog Builder</p>
   </header>
 
   <div class="api-row">
     <label>🔑 Gemini API Key</label>
-    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" />
+    <input type="password" id="apiKey" placeholder="AIza... (required for PR &amp; Changelog tabs only)" autocomplete="off" />
     <button class="api-save-btn" onclick="saveApiKey()">Save</button>
     <span class="api-status" id="apiStatus">✓ Saved</span>
   </div>
@@ -415,7 +415,483 @@
     return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
   }
 
-  // ─── BUG EXPLAINER ─────────────────────────────────────────
+  // ─── BUG EXPLAINER (offline — no API key needed) ───────────
+
+  function isBgn(exp) { return /beginner|learning/i.test(exp); }
+
+  function classifyError(err) {
+    const e = err.toLowerCase();
+    if (/not defined|nameerror/.test(e)) return 'a name does not exist in the current scope — the variable or function was never declared, or was declared in a different block.';
+    if (/null|nonetype|undefined/.test(e)) return 'a null or None value is being used where an object is expected — something returned nothing when a value was required.';
+    if (/index|out of (range|bounds)/.test(e)) return 'code tries to access a position in a list or string that does not exist — the index is too large (or negative beyond the start).';
+    if (/keyerror/.test(e)) return 'code looks up a key in a dictionary that does not exist — the key was never inserted or was spelled differently.';
+    if (/typeerror/.test(e)) return 'an operation received the wrong data type — for example, adding a string to a number without conversion.';
+    if (/syntaxerror/.test(e)) return 'the code cannot be parsed — there is a typo, a missing bracket, or a misplaced keyword.';
+    if (/division by zero|zerodivision/.test(e)) return 'the code tried to divide a number by zero, which is mathematically undefined.';
+    if (/recursion|call stack/.test(e)) return 'a function keeps calling itself forever without a base case that stops the recursion.';
+    if (/import|module/.test(e)) return 'a module or package could not be found — it may not be installed or the name may be misspelled.';
+    return 'a runtime error occurred while executing the code.';
+  }
+
+  const BUG_RULES = [
+
+    // ── Python: Missing required argument ──────────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return /missing \d+ required positional argument/.test(err) || /takes \d+ positional argument.* given/.test(err); },
+      analyze: function(code, err, raw, exp) {
+        var fnMatch = raw.match(/(\w+)\(\) missing/) || raw.match(/(\w+)\(\) takes/);
+        var fnName = fnMatch ? fnMatch[1] : 'the function';
+        var argMatch = raw.match(/argument[s]?: '([^']+)'/);
+        var argName = argMatch ? argMatch[1] : 'a required argument';
+        return {
+          oneLiner: 'You called ' + fnName + '() without passing all required arguments.',
+          whyItHappens: isBgn(exp)
+            ? 'Think of a function like a vending machine: you have to press the right buttons (pass the right values) to get something out. This machine needs "' + argName + '" to work, but you did not give it one. Python refuses to guess what you meant.'
+            : 'The function signature requires the parameter "' + argName + '" but the call site omits it. Python enforces this strictly — no default value is defined for that parameter.',
+          fix: {
+            explanation: 'Pass a value for "' + argName + '" when you call ' + fnName + '().',
+            oldCode: fnName + '()',
+            newCode: fnName + '(' + argName + '=<your_value>)',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Count the parameters in the def line and compare to your call site.',
+            'If a parameter has no default (no = sign), it is always required.',
+            'Read the TypeError message — it tells you exactly which argument is missing.'
+          ]
+        };
+      }
+    },
+
+    // ── Python: String + non-string TypeError ──────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return /can only concatenate str/.test(err) || /unsupported operand.*str.*int/.test(err) || /unsupported operand.*int.*str/.test(err); },
+      analyze: function(code, err, raw, exp) {
+        return {
+          oneLiner: 'You tried to join a string and a number with +, but Python cannot mix types directly.',
+          whyItHappens: isBgn(exp)
+            ? 'Imagine trying to staple a sticky note to a number on a whiteboard — they are different things and Python does not know how to combine them without help. You need to convert the number to text first using str().'
+            : 'The + operator is overloaded for both numeric addition and string concatenation, but Python will not implicitly coerce types. You must explicitly cast with str() or use an f-string.',
+          fix: {
+            explanation: 'Wrap the number in str() or use an f-string instead of + concatenation.',
+            oldCode: 'print("Value: " + count)',
+            newCode: 'print(f"Value: {count}")  # or: print("Value: " + str(count))',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Whenever you use + with a string, make sure every operand is also a string.',
+            'Prefer f-strings (f"text {variable}") — they handle mixed types automatically.',
+            'The error message will say "can only concatenate str (not int) to str".'
+          ]
+        };
+      }
+    },
+
+    // ── Python: NameError ──────────────────────────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return /nameerror.*name '(\w+)' is not defined/.test(err); },
+      analyze: function(code, err, raw, exp) {
+        var nameMatch = raw.match(/name '(\w+)' is not defined/i);
+        var varName = nameMatch ? nameMatch[1] : 'the variable';
+        return {
+          oneLiner: '"' + varName + '" is used before it was ever defined.',
+          whyItHappens: isBgn(exp)
+            ? 'Python reads your code top-to-bottom. If you use a word (variable name) before you have written what it means, Python has no idea what you are referring to. It is like using a word in a sentence that you have not defined yet.'
+            : 'The name "' + varName + '" is not present in the local, enclosing, global, or built-in namespaces at the point of use. This is a LEGB scope lookup failure.',
+          fix: {
+            explanation: 'Define "' + varName + '" before the line that uses it.',
+            oldCode: varName + '  # used here without definition',
+            newCode: varName + ' = <value>  # define it first, then use it',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Search your file for where ' + varName + ' is assigned — make sure it comes before it is used.',
+            'Check for typos — Python variable names are case-sensitive.',
+            'If it is inside a function, ensure the variable is defined in that function or passed as a parameter.'
+          ]
+        };
+      }
+    },
+
+    // ── Python: NoneType AttributeError ───────────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return /'nonetype' object has no attribute/.test(err); },
+      analyze: function(code, err, raw, exp) {
+        var attrMatch = raw.match(/attribute '([^']+)'/);
+        var attr = attrMatch ? attrMatch[1] : 'the attribute';
+        return {
+          oneLiner: 'A variable is None when you expected an object — you cannot call .' + attr + ' on None.',
+          whyItHappens: isBgn(exp)
+            ? 'Think of None as an empty box. You tried to open the box and take out "' + attr + '", but the box is empty — there is nothing inside. Something in your code returned None instead of a real object.'
+            : 'The variable resolves to NoneType at runtime. Likely causes: a function returned None implicitly, an optional lookup failed, or a method like list.sort() was assigned (it returns None).',
+          fix: {
+            explanation: 'Check that the variable is not None before accessing .' + attr + ', or find why the function returned None.',
+            oldCode: 'obj.' + attr,
+            newCode: 'if obj is not None:\n    obj.' + attr,
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'If a function can return None, add a None check before using its result.',
+            'Methods like list.sort(), list.append(), dict.update() return None — do not assign their result.',
+            'Use "if obj is not None:" guards before chaining method calls.'
+          ]
+        };
+      }
+    },
+
+    // ── Python: IndexError ─────────────────────────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return /indexerror/.test(err) || /list index out of range/.test(err); },
+      analyze: function(code, err, raw, exp) {
+        return {
+          oneLiner: 'You tried to access an index that does not exist in the list or string.',
+          whyItHappens: isBgn(exp)
+            ? 'Lists are like numbered slots in a row. If a list has 3 items, valid slots are 0, 1, and 2. Asking for slot 3 (or higher) is like pointing to a shelf that was never built.'
+            : 'The index exceeds len(seq)-1 (for positive indices) or goes below -len(seq) (for negative indices). Common causes: off-by-one in a loop, empty list, or an index from user input.',
+          fix: {
+            explanation: 'Check the list length before indexing, or use a range-safe approach.',
+            oldCode: 'items[i]',
+            newCode: 'items[i] if i < len(items) else None  # or: for item in items:',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Use "for item in my_list:" instead of index-based loops whenever possible.',
+            'Before accessing my_list[i], verify i < len(my_list).',
+            'Print len(my_list) to confirm it has items before indexing.'
+          ]
+        };
+      }
+    },
+
+    // ── Python: KeyError ───────────────────────────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return /keyerror/.test(err) && !/typeerror/.test(err); },
+      analyze: function(code, err, raw, exp) {
+        var keyMatch = raw.match(/KeyError:\s*['"]?([^'"\n]+)['"]?/i);
+        var key = keyMatch ? keyMatch[1].trim() : 'that key';
+        return {
+          oneLiner: 'The dictionary does not have a key named "' + key + '".',
+          whyItHappens: isBgn(exp)
+            ? 'A dictionary is like a labeled filing cabinet. You asked for the drawer labeled "' + key + '", but that drawer was never created. Python does not create missing entries automatically — it raises a KeyError instead.'
+            : 'dict["key"] raises KeyError when the key is absent. Use dict.get("key") for safe access, or check with "key in dict" before accessing.',
+          fix: {
+            explanation: 'Use .get() for a safe lookup, or check if the key exists first.',
+            oldCode: 'data["' + key + '"]',
+            newCode: 'data.get("' + key + '", default_value)  # returns default if key is missing',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Use dict.get(key) instead of dict[key] when the key might not exist.',
+            'Check "if key in my_dict:" before accessing my_dict[key].',
+            'Print my_dict.keys() to see what keys are actually present.'
+          ]
+        };
+      }
+    },
+
+    // ── Python: ZeroDivisionError ──────────────────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return /zerodivisionerror|division by zero/.test(err); },
+      analyze: function(code, err, raw, exp) {
+        return {
+          oneLiner: 'The code tried to divide by zero, which is mathematically undefined.',
+          whyItHappens: isBgn(exp)
+            ? 'Division by zero is like asking "how many times does 0 fit into 10?" — the answer is infinite, and computers cannot store infinity. Python stops and raises an error to protect you.'
+            : 'The divisor evaluates to 0 at runtime. This often happens with user input, computed denominators, or when averaging an empty list.',
+          fix: {
+            explanation: 'Guard against zero before dividing.',
+            oldCode: 'result = a / b',
+            newCode: 'result = a / b if b != 0 else 0  # or raise a meaningful error',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Always validate denominators before dividing: "if b != 0:".',
+            'When averaging a list, check "if len(items) > 0:" first.',
+            'Use try/except ZeroDivisionError to handle it gracefully.'
+          ]
+        };
+      }
+    },
+
+    // ── Python: IndentationError ───────────────────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return /indentationerror/.test(err) || /unexpected indent/.test(err) || /expected an indented block/.test(err); },
+      analyze: function(code, err, raw, exp) {
+        return {
+          oneLiner: 'Python cannot parse the code because the indentation is inconsistent or missing.',
+          whyItHappens: isBgn(exp)
+            ? 'Python uses spaces at the start of each line to understand which code belongs inside which block. If you mix tabs and spaces, or forget to indent after an if/for/def, Python gets confused and refuses to run your code.'
+            : 'Python\'s parser requires consistent indentation to delimit blocks. Mixing tabs and spaces, or misaligned dedents, cause IndentationError before any execution begins.',
+          fix: {
+            explanation: 'Use 4 spaces consistently. Never mix tabs and spaces. Configure your editor to show whitespace characters.',
+            oldCode: 'def greet():\nprint("hi")  # wrong — not indented',
+            newCode: 'def greet():\n    print("hi")  # correct — 4 spaces',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Set your editor to convert tabs to 4 spaces automatically.',
+            'The error message shows the line number — look at that line and the line before it.',
+            'After every def/if/for/while/with/class line, the next line must be indented.'
+          ]
+        };
+      }
+    },
+
+    // ── Python: RecursionError ─────────────────────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return /recursionerror|maximum recursion depth exceeded/.test(err); },
+      analyze: function(code, err, raw, exp) {
+        var fnMatch = code.match(/def\s+(\w+)/);
+        var fnName = fnMatch ? fnMatch[1] : 'the function';
+        return {
+          oneLiner: fnName + ' calls itself forever because a base case is missing or unreachable.',
+          whyItHappens: isBgn(exp)
+            ? 'Imagine looking up a word in a dictionary and the definition just says "see this word again" — you would loop forever. A recursive function must have a stopping condition (base case) that eventually returns without calling itself again.'
+            : 'Python\'s default recursion limit is 1000. The function lacks a reachable base case, so the call stack fills up and Python raises RecursionError to prevent a crash.',
+          fix: {
+            explanation: 'Add a base case that returns a value without recursing, and ensure every recursive call moves closer to that base case.',
+            oldCode: 'def factorial(n):\n    return n * factorial(n - 1)  # no base case!',
+            newCode: 'def factorial(n):\n    if n <= 1:   # base case\n        return 1\n    return n * factorial(n - 1)',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Every recursive function needs at least one base case that does NOT call itself.',
+            'Trace through the function manually with a small input — does it ever stop?',
+            'Consider converting deep recursion to iteration (a while loop) for large inputs.'
+          ]
+        };
+      }
+    },
+
+    // ── Python: = vs == in condition ───────────────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return code.split('\n').some(function(l) { return /^\s*(if|elif|while)\s+\w[\w.]*\s*=[^=<>!~]/.test(l); }); },
+      analyze: function(code, err, raw, exp) {
+        var badLine = code.split('\n').find(function(l) { return /^\s*(if|elif|while)\s+\w[\w.]*\s*=[^=<>!~]/.test(l); }) || '';
+        var fixed = badLine.replace(/^(\s*(if|elif|while)\s+[\w.]+)\s*=([^=])/, '$1==$3');
+        return {
+          oneLiner: 'Used = (assignment) inside a condition instead of == (comparison).',
+          whyItHappens: isBgn(exp)
+            ? '= means "set this variable to a value". == means "check if two things are equal". Using = inside an if is like writing a shopping list when you meant to ask a question — Python expects a comparison here.'
+            : 'Python does not allow bare assignment expressions in conditions (unlike C). Use == for equality checks. For assignment-in-condition, use the walrus operator :=.',
+          fix: {
+            explanation: 'Replace = with == in the condition.',
+            oldCode: badLine.trim(),
+            newCode: fixed.trim(),
+            fullFixed: code.split('\n').map(function(l) {
+              return /^\s*(if|elif|while)\s+\w[\w.]*\s*=[^=<>!~]/.test(l)
+                ? l.replace(/^(\s*(if|elif|while)\s+[\w.]+)\s*=([^=])/, '$1==$3')
+                : l;
+            }).join('\n')
+          },
+          spotItNextTime: [
+            '== compares, = assigns — use == in if/while conditions.',
+            'Linters like pylint and flake8 flag this immediately.',
+            'If you need assign-and-check in one step, use the walrus operator: if (n := get_value()) > 0:'
+          ]
+        };
+      }
+    },
+
+    // ── Python: Mutable default argument ──────────────────────
+    { langs: ['Python'],
+      detect: function(code, err) { return !err && /def\s+\w+\s*\([^)]*=\s*[\[\{]/.test(code); },
+      analyze: function(code, err, raw, exp) {
+        var match = code.match(/def\s+(\w+)\s*\(/);
+        var fnName = match ? match[1] : 'the function';
+        return {
+          oneLiner: 'A mutable default argument (list or dict) is shared across all calls to ' + fnName + '.',
+          whyItHappens: isBgn(exp)
+            ? 'Default values in Python are created once when the function is defined, not each time it is called. Using a list [] as default is like sharing a whiteboard — every call writes on the same board instead of getting a fresh one.'
+            : 'Default argument values are evaluated once at function definition time. Mutable defaults ([], {}, set()) are shared across all invocations, causing state to leak between calls.',
+          fix: {
+            explanation: 'Use None as the default and create a new list/dict inside the function body.',
+            oldCode: 'def ' + fnName + '(items=[]):\n    items.append(1)',
+            newCode: 'def ' + fnName + '(items=None):\n    if items is None:\n        items = []\n    items.append(1)',
+            fullFixed: code.replace(/def\s+(\w+)\s*\(([^)]*?)=\s*\[\]/g, 'def $1($2=None)')
+          },
+          spotItNextTime: [
+            'Never use [], {}, or set() as default parameter values.',
+            'Always use None as the default and initialize inside the function.',
+            'Linters and type checkers (mypy, pylint) warn about this pattern automatically.'
+          ]
+        };
+      }
+    },
+
+    // ── JavaScript/TypeScript: X is not a function ─────────────
+    { langs: ['JavaScript', 'TypeScript'],
+      detect: function(code, err) { return /is not a function/.test(err); },
+      analyze: function(code, err, raw, exp) {
+        var nameMatch = raw.match(/(\S+) is not a function/i);
+        var name = nameMatch ? nameMatch[1] : 'the value';
+        return {
+          oneLiner: name + ' is not a function — you tried to call something that is not callable.',
+          whyItHappens: isBgn(exp)
+            ? 'In JavaScript, you can only use () to call something that is actually a function. If you write myVar() but myVar holds a number or a string, it is like asking a brick to run — it cannot.'
+            : name + ' resolves to a non-function type at the call site. Common causes: calling a property that does not exist on the prototype, shadowing a built-in, or calling a property value instead of a method.',
+          fix: {
+            explanation: 'Check the type of ' + name + ' with typeof before calling it, and verify you are referencing the correct property.',
+            oldCode: name + '()',
+            newCode: 'if (typeof ' + name + ' === "function") { ' + name + '(); }',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Use console.log(typeof ' + name + ') to check what type it actually holds.',
+            'Check the docs — some array methods return values (map, filter) while others are void (forEach).',
+            'Watch for missing imports — if a module is not imported, its exports are undefined.'
+          ]
+        };
+      }
+    },
+
+    // ── JavaScript/TypeScript: Cannot read properties ──────────
+    { langs: ['JavaScript', 'TypeScript'],
+      detect: function(code, err) { return /cannot read prop(erty|erties) of (undefined|null)/i.test(err) || /cannot read property/i.test(err); },
+      analyze: function(code, err, raw, exp) {
+        var propMatch = raw.match(/(?:property|properties) ['"]?(\w+)['"]?/i) || raw.match(/reading ['"](\w+)['"]/i);
+        var prop = propMatch ? propMatch[1] : 'the property';
+        var typeMatch = raw.match(/(undefined|null)/i);
+        var nilType = typeMatch ? typeMatch[1] : 'null/undefined';
+        return {
+          oneLiner: 'You accessed .' + prop + ' on ' + nilType + ' — the object does not exist at this point.',
+          whyItHappens: isBgn(exp)
+            ? 'Imagine trying to open a drawer in a desk that has not been delivered yet. The desk (' + nilType + ') is not there, so you cannot open drawer "' + prop + '". Something in your code returned ' + nilType + ' instead of a real object.'
+            : 'The object resolves to ' + nilType + ' at the point of property access. Common causes: async data not yet loaded, a DOM element not found, a function returning undefined, or missing null-checks on deeply nested paths.',
+          fix: {
+            explanation: 'Guard with optional chaining (?.) or check for null/undefined first.',
+            oldCode: 'obj.' + prop,
+            newCode: 'obj?.' + prop + '  // optional chaining — returns undefined instead of throwing',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Use optional chaining: obj?.property?.nested instead of obj.property.nested.',
+            'For async data, check that the data has loaded before rendering.',
+            'Add console.log() right before the failing line to see what the variable actually holds.'
+          ]
+        };
+      }
+    },
+
+    // ── JavaScript/TypeScript: ReferenceError ──────────────────
+    { langs: ['JavaScript', 'TypeScript'],
+      detect: function(code, err) { return /referenceerror.*is not defined/i.test(err); },
+      analyze: function(code, err, raw, exp) {
+        var nameMatch = raw.match(/(\w+) is not defined/i);
+        var varName = nameMatch ? nameMatch[1] : 'the variable';
+        return {
+          oneLiner: '"' + varName + '" is not defined — the variable does not exist in this scope.',
+          whyItHappens: isBgn(exp)
+            ? 'JavaScript needs you to introduce every variable with let, const, or var before using it. Using "' + varName + '" without declaring it first is like calling someone by a name you never gave them.'
+            : '"' + varName + '" was not found in the scope chain. Common causes: typo in the variable name, using a let/const before its declaration (temporal dead zone), or a missing import.',
+          fix: {
+            explanation: 'Declare the variable with const or let before using it, or check for a typo.',
+            oldCode: varName + '  // used without declaration',
+            newCode: 'const ' + varName + ' = <value>;  // declare first',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Always declare variables with const (preferred) or let before using them.',
+            'Check for spelling mistakes — JavaScript is case-sensitive.',
+            'If it comes from another file, make sure you have imported it.'
+          ]
+        };
+      }
+    },
+
+    // ── JavaScript/TypeScript: Assignment to constant ──────────
+    { langs: ['JavaScript', 'TypeScript'],
+      detect: function(code, err) { return /assignment to constant variable/i.test(err); },
+      analyze: function(code, err, raw, exp) {
+        return {
+          oneLiner: 'You tried to reassign a const variable — const bindings cannot be reassigned.',
+          whyItHappens: isBgn(exp)
+            ? 'const is like writing something in permanent marker — once written, it cannot be changed. If you need to change the value later, you should use let instead of const.'
+            : 'const bindings are immutable after initialisation. Note that for objects and arrays the contents can still be mutated; only the binding itself is constant.',
+          fix: {
+            explanation: 'Change const to let if the variable needs to be reassigned.',
+            oldCode: 'const count = 0;\ncount = count + 1;  // TypeError!',
+            newCode: 'let count = 0;\ncount = count + 1;  // fine',
+            fullFixed: code.replace(/\bconst\b/, 'let')
+          },
+          spotItNextTime: [
+            'Use const for values that never change, let for values that will be reassigned.',
+            'Linters (ESLint) catch this before you even run the code.',
+            'For objects, const means the variable always points to the same object — you can still add or change properties.'
+          ]
+        };
+      }
+    },
+
+    // ── JavaScript/TypeScript: Maximum call stack ──────────────
+    { langs: ['JavaScript', 'TypeScript'],
+      detect: function(code, err) { return /maximum call stack|stack overflow/i.test(err); },
+      analyze: function(code, err, raw, exp) {
+        var fnMatch = code.match(/function\s+(\w+)/) || code.match(/const\s+(\w+)\s*=/);
+        var fnName = fnMatch ? fnMatch[1] : 'the function';
+        return {
+          oneLiner: fnName + ' calls itself (or another function) infinitely — the call stack overflows.',
+          whyItHappens: isBgn(exp)
+            ? 'Every function call uses a memory slot. If a function keeps calling itself forever, it fills all the slots and JavaScript stops it with "Maximum call stack size exceeded". You need a rule that stops the recursion.'
+            : 'The call stack depth exceeds the JS engine limit (~10,000 frames in V8). The function recurses without a reachable base case, or two functions call each other in a cycle.',
+          fix: {
+            explanation: 'Add a base case that returns without recursing, or convert to an iterative solution.',
+            oldCode: 'function ' + fnName + '(n) {\n    return ' + fnName + '(n - 1);  // no base case\n}',
+            newCode: 'function ' + fnName + '(n) {\n    if (n <= 0) return 0;  // base case\n    return ' + fnName + '(n - 1);\n}',
+            fullFixed: code
+          },
+          spotItNextTime: [
+            'Every recursive function needs a base case that returns without calling itself.',
+            'Trace the function with a small value (e.g. n=3) to verify it terminates.',
+            'For large inputs, prefer iteration (while/for loops) over recursion in JavaScript.'
+          ]
+        };
+      }
+    }
+
+  ]; // end BUG_RULES
+
+  function analyzeLocally(buggyCode, errorMsg, language, experience) {
+    var extra = '';
+    if ((language === 'JavaScript' || language === 'TypeScript') && !errorMsg) {
+      try { new Function(buggyCode); } catch (e) { extra = e.message; }
+    }
+    var raw = (errorMsg || extra || '').trim();
+    var err = raw.toLowerCase();
+    for (var i = 0; i < BUG_RULES.length; i++) {
+      var rule = BUG_RULES[i];
+      if (rule.langs.indexOf(language) === -1) continue;
+      try {
+        if (rule.detect(buggyCode, err, raw)) {
+          return rule.analyze(buggyCode, err, raw, experience);
+        }
+      } catch (e) { /* skip broken rule */ }
+    }
+    return genericFallback(buggyCode, raw, language, experience);
+  }
+
+  function genericFallback(code, errorMsg, language, experience) {
+    var why = errorMsg ? classifyError(errorMsg) : 'an issue was found in the code that needs closer inspection.';
+    var tip = isBgn(experience)
+      ? 'Read the error message carefully — it usually tells you the line number and what went wrong. Then look at that line and the lines just before it.'
+      : 'Inspect the stack trace for the innermost frame in your own code. Add logging around that line to observe runtime values.';
+    return {
+      oneLiner: errorMsg ? errorMsg.slice(0, 120) : 'Code issue detected — paste the error message for a specific explanation.',
+      whyItHappens: 'This error typically means ' + why + ' ' + tip,
+      fix: {
+        explanation: 'Locate the line number in the traceback and inspect the variables involved. Add a print/console.log just before the failing line to see the actual runtime values.',
+        oldCode: '# the line causing the error',
+        newCode: '# add a debug print here, then fix based on what you see',
+        fullFixed: code
+      },
+      spotItNextTime: [
+        'Always read the full error message and traceback — the last line in the traceback is usually where the bug is.',
+        'Add print() / console.log() statements to see what your variables actually contain.',
+        'Search the error message online — most common errors have clear, well-documented solutions.'
+      ]
+    };
+  }
+
   async function explainBug() {
     const buggyCode = document.getElementById('buggyCode').value.trim();
     const errorMsg = document.getElementById('errorMsg').value.trim();
@@ -423,14 +899,12 @@
     const experience = document.getElementById('experience').value;
     if (!buggyCode) return showToast('Please paste your buggy code');
     setBugLoading(true);
-    const prompt = `I am a ${experience} programmer writing ${language}. My code has a bug.\n\nBuggy code:\n${buggyCode}\n\nError message:\n${errorMsg || '(no error message provided)'}\n\nExplain this bug to me at a ${experience} level. Use simple analogies if I am a beginner. Respond in this exact JSON format:\n{\n  "oneLiner": "The bug in one sentence",\n  "whyItHappens": "Explanation with analogy if beginner (3-4 sentences)",\n  "fix": {\n    "explanation": "What to change and why",\n    "oldCode": "the broken line(s)",\n    "newCode": "the fixed line(s)",\n    "fullFixed": "full corrected code"\n  },\n  "spotItNextTime": ["Warning sign 1", "Warning sign 2"]\n}\n\nReturn only the JSON, no markdown.`;
+    await new Promise(r => setTimeout(r, 320));
     try {
-      const rawText = await callGemini(prompt);
-      const json = extractJSON(rawText);
-      if (!json) throw new Error('Could not parse AI response as JSON');
-      lastResult = json; lastContext = { buggyCode, errorMsg, language, experience }; chatHistory = [];
-      renderResults(json, experience);
-      saveToHistory(json, language, experience);
+      const result = analyzeLocally(buggyCode, errorMsg, language, experience);
+      lastResult = result; lastContext = { buggyCode, errorMsg, language, experience }; chatHistory = [];
+      renderResults(result, experience);
+      saveToHistory(result, language, experience);
       renderHistory();
     } catch (err) { showToast('Error: ' + err.message); }
     finally { setBugLoading(false); }
