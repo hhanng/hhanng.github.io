@@ -14,7 +14,7 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-████████████████████████████████████████████████████  100 / 100 🏆
+██████████████████████████████████████████████████  103 / 100 🏆
 ```
 
 **100 / 100 complete — Challenge done!** 🎉 — progress bar on the live site updates automatically 🎉
@@ -48,9 +48,9 @@ made these to survive my own classes, now sharing them 😅
 | # | Agent | What it does |
 |---|-------|-------------|
 | [#12](./agent-12-algorithm-explainer/) | Algorithm Explainer | analogies, visual traces, Big O, and a quiz |
-| [#13](./agent-13-cs-concept-simplifier/) | CS Concept Simplifier | any CS concept → plain English with analogies & code |
+| [#13](./agent-13-cs-concept-simplifier/) | CS Concept Deep Diver | any CS concept → plain English with analogies, code, prerequisite map, FAANG interview angle, and side-by-side Comparison Mode |
 | [#14](./agent-14-quiz-generator/) | Quiz Generator from Notes | paste notes → MCQ / true-false / short-answer quiz |
-| [#15](./agent-15-study-plan-maker/) | Study Plan Maker | exam date → color-coded day-by-day study calendar |
+| [#15](./agent-15-study-plan-maker/) | Study Plan Maker + FAANG Prep Mode | exam date → study calendar; FAANG mode: 12-week schedule with company-specific notes (Google/Meta/Amazon/Apple/Netflix), LeetCode targets, system design topics, and skill-level hour plans |
 | [#16](./agent-16-homework-solver/) | Homework Problem Solver | step-by-step help that teaches *how* to think |
 | [#17](./agent-17-research-topic-finder/) | Research Topic Finder | 6 unique research topics with thesis + outline |
 | [#18](./agent-18-active-recall-coach/) | Active Recall Coach | paste notes → flashcard drill → weak spot re-drill |
@@ -74,11 +74,11 @@ because getting an internship is basically a full-time job
 | [#21](./agent-21-cover-letter-generator/) | Cover Letter Generator | personalized cover letters with JD keyword matching |
 | [#22](./agent-22-mock-interview-coach/) | Mock Interview Coach | chat-style HR interviews + scored session report |
 | [#23](./agent-23-resume-bullet-rewriter/) | Resume Bullet Rewriter | weak bullets → 3 strong, metric-driven ATS versions |
-| [#24](./agent-24-cold-email-recruiter/) | Cold Email to Recruiter | 3 email variants under 150 words that actually get replies |
+| [#24](./agent-24-cold-email-recruiter/) | Recruiter Outreach Suite | cold email writer + Day 7/14/21 follow-up sequence generator + referral request script (LinkedIn DM, email, + 3 things NOT to say) |
 | [#25](./agent-25-jd-analyzer/) | Internship JD Analyzer | match score, keyword chips, gaps, + "should I apply?" verdict |
 | [#48](./agent-48-faang-application-tracker/) | FAANG Application Tracker | track apps through 9 stages, CSV export, stats dashboard |
 | [#49](https://hhanng.github.io/agent-49-faang-comp-negotiator/) | FAANG Comp Negotiator | offer analyzer, negotiation scripts, TC calculator |
-| [#50](https://hhanng.github.io/agent-50-linkedin-connection-generator/) | LinkedIn Message Generator | 4 message types, 3 AI variants each, character count |
+| [#50](https://hhanng.github.io/agent-50-linkedin-connection-generator/) | LinkedIn Outreach Suite | message generator (4 types, 3 AI variants) + message tracker with reply-rate stats + warm intro chain mapper with visual hop visualization |
 | [#67](https://hhanng.github.io/agent-67-interview-confidence-coach/) | Interview Confidence Coach | 4-7-8 breathing, affirmations, 40 practice questions with hints + self-rating, body language tips, progress dashboard |
 | [#68](https://hhanng.github.io/agent-68-coding-quiz-battle/) | Coding Quiz Battle | 100 questions across 10 CS topics, 20s timer, streak bonuses, answer explanations, personal leaderboard, topic accuracy stats |
 
@@ -115,6 +115,15 @@ for when you need a break from studying lol
 | [#36](https://hhanng.github.io/agent-36-recipe-remix-bot/) | Recipe Remix Bot | remix any recipe — healthier, fusion, or budget-friendly |
 | [#37](https://hhanng.github.io/agent-37-this-day-in-history/) | This Day in History Bot | fascinating stories for any date + Vietnam connection mode |
 
+### 🗂️ productivity tools
+for getting things out of your head and onto the page
+
+| # | Agent | What it does |
+|---|-------|-------------|
+| [#62](https://hhanng.github.io/agent-62-brain-dump-quick-notes/) | Brain Dump + English Journal Mode | fast brain-dump with auto-save, #tag grid, pin & archive — plus Journal Mode with word-count goals, live progress bar, vocab detector, streak counter, and weekly summary |
+
+&nbsp;
+
 ### 📱 product & startup tools
 for founders, indie hackers, and anyone shipping something
 
@@ -137,7 +146,7 @@ for founders, indie hackers, and anyone shipping something
 | [#83](https://hhanng.github.io/agent-83-cs-student-fitness-os/) | CS Student Fitness OS | 3 workout plans, 8 desk breaks, rest timer, session tracker, streak + weekly stats |
 | [#84](https://hhanng.github.io/agent-84-coders-hiit-timer/) | Coder's HIIT Timer | Pomodoro-HIIT hybrid timer, Tabata & Pure HIIT modes, 10 desk-friendly routines, SVG ring countdown, session history with streak tracking |
 | [#85](https://hhanng.github.io/agent-85-pr-strength-tracker/) | PR & Strength Tracker | workout log with auto-PR detection, e1RM estimates, plateau detector, progress charts, 4-week Big 3 progression planner |
-| [#86](https://hhanng.github.io/agent-86-period-cycle-tracker/) | Period & Cycle Tracker | cycle calendar with period prediction, fertile window & phase tracker, 20-symptom log with phase patterns, bilingual EN/VI vocab, doctor visit script generator |
+| [#86](https://hhanng.github.io/agent-86-period-cycle-tracker/) | Period & Cycle Tracker (Bilingual) | cycle calendar, 22-symptom log with EN/VI labels, 50 health terms EN/VI, doctor scripts with side-by-side EN/Vietnamese, and "Giải thích với Ba Mẹ" with 5 culturally respectful parent conversation scenarios |
 | [#87](https://hhanng.github.io/agent-87-skincare-routine-tracker/) | Skincare Routine Tracker | AM/PM routine builder with streaks, ingredient decoder (50 terms EN/VI), Vietnamese skin in America guide, 15 brand reviews, 30-day skin log |
 | [#88](https://hhanng.github.io/agent-88-glowup-tracker-vision-board/) | Glow-Up Tracker & Vision Board | vision board across 6 life categories, 30 "First Year in America" milestone cards, bilingual EN/VI journal, weekly radar glow chart |
 | [#89](https://hhanng.github.io/agent-89-meal-macro-tracker/) | Vietnamese-American Meal & Macro Tracker | 40 Vietnamese + 40 American foods with real macros, traditional recipes with US pantry substitutions, bilingual EN/VI nutrition vocab, daily calorie tracking |
@@ -206,4 +215,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-26 · 100/100 complete 🏆 · agent #100 Behavioral Interview STAR Bank: https://hhanng.github.io/agent-100-behavioral-interview-star-bank/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-28 · 100/100 complete 🏆 · agent #100 Behavioral Interview STAR Bank: https://hhanng.github.io/agent-100-behavioral-interview-star-bank/</sub>

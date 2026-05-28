@@ -24,16 +24,18 @@ const gridHtml  = html.slice(gridStart, gridEnd);
 const cardCount = (gridHtml.match(/<div class="card">/g) || []).length;
 const total     = cardCount + offset;
 
-// Build progress bar (50 chars wide)
-const filled = Math.round(total / 2);
+// Build progress bar (50 chars wide) — clamp when challenge is complete (total ≥ 100)
+const displayTotal = Math.min(total, 100);
+const filled = Math.min(50, Math.round(displayTotal / 2));
+const barLabel = total >= 100 ? `${total} / 100 🏆` : `${total} / 100`;
 const bar    = "█".repeat(filled) + "░".repeat(50 - filled);
 
 let readme = fs.readFileSync(readmePath, "utf8");
 
 // Patch the ████ bar line
 readme = readme.replace(
-  /`{3}\n[█░ ]+\d+ \/ 100\n`{3}/,
-  `\`\`\`\n${bar}  ${total} / 100\n\`\`\``
+  /`{3}\n[█░ ]+.*\d+ \/ 100.*\n`{3}/,
+  `\`\`\`\n${bar}  ${barLabel}\n\`\`\``
 );
 
 // Patch the "X / 100 complete" summary line
