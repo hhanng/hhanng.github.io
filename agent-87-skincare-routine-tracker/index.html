@@ -173,6 +173,9 @@
   <button class="tab-btn" onclick="switchTab('products',this)">PRODUCTS</button>
   <button class="tab-btn" onclick="switchTab('learn',this)">LEARN</button>
   <button class="tab-btn" onclick="switchTab('log',this)">LOG</button>
+  <button class="tab-btn" onclick="switchTab('lookup',this)">🔍 LOOKUP</button>
+  <button class="tab-btn" onclick="switchTab('journal',this)">📅 JOURNAL</button>
+  <button class="tab-btn" onclick="switchTab('safety',this)">🧪 SAFETY</button>
 </div>
 
 <!-- ===== ROUTINE ===== -->
@@ -310,6 +313,145 @@
     <div class="card">
       <div class="card-title">📋 Recent Logs</div>
       <div class="log-list" id="log-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== LOOKUP ===== -->
+<div class="tab-content" id="tab-lookup">
+  <div style="margin-top:14px">
+
+    <div class="card">
+      <div class="card-title">🔍 Bilingual Product Lookup</div>
+      <p class="info-text" style="margin-bottom:10px">Search for a product or ingredient in English or Vietnamese (Tìm theo tên tiếng Anh hoặc tiếng Việt).</p>
+      <input class="decoder-input" id="lookup-search" placeholder="e.g. CeraVe, toner, kem dưỡng, serum..." oninput="renderLookup()" style="margin-bottom:10px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;" id="lookup-cats">
+        <button class="cond-btn selected" onclick="setLookupCat('',this)">All / Tất cả</button>
+        <button class="cond-btn" onclick="setLookupCat('Cleanser',this)">Cleanser</button>
+        <button class="cond-btn" onclick="setLookupCat('Toner',this)">Toner</button>
+        <button class="cond-btn" onclick="setLookupCat('Serum',this)">Serum</button>
+        <button class="cond-btn" onclick="setLookupCat('Moisturizer',this)">Moisturizer</button>
+        <button class="cond-btn" onclick="setLookupCat('SPF',this)">SPF</button>
+        <button class="cond-btn" onclick="setLookupCat('Treatment',this)">Treatment</button>
+        <button class="cond-btn" onclick="setLookupCat('Mask',this)">Mask</button>
+      </div>
+    </div>
+
+    <div id="lookup-results"></div>
+
+  </div>
+</div>
+
+<!-- ===== JOURNAL ===== -->
+<div class="tab-content" id="tab-journal">
+  <div style="margin-top:14px">
+
+    <div class="card">
+      <div class="card-title">📅 30-Day Effectiveness Journal</div>
+      <div class="section-label" style="margin-bottom:8px">Log for: <strong id="journal-today-label"></strong></div>
+
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.82rem;color:#374151;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:7px 12px;">
+          <input type="checkbox" id="journal-am" style="accent-color:#059669"> ☀️ AM routine done
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.82rem;color:#374151;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:7px 12px;">
+          <input type="checkbox" id="journal-pm" style="accent-color:#3b82f6"> 🌙 PM routine done
+        </label>
+      </div>
+
+      <div class="section-label">Skin Rating Today (1 = rough, 5 = glowing)</div>
+      <div class="rating-btns" style="margin-bottom:12px">
+        <button class="rating-btn" onclick="setJournalRating(1)" id="jr1">1</button>
+        <button class="rating-btn" onclick="setJournalRating(2)" id="jr2">2</button>
+        <button class="rating-btn" onclick="setJournalRating(3)" id="jr3">3</button>
+        <button class="rating-btn" onclick="setJournalRating(4)" id="jr4">4</button>
+        <button class="rating-btn" onclick="setJournalRating(5)" id="jr5">5</button>
+      </div>
+
+      <div class="section-label">Notes / Observations</div>
+      <textarea class="notes-input" id="journal-notes" placeholder="What changed today? New product? Different diet? Stress? Hormonal?"></textarea>
+
+      <div class="section-label" style="margin-top:10px">Photo URL (optional)</div>
+      <input class="form-input" id="journal-photo" placeholder="Paste a photo URL to track skin progress..." style="margin-bottom:10px">
+
+      <button class="btn btn-green" style="margin-top:6px" onclick="saveJournalEntry()">💾 Save Journal Entry</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title cyan">🗓️ 30-Day Calendar Heatmap</div>
+      <p class="info-text" style="margin-bottom:10px">Color shows skin rating — red (1) to green (5). Gray = no entry.</p>
+      <div id="journal-heatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
+      <div style="display:flex;gap:6px;margin-top:10px;align-items:center;font-size:0.7rem;color:#64748b;">
+        <span style="width:14px;height:14px;background:#e2e8f0;border-radius:3px;display:inline-block"></span>No entry
+        <span style="width:14px;height:14px;background:#fca5a5;border-radius:3px;display:inline-block;margin-left:8px"></span>1–2
+        <span style="width:14px;height:14px;background:#fde68a;border-radius:3px;display:inline-block;margin-left:8px"></span>3
+        <span style="width:14px;height:14px;background:#6ee7b7;border-radius:3px;display:inline-block;margin-left:8px"></span>4
+        <span style="width:14px;height:14px;background:#059669;border-radius:3px;display:inline-block;margin-left:8px"></span>5
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Weekly Averages</div>
+      <div id="journal-weekly"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Recent Journal Entries</div>
+      <div id="journal-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== SAFETY ===== -->
+<div class="tab-content" id="tab-safety">
+  <div style="margin-top:14px">
+
+    <div class="card">
+      <div class="card-title">🧪 Ingredient Safety Checker</div>
+      <p class="info-text" style="margin-bottom:10px">Paste the full INCI ingredient list from your product label. The checker will flag potentially harmful, irritating, or conflicting ingredients.</p>
+      <textarea class="notes-input" id="safety-input" placeholder="Paste INCI ingredients here, e.g.:&#10;Water, Glycerin, Niacinamide, Dimethicone, Fragrance, Alcohol Denat., Retinol, Sodium Lauryl Sulfate..." style="min-height:120px;margin-bottom:10px"></textarea>
+      <button class="btn btn-cyan" onclick="checkSafety()">🔬 Check Safety</button>
+    </div>
+
+    <div id="safety-output" style="display:none;">
+
+      <div class="card">
+        <div class="card-title">🎯 Overall Safety Score</div>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div id="safety-score" style="font-size:3rem;font-weight:700;color:#059669;line-height:1;">100</div>
+            <div style="font-size:0.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em">/ 100</div>
+          </div>
+          <div id="safety-verdict" style="flex:1;font-size:0.88rem;line-height:1.6;color:#374151;"></div>
+        </div>
+        <div style="margin-top:12px;background:#e2e8f0;border-radius:6px;height:10px;overflow:hidden;">
+          <div id="safety-bar" style="height:100%;background:#059669;border-radius:6px;transition:width .5s;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:#dc2626">🚨 Flagged Ingredients</div>
+        <div id="safety-flagged"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:#059669">✅ Safe Ingredients Found</div>
+        <div id="safety-safe"></div>
+      </div>
+
+      <div class="card" id="safety-conflicts-card" style="display:none;">
+        <div class="card-title" style="color:#d97706">⚡ Conflict Warnings</div>
+        <div id="safety-conflicts"></div>
+      </div>
+
+      <div class="card" style="background:#fffbeb;border-color:#fde68a;">
+        <div style="font-size:0.72rem;color:#92400e;line-height:1.6;">
+          ⚕️ <strong>Dermatologist Disclaimer:</strong> This checker is for educational purposes only and is based on a simplified ingredient database. It is NOT medical advice. Individual skin reactions vary. If you have concerns about a product's safety, consult a licensed dermatologist. Pregnancy and medical conditions may change which ingredients are safe for you.
+        </div>
+      </div>
+
     </div>
 
   </div>
@@ -801,7 +943,372 @@ function switchTab(tab, btn) {
   renderConditions();
   renderLogs();
   renderTrend();
+  initJournal();
 })();
+
+// ==============================
+// LOOKUP TAB
+// ==============================
+const LOOKUP_PRODUCTS = [
+  {name:'CeraVe Hydrating Cleanser',vi:'Sữa rửa mặt dưỡng ẩm CeraVe',brand:'CeraVe',cat:'Cleanser',step:'Step 1',ingredient:'Ceramides, Hyaluronic Acid',howto:'Apply to damp skin, massage gently, rinse.',howto_vi:'Thoa lên da ướt, massage nhẹ, rửa sạch.',benefit:'Gentle daily cleanser. Maintains skin barrier.',for:'Dry, normal, sensitive skin'},
+  {name:'CeraVe SA Cleanser',vi:'Sữa rửa mặt SA CeraVe',brand:'CeraVe',cat:'Cleanser',step:'Step 1',ingredient:'Salicylic Acid, Ceramides',howto:'Use 2-3x/week for exfoliation.',howto_vi:'Dùng 2-3 lần/tuần để tẩy tế bào chết.',benefit:'Unclogs pores, smooths rough skin.',for:'Oily, acne-prone, textured skin'},
+  {name:'Neutrogena Hydro Boost Water Gel',vi:'Gel dưỡng ẩm Hydro Boost',brand:'Neutrogena',cat:'Moisturizer',step:'Step 6',ingredient:'Hyaluronic Acid',howto:'Apply AM and/or PM as final moisturizing step.',howto_vi:'Thoa sáng và/hoặc tối làm bước dưỡng ẩm cuối.',benefit:'Lightweight hydration. Oil-free. Plumps skin.',for:'Oily, combo, all skin types'},
+  {name:'The Ordinary Niacinamide 10% + Zinc 1%',vi:'Serum Niacinamide The Ordinary',brand:'The Ordinary',cat:'Serum',step:'Step 4',ingredient:'Niacinamide, Zinc',howto:'Apply a few drops AM or PM after toner.',howto_vi:'Thoa vài giọt sáng hoặc tối sau toner.',benefit:'Reduces pores, fades dark spots, controls oil.',for:'Oily, acne-prone, combination skin'},
+  {name:'The Ordinary Hyaluronic Acid 2% + B5',vi:'Serum HA The Ordinary',brand:'The Ordinary',cat:'Serum',step:'Step 3',ingredient:'Hyaluronic Acid, Vitamin B5',howto:'Apply to slightly damp skin before moisturizer.',howto_vi:'Thoa lên da hơi ẩm trước kem dưỡng.',benefit:'Deep hydration, plumps and softens skin.',for:'All skin types, especially dehydrated skin'},
+  {name:'La Roche-Posay Anthelios UV Correct SPF 70',vi:'Kem chống nắng SPF 70 La Roche-Posay',brand:'La Roche-Posay',cat:'SPF',step:'Last AM step',ingredient:'Mexoryl SX, Mexoryl XL',howto:'Apply generously last in AM routine. Reapply every 2h.',howto_vi:'Thoa đều lên da bước cuối buổi sáng. Thoa lại mỗi 2 giờ.',benefit:'Broad spectrum UVA+UVB. Lightweight finish.',for:'All skin types, especially sensitive'},
+  {name:'EltaMD UV Clear SPF 46',vi:'Kem chống nắng SPF 46 EltaMD',brand:'EltaMD',cat:'SPF',step:'Last AM step',ingredient:'Zinc Oxide, Niacinamide',howto:'Apply as final AM step after moisturizer.',howto_vi:'Thoa làm bước cuối buổi sáng sau kem dưỡng.',benefit:'Mineral SPF. Calms redness. Dermatologist favorite.',for:'Acne-prone, sensitive, rosacea skin'},
+  {name:'Paula\'s Choice 2% BHA Liquid Exfoliant',vi:'Tẩy da chết BHA Paula\'s Choice',brand:"Paula's Choice",cat:'Treatment',step:'After toner, 2-3x/week',ingredient:'Salicylic Acid 2%',howto:'Apply after toner on clean skin. Leave on, do not rinse.',howto_vi:'Thoa sau toner. Không cần rửa sạch.',benefit:'Unclogs pores, removes blackheads, smooths texture.',for:'Oily, acne-prone, large pores'},
+  {name:'Differin Adapalene Gel 0.1%',vi:'Gel trị mụn Differin',brand:'Differin',cat:'Treatment',step:'PM step 4',ingredient:'Adapalene (Retinoid)',howto:'Apply PM every other night at first. Tiny amount.',howto_vi:'Thoa tối cách ngày lúc đầu. Lượng nhỏ thôi.',benefit:'Treats and prevents acne. Speeds cell turnover.',for:'Acne-prone skin, all types'},
+  {name:'Cetaphil Gentle Skin Cleanser',vi:'Sữa rửa mặt dịu nhẹ Cetaphil',brand:'Cetaphil',cat:'Cleanser',step:'Step 1',ingredient:'Niacinamide, Panthenol, Glycerin',howto:'Use AM and PM. Can rinse off or wipe off.',howto_vi:'Dùng sáng và tối. Có thể rửa hoặc lau sạch.',benefit:'Ultra gentle. Fragrance-free. Good for eczema.',for:'Sensitive, dry, eczema-prone skin'},
+  {name:'Laneige Water Sleeping Mask',vi:'Mặt nạ ngủ cấp nước Laneige',brand:'Laneige',cat:'Mask',step:'Last PM step',ingredient:'Hyaluronic Acid, Mineral Water',howto:'Apply as last step PM 2-3x/week. Rinse off in morning.',howto_vi:'Thoa cuối buổi tối 2-3 lần/tuần. Rửa sáng hôm sau.',benefit:'Intensive overnight hydration and recovery.',for:'Dry, dehydrated, dull skin'},
+  {name:'COSRX Snail Mucin 96% Power Repairing Essence',vi:'Serum ốc sên COSRX',brand:'COSRX',cat:'Serum',step:'Step 3-4',ingredient:'Snail Secretion Filtrate 96%',howto:'Apply after toner, before serum. Pat gently.',howto_vi:'Thoa sau toner, trước serum. Vỗ nhẹ.',benefit:'Repairs damaged skin, fades scars, deep hydration.',for:'Acne-prone, dry, sensitive, all types'},
+  {name:'Kiehl\'s Midnight Recovery Concentrate',vi:'Dầu dưỡng phục hồi Kiehl\'s',brand:"Kiehl's",cat:'Treatment',step:'PM last step',ingredient:'Lavender Essential Oil, Squalane',howto:'3-4 drops, press into skin as final PM step.',howto_vi:'3-4 giọt, vỗ nhẹ lên da bước cuối buổi tối.',benefit:'Overnight repair. Restores radiance.',for:'Dry, dull, tired skin'},
+  {name:'Pixi Glow Tonic',vi:'Toner tẩy da chết Pixi',brand:'Pixi',cat:'Toner',step:'Step 2-3',ingredient:'Glycolic Acid 5%',howto:'Apply after cleansing with cotton pad or fingertips. 2-3x/week.',howto_vi:'Thoa sau rửa mặt bằng bông hoặc tay. 2-3 lần/tuần.',benefit:'Brightens, refines texture, evens skin tone.',for:'Dull, uneven, textured skin'},
+  {name:'Hada Labo Gokujyun Premium Hyaluronic Lotion',vi:'Nước thần HA Hada Labo',brand:'Hada Labo',cat:'Toner',step:'Step 2',ingredient:'5 types of Hyaluronic Acid',howto:'Pat onto skin after cleansing. Can layer 2-3 times.',howto_vi:'Vỗ nhẹ lên da sau rửa mặt. Có thể thoa 2-3 lớp.',benefit:'Intense hydration. Plumps and smooths skin.',for:'All skin types, especially dehydrated'},
+  {name:'Missha Time Revolution Night Repair Ampoule',vi:'Ampoule phục hồi ban đêm Missha',brand:'Missha',cat:'Serum',step:'PM step 4',ingredient:'Bifida Ferment Lysate, Niacinamide',howto:'Apply PM after essence. 2-3 drops.',howto_vi:'Thoa tối sau essence. 2-3 giọt.',benefit:'Anti-aging, repairs overnight, brightens.',for:'Dull, aging, hyperpigmented skin'},
+  {name:'Innisfree Green Tea Seed Serum',vi:'Serum trà xanh Innisfree',brand:'Innisfree',cat:'Serum',step:'Step 3-4',ingredient:'Green Tea Water, Green Tea Seed Oil',howto:'Apply AM and PM after toner.',howto_vi:'Thoa sáng và tối sau toner.',benefit:'Antioxidant protection, lightweight hydration.',for:'Oily, combination, all types'},
+  {name:'Olay Regenerist Micro-Sculpting Cream',vi:'Kem dưỡng Olay Regenerist',brand:'Olay',cat:'Moisturizer',step:'Step 6',ingredient:'Niacinamide, Peptides, Hyaluronic Acid',howto:'Apply AM and PM after serum.',howto_vi:'Thoa sáng và tối sau serum.',benefit:'Anti-aging, firms skin, brightens.',for:'Normal to dry, aging skin'},
+  {name:'Neutrogena Rapid Tone Repair Vitamin C Serum',vi:'Serum Vitamin C Neutrogena',brand:'Neutrogena',cat:'Serum',step:'AM step 4',ingredient:'Vitamin C, Retinol SA',howto:'Apply AM after toner. Follow with SPF.',howto_vi:'Thoa sáng sau toner. Sau đó thoa kem chống nắng.',benefit:'Brightens, fades dark spots, boosts collagen.',for:'Dull, hyperpigmented, aging skin'},
+  {name:'SOME BY MI AHA BHA PHA 30 Days Miracle Toner',vi:'Toner tẩy da chết SOME BY MI',brand:'SOME BY MI',cat:'Toner',step:'Step 2',ingredient:'AHA, BHA, PHA, Centella',howto:'Apply after cleansing 1-2x/week. Build up slowly.',howto_vi:'Thoa sau rửa mặt 1-2 lần/tuần. Tăng dần tần suất.',benefit:'Exfoliates, brightens, calms acne-prone skin.',for:'Oily, acne-prone, combination skin'},
+  {name:'Youth to the People Superfood Cleanser',vi:'Sữa rửa mặt siêu thực phẩm YTTP',brand:'Youth to the People',cat:'Cleanser',step:'Step 1',ingredient:'Kale, Spinach, Green Tea',howto:'Massage onto dry or damp face, rinse.',howto_vi:'Massage lên mặt khô hoặc ướt, rửa sạch.',benefit:'Antioxidant cleanse. Gentle and effective.',for:'All skin types, especially oily'},
+  {name:'First Aid Beauty Ultra Repair Cream',vi:'Kem phục hồi FAB',brand:'First Aid Beauty',cat:'Moisturizer',step:'Step 6',ingredient:'Colloidal Oatmeal, Ceramides, Shea Butter',howto:'Apply AM and PM generously to face and body.',howto_vi:'Thoa sáng và tối lên mặt và thân thể.',benefit:'Intense moisture for very dry or eczema skin.',for:'Very dry, sensitive, eczema-prone skin'},
+  {name:'Glow Recipe Watermelon Glow Sleeping Mask',vi:'Mặt nạ ngủ dưa hấu Glow Recipe',brand:'Glow Recipe',cat:'Mask',step:'PM last step',ingredient:'Watermelon Extract, Hyaluronic Acid, AHA',howto:'Apply as final PM step 2-3x/week.',howto_vi:'Thoa bước cuối buổi tối 2-3 lần/tuần.',benefit:'Brightens, refines texture, overnight hydration.',for:'Dull, uneven, combination skin'},
+  {name:'Tatcha The Dewy Skin Cream',vi:'Kem dưỡng ẩm Tatcha',brand:'Tatcha',cat:'Moisturizer',step:'Step 6',ingredient:'Hadasei-3 (Green Tea, Rice, Algae)',howto:'Apply AM and PM as final moisturizing step.',howto_vi:'Thoa sáng và tối làm bước ẩm cuối.',benefit:'Deep hydration, natural glow, anti-aging.',for:'Dry, dull, aging skin'},
+  {name:'Herbivore Bakuchiol Serum',vi:'Serum Bakuchiol Herbivore',brand:'Herbivore',cat:'Serum',step:'PM step 4',ingredient:'Bakuchiol, Squalane',howto:'Apply PM after toner. Gentle retinol alternative.',howto_vi:'Thoa tối sau toner. Thay thế nhẹ nhàng cho retinol.',benefit:'Anti-aging without retinol irritation. Safe in pregnancy.',for:'Sensitive skin, pregnant, retinol-sensitive'},
+  {name:'COSRX Advanced Snail 92 All in one Cream',vi:'Kem ốc sên COSRX 92',brand:'COSRX',cat:'Moisturizer',step:'Step 6',ingredient:'Snail Secretion Filtrate 92%',howto:'Apply AM or PM as moisturizing step.',howto_vi:'Thoa sáng hoặc tối làm bước dưỡng ẩm.',benefit:'Heals acne scars, hydrates, repairs skin.',for:'Acne-prone, dry, sensitive skin'},
+  {name:'Cetaphil Daily Facial Moisturizer SPF 50',vi:'Kem dưỡng ẩm SPF 50 Cetaphil',brand:'Cetaphil',cat:'SPF',step:'Last AM step',ingredient:'Zinc Oxide, Titanium Dioxide',howto:'Apply last in AM routine daily.',howto_vi:'Thoa bước cuối buổi sáng hàng ngày.',benefit:'Gentle mineral SPF. Lightweight for daily use.',for:'Sensitive, dry, normal skin'},
+  {name:'Biore UV Aqua Rich Watery Essence SPF 50+',vi:'Kem chống nắng Biore Nhật',brand:'Biore',cat:'SPF',step:'Last AM step',ingredient:'UV filters, Hyaluronic Acid',howto:'Apply generously as final AM step.',howto_vi:'Thoa đủ lượng làm bước cuối buổi sáng.',benefit:'Ultra-lightweight Japanese SPF. No white cast.',for:'Oily, combination, all types'},
+  {name:'Belif The True Cream Aqua Bomb',vi:'Kem dưỡng ẩm Belif',brand:'Belif',cat:'Moisturizer',step:'Step 6',ingredient:'Lady\'s Mantle, Oat Kernels',howto:'Apply AM and PM as moisturizing step.',howto_vi:'Thoa sáng và tối làm bước dưỡng ẩm.',benefit:'Refreshing, lightweight hydration. Korean skincare favorite.',for:'Oily, combination, normal skin'},
+  {name:'Skinceuticals C E Ferulic',vi:'Serum Vitamin C SkinCeuticals',brand:'SkinCeuticals',cat:'Serum',step:'AM step 4',ingredient:'Vitamin C 15%, Vitamin E, Ferulic Acid',howto:'Apply 4-5 drops AM to clean dry skin.',howto_vi:'Thoa 4-5 giọt sáng lên da sạch khô.',benefit:'Best-in-class Vitamin C serum. Antioxidant powerhouse.',for:'All skin types, anti-aging, brightening'},
+  {name:'TonyMoly I\'m Real Sheet Mask',vi:'Mặt nạ giấy TonyMoly',brand:'TonyMoly',cat:'Mask',step:'After cleansing 1-2x/week',ingredient:'Various (serum-soaked)',howto:'Apply 10-15 min after cleansing. Pat in excess serum.',howto_vi:'Đắp 10-15 phút sau rửa mặt. Vỗ nhẹ phần serum dư.',benefit:'Quick intensive treatment. Many varieties available.',for:'All skin types'},
+  {name:'Supergoop Unseen Sunscreen SPF 40',vi:'Kem chống nắng không nhìn thấy Supergoop',brand:'Supergoop',cat:'SPF',step:'Last AM step',ingredient:'Meadowfoam Seed Oil, UV filters',howto:'Apply as primer/last step in AM routine.',howto_vi:'Thoa như lớp lót/bước cuối buổi sáng.',benefit:'Invisible finish. Great under makeup.',for:'All skin types, especially oily'},
+];
+
+let lookupCatFilter = '';
+
+function setLookupCat(cat, btn) {
+  lookupCatFilter = cat;
+  document.querySelectorAll('#lookup-cats .cond-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  renderLookup();
+}
+
+function renderLookup() {
+  const q = (document.getElementById('lookup-search').value || '').toLowerCase().trim();
+  const results = document.getElementById('lookup-results');
+  let filtered = LOOKUP_PRODUCTS;
+  if (lookupCatFilter) filtered = filtered.filter(p => p.cat === lookupCatFilter);
+  if (q) filtered = filtered.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.vi.toLowerCase().includes(q) ||
+    p.brand.toLowerCase().includes(q) ||
+    p.ingredient.toLowerCase().includes(q) ||
+    p.benefit.toLowerCase().includes(q) ||
+    (p.cat && p.cat.toLowerCase().includes(q))
+  );
+  if (!filtered.length) {
+    results.innerHTML = '<div class="card"><p class="info-text" style="text-align:center;padding:16px">No products found. Try a different search.</p></div>';
+    return;
+  }
+  results.innerHTML = filtered.map(p => `
+    <div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <div>
+          <div style="font-size:0.95rem;font-weight:700;color:#0f172a">${p.name}</div>
+          <div style="font-size:0.78rem;color:#0891b2;margin-top:2px">🇻🇳 ${p.vi}</div>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0;">
+          <span class="badge badge-green">${p.cat}</span>
+          <span class="badge badge-cyan">${p.brand}</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.78rem;">
+        <div>
+          <div class="section-label">Key Ingredients</div>
+          <div style="color:#374151">${p.ingredient}</div>
+          <div class="section-label" style="margin-top:8px">Routine Step</div>
+          <div style="color:#059669;font-weight:600">${p.step}</div>
+          <div class="section-label" style="margin-top:8px">Best For</div>
+          <div style="color:#374151">${p.for}</div>
+        </div>
+        <div>
+          <div class="section-label">Key Benefit</div>
+          <div style="color:#374151;margin-bottom:6px">${p.benefit}</div>
+          <div class="section-label">How to Use 🇺🇸</div>
+          <div style="color:#374151;margin-bottom:4px">${p.howto}</div>
+          <div class="section-label">Cách dùng 🇻🇳</div>
+          <div style="color:#0891b2">${p.howto_vi}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==============================
+// JOURNAL TAB
+// ==============================
+let journalRating = null;
+
+function initJournal() {
+  const today = new Date();
+  const opts = { weekday:'long', month:'long', day:'numeric' };
+  const el = document.getElementById('journal-today-label');
+  if (el) el.textContent = today.toLocaleDateString('en-US', opts);
+  // Load today's entry if exists
+  const entries = get('journal_entries') || {};
+  const todayKey = todayStr();
+  if (entries[todayKey]) {
+    const e = entries[todayKey];
+    if (e.am !== undefined) document.getElementById('journal-am').checked = e.am;
+    if (e.pm !== undefined) document.getElementById('journal-pm').checked = e.pm;
+    if (e.rating) setJournalRating(e.rating, true);
+    if (e.notes) document.getElementById('journal-notes').value = e.notes;
+    if (e.photo) document.getElementById('journal-photo').value = e.photo;
+  }
+  renderJournalHeatmap();
+  renderJournalWeekly();
+  renderJournalList();
+}
+
+function setJournalRating(r, silent) {
+  journalRating = r;
+  for (let i=1;i<=5;i++) {
+    const btn = document.getElementById('jr'+i);
+    if (!btn) continue;
+    btn.className = 'rating-btn' + (i===r?' selected':'');
+    btn.textContent = i===r ? (RATINGS_EMOJI[i]||i) : i;
+  }
+}
+
+function saveJournalEntry() {
+  if (!journalRating) { alert('Please rate your skin today (1–5).'); return; }
+  const entries = get('journal_entries') || {};
+  const today = todayStr();
+  entries[today] = {
+    am: document.getElementById('journal-am').checked,
+    pm: document.getElementById('journal-pm').checked,
+    rating: journalRating,
+    notes: document.getElementById('journal-notes').value.trim(),
+    photo: document.getElementById('journal-photo').value.trim(),
+    ts: Date.now()
+  };
+  set('journal_entries', entries);
+  renderJournalHeatmap();
+  renderJournalWeekly();
+  renderJournalList();
+  alert('Journal entry saved! ✨');
+}
+
+function renderJournalHeatmap() {
+  const hm = document.getElementById('journal-heatmap');
+  if (!hm) return;
+  const entries = get('journal_entries') || {};
+  const RATING_COLORS = { 1:'#fca5a5', 2:'#fca5a5', 3:'#fde68a', 4:'#6ee7b7', 5:'#059669' };
+  let html = '';
+  // Day labels
+  ['S','M','T','W','T','F','S'].forEach(d => {
+    html += `<div style="text-align:center;font-size:0.6rem;color:#94a3b8;font-weight:600;padding-bottom:2px">${d}</div>`;
+  });
+  // Fill padding for first week
+  const today = new Date();
+  const d30ago = new Date(); d30ago.setDate(d30ago.getDate()-29);
+  const startDay = d30ago.getDay(); // 0=Sun
+  for (let i=0;i<startDay;i++) html += '<div></div>';
+  for (let i=29;i>=0;i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const ds = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const entry = entries[ds];
+    const bg = entry ? (RATING_COLORS[entry.rating] || '#e2e8f0') : '#e2e8f0';
+    const label = d.toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
+    const tip = entry ? `${label}: ${entry.rating}/5${entry.am?' ☀️':''}${entry.pm?' 🌙':''}` : `${label}: no entry`;
+    html += `<div title="${tip}" style="width:100%;aspect-ratio:1;background:${bg};border-radius:4px;cursor:pointer;" onclick=""></div>`;
+  }
+  hm.innerHTML = html;
+}
+
+function renderJournalWeekly() {
+  const el = document.getElementById('journal-weekly');
+  if (!el) return;
+  const entries = get('journal_entries') || {};
+  // Last 4 weeks
+  const weeks = [];
+  for (let w=0;w<4;w++) {
+    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - (w*7+6));
+    const weekEnd = new Date(); weekEnd.setDate(weekEnd.getDate() - (w*7));
+    const days = [];
+    for (let d=0;d<7;d++) {
+      const day = new Date(weekStart); day.setDate(weekStart.getDate()+d);
+      const ds = `${day.getFullYear()}-${pad(day.getMonth()+1)}-${pad(day.getDate())}`;
+      if (entries[ds]) days.push(entries[ds]);
+    }
+    if (days.length) {
+      const avg = days.reduce((s,e)=>s+e.rating,0)/days.length;
+      const amCount = days.filter(e=>e.am).length;
+      const pmCount = days.filter(e=>e.pm).length;
+      const startLabel = weekStart.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      const endLabel = weekEnd.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      weeks.push({label:`${startLabel}–${endLabel}`, avg:avg.toFixed(1), amCount, pmCount, entries:days.length});
+    }
+  }
+  if (!weeks.length) { el.innerHTML = '<p class="info-text" style="text-align:center;padding:12px">No journal entries yet.</p>'; return; }
+  el.innerHTML = weeks.map(w => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:6px;flex-wrap:wrap;">
+      <div style="font-size:0.75rem;color:#64748b;min-width:110px">${w.label}</div>
+      <div style="font-size:1.1rem;font-weight:700;color:#059669">${w.avg}<span style="font-size:0.7rem;color:#94a3b8">/5 avg</span></div>
+      <div style="font-size:0.72rem;color:#0891b2">☀️ ${w.amCount}/7 AM&nbsp;&nbsp;🌙 ${w.pmCount}/7 PM</div>
+      <div style="font-size:0.72rem;color:#94a3b8">${w.entries} entries</div>
+    </div>
+  `).join('');
+}
+
+function renderJournalList() {
+  const el = document.getElementById('journal-list');
+  if (!el) return;
+  const entries = get('journal_entries') || {};
+  const sorted = Object.entries(entries).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
+  if (!sorted.length) { el.innerHTML = '<p class="info-text" style="text-align:center;padding:12px">No journal entries yet.</p>'; return; }
+  el.innerHTML = sorted.map(([date, e]) => `
+    <div class="log-entry" style="margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+        <div class="log-date">${fmtDate(date)}</div>
+        <span style="font-size:1.1rem">${RATINGS_EMOJI[e.rating]||''}</span>
+        <span style="font-size:0.78rem;color:#059669;font-weight:700">${e.rating}/5</span>
+        ${e.am?'<span style="font-size:0.65rem;background:#d1fae5;color:#059669;padding:2px 7px;border-radius:10px;font-weight:600">☀️ AM done</span>':''}
+        ${e.pm?'<span style="font-size:0.65rem;background:#dbeafe;color:#3b82f6;padding:2px 7px;border-radius:10px;font-weight:600">🌙 PM done</span>':''}
+      </div>
+      ${e.notes?`<div class="log-note">"${e.notes}"</div>`:''}
+      ${e.photo?`<div style="margin-top:4px"><img src="${e.photo}" style="max-width:80px;max-height:80px;border-radius:6px;object-fit:cover" onerror="this.style.display='none'"></div>`:''}
+    </div>
+  `).join('');
+}
+
+// ==============================
+// SAFETY TAB
+// ==============================
+const SAFETY_DB = [
+  // { name, aliases[], category, severity (1=info,2=caution,3=flag), reason, reasonVi }
+  {name:'Fragrance',aliases:['fragrance','parfum','scent','perfume','aroma'],cat:'Irritant',severity:3,reason:'Common allergen and irritant. One of the top causes of contact dermatitis. Avoid if skin is sensitive or reactive.',reasonVi:'Hương liệu thường gây dị ứng và kích ứng. Tránh nếu da nhạy cảm.'},
+  {name:'Alcohol Denat.',aliases:['alcohol denat','denatured alcohol','sd alcohol','alcohol denat.','ethanol','isopropanol'],cat:'Irritant',severity:3,reason:'Drying alcohol that strips the skin barrier, increases water loss, and can cause irritation with repeated use.',reasonVi:'Cồn làm khô da, phá vỡ hàng rào bảo vệ da.'},
+  {name:'Sodium Lauryl Sulfate (SLS)',aliases:['sodium lauryl sulfate','sls','sodium dodecyl sulfate'],cat:'Irritant',severity:3,reason:'Harsh surfactant that strips natural oils. Can cause dryness, irritation, and worsen sensitive skin or eczema.',reasonVi:'Chất tẩy rửa mạnh làm khô da, có thể gây kích ứng.'},
+  {name:'Sodium Laureth Sulfate (SLES)',aliases:['sodium laureth sulfate','sles','sodium lauryl ether sulfate'],cat:'Mild Irritant',severity:2,reason:'Gentler than SLS but still a surfactant that can cause dryness for sensitive skin types.',reasonVi:'Nhẹ hơn SLS nhưng vẫn có thể làm khô da nhạy cảm.'},
+  {name:'Methylisothiazolinone (MI)',aliases:['methylisothiazolinone','mi','methylchloroisothiazolinone','mci/mi'],cat:'Allergen',severity:3,reason:'Powerful preservative and known sensitizer. EU has restricted use in leave-on products due to high allergy rates.',reasonVi:'Chất bảo quản mạnh, hay gây dị ứng da. EU hạn chế trong sản phẩm để lại trên da.'},
+  {name:'Formaldehyde Releasers',aliases:['dmdm hydantoin','imidazolidinyl urea','diazolidinyl urea','quaternium-15','bronopol'],cat:'Allergen',severity:3,reason:'Preservatives that slowly release formaldehyde. Known sensitizers. Can cause allergic reactions over time.',reasonVi:'Chất bảo quản giải phóng formaldehyde — có thể gây dị ứng theo thời gian.'},
+  {name:'Hydroquinone',aliases:['hydroquinone'],cat:'Restricted Ingredient',severity:3,reason:'Prescription-only in many countries for hyperpigmentation. Can cause ochronosis (blue-gray discoloration) with prolonged use. Avoid OTC products claiming to contain this.',reasonVi:'Thành phần làm trắng da cần kê đơn. Dùng lâu dài có thể gây đổi màu da.'},
+  {name:'Retinol/Retinoids',aliases:['retinol','retinal','retinaldehyde','tretinoin','adapalene','retinoic acid','retinyl palmitate'],cat:'Pregnancy Warning',severity:2,reason:'Retinoids are highly effective but should be avoided during pregnancy. Consult a doctor before use.',reasonVi:'Retinoid hiệu quả nhưng không dùng khi mang thai. Hỏi bác sĩ trước khi dùng.'},
+  {name:'Salicylic Acid (High Conc.)',aliases:['salicylic acid'],cat:'Pregnancy Warning',severity:2,reason:'Generally safe topically in low concentrations, but high concentrations or extensive use during pregnancy should be avoided.',reasonVi:'An toàn ở nồng độ thấp, nhưng tránh nồng độ cao khi mang thai.'},
+  {name:'Isopropyl Myristate',aliases:['isopropyl myristate','isopropyl palmitate','isopropyl isostearate'],cat:'Comedogenic',severity:2,reason:'High comedogenic rating. Known pore-clogger. Can cause breakouts especially in acne-prone skin.',reasonVi:'Tỷ lệ gây bít lỗ chân lông cao. Có thể gây mụn cho da dễ nổi mụn.'},
+  {name:'Mineral Oil (Comedogenic)',aliases:['mineral oil','petrolatum','paraffinum liquidum'],cat:'Comedogenic',severity:1,reason:'Can be comedogenic for acne-prone skin, though refined cosmetic-grade versions are generally safe. Use caution if acne-prone.',reasonVi:'Có thể gây bít lỗ chân lông cho da mụn. Dạng lọc sạch thường an toàn hơn.'},
+  {name:'Parabens',aliases:['methylparaben','propylparaben','butylparaben','ethylparaben','isobutylparaben'],cat:'Preservative Concern',severity:1,reason:'Controversial preservatives. FDA considers them safe at current levels, but some people prefer to avoid them. Look for "paraben-free" if concerned.',reasonVi:'Chất bảo quản gây tranh cãi. FDA cho là an toàn ở mức hiện tại.'},
+  {name:'Linalool / Limonene (Fragrance Components)',aliases:['linalool','limonene','geraniol','citronellol','eugenol','farnesol','benzyl alcohol','benzyl benzoate','coumarin'],cat:'Fragrance Allergen',severity:2,reason:'Individual fragrance compounds that are common sensitizers. EU requires labeling when present above a threshold.',reasonVi:'Thành phần hương liệu riêng lẻ — có thể gây dị ứng.'},
+  {name:'Triclosan',aliases:['triclosan','triclocarban'],cat:'Restricted Ingredient',severity:3,reason:'Antibacterial ingredient banned in US OTC antiseptics (FDA 2016). Potential hormone disruption. Should not appear in current products.',reasonVi:'Bị cấm trong chất kháng khuẩn OTC ở Mỹ từ 2016. Có thể ảnh hưởng nội tiết.'},
+  {name:'Oxybenzone (Chemical Sunscreen)',aliases:['oxybenzone','benzophenone-3'],cat:'Hormone Concern',severity:2,reason:'Chemical UV filter. Absorbs into the bloodstream. Hawaii banned it due to coral reef damage. Sensitive individuals may prefer mineral filters.',reasonVi:'Bộ lọc UV hóa học. Hấp thụ vào máu. Hawaii đã cấm vì hại san hô. Nên chọn kem chống nắng khoáng.'},
+  {name:'Butylated Hydroxyanisole (BHA)',aliases:['butylated hydroxyanisole','bha (not to be confused with beta hydroxy acid)'],cat:'Preservative Concern',severity:2,reason:'Antioxidant preservative. Listed as possible carcinogen by some agencies. Different from skincare "BHA" (salicylic acid).',reasonVi:'Chất chống oxy hóa bảo quản. Một số cơ quan xếp là chất có thể gây ung thư.'},
+  {name:'Talc',aliases:['talc','talcum'],cat:'Contaminant Concern',severity:2,reason:'Talc can be contaminated with asbestos. Quality talc is safe, but contamination has occurred in some products. Choose talc-free if concerned.',reasonVi:'Có thể bị nhiễm amiăng. Chất lượng tốt an toàn nhưng nên chọn sản phẩm không talc nếu lo ngại.'},
+  {name:'Coconut Oil (Comedogenic)',aliases:['cocos nucifera oil','coconut oil'],cat:'Comedogenic',severity:2,reason:'High comedogenic rating for the face. Great for hair and body, but can clog pores on the face especially for oily/acne-prone skin.',reasonVi:'Tỷ lệ gây bít lỗ chân lông cao trên mặt. Tốt cho tóc và cơ thể nhưng hạn chế bôi mặt.'},
+];
+
+// Conflict pairs: if ingredient A and ingredient B are both present
+const SAFETY_CONFLICTS = [
+  {a:['retinol','retinal','retinaldehyde','tretinoin','adapalene'], b:['glycolic acid','lactic acid','aha','mandelic acid','salicylic acid','bha'], msg:'Retinoids + AHA/BHA: Combining these in the same routine can cause severe irritation, redness, and barrier damage. Use on alternating nights.'},
+  {a:['vitamin c','ascorbic acid','l-ascorbic acid'], b:['retinol','retinal','tretinoin'], msg:'Vitamin C + Retinol: Can reduce the efficacy of both. Use Vitamin C in the AM and Retinol in the PM.'},
+  {a:['benzoyl peroxide'], b:['retinol','tretinoin','retinal'], msg:'Benzoyl Peroxide + Retinoids: BP oxidizes and deactivates retinoids. Use at different times of day.'},
+  {a:['aha','glycolic acid','lactic acid'], b:['bha','salicylic acid'], msg:'AHA + BHA same session: Over-exfoliation risk. Alternate between days or use at different sessions.'},
+];
+
+const SAFE_INGREDIENTS = ['niacinamide','hyaluronic acid','sodium hyaluronate','ceramide','centella asiatica','cica','panthenol','glycerin','squalane','allantoin','aloe vera','green tea','vitamin e','tocopherol','peptide','adenosine','snail secretion','bakuchiol','azelaic acid','zinc oxide','titanium dioxide','colloidal oatmeal','ferulic acid','tranexamic acid'];
+
+function checkSafety() {
+  const raw = document.getElementById('safety-input').value.trim();
+  if (!raw) { alert('Please paste ingredient list first.'); return; }
+
+  // Parse ingredients
+  const ingredients = raw.split(/[,\n]/).map(s => s.trim().toLowerCase()).filter(Boolean);
+
+  const flagged = [];
+  const safeFound = [];
+  const seen = new Set();
+
+  ingredients.forEach(ing => {
+    SAFETY_DB.forEach(db => {
+      if (seen.has(db.name)) return;
+      if (db.aliases.some(a => ing.includes(a) || a.includes(ing.split(' ').slice(0,2).join(' ')))) {
+        seen.add(db.name);
+        flagged.push(db);
+      }
+    });
+    SAFE_INGREDIENTS.forEach(safe => {
+      if (ing.includes(safe) || safe.includes(ing.split(' ').slice(0,2).join(' '))) {
+        if (!safeFound.includes(safe)) safeFound.push(safe);
+      }
+    });
+  });
+
+  // Score: start 100, deduct for flagged
+  let score = 100;
+  flagged.forEach(f => { score -= f.severity === 3 ? 15 : f.severity === 2 ? 8 : 3; });
+  score = Math.max(0, score);
+  score = Math.min(100, score);
+
+  // Conflicts
+  const conflicts = [];
+  SAFETY_CONFLICTS.forEach(c => {
+    const hasA = c.a.some(a => ingredients.some(i => i.includes(a)));
+    const hasB = c.b.some(b => ingredients.some(i => i.includes(b)));
+    if (hasA && hasB) conflicts.push(c.msg);
+  });
+
+  // Render
+  const scoreColor = score >= 80 ? '#059669' : score >= 60 ? '#d97706' : '#dc2626';
+  document.getElementById('safety-score').textContent = score;
+  document.getElementById('safety-score').style.color = scoreColor;
+  document.getElementById('safety-bar').style.width = score + '%';
+  document.getElementById('safety-bar').style.background = scoreColor;
+
+  const verdicts = score >= 85 ? '✅ Generally safe for most skin types. A few items to be aware of.' :
+    score >= 65 ? '⚠️ Some concerning ingredients present. Review flagged items carefully.' :
+    '🚨 Multiple concerning ingredients found. Consider consulting a dermatologist before use.';
+  document.getElementById('safety-verdict').textContent = verdicts;
+
+  // Flagged
+  const flaggedEl = document.getElementById('safety-flagged');
+  if (flagged.length) {
+    flaggedEl.innerHTML = flagged.map(f => `
+      <div style="padding:10px 12px;border-radius:8px;margin-bottom:6px;border:1px solid;${f.severity===3?'background:#fef2f2;border-color:#fca5a5':f.severity===2?'background:#fffbeb;border-color:#fde68a':'background:#f8fafc;border-color:#e2e8f0'}">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <span style="font-weight:700;font-size:0.85rem;${f.severity===3?'color:#dc2626':f.severity===2?'color:#d97706':'color:#64748b'}">${f.severity===3?'🚨':f.severity===2?'⚠️':'ℹ️'} ${f.name}</span>
+          <span style="font-size:0.65rem;padding:2px 8px;border-radius:10px;font-weight:600;${f.severity===3?'background:#fee2e2;color:#dc2626':f.severity===2?'background:#fef3c7;color:#d97706':'background:#e2e8f0;color:#64748b'}">${f.cat}</span>
+        </div>
+        <div style="font-size:0.78rem;color:#374151;line-height:1.5">${f.reason}</div>
+        <div style="font-size:0.74rem;color:#0891b2;margin-top:3px">🇻🇳 ${f.reasonVi}</div>
+      </div>
+    `).join('');
+  } else {
+    flaggedEl.innerHTML = '<p style="font-size:0.82rem;color:#64748b;padding:10px">No major flagged ingredients found!</p>';
+  }
+
+  // Safe
+  const safeEl = document.getElementById('safety-safe');
+  if (safeFound.length) {
+    safeEl.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:6px;">${safeFound.map(s=>`<span class="badge badge-green" style="font-size:0.7rem;padding:3px 10px">${s}</span>`).join('')}</div>`;
+  } else {
+    safeEl.innerHTML = '<p style="font-size:0.82rem;color:#64748b;padding:10px">No specifically flagged "safe" ingredients found in our database, but that doesn\'t mean the product is unsafe.</p>';
+  }
+
+  // Conflicts
+  const conflictsCard = document.getElementById('safety-conflicts-card');
+  const conflictsEl = document.getElementById('safety-conflicts');
+  if (conflicts.length) {
+    conflictsCard.style.display = 'block';
+    conflictsEl.innerHTML = conflicts.map(c => `
+      <div style="padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;margin-bottom:6px;font-size:0.8rem;color:#92400e;line-height:1.5">⚡ ${c}</div>
+    `).join('');
+  } else {
+    conflictsCard.style.display = 'none';
+  }
+
+  document.getElementById('safety-output').style.display = 'block';
+  document.getElementById('safety-output').scrollIntoView({behavior:'smooth',block:'start'});
+}
 </script>
 </body>
 </html>

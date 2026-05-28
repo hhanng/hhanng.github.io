@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Git Commit Writer — AI-Powered Commit Messages</title>
+  <title>Dev Workflow Companion Lite — Git Tools</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -16,6 +16,9 @@
       --accent-dim: rgba(249,115,22,0.15);
       --blue: #60a5fa;
       --green: #4ade80;
+      --red: #f87171;
+      --purple: #c084fc;
+      --amber: #f97316;
       --text: #e5e5e5;
       --muted: #888;
       --radius: 10px;
@@ -98,6 +101,33 @@
     }
     .api-status.saved { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid var(--green); }
     .api-status.empty { background: rgba(249,115,22,0.1); color: var(--muted); border: 1px solid var(--border); }
+
+    /* Tab nav */
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 11px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all .2s;
+    }
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .tab-btn.active { background: var(--accent); color: #000; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
     /* Textarea */
     textarea {
@@ -188,6 +218,52 @@
     .btn-generate:active { transform: scale(0.99); }
     .btn-generate:disabled { opacity: 0.45; cursor: not-allowed; }
 
+    /* Blue/Teal main buttons */
+    .main-btn-blue {
+      width: 100%;
+      background: var(--blue);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-top: 4px;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .main-btn-blue:hover { opacity: 0.9; }
+    .main-btn-blue:disabled { opacity: 0.45; cursor: not-allowed; }
+    .main-btn-teal {
+      width: 100%;
+      background: #2dd4bf;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-top: 4px;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .main-btn-teal:hover { opacity: 0.9; }
+    .main-btn-teal:disabled { opacity: 0.45; cursor: not-allowed; }
+    .main-btn-blue .spinner, .main-btn-teal .spinner {
+      border-color: rgba(0,0,0,0.2);
+      border-top-color: #000;
+    }
+
     /* Loading */
     .loading {
       display: none;
@@ -203,6 +279,14 @@
       border-radius: 50%;
       animation: spin .7s linear infinite;
       margin: 0 auto 12px;
+    }
+    .btn-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -398,6 +482,143 @@
       margin-bottom: 16px;
     }
 
+    /* Tone toggle */
+    .tone-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .tone-btn {
+      flex: 1;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 7px;
+      padding: 9px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .tone-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+    /* PR output */
+    .pr-output-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-top: 16px;
+      display: none;
+    }
+    .pr-output-card.visible { display: block; }
+    .pr-section { margin-bottom: 20px; }
+    .pr-section:last-child { margin-bottom: 0; }
+    .pr-section-title {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .pr-title-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      color: var(--blue);
+      word-break: break-word;
+    }
+    .pr-summary-text {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .pr-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .pr-list li { font-size: 0.87rem; color: var(--text); padding-left: 18px; position: relative; line-height: 1.5; }
+    .pr-list li::before { content: '•'; position: absolute; left: 4px; color: var(--accent); }
+    .pr-checklist { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .pr-checklist li { font-size: 0.87rem; color: var(--text); padding-left: 22px; position: relative; line-height: 1.5; }
+    .pr-checklist li::before { content: '☐'; position: absolute; left: 2px; color: var(--green); }
+    .screenshot-note {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-style: italic;
+      background: rgba(255,255,255,.03);
+      padding: 8px 12px;
+      border-radius: 6px;
+      border-left: 2px solid var(--border);
+    }
+    .pr-copy-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+    .btn-copy-pr {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 7px;
+      padding: 8px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-copy-pr:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-copy-pr.copied { color: var(--green); border-color: var(--green); }
+
+    /* Sprint summary */
+    .word-limit-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .wl-btn {
+      flex: 1;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 7px;
+      padding: 9px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .wl-btn.active { background: rgba(45,212,191,0.15); border-color: #2dd4bf; color: #2dd4bf; }
+
+    .sprint-output-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-top: 16px;
+      display: none;
+    }
+    .sprint-output-card.visible { display: block; }
+    .sprint-text {
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+    .sprint-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .sprint-word-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .sprint-copy-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 14px;
+    }
+
     /* Footer */
     footer {
       text-align: center;
@@ -419,8 +640,8 @@
 
   <header>
     <div class="badge">Agent #9 of 97 · 100 AI Agents Challenge</div>
-    <h1>Git <span>Commit</span> Writer</h1>
-    <p>Describe your changes · Get 3 perfectly formatted commit messages</p>
+    <h1>Dev Workflow <span>Companion</span> Lite</h1>
+    <p>Commit messages · PR descriptions · Sprint summaries</p>
   </header>
 
   <!-- API Key -->
@@ -432,104 +653,219 @@
     </div>
   </div>
 
-  <!-- Main input -->
-  <div class="card">
-    <div class="card-title">What did you change?</div>
-    <textarea id="description" placeholder="e.g. fixed the login button not working on mobile, added dark mode toggle, refactored the user auth service..." rows="3"></textarea>
+  <!-- Tab Nav -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('commits', this)">📝 Commit Writer</button>
+    <button class="tab-btn" onclick="switchTab('pr', this)">🔀 PR Description</button>
+    <button class="tab-btn" onclick="switchTab('sprint', this)">📊 Sprint Summary</button>
   </div>
 
-  <!-- Settings -->
-  <div class="card">
-    <div class="card-title">Settings</div>
-    <div class="settings-grid">
-      <div class="field">
-        <label>Commit Style</label>
-        <select id="style">
-          <option value="Conventional Commits (feat/fix/docs...)">Conventional Commits</option>
-          <option value="Emoji Commits">Emoji Commits</option>
-          <option value="Simple & Short">Simple &amp; Short</option>
-          <option value="Detailed with body">Detailed with Body</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Project Type</label>
-        <select id="projectType">
-          <option value="Web App">Web App</option>
-          <option value="Mobile App">Mobile App</option>
-          <option value="API / Backend">API / Backend</option>
-          <option value="CLI Tool">CLI Tool</option>
-          <option value="Library / Package">Library / Package</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Scope (optional)</label>
-        <input type="text" id="scope" placeholder="e.g. auth, navbar, api" />
-      </div>
-    </div>
+  <!-- ═══════════════════════════════════════════════════════ TAB 1: Commit Writer -->
+  <div class="tab-panel active" id="tab-commits">
 
-    <!-- Emoji picker (shown only for Emoji style) -->
-    <div class="emoji-section" id="emojiSection" style="display:none;">
-      <div class="emoji-label">Quick emoji</div>
-      <div class="emoji-grid">
-        <button class="emoji-btn" data-emoji="✨">✨</button>
-        <button class="emoji-btn" data-emoji="🐛">🐛</button>
-        <button class="emoji-btn" data-emoji="📝">📝</button>
-        <button class="emoji-btn" data-emoji="🔥">🔥</button>
-        <button class="emoji-btn" data-emoji="🚀">🚀</button>
-        <button class="emoji-btn" data-emoji="💄">💄</button>
-        <button class="emoji-btn" data-emoji="♻️">♻️</button>
-        <button class="emoji-btn" data-emoji="🔧">🔧</button>
-        <button class="emoji-btn" data-emoji="⚡">⚡</button>
-        <button class="emoji-btn" data-emoji="🎨">🎨</button>
-        <button class="emoji-btn" data-emoji="✅">✅</button>
-        <button class="emoji-btn" data-emoji="🔒">🔒</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Error -->
-  <div class="error-box" id="errorBox"></div>
-
-  <!-- Generate button -->
-  <button class="btn-generate" id="generateBtn" onclick="generateCommits()">
-    ✦ Generate Commits
-  </button>
-
-  <!-- Loading -->
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    Asking Gemini for commit messages...
-  </div>
-
-  <!-- Results -->
-  <div id="results" style="margin-top:20px;">
-    <div class="results-header">
-      <h2>Generated Commits</h2>
-      <span class="results-count" id="resultsCount">3 variants</span>
-    </div>
-    <div id="commitCards"></div>
-
-    <!-- Git command -->
-    <div class="git-panel" id="gitPanel" style="display:none;">
-      <div class="git-panel-label">Ready-to-run command</div>
-      <div class="git-command-row">
-        <input type="text" class="git-command" id="gitCommand" readonly />
-        <button class="btn-copy-cmd" id="copyCmd" onclick="copyGitCommand()">Copy</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- History -->
-  <div id="history-section" style="margin-top:20px;">
+    <!-- Main input -->
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <div class="card-title" style="margin-bottom:0;">Recent Commits</div>
-        <button class="btn-clear-history" onclick="clearHistory()">Clear</button>
-      </div>
-      <div class="history-list" id="historyList"></div>
+      <div class="card-title">What did you change?</div>
+      <textarea id="description" placeholder="e.g. fixed the login button not working on mobile, added dark mode toggle, refactored the user auth service..." rows="3"></textarea>
     </div>
-  </div>
+
+    <!-- Settings -->
+    <div class="card">
+      <div class="card-title">Settings</div>
+      <div class="settings-grid">
+        <div class="field">
+          <label>Commit Style</label>
+          <select id="style">
+            <option value="Conventional Commits (feat/fix/docs...)">Conventional Commits</option>
+            <option value="Emoji Commits">Emoji Commits</option>
+            <option value="Simple &amp; Short">Simple &amp; Short</option>
+            <option value="Detailed with body">Detailed with Body</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Project Type</label>
+          <select id="projectType">
+            <option value="Web App">Web App</option>
+            <option value="Mobile App">Mobile App</option>
+            <option value="API / Backend">API / Backend</option>
+            <option value="CLI Tool">CLI Tool</option>
+            <option value="Library / Package">Library / Package</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Scope (optional)</label>
+          <input type="text" id="scope" placeholder="e.g. auth, navbar, api" />
+        </div>
+      </div>
+
+      <!-- Emoji picker (shown only for Emoji style) -->
+      <div class="emoji-section" id="emojiSection" style="display:none;">
+        <div class="emoji-label">Quick emoji</div>
+        <div class="emoji-grid">
+          <button class="emoji-btn" data-emoji="✨">✨</button>
+          <button class="emoji-btn" data-emoji="🐛">🐛</button>
+          <button class="emoji-btn" data-emoji="📝">📝</button>
+          <button class="emoji-btn" data-emoji="🔥">🔥</button>
+          <button class="emoji-btn" data-emoji="🚀">🚀</button>
+          <button class="emoji-btn" data-emoji="💄">💄</button>
+          <button class="emoji-btn" data-emoji="♻️">♻️</button>
+          <button class="emoji-btn" data-emoji="🔧">🔧</button>
+          <button class="emoji-btn" data-emoji="⚡">⚡</button>
+          <button class="emoji-btn" data-emoji="🎨">🎨</button>
+          <button class="emoji-btn" data-emoji="✅">✅</button>
+          <button class="emoji-btn" data-emoji="🔒">🔒</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-box" id="errorBox"></div>
+
+    <!-- Generate button -->
+    <button class="btn-generate" id="generateBtn" onclick="generateCommits()">
+      ✦ Generate Commits
+    </button>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      Asking Gemini for commit messages...
+    </div>
+
+    <!-- Results -->
+    <div id="results" style="margin-top:20px;">
+      <div class="results-header">
+        <h2>Generated Commits</h2>
+        <span class="results-count" id="resultsCount">3 variants</span>
+      </div>
+      <div id="commitCards"></div>
+
+      <!-- Git command -->
+      <div class="git-panel" id="gitPanel" style="display:none;">
+        <div class="git-panel-label">Ready-to-run command</div>
+        <div class="git-command-row">
+          <input type="text" class="git-command" id="gitCommand" readonly />
+          <button class="btn-copy-cmd" id="copyCmd" onclick="copyGitCommand()">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div id="history-section" style="margin-top:20px;">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div class="card-title" style="margin-bottom:0;">Recent Commits</div>
+          <button class="btn-clear-history" onclick="clearHistory()">Clear</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </div>
+
+  </div><!-- /tab-commits -->
+
+  <!-- ═══════════════════════════════════════════════════════ TAB 2: PR Description -->
+  <div class="tab-panel" id="tab-pr">
+
+    <div class="card">
+      <div class="card-title">PR Details</div>
+      <div class="settings-grid" style="margin-bottom:14px;">
+        <div class="field">
+          <label>PR Title</label>
+          <input type="text" id="prTitle" placeholder="e.g. Add mobile login fix" />
+        </div>
+        <div class="field">
+          <label>Ticket # (optional)</label>
+          <input type="text" id="prTicket" placeholder="e.g. JIRA-123" />
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Files / Areas Changed</label>
+        <input type="text" id="prChanges" placeholder="e.g. LoginButton.tsx, auth/utils.ts, styles/mobile.css" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tone</div>
+      <div class="tone-toggle">
+        <button class="tone-btn active" id="toneBtn-concise" onclick="setPrTone('concise', this)">⚡ Concise</button>
+        <button class="tone-btn" id="toneBtn-detailed" onclick="setPrTone('detailed', this)">📋 Detailed</button>
+      </div>
+    </div>
+
+    <div class="error-box" id="prErrorBox"></div>
+
+    <button class="main-btn-blue" id="prBtn" onclick="generatePR()">
+      <span class="btn-spinner" id="prSpinner"></span>
+      🔀 Generate PR Description
+    </button>
+
+    <div class="pr-output-card" id="prOutput">
+      <div class="pr-section">
+        <div class="pr-section-title">PR Title</div>
+        <div class="pr-title-text" id="prTitleOut"></div>
+      </div>
+      <div class="pr-section">
+        <div class="pr-section-title">Summary</div>
+        <div class="pr-summary-text" id="prSummaryOut"></div>
+      </div>
+      <div class="pr-section">
+        <div class="pr-section-title">Changes</div>
+        <ul class="pr-list" id="prChangesList"></ul>
+      </div>
+      <div class="pr-section">
+        <div class="pr-section-title">Test Plan</div>
+        <ul class="pr-checklist" id="prTestList"></ul>
+      </div>
+      <div class="pr-section">
+        <div class="pr-section-title">Screenshot Note</div>
+        <div class="screenshot-note" id="prScreenshotNote"></div>
+      </div>
+      <div class="pr-copy-row">
+        <button class="btn-copy-pr" id="prCopyBtn" onclick="copyPR()">📋 Copy as Markdown</button>
+      </div>
+    </div>
+
+  </div><!-- /tab-pr -->
+
+  <!-- ═══════════════════════════════════════════════════════ TAB 3: Sprint Summary -->
+  <div class="tab-panel" id="tab-sprint">
+
+    <div class="card">
+      <div class="card-title">Sprint Commits</div>
+      <textarea id="sprintCommits" placeholder="Paste your sprint commit messages here, one per line:&#10;&#10;feat(auth): add OAuth login flow&#10;fix(ui): resolve mobile nav overlap&#10;chore: update dependencies&#10;feat(dashboard): add weekly stats widget&#10;fix(api): handle 401 token refresh&#10;docs: update README with setup steps" rows="10"></textarea>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Output Format</div>
+      <div class="word-limit-toggle">
+        <button class="wl-btn active" id="wlBtn-slack" onclick="setWordLimit('slack', this)">💬 Slack (~100 words)</button>
+        <button class="wl-btn" id="wlBtn-email" onclick="setWordLimit('email', this)">📧 Email (~300 words)</button>
+      </div>
+      <p style="font-size:0.8rem; color:var(--muted); line-height:1.5;">
+        Slack: tight, punchy summary for team channels. Email: full detail for stakeholders.
+      </p>
+    </div>
+
+    <div class="error-box" id="sprintErrorBox"></div>
+
+    <button class="main-btn-teal" id="sprintBtn" onclick="generateSprint()">
+      <span class="btn-spinner" id="sprintSpinner"></span>
+      📊 Generate Sprint Summary
+    </button>
+
+    <div class="sprint-output-card" id="sprintOutput">
+      <div class="sprint-meta">
+        <div class="card-title" style="margin-bottom:0;">Sprint Summary</div>
+        <span class="sprint-word-count" id="sprintWordCount"></span>
+      </div>
+      <div class="sprint-text" id="sprintText"></div>
+      <div class="sprint-copy-row">
+        <button class="btn-copy-pr" id="sprintCopyBtn" onclick="copySprint()">📋 Copy Summary</button>
+      </div>
+    </div>
+
+  </div><!-- /tab-sprint -->
 
   <footer>
     <p>Built with Gemini 2.0 Flash · <a href="https://hhanng.github.io" target="_blank">100 AI Agents Challenge</a></p>
@@ -541,6 +877,10 @@
   // ── State ──────────────────────────────────────────────────────────────────
   let selectedCommit = null;
   let currentCommits = [];
+  let prTone = 'concise';
+  let wordLimit = 'slack';
+  let currentPRData = null;
+  let currentSprintText = '';
 
   // ── Init ───────────────────────────────────────────────────────────────────
   (function init() {
@@ -587,7 +927,46 @@
     }
   }
 
-  // ── Generate ───────────────────────────────────────────────────────────────
+  // ── Tab switching ──────────────────────────────────────────────────────────
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Gemini helper ──────────────────────────────────────────────────────────
+  async function callGemini(prompt) {
+    const key = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
+    if (!key) throw new Error('Please enter your Gemini API key first.');
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+        })
+      }
+    );
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${res.status}`);
+    }
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  }
+
+  function extractJSON(raw) {
+    const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    try { return JSON.parse(cleaned); } catch {}
+    const m = cleaned.match(/\{[\s\S]*\}/);
+    if (m) { try { return JSON.parse(m[0]); } catch {} }
+    return null;
+  }
+
+  // ── TAB 1: Generate commits ────────────────────────────────────────────────
   async function generateCommits() {
     const apiKey = localStorage.getItem('gemini_api_key') || '';
     const description = document.getElementById('description').value.trim();
@@ -595,10 +974,10 @@
     const projectType = document.getElementById('projectType').value;
     const scope = document.getElementById('scope').value.trim();
 
-    hideError();
+    hideError('errorBox');
 
-    if (!apiKey) { showError('Please enter your Gemini API key above.'); return; }
-    if (!description) { showError('Please describe what you changed.'); return; }
+    if (!apiKey) { showError('errorBox', 'Please enter your Gemini API key above.'); return; }
+    if (!description) { showError('errorBox', 'Please describe what you changed.'); return; }
 
     setLoading(true);
     selectedCommit = null;
@@ -638,36 +1017,14 @@ Respond in this exact JSON format:
 Return only the JSON, no markdown.`;
 
     try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
-          })
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error?.message || `API error ${res.status}`);
-      }
-
-      const data = await res.json();
-      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      const parsed = JSON.parse(cleaned);
-
-      if (!parsed.commits || !Array.isArray(parsed.commits)) throw new Error('Unexpected response format.');
-
+      const raw = await callGemini(prompt);
+      const parsed = extractJSON(raw);
+      if (!parsed?.commits || !Array.isArray(parsed.commits)) throw new Error('Unexpected response format.');
       currentCommits = parsed.commits;
       renderCommits(parsed.commits);
       saveHistory(parsed.commits);
-
     } catch (e) {
-      showError('Error: ' + (e.message || 'Something went wrong. Check your API key.'));
+      showError('errorBox', 'Error: ' + (e.message || 'Something went wrong. Check your API key.'));
     } finally {
       setLoading(false);
     }
@@ -702,7 +1059,6 @@ Return only the JSON, no markdown.`;
   }
 
   function highlightCommit(msg) {
-    // Match: type(scope): desc OR type: desc OR emoji type(scope): desc
     const conventional = msg.match(/^(\S+?)(\(([^)]*)\))?(!)?(:\s*)(.*)$/);
     if (conventional) {
       const type = escapeHtml(conventional[1]);
@@ -767,7 +1123,6 @@ Return only the JSON, no markdown.`;
 
   function renderHistory() {
     let history = JSON.parse(localStorage.getItem('commit_history') || '[]');
-    // Deduplicate by message and show last 10 unique
     const seen = new Set();
     const unique = history.filter(h => {
       if (seen.has(h.message)) return false;
@@ -787,8 +1142,6 @@ Return only the JSON, no markdown.`;
         <button class="history-copy" onclick="copyHistoryItem(${i}, this, event)">Copy</button>
       </div>
     `).join('');
-
-    // store for reference
     list._data = unique;
   }
 
@@ -825,20 +1178,179 @@ Return only the JSON, no markdown.`;
     else document.getElementById('generateBtn').textContent = '✦ Generate Commits';
   }
 
-  function showError(msg) {
-    const el = document.getElementById('errorBox');
+  function showError(id, msg) {
+    const el = document.getElementById(id);
     el.textContent = msg;
     el.style.display = 'block';
   }
 
-  function hideError() {
-    document.getElementById('errorBox').style.display = 'none';
+  function hideError(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
   }
 
-  // Allow Ctrl+Enter to generate
   document.getElementById('description').addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') generateCommits();
   });
+
+  // ── TAB 2: PR tone ─────────────────────────────────────────────────────────
+  function setPrTone(tone, btn) {
+    prTone = tone;
+    document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  async function generatePR() {
+    const title = document.getElementById('prTitle').value.trim();
+    const changes = document.getElementById('prChanges').value.trim();
+    const ticket = document.getElementById('prTicket').value.trim();
+    hideError('prErrorBox');
+    if (!title) { showError('prErrorBox', 'Please enter a PR title.'); return; }
+    if (!changes) { showError('prErrorBox', 'Please enter which files or areas changed.'); return; }
+
+    const btn = document.getElementById('prBtn');
+    const spinner = document.getElementById('prSpinner');
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+    btn.querySelector('span').nextSibling.textContent = ' Generating...';
+
+    try {
+      const toneInst = prTone === 'concise'
+        ? 'Be concise. Summary: 1-2 sentences. Changes: 3-5 bullets. Test plan: 3-4 checkboxes.'
+        : 'Be detailed. Summary: 3-4 sentences with context and rationale. Changes: 5-8 bullets. Test plan: 5-6 checkboxes.';
+
+      const prompt = `You are a senior engineer writing a pull request description.
+
+PR Title: ${title}
+Files/Areas Changed: ${changes}
+${ticket ? 'Ticket: ' + ticket : ''}
+Tone: ${prTone} — ${toneInst}
+
+Return ONLY this JSON (no markdown fences):
+{
+  "prTitle": "conventional commit style title with type prefix, e.g. feat(auth): add mobile login fix",
+  "summary": "summary paragraph",
+  "changes": ["change 1", "change 2", "change 3"],
+  "testPlan": ["test step 1", "test step 2", "test step 3"],
+  "screenshotNote": "one sentence about what screenshots to attach or 'No UI changes – no screenshots needed.'"
+}`;
+
+      const raw = await callGemini(prompt);
+      const data = extractJSON(raw);
+      if (!data?.prTitle) throw new Error('Invalid response from Gemini.');
+      currentPRData = data;
+      renderPR(data);
+    } catch (e) {
+      showError('prErrorBox', 'Error: ' + (e.message || 'Something went wrong.'));
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      btn.querySelector('span').nextSibling.textContent = ' 🔀 Generate PR Description';
+    }
+  }
+
+  function renderPR(d) {
+    document.getElementById('prTitleOut').textContent = d.prTitle || '';
+    document.getElementById('prSummaryOut').textContent = d.summary || '';
+    document.getElementById('prChangesList').innerHTML = (d.changes || []).map(c => `<li>${escapeHtml(c)}</li>`).join('');
+    document.getElementById('prTestList').innerHTML = (d.testPlan || []).map(t => `<li>${escapeHtml(t)}</li>`).join('');
+    document.getElementById('prScreenshotNote').textContent = d.screenshotNote || '';
+    const out = document.getElementById('prOutput');
+    out.classList.add('visible');
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function copyPR() {
+    if (!currentPRData) return;
+    const d = currentPRData;
+    const ticket = document.getElementById('prTicket').value.trim();
+    const lines = [
+      `## ${d.prTitle}`,
+      '',
+      d.summary,
+      '',
+      '## Changes',
+      ...(d.changes || []).map(c => `- ${c}`),
+      '',
+      '## Test Plan',
+      ...(d.testPlan || []).map(t => `- [ ] ${t}`),
+      '',
+      '## Screenshots',
+      d.screenshotNote,
+    ];
+    if (ticket) lines.unshift(`> Ticket: ${ticket}\n`);
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+      const btn = document.getElementById('prCopyBtn');
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '📋 Copy as Markdown'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── TAB 3: Sprint Summary ──────────────────────────────────────────────────
+  function setWordLimit(limit, btn) {
+    wordLimit = limit;
+    document.querySelectorAll('.wl-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  async function generateSprint() {
+    const commits = document.getElementById('sprintCommits').value.trim();
+    hideError('sprintErrorBox');
+    if (!commits) { showError('sprintErrorBox', 'Please paste your sprint commit messages.'); return; }
+
+    const btn = document.getElementById('sprintBtn');
+    const spinner = document.getElementById('sprintSpinner');
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+    btn.querySelector('span').nextSibling.textContent = ' Generating...';
+
+    try {
+      const targetWords = wordLimit === 'slack' ? 100 : 300;
+      const formatInst = wordLimit === 'slack'
+        ? 'Write a punchy Slack-style sprint summary under 100 words. Use bullet points or short paragraphs. Skip formalities. Hit the highlights: what shipped, what was fixed, and any key improvements. Emoji are fine.'
+        : 'Write a detailed Email-style sprint summary around 300 words. Include a brief intro paragraph, then sections for New Features, Bug Fixes, and Improvements with bullet points. Use professional language suitable for stakeholders. End with a brief closing line.';
+
+      const prompt = `You are a tech lead summarizing a sprint for the team.
+
+Sprint commits:
+${commits}
+
+Format instructions:
+${formatInst}
+
+Return ONLY the plain text summary, no JSON, no markdown headings, no code blocks.`;
+
+      const raw = await callGemini(prompt);
+      currentSprintText = raw.trim();
+      renderSprint(currentSprintText);
+    } catch (e) {
+      showError('sprintErrorBox', 'Error: ' + (e.message || 'Something went wrong.'));
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      btn.querySelector('span').nextSibling.textContent = ' 📊 Generate Sprint Summary';
+    }
+  }
+
+  function renderSprint(text) {
+    document.getElementById('sprintText').textContent = text;
+    const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+    document.getElementById('sprintWordCount').textContent = `~${wordCount} words`;
+    const out = document.getElementById('sprintOutput');
+    out.classList.add('visible');
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function copySprint() {
+    if (!currentSprintText) return;
+    navigator.clipboard.writeText(currentSprintText).then(() => {
+      const btn = document.getElementById('sprintCopyBtn');
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '📋 Copy Summary'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
 </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Star Wars Builder — Agent #65</title>
+<title>Creative Story Builder — Agent #65</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -15,50 +15,46 @@
     --yellow: #fbbf24;
     --red: #f87171;
     --purple: #a78bfa;
+    --teal: #2dd4bf;
     --text: #e2e8f0;
     --muted: #94a3b8;
   }
   body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
-  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   header .logo { font-size: 24px; }
   header h1 { font-size: 20px; font-weight: 700; color: var(--blue); }
   header .sub { font-size: 13px; color: var(--muted); margin-left: auto; }
-  .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; gap: 4px; }
-  .tab { padding: 14px 20px; cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 500; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; }
+  .api-key-row { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; width: 280px; }
+  .api-key-row input { background: none; border: none; color: var(--text); font-size: 13px; font-family: monospace; outline: none; flex: 1; width: 0; }
+  .api-key-row input::placeholder { color: var(--muted); }
+  .api-key-row .api-label { font-size: 11px; color: var(--muted); white-space: nowrap; font-weight: 600; }
+  .api-saved { font-size: 11px; color: var(--green); font-weight: 700; white-space: nowrap; }
+  @media(max-width:640px){ .api-key-row { width: 100%; } header { gap: 8px; } }
+  .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; gap: 4px; overflow-x: auto; }
+  .tabs::-webkit-scrollbar { height: 3px; }
+  .tabs::-webkit-scrollbar-thumb { background: var(--border); }
+  .tab { padding: 14px 16px; cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 500; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; flex-shrink: 0; }
   .tab:hover { color: var(--text); }
   .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
   .page { display: none; padding: 24px; max-width: 960px; margin: 0 auto; }
   .page.active { display: block; }
   .section-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-  @media(max-width:640px){ .grid2 { grid-template-columns: 1fr; } }
   .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; font-weight: 600; }
-  .options { display: flex; flex-wrap: wrap; gap: 8px; }
-  .opt { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; font-size: 13px; transition: all .15s; }
-  .opt:hover { border-color: var(--blue); color: var(--blue); }
-  .opt.selected { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600; }
-  .opt.light.selected { background: var(--yellow); border-color: var(--yellow); color: #1a1d27; }
-  .opt.dark.selected { background: var(--red); border-color: var(--red); color: #fff; }
-  .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all .15s; }
+  .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
   .btn-primary { background: var(--blue); color: #fff; }
-  .btn-primary:hover { opacity: .85; }
+  .btn-primary:hover:not(:disabled) { opacity: .85; }
   .btn-green { background: var(--green); color: #0f1117; }
-  .btn-green:hover { opacity: .85; }
+  .btn-green:hover:not(:disabled) { opacity: .85; }
+  .btn-yellow { background: var(--yellow); color: #0f1117; }
+  .btn-yellow:hover:not(:disabled) { opacity: .85; }
+  .btn-purple { background: var(--purple); color: #0f1117; }
+  .btn-purple:hover:not(:disabled) { opacity: .85; }
   .btn-danger { background: var(--red); color: #fff; font-size: 12px; padding: 6px 12px; }
-  .btn-danger:hover { opacity: .85; }
+  .btn-danger:hover:not(:disabled) { opacity: .85; }
   .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 12px; padding: 6px 12px; }
   .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
-  .character-card { background: linear-gradient(135deg, var(--card), #0f1117); border: 2px solid var(--blue); border-radius: 16px; padding: 28px; text-align: center; position: relative; overflow: hidden; }
-  .character-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, rgba(79,142,247,.05) 0%, transparent 60%); pointer-events: none; }
-  .char-avatar { font-size: 64px; margin-bottom: 12px; }
-  .char-name { font-size: 24px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
-  .char-subtitle { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
-  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-  .stat { background: rgba(79,142,247,.1); border-radius: 8px; padding: 12px; }
-  .stat-val { font-size: 22px; font-weight: 700; color: var(--green); }
-  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
-  .backstory { background: rgba(255,255,255,.03); border-radius: 8px; padding: 16px; text-align: left; font-size: 13px; color: var(--muted); line-height: 1.6; }
   .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
   .badge-light { background: rgba(251,191,36,.2); color: var(--yellow); }
   .badge-dark { background: rgba(248,113,113,.2); color: var(--red); }
@@ -98,6 +94,12 @@
   .result-title { font-size: 28px; font-weight: 700; color: var(--yellow); margin-bottom: 8px; }
   .result-score { font-size: 48px; font-weight: 700; color: var(--blue); }
   /* Collection */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media(max-width:640px){ .grid2 { grid-template-columns: 1fr; } }
+  .options { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; font-size: 13px; transition: all .15s; }
+  .opt:hover { border-color: var(--blue); color: var(--blue); }
+  .opt.selected { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600; }
   .collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
   .coll-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
   .coll-avatar { font-size: 40px; margin-bottom: 8px; }
@@ -109,89 +111,264 @@
   .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(79,142,247,.15); color: var(--blue); margin: 2px; }
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #0f1117; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; transform: translateY(80px); opacity: 0; transition: all .3s; z-index: 999; }
   .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── Story Builder ── */
+  .char-select { width: 100%; background: #111; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; padding: 10px 12px; outline: none; appearance: none; cursor: pointer; }
+  .char-select:focus { border-color: var(--blue); }
+  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media(max-width:500px){ .scenario-grid { grid-template-columns: 1fr; } }
+  .scenario-card { padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; font-size: 13px; text-align: left; transition: all .15s; line-height: 1.4; }
+  .scenario-card:hover { border-color: var(--yellow); color: var(--yellow); }
+  .scenario-card.selected { border-color: var(--yellow); background: rgba(251,191,36,.08); color: var(--yellow); }
+  .story-block { margin-bottom: 20px; }
+  .story-para {
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding: 16px 20px;
+    background: rgba(255,255,255,.02);
+    border-radius: 10px;
+    border-left: 3px solid var(--blue);
+  }
+  .story-para.user-para {
+    border-left-color: var(--green);
+    background: rgba(74,222,128,.03);
+  }
+  .vocab-section { margin-top: 10px; margin-bottom: 16px; }
+  .vocab-title { font-size: 11px; color: var(--yellow); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .vocab-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .vocab-pill {
+    background: rgba(251,191,36,.1);
+    border: 1px solid rgba(251,191,36,.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: help;
+    position: relative;
+    color: var(--yellow);
+  }
+  .vocab-pill:hover .vocab-tooltip { opacity: 1; pointer-events: auto; }
+  .vocab-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1d27;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    width: 220px;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    z-index: 20;
+    white-space: normal;
+    line-height: 1.5;
+  }
+  .vocab-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--border);
+  }
+  .story-highlighted [data-def] {
+    color: var(--yellow);
+    border-bottom: 1px dashed rgba(251,191,36,.5);
+    cursor: help;
+  }
+  textarea.story-input {
+    width: 100%;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 14px;
+    outline: none;
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+    font-family: inherit;
+    transition: border-color .2s;
+  }
+  textarea.story-input:focus { border-color: var(--green); }
+  textarea.story-input::placeholder { color: var(--muted); }
+  .story-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .spinner-sm { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+  .spinner-sm.dark { border-color: rgba(0,0,0,.2); border-top-color: #000; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-box { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3); color: #fca5a5; border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-bottom: 12px; display: none; }
+
+  /* ── Fan Wiki ── */
+  .wiki-form textarea { width: 100%; background: #111; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; padding: 12px 14px; outline: none; resize: vertical; min-height: 120px; line-height: 1.6; font-family: inherit; }
+  .wiki-form textarea:focus { border-color: var(--purple); }
+  .wiki-form input[type="text"] { width: 100%; background: #111; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 15px; padding: 11px 14px; outline: none; font-family: inherit; transition: border-color .2s; }
+  .wiki-form input[type="text"]:focus { border-color: var(--purple); }
+  .wiki-output { display: none; }
+  .wiki-output.visible { display: block; }
+  .wiki-article { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .wiki-header { background: linear-gradient(135deg, #1a1d27, #0f1117); padding: 24px; border-bottom: 1px solid var(--border); }
+  .wiki-name { font-size: 28px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+  .wiki-tagline { font-size: 14px; color: var(--muted); font-style: italic; }
+  .wiki-body { padding: 24px; display: grid; grid-template-columns: 240px 1fr; gap: 24px; }
+  @media(max-width:640px){ .wiki-body { grid-template-columns: 1fr; } }
+  .wiki-infobox { background: rgba(79,142,247,.05); border: 1px solid rgba(79,142,247,.2); border-radius: 10px; padding: 16px; font-size: 13px; }
+  .wiki-infobox-title { font-size: 12px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+  .wiki-info-row { display: flex; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); line-height: 1.4; }
+  .wiki-info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .wiki-info-key { font-weight: 600; color: var(--muted); min-width: 80px; flex-shrink: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .3px; }
+  .wiki-info-val { color: var(--text); }
+  .wiki-content-sections { display: flex; flex-direction: column; gap: 20px; }
+  .wiki-section-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+  .wiki-section-body { font-size: 14px; color: #cbd5e1; line-height: 1.75; }
+  .wiki-section-body ul { list-style: none; display: flex; flex-direction: column; gap: 6px; padding: 0; }
+  .wiki-section-body ul li { padding-left: 16px; position: relative; }
+  .wiki-section-body ul li::before { content: '•'; position: absolute; left: 0; color: var(--purple); }
+  .wiki-export-row { display: flex; gap: 10px; justify-content: flex-end; padding: 16px 24px; border-top: 1px solid var(--border); flex-wrap: wrap; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">⭐</div>
-  <h1>Star Wars Builder</h1>
+  <h1>Creative Story Builder</h1>
+  <div class="api-key-row">
+    <span class="api-label">API KEY</span>
+    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" />
+    <span id="apiSaved" class="api-saved" style="display:none">✓ Saved</span>
+  </div>
   <div class="sub">Agent #65 · 100 AI Agents</div>
 </header>
 
 <nav class="tabs">
-  <div class="tab active" onclick="showTab('build')">⚔️ Build</div>
-  <div class="tab" onclick="showTab('lore')">📖 Lore</div>
-  <div class="tab" onclick="showTab('quiz')">🎯 Quiz</div>
-  <div class="tab" onclick="showTab('collection')">🗂️ Collection</div>
+  <div class="tab active" onclick="showTab('story', event)">📖 Story Builder</div>
+  <div class="tab" onclick="showTab('wiki', event)">🌐 Fan Wiki</div>
+  <div class="tab" onclick="showTab('lore', event)">📚 Lore</div>
+  <div class="tab" onclick="showTab('quiz', event)">🎯 Quiz</div>
+  <div class="tab" onclick="showTab('collection', event)">🗂️ Collection</div>
 </nav>
 
-<!-- BUILD TAB -->
-<div id="tab-build" class="page active">
-  <div class="section-title">⚔️ Character Creator</div>
+<!-- ═══════════════════════════ STORY BUILDER TAB ═══════════════════════════ -->
+<div id="tab-story" class="page active">
+  <div class="section-title">📖 AI Story Builder</div>
 
-  <div class="grid2">
-    <div class="card">
-      <div class="label">Choose Your Side</div>
-      <div class="options" id="side-opts">
-        <div class="opt light" onclick="pick('side','Light Side',this)">☀️ Light Side</div>
-        <div class="opt dark" onclick="pick('side','Dark Side',this)">🌑 Dark Side</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="label">Choose Weapon</div>
-      <div class="options" id="weapon-opts">
-        <div class="opt" onclick="pick('weapon','Blue Lightsaber',this)">🔵 Blue Saber</div>
-        <div class="opt" onclick="pick('weapon','Green Lightsaber',this)">🟢 Green Saber</div>
-        <div class="opt" onclick="pick('weapon','Red Lightsaber',this)">🔴 Red Saber</div>
-        <div class="opt" onclick="pick('weapon','Purple Lightsaber',this)">🟣 Purple Saber</div>
-        <div class="opt" onclick="pick('weapon','Darksaber',this)">⬛ Darksaber</div>
-        <div class="opt" onclick="pick('weapon','Blaster',this)">🔫 Blaster</div>
-        <div class="opt" onclick="pick('weapon','Bowcaster',this)">🏹 Bowcaster</div>
-        <div class="opt" onclick="pick('weapon','Dual Blasters',this)">🔫🔫 Dual Blasters</div>
-      </div>
+  <div class="card">
+    <div class="label">Choose a Character</div>
+    <select class="char-select" id="storyChar">
+      <option value="">— Select a character —</option>
+      <option>Luke Skywalker</option>
+      <option>Leia Organa</option>
+      <option>Han Solo</option>
+      <option>Darth Vader</option>
+      <option>Yoda</option>
+      <option>Obi-Wan Kenobi</option>
+      <option>Rey</option>
+      <option>Finn</option>
+      <option>Kylo Ren</option>
+      <option>Ahsoka Tano</option>
+      <option>Din Djarin (The Mandalorian)</option>
+      <option>Grogu</option>
+      <option>Padmé Amidala</option>
+      <option>Anakin Skywalker</option>
+      <option>Qui-Gon Jinn</option>
+      <option>Mace Windu</option>
+      <option>Count Dooku</option>
+      <option>Boba Fett</option>
+      <option>Darth Maul</option>
+      <option>Ezra Bridger</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <div class="label">Choose a Mission Scenario</div>
+    <div class="scenario-grid">
+      <div class="scenario-card" onclick="selectScenario(this, 'Rescue a captured Jedi from an Imperial prison facility')">⛓️ Rescue a captured Jedi from an Imperial prison</div>
+      <div class="scenario-card" onclick="selectScenario(this, 'Infiltrate an Imperial Star Destroyer to steal battle plans')">🕵️ Infiltrate an Imperial Star Destroyer</div>
+      <div class="scenario-card" onclick="selectScenario(this, 'Escort a Rebel diplomat safely through hostile Outer Rim space')">🛸 Escort a Rebel diplomat through hostile space</div>
+      <div class="scenario-card" onclick="selectScenario(this, 'Destroy an ancient Sith artifact before it falls into enemy hands')">💀 Destroy a dangerous Sith artifact</div>
+      <div class="scenario-card" onclick="selectScenario(this, 'Navigate the deadly Unknown Regions to find a lost Jedi Temple')">🗺️ Navigate the Unknown Regions to find a lost Temple</div>
+      <div class="scenario-card" onclick="selectScenario(this, 'Broker peace between warring Mandalorian clans before war erupts')">⚔️ Broker peace between warring Mandalorian clans</div>
     </div>
   </div>
 
-  <div class="grid2">
-    <div class="card">
-      <div class="label">Choose Species</div>
-      <div class="options" id="species-opts">
-        <div class="opt" onclick="pick('species','Human',this)">🧑 Human</div>
-        <div class="opt" onclick="pick('species','Twi\'lek',this)">💙 Twi'lek</div>
-        <div class="opt" onclick="pick('species','Wookiee',this)">🐻 Wookiee</div>
-        <div class="opt" onclick="pick('species','Droid',this)">🤖 Droid</div>
-        <div class="opt" onclick="pick('species','Zabrak',this)">😈 Zabrak</div>
-        <div class="opt" onclick="pick('species','Togruta',this)">🦊 Togruta</div>
-        <div class="opt" onclick="pick('species','Rodian',this)">🟢 Rodian</div>
-        <div class="opt" onclick="pick('species','Mirialan',this)">🌿 Mirialan</div>
-        <div class="opt" onclick="pick('species','Chiss',this)">❄️ Chiss</div>
-        <div class="opt" onclick="pick('species','Mandalorian',this)">🪖 Mandalorian</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="label">Choose Class</div>
-      <div class="options" id="class-opts">
-        <div class="opt" onclick="pick('class','Jedi',this)">✨ Jedi</div>
-        <div class="opt" onclick="pick('class','Sith',this)">⚡ Sith</div>
-        <div class="opt" onclick="pick('class','Bounty Hunter',this)">🎯 Bounty Hunter</div>
-        <div class="opt" onclick="pick('class','Smuggler',this)">🚀 Smuggler</div>
-        <div class="opt" onclick="pick('class','Rebel',this)">✊ Rebel</div>
-        <div class="opt" onclick="pick('class','Imperial',this)">🎖️ Imperial</div>
-      </div>
-    </div>
-  </div>
+  <div class="error-box" id="storyError"></div>
 
-  <div style="text-align:center; margin-bottom:24px;">
-    <button class="btn btn-primary" onclick="generateCharacter()">⚡ Generate Character</button>
-  </div>
+  <button class="btn btn-yellow" id="beginStoryBtn" onclick="beginStory()">
+    <span class="spinner-sm dark" id="beginSpinner"></span>
+    ✦ Begin Story
+  </button>
 
-  <div id="char-output" style="display:none;"></div>
+  <div id="storyOutput" style="margin-top:24px;"></div>
 </div>
 
-<!-- LORE TAB -->
+<!-- ═══════════════════════════ FAN WIKI TAB ═══════════════════════════════ -->
+<div id="tab-wiki" class="page">
+  <div class="section-title">🌐 Fan Wiki Generator</div>
+
+  <div class="card wiki-form">
+    <div style="margin-bottom:14px;">
+      <div class="label">Character or Concept Name</div>
+      <input type="text" id="wikiName" placeholder="e.g. Ahsoka Tano, The Darksaber, Mandalore..." />
+    </div>
+    <div>
+      <div class="label">Key Facts (one per line)</div>
+      <textarea id="wikiFacts" placeholder="e.g.&#10;Togruta Jedi Padawan trained by Anakin Skywalker&#10;Left the Jedi Order after being falsely accused&#10;Fought in the Clone Wars as Commander Ahsoka&#10;Survived Order 66 and joined the Rebellion&#10;Known for her twin white lightsabers"></textarea>
+    </div>
+  </div>
+
+  <div class="error-box" id="wikiError"></div>
+
+  <button class="btn btn-purple" id="wikiBtn" onclick="generateWiki()">
+    <span class="spinner-sm" id="wikiSpinner"></span>
+    🌐 Generate Wiki Article
+  </button>
+
+  <div class="wiki-output" id="wikiOutput" style="margin-top:24px;">
+    <div class="wiki-article">
+      <div class="wiki-header">
+        <div class="wiki-name" id="wikiArticleName"></div>
+        <div class="wiki-tagline" id="wikiTagline"></div>
+      </div>
+      <div class="wiki-body">
+        <div>
+          <div class="wiki-infobox">
+            <div class="wiki-infobox-title">📋 Infobox</div>
+            <div id="wikiInfobox"></div>
+          </div>
+        </div>
+        <div class="wiki-content-sections">
+          <div>
+            <div class="wiki-section-title">📜 History</div>
+            <div class="wiki-section-body" id="wikiHistory"></div>
+          </div>
+          <div>
+            <div class="wiki-section-title">🤝 Relationships</div>
+            <div class="wiki-section-body" id="wikiRelationships"></div>
+          </div>
+          <div>
+            <div class="wiki-section-title">🎬 Behind the Scenes</div>
+            <div class="wiki-section-body" id="wikiBehind"></div>
+          </div>
+        </div>
+      </div>
+      <div class="wiki-export-row">
+        <button class="btn btn-outline" onclick="copyWikiText()">📋 Copy text</button>
+        <button class="btn btn-purple" onclick="exportWikiHTML()">⬇️ Export HTML</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ LORE TAB ═══════════════════════════════════ -->
 <div id="tab-lore" class="page">
-  <div class="section-title">📖 Star Wars Universe Guide</div>
+  <div class="section-title">📚 Star Wars Universe Guide</div>
   <div class="lore-categories" id="lore-cats">
     <div class="lore-cat active" onclick="showLore(0,this)"><div class="icon">✨</div><div class="name">Jedi Order</div></div>
     <div class="lore-cat" onclick="showLore(1,this)"><div class="icon">⚡</div><div class="name">Sith</div></div>
@@ -205,13 +382,13 @@
   <div class="card" id="lore-content"></div>
 </div>
 
-<!-- QUIZ TAB -->
+<!-- ═══════════════════════════ QUIZ TAB ═══════════════════════════════════ -->
 <div id="tab-quiz" class="page">
   <div class="section-title">🎯 Star Wars Trivia</div>
   <div id="quiz-area"></div>
 </div>
 
-<!-- COLLECTION TAB -->
+<!-- ═══════════════════════════ COLLECTION TAB ══════════════════════════════ -->
 <div id="tab-collection" class="page">
   <div class="section-title">🗂️ My Characters</div>
   <div id="collection-area"></div>
@@ -220,20 +397,54 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const STATE = { side: null, species: null, class: null, weapon: null };
+// ── API Key ─────────────────────────────────────────────────────────────────
+(function initApiKey() {
+  const saved = localStorage.getItem('gemini_api_key');
+  if (saved) { document.getElementById('apiKey').value = saved; document.getElementById('apiSaved').style.display = 'inline'; }
+  document.getElementById('apiKey').addEventListener('input', (e) => {
+    const v = e.target.value.trim();
+    localStorage.setItem('gemini_api_key', v);
+    document.getElementById('apiSaved').style.display = v ? 'inline' : 'none';
+  });
+})();
 
-function pick(key, val, el) {
-  STATE[key] = val;
-  const group = el.parentElement;
-  group.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
+function getApiKey() {
+  return (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
 }
 
-function showTab(t) {
+async function callGemini(prompt) {
+  const key = getApiKey();
+  if (!key) throw new Error('Please enter your Gemini API key in the header.');
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.85, maxOutputTokens: 2000 }
+      })
+    }
+  );
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.error?.message || `API error ${res.status}`); }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function extractJSON(raw) {
+  const c = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+  try { return JSON.parse(c); } catch {}
+  const m = c.match(/\{[\s\S]*\}/);
+  if (m) { try { return JSON.parse(m[0]); } catch {} }
+  return null;
+}
+
+// ── Tab system ───────────────────────────────────────────────────────────────
+function showTab(t, ev) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-'+t).classList.add('active');
-  event.currentTarget.classList.add('active');
+  if (ev) ev.currentTarget.classList.add('active');
   if (t === 'lore') showLore(0, document.querySelector('.lore-cat'));
   if (t === 'quiz') initQuiz();
   if (t === 'collection') renderCollection();
@@ -246,127 +457,301 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ─── CHARACTER DATA ───────────────────────────────────────────────────────────
-const NAMES = {
-  'Human': ['Kael Dorne', 'Sera Voss', 'Jorin Mak', 'Lysa Crane', 'Bren Sato'],
-  "Twi'lek": ['Aayla Rin', 'Nyla Verso', 'Jax Ryloth', 'Mira Tal', 'Synn Drex'],
-  'Wookiee': ['Krannax', 'Gorrath', 'Hraakar', 'Urrgara', 'Rroarr'],
-  'Droid': ['V-3PO', 'RX-7', 'K-9MO', 'XT-22', 'BD-77'],
-  'Zabrak': ['Darrax', 'Zoryx', 'Korrak', 'Prynn', 'Vexxar'],
-  'Togruta': ['Asha Tano', 'Kira Mont', 'Sela Reth', 'Voss Nal', 'Dara Shil'],
-  'Rodian': ['Greema', 'Nex Fenn', 'Drix Quell', 'Vesk', 'Jorran'],
-  'Mirialan': ['Lumi Sael', 'Tessra', 'Venn Kai', 'Orla Mist', 'Shael Ven'],
-  'Chiss': ['Thrawn Vel', 'Kayss', 'Nuruodo', 'Voss\'ek', 'Csahra'],
-  'Mandalorian': ['Din Axe', 'Boba Kest', 'Sabine Ryn', 'Jango Kel', 'Bo-Katan Vex'],
-};
+// ── STORY BUILDER ────────────────────────────────────────────────────────────
+let storyScenario = '';
+let storyChunks = [];   // { type: 'ai'|'user', text: string, vocab: [] }
 
-const STATS = {
-  'Jedi':         { force: 95, combat: 80, stealth: 40, charisma: 70, survival: 65 },
-  'Sith':         { force: 98, combat: 90, stealth: 50, charisma: 30, survival: 70 },
-  'Bounty Hunter':{ force: 5,  combat: 88, stealth: 90, charisma: 45, survival: 92 },
-  'Smuggler':     { force: 10, combat: 60, stealth: 85, charisma: 95, survival: 80 },
-  'Rebel':        { force: 20, combat: 75, stealth: 70, charisma: 80, survival: 75 },
-  'Imperial':     { force: 15, combat: 82, stealth: 55, charisma: 60, survival: 70 },
-};
+function selectScenario(el, scenario) {
+  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  storyScenario = scenario;
+}
 
-const BACKSTORIES = {
-  'Jedi-Light Side': 'Chosen by the Force at a young age, you were taken to the Jedi Temple on Coruscant. Years of training under a wise Master have honed your connection to the Force. You seek justice across the galaxy, upholding the Jedi Code even in the darkest times.',
-  'Sith-Dark Side': 'You discovered the dark side during a moment of great pain and anger. A Sith Lord sensed your potential and molded you into a weapon. Now you bend the galaxy to your will, your power fueled by passion and ambition.',
-  'Bounty Hunter-Light Side': 'You hunt criminals and Imperial war criminals to bring them to justice, not for credits alone. Your reputation for delivering targets alive and unharmed sets you apart from ruthless hunters.',
-  'Bounty Hunter-Dark Side': "Credits are your creed. You take any contract — no questions asked. The galaxy's most dangerous underworld figures know your name and pay handsomely for your unique skill set.",
-  'Smuggler-Light Side': "You run contraband to desperate Rebel cells and starving colonies, taking only what covers fuel costs. The Empire hunts you, but you keep flying because someone has to.",
-  'Smuggler-Dark Side': "You move spice, stolen artifacts, and black-market weapons for the highest bidder. Morality is a luxury you can't afford when Hutt enforcers are breathing down your neck.",
-  'Rebel-Light Side': "You joined the Rebellion after your home was destroyed by an Imperial Star Destroyer. You fight not for glory but to give others the future that was taken from you.",
-  'Rebel-Dark Side': "You claim to fight the Empire but your methods are ruthless. You believe the galaxy can only be freed through fire — even if it means burning innocents in the process.",
-  'Imperial-Light Side': "You serve the Empire believing it brings order to a chaotic galaxy, but you refuse to commit atrocities. You protect civilians wherever you're stationed and secretly hope for a more just Empire.",
-  'Imperial-Dark Side': "Order through fear is the Empire's doctrine, and you enforce it without hesitation. Planets that resist are made examples. The Emperor's will is absolute.",
-};
+async function beginStory() {
+  const char = document.getElementById('storyChar').value;
+  const errEl = document.getElementById('storyError');
+  errEl.style.display = 'none';
+  if (!char) { errEl.textContent = 'Please select a character.'; errEl.style.display = 'block'; return; }
+  if (!storyScenario) { errEl.textContent = 'Please choose a mission scenario.'; errEl.style.display = 'block'; return; }
 
-const SPECIES_BONUS = {
-  'Human':       'Adaptability',
-  "Twi'lek":    'Persuasion',
-  'Wookiee':    'Strength',
-  'Droid':       'Intelligence',
-  'Zabrak':      'Endurance',
-  'Togruta':    'Intuition',
-  'Rodian':      'Tracking',
-  'Mirialan':   'Discipline',
-  'Chiss':       'Tactics',
-  'Mandalorian': 'Combat Arts',
-};
+  storyChunks = [];
+  document.getElementById('storyOutput').innerHTML = '';
 
-const WEAPON_DESC = {
-  'Blue Lightsaber':  'Kyber crystal attuned to the light side — favored by Jedi Guardians.',
-  'Green Lightsaber': 'Rare crystal favored by Force-sensitive Jedi Consulars.',
-  'Red Lightsaber':   'Bled crystal, corrupted by the dark side. Symbol of the Sith.',
-  'Purple Lightsaber': 'Unique balance of light and dark — only the most disciplined wield it.',
-  'Darksaber':        'Ancient Mandalorian black-bladed saber of legendary prestige.',
-  'Blaster':          'Reliable ranged weapon — the tool of soldiers, smugglers, and bounty hunters.',
-  'Bowcaster':        'A Wookiee-crafted magnetic accelerator — devastating at any range.',
-  'Dual Blasters':    'Two-gun style requiring supreme coordination and nerves of durasteel.',
-};
+  const btn = document.getElementById('beginStoryBtn');
+  const spinner = document.getElementById('beginSpinner');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
 
-const AVATARS = {
-  'Jedi':'🧘','Sith':'😈','Bounty Hunter':'🎯','Smuggler':'🚀','Rebel':'✊','Imperial':'🎖️',
-};
+  try {
+    const prompt = `You are writing a Star Wars fan fiction story. Write the opening 2 paragraphs (around 150-200 words total) for this story:
 
-function generateCharacter() {
-  const {side, species, cls, weapon} = {side:STATE.side, species:STATE.species, cls:STATE['class'], weapon:STATE.weapon};
-  if (!side || !species || !cls || !weapon) {
-    alert('Please select all four options before generating a character!'); return;
+Character: ${char}
+Mission: ${storyScenario}
+
+Rules:
+- Write in third-person present tense, cinematic style
+- Reference the Star Wars universe authentically (planets, technology, lore)
+- End the second paragraph at a tense moment that invites the reader to continue
+- Choose exactly 5 interesting Star Wars vocabulary words used in your text and define them
+
+Return ONLY this JSON (no markdown):
+{
+  "paragraphs": ["paragraph 1 text", "paragraph 2 text"],
+  "vocab": [
+    { "word": "Hyperspace", "definition": "Alternate dimension allowing faster-than-light travel" },
+    { "word": "Kyber crystal", "definition": "Force-attuned gem powering every lightsaber" }
+  ]
+}`;
+
+    const raw = await callGemini(prompt);
+    const data = extractJSON(raw);
+    if (!data?.paragraphs) throw new Error('Unexpected response. Try again.');
+
+    storyChunks.push({ type: 'ai', paragraphs: data.paragraphs, vocab: data.vocab || [] });
+    renderStory();
+  } catch(e) {
+    errEl.textContent = 'Error: ' + (e.message || 'Something went wrong.');
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
   }
-  const nameList = NAMES[species];
-  const name = nameList[Math.floor(Math.random() * nameList.length)];
-  const st = STATS[cls];
-  const backstoryKey = cls + '-' + side;
-  const backstory = BACKSTORIES[backstoryKey] || `A ${species} ${cls} who walks the path of the ${side}. Their story is still being written among the stars.`;
-  const sideClass = side === 'Light Side' ? 'badge-light' : 'badge-dark';
-  const bonusStat = SPECIES_BONUS[species];
+}
 
-  const html = `
-    <div class="character-card">
-      <div class="char-avatar">${AVATARS[cls]}</div>
-      <div class="char-name">${name}</div>
-      <div class="char-subtitle">
-        <span class="badge ${sideClass}">${side}</span>
-        <span style="margin:0 6px">·</span>
-        <span style="color:var(--muted)">${species} ${cls}</span>
-      </div>
-      <div class="stats-grid">
-        <div class="stat"><div class="stat-val">${st.force}</div><div class="stat-label">Force</div></div>
-        <div class="stat"><div class="stat-val">${st.combat}</div><div class="stat-label">Combat</div></div>
-        <div class="stat"><div class="stat-val">${st.stealth}</div><div class="stat-label">Stealth</div></div>
-        <div class="stat"><div class="stat-val">${st.charisma}</div><div class="stat-label">Charisma</div></div>
-        <div class="stat"><div class="stat-val">${st.survival}</div><div class="stat-label">Survival</div></div>
-        <div class="stat"><div class="stat-val">★</div><div class="stat-label">${bonusStat}</div></div>
-      </div>
-      <div style="margin-bottom:12px;font-size:13px;color:var(--blue)">⚔️ ${weapon} — <span style="color:var(--muted)">${WEAPON_DESC[weapon]}</span></div>
-      <div class="backstory">${backstory}</div>
-      <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;">
-        <button class="btn btn-green" onclick="saveCharacter('${name}','${species}','${cls}','${side}','${AVATARS[cls]}','${weapon}')">💾 Save Character</button>
-        <button class="btn btn-outline" onclick="shareCharacter('${name}','${species}','${cls}','${side}','${weapon}',${st.force},${st.combat},${st.stealth},${st.charisma},${st.survival})">📋 Share</button>
+async function continueStory() {
+  const userText = document.getElementById('userParagraph')?.value?.trim();
+  if (!userText) { alert('Please write your paragraph before continuing.'); return; }
+
+  storyChunks.push({ type: 'user', paragraphs: [userText], vocab: [] });
+
+  const btn = document.getElementById('continueBtn');
+  const spinner = document.getElementById('continueSpinner');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+
+  const errEl = document.getElementById('storyError');
+  errEl.style.display = 'none';
+
+  try {
+    const char = document.getElementById('storyChar').value;
+    const allText = storyChunks.map(c => c.paragraphs.join('\n\n')).join('\n\n');
+
+    const prompt = `Continue this Star Wars fan fiction story. Write the next 2 paragraphs (around 150-200 words).
+
+Character: ${char}
+Mission: ${storyScenario}
+
+Story so far:
+${allText}
+
+Rules:
+- Maintain the tone, tense, and style of what's already written
+- Advance the plot and raise the stakes further
+- End at a new cliffhanger moment
+- Pick exactly 5 different Star Wars vocabulary words from your new text
+
+Return ONLY this JSON (no markdown):
+{
+  "paragraphs": ["paragraph 3 text", "paragraph 4 text"],
+  "vocab": [
+    { "word": "word", "definition": "definition" }
+  ]
+}`;
+
+    const raw = await callGemini(prompt);
+    const data = extractJSON(raw);
+    if (!data?.paragraphs) throw new Error('Unexpected response. Try again.');
+
+    storyChunks.push({ type: 'ai', paragraphs: data.paragraphs, vocab: data.vocab || [] });
+    renderStory();
+  } catch(e) {
+    errEl.textContent = 'Error: ' + (e.message || 'Something went wrong.');
+    errEl.style.display = 'block';
+  } finally {
+    if (btn) { btn.disabled = false; spinner.style.display = 'none'; }
+  }
+}
+
+function renderStory() {
+  const out = document.getElementById('storyOutput');
+  let html = '';
+
+  storyChunks.forEach((chunk, ci) => {
+    chunk.paragraphs.forEach(para => {
+      const cls = chunk.type === 'user' ? 'story-para user-para' : 'story-para';
+      const label = chunk.type === 'user'
+        ? '<div style="font-size:11px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">✍️ Your paragraph</div>'
+        : '<div style="font-size:11px;color:var(--blue);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📖 Story continues...</div>';
+      html += `<div class="${cls}">${label}${escapeHtml(para)}</div>`;
+    });
+    if (chunk.type === 'ai' && chunk.vocab && chunk.vocab.length) {
+      html += `<div class="vocab-section">
+        <div class="vocab-title">📚 Vocabulary Challenge</div>
+        <div class="vocab-pills">${chunk.vocab.map(v => `
+          <span class="vocab-pill">${escapeHtml(v.word)}
+            <span class="vocab-tooltip">${escapeHtml(v.definition)}</span>
+          </span>`).join('')}</div>
+      </div>`;
+    }
+  });
+
+  // Last chunk is AI → show user input
+  const lastChunk = storyChunks[storyChunks.length - 1];
+  if (lastChunk && lastChunk.type === 'ai') {
+    html += `<div class="card" style="border-color:rgba(74,222,128,.3);">
+      <div class="label" style="color:var(--green);">✍️ Your turn — write the next paragraph</div>
+      <textarea class="story-input" id="userParagraph" placeholder="Continue the story in your own words..."></textarea>
+      <div class="story-actions">
+        <button class="btn btn-green" id="continueBtn" onclick="continueStory()">
+          <span class="spinner-sm dark" id="continueSpinner"></span>
+          Continue Story →
+        </button>
+        <button class="btn btn-outline" onclick="exportStory()">📄 Export .txt</button>
       </div>
     </div>`;
-  const out = document.getElementById('char-output');
-  out.style.display = 'block';
+  }
+
   out.innerHTML = html;
-  out.scrollIntoView({behavior:'smooth',block:'nearest'});
+  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function saveCharacter(name, species, cls, side, avatar, weapon) {
-  const saved = JSON.parse(localStorage.getItem('sw65_collection') || '[]');
-  if (saved.length >= 20) { alert('Collection full! Delete a character first.'); return; }
-  saved.push({ name, species, cls, side, avatar, weapon, date: new Date().toLocaleDateString() });
-  localStorage.setItem('sw65_collection', JSON.stringify(saved));
-  toast('Character saved to collection!');
+function exportStory() {
+  const char = document.getElementById('storyChar').value;
+  const lines = [`STAR WARS FAN FICTION\nCharacter: ${char}\nMission: ${storyScenario}\n\n${'─'.repeat(50)}\n`];
+  storyChunks.forEach(chunk => {
+    chunk.paragraphs.forEach(p => lines.push(p));
+    lines.push('');
+    if (chunk.vocab?.length) {
+      lines.push('VOCABULARY:');
+      chunk.vocab.forEach(v => lines.push(`  • ${v.word}: ${v.definition}`));
+      lines.push('');
+    }
+  });
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${char.replace(/\s+/g,'_')}_story.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Story exported!');
 }
 
-function shareCharacter(name, species, cls, side, weapon, force, combat, stealth, charisma, survival) {
-  const text = `⭐ STAR WARS CHARACTER ⭐\nName: ${name}\nSpecies: ${species} | Class: ${cls}\nSide: ${side} | Weapon: ${weapon}\nForce: ${force} | Combat: ${combat} | Stealth: ${stealth}\nCharisma: ${charisma} | Survival: ${survival}\nBuilt at: hhanng.github.io/agent-65-star-wars-builder/`;
-  navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard!')).catch(() => alert(text));
+// ── FAN WIKI GENERATOR ────────────────────────────────────────────────────────
+let currentWikiData = null;
+
+async function generateWiki() {
+  const name = document.getElementById('wikiName').value.trim();
+  const facts = document.getElementById('wikiFacts').value.trim();
+  const errEl = document.getElementById('wikiError');
+  errEl.style.display = 'none';
+  if (!name) { errEl.textContent = 'Please enter a character or concept name.'; errEl.style.display = 'block'; return; }
+
+  const btn = document.getElementById('wikiBtn');
+  const spinner = document.getElementById('wikiSpinner');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+
+  try {
+    const prompt = `You are a Star Wars wiki writer. Generate a detailed wiki article for:
+
+Name: ${name}
+${facts ? 'Known facts:\n' + facts : ''}
+
+Return ONLY this JSON (no markdown fences):
+{
+  "tagline": "Short one-line description (e.g. 'Togruta Jedi Padawan and hero of the Clone Wars')",
+  "infobox": [
+    { "key": "Species", "value": "Togruta" },
+    { "key": "Affiliation", "value": "Jedi Order, Galactic Republic" },
+    { "key": "Homeworld", "value": "Shili" },
+    { "key": "Era", "value": "Clone Wars, Galactic Civil War" },
+    { "key": "Status", "value": "Active" }
+  ],
+  "history": "3-4 paragraph narrative history. Write in encyclopedic third-person style.",
+  "relationships": ["Relationship 1 — short description", "Relationship 2", "Relationship 3", "Relationship 4", "Relationship 5"],
+  "behindTheScenes": "2 paragraph production notes: creation, voice actors, cultural impact, interesting development facts."
+}`;
+
+    const raw = await callGemini(prompt);
+    const data = extractJSON(raw);
+    if (!data?.infobox) throw new Error('Could not generate wiki. Try again.');
+    currentWikiData = { ...data, name };
+    renderWiki(data, name);
+  } catch(e) {
+    errEl.textContent = 'Error: ' + (e.message || 'Something went wrong.');
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
 }
 
-// ─── LORE DATA ────────────────────────────────────────────────────────────────
+function renderWiki(d, name) {
+  document.getElementById('wikiArticleName').textContent = name;
+  document.getElementById('wikiTagline').textContent = d.tagline || '';
+  document.getElementById('wikiInfobox').innerHTML = (d.infobox || []).map(row =>
+    `<div class="wiki-info-row"><span class="wiki-info-key">${escapeHtml(row.key)}</span><span class="wiki-info-val">${escapeHtml(row.value)}</span></div>`
+  ).join('');
+  document.getElementById('wikiHistory').innerHTML = escapeHtml(d.history || '').replace(/\n\n/g, '</p><p style="margin-top:10px;">').replace(/^/, '<p>').replace(/$/, '</p>');
+  const rels = d.relationships || [];
+  document.getElementById('wikiRelationships').innerHTML = `<ul>${rels.map(r => `<li>${escapeHtml(r)}</li>`).join('')}</ul>`;
+  document.getElementById('wikiBehind').innerHTML = escapeHtml(d.behindTheScenes || '').replace(/\n\n/g, '</p><p style="margin-top:10px;">').replace(/^/, '<p>').replace(/$/, '</p>');
+  const out = document.getElementById('wikiOutput');
+  out.classList.add('visible');
+  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copyWikiText() {
+  if (!currentWikiData) return;
+  const d = currentWikiData;
+  const lines = [
+    `== ${d.name} ==`,
+    d.tagline,
+    '',
+    '=== Infobox ===',
+    ...(d.infobox || []).map(r => `${r.key}: ${r.value}`),
+    '',
+    '=== History ===',
+    d.history,
+    '',
+    '=== Relationships ===',
+    ...(d.relationships || []).map(r => `• ${r}`),
+    '',
+    '=== Behind the Scenes ===',
+    d.behindTheScenes,
+  ];
+  navigator.clipboard.writeText(lines.join('\n')).then(() => toast('Copied to clipboard!'));
+}
+
+function exportWikiHTML() {
+  if (!currentWikiData) return;
+  const d = currentWikiData;
+  const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>${d.name} — Star Wars Wiki</title>
+<style>body{font-family:sans-serif;max-width:860px;margin:40px auto;padding:20px;background:#0f1117;color:#e2e8f0}
+h1{color:#4f8ef7;border-bottom:2px solid #2a2d3a;padding-bottom:12px}
+h2{color:#94a3b8;margin-top:24px;font-size:18px;border-bottom:1px solid #2a2d3a;padding-bottom:6px}
+.infobox{float:right;margin:0 0 20px 20px;background:#1a1d27;border:1px solid #2a2d3a;border-radius:8px;padding:16px;min-width:220px;font-size:13px}
+.infobox td{padding:4px 8px;vertical-align:top}.infobox td:first-child{font-weight:700;color:#94a3b8}
+p{line-height:1.7;margin-bottom:12px}ul{list-style:disc;padding-left:20px}li{margin-bottom:6px}
+</style></head><body>
+<h1>${d.name}</h1>
+<em>${d.tagline}</em>
+<div class="infobox"><table>${(d.infobox||[]).map(r=>`<tr><td>${r.key}</td><td>${r.value}</td></tr>`).join('')}</table></div>
+<h2>History</h2><p>${(d.history||'').replace(/\n\n/g,'</p><p>')}</p>
+<h2>Relationships</h2><ul>${(d.relationships||[]).map(r=>`<li>${r}</li>`).join('')}</ul>
+<h2>Behind the Scenes</h2><p>${(d.behindTheScenes||'').replace(/\n\n/g,'</p><p>')}</p>
+</body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${d.name.replace(/\s+/g,'_')}_wiki.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('HTML exported!');
+}
+
+// ── LORE DATA ─────────────────────────────────────────────────────────────────
 const LORE = [
   { name: 'Jedi Order', icon: '✨', facts: [
     'The Jedi Order was founded over 25,000 years before the Battle of Yavin on the planet Tython.',
@@ -382,7 +767,7 @@ const LORE = [
     'The Rule of Two was established by Darth Bane: always two Sith — a Master and an Apprentice, no more, no less.',
     'The Sith originated as a group of fallen Jedi who embraced the dark side thousands of years before the Empire.',
     'Sith lightsabers are red because they "bleed" their kyber crystals by channeling their pain and rage into them.',
-    'Darth Plagueis, Palpatine\'s master, had learned to create and sustain life through the Force — a power Palpatine used knowledge of.',
+    "Darth Plagueis, Palpatine's master, had learned to create and sustain life through the Force.",
     'The Sith code: "Peace is a lie, there is only passion. Through passion, I gain strength. Through strength, I gain power. Through power, I gain victory. Through victory, my chains are broken."',
     'The ancient Sith were a species on Korriban, later mixed with exiled Dark Jedi who became their rulers.',
     'Darth Sidious/Palpatine was the most powerful Sith in recorded history, hiding in plain sight as Supreme Chancellor.',
@@ -390,39 +775,35 @@ const LORE = [
   { name: 'Planets', icon: '🌍', facts: [
     'Coruscant is an entire planet covered by a single massive city, home to the Senate and former Jedi Temple.',
     'Tatooine is a desert world with twin suns orbiting Tatoo I and Tatoo II — a binary star system.',
-    'Hoth\'s surface temperature drops to -60°C at night, yet the Rebel Alliance established Echo Base there.',
+    "Hoth's surface temperature drops to -60°C at night, yet the Rebel Alliance established Echo Base there.",
     'Dagobah is a swampy world strong in the Force; Yoda hid there for years after Order 66.',
     'Mustafar is a volcanic planet where the duel between Obi-Wan Kenobi and Anakin Skywalker took place.',
-    'Mandalore has had a complex history — once a world of warrior clans, it sought peace then was repeatedly invaded.',
-    'Endor\'s moon is inhabited by Ewoks, small bear-like creatures who allied with the Rebel Alliance to defeat the Empire.',
+    "Mandalore has had a complex history — once a world of warrior clans, it sought peace then was repeatedly invaded.",
+    "Endor's moon is inhabited by Ewoks, small bear-like creatures who allied with the Rebel Alliance to defeat the Empire.",
     'Exegol is a hidden Sith world in the Unknown Regions where Palpatine rebuilt his Final Order fleet.',
   ]},
   { name: 'Ships', icon: '🚀', facts: [
     'The Millennium Falcon made the Kessel Run in less than 12 parsecs — a feat requiring risky navigation through dangerous space.',
-    'Star Destroyers are 1,600 meters long and can hold 9,235 troops, 72 TIE fighters, and enough firepower to devastate a planet\'s surface.',
+    "Star Destroyers are 1,600 meters long and can hold 9,235 troops, 72 TIE fighters, and enough firepower to devastate a planet's surface.",
     'The Death Star I was 160 km in diameter; Death Star II was 900 km — and both were destroyed by the Rebellion.',
-    'X-wings are the Rebel Alliance\'s primary starfighter, equipped with four laser cannons and proton torpedoes.',
+    "X-wings are the Rebel Alliance's primary starfighter, equipped with four laser cannons and proton torpedoes.",
     'TIE fighters have no hyperdrive or shields — they rely on swarm tactics and are considered expendable.',
-    'The Executor, Vader\'s personal flagship, was a Super Star Destroyer stretching 19 kilometers.',
-    'Slave I (Boba Fett\'s ship, later called "Firespray-31") used seismic charges and ion cannons as its weapons.',
-    'The Ghost is the VCX-100 light freighter used by the Spectres rebel cell in the years before the Battle of Yavin.',
+    "The Executor, Vader's personal flagship, was a Super Star Destroyer stretching 19 kilometers.",
+    "The Ghost is the VCX-100 light freighter used by the Spectres rebel cell in the years before the Battle of Yavin.",
   ]},
   { name: 'Weapons', icon: '⚔️', facts: [
     'Lightsaber kyber crystals are Force-attuned — Jedi must find theirs on Ilum in a rite called "The Gathering."',
     'The Darksaber is an ancient black-bladed lightsaber created by Tarre Vizsla, the first Mandalorian Jedi, over 1,000 years ago.',
     'A blaster bolt travels slower than the speed of light, which is why Jedi can deflect them with a lightsaber.',
     'Wookiee bowcasters use magnetic accelerators to fire explosive metal quarrels wrapped in energy.',
-    'Vibroblade weapons vibrate at high frequency, cutting through almost anything — a common non-Force weapon.',
     'The Mandalorian Darksaber passes by conquest — it must be won in combat for the wielder to be considered a true leader.',
-    'Holdo Maneuver: a ship jumping to hyperspace through another ship destroys both — a tactic considered near-impossible.',
   ]},
   { name: 'Creatures', icon: '🐉', facts: [
-    'Tauntauns are reptomammals native to Hoth used as mounts by Rebels — Han Solo cut one open to save Luke from freezing.',
-    'Rancors are large predatory creatures kept as pets by Hutts and crime lords — like Jabba\'s palace rancor.',
+    "Tauntauns are reptomammals native to Hoth used as mounts by Rebels — Han Solo cut one open to save Luke from freezing.",
+    "Rancors are large predatory creatures kept as pets by Hutts and crime lords — like Jabba's palace rancor.",
     'Sarlacc are ancient sessile creatures buried in desert pits; they digest prey over thousands of years.',
-    'Porg are cliff-dwelling seabirds native to Ahch-To with large eyes and small wings — discovered by the Resistance.',
+    'Porg are cliff-dwelling seabirds native to Ahch-To with large eyes and small wings.',
     'Banthas are large mammals with curved horns used by Tusken Raiders as mounts on Tatooine.',
-    'The Dianoga is the tentacled garbage-compactor creature Luke encountered on the Death Star.',
     'Space whales (Purrgil) are massive creatures that can travel through hyperspace naturally — inspiring early hyperdrive technology.',
     'Zillo Beasts are near-indestructible ancient creatures whose scales resist lightsabers and blasters alike.',
   ]},
@@ -431,9 +812,7 @@ const LORE = [
     'The Rebel Alliance was formally established by Mon Mothma and Bail Organa as a secret network of resistance cells.',
     'The First Order rose from remnants of the Empire in the Unknown Regions, secretly building a military for decades.',
     'The Mandalorian clans have a complex code called the Creed — "This is the Way" — governing their warrior culture.',
-    'The Hutt Clans control a vast criminal empire spanning dozens of systems, with Jabba Desilijic Tiure as their most famous scion.',
-    'Death Watch was a Mandalorian splinter group that sought to restore the warrior traditions of old Mandalore.',
-    'The Trade Federation blockaded Naboo, triggering the events of the Clone Wars after being manipulated by Darth Sidious.',
+    "The Hutt Clans control a vast criminal empire spanning dozens of systems.",
     'The Resistance is distinct from the New Republic — a private force funded by Leia Organa to counter the First Order.',
   ]},
   { name: 'The Force', icon: '🌀', facts: [
@@ -441,8 +820,7 @@ const LORE = [
     'Midichlorians are microscopic organisms that exist in all living cells and communicate with the Force; a high count indicates Force sensitivity.',
     'The dark side is fed by powerful emotions: fear, anger, hatred, and aggression — offering quick power at a great cost.',
     'Force abilities include telekinesis (Force push/pull), mind tricks, Force lightning, Force heal, and foresight.',
-    'Force ghosts are spirits of deceased Jedi who learned to retain their consciousness after death from Qui-Gon Jinn\'s teachings.',
-    '"The Living Force" focuses on the present moment, while "The Cosmic Force" spans all time — Qui-Gon emphasized the former.',
+    "Force ghosts are spirits of deceased Jedi who learned to retain their consciousness after death from Qui-Gon Jinn's teachings.",
     'The dyad in the Force — two beings sharing one Force bond as if they were one — is said to happen once in a generation.',
     'Grogu (Baby Yoda) demonstrated Force abilities at 50 years old, including healing wounds and lifting objects far heavier than himself.',
   ]},
@@ -457,49 +835,41 @@ function showLore(idx, el) {
     <ul class="lore-facts">${cat.facts.map(f => `<li>${f}</li>`).join('')}</ul>`;
 }
 
-// ─── QUIZ DATA ────────────────────────────────────────────────────────────────
+// ── QUIZ DATA ─────────────────────────────────────────────────────────────────
 const QUESTIONS = [
-  // Easy
-  { q: 'Who is Luke Skywalker\'s father?', a: 'Darth Vader', choices: ['Darth Vader','Emperor Palpatine','Obi-Wan Kenobi','Boba Fett'], diff: 'easy' },
-  { q: 'What is the homeworld of the Ewoks?', a: 'Endor\'s moon', choices: ['Endor\'s moon','Hoth','Dagobah','Mustafar'], diff: 'easy' },
-  { q: 'What color is Yoda\'s lightsaber?', a: 'Green', choices: ['Green','Blue','Purple','Yellow'], diff: 'easy' },
-  { q: 'What is the ship Han Solo pilots?', a: 'Millennium Falcon', choices: ['Millennium Falcon','X-wing','Slave I','Ghost'], diff: 'easy' },
-  { q: 'What does "May the Force be with you" mean?', a: 'A Jedi blessing of good luck and protection', choices: ['A Jedi blessing of good luck and protection','An Imperial greeting','A Sith war cry','A Mandalorian oath'], diff: 'easy' },
-  { q: 'What color is Darth Vader\'s lightsaber?', a: 'Red', choices: ['Red','Blue','Orange','Black'], diff: 'easy' },
-  { q: 'What planet is Luke Skywalker from?', a: 'Tatooine', choices: ['Tatooine','Coruscant','Alderaan','Endor'], diff: 'easy' },
-  { q: 'What creature does Han Solo hide inside on Hoth?', a: 'Tauntaun', choices: ['Tauntaun','Bantha','Rancor','Wampa'], diff: 'easy' },
-  { q: 'Who says "I am your father"?', a: 'Darth Vader', choices: ['Darth Vader','Emperor Palpatine','Darth Maul','Kylo Ren'], diff: 'easy' },
-  { q: 'What is R2-D2?', a: 'An astromech droid', choices: ['An astromech droid','A protocol droid','A battle droid','A medical droid'], diff: 'easy' },
-  // Medium
-  { q: 'What is the Rule of Two?', a: 'Only a Master and an Apprentice — no more, no less', choices: ['Only a Master and an Apprentice — no more, no less','Two Sith lords rule the galaxy','A Sith must kill two Jedi','The Sith must have two weapons'], diff: 'medium' },
-  { q: 'Where did Yoda go into exile?', a: 'Dagobah', choices: ['Dagobah','Tatooine','Ilum','Ahch-To'], diff: 'medium' },
-  { q: 'What is Order 66?', a: 'A clone trooper command to kill all Jedi', choices: ['A clone trooper command to kill all Jedi','An Imperial invasion plan','A Sith ritual','A Rebel escape plan'], diff: 'medium' },
-  { q: 'Who created the Darksaber?', a: 'Tarre Vizsla, the first Mandalorian Jedi', choices: ['Tarre Vizsla, the first Mandalorian Jedi','Darth Maul','Pre Vizsla','Bo-Katan Kryze'], diff: 'medium' },
-  { q: 'What planet is Darth Maul from?', a: 'Dathomir', choices: ['Dathomir','Zabrak Prime','Tatooine','Mustafar'], diff: 'medium' },
-  { q: 'What is the Jedi Gathering ceremony called?', a: 'The Gathering', choices: ['The Gathering','The Trial','The Selection','The Awakening'], diff: 'medium' },
-  { q: 'Who trained Obi-Wan Kenobi?', a: 'Qui-Gon Jinn', choices: ['Qui-Gon Jinn','Yoda','Mace Windu','Count Dooku'], diff: 'medium' },
-  { q: 'What species is Jabba the Hutt?', a: 'Hutt', choices: ['Hutt','Gamorrean','Twi\'lek','Rodian'], diff: 'medium' },
-  { q: 'What does TIE stand for in TIE Fighter?', a: 'Twin Ion Engine', choices: ['Twin Ion Engine','Tactical Imperial Enforcer','Total Inertial Engine','Targeted Intercept Element'], diff: 'medium' },
-  { q: 'Which planet was the seat of the Galactic Empire?', a: 'Coruscant', choices: ['Coruscant','Mustafar','Exegol','Naboo'], diff: 'medium' },
-  // Hard
-  { q: 'Who was Darth Plagueis\'s master?', a: 'Darth Tenebrous', choices: ['Darth Tenebrous','Darth Bane','Darth Sidious','Count Dooku'], diff: 'hard' },
-  { q: 'What is the diameter of the original Death Star?', a: '160 km', choices: ['160 km','120 km','250 km','900 km'], diff: 'hard' },
-  { q: 'What Jedi philosophy did Qui-Gon Jinn champion?', a: 'The Living Force', choices: ['The Living Force','The Cosmic Force','The Unifying Force','The Eternal Force'], diff: 'hard' },
-  { q: 'What ancient civilization built the Dyad prophecy?', a: 'The ancient Sith', choices: ['The ancient Sith','The Je\'daii Order','The Whills','The Celestials'], diff: 'hard' },
-  { q: 'How long is a Super Star Destroyer Executor class?', a: '19 kilometers', choices: ['19 kilometers','12 kilometers','8 kilometers','32 kilometers'], diff: 'hard' },
-  { q: 'What does "BBY" mean in Star Wars dating?', a: 'Before the Battle of Yavin', choices: ['Before the Battle of Yavin','Before the Battle of Yavin II','Before Boba\'s Year','Before Bespin Year'], diff: 'hard' },
-  { q: 'What species are Purrgil?', a: 'Space whales that travel through hyperspace', choices: ['Space whales that travel through hyperspace','Giant space slugs','Ancient Force creatures','Mechanical droid beings'], diff: 'hard' },
-  { q: 'What is a Zillo Beast known for?', a: 'Nearly indestructible scales that resist lightsabers', choices: ['Nearly indestructible scales that resist lightsabers','The ability to turn invisible','Extreme speed in space','Force sensitivity'], diff: 'hard' },
-  { q: 'Who first learned to retain consciousness after death?', a: 'Qui-Gon Jinn', choices: ['Qui-Gon Jinn','Yoda','Obi-Wan Kenobi','Anakin Skywalker'], diff: 'hard' },
-  { q: 'What material is a Mandalorian\'s armor traditionally made from?', a: 'Beskar (Mandalorian iron)', choices: ['Beskar (Mandalorian iron)','Durasteel','Cortosis','Phrik alloy'], diff: 'hard' },
+  { q: "Who is Luke Skywalker's father?", a: 'Darth Vader', choices: ['Darth Vader','Emperor Palpatine','Obi-Wan Kenobi','Boba Fett'], diff: 'easy' },
+  { q: "What is the homeworld of the Ewoks?", a: "Endor's moon", choices: ["Endor's moon",'Hoth','Dagobah','Mustafar'], diff: 'easy' },
+  { q: "What color is Yoda's lightsaber?", a: 'Green', choices: ['Green','Blue','Purple','Yellow'], diff: 'easy' },
+  { q: "What is the ship Han Solo pilots?", a: 'Millennium Falcon', choices: ['Millennium Falcon','X-wing','Slave I','Ghost'], diff: 'easy' },
+  { q: "What color is Darth Vader's lightsaber?", a: 'Red', choices: ['Red','Blue','Orange','Black'], diff: 'easy' },
+  { q: "What planet is Luke Skywalker from?", a: 'Tatooine', choices: ['Tatooine','Coruscant','Alderaan','Endor'], diff: 'easy' },
+  { q: "What creature does Han Solo hide inside on Hoth?", a: 'Tauntaun', choices: ['Tauntaun','Bantha','Rancor','Wampa'], diff: 'easy' },
+  { q: "Who says 'I am your father'?", a: 'Darth Vader', choices: ['Darth Vader','Emperor Palpatine','Darth Maul','Kylo Ren'], diff: 'easy' },
+  { q: "What is R2-D2?", a: 'An astromech droid', choices: ['An astromech droid','A protocol droid','A battle droid','A medical droid'], diff: 'easy' },
+  { q: "What is the Rule of Two?", a: 'Only a Master and an Apprentice — no more, no less', choices: ['Only a Master and an Apprentice — no more, no less','Two Sith lords rule the galaxy','A Sith must kill two Jedi','The Sith must have two weapons'], diff: 'medium' },
+  { q: "Where did Yoda go into exile?", a: 'Dagobah', choices: ['Dagobah','Tatooine','Ilum','Ahch-To'], diff: 'medium' },
+  { q: "What is Order 66?", a: 'A clone trooper command to kill all Jedi', choices: ['A clone trooper command to kill all Jedi','An Imperial invasion plan','A Sith ritual','A Rebel escape plan'], diff: 'medium' },
+  { q: "Who created the Darksaber?", a: 'Tarre Vizsla, the first Mandalorian Jedi', choices: ['Tarre Vizsla, the first Mandalorian Jedi','Darth Maul','Pre Vizsla','Bo-Katan Kryze'], diff: 'medium' },
+  { q: "What planet is Darth Maul from?", a: 'Dathomir', choices: ['Dathomir','Zabrak Prime','Tatooine','Mustafar'], diff: 'medium' },
+  { q: "Who trained Obi-Wan Kenobi?", a: 'Qui-Gon Jinn', choices: ['Qui-Gon Jinn','Yoda','Mace Windu','Count Dooku'], diff: 'medium' },
+  { q: "What does TIE stand for in TIE Fighter?", a: 'Twin Ion Engine', choices: ['Twin Ion Engine','Tactical Imperial Enforcer','Total Inertial Engine','Targeted Intercept Element'], diff: 'medium' },
+  { q: "Which planet was the seat of the Galactic Empire?", a: 'Coruscant', choices: ['Coruscant','Mustafar','Exegol','Naboo'], diff: 'medium' },
+  { q: "What is the diameter of the original Death Star?", a: '160 km', choices: ['160 km','120 km','250 km','900 km'], diff: 'hard' },
+  { q: "What Jedi philosophy did Qui-Gon Jinn champion?", a: 'The Living Force', choices: ['The Living Force','The Cosmic Force','The Unifying Force','The Eternal Force'], diff: 'hard' },
+  { q: "How long is a Super Star Destroyer Executor class?", a: '19 kilometers', choices: ['19 kilometers','12 kilometers','8 kilometers','32 kilometers'], diff: 'hard' },
+  { q: "What does 'BBY' mean in Star Wars dating?", a: 'Before the Battle of Yavin', choices: ['Before the Battle of Yavin','Before the Battle of Yavin II',"Before Boba's Year",'Before Bespin Year'], diff: 'hard' },
+  { q: "What is a Zillo Beast known for?", a: 'Nearly indestructible scales that resist lightsabers', choices: ['Nearly indestructible scales that resist lightsabers','The ability to turn invisible','Extreme speed in space','Force sensitivity'], diff: 'hard' },
+  { q: "Who first learned to retain consciousness after death?", a: 'Qui-Gon Jinn', choices: ['Qui-Gon Jinn','Yoda','Obi-Wan Kenobi','Anakin Skywalker'], diff: 'hard' },
+  { q: "What material is Mandalorian armor traditionally made from?", a: 'Beskar (Mandalorian iron)', choices: ['Beskar (Mandalorian iron)','Durasteel','Cortosis','Phrik alloy'], diff: 'hard' },
+  { q: "Who was Darth Plagueis's master?", a: 'Darth Tenebrous', choices: ['Darth Tenebrous','Darth Bane','Darth Sidious','Count Dooku'], diff: 'hard' },
 ];
 
 const RANKS = [
   { min: 0,  max: 5,  rank: 'Youngling',   icon: '🌱' },
   { min: 6,  max: 10, rank: 'Padawan',      icon: '📚' },
-  { min: 11, max: 15, rank: 'Jedi Knight',  icon: '⚔️' },
-  { min: 16, max: 22, rank: 'Jedi Master',  icon: '✨' },
-  { min: 23, max: 30, rank: 'Grand Master', icon: '🌌' },
+  { min: 11, max: 17, rank: 'Jedi Knight',  icon: '⚔️' },
+  { min: 18, max: 22, rank: 'Jedi Master',  icon: '✨' },
+  { min: 23, max: 25, rank: 'Grand Master', icon: '🌌' },
 ];
 
 let qState = { current: 0, score: 0, answered: false, shuffled: [] };
@@ -527,8 +897,7 @@ function renderQuestion() {
         ${q.choices.map(c => `<button class="choice" onclick="answerQ('${c.replace(/'/g,"\\'")}','${q.a.replace(/'/g,"\\'")}',this)">${c}</button>`).join('')}
       </div>
       <div id="feedback"></div>
-    </div>
-    ${qState.answered ? `<div style="text-align:center;margin-top:12px;"><button class="btn btn-primary" onclick="nextQ()">Next →</button></div>` : ''}`;
+    </div>`;
 }
 
 function answerQ(chosen, correct, el) {
@@ -563,12 +932,12 @@ function renderResult() {
     </div>`;
 }
 
-// ─── COLLECTION ───────────────────────────────────────────────────────────────
+// ── COLLECTION ────────────────────────────────────────────────────────────────
 function renderCollection() {
   const saved = JSON.parse(localStorage.getItem('sw65_collection') || '[]');
   const area = document.getElementById('collection-area');
   if (!saved.length) {
-    area.innerHTML = `<div class="empty-state"><div class="icon">🌌</div><div>No characters yet.<br>Head to BUILD to create your first character!</div></div>`;
+    area.innerHTML = `<div class="empty-state"><div class="icon">🌌</div><div>No characters yet.<br>Create characters by using the Lore and Quiz tabs to inspire you!</div></div>`;
     return;
   }
   area.innerHTML = `
@@ -576,13 +945,13 @@ function renderCollection() {
     <div class="collection-grid">
       ${saved.map((c,i) => `
         <div class="coll-card">
-          <div class="coll-avatar">${c.avatar}</div>
-          <div class="coll-name">${c.name}</div>
-          <div class="coll-sub">${c.species} ${c.cls}</div>
+          <div class="coll-avatar">${c.avatar || '⭐'}</div>
+          <div class="coll-name">${escapeHtml(c.name)}</div>
+          <div class="coll-sub">${escapeHtml(c.species || '')} ${escapeHtml(c.cls || '')}</div>
           <div style="margin-bottom:10px;">
-            <span class="badge ${c.side==='Light Side'?'badge-light':'badge-dark'}">${c.side}</span>
+            <span class="badge ${c.side==='Light Side'?'badge-light':'badge-dark'}">${escapeHtml(c.side || '')}</span>
           </div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">⚔️ ${c.weapon}</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">⚔️ ${escapeHtml(c.weapon || '')}</div>
           <div class="coll-actions">
             <button class="btn btn-outline" onclick="shareChar(${i})">📋 Share</button>
             <button class="btn btn-danger" onclick="deleteChar(${i})">🗑️</button>
@@ -602,8 +971,12 @@ function deleteChar(i) {
 function shareChar(i) {
   const saved = JSON.parse(localStorage.getItem('sw65_collection') || '[]');
   const c = saved[i];
-  const text = `⭐ ${c.name} — ${c.species} ${c.cls} (${c.side})\nWeapon: ${c.weapon}\nBuilt at hhanng.github.io/agent-65-star-wars-builder/`;
+  const text = `⭐ ${c.name} — ${c.species || ''} ${c.cls || ''} (${c.side || ''})\nWeapon: ${c.weapon || ''}\nBuilt at hhanng.github.io/agent-65-star-wars-builder/`;
   navigator.clipboard.writeText(text).then(() => toast('Copied!')).catch(() => alert(text));
+}
+
+function escapeHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // Init lore on load

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Code Comment Generator</title>
+  <title>Code Documentation Suite</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
@@ -16,6 +16,9 @@
       --accent: #10b981;
       --accent-dark: #059669;
       --accent-dim: rgba(16,185,129,0.15);
+      --blue: #60a5fa;
+      --amber: #fbbf24;
+      --purple: #c084fc;
       --text: #e5e5e5;
       --muted: #888;
       --danger: #ef4444;
@@ -29,10 +32,7 @@
       padding: 24px 16px 60px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
+    header { text-align: center; margin-bottom: 32px; }
     header h1 {
       font-size: 2rem;
       font-weight: 700;
@@ -41,11 +41,7 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    header p {
-      color: var(--muted);
-      margin-top: 6px;
-      font-size: 0.95rem;
-    }
+    header p { color: var(--muted); margin-top: 6px; font-size: 0.95rem; }
     .badge-agent {
       display: inline-block;
       background: var(--accent-dim);
@@ -94,23 +90,103 @@
     }
     select option { background: #1a1a1a; }
 
-    textarea#codeInput {
+    textarea.code-input {
       font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
       font-size: 0.85rem;
-      min-height: 240px;
+      min-height: 200px;
       resize: vertical;
       line-height: 1.6;
     }
+    textarea.text-input {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+
+    /* Tab nav */
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 11px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all .2s;
+    }
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .tab-btn.active { background: var(--accent); color: #000; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
     .settings-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 700px) {
+      .settings-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 400px) {
+      .settings-row { grid-template-columns: 1fr; }
+    }
+    .settings-row-3 {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 14px;
       margin-bottom: 16px;
     }
     @media (max-width: 640px) {
-      .settings-row { grid-template-columns: 1fr; }
+      .settings-row-3 { grid-template-columns: 1fr; }
     }
+
+    /* Toggle switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .toggle-row label { margin-bottom: 0; text-transform: none; font-size: 0.87rem; cursor: pointer; }
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #333;
+      border-radius: 22px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      height: 16px; width: 16px;
+      left: 3px; bottom: 3px;
+      background: #888;
+      border-radius: 50%;
+      transition: transform .2s, background .2s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--accent-dim); border: 1px solid var(--accent); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); background: var(--accent); }
 
     .btn {
       display: inline-flex;
@@ -134,6 +210,24 @@
     }
     .btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary-blue {
+      background: var(--blue);
+      color: #000;
+      width: 100%;
+      font-size: 1rem;
+      padding: 14px;
+    }
+    .btn-primary-blue:hover:not(:disabled) { opacity: 0.9; }
+    .btn-primary-blue:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary-purple {
+      background: var(--purple);
+      color: #000;
+      width: 100%;
+      font-size: 1rem;
+      padding: 14px;
+    }
+    .btn-primary-purple:hover:not(:disabled) { opacity: 0.9; }
+    .btn-primary-purple:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .btn-secondary {
       background: #222;
@@ -159,14 +253,15 @@
     }
     .btn-row .btn { flex: 1; min-width: 140px; }
 
-    #spinner {
-      display: none;
+    .spinner-inline {
       width: 18px; height: 18px;
       border: 2px solid rgba(0,0,0,0.3);
       border-top-color: #000;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
+      display: none;
     }
+    #spinner { display: none; width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .error-msg {
@@ -180,7 +275,7 @@
       display: none;
     }
 
-    /* Output panel */
+    /* Output panel - Tab 1 */
     #outputPanel { display: none; }
 
     .output-header {
@@ -202,7 +297,6 @@
       border-radius: 20px;
     }
 
-    /* Diff view */
     .diff-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -232,12 +326,7 @@
       align-items: center;
       justify-content: space-between;
     }
-    .diff-panel-header .panel-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 6px;
-    }
+    .panel-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
     .dot-original { background: #888; }
     .dot-commented { background: var(--accent); }
 
@@ -253,7 +342,6 @@
       white-space: pre;
     }
 
-    /* Mobile toggle */
     .mobile-toggle {
       display: none;
       gap: 0;
@@ -275,7 +363,6 @@
     }
     .toggle-btn.active { background: var(--accent); color: #000; }
 
-    /* Stats bar */
     .stats-bar {
       display: flex;
       gap: 20px;
@@ -287,26 +374,10 @@
       margin-bottom: 16px;
     }
     .stat-item { text-align: center; }
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--accent);
-      line-height: 1;
-    }
-    .stat-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 3px;
-    }
-    .stats-divider {
-      width: 1px;
-      background: var(--border);
-      margin: 0 4px;
-    }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+    .stats-divider { width: 1px; background: var(--border); margin: 0 4px; }
 
-    /* Explain box */
     .explain-box {
       display: none;
       background: #111;
@@ -320,12 +391,7 @@
     }
     .explain-box strong { color: var(--accent); }
 
-    /* History */
-    .history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .history-list { display: flex; flex-direction: column; gap: 10px; }
     .history-item {
       background: #111;
       border: 1px solid var(--border);
@@ -340,33 +406,10 @@
     }
     .history-item:hover { border-color: var(--accent); }
     .history-item-info { flex: 1; min-width: 0; }
-    .history-item-lang {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .history-item-preview {
-      font-family: monospace;
-      font-size: 0.78rem;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-top: 2px;
-    }
-    .history-item-date {
-      font-size: 0.7rem;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .history-empty {
-      color: var(--muted);
-      font-size: 0.85rem;
-      text-align: center;
-      padding: 16px;
-    }
+    .history-item-lang { font-size: 0.7rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+    .history-item-preview { font-family: monospace; font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .history-item-date { font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
+    .history-empty { color: var(--muted); font-size: 0.85rem; text-align: center; padding: 16px; }
 
     .section-title {
       font-size: 0.75rem;
@@ -377,14 +420,177 @@
       margin-bottom: 14px;
     }
 
-    /* API key area */
-    .api-row {
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-    }
+    /* API key */
+    .api-row { display: flex; gap: 10px; align-items: flex-end; }
     .api-row > div:first-child { flex: 1; }
     .api-row .btn { white-space: nowrap; padding: 10px 16px; }
+
+    /* ── Tab 2: README Generator ── */
+    .readme-output { display: none; }
+    .readme-output.visible { display: block; }
+    .readme-section {
+      margin-bottom: 20px;
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .readme-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #0e0e0e;
+      border-bottom: 1px solid var(--border);
+    }
+    .readme-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-copy-section {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-copy-section:hover { color: var(--accent); border-color: var(--accent); }
+    .btn-copy-section.copied { color: var(--accent); border-color: var(--accent); }
+    .readme-section-body {
+      padding: 14px 16px;
+      font-size: 0.88rem;
+      line-height: 1.75;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .readme-section-body table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    .readme-section-body th {
+      text-align: left;
+      padding: 7px 10px;
+      background: #1a1a1a;
+      color: var(--accent);
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .readme-section-body td {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .readme-copy-all-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+    .btn-copy-all {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 7px;
+      padding: 8px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-copy-all:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-copy-all.copied { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Tab 3: Whiteboard Mode ── */
+    .wb-output { display: none; }
+    .wb-output.visible { display: block; }
+    .wb-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    .wb-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .wb-section-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+    .wb-section-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .wb-section-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .wb-body {
+      font-size: 0.9rem;
+      line-height: 1.75;
+      color: var(--text);
+    }
+    .wb-body strong { color: var(--amber); }
+    .wb-complexity-chip {
+      display: inline-block;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 4px 12px;
+      margin-bottom: 8px;
+    }
+    .wb-script {
+      background: #111;
+      border: 1px solid rgba(251,191,36,0.3);
+      border-radius: 10px;
+      padding: 16px 18px;
+      font-size: 0.9rem;
+      line-height: 1.85;
+      color: var(--text);
+    }
+    .wb-script strong { color: var(--amber); }
+    .wb-edge-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .wb-edge-list li {
+      padding-left: 20px;
+      position: relative;
+      font-size: 0.87rem;
+      line-height: 1.5;
+    }
+    .wb-edge-list li::before { content: '⚠'; position: absolute; left: 0; color: var(--amber); }
+    .wb-copy-script {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 10px;
+      display: block;
+      width: fit-content;
+    }
+    .wb-copy-script:hover { color: var(--amber); border-color: var(--amber); }
+    .wb-copy-script.copied { color: var(--accent); border-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -392,8 +598,8 @@
 
   <header>
     <div class="badge-agent">AGENT #11 OF 97</div>
-    <h1>Code Comment Generator</h1>
-    <p>Paste any code — get it back fully commented with Gemini AI</p>
+    <h1>Code Documentation Suite</h1>
+    <p>Docstrings · README sections · Whiteboard Interview Mode</p>
   </header>
 
   <!-- API Key -->
@@ -410,124 +616,313 @@
     </p>
   </div>
 
-  <!-- Input -->
-  <div class="card">
-    <label for="codeInput">Your Code</label>
-    <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
-
-    <div class="settings-row" style="margin-top:14px;">
-      <div>
-        <label for="langSelect">Language</label>
-        <select id="langSelect">
-          <option>Python</option>
-          <option>JavaScript</option>
-          <option>TypeScript</option>
-          <option>Java</option>
-          <option>C++</option>
-          <option>Go</option>
-          <option>Rust</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div>
-        <label for="styleSelect">Comment Style</label>
-        <select id="styleSelect">
-          <option value="inline comments">Inline comments</option>
-          <option value="JSDoc / Docstrings">JSDoc / Docstrings</option>
-          <option value="both inline and docstring">Both inline + docstrings</option>
-          <option value="minimal (functions only)">Minimal (functions only)</option>
-        </select>
-      </div>
-      <div>
-        <label for="toneSelect">Tone</label>
-        <select id="toneSelect">
-          <option value="Professional">Professional</option>
-          <option value="Beginner-friendly (explain everything)">Beginner-friendly</option>
-          <option value="Concise">Concise</option>
-        </select>
-      </div>
-    </div>
-
-    <button class="btn btn-primary" id="addBtn" onclick="addComments()">
-      <div id="spinner"></div>
-      <span id="btnText">Add Comments</span>
-    </button>
-    <div class="error-msg" id="errorMsg"></div>
+  <!-- Tab Nav -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('docstring', this)">📄 Docstring Generator</button>
+    <button class="tab-btn" onclick="switchTab('readme', this)">📖 README Generator</button>
+    <button class="tab-btn" onclick="switchTab('whiteboard', this)">🧠 Whiteboard Mode</button>
   </div>
 
-  <!-- Output Panel -->
-  <div id="outputPanel">
+  <!-- ═══════════ TAB 1: Docstring Generator ═══════════ -->
+  <div class="tab-panel active" id="tab-docstring">
+
     <div class="card">
-      <div class="output-header">
-        <h2>Result</h2>
-        <span class="comment-badge" id="commentBadge">0 comments added</span>
+      <label for="codeInput">Your Code</label>
+      <textarea id="codeInput" class="code-input" placeholder="Paste your code here..."></textarea>
+
+      <div class="settings-row" style="margin-top:14px;">
+        <div>
+          <label for="langSelect">Language</label>
+          <select id="langSelect">
+            <option>Python</option>
+            <option>JavaScript</option>
+            <option>TypeScript</option>
+            <option>Java</option>
+            <option>C++</option>
+            <option>Go</option>
+            <option>Rust</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="formatSelect">Docstring Format</label>
+          <select id="formatSelect">
+            <option value="Google Style">Google Style</option>
+            <option value="NumPy Style">NumPy Style</option>
+            <option value="JSDoc">JSDoc</option>
+          </select>
+        </div>
+        <div>
+          <label for="styleSelect">Comment Style</label>
+          <select id="styleSelect">
+            <option value="inline comments">Inline comments</option>
+            <option value="JSDoc / Docstrings">JSDoc / Docstrings</option>
+            <option value="both inline and docstring">Both inline + docstrings</option>
+            <option value="minimal (functions only)">Minimal (functions only)</option>
+          </select>
+        </div>
+        <div>
+          <label for="toneSelect">Tone</label>
+          <select id="toneSelect">
+            <option value="Professional">Professional</option>
+            <option value="Beginner-friendly (explain everything)">Beginner-friendly</option>
+            <option value="Concise">Concise</option>
+          </select>
+        </div>
       </div>
 
-      <!-- Mobile toggle -->
-      <div class="mobile-toggle">
-        <button class="toggle-btn active" id="toggleOrigBtn" onclick="showPanel('original')">Original</button>
-        <button class="toggle-btn" id="toggleComBtn" onclick="showPanel('commented')">Commented</button>
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" id="inlineToggle" />
+          <span class="toggle-slider"></span>
+        </label>
+        <label for="inlineToggle" style="color:var(--text);">Add inline comments too</label>
       </div>
 
-      <div class="diff-container">
-        <div class="diff-panel" id="panelOriginal">
-          <div class="diff-panel-header">
-            <span><span class="panel-dot dot-original"></span>Original</span>
-          </div>
-          <pre><code id="originalCode" class="hljs"></code></pre>
-        </div>
-        <div class="diff-panel" id="panelCommented">
-          <div class="diff-panel-header">
-            <span><span class="panel-dot dot-commented"></span>Commented</span>
-          </div>
-          <pre><code id="commentedCode" class="hljs"></code></pre>
-        </div>
-      </div>
-
-      <!-- Stats -->
-      <div class="stats-bar">
-        <div class="stat-item">
-          <div class="stat-value" id="statFunctions">0</div>
-          <div class="stat-label">Functions Documented</div>
-        </div>
-        <div class="stats-divider"></div>
-        <div class="stat-item">
-          <div class="stat-value" id="statInline">0</div>
-          <div class="stat-label">Inline Comments</div>
-        </div>
-        <div class="stats-divider"></div>
-        <div class="stat-item">
-          <div class="stat-value" id="statLines">0</div>
-          <div class="stat-label">Total Lines</div>
-        </div>
-      </div>
-
-      <!-- Action buttons -->
-      <div class="btn-row">
-        <button class="btn btn-secondary" onclick="copyCommented()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy commented code
-        </button>
-        <button class="btn btn-secondary" onclick="downloadFile()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download as file
-        </button>
-      </div>
-
-      <button class="btn btn-explain" id="explainBtn" onclick="explainCode()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        Explain this code
+      <button class="btn btn-primary" id="addBtn" onclick="addComments()">
+        <div id="spinner"></div>
+        <span id="btnText">Add Comments</span>
       </button>
-
-      <div class="explain-box" id="explainBox"></div>
+      <div class="error-msg" id="errorMsg"></div>
     </div>
-  </div>
 
-  <!-- History -->
-  <div class="card">
-    <div class="section-title">Recent History</div>
-    <div class="history-list" id="historyList"></div>
-  </div>
+    <!-- Output Panel -->
+    <div id="outputPanel">
+      <div class="card">
+        <div class="output-header">
+          <h2>Result</h2>
+          <span class="comment-badge" id="commentBadge">0 comments added</span>
+        </div>
+
+        <div class="mobile-toggle">
+          <button class="toggle-btn active" id="toggleOrigBtn" onclick="showPanel('original')">Original</button>
+          <button class="toggle-btn" id="toggleComBtn" onclick="showPanel('commented')">Commented</button>
+        </div>
+
+        <div class="diff-container">
+          <div class="diff-panel" id="panelOriginal">
+            <div class="diff-panel-header">
+              <span><span class="panel-dot dot-original"></span>Original</span>
+            </div>
+            <pre><code id="originalCode" class="hljs"></code></pre>
+          </div>
+          <div class="diff-panel" id="panelCommented">
+            <div class="diff-panel-header">
+              <span><span class="panel-dot dot-commented"></span>Commented</span>
+            </div>
+            <pre><code id="commentedCode" class="hljs"></code></pre>
+          </div>
+        </div>
+
+        <div class="stats-bar">
+          <div class="stat-item">
+            <div class="stat-value" id="statFunctions">0</div>
+            <div class="stat-label">Functions Documented</div>
+          </div>
+          <div class="stats-divider"></div>
+          <div class="stat-item">
+            <div class="stat-value" id="statInline">0</div>
+            <div class="stat-label">Inline Comments</div>
+          </div>
+          <div class="stats-divider"></div>
+          <div class="stat-item">
+            <div class="stat-value" id="statLines">0</div>
+            <div class="stat-label">Total Lines</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="copyCommented()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy commented code
+          </button>
+          <button class="btn btn-secondary" onclick="downloadFile()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download as file
+          </button>
+        </div>
+
+        <button class="btn btn-explain" id="explainBtn" onclick="explainCode()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Explain this code
+        </button>
+        <div class="explain-box" id="explainBox"></div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="card">
+      <div class="section-title">Recent History</div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+  </div><!-- /tab-docstring -->
+
+  <!-- ═══════════ TAB 2: README Generator ═══════════ -->
+  <div class="tab-panel" id="tab-readme">
+
+    <div class="card">
+      <label for="readmeCode">Code Block</label>
+      <textarea id="readmeCode" class="code-input" placeholder="Paste a function, class, or module you want to document..."></textarea>
+      <div class="settings-row-3" style="margin-top:14px;">
+        <div>
+          <label for="readmeLang">Language</label>
+          <select id="readmeLang">
+            <option>Python</option>
+            <option>JavaScript</option>
+            <option>TypeScript</option>
+            <option>Java</option>
+            <option>C++</option>
+            <option>Go</option>
+            <option>Rust</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="readmeErrorMsg" style="display:none;"></div>
+
+    <button class="btn btn-primary-blue" id="readmeBtn" onclick="generateReadme()">
+      <span class="spinner-inline" id="readmeSpinner"></span>
+      📖 Generate README Sections
+    </button>
+
+    <div class="readme-output" id="readmeOutput" style="margin-top:20px;">
+      <div class="readme-section">
+        <div class="readme-section-header">
+          <span class="readme-section-title">📝 Description</span>
+          <button class="btn-copy-section" onclick="copySection('readmeDesc', this)">Copy</button>
+        </div>
+        <div class="readme-section-body" id="readmeDesc"></div>
+      </div>
+      <div class="readme-section">
+        <div class="readme-section-header">
+          <span class="readme-section-title">⚙️ Parameters</span>
+          <button class="btn-copy-section" onclick="copySection('readmeParams', this)">Copy</button>
+        </div>
+        <div class="readme-section-body" id="readmeParams"></div>
+      </div>
+      <div class="readme-section">
+        <div class="readme-section-header">
+          <span class="readme-section-title">↩️ Returns</span>
+          <button class="btn-copy-section" onclick="copySection('readmeReturns', this)">Copy</button>
+        </div>
+        <div class="readme-section-body" id="readmeReturns"></div>
+      </div>
+      <div class="readme-section">
+        <div class="readme-section-header">
+          <span class="readme-section-title">💡 Example</span>
+          <button class="btn-copy-section" onclick="copySection('readmeExample', this)">Copy</button>
+        </div>
+        <div class="readme-section-body" id="readmeExample"></div>
+      </div>
+      <div class="readme-section">
+        <div class="readme-section-header">
+          <span class="readme-section-title">📌 Notes</span>
+          <button class="btn-copy-section" onclick="copySection('readmeNotes', this)">Copy</button>
+        </div>
+        <div class="readme-section-body" id="readmeNotes"></div>
+      </div>
+      <div class="readme-copy-all-row">
+        <button class="btn-copy-all" id="readmeCopyAllBtn" onclick="copyAllReadme()">📋 Copy All as Markdown</button>
+      </div>
+    </div>
+
+  </div><!-- /tab-readme -->
+
+  <!-- ═══════════ TAB 3: Whiteboard Mode ═══════════ -->
+  <div class="tab-panel" id="tab-whiteboard">
+
+    <div class="card">
+      <label for="wbCode">Algorithm or Code</label>
+      <textarea id="wbCode" class="code-input" placeholder="Paste code or describe an algorithm in plain English...&#10;&#10;e.g.&#10;def two_sum(nums, target):&#10;    seen = {}&#10;    for i, n in enumerate(nums):&#10;        diff = target - n&#10;        if diff in seen: return [seen[diff], i]&#10;        seen[n] = i"></textarea>
+      <div class="settings-row-3" style="margin-top:14px;">
+        <div>
+          <label for="wbLang">Language / Context</label>
+          <select id="wbLang">
+            <option>Python</option>
+            <option>JavaScript</option>
+            <option>TypeScript</option>
+            <option>Java</option>
+            <option>C++</option>
+            <option>Go</option>
+            <option>General Algorithm</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="wbErrorMsg" style="display:none;"></div>
+
+    <button class="btn btn-primary-purple" id="wbBtn" onclick="generateWhiteboard()">
+      <span class="spinner-inline" id="wbSpinner"></span>
+      🧠 Analyze for Interview
+    </button>
+
+    <div class="wb-output" id="wbOutput" style="margin-top:20px;">
+
+      <div class="wb-section">
+        <div class="wb-section-header">
+          <span class="wb-section-icon">💬</span>
+          <div>
+            <div class="wb-section-title">Plain English</div>
+            <div class="wb-section-subtitle">What it does, simply</div>
+          </div>
+        </div>
+        <div class="wb-body" id="wbPlain"></div>
+      </div>
+
+      <div class="wb-section">
+        <div class="wb-section-header">
+          <span class="wb-section-icon">⏱️</span>
+          <div>
+            <div class="wb-section-title">Time Complexity</div>
+            <div class="wb-section-subtitle">Big-O analysis</div>
+          </div>
+        </div>
+        <div class="wb-complexity-chip" id="wbTimeChip">O(?)</div>
+        <div class="wb-body" id="wbTime"></div>
+      </div>
+
+      <div class="wb-section">
+        <div class="wb-section-header">
+          <span class="wb-section-icon">💾</span>
+          <div>
+            <div class="wb-section-title">Space Complexity</div>
+            <div class="wb-section-subtitle">Memory usage analysis</div>
+          </div>
+        </div>
+        <div class="wb-complexity-chip" id="wbSpaceChip">O(?)</div>
+        <div class="wb-body" id="wbSpace"></div>
+      </div>
+
+      <div class="wb-section">
+        <div class="wb-section-header">
+          <span class="wb-section-icon">⚠️</span>
+          <div>
+            <div class="wb-section-title">Edge Cases</div>
+            <div class="wb-section-subtitle">What to watch out for</div>
+          </div>
+        </div>
+        <ul class="wb-edge-list" id="wbEdges"></ul>
+      </div>
+
+      <div class="wb-section">
+        <div class="wb-section-header">
+          <span class="wb-section-icon">🎤</span>
+          <div>
+            <div class="wb-section-title">60-Second Verbal Script</div>
+            <div class="wb-section-subtitle">Key phrases <strong style="color:var(--amber)">bolded</strong> — say these confidently</div>
+          </div>
+        </div>
+        <div class="wb-script" id="wbScript"></div>
+        <button class="wb-copy-script" id="wbCopyScriptBtn" onclick="copyScript()">📋 Copy script</button>
+      </div>
+
+    </div>
+
+  </div><!-- /tab-whiteboard -->
 
 </div>
 
@@ -536,6 +931,8 @@
   let lastCommentedCode = '';
   let lastLanguage = 'Python';
   let mobileView = 'original';
+  let currentReadmeData = null;
+  let currentScriptText = '';
 
   const EXT_MAP = {
     Python: 'py', JavaScript: 'js', TypeScript: 'ts',
@@ -562,27 +959,71 @@
     }
   }
 
-  // ── Main action ────────────────────────────────────────────────────
+  // ── Tab switching ──────────────────────────────────────────────────
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Gemini helper ──────────────────────────────────────────────────
+  async function callGemini(prompt, temp = 0.3) {
+    const apiKey = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
+    if (!apiKey) throw new Error('Please enter your Gemini API key.');
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: temp, maxOutputTokens: 3000 }
+        })
+      }
+    );
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || `API error ${res.status}`);
+    }
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  }
+
+  function extractJSON(raw) {
+    const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    try { return JSON.parse(cleaned); } catch {}
+    const m = cleaned.match(/\{[\s\S]*\}/);
+    if (m) { try { return JSON.parse(m[0]); } catch {} }
+    return null;
+  }
+
+  // ── TAB 1: Add Comments ────────────────────────────────────────────
   async function addComments() {
-    const apiKey = document.getElementById('apiKey').value.trim();
     const code = document.getElementById('codeInput').value.trim();
     const language = document.getElementById('langSelect').value;
     const commentStyle = document.getElementById('styleSelect').value;
     const tone = document.getElementById('toneSelect').value;
+    const docFormat = document.getElementById('formatSelect').value;
+    const addInline = document.getElementById('inlineToggle').checked;
 
-    if (!apiKey) return showError('Please enter your Gemini API key.');
-    if (!code) return showError('Please paste some code first.');
+    if (!document.getElementById('apiKey').value.trim()) return showDocError('Please enter your Gemini API key.');
+    if (!code) return showDocError('Please paste some code first.');
 
     setLoading(true);
-    hideError();
+    document.getElementById('errorMsg').style.display = 'none';
 
-    const prompt = `Add ${commentStyle} comments to this ${language} code. Tone: ${tone}.
+    const inlineExtra = addInline && commentStyle !== 'inline comments'
+      ? '\n- ALSO add inline comments above each meaningful line in addition to the docstrings.'
+      : '';
+
+    const prompt = `Add ${commentStyle} comments to this ${language} code using ${docFormat} format. Tone: ${tone}.
 
 Rules:
 - For inline comments: add a comment above or beside each meaningful line explaining WHAT it does and WHY
-- For docstrings: add proper ${language} docstrings to every function/class with params and return description
+- For docstrings: add proper ${language} docstrings to every function/class with params and return description using ${docFormat} format
 - Do NOT change any existing logic, only add comments
-- Keep comments accurate and useful, not obvious (don't write '// add 1 to x' for 'x += 1')
+- Keep comments accurate and useful, not obvious${inlineExtra}
 - If beginner-friendly tone: explain concepts a student might not know
 
 Code:
@@ -601,36 +1042,13 @@ Respond in this exact JSON format:
 Return only the JSON, no markdown.`;
 
     try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.3 }
-          })
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error?.message || `API error ${res.status}`);
-      }
-
-      const data = await res.json();
-      let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-      // Strip markdown code fences if present
-      raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
-
+      const raw = await callGemini(prompt);
+      let cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
       let parsed;
-      try {
-        parsed = JSON.parse(raw);
-      } catch {
-        // Try to extract JSON object
-        const match = raw.match(/\{[\s\S]*\}/);
-        if (match) parsed = JSON.parse(match[0]);
+      try { parsed = JSON.parse(cleaned); }
+      catch {
+        const m = cleaned.match(/\{[\s\S]*\}/);
+        if (m) parsed = JSON.parse(m[0]);
         else throw new Error('Could not parse Gemini response as JSON.');
       }
 
@@ -642,35 +1060,23 @@ Return only the JSON, no markdown.`;
       lastCommentedCode = commented;
       lastLanguage = language;
 
-      // Render diff
       const hljsLang = HLJS_LANG[language] || 'plaintext';
       renderCode('originalCode', code, hljsLang);
       renderCode('commentedCode', commented, hljsLang);
 
-      // Badge
       const added = stats.inlineCommentsAdded || (commentedLines - originalLines);
       document.getElementById('commentBadge').textContent = `+${added} comments added`;
-
-      // Stats
       document.getElementById('statFunctions').textContent = stats.functionsDocumented ?? '—';
       document.getElementById('statInline').textContent = stats.inlineCommentsAdded ?? added;
       document.getElementById('statLines').textContent = commentedLines;
-
-      // Hide explain box
       document.getElementById('explainBox').style.display = 'none';
-
-      // Show output
       document.getElementById('outputPanel').style.display = 'block';
       document.getElementById('outputPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-      // Reset mobile view
       showPanel('original');
-
-      // Save to history
       saveHistory({ code, commented, language, commentStyle, tone, stats, date: new Date().toISOString() });
 
     } catch (err) {
-      showError(err.message || 'Something went wrong. Check your API key and try again.');
+      showDocError(err.message || 'Something went wrong. Check your API key and try again.');
     } finally {
       setLoading(false);
     }
@@ -678,36 +1084,21 @@ Return only the JSON, no markdown.`;
 
   // ── Explain ────────────────────────────────────────────────────────
   async function explainCode() {
-    const apiKey = document.getElementById('apiKey').value.trim();
     const code = document.getElementById('codeInput').value.trim();
     const language = document.getElementById('langSelect').value;
-
-    if (!apiKey || !code) return;
+    if (!code) return;
 
     const btn = document.getElementById('explainBtn');
     btn.textContent = 'Explaining…';
     btn.disabled = true;
 
     try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: `Explain in plain English what this ${language} code does. Write 2-3 concise sentences max. No code blocks.\n\n${code}` }] }],
-            generationConfig: { temperature: 0.4 }
-          })
-        }
-      );
-      const data = await res.json();
-      const explanation = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Could not generate explanation.';
-
+      const explanation = await callGemini(`Explain in plain English what this ${language} code does. Write 2-3 concise sentences max. No code blocks.\n\n${code}`, 0.4);
       const box = document.getElementById('explainBox');
       box.innerHTML = `<strong>What this code does:</strong> ${escapeHtml(explanation)}`;
       box.style.display = 'block';
     } catch {
-      showError('Could not explain the code. Try again.');
+      showDocError('Could not explain the code. Try again.');
     } finally {
       btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Explain this code`;
       btn.disabled = false;
@@ -744,7 +1135,6 @@ Return only the JSON, no markdown.`;
     const com = document.getElementById('panelCommented');
     const tOrig = document.getElementById('toggleOrigBtn');
     const tCom = document.getElementById('toggleComBtn');
-
     if (window.innerWidth <= 640) {
       if (panel === 'original') {
         orig.classList.remove('hide-mobile'); orig.classList.add('show-mobile');
@@ -764,18 +1154,14 @@ Return only the JSON, no markdown.`;
     document.getElementById('btnText').textContent = on ? 'Generating…' : 'Add Comments';
   }
 
-  function showError(msg) {
+  function showDocError(msg) {
     const el = document.getElementById('errorMsg');
     el.textContent = msg;
     el.style.display = 'block';
   }
 
-  function hideError() {
-    document.getElementById('errorMsg').style.display = 'none';
-  }
-
   function escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   function showToast(msg) {
@@ -802,12 +1188,10 @@ Return only the JSON, no markdown.`;
   function renderHistory() {
     const list = document.getElementById('historyList');
     const hist = JSON.parse(localStorage.getItem('ccg_history') || '[]');
-
     if (!hist.length) {
       list.innerHTML = '<div class="history-empty">No history yet — add some comments!</div>';
       return;
     }
-
     list.innerHTML = hist.map((h, i) => {
       const date = new Date(h.date);
       const dateStr = date.toLocaleDateString(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
@@ -826,30 +1210,215 @@ Return only the JSON, no markdown.`;
     const hist = JSON.parse(localStorage.getItem('ccg_history') || '[]');
     const h = hist[i];
     if (!h) return;
-
     document.getElementById('codeInput').value = h.code;
     document.getElementById('langSelect').value = h.language;
     document.getElementById('styleSelect').value = h.commentStyle;
     document.getElementById('toneSelect').value = h.tone;
-
     lastCommentedCode = h.commented;
     lastLanguage = h.language;
-
     const hljsLang = HLJS_LANG[h.language] || 'plaintext';
     renderCode('originalCode', h.code, hljsLang);
     renderCode('commentedCode', h.commented, hljsLang);
-
     const stats = h.stats || {};
     const added = stats.inlineCommentsAdded || 0;
     document.getElementById('commentBadge').textContent = `+${added} comments added`;
     document.getElementById('statFunctions').textContent = stats.functionsDocumented ?? '—';
     document.getElementById('statInline').textContent = stats.inlineCommentsAdded ?? added;
     document.getElementById('statLines').textContent = h.commented.split('\n').length;
-
     document.getElementById('explainBox').style.display = 'none';
     document.getElementById('outputPanel').style.display = 'block';
     document.getElementById('outputPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     showPanel('original');
+    // Switch to docstring tab
+    document.querySelectorAll('.tab-btn')[0].click();
+  }
+
+  // ── TAB 2: README Generator ────────────────────────────────────────
+  async function generateReadme() {
+    const code = document.getElementById('readmeCode').value.trim();
+    const lang = document.getElementById('readmeLang').value;
+    const errEl = document.getElementById('readmeErrorMsg');
+    errEl.style.display = 'none';
+    if (!code) { errEl.textContent = 'Please paste code first.'; errEl.style.display = 'block'; return; }
+
+    const btn = document.getElementById('readmeBtn');
+    const spinner = document.getElementById('readmeSpinner');
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    try {
+      const prompt = `You are a technical writer generating README documentation for a ${lang} function or module.
+
+Code:
+${code}
+
+Return ONLY this JSON (no markdown fences):
+{
+  "description": "2-3 sentence plain English description of what this code does and why you'd use it",
+  "params": [
+    { "name": "paramName", "type": "string", "description": "what it is" }
+  ],
+  "returns": "description of what is returned, including type",
+  "example": "code example showing how to call/use this, as a plain string",
+  "notes": "any important notes, caveats, or edge cases the user should know"
+}
+
+If there are no parameters (e.g. it's a module), use an empty array for params.`;
+
+      const raw = await callGemini(prompt, 0.4);
+      const data = extractJSON(raw);
+      if (!data) throw new Error('Could not parse response. Try again.');
+      currentReadmeData = { ...data, lang, code };
+      renderReadme(data, lang);
+    } catch (e) {
+      errEl.textContent = 'Error: ' + (e.message || 'Something went wrong.');
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function renderReadme(d, lang) {
+    document.getElementById('readmeDesc').textContent = d.description || '';
+
+    // Parameters table
+    if (d.params && d.params.length > 0) {
+      const rows = d.params.map(p =>
+        `<tr><td><code>${escapeHtml(p.name || '')}</code></td><td><code>${escapeHtml(p.type || '')}</code></td><td>${escapeHtml(p.description || '')}</td></tr>`
+      ).join('');
+      document.getElementById('readmeParams').innerHTML =
+        `<table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>${rows}</tbody></table>`;
+    } else {
+      document.getElementById('readmeParams').textContent = 'No parameters.';
+    }
+
+    document.getElementById('readmeReturns').textContent = d.returns || '';
+    document.getElementById('readmeExample').textContent = d.example || '';
+    document.getElementById('readmeNotes').textContent = d.notes || '';
+
+    const out = document.getElementById('readmeOutput');
+    out.classList.add('visible');
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function copySection(id, btn) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+
+  function copyAllReadme() {
+    if (!currentReadmeData) return;
+    const d = currentReadmeData;
+    const paramsMd = d.params && d.params.length
+      ? `| Name | Type | Description |\n|------|------|-------------|\n` +
+        d.params.map(p => `| \`${p.name}\` | \`${p.type}\` | ${p.description} |`).join('\n')
+      : 'No parameters.';
+
+    const md = [
+      '## Description',
+      d.description,
+      '',
+      '## Parameters',
+      paramsMd,
+      '',
+      '## Returns',
+      d.returns,
+      '',
+      '## Example',
+      '```' + (d.lang || ''),
+      d.example,
+      '```',
+      '',
+      '## Notes',
+      d.notes,
+    ].join('\n');
+
+    navigator.clipboard.writeText(md).then(() => {
+      const btn = document.getElementById('readmeCopyAllBtn');
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '📋 Copy All as Markdown'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── TAB 3: Whiteboard Mode ─────────────────────────────────────────
+  async function generateWhiteboard() {
+    const code = document.getElementById('wbCode').value.trim();
+    const lang = document.getElementById('wbLang').value;
+    const errEl = document.getElementById('wbErrorMsg');
+    errEl.style.display = 'none';
+    if (!code) { errEl.textContent = 'Please paste code or describe an algorithm.'; errEl.style.display = 'block'; return; }
+
+    const btn = document.getElementById('wbBtn');
+    const spinner = document.getElementById('wbSpinner');
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    try {
+      const prompt = `You are a senior engineer helping a candidate prepare for a whiteboard interview.
+
+Language/Context: ${lang}
+Code/Algorithm:
+${code}
+
+Return ONLY this JSON (no markdown fences):
+{
+  "plain": "Plain English explanation of what this algorithm does, in 2-3 sentences. No jargon. Pretend you're explaining to a smart non-programmer.",
+  "timeComplexity": "O(n) or O(n log n) etc — just the notation",
+  "timeExplanation": "1-2 sentences explaining why",
+  "spaceComplexity": "O(n) or O(1) etc",
+  "spaceExplanation": "1-2 sentences explaining why",
+  "edgeCases": ["edge case 1", "edge case 2", "edge case 3", "edge case 4"],
+  "verbalScript": "A 60-second verbal script the candidate can say out loud. Use **double asterisks** around KEY phrases that should be spoken confidently and clearly. The script should cover: what it does, the approach, time and space complexity, and one edge case. Natural speaking tone."
+}`;
+
+      const raw = await callGemini(prompt, 0.5);
+      const data = extractJSON(raw);
+      if (!data) throw new Error('Could not parse response. Try again.');
+      renderWhiteboard(data);
+    } catch (e) {
+      errEl.textContent = 'Error: ' + (e.message || 'Something went wrong.');
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function renderWhiteboard(d) {
+    document.getElementById('wbPlain').textContent = d.plain || '';
+    document.getElementById('wbTimeChip').textContent = d.timeComplexity || 'O(?)';
+    document.getElementById('wbTime').textContent = d.timeExplanation || '';
+    document.getElementById('wbSpaceChip').textContent = d.spaceComplexity || 'O(?)';
+    document.getElementById('wbSpace').textContent = d.spaceExplanation || '';
+
+    const edges = d.edgeCases || [];
+    document.getElementById('wbEdges').innerHTML = edges.map(e => `<li>${escapeHtml(e)}</li>`).join('');
+
+    // Render script with **bold** key phrases
+    const script = d.verbalScript || '';
+    currentScriptText = script.replace(/\*\*(.*?)\*\*/g, '$1');
+    const scriptHtml = escapeHtml(script).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    document.getElementById('wbScript').innerHTML = scriptHtml;
+
+    const out = document.getElementById('wbOutput');
+    out.classList.add('visible');
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function copyScript() {
+    if (!currentScriptText) return;
+    navigator.clipboard.writeText(currentScriptText).then(() => {
+      const btn = document.getElementById('wbCopyScriptBtn');
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '📋 Copy script'; btn.classList.remove('copied'); }, 2000);
+    });
   }
 </script>
 </body>
