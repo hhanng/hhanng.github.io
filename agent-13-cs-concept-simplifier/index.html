@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CS Concept Simplifier — Agent #13</title>
+<title>CS Concept Deep Diver — Agent #13</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
@@ -21,6 +21,7 @@
     --yellow: #eab308;
     --purple: #a78bfa;
     --red: #ef4444;
+    --orange: #f97316;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -86,6 +87,39 @@
   .api-bar .key-label { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
   .key-saved { font-size: 0.75rem; color: var(--green); white-space: nowrap; }
 
+  /* ── Mode tabs bar ── */
+  .mode-tabs-bar {
+    max-width: 820px;
+    margin: 20px auto 0;
+    padding: 0 20px;
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+  .mode-tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 10px 18px 12px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .mode-tab-btn:hover { color: var(--blue-light); }
+  .mode-tab-btn.active {
+    color: var(--blue-light);
+    border-bottom-color: var(--blue);
+  }
+
+  /* ── Mode panels ── */
+  .mode-panel { display: none; }
+  .mode-panel.active { display: block; }
+
   /* ── Main ── */
   main { max-width: 820px; margin: 0 auto; padding: 24px 20px 0; }
 
@@ -144,6 +178,33 @@
     color: var(--blue-light);
     background: rgba(59,130,246,0.07);
   }
+
+  /* ── Prereq chips ── */
+  .prereq-chip {
+    padding: 5px 13px;
+    border: 1px solid #2d4a1e;
+    border-radius: 99px;
+    background: rgba(34,197,94,0.08);
+    color: #86efac;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .prereq-chip:hover { background: rgba(34,197,94,0.18); border-color: var(--green); }
+
+  .unlock-chip {
+    padding: 5px 13px;
+    border: 1px solid #3b2a6f;
+    border-radius: 99px;
+    background: rgba(167,139,250,0.08);
+    color: #c4b5fd;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .unlock-chip:hover { background: rgba(167,139,250,0.18); border-color: var(--purple); }
 
   /* ── Controls ── */
   .controls-bar {
@@ -211,6 +272,8 @@
   .result-card:nth-child(5) { animation-delay: 0.20s; }
   .result-card:nth-child(6) { animation-delay: 0.25s; }
   .result-card:nth-child(7) { animation-delay: 0.30s; }
+  .result-card:nth-child(8) { animation-delay: 0.35s; }
+  .result-card:nth-child(9) { animation-delay: 0.40s; }
 
   .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .card-icon {
@@ -318,6 +381,77 @@
     color: #86efac;
   }
 
+  /* ── Prereq Map card ── */
+  .prereq-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 14px;
+    animation: fadeUp 0.4s ease both;
+    animation-delay: 0.45s;
+  }
+  .prereq-section { margin-bottom: 16px; }
+  .prereq-section:last-child { margin-bottom: 0; }
+  .prereq-section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .prereq-section-label.learn-first { color: var(--green); }
+  .prereq-section-label.unlocks { color: var(--purple); }
+  .prereq-chips-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* ── FAANG card ── */
+  .faang-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 14px;
+    animation: fadeUp 0.4s ease both;
+    animation-delay: 0.50s;
+  }
+  .faang-interview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(249,115,22,0.12);
+    border: 1px solid rgba(249,115,22,0.35);
+    color: #fdba74;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 99px;
+    margin-bottom: 14px;
+  }
+  .faang-question {
+    background: #0d1a2d;
+    border-left: 3px solid var(--orange);
+    padding: 13px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.93rem;
+    line-height: 1.6;
+    color: #fed7aa;
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+  .faang-insight {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: #d1d5db;
+  }
+  .faang-insight-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+
   /* ── Bottom actions ── */
   .bottom-actions {
     display: flex; gap: 12px; flex-wrap: wrap;
@@ -356,6 +490,133 @@
   /* ── History section ── */
   #history-section { margin-bottom: 14px; display: none; }
 
+  /* ── Compare mode ── */
+  .compare-intro {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .compare-search-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .compare-search-row input[type="text"] {
+    flex: 1;
+    min-width: 150px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .compare-search-row input[type="text"]::placeholder { color: var(--muted); }
+  .compare-search-row input[type="text"]:focus { border-color: var(--blue); }
+  .vs-badge {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--muted);
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 18px;
+  }
+  @media (max-width: 580px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .cmp-row-label { display: none; }
+  }
+  .compare-row-wrap {
+    display: contents;
+  }
+  .cmp-row-label {
+    grid-column: 1 / -1;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 10px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cmp-col {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #d1d5db;
+  }
+  .cmp-col-header {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--blue-light);
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .cmp-key-diff {
+    grid-column: 1 / -1;
+    background: #0d1a2d;
+    border: 1px solid var(--blue-dim);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: #bfdbfe;
+    margin-top: 4px;
+  }
+  .cmp-key-diff-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--blue-light);
+    margin-bottom: 8px;
+  }
+  .cmp-when-to {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 580px) { .cmp-when-to { grid-template-columns: 1fr; } }
+  .cmp-when-col {
+    background: #0a1a0a;
+    border: 1px solid #1a3a1a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #86efac;
+  }
+  .cmp-when-col-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  #cmp-error { margin-bottom: 14px; }
+  #cmp-loader { padding: 44px; }
+  #cmp-results { margin-top: 4px; }
+
   /* ── Toast ── */
   .toast {
     position: fixed; bottom: 24px; left: 50%;
@@ -374,6 +635,7 @@
     .controls-bar { flex-direction: column; align-items: stretch; }
     .btn-primary { width: 100%; text-align: center; }
     .one-sentence { font-size: 1.05rem; }
+    .mode-tab-btn { padding: 10px 12px 12px; font-size: 0.82rem; }
   }
 </style>
 </head>
@@ -381,8 +643,8 @@
 
 <header>
   <div class="badge">Agent #13 of 97</div>
-  <h1>CS Concept Simplifier</h1>
-  <p>Any concept, explained so it actually makes sense.</p>
+  <h1>CS Concept Deep Diver</h1>
+  <p>Any concept, explained so it actually makes sense — with FAANG insights.</p>
 
   <div class="api-bar">
     <span class="key-label">Gemini API Key</span>
@@ -391,6 +653,14 @@
   </div>
 </header>
 
+<!-- Mode tabs -->
+<div class="mode-tabs-bar">
+  <button class="mode-tab-btn active" onclick="switchMode('explain', this)">✨ Explain</button>
+  <button class="mode-tab-btn" onclick="switchMode('compare', this)">⚖️ Compare</button>
+</div>
+
+<!-- ═══════════════════ EXPLAIN MODE ═══════════════════ -->
+<div id="mode-explain" class="mode-panel active">
 <main>
   <!-- History -->
   <div id="history-section">
@@ -449,6 +719,29 @@
     <div class="deeper-content" id="deeperContent"></div>
   </div>
 </main>
+</div><!-- /mode-explain -->
+
+<!-- ═══════════════════ COMPARE MODE ═══════════════════ -->
+<div id="mode-compare" class="mode-panel">
+<main>
+  <p class="compare-intro">Enter two CS concepts to get a side-by-side breakdown — definition, use case, complexity, and when to choose each one.</p>
+
+  <div class="compare-search-row">
+    <input type="text" id="cmpConceptA" placeholder="e.g. Stack" autocomplete="off">
+    <span class="vs-badge">VS</span>
+    <input type="text" id="cmpConceptB" placeholder="e.g. Queue" autocomplete="off">
+    <button class="btn-primary" id="compareBtn" onclick="runComparison()">⚖️ Compare</button>
+  </div>
+
+  <div class="error-box" id="cmp-error"></div>
+  <div class="loader" id="cmp-loader">
+    <div class="spinner"></div>
+    <div>Comparing…</div>
+  </div>
+
+  <div id="cmp-results"></div>
+</main>
+</div><!-- /mode-compare -->
 
 <div class="toast" id="toast"></div>
 
@@ -463,6 +756,7 @@ const QUICK_PICKS = [
 // ── State ──
 let lastConcept = '';
 let lastData = null;
+let isComparing = false;
 
 // ── API key ──
 const apiInput = document.getElementById('apiKey');
@@ -478,6 +772,20 @@ apiInput.addEventListener('input', () => {
 document.getElementById('conceptInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') simplify();
 });
+document.getElementById('cmpConceptA').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runComparison();
+});
+document.getElementById('cmpConceptB').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runComparison();
+});
+
+// ── Mode switching ──
+function switchMode(name, btn) {
+  document.querySelectorAll('.mode-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('mode-' + name).classList.add('active');
+}
 
 // ── Quick pick chips ──
 const qc = document.getElementById('quickChips');
@@ -571,7 +879,12 @@ Respond in this exact JSON format:
   "dontConfuseWith": [
     { "concept": "Related concept", "difference": "One-line distinction" }
   ],
-  "whyItMatters": "Practical reason a developer needs to know this"
+  "whyItMatters": "Practical reason a developer needs to know this",
+  "prerequisites": ["Most important concept to know first", "Second prerequisite", "Third prerequisite"],
+  "unlocks": ["Advanced concept this knowledge enables", "Second advanced topic", "Third thing this unlocks"],
+  "faangInterviewType": "Coding / System Design / Both / Behavioral",
+  "faangSampleQuestion": "A realistic interview question you'd see at Google, Meta, or Amazon about this concept",
+  "faangKeyInsight": "2-3 sentences on what the interviewer is really testing and what most candidates miss"
 }
 
 Return only the JSON, no markdown.`;
@@ -672,6 +985,91 @@ function renderResults(d, lang) {
   `;
 
   document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+
+  // Render prerequisite map
+  renderPrereqMap(d);
+
+  // Render FAANG angle
+  renderFAANGAngle(d);
+}
+
+// ── Prereq Map ──
+function renderPrereqMap(d) {
+  const prereqs = d.prerequisites || [];
+  const unlocks = d.unlocks || [];
+  if (!prereqs.length && !unlocks.length) return;
+
+  const container = document.getElementById('results');
+  const card = document.createElement('div');
+  card.className = 'prereq-card';
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-icon">🗺️</div>
+      <div class="card-title">Concept Prerequisite Map</div>
+    </div>
+    ${prereqs.length ? `
+    <div class="prereq-section">
+      <div class="prereq-section-label learn-first">📚 Learn this first</div>
+      <div class="prereq-chips-row" id="prereq-chips-learn"></div>
+    </div>` : ''}
+    ${unlocks.length ? `
+    <div class="prereq-section">
+      <div class="prereq-section-label unlocks">🔓 What this unlocks</div>
+      <div class="prereq-chips-row" id="prereq-chips-unlock"></div>
+    </div>` : ''}
+  `;
+  container.appendChild(card);
+
+  if (prereqs.length) {
+    const learnRow = card.querySelector('#prereq-chips-learn');
+    prereqs.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'prereq-chip';
+      btn.textContent = c;
+      btn.onclick = () => loadConceptChip(c);
+      learnRow.appendChild(btn);
+    });
+  }
+  if (unlocks.length) {
+    const unlockRow = card.querySelector('#prereq-chips-unlock');
+    unlocks.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'unlock-chip';
+      btn.textContent = c;
+      btn.onclick = () => loadConceptChip(c);
+      unlockRow.appendChild(btn);
+    });
+  }
+}
+
+function loadConceptChip(concept) {
+  // Switch to explain mode if needed
+  const explainBtn = document.querySelector('.mode-tab-btn');
+  switchMode('explain', explainBtn);
+  document.getElementById('conceptInput').value = concept;
+  simplify();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── FAANG Angle ──
+function renderFAANGAngle(d) {
+  if (!d.faangSampleQuestion && !d.faangKeyInsight) return;
+
+  const container = document.getElementById('results');
+  const card = document.createElement('div');
+  card.className = 'faang-card';
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-icon">🎯</div>
+      <div class="card-title">FAANG Interview Angle</div>
+    </div>
+    ${d.faangInterviewType ? `<div class="faang-interview-badge">🏷️ ${esc(d.faangInterviewType)} Interview</div>` : ''}
+    ${d.faangSampleQuestion ? `<div class="faang-question">"${esc(d.faangSampleQuestion)}"</div>` : ''}
+    ${d.faangKeyInsight ? `
+    <div class="faang-insight-label">💡 Key insight</div>
+    <div class="faang-insight">${esc(d.faangKeyInsight)}</div>` : ''}
+  `;
+  container.appendChild(card);
 }
 
 // ── Go deeper ──
@@ -705,6 +1103,128 @@ Write in clear, engaging prose (3-5 paragraphs). No JSON needed — just write n
     deepLoader.style.display = 'none';
     document.getElementById('deeperBtn').disabled = false;
   }
+}
+
+// ── Compare mode ──
+async function runComparison() {
+  if (isComparing) return;
+  const conceptA = document.getElementById('cmpConceptA').value.trim();
+  const conceptB = document.getElementById('cmpConceptB').value.trim();
+
+  showCmpError('');
+  if (!conceptA || !conceptB) { showCmpError('Please enter both concepts to compare.'); return; }
+  if (conceptA.toLowerCase() === conceptB.toLowerCase()) { showCmpError('Please enter two different concepts.'); return; }
+
+  isComparing = true;
+  const btn = document.getElementById('compareBtn');
+  btn.disabled = true;
+  const loader = document.getElementById('cmp-loader');
+  loader.classList.add('visible');
+  document.getElementById('cmp-results').innerHTML = '';
+
+  const prompt = `Compare these two CS concepts side by side: "${conceptA}" vs "${conceptB}".
+
+Respond in this exact JSON format:
+{
+  "conceptA": "${conceptA}",
+  "conceptB": "${conceptB}",
+  "definitionA": "One clear sentence defining ${conceptA}",
+  "definitionB": "One clear sentence defining ${conceptB}",
+  "useCaseA": "Primary use case or where you'd reach for ${conceptA}",
+  "useCaseB": "Primary use case or where you'd reach for ${conceptB}",
+  "complexityA": "Time/space complexity summary for ${conceptA}",
+  "complexityB": "Time/space complexity summary for ${conceptB}",
+  "prosA": ["Strength 1", "Strength 2"],
+  "prosB": ["Strength 1", "Strength 2"],
+  "consA": ["Weakness 1", "Weakness 2"],
+  "consB": ["Weakness 1", "Weakness 2"],
+  "keyDifference": "The single most important conceptual difference between these two, in 2-3 sentences",
+  "whenChooseA": "Specific scenario where you should pick ${conceptA} over ${conceptB}",
+  "whenChooseB": "Specific scenario where you should pick ${conceptB} over ${conceptA}"
+}
+
+Return only the JSON, no markdown.`;
+
+  try {
+    const raw = await callGemini(prompt);
+    const d = extractJSON(raw);
+    renderComparison(d);
+  } catch (e) {
+    showCmpError(e.message || 'Something went wrong. Try again.');
+  } finally {
+    isComparing = false;
+    btn.disabled = false;
+    loader.classList.remove('visible');
+  }
+}
+
+function renderComparison(d) {
+  const out = document.getElementById('cmp-results');
+
+  const prosA = (d.prosA || []).map(p => `<li>${esc(p)}</li>`).join('');
+  const prosB = (d.prosB || []).map(p => `<li>${esc(p)}</li>`).join('');
+  const consA = (d.consA || []).map(p => `<li>${esc(p)}</li>`).join('');
+  const consB = (d.consB || []).map(p => `<li>${esc(p)}</li>`).join('');
+
+  out.innerHTML = `
+    <div class="compare-grid">
+      <!-- Headers -->
+      <div class="cmp-col">
+        <div class="cmp-col-header">📘 ${esc(d.conceptA || '')}</div>
+        <div style="color:#bfdbfe;font-size:0.9rem;line-height:1.6">${esc(d.definitionA || '')}</div>
+      </div>
+      <div class="cmp-col">
+        <div class="cmp-col-header">📗 ${esc(d.conceptB || '')}</div>
+        <div style="color:#bbf7d0;font-size:0.9rem;line-height:1.6">${esc(d.definitionB || '')}</div>
+      </div>
+
+      <!-- Use case -->
+      <div class="cmp-row-label">🎯 Primary Use Case</div>
+      <div class="cmp-col">${esc(d.useCaseA || '')}</div>
+      <div class="cmp-col">${esc(d.useCaseB || '')}</div>
+
+      <!-- Complexity -->
+      <div class="cmp-row-label">⏱ Complexity</div>
+      <div class="cmp-col" style="font-family:monospace;font-size:0.88rem">${esc(d.complexityA || '')}</div>
+      <div class="cmp-col" style="font-family:monospace;font-size:0.88rem">${esc(d.complexityB || '')}</div>
+
+      <!-- Pros -->
+      <div class="cmp-row-label">✅ Strengths</div>
+      <div class="cmp-col"><ul class="bullet-list">${prosA}</ul></div>
+      <div class="cmp-col"><ul class="bullet-list">${prosB}</ul></div>
+
+      <!-- Cons -->
+      <div class="cmp-row-label">⚠️ Weaknesses</div>
+      <div class="cmp-col"><ul class="bullet-list">${consA}</ul></div>
+      <div class="cmp-col"><ul class="bullet-list">${consB}</ul></div>
+
+      <!-- Key difference -->
+      ${d.keyDifference ? `
+      <div class="cmp-key-diff">
+        <div class="cmp-key-diff-label">🔑 The key difference</div>
+        ${esc(d.keyDifference)}
+      </div>` : ''}
+
+      <!-- When to choose -->
+      ${(d.whenChooseA || d.whenChooseB) ? `
+      <div class="cmp-when-to">
+        <div class="cmp-when-col">
+          <div class="cmp-when-col-title">✅ Use ${esc(d.conceptA || '')} when…</div>
+          ${esc(d.whenChooseA || '')}
+        </div>
+        <div class="cmp-when-col">
+          <div class="cmp-when-col-title">✅ Use ${esc(d.conceptB || '')} when…</div>
+          ${esc(d.whenChooseB || '')}
+        </div>
+      </div>` : ''}
+    </div>
+  `;
+}
+
+function showCmpError(msg) {
+  const box = document.getElementById('cmp-error');
+  box.textContent = msg;
+  box.classList.toggle('visible', !!msg);
 }
 
 // ── Helpers ──
