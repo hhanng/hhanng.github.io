@@ -14,7 +14,7 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-██████████████████████████████████████████████████  103 / 100 🏆
+██████████████████████████████████████████████████  107 / 100 🏆
 ```
 
 **100 / 100 complete — Challenge done!** 🎉 — progress bar on the live site updates automatically 🎉
@@ -162,6 +162,10 @@ for founders, indie hackers, and anyone shipping something
 | [#98](https://hhanng.github.io/agent-98-graph-algorithms-visualizer/) | Graph Algorithms Visualizer | 9 algorithms animated step by step (BFS, DFS, Dijkstra, Bellman-Ford, Prim's, Kruskal's, Topo Sort, Cycle Detection, Bipartite), 6 example graphs, 15 challenges, 20 flip-card Q&As |
 | [#99](https://hhanng.github.io/agent-99-llm-generative-ai-roadmap/) | LLM & Generative AI Roadmap | 6-stage roadmap from foundations to production, 20 concept explainers (self-attention, RAG, RLHF, temperature, LoRA, quantization), prompt builder, token counter, 40 curated resources |
 | [#100 🏆](https://hhanng.github.io/agent-100-behavioral-interview-star-bank/) | Behavioral Interview STAR Bank | STAR story bank with quality checker, 60 questions across all 16 Amazon LPs + Google/Meta/Apple/Microsoft, answer analyzer (5 dimensions), LP mapper, "tell me about yourself" builder |
+| [#101](https://hhanng.github.io/agent-101.html) | FAANG Mock Coding Round | 20 problems (5 Easy / 10 Medium / 5 Hard), 45-min SVG ring timer, Python/JS/Java editor with line numbers, 3 progressive hints per problem, model solutions with complexity, self-rating system, history + streak dashboard |
+| [#102](https://hhanng.github.io/agent-102.html) | Vietnamese Teen School Navigator | 8-tab school guide in EN/VI for Vietnamese families — Registration, Classroom, Counselor/IEP, Grades + GPA calculator, AP & Honors, Clubs, College Prep 30-month timeline, Talking to Parents; 50-term glossary, flip cards, progress checklists |
+| [#103](https://hhanng.github.io/agent-103.html) | Full-Stack Project Scaffold Generator | 3-step wizard, 6 tech-stack presets (Next.js, Vite, T3, Django, NestJS, SvelteKit), generates file tree, package.json, .env.example, README.md, first 5 git commits, 30-day build plan; dark/light toggle |
+| [#104](https://hhanng.github.io/agent-104.html) | Mom's Everyday English Survival Kit | 10 life-situation tabs (Grocery, Doctor, Bank, DMV, Workplace, Phone, Landlord, School, Emergency, Small Talk) with EN/VI flip cards, full conversation scripts, text-to-speech audio, fill-in-blank quizzes, personal phrasebook |
 
 &nbsp;
 
@@ -216,4 +220,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-29 · 100/100 complete 🏆 · agent #100 Behavioral Interview STAR Bank: https://hhanng.github.io/agent-100-behavioral-interview-star-bank/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-29 · 104 agents built · latest: #104 Mom's Everyday English Survival Kit: https://hhanng.github.io/agent-104.html</sub>
