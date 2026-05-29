@@ -1,1242 +1,616 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dev Workflow Companion — Bug Explainer, PR & Changelog</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #0f0f0f; --card: #1a1a1a; --card2: #222; --border: #2a2a2a;
-      --amber: #f59e0b; --amber-dim: #d97706; --blue: #3b82f6; --green: #22c55e;
-      --red: #ef4444; --purple: #a855f7; --teal: #14b8a6;
-      --text: #e5e7eb; --muted: #9ca3af;
-      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      --mono: 'Cascadia Code', 'Fira Code', Consolas, monospace;
-    }
-    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; padding: 24px 16px 60px; }
-    .container { max-width: 960px; margin: 0 auto; }
-
-    /* Header */
-    header { text-align: center; margin-bottom: 28px; }
-    header .badge { display: inline-block; background: #1a1a1a; border: 1px solid var(--border); color: var(--muted); font-size: 11px; letter-spacing: 1px; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; text-transform: uppercase; }
-    header h1 { font-size: clamp(24px, 5vw, 38px); font-weight: 800; letter-spacing: -1px; }
-    header h1 span { color: var(--amber); }
-    header p { color: var(--muted); margin-top: 8px; font-size: 15px; }
-
-    /* API Key */
-    .api-row { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; }
-    .api-row label { font-size: 13px; color: var(--muted); white-space: nowrap; font-weight: 600; }
-    .api-row input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: var(--mono); font-size: 13px; min-width: 0; }
-    .api-row input::placeholder { color: #555; }
-    .api-save-btn { background: var(--amber); color: #000; border: none; border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background .2s; }
-    .api-save-btn:hover { background: var(--amber-dim); }
-    .api-status { font-size: 11px; color: var(--green); white-space: nowrap; display: none; }
-
-    /* Tab Nav */
-    .tab-nav { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 24px; }
-    .tab-btn { flex: 1; background: transparent; border: none; color: var(--muted); padding: 11px 8px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all .2s; white-space: nowrap; }
-    .tab-btn.active { background: var(--amber); color: #000; }
-    .tab-btn:hover:not(.active) { color: var(--text); background: rgba(255,255,255,.05); }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-
-    /* Code input panels */
-    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    @media (max-width: 640px) { .panels { grid-template-columns: 1fr; } }
-    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-    .panel-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #1f1f1f; border-bottom: 1px solid var(--border); }
-    .panel-header .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-red { background: #ff5f57; } .dot-yellow { background: #febc2e; } .dot-green { background: #28c840; }
-    .panel-title { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .5px; margin-left: 4px; }
-    textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: var(--mono); font-size: 13px; line-height: 1.6; padding: 14px; resize: vertical; min-height: 180px; }
-    textarea::placeholder { color: #444; }
-
-    /* Controls */
-    .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; align-items: center; }
-    .select-wrap { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
-    .select-wrap label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-    select { background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; padding: 9px 12px; outline: none; cursor: pointer; transition: border-color .2s; }
-    select:focus { border-color: var(--amber); }
-
-    /* Main action buttons */
-    .main-btn { width: 100%; border: none; border-radius: 10px; padding: 15px; font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: .3px; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px; }
-    .main-btn-amber { background: var(--amber); color: #000; }
-    .main-btn-amber:hover:not(:disabled) { background: var(--amber-dim); transform: translateY(-1px); }
-    .main-btn-blue { background: var(--blue); color: #fff; }
-    .main-btn-blue:hover:not(:disabled) { background: #2563eb; transform: translateY(-1px); }
-    .main-btn-teal { background: var(--teal); color: #fff; }
-    .main-btn-teal:hover:not(:disabled) { background: #0d9488; transform: translateY(-1px); }
-    .main-btn:disabled { opacity: .6; cursor: not-allowed; transform: none !important; }
-
-    /* Spinner */
-    .spinner { width: 18px; height: 18px; border: 3px solid rgba(0,0,0,.3); border-top-color: currentColor; border-radius: 50%; animation: spin .7s linear infinite; display: none; flex-shrink: 0; }
-    .main-btn-blue .spinner, .main-btn-teal .spinner { border-color: rgba(255,255,255,.3); border-top-color: #fff; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Result cards (Bug Explainer) */
-    #results { display: none; }
-    .results-grid { display: grid; gap: 16px; margin-bottom: 24px; }
-    .result-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; border-top: 3px solid transparent; opacity: 0; transform: translateY(16px); transition: opacity .4s ease, transform .4s ease; }
-    .result-card.visible { opacity: 1; transform: translateY(0); }
-    .card-amber { border-top-color: var(--amber); } .card-blue { border-top-color: var(--blue); }
-    .card-green { border-top-color: var(--green); } .card-purple { border-top-color: var(--purple); }
-    .card-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
-    .label-amber { color: var(--amber); } .label-blue { color: var(--blue); } .label-green { color: var(--green); } .label-purple { color: var(--purple); }
-    .one-liner { font-size: 20px; font-weight: 700; line-height: 1.4; color: #fff; }
-    .why-text { font-size: 15px; line-height: 1.7; }
-    .analogy-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.25); color: var(--blue); font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; margin-bottom: 8px; }
-    .fix-explanation { font-size: 14px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
-    .diff-view { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 14px; font-family: var(--mono); font-size: 13px; }
-    .diff-header { background: #141414; padding: 6px 12px; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); letter-spacing: .5px; }
-    .diff-line { display: flex; align-items: flex-start; padding: 4px 12px; line-height: 1.6; }
-    .diff-line.removed { background: rgba(239,68,68,.1); border-left: 3px solid var(--red); }
-    .diff-line.added { background: rgba(34,197,94,.1); border-left: 3px solid var(--green); }
-    .diff-sign { width: 18px; flex-shrink: 0; font-weight: 700; user-select: none; }
-    .diff-line.removed .diff-sign { color: var(--red); } .diff-line.added .diff-sign { color: var(--green); }
-    .diff-code { flex: 1; white-space: pre-wrap; word-break: break-all; }
-    .diff-line.removed .diff-code { color: #fca5a5; } .diff-line.added .diff-code { color: #86efac; }
-    .copy-btn { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.3); color: var(--green); border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 6px; }
-    .copy-btn:hover { background: rgba(34,197,94,.25); }
-    .copy-btn.copied { color: #fff; background: var(--green); border-color: var(--green); }
-    .warning-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .warning-item { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.6; }
-    .warning-icon { width: 22px; height: 22px; background: rgba(168,85,247,.15); border: 1px solid rgba(168,85,247,.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; color: var(--purple); font-weight: 700; margin-top: 1px; }
-
-    /* Follow-up chat */
-    #followupSection { margin-bottom: 24px; }
-    #followupToggle { width: 100%; background: transparent; border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
-    #followupToggle:hover { border-color: var(--amber); color: var(--amber); }
-    #followupChat { display: none; }
-    .chat-messages { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .msg { padding: 10px 14px; border-radius: 8px; font-size: 14px; line-height: 1.6; max-width: 85%; }
-    .msg.user { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.2); align-self: flex-end; }
-    .msg.ai { background: #222; border: 1px solid var(--border); align-self: flex-start; }
-    .chat-input-row { display: flex; gap: 8px; }
-    #followupInput { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; outline: none; transition: border-color .2s; }
-    #followupInput:focus { border-color: var(--amber); }
-    #followupInput::placeholder { color: #555; }
-    #sendFollowup { background: var(--amber); color: #000; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background .2s; }
-    #sendFollowup:hover:not(:disabled) { background: var(--amber-dim); }
-    #sendFollowup:disabled { opacity: .6; cursor: not-allowed; }
-
-    /* History */
-    #historySection { border-top: 1px solid var(--border); padding-top: 24px; margin-top: 8px; }
-    .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .history-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-    #clearHistory { background: transparent; border: none; color: #555; font-size: 12px; cursor: pointer; transition: color .2s; }
-    #clearHistory:hover { color: var(--red); }
-    .history-list { display: flex; flex-direction: column; gap: 8px; }
-    .history-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; cursor: pointer; transition: border-color .2s; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .history-item:hover { border-color: var(--amber); }
-    .history-item-info { flex: 1; min-width: 0; }
-    .history-item-summary { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .history-item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .history-badge { background: #1f1f1f; border: 1px solid var(--border); color: var(--muted); font-size: 11px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
-    .no-history { color: var(--muted); font-size: 13px; text-align: center; padding: 20px; }
-
-    /* Form inputs (PR, Changelog) */
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-    .form-input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--font); font-size: 14px; padding: 10px 14px; outline: none; transition: border-color .2s; }
-    .form-input:focus { border-color: var(--blue); }
-    .form-input::placeholder { color: #555; }
-    .form-textarea { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 13px; padding: 12px 14px; outline: none; resize: vertical; min-height: 130px; line-height: 1.6; transition: border-color .2s; }
-    .form-textarea:focus { border-color: var(--blue); }
-    .form-textarea::placeholder { color: #444; }
-    .tone-toggle { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-    .tone-btn { flex: 1; background: transparent; border: none; color: var(--muted); padding: 9px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
-    .tone-btn.active { background: var(--blue); color: #fff; }
-    .tone-btn:hover:not(.active) { background: rgba(255,255,255,.05); color: var(--text); }
-
-    /* PR Output */
-    .pr-output, .cl-output { display: none; }
-    .output-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-    .pr-section { margin-bottom: 18px; }
-    .pr-section:last-child { margin-bottom: 0; }
-    .pr-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--blue); margin-bottom: 8px; }
-    .pr-title-display { font-family: var(--mono); font-size: 14px; font-weight: 700; background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); }
-    .pr-summary-text { font-size: 14px; line-height: 1.7; }
-    .pr-bullet-list, .pr-test-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-    .pr-bullet-list li, .pr-test-list li { display: flex; gap: 8px; font-size: 14px; line-height: 1.5; }
-    .pr-bullet-list li::before { content: '•'; color: var(--blue); flex-shrink: 0; font-weight: 700; }
-    .pr-test-list li::before { content: '☐'; color: var(--green); flex-shrink: 0; }
-    .pr-screenshot-note { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.2); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--amber); }
-    .action-copy-btn { width: 100%; border-radius: 8px; padding: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; margin-top: 4px; border: 1px solid; }
-    .action-copy-btn-blue { background: rgba(59,130,246,.15); border-color: rgba(59,130,246,.3); color: var(--blue); }
-    .action-copy-btn-blue:hover { background: rgba(59,130,246,.25); }
-    .action-copy-btn-blue.copied { background: var(--blue); color: #fff; border-color: var(--blue); }
-    .action-copy-btn-teal { background: rgba(20,184,166,.15); border-color: rgba(20,184,166,.3); color: var(--teal); }
-    .action-copy-btn-teal:hover { background: rgba(20,184,166,.25); }
-    .action-copy-btn-teal.copied { background: var(--teal); color: #fff; border-color: var(--teal); }
-
-    /* Changelog output */
-    .cl-group { margin-bottom: 18px; }
-    .cl-group-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-    .cl-items { list-style: none; display: flex; flex-direction: column; gap: 5px; }
-    .cl-items li { display: flex; gap: 8px; font-size: 14px; line-height: 1.5; }
-    .cl-items li::before { content: '–'; color: var(--muted); flex-shrink: 0; }
-
-    /* Toast */
-    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #2a0a0a; border: 1px solid var(--red); color: #fca5a5; padding: 12px 20px; border-radius: 10px; font-size: 14px; transition: transform .3s ease; z-index: 999; max-width: 90vw; text-align: center; }
-    #toast.show { transform: translateX(-50%) translateY(0); }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Workflow Companion — Agent #08</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--card:#21262d;--border:#30363d;
+  --text:#e6edf3;--sub:#8b949e;--amber:#e3b341;--green:#3fb950;
+  --blue:#58a6ff;--red:#f85149;--purple:#bc8cff;
+  --mono:'Fira Code','Cascadia Code',Consolas,monospace
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+/* ── HEADER ── */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:12px}
+header h1{font-size:1.05rem;font-weight:700;color:var(--amber)}
+header h1 span{color:var(--sub);font-weight:400;font-size:.82rem;margin-left:6px}
+.api-row{display:flex;align-items:center;gap:8px;margin-left:auto}
+.api-row label{font-size:.75rem;color:var(--sub)}
+.api-row input{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:.78rem;font-family:var(--mono);width:260px;outline:none}
+.api-row input:focus{border-color:var(--amber)}
+/* ── TABS ── */
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;gap:4px}
+.tab{padding:11px 18px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--sub);border-bottom:2px solid transparent;transition:.15s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--amber);border-bottom-color:var(--amber)}
+/* ── PAGES ── */
+.page{display:none;padding:24px 20px;max-width:1100px;margin:0 auto}
+.page.active{display:block}
+/* ── FORM ELEMENTS ── */
+label.lbl{display:block;font-size:.78rem;font-weight:600;color:var(--sub);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+select,input[type=text]{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:.88rem;outline:none;width:100%;transition:.15s}
+select:focus,input[type=text]:focus{border-color:var(--blue)}
+textarea{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:.84rem;line-height:1.6;resize:vertical;outline:none;width:100%;transition:.15s}
+textarea:focus{border-color:var(--blue)}
+/* ── BUTTONS ── */
+.btn{padding:9px 20px;border-radius:7px;border:none;cursor:pointer;font-size:.85rem;font-weight:700;transition:.15s}
+.btn-amber{background:#d97706;color:#fff}
+.btn-amber:hover{background:#b45309}
+.btn-blue{background:#1f6feb;color:#fff}
+.btn-blue:hover{background:#1158cc}
+.btn-green{background:#1a7f37;color:#fff}
+.btn-green:hover{background:#15632e}
+.btn-sm{padding:5px 12px;font-size:.75rem;border-radius:5px;background:var(--card);color:var(--sub);border:1px solid var(--border);cursor:pointer}
+.btn-sm:hover{border-color:var(--blue);color:var(--blue)}
+/* ── LAYOUT ── */
+.row{display:flex;gap:16px;flex-wrap:wrap}
+.col{flex:1;min-width:280px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.sec-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--sub);margin-bottom:8px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px}
+.card-title{font-size:.82rem;font-weight:700;color:var(--amber);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+/* ── CODE BLOCK ── */
+.code-block{background:#0d1117;border:1px solid var(--border);border-radius:8px;overflow:auto;font-family:var(--mono);font-size:.82rem;line-height:1.7;color:var(--text);position:relative}
+.code-block pre{padding:14px 14px 14px 52px;min-height:60px}
+.code-block .line-nums{position:absolute;left:0;top:0;padding:14px 8px;color:#484f58;text-align:right;user-select:none;line-height:1.7;min-width:38px;border-right:1px solid var(--border);background:var(--surface)}
+/* ── OUTPUT SECTIONS ── */
+.out-section{margin-bottom:16px}
+.out-section h4{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;border-radius:6px 6px 0 0;margin-bottom:0}
+.out-section .out-body{border-radius:0 0 6px 6px;padding:12px 14px;font-size:.88rem;line-height:1.7;border:1px solid}
+.out-error h4{background:#3a1a1a;color:var(--red);border-color:var(--red)40}
+.out-error .out-body{background:#1e0e0e;border-color:var(--red)30;color:#f0a0a0}
+.out-trace h4{background:#1a1e2e;color:var(--blue);border-color:var(--blue)40}
+.out-trace .out-body{background:#0e1018;border-color:var(--blue)30;color:#a0c8f0}
+.out-root h4{background:#2a1e0e;color:var(--amber);border-color:var(--amber)40}
+.out-root .out-body{background:#1a1208;border-color:var(--amber)30;color:#e8d080}
+.out-fix h4{background:#0e2a14;color:var(--green);border-color:var(--green)40}
+.out-fix .out-body{background:#080e0a;border-color:var(--green)30}
+/* ── VAR TABLE ── */
+.var-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.8rem;margin-top:8px}
+.var-table th{background:var(--card);padding:7px 10px;text-align:left;color:var(--sub);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)}
+.var-table td{padding:7px 10px;border-bottom:1px solid var(--border)20;vertical-align:top}
+.var-table tr:last-child td{border-bottom:none}
+.val-before{color:var(--red)}
+.val-after{color:var(--green)}
+/* ── HISTORY ── */
+.hist-list{display:flex;flex-direction:column;gap:6px}
+.hist-item{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:.15s}
+.hist-item:hover{border-color:var(--amber);background:#21262d}
+.hist-lang{font-size:.7rem;padding:1px 6px;border-radius:4px;background:var(--surface);color:var(--sub);flex-shrink:0}
+.hist-preview{font-size:.8rem;color:var(--sub);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.hist-time{font-size:.7rem;color:#484f58;flex-shrink:0}
+/* ── PR ── */
+.pr-output{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:var(--mono);font-size:.82rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;color:var(--text);min-height:80px}
+/* ── CHANGELOG ── */
+.cl-group{margin-bottom:12px}
+.cl-group h4{font-size:.88rem;font-weight:700;color:var(--amber);margin-bottom:6px}
+.cl-group li{font-size:.85rem;color:var(--text);margin-bottom:3px;padding-left:4px}
+.cl-output{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:var(--mono);font-size:.82rem;line-height:1.7;white-space:pre-wrap;color:var(--text);min-height:60px;max-height:500px;overflow-y:auto}
+/* ── LOADER ── */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ── TOGGLE ── */
+.toggle-row{display:flex;align-items:center;gap:10px}
+.toggle-switch{position:relative;width:38px;height:21px;flex-shrink:0}
+.toggle-switch input{display:none}
+.t-slider{position:absolute;inset:0;background:var(--card);border:1px solid var(--border);border-radius:11px;cursor:pointer;transition:.2s}
+.t-slider::after{content:'';position:absolute;width:15px;height:15px;border-radius:50%;background:#aaa;top:2px;left:2px;transition:.2s}
+input:checked+.t-slider{background:var(--green);border-color:var(--green)}
+input:checked+.t-slider::after{transform:translateX(17px);background:#fff}
+</style>
 </head>
 <body>
-<div class="container">
-
-  <header>
-    <div class="badge">Agent #8 · 100 AI Agents Challenge</div>
-    <h1>Dev <span>Workflow</span> Companion</h1>
-    <p>Bug Explainer <span style="font-size:11px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#22c55e;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;">⚡ offline</span> · PR Description Generator · Changelog Builder</p>
-  </header>
-
+<header>
+  <h1>🛠 Dev Workflow Companion <span>Agent #08</span></h1>
   <div class="api-row">
-    <label>🔑 Gemini API Key</label>
-    <input type="password" id="apiKey" placeholder="AIza... (required for PR &amp; Changelog tabs only)" autocomplete="off" />
-    <button class="api-save-btn" onclick="saveApiKey()">Save</button>
-    <span class="api-status" id="apiStatus">✓ Saved</span>
+    <label>Gemini API Key</label>
+    <input type="password" id="api-key" placeholder="AIza..." oninput="localStorage.setItem('ag08_key',this.value)">
   </div>
+</header>
 
-  <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('bug',this)">🐛 Bug Explainer</button>
-    <button class="tab-btn" onclick="switchTab('pr',this)">📋 PR Description</button>
-    <button class="tab-btn" onclick="switchTab('changelog',this)">📝 Changelog</button>
-    <button class="tab-btn" onclick="switchTab('trace',this)">🪜 Step Tracer</button>
-  </div>
-
-  <!-- ══ TAB 1: Bug Explainer ══ -->
-  <div class="tab-panel active" id="tab-bug">
-    <div class="panels">
-      <div class="panel">
-        <div class="panel-header">
-          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
-          <span class="panel-title">Your buggy code</span>
-        </div>
-        <textarea id="buggyCode" placeholder="# Paste your broken code here...&#10;&#10;def greet(name):&#10;    print('Hello, ' + name)&#10;&#10;greet()  # Forgot the argument!"></textarea>
-      </div>
-      <div class="panel">
-        <div class="panel-header">
-          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
-          <span class="panel-title">Error message / traceback</span>
-        </div>
-        <textarea id="errorMsg" placeholder="Paste the error or traceback here...&#10;&#10;TypeError: greet() missing 1 required positional&#10;argument: 'name'"></textarea>
-      </div>
-    </div>
-
-    <div class="controls">
-      <div class="select-wrap">
-        <label>Language</label>
-        <select id="language">
-          <option>Python</option><option>JavaScript</option><option>Java</option>
-          <option>C++</option><option>TypeScript</option><option>Other</option>
-        </select>
-      </div>
-      <div class="select-wrap">
-        <label>Experience Level</label>
-        <select id="experience">
-          <option>Complete Beginner</option><option>Learning (&lt; 1 year)</option>
-          <option>Intermediate</option><option>Advanced</option>
-        </select>
-      </div>
-    </div>
-
-    <button class="main-btn main-btn-amber" id="explainBtn" onclick="explainBug()">
-      <div class="spinner" id="spinner"></div>
-      <span id="btnText">🔍 Explain This Bug</span>
-    </button>
-
-    <div id="results">
-      <div class="results-grid" id="cardsGrid">
-        <div class="result-card card-amber" id="card1">
-          <div class="card-label label-amber">⚡ The bug in one sentence</div>
-          <div class="one-liner" id="oneLiner"></div>
-        </div>
-        <div class="result-card card-blue" id="card2">
-          <div class="card-label label-blue">🧠 Why this happens</div>
-          <div id="analogyTag" class="analogy-tag" style="display:none;">💡 Real-world analogy</div>
-          <div class="why-text" id="whyText"></div>
-        </div>
-        <div class="result-card card-green" id="card3">
-          <div class="card-label label-green">🔧 The fix</div>
-          <div class="fix-explanation" id="fixExplanation"></div>
-          <div class="diff-view">
-            <div class="diff-header">diff — old vs fixed</div>
-            <div id="diffLines"></div>
-          </div>
-          <button class="copy-btn" id="copyBtn" onclick="copyFixed()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copy fixed code
-          </button>
-        </div>
-        <div class="result-card card-purple" id="card4">
-          <div class="card-label label-purple">👁 How to spot this next time</div>
-          <ul class="warning-list" id="warningList"></ul>
-        </div>
-      </div>
-
-      <div id="followupSection">
-        <button id="followupToggle" onclick="toggleFollowup()">💬 Ask a follow-up question</button>
-        <div id="followupChat">
-          <div class="chat-messages" id="chatMessages"></div>
-          <div class="chat-input-row">
-            <input type="text" id="followupInput" placeholder="e.g. Can you show me another example?" onkeydown="if(event.key==='Enter')sendFollowup()" />
-            <button id="sendFollowup" onclick="sendFollowup()">Send</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="historySection">
-        <div class="history-header">
-          <span class="history-title">📋 Recent bugs</span>
-          <button id="clearHistory" onclick="clearHistory()">Clear all</button>
-        </div>
-        <div class="history-list" id="historyList"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ TAB 2: PR Description Generator ══ -->
-  <div class="tab-panel" id="tab-pr">
-    <div class="form-group">
-      <label>PR Title — what does this PR do?</label>
-      <input type="text" class="form-input" id="prTitle" placeholder="e.g. Fix login button on mobile, Add OAuth2 Google login, Refactor auth service..." />
-    </div>
-    <div class="form-group">
-      <label>Changed Files or Diff Summary</label>
-      <textarea class="form-textarea" id="prChanges" placeholder="e.g.&#10;- src/components/LoginButton.tsx — fixed touch target size&#10;- styles/theme.css — added .dark class variables&#10;- api/auth.ts — extracted token refresh into AuthService&#10;- tests/login.test.ts — added mobile test cases"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Ticket / Issue # (optional)</label>
-      <input type="text" class="form-input" id="prTicket" placeholder="e.g. JIRA-1234, #456, GH-89" />
-    </div>
-    <div class="form-group">
-      <label>Tone</label>
-      <div class="tone-toggle">
-        <button class="tone-btn active" onclick="setTone('concise',this)">⚡ Concise</button>
-        <button class="tone-btn" onclick="setTone('detailed',this)">📄 Detailed</button>
-      </div>
-    </div>
-
-    <button class="main-btn main-btn-blue" id="prBtn" onclick="generatePR()">
-      <div class="spinner" id="prSpinner"></div>
-      <span id="prBtnText">📋 Generate PR Description</span>
-    </button>
-
-    <div class="pr-output" id="prOutput">
-      <div class="output-card">
-        <div class="pr-section">
-          <div class="pr-section-title">PR Title (Conventional Format)</div>
-          <div class="pr-title-display" id="prTitleOut"></div>
-        </div>
-        <div class="pr-section">
-          <div class="pr-section-title">Summary</div>
-          <div class="pr-summary-text" id="prSummaryOut"></div>
-        </div>
-        <div class="pr-section">
-          <div class="pr-section-title">Changes</div>
-          <ul class="pr-bullet-list" id="prChangesOut"></ul>
-        </div>
-        <div class="pr-section">
-          <div class="pr-section-title">Test Plan</div>
-          <ul class="pr-test-list" id="prTestOut"></ul>
-        </div>
-        <div id="prScreenshotOut" class="pr-screenshot-note" style="display:none;margin-top:12px;"></div>
-        <button class="action-copy-btn action-copy-btn-blue" id="prCopyBtn" onclick="copyPR()" style="margin-top:16px;">📋 Copy as Markdown</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ TAB 3: Changelog Builder ══ -->
-  <div class="tab-panel" id="tab-changelog">
-    <div class="form-group">
-      <label>Paste Commit Messages (one per line, 3–10 commits)</label>
-      <textarea class="form-textarea" id="clInput" style="min-height:200px" placeholder="feat(auth): add OAuth2 Google login&#10;fix(ui): resolve mobile button tap target too small&#10;chore: update dependencies to latest versions&#10;feat(dashboard): add real-time notifications&#10;fix: prevent XSS in comment parser&#10;BREAKING CHANGE: rename /api/users to /api/v2/users&#10;docs: add API rate limiting documentation&#10;chore(ci): add GitHub Actions deploy workflow"></textarea>
-    </div>
-
-    <button class="main-btn main-btn-teal" id="clBtn" onclick="buildChangelog()">
-      <div class="spinner" id="clSpinner"></div>
-      <span id="clBtnText">📝 Build Changelog</span>
-    </button>
-
-    <div class="cl-output" id="clOutput">
-      <div class="output-card" id="clContent"></div>
-      <button class="action-copy-btn action-copy-btn-teal" id="clCopyBtn" onclick="copyChangelog()">📋 Copy Changelog</button>
-    </div>
-  </div>
-
-  <!-- ══ TAB 4: Step Tracer ══ -->
-  <div class="tab-panel" id="tab-trace">
-    <div class="form-group">
-      <label>Code to Trace</label>
-      <textarea class="form-textarea" id="traceCode" style="min-height:180px" placeholder="Paste code here to walk through it step-by-step...&#10;&#10;def factorial(n):&#10;    if n &lt;= 1:&#10;        return 1&#10;    return n * factorial(n - 1)&#10;&#10;result = factorial(5)&#10;print(result)"></textarea>
-    </div>
-    <div class="controls">
-      <div class="select-wrap">
-        <label>Language</label>
-        <select id="traceLang">
-          <option>Python</option><option>JavaScript</option><option>Java</option>
-          <option>C++</option><option>TypeScript</option><option>Other</option>
-        </select>
-      </div>
-    </div>
-    <button class="main-btn" style="background:var(--purple);color:#fff;" id="traceBtn" onclick="traceCodeSteps()">
-      <div class="spinner" id="traceSpinner"></div>
-      <span id="traceBtnText">🪜 Trace Step-by-Step</span>
-    </button>
-    <div id="traceOutput" style="display:none;"></div>
-  </div>
-
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('bug',this)">🐛 Bug Tracer</div>
+  <div class="tab" onclick="switchTab('pr',this)">📝 PR Description</div>
+  <div class="tab" onclick="switchTab('cl',this)">📋 Changelog Builder</div>
 </div>
-<div id="toast"></div>
+
+<!-- ═══════════════════ TAB 1 — BUG TRACER ═══════════════════ -->
+<div class="page active" id="tab-bug">
+  <div class="grid2" style="margin-bottom:14px">
+    <div>
+      <label class="lbl">Paste Your Code</label>
+      <textarea id="bug-code" rows="14" placeholder="def divide(a, b):
+    return a / b
+
+result = divide(10, 0)
+print(result)"></textarea>
+    </div>
+    <div>
+      <label class="lbl">Paste the Error Message</label>
+      <textarea id="bug-error" rows="14" placeholder="Traceback (most recent call last):
+  File &quot;app.py&quot;, line 4, in &lt;module&gt;
+    result = divide(10, 0)
+  File &quot;app.py&quot;, line 2, in divide
+    return a / b
+ZeroDivisionError: division by zero"></textarea>
+    </div>
+  </div>
+
+  <div class="row" style="margin-bottom:14px;align-items:flex-end">
+    <div class="col" style="max-width:200px">
+      <label class="lbl">Language</label>
+      <select id="bug-lang">
+        <option>Python</option><option>JavaScript</option><option>TypeScript</option>
+        <option>Java</option><option>C++</option><option>Go</option>
+      </select>
+    </div>
+    <div class="col" style="max-width:200px">
+      <label class="lbl">Level</label>
+      <select id="bug-level">
+        <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+      </select>
+    </div>
+    <div>
+      <button class="btn btn-amber" id="bug-btn" onclick="traceBug()">🔍 Trace the Bug</button>
+    </div>
+  </div>
+
+  <div id="bug-output" style="display:none">
+    <div class="out-section out-error">
+      <h4>📖 ERROR BREAKDOWN</h4>
+      <div class="out-body" id="out-breakdown"></div>
+    </div>
+    <div class="out-section out-trace">
+      <h4>🔢 LINE-BY-LINE TRACE</h4>
+      <div class="out-body" id="out-trace" style="font-family:var(--mono);white-space:pre-line"></div>
+    </div>
+    <div class="out-section out-root">
+      <h4>🎯 ROOT CAUSE</h4>
+      <div class="out-body" id="out-root"></div>
+    </div>
+    <div class="out-section out-fix">
+      <h4>✅ FIXED CODE</h4>
+      <div class="out-body" style="padding:0">
+        <div class="code-block">
+          <div class="line-nums" id="fix-nums"></div>
+          <pre id="fix-code"></pre>
+        </div>
+      </div>
+      <div style="margin-top:6px;text-align:right"><button class="btn-sm" onclick="copyEl('fix-code')">📋 Copy Fixed Code</button></div>
+    </div>
+
+    <div class="card" style="margin-top:4px">
+      <div class="card-title">📊 Variable State Viewer</div>
+      <table class="var-table" id="var-table">
+        <thead><tr><th>Variable</th><th>Value BEFORE (bug)</th><th>Value AFTER (fix)</th><th>Note</th></tr></thead>
+        <tbody id="var-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">🕐 Recent Bugs <span style="font-size:.72rem;color:var(--sub);font-weight:400;margin-left:auto">last 5 · click to reload</span></div>
+    <div class="hist-list" id="bug-history"></div>
+    <div id="bug-hist-empty" style="color:var(--sub);font-size:.82rem">No bugs traced yet.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TAB 2 — PR DESCRIPTION ═══════════════════ -->
+<div class="page" id="tab-pr">
+  <div class="grid2" style="margin-bottom:14px">
+    <div>
+      <label class="lbl">PR Title</label>
+      <input type="text" id="pr-title" placeholder="Add user authentication with JWT tokens">
+    </div>
+    <div>
+      <label class="lbl">Ticket / Issue # (optional)</label>
+      <input type="text" id="pr-ticket" placeholder="PROJ-123 or #42">
+    </div>
+  </div>
+  <div style="margin-bottom:14px">
+    <label class="lbl">What Changed (describe the changes)</label>
+    <textarea id="pr-changes" rows="5" placeholder="Added JWT-based authentication, login/logout endpoints, token refresh logic, and middleware to protect API routes. Updated the user model to include password hash field."></textarea>
+  </div>
+  <div class="row" style="margin-bottom:14px;align-items:flex-end;flex-wrap:wrap">
+    <div class="col" style="max-width:220px">
+      <label class="lbl">PR Type</label>
+      <select id="pr-type">
+        <option>Feature</option><option>Bug Fix</option><option>Refactor</option>
+        <option>Performance</option><option>Documentation</option><option>Hotfix</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <label class="lbl" style="margin:0">Tone:</label>
+      <label class="toggle-switch"><input type="checkbox" id="pr-tone-toggle"><span class="t-slider"></span></label>
+      <span id="pr-tone-lbl" style="font-size:.82rem;color:var(--sub)">Technical</span>
+    </div>
+    <button class="btn btn-blue" id="pr-btn" onclick="generatePR()">📝 Generate PR Description</button>
+  </div>
+
+  <div id="pr-output" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="sec-title">Generated PR Body</span>
+      <button class="btn-sm" onclick="copyEl('pr-body')">📋 Copy PR Body</button>
+    </div>
+    <div class="pr-output" id="pr-body"></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">🕐 Recent PRs <span style="font-size:.72rem;color:var(--sub);font-weight:400;margin-left:auto">last 3 · click to reload</span></div>
+    <div class="hist-list" id="pr-history"></div>
+    <div id="pr-hist-empty" style="color:var(--sub);font-size:.82rem">No PRs generated yet.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TAB 3 — CHANGELOG BUILDER ═══════════════════ -->
+<div class="page" id="tab-cl">
+  <div style="margin-bottom:14px">
+    <label class="lbl">Paste Commit Messages (one per line)</label>
+    <textarea id="cl-commits" rows="10" placeholder="feat: add user authentication
+fix: resolve null pointer in login flow
+chore: update dependencies
+docs: improve API documentation
+refactor: simplify token validation logic
+perf: cache user session for faster loads
+feat: add password reset via email
+BREAKING CHANGE: rename /api/auth to /api/v2/auth
+test: add unit tests for auth middleware
+fix: handle edge case when token expires during request"></textarea>
+  </div>
+  <div class="row" style="margin-bottom:14px;align-items:flex-end;flex-wrap:wrap;gap:12px">
+    <div style="min-width:160px">
+      <label class="lbl">Version</label>
+      <input type="text" id="cl-version" value="v1.0.0" style="max-width:160px">
+    </div>
+    <div style="min-width:160px">
+      <label class="lbl">Date</label>
+      <input type="text" id="cl-date" style="max-width:160px">
+    </div>
+    <button class="btn btn-amber" onclick="parseChangelog()">⚙️ Parse &amp; Build Changelog</button>
+  </div>
+
+  <div id="cl-output" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+      <span class="sec-title">Changelog</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" onclick="copyEl('cl-body')">📋 Copy Markdown</button>
+        <button class="btn-sm" onclick="downloadChangelog()">⬇️ Export CHANGELOG.md</button>
+      </div>
+    </div>
+    <div class="cl-output" id="cl-body"></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">🕐 Recent Changelogs <span style="font-size:.72rem;color:var(--sub);font-weight:400;margin-left:auto">last 3 · click to reload</span></div>
+    <div class="hist-list" id="cl-history"></div>
+    <div id="cl-hist-empty" style="color:var(--sub);font-size:.82rem">No changelogs built yet.</div>
+  </div>
+</div>
 
 <script>
-  // ─── State ─────────────────────────────────────────────────
-  let lastResult = null, lastContext = {}, chatHistory = [];
-  let prTone = 'concise', lastPRData = null, lastChangelogText = '';
+// ── INIT ──
+document.getElementById('api-key').value = localStorage.getItem('ag08_key') || '';
+document.getElementById('cl-date').value = new Date().toISOString().split('T')[0];
+document.getElementById('pr-tone-toggle').addEventListener('change', function(){
+  document.getElementById('pr-tone-lbl').textContent = this.checked ? 'Plain English' : 'Technical';
+});
 
-  // ─── Init ───────────────────────────────────────────────────
-  window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('gemini_api_key');
-    if (saved) { document.getElementById('apiKey').value = saved; document.getElementById('apiStatus').style.display = 'inline'; }
-    renderHistory();
+// ── TAB SWITCH ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── GEMINI API ──
+async function callGemini(prompt) {
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) throw new Error('No API key. Enter your Gemini key in the header.');
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function extractJSON(raw) {
+  const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  return m ? m[1].trim() : raw.trim();
+}
+
+function setLoading(btnId, on, label = '') {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = on;
+  btn.innerHTML = on ? `<span class="spinner"></span>Analyzing...` : label || btn.textContent;
+}
+
+// ─────────────────────────────────
+// TAB 1 — BUG TRACER
+// ─────────────────────────────────
+async function traceBug() {
+  const code = document.getElementById('bug-code').value.trim();
+  const error = document.getElementById('bug-error').value.trim();
+  const lang = document.getElementById('bug-lang').value;
+  const level = document.getElementById('bug-level').value;
+  if (!code && !error) { alert('Paste code or an error message first.'); return; }
+  setLoading('bug-btn', true);
+  try {
+    const prompt = `You are a senior ${lang} engineer helping a ${level.toLowerCase()} developer debug their code.
+
+Code:
+\`\`\`${lang.toLowerCase()}
+${code || '(no code provided)'}
+\`\`\`
+
+Error:
+${error || '(no error message provided)'}
+
+Respond ONLY with a JSON object:
+{
+  "breakdown": "3-4 sentence plain English explanation of what this error means and what caused it, suitable for a ${level.toLowerCase()} developer",
+  "trace": ["Line N: what it does — what goes wrong here", "Line N: ...", "Line N: ...", "Line N: ...", "Line N: ...", "...at least 5 lines analyzed"],
+  "rootCause": "One precise sentence stating the exact root cause",
+  "fixedCode": "Complete corrected ${lang} code only, no markdown fences",
+  "variables": [
+    {"name": "varName", "before": "value/state before bug", "after": "value/state after fix", "note": "why it matters"},
+    {"name": "varName2", "before": "...", "after": "...", "note": "..."},
+    {"name": "varName3", "before": "...", "after": "...", "note": "..."},
+    {"name": "varName4", "before": "...", "after": "...", "note": "..."},
+    {"name": "varName5", "before": "...", "after": "...", "note": "..."}
+  ]
+}`;
+    const raw = await callGemini(prompt);
+    const data = JSON.parse(extractJSON(raw));
+    document.getElementById('out-breakdown').textContent = data.breakdown || '';
+    document.getElementById('out-trace').textContent = (data.trace || []).join('\n');
+    document.getElementById('out-root').textContent = data.rootCause || '';
+    const fixedCode = data.fixedCode || '';
+    const lines = fixedCode.split('\n');
+    document.getElementById('fix-code').textContent = fixedCode;
+    document.getElementById('fix-nums').innerHTML = lines.map((_,i) => i+1).join('<br>');
+    const tbody = document.getElementById('var-tbody');
+    tbody.innerHTML = (data.variables || []).map(v =>
+      `<tr><td style="color:var(--blue);font-weight:700">${escHtml(v.name)}</td><td class="val-before">${escHtml(String(v.before))}</td><td class="val-after">${escHtml(String(v.after))}</td><td style="color:var(--sub)">${escHtml(v.note)}</td></tr>`
+    ).join('');
+    document.getElementById('bug-output').style.display = 'block';
+    saveBugHistory({lang, errorPreview: (error||code).slice(0,60), code, error});
+    renderBugHistory();
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+  setLoading('bug-btn', false, '🔍 Trace the Bug');
+}
+
+function saveBugHistory(entry) {
+  const hist = JSON.parse(localStorage.getItem('ag08_bug_hist') || '[]');
+  hist.unshift({...entry, ts: Date.now()});
+  localStorage.setItem('ag08_bug_hist', JSON.stringify(hist.slice(0,5)));
+}
+
+function renderBugHistory() {
+  const hist = JSON.parse(localStorage.getItem('ag08_bug_hist') || '[]');
+  const el = document.getElementById('bug-history');
+  const empty = document.getElementById('bug-hist-empty');
+  if (!hist.length) { el.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  el.innerHTML = hist.map((h,i) => `
+    <div class="hist-item" onclick="reloadBug(${i})">
+      <span class="hist-lang">${escHtml(h.lang)}</span>
+      <span class="hist-preview">${escHtml(h.errorPreview)}...</span>
+      <span class="hist-time">${timeAgo(h.ts)}</span>
+    </div>`).join('');
+}
+
+function reloadBug(idx) {
+  const hist = JSON.parse(localStorage.getItem('ag08_bug_hist') || '[]');
+  const h = hist[idx];
+  if (!h) return;
+  document.getElementById('bug-code').value = h.code || '';
+  document.getElementById('bug-error').value = h.error || '';
+  document.querySelectorAll('#tab-bug select')[0].value = h.lang;
+}
+
+// ─────────────────────────────────
+// TAB 2 — PR DESCRIPTION
+// ─────────────────────────────────
+async function generatePR() {
+  const title = document.getElementById('pr-title').value.trim();
+  const changes = document.getElementById('pr-changes').value.trim();
+  const ticket = document.getElementById('pr-ticket').value.trim();
+  const type = document.getElementById('pr-type').value;
+  const plain = document.getElementById('pr-tone-toggle').checked;
+  if (!title || !changes) { alert('Fill in PR Title and What Changed.'); return; }
+  setLoading('pr-btn', true);
+  try {
+    const tone = plain ? 'plain, non-technical English accessible to non-engineers' : 'technical GitHub PR style with precise engineering language';
+    const prompt = `Generate a complete GitHub pull request description in ${tone}.
+
+PR Title: ${title}
+Type: ${type}
+${ticket ? `Ticket: ${ticket}` : ''}
+Changes: ${changes}
+
+Respond ONLY with a JSON object:
+{
+  "summary": "2-3 sentence paragraph summarizing what this PR does and why",
+  "changes": ["bullet 1", "bullet 2", "bullet 3", "bullet 4", "bullet 5 if needed"],
+  "testSteps": ["step 1", "step 2", "step 3", "step 4 if needed"],
+  "checklist": {
+    "testsAdded": true,
+    "docsUpdated": false,
+    "breakingChanges": false
+  },
+  "breakingNotes": ""
+}`;
+    const raw = await callGemini(prompt);
+    const d = JSON.parse(extractJSON(raw));
+    const ticketLine = ticket ? `\n> Closes ${ticket}\n` : '';
+    const body = `## Summary\n${ticketLine}${d.summary}\n\n## Changes Made\n${(d.changes||[]).map(c=>`- ${c}`).join('\n')}\n\n## How to Test\n${(d.testSteps||[]).map((s,i)=>`${i+1}. ${s}`).join('\n')}\n\n## Screenshots\n\n<!-- Add screenshots or screen recordings here -->\n\n## Checklist\n- [${d.checklist?.testsAdded?'x':' '}] Tests added or updated\n- [${d.checklist?.docsUpdated?'x':' '}] Documentation updated\n- [${d.checklist?.breakingChanges?'x':' '}] Breaking changes documented${d.breakingNotes ? `\n\n> ⚠️ **Breaking Change:** ${d.breakingNotes}` : ''}`;
+    document.getElementById('pr-body').textContent = body;
+    document.getElementById('pr-output').style.display = 'block';
+    savePRHistory({title, type, preview: title.slice(0,60), body});
+    renderPRHistory();
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+  setLoading('pr-btn', false, '📝 Generate PR Description');
+}
+
+function savePRHistory(entry) {
+  const hist = JSON.parse(localStorage.getItem('ag08_pr_hist') || '[]');
+  hist.unshift({...entry, ts: Date.now()});
+  localStorage.setItem('ag08_pr_hist', JSON.stringify(hist.slice(0,3)));
+}
+
+function renderPRHistory() {
+  const hist = JSON.parse(localStorage.getItem('ag08_pr_hist') || '[]');
+  const el = document.getElementById('pr-history');
+  const empty = document.getElementById('pr-hist-empty');
+  if (!hist.length) { el.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  el.innerHTML = hist.map((h,i) => `
+    <div class="hist-item" onclick="reloadPR(${i})">
+      <span class="hist-lang">${escHtml(h.type)}</span>
+      <span class="hist-preview">${escHtml(h.preview)}</span>
+      <span class="hist-time">${timeAgo(h.ts)}</span>
+    </div>`).join('');
+}
+
+function reloadPR(idx) {
+  const hist = JSON.parse(localStorage.getItem('ag08_pr_hist') || '[]');
+  const h = hist[idx];
+  if (!h) return;
+  document.getElementById('pr-title').value = h.title || '';
+  document.getElementById('pr-body').textContent = h.body || '';
+  document.getElementById('pr-output').style.display = 'block';
+}
+
+// ─────────────────────────────────
+// TAB 3 — CHANGELOG BUILDER
+// ─────────────────────────────────
+function parseChangelog() {
+  const raw = document.getElementById('cl-commits').value.trim();
+  const version = document.getElementById('cl-version').value.trim() || 'v1.0.0';
+  const date = document.getElementById('cl-date').value || new Date().toISOString().split('T')[0];
+  if (!raw) { alert('Paste commit messages first.'); return; }
+
+  const groups = {feat:[],fix:[],perf:[],docs:[],chore:[],breaking:[]};
+  const prefixMap = {feat:'feat',fix:'fix','bug fix':'fix',perf:'perf',docs:'docs',doc:'docs',chore:'chore',refactor:'chore',test:'chore',ci:'chore',style:'chore'};
+
+  raw.split('\n').forEach(line => {
+    const l = line.trim();
+    if (!l) return;
+    if (/^BREAKING CHANGE:/i.test(l)) {
+      groups.breaking.push(l.replace(/^BREAKING CHANGE:\s*/i, ''));
+      return;
+    }
+    const m = l.match(/^(\w+)(?:\(.*?\))?[!]?:\s*(.+)/);
+    if (m) {
+      const type = prefixMap[m[1].toLowerCase()] || 'chore';
+      const isBreaking = l.includes('!:');
+      if (isBreaking) groups.breaking.push(m[2]);
+      else groups[type].push(m[2]);
+    } else {
+      groups.chore.push(l);
+    }
   });
 
-  // ─── Tab Switching ──────────────────────────────────────────
-  function switchTab(name, btn) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    btn.classList.add('active');
-  }
+  const sectionDef = [
+    {key:'feat', icon:'🚀', title:'New Features'},
+    {key:'fix',  icon:'🐛', title:'Bug Fixes'},
+    {key:'perf', icon:'⚡', title:'Performance'},
+    {key:'docs', icon:'📝', title:'Documentation'},
+    {key:'chore',icon:'🔧', title:'Maintenance'},
+    {key:'breaking',icon:'💥', title:'Breaking Changes'},
+  ];
 
-  // ─── API Key ────────────────────────────────────────────────
-  function saveApiKey() {
-    const key = document.getElementById('apiKey').value.trim();
-    if (!key) return showToast('Please enter an API key');
-    localStorage.setItem('gemini_api_key', key);
-    const s = document.getElementById('apiStatus');
-    s.style.display = 'inline'; s.textContent = '✓ Saved';
-    setTimeout(() => { s.style.display = 'none'; }, 2000);
-  }
+  let md = `# Changelog\n\n## [${version}] — ${date}\n\n`;
+  sectionDef.forEach(s => {
+    if (!groups[s.key].length) return;
+    md += `### ${s.icon} ${s.title}\n`;
+    groups[s.key].forEach(item => { md += `- ${item}\n`; });
+    md += '\n';
+  });
+  md = md.trim() + '\n\n---\n*Generated by [Dev Workflow Companion](https://hhanng.github.io/agent-08-bug-explainer/)*';
 
-  async function callGemini(prompt) {
-    const key = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
-    if (!key) throw new Error('Please enter your Gemini API key first');
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
-    );
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'API error');
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  }
-
-  // ─── BUG EXPLAINER (offline — no API key needed) ───────────
-
-  function isBgn(exp) { return /beginner|learning/i.test(exp); }
-
-  function classifyError(err) {
-    const e = err.toLowerCase();
-    if (/not defined|nameerror/.test(e)) return 'a name does not exist in the current scope — the variable or function was never declared, or was declared in a different block.';
-    if (/null|nonetype|undefined/.test(e)) return 'a null or None value is being used where an object is expected — something returned nothing when a value was required.';
-    if (/index|out of (range|bounds)/.test(e)) return 'code tries to access a position in a list or string that does not exist — the index is too large (or negative beyond the start).';
-    if (/keyerror/.test(e)) return 'code looks up a key in a dictionary that does not exist — the key was never inserted or was spelled differently.';
-    if (/typeerror/.test(e)) return 'an operation received the wrong data type — for example, adding a string to a number without conversion.';
-    if (/syntaxerror/.test(e)) return 'the code cannot be parsed — there is a typo, a missing bracket, or a misplaced keyword.';
-    if (/division by zero|zerodivision/.test(e)) return 'the code tried to divide a number by zero, which is mathematically undefined.';
-    if (/recursion|call stack/.test(e)) return 'a function keeps calling itself forever without a base case that stops the recursion.';
-    if (/import|module/.test(e)) return 'a module or package could not be found — it may not be installed or the name may be misspelled.';
-    return 'a runtime error occurred while executing the code.';
-  }
-
-  const BUG_RULES = [
-
-    // ── Python: Missing required argument ──────────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return /missing \d+ required positional argument/.test(err) || /takes \d+ positional argument.* given/.test(err); },
-      analyze: function(code, err, raw, exp) {
-        var fnMatch = raw.match(/(\w+)\(\) missing/) || raw.match(/(\w+)\(\) takes/);
-        var fnName = fnMatch ? fnMatch[1] : 'the function';
-        var argMatch = raw.match(/argument[s]?: '([^']+)'/);
-        var argName = argMatch ? argMatch[1] : 'a required argument';
-        return {
-          oneLiner: 'You called ' + fnName + '() without passing all required arguments.',
-          whyItHappens: isBgn(exp)
-            ? 'Think of a function like a vending machine: you have to press the right buttons (pass the right values) to get something out. This machine needs "' + argName + '" to work, but you did not give it one. Python refuses to guess what you meant.'
-            : 'The function signature requires the parameter "' + argName + '" but the call site omits it. Python enforces this strictly — no default value is defined for that parameter.',
-          fix: {
-            explanation: 'Pass a value for "' + argName + '" when you call ' + fnName + '().',
-            oldCode: fnName + '()',
-            newCode: fnName + '(' + argName + '=<your_value>)',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Count the parameters in the def line and compare to your call site.',
-            'If a parameter has no default (no = sign), it is always required.',
-            'Read the TypeError message — it tells you exactly which argument is missing.'
-          ]
-        };
-      }
-    },
-
-    // ── Python: String + non-string TypeError ──────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return /can only concatenate str/.test(err) || /unsupported operand.*str.*int/.test(err) || /unsupported operand.*int.*str/.test(err); },
-      analyze: function(code, err, raw, exp) {
-        return {
-          oneLiner: 'You tried to join a string and a number with +, but Python cannot mix types directly.',
-          whyItHappens: isBgn(exp)
-            ? 'Imagine trying to staple a sticky note to a number on a whiteboard — they are different things and Python does not know how to combine them without help. You need to convert the number to text first using str().'
-            : 'The + operator is overloaded for both numeric addition and string concatenation, but Python will not implicitly coerce types. You must explicitly cast with str() or use an f-string.',
-          fix: {
-            explanation: 'Wrap the number in str() or use an f-string instead of + concatenation.',
-            oldCode: 'print("Value: " + count)',
-            newCode: 'print(f"Value: {count}")  # or: print("Value: " + str(count))',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Whenever you use + with a string, make sure every operand is also a string.',
-            'Prefer f-strings (f"text {variable}") — they handle mixed types automatically.',
-            'The error message will say "can only concatenate str (not int) to str".'
-          ]
-        };
-      }
-    },
-
-    // ── Python: NameError ──────────────────────────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return /nameerror.*name '(\w+)' is not defined/.test(err); },
-      analyze: function(code, err, raw, exp) {
-        var nameMatch = raw.match(/name '(\w+)' is not defined/i);
-        var varName = nameMatch ? nameMatch[1] : 'the variable';
-        return {
-          oneLiner: '"' + varName + '" is used before it was ever defined.',
-          whyItHappens: isBgn(exp)
-            ? 'Python reads your code top-to-bottom. If you use a word (variable name) before you have written what it means, Python has no idea what you are referring to. It is like using a word in a sentence that you have not defined yet.'
-            : 'The name "' + varName + '" is not present in the local, enclosing, global, or built-in namespaces at the point of use. This is a LEGB scope lookup failure.',
-          fix: {
-            explanation: 'Define "' + varName + '" before the line that uses it.',
-            oldCode: varName + '  # used here without definition',
-            newCode: varName + ' = <value>  # define it first, then use it',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Search your file for where ' + varName + ' is assigned — make sure it comes before it is used.',
-            'Check for typos — Python variable names are case-sensitive.',
-            'If it is inside a function, ensure the variable is defined in that function or passed as a parameter.'
-          ]
-        };
-      }
-    },
-
-    // ── Python: NoneType AttributeError ───────────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return /'nonetype' object has no attribute/.test(err); },
-      analyze: function(code, err, raw, exp) {
-        var attrMatch = raw.match(/attribute '([^']+)'/);
-        var attr = attrMatch ? attrMatch[1] : 'the attribute';
-        return {
-          oneLiner: 'A variable is None when you expected an object — you cannot call .' + attr + ' on None.',
-          whyItHappens: isBgn(exp)
-            ? 'Think of None as an empty box. You tried to open the box and take out "' + attr + '", but the box is empty — there is nothing inside. Something in your code returned None instead of a real object.'
-            : 'The variable resolves to NoneType at runtime. Likely causes: a function returned None implicitly, an optional lookup failed, or a method like list.sort() was assigned (it returns None).',
-          fix: {
-            explanation: 'Check that the variable is not None before accessing .' + attr + ', or find why the function returned None.',
-            oldCode: 'obj.' + attr,
-            newCode: 'if obj is not None:\n    obj.' + attr,
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'If a function can return None, add a None check before using its result.',
-            'Methods like list.sort(), list.append(), dict.update() return None — do not assign their result.',
-            'Use "if obj is not None:" guards before chaining method calls.'
-          ]
-        };
-      }
-    },
-
-    // ── Python: IndexError ─────────────────────────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return /indexerror/.test(err) || /list index out of range/.test(err); },
-      analyze: function(code, err, raw, exp) {
-        return {
-          oneLiner: 'You tried to access an index that does not exist in the list or string.',
-          whyItHappens: isBgn(exp)
-            ? 'Lists are like numbered slots in a row. If a list has 3 items, valid slots are 0, 1, and 2. Asking for slot 3 (or higher) is like pointing to a shelf that was never built.'
-            : 'The index exceeds len(seq)-1 (for positive indices) or goes below -len(seq) (for negative indices). Common causes: off-by-one in a loop, empty list, or an index from user input.',
-          fix: {
-            explanation: 'Check the list length before indexing, or use a range-safe approach.',
-            oldCode: 'items[i]',
-            newCode: 'items[i] if i < len(items) else None  # or: for item in items:',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Use "for item in my_list:" instead of index-based loops whenever possible.',
-            'Before accessing my_list[i], verify i < len(my_list).',
-            'Print len(my_list) to confirm it has items before indexing.'
-          ]
-        };
-      }
-    },
-
-    // ── Python: KeyError ───────────────────────────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return /keyerror/.test(err) && !/typeerror/.test(err); },
-      analyze: function(code, err, raw, exp) {
-        var keyMatch = raw.match(/KeyError:\s*['"]?([^'"\n]+)['"]?/i);
-        var key = keyMatch ? keyMatch[1].trim() : 'that key';
-        return {
-          oneLiner: 'The dictionary does not have a key named "' + key + '".',
-          whyItHappens: isBgn(exp)
-            ? 'A dictionary is like a labeled filing cabinet. You asked for the drawer labeled "' + key + '", but that drawer was never created. Python does not create missing entries automatically — it raises a KeyError instead.'
-            : 'dict["key"] raises KeyError when the key is absent. Use dict.get("key") for safe access, or check with "key in dict" before accessing.',
-          fix: {
-            explanation: 'Use .get() for a safe lookup, or check if the key exists first.',
-            oldCode: 'data["' + key + '"]',
-            newCode: 'data.get("' + key + '", default_value)  # returns default if key is missing',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Use dict.get(key) instead of dict[key] when the key might not exist.',
-            'Check "if key in my_dict:" before accessing my_dict[key].',
-            'Print my_dict.keys() to see what keys are actually present.'
-          ]
-        };
-      }
-    },
-
-    // ── Python: ZeroDivisionError ──────────────────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return /zerodivisionerror|division by zero/.test(err); },
-      analyze: function(code, err, raw, exp) {
-        return {
-          oneLiner: 'The code tried to divide by zero, which is mathematically undefined.',
-          whyItHappens: isBgn(exp)
-            ? 'Division by zero is like asking "how many times does 0 fit into 10?" — the answer is infinite, and computers cannot store infinity. Python stops and raises an error to protect you.'
-            : 'The divisor evaluates to 0 at runtime. This often happens with user input, computed denominators, or when averaging an empty list.',
-          fix: {
-            explanation: 'Guard against zero before dividing.',
-            oldCode: 'result = a / b',
-            newCode: 'result = a / b if b != 0 else 0  # or raise a meaningful error',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Always validate denominators before dividing: "if b != 0:".',
-            'When averaging a list, check "if len(items) > 0:" first.',
-            'Use try/except ZeroDivisionError to handle it gracefully.'
-          ]
-        };
-      }
-    },
-
-    // ── Python: IndentationError ───────────────────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return /indentationerror/.test(err) || /unexpected indent/.test(err) || /expected an indented block/.test(err); },
-      analyze: function(code, err, raw, exp) {
-        return {
-          oneLiner: 'Python cannot parse the code because the indentation is inconsistent or missing.',
-          whyItHappens: isBgn(exp)
-            ? 'Python uses spaces at the start of each line to understand which code belongs inside which block. If you mix tabs and spaces, or forget to indent after an if/for/def, Python gets confused and refuses to run your code.'
-            : 'Python\'s parser requires consistent indentation to delimit blocks. Mixing tabs and spaces, or misaligned dedents, cause IndentationError before any execution begins.',
-          fix: {
-            explanation: 'Use 4 spaces consistently. Never mix tabs and spaces. Configure your editor to show whitespace characters.',
-            oldCode: 'def greet():\nprint("hi")  # wrong — not indented',
-            newCode: 'def greet():\n    print("hi")  # correct — 4 spaces',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Set your editor to convert tabs to 4 spaces automatically.',
-            'The error message shows the line number — look at that line and the line before it.',
-            'After every def/if/for/while/with/class line, the next line must be indented.'
-          ]
-        };
-      }
-    },
-
-    // ── Python: RecursionError ─────────────────────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return /recursionerror|maximum recursion depth exceeded/.test(err); },
-      analyze: function(code, err, raw, exp) {
-        var fnMatch = code.match(/def\s+(\w+)/);
-        var fnName = fnMatch ? fnMatch[1] : 'the function';
-        return {
-          oneLiner: fnName + ' calls itself forever because a base case is missing or unreachable.',
-          whyItHappens: isBgn(exp)
-            ? 'Imagine looking up a word in a dictionary and the definition just says "see this word again" — you would loop forever. A recursive function must have a stopping condition (base case) that eventually returns without calling itself again.'
-            : 'Python\'s default recursion limit is 1000. The function lacks a reachable base case, so the call stack fills up and Python raises RecursionError to prevent a crash.',
-          fix: {
-            explanation: 'Add a base case that returns a value without recursing, and ensure every recursive call moves closer to that base case.',
-            oldCode: 'def factorial(n):\n    return n * factorial(n - 1)  # no base case!',
-            newCode: 'def factorial(n):\n    if n <= 1:   # base case\n        return 1\n    return n * factorial(n - 1)',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Every recursive function needs at least one base case that does NOT call itself.',
-            'Trace through the function manually with a small input — does it ever stop?',
-            'Consider converting deep recursion to iteration (a while loop) for large inputs.'
-          ]
-        };
-      }
-    },
-
-    // ── Python: = vs == in condition ───────────────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return code.split('\n').some(function(l) { return /^\s*(if|elif|while)\s+\w[\w.]*\s*=[^=<>!~]/.test(l); }); },
-      analyze: function(code, err, raw, exp) {
-        var badLine = code.split('\n').find(function(l) { return /^\s*(if|elif|while)\s+\w[\w.]*\s*=[^=<>!~]/.test(l); }) || '';
-        var fixed = badLine.replace(/^(\s*(if|elif|while)\s+[\w.]+)\s*=([^=])/, '$1==$3');
-        return {
-          oneLiner: 'Used = (assignment) inside a condition instead of == (comparison).',
-          whyItHappens: isBgn(exp)
-            ? '= means "set this variable to a value". == means "check if two things are equal". Using = inside an if is like writing a shopping list when you meant to ask a question — Python expects a comparison here.'
-            : 'Python does not allow bare assignment expressions in conditions (unlike C). Use == for equality checks. For assignment-in-condition, use the walrus operator :=.',
-          fix: {
-            explanation: 'Replace = with == in the condition.',
-            oldCode: badLine.trim(),
-            newCode: fixed.trim(),
-            fullFixed: code.split('\n').map(function(l) {
-              return /^\s*(if|elif|while)\s+\w[\w.]*\s*=[^=<>!~]/.test(l)
-                ? l.replace(/^(\s*(if|elif|while)\s+[\w.]+)\s*=([^=])/, '$1==$3')
-                : l;
-            }).join('\n')
-          },
-          spotItNextTime: [
-            '== compares, = assigns — use == in if/while conditions.',
-            'Linters like pylint and flake8 flag this immediately.',
-            'If you need assign-and-check in one step, use the walrus operator: if (n := get_value()) > 0:'
-          ]
-        };
-      }
-    },
-
-    // ── Python: Mutable default argument ──────────────────────
-    { langs: ['Python'],
-      detect: function(code, err) { return !err && /def\s+\w+\s*\([^)]*=\s*[\[\{]/.test(code); },
-      analyze: function(code, err, raw, exp) {
-        var match = code.match(/def\s+(\w+)\s*\(/);
-        var fnName = match ? match[1] : 'the function';
-        return {
-          oneLiner: 'A mutable default argument (list or dict) is shared across all calls to ' + fnName + '.',
-          whyItHappens: isBgn(exp)
-            ? 'Default values in Python are created once when the function is defined, not each time it is called. Using a list [] as default is like sharing a whiteboard — every call writes on the same board instead of getting a fresh one.'
-            : 'Default argument values are evaluated once at function definition time. Mutable defaults ([], {}, set()) are shared across all invocations, causing state to leak between calls.',
-          fix: {
-            explanation: 'Use None as the default and create a new list/dict inside the function body.',
-            oldCode: 'def ' + fnName + '(items=[]):\n    items.append(1)',
-            newCode: 'def ' + fnName + '(items=None):\n    if items is None:\n        items = []\n    items.append(1)',
-            fullFixed: code.replace(/def\s+(\w+)\s*\(([^)]*?)=\s*\[\]/g, 'def $1($2=None)')
-          },
-          spotItNextTime: [
-            'Never use [], {}, or set() as default parameter values.',
-            'Always use None as the default and initialize inside the function.',
-            'Linters and type checkers (mypy, pylint) warn about this pattern automatically.'
-          ]
-        };
-      }
-    },
-
-    // ── JavaScript/TypeScript: X is not a function ─────────────
-    { langs: ['JavaScript', 'TypeScript'],
-      detect: function(code, err) { return /is not a function/.test(err); },
-      analyze: function(code, err, raw, exp) {
-        var nameMatch = raw.match(/(\S+) is not a function/i);
-        var name = nameMatch ? nameMatch[1] : 'the value';
-        return {
-          oneLiner: name + ' is not a function — you tried to call something that is not callable.',
-          whyItHappens: isBgn(exp)
-            ? 'In JavaScript, you can only use () to call something that is actually a function. If you write myVar() but myVar holds a number or a string, it is like asking a brick to run — it cannot.'
-            : name + ' resolves to a non-function type at the call site. Common causes: calling a property that does not exist on the prototype, shadowing a built-in, or calling a property value instead of a method.',
-          fix: {
-            explanation: 'Check the type of ' + name + ' with typeof before calling it, and verify you are referencing the correct property.',
-            oldCode: name + '()',
-            newCode: 'if (typeof ' + name + ' === "function") { ' + name + '(); }',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Use console.log(typeof ' + name + ') to check what type it actually holds.',
-            'Check the docs — some array methods return values (map, filter) while others are void (forEach).',
-            'Watch for missing imports — if a module is not imported, its exports are undefined.'
-          ]
-        };
-      }
-    },
-
-    // ── JavaScript/TypeScript: Cannot read properties ──────────
-    { langs: ['JavaScript', 'TypeScript'],
-      detect: function(code, err) { return /cannot read prop(erty|erties) of (undefined|null)/i.test(err) || /cannot read property/i.test(err); },
-      analyze: function(code, err, raw, exp) {
-        var propMatch = raw.match(/(?:property|properties) ['"]?(\w+)['"]?/i) || raw.match(/reading ['"](\w+)['"]/i);
-        var prop = propMatch ? propMatch[1] : 'the property';
-        var typeMatch = raw.match(/(undefined|null)/i);
-        var nilType = typeMatch ? typeMatch[1] : 'null/undefined';
-        return {
-          oneLiner: 'You accessed .' + prop + ' on ' + nilType + ' — the object does not exist at this point.',
-          whyItHappens: isBgn(exp)
-            ? 'Imagine trying to open a drawer in a desk that has not been delivered yet. The desk (' + nilType + ') is not there, so you cannot open drawer "' + prop + '". Something in your code returned ' + nilType + ' instead of a real object.'
-            : 'The object resolves to ' + nilType + ' at the point of property access. Common causes: async data not yet loaded, a DOM element not found, a function returning undefined, or missing null-checks on deeply nested paths.',
-          fix: {
-            explanation: 'Guard with optional chaining (?.) or check for null/undefined first.',
-            oldCode: 'obj.' + prop,
-            newCode: 'obj?.' + prop + '  // optional chaining — returns undefined instead of throwing',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Use optional chaining: obj?.property?.nested instead of obj.property.nested.',
-            'For async data, check that the data has loaded before rendering.',
-            'Add console.log() right before the failing line to see what the variable actually holds.'
-          ]
-        };
-      }
-    },
-
-    // ── JavaScript/TypeScript: ReferenceError ──────────────────
-    { langs: ['JavaScript', 'TypeScript'],
-      detect: function(code, err) { return /referenceerror.*is not defined/i.test(err); },
-      analyze: function(code, err, raw, exp) {
-        var nameMatch = raw.match(/(\w+) is not defined/i);
-        var varName = nameMatch ? nameMatch[1] : 'the variable';
-        return {
-          oneLiner: '"' + varName + '" is not defined — the variable does not exist in this scope.',
-          whyItHappens: isBgn(exp)
-            ? 'JavaScript needs you to introduce every variable with let, const, or var before using it. Using "' + varName + '" without declaring it first is like calling someone by a name you never gave them.'
-            : '"' + varName + '" was not found in the scope chain. Common causes: typo in the variable name, using a let/const before its declaration (temporal dead zone), or a missing import.',
-          fix: {
-            explanation: 'Declare the variable with const or let before using it, or check for a typo.',
-            oldCode: varName + '  // used without declaration',
-            newCode: 'const ' + varName + ' = <value>;  // declare first',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Always declare variables with const (preferred) or let before using them.',
-            'Check for spelling mistakes — JavaScript is case-sensitive.',
-            'If it comes from another file, make sure you have imported it.'
-          ]
-        };
-      }
-    },
-
-    // ── JavaScript/TypeScript: Assignment to constant ──────────
-    { langs: ['JavaScript', 'TypeScript'],
-      detect: function(code, err) { return /assignment to constant variable/i.test(err); },
-      analyze: function(code, err, raw, exp) {
-        return {
-          oneLiner: 'You tried to reassign a const variable — const bindings cannot be reassigned.',
-          whyItHappens: isBgn(exp)
-            ? 'const is like writing something in permanent marker — once written, it cannot be changed. If you need to change the value later, you should use let instead of const.'
-            : 'const bindings are immutable after initialisation. Note that for objects and arrays the contents can still be mutated; only the binding itself is constant.',
-          fix: {
-            explanation: 'Change const to let if the variable needs to be reassigned.',
-            oldCode: 'const count = 0;\ncount = count + 1;  // TypeError!',
-            newCode: 'let count = 0;\ncount = count + 1;  // fine',
-            fullFixed: code.replace(/\bconst\b/, 'let')
-          },
-          spotItNextTime: [
-            'Use const for values that never change, let for values that will be reassigned.',
-            'Linters (ESLint) catch this before you even run the code.',
-            'For objects, const means the variable always points to the same object — you can still add or change properties.'
-          ]
-        };
-      }
-    },
-
-    // ── JavaScript/TypeScript: Maximum call stack ──────────────
-    { langs: ['JavaScript', 'TypeScript'],
-      detect: function(code, err) { return /maximum call stack|stack overflow/i.test(err); },
-      analyze: function(code, err, raw, exp) {
-        var fnMatch = code.match(/function\s+(\w+)/) || code.match(/const\s+(\w+)\s*=/);
-        var fnName = fnMatch ? fnMatch[1] : 'the function';
-        return {
-          oneLiner: fnName + ' calls itself (or another function) infinitely — the call stack overflows.',
-          whyItHappens: isBgn(exp)
-            ? 'Every function call uses a memory slot. If a function keeps calling itself forever, it fills all the slots and JavaScript stops it with "Maximum call stack size exceeded". You need a rule that stops the recursion.'
-            : 'The call stack depth exceeds the JS engine limit (~10,000 frames in V8). The function recurses without a reachable base case, or two functions call each other in a cycle.',
-          fix: {
-            explanation: 'Add a base case that returns without recursing, or convert to an iterative solution.',
-            oldCode: 'function ' + fnName + '(n) {\n    return ' + fnName + '(n - 1);  // no base case\n}',
-            newCode: 'function ' + fnName + '(n) {\n    if (n <= 0) return 0;  // base case\n    return ' + fnName + '(n - 1);\n}',
-            fullFixed: code
-          },
-          spotItNextTime: [
-            'Every recursive function needs a base case that returns without calling itself.',
-            'Trace the function with a small value (e.g. n=3) to verify it terminates.',
-            'For large inputs, prefer iteration (while/for loops) over recursion in JavaScript.'
-          ]
-        };
-      }
-    }
-
-  ]; // end BUG_RULES
-
-  function analyzeLocally(buggyCode, errorMsg, language, experience) {
-    var extra = '';
-    if ((language === 'JavaScript' || language === 'TypeScript') && !errorMsg) {
-      try { new Function(buggyCode); } catch (e) { extra = e.message; }
-    }
-    var raw = (errorMsg || extra || '').trim();
-    var err = raw.toLowerCase();
-    for (var i = 0; i < BUG_RULES.length; i++) {
-      var rule = BUG_RULES[i];
-      if (rule.langs.indexOf(language) === -1) continue;
-      try {
-        if (rule.detect(buggyCode, err, raw)) {
-          return rule.analyze(buggyCode, err, raw, experience);
-        }
-      } catch (e) { /* skip broken rule */ }
-    }
-    return genericFallback(buggyCode, raw, language, experience);
-  }
-
-  function genericFallback(code, errorMsg, language, experience) {
-    var why = errorMsg ? classifyError(errorMsg) : 'an issue was found in the code that needs closer inspection.';
-    var tip = isBgn(experience)
-      ? 'Read the error message carefully — it usually tells you the line number and what went wrong. Then look at that line and the lines just before it.'
-      : 'Inspect the stack trace for the innermost frame in your own code. Add logging around that line to observe runtime values.';
-    return {
-      oneLiner: errorMsg ? errorMsg.slice(0, 120) : 'Code issue detected — paste the error message for a specific explanation.',
-      whyItHappens: 'This error typically means ' + why + ' ' + tip,
-      fix: {
-        explanation: 'Locate the line number in the traceback and inspect the variables involved. Add a print/console.log just before the failing line to see the actual runtime values.',
-        oldCode: '# the line causing the error',
-        newCode: '# add a debug print here, then fix based on what you see',
-        fullFixed: code
-      },
-      spotItNextTime: [
-        'Always read the full error message and traceback — the last line in the traceback is usually where the bug is.',
-        'Add print() / console.log() statements to see what your variables actually contain.',
-        'Search the error message online — most common errors have clear, well-documented solutions.'
-      ]
-    };
-  }
-
-  async function explainBug() {
-    const buggyCode = document.getElementById('buggyCode').value.trim();
-    const errorMsg = document.getElementById('errorMsg').value.trim();
-    const language = document.getElementById('language').value;
-    const experience = document.getElementById('experience').value;
-    if (!buggyCode) return showToast('Please paste your buggy code');
-    setBugLoading(true);
-    await new Promise(r => setTimeout(r, 320));
-    try {
-      const result = analyzeLocally(buggyCode, errorMsg, language, experience);
-      lastResult = result; lastContext = { buggyCode, errorMsg, language, experience }; chatHistory = [];
-      renderResults(result, experience);
-      saveToHistory(result, language, experience);
-      renderHistory();
-    } catch (err) { showToast('Error: ' + err.message); }
-    finally { setBugLoading(false); }
-  }
-
-  function renderResults(r, experience) {
-    document.getElementById('oneLiner').textContent = r.oneLiner || '';
-    const isBeginner = experience.includes('Beginner') || experience.includes('Learning');
-    document.getElementById('analogyTag').style.display = isBeginner ? 'inline-flex' : 'none';
-    document.getElementById('whyText').textContent = r.whyItHappens || '';
-    document.getElementById('fixExplanation').textContent = r.fix?.explanation || '';
-    renderDiff(r.fix?.oldCode || '', r.fix?.newCode || '');
-    const ul = document.getElementById('warningList');
-    ul.innerHTML = '';
-    (r.spotItNextTime || []).forEach((w, i) => {
-      const li = document.createElement('li');
-      li.className = 'warning-item';
-      li.innerHTML = `<div class="warning-icon">${i+1}</div><span>${escapeHtml(w)}</span>`;
-      ul.appendChild(li);
-    });
-    document.getElementById('results').style.display = 'block';
-    document.getElementById('followupChat').style.display = 'none';
-    document.getElementById('followupToggle').textContent = '💬 Ask a follow-up question';
-    ['card1','card2','card3','card4'].forEach((id, i) => {
-      const el = document.getElementById(id);
-      el.classList.remove('visible');
-      setTimeout(() => el.classList.add('visible'), i * 100);
-    });
-    setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-  }
-
-  function renderDiff(oldCode, newCode) {
-    const container = document.getElementById('diffLines');
-    container.innerHTML = '';
-    oldCode.split('\n').forEach(line => {
-      const d = document.createElement('div');
-      d.className = 'diff-line removed';
-      d.innerHTML = `<span class="diff-sign">-</span><span class="diff-code">${escapeHtml(line)}</span>`;
-      container.appendChild(d);
-    });
-    newCode.split('\n').forEach(line => {
-      const d = document.createElement('div');
-      d.className = 'diff-line added';
-      d.innerHTML = `<span class="diff-sign">+</span><span class="diff-code">${escapeHtml(line)}</span>`;
-      container.appendChild(d);
-    });
-  }
-
-  function copyFixed() {
-    const code = lastResult?.fix?.fullFixed || lastResult?.fix?.newCode || '';
-    if (!code) return;
-    navigator.clipboard.writeText(code).then(() => {
-      const btn = document.getElementById('copyBtn');
-      btn.classList.add('copied'); btn.textContent = '✓ Copied!';
-      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy fixed code`; }, 2000);
-    });
-  }
-
-  function toggleFollowup() {
-    const chat = document.getElementById('followupChat');
-    const btn = document.getElementById('followupToggle');
-    const visible = chat.style.display !== 'none';
-    chat.style.display = visible ? 'none' : 'block';
-    btn.textContent = visible ? '💬 Ask a follow-up question' : '✕ Close follow-up';
-    if (!visible && document.getElementById('chatMessages').children.length === 0) {
-      addChatMsg('ai', `I've explained the bug in your ${lastContext.language} code. What would you like to know more about?`);
-    }
-  }
-
-  async function sendFollowup() {
-    const input = document.getElementById('followupInput');
-    const question = input.value.trim();
-    if (!question) return;
-    input.value = ''; addChatMsg('user', question);
-    document.getElementById('sendFollowup').disabled = true;
-    const ctx = `Context: ${lastContext.experience} programmer in ${lastContext.language}. Bug: ${lastResult?.oneLiner}. Fix: ${lastResult?.fix?.explanation}. Answer follow-up:`;
-    try {
-      const reply = await callGemini(ctx + '\n\n' + question);
-      addChatMsg('ai', reply);
-    } catch (err) { addChatMsg('ai', 'Error: ' + err.message); }
-    finally { document.getElementById('sendFollowup').disabled = false; }
-  }
-
-  function addChatMsg(role, text) {
-    const c = document.getElementById('chatMessages');
-    const d = document.createElement('div');
-    d.className = `msg ${role}`; d.textContent = text;
-    c.appendChild(d); c.scrollTop = c.scrollHeight;
-  }
-
-  function saveToHistory(result, language, experience) {
-    let h = getHistory();
-    h.unshift({ oneLiner: result.oneLiner, language, experience, ts: Date.now(), result, code: lastContext.buggyCode, errorMsg: lastContext.errorMsg });
-    localStorage.setItem('bug_history', JSON.stringify(h.slice(0, 5)));
-  }
-  function getHistory() { try { return JSON.parse(localStorage.getItem('bug_history') || '[]'); } catch { return []; } }
-  function renderHistory() {
-    const history = getHistory();
-    const list = document.getElementById('historyList');
-    if (!history.length) { list.innerHTML = '<div class="no-history">No bugs explained yet</div>'; return; }
-    list.innerHTML = '';
-    history.forEach((item, i) => {
-      const div = document.createElement('div');
-      div.className = 'history-item';
-      div.innerHTML = `<div class="history-item-info"><div class="history-item-summary">${escapeHtml(item.oneLiner || 'Bug ' + (i+1))}</div><div class="history-item-meta">${timeAgo(item.ts)}</div></div><span class="history-badge">${escapeHtml(item.language)}</span>`;
-      div.onclick = () => {
-        document.getElementById('buggyCode').value = item.code || '';
-        document.getElementById('errorMsg').value = item.errorMsg || '';
-        lastResult = item.result; lastContext = { buggyCode: item.code, errorMsg: item.errorMsg, language: item.language, experience: item.experience };
-        renderResults(item.result, item.experience);
-      };
-      list.appendChild(div);
-    });
-  }
-  function clearHistory() { localStorage.removeItem('bug_history'); renderHistory(); }
-
-  // ─── PR DESCRIPTION GENERATOR ──────────────────────────────
-  function setTone(tone, btn) {
-    prTone = tone;
-    document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  }
-
-  async function generatePR() {
-    const title = document.getElementById('prTitle').value.trim();
-    const changes = document.getElementById('prChanges').value.trim();
-    const ticket = document.getElementById('prTicket').value.trim();
-    if (!title) return showToast('Please enter a PR title');
-    if (!changes) return showToast('Please describe the changed files or diff');
-    setPRLoading(true);
-    const toneDesc = prTone === 'concise' ? 'Concise — short and focused, under 150 words total' : 'Detailed — thorough, 300+ words, explain the why in depth';
-    const prompt = `Generate a PR description for a code change.\n\nPR title: ${title}\nChanged files/diff: ${changes}\nTicket: ${ticket || 'none'}\nTone: ${toneDesc}\n\nReturn this exact JSON (no markdown):\n{\n  "prTitle": "feat(scope): description in conventional commit format",\n  "summary": "explanation of what this PR does and why",\n  "changes": ["bullet change 1", "bullet change 2", "bullet change 3"],\n  "testPlan": ["test step 1", "test step 2", "test step 3"],\n  "screenshotNote": "note about screenshots if UI changed, else empty string"\n}`;
-    try {
-      const json = extractJSON(await callGemini(prompt));
-      if (!json) throw new Error('Could not parse response');
-      lastPRData = json; renderPR(json);
-    } catch (err) { showToast('Error: ' + err.message); }
-    finally { setPRLoading(false); }
-  }
-
-  function renderPR(d) {
-    document.getElementById('prTitleOut').textContent = d.prTitle || '';
-    document.getElementById('prSummaryOut').textContent = d.summary || '';
-    document.getElementById('prChangesOut').innerHTML = (d.changes || []).map(c => `<li>${escapeHtml(c)}</li>`).join('');
-    document.getElementById('prTestOut').innerHTML = (d.testPlan || []).map(t => `<li>${escapeHtml(t)}</li>`).join('');
-    const sn = document.getElementById('prScreenshotOut');
-    if (d.screenshotNote) { sn.textContent = '📸 ' + d.screenshotNote; sn.style.display = 'block'; } else { sn.style.display = 'none'; }
-    document.getElementById('prOutput').style.display = 'block';
-    const btn = document.getElementById('prCopyBtn'); btn.textContent = '📋 Copy as Markdown'; btn.classList.remove('copied');
-    setTimeout(() => document.getElementById('prOutput').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-  }
-
-  function copyPR() {
-    if (!lastPRData) return;
-    const d = lastPRData;
-    const md = `## ${d.prTitle}\n\n${d.summary}\n\n## Changes\n${(d.changes||[]).map(c=>`- ${c}`).join('\n')}\n\n## Test Plan\n${(d.testPlan||[]).map(t=>`- [ ] ${t}`).join('\n')}${d.screenshotNote ? `\n\n## Screenshots\n> ${d.screenshotNote}` : ''}`;
-    navigator.clipboard.writeText(md).then(() => {
-      const btn = document.getElementById('prCopyBtn');
-      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = '📋 Copy as Markdown'; btn.classList.remove('copied'); }, 2000);
-    });
-  }
-
-  // ─── CHANGELOG BUILDER ─────────────────────────────────────
-  async function buildChangelog() {
-    const commits = document.getElementById('clInput').value.trim();
-    if (!commits) return showToast('Please paste some commit messages');
-    setCLLoading(true);
-    const prompt = `Parse these git commit messages and group them into a changelog. Use Conventional Commits parsing (feat:, fix:, chore:, docs:, BREAKING CHANGE:, etc.)\n\nCommits:\n${commits}\n\nReturn this exact JSON (no markdown):\n{\n  "breaking": ["description 1"],\n  "features": ["description 1", "description 2"],\n  "fixes": ["description 1"],\n  "chores": ["description 1"],\n  "docs": ["description 1"],\n  "other": ["description 1"]\n}\n\nEach entry should be a clean human-readable sentence. Include only categories that have entries.`;
-    try {
-      const json = extractJSON(await callGemini(prompt));
-      if (!json) throw new Error('Could not parse response');
-      lastChangelogText = renderChangelog(json);
-    } catch (err) { showToast('Error: ' + err.message); }
-    finally { setCLLoading(false); }
-  }
-
-  function renderChangelog(d) {
-    const groups = [
-      { key: 'breaking', label: '💥 Breaking Changes', color: 'var(--red)' },
-      { key: 'features', label: '🚀 Features', color: 'var(--green)' },
-      { key: 'fixes', label: '🐛 Bug Fixes', color: 'var(--amber)' },
-      { key: 'chores', label: '🔧 Chores', color: 'var(--muted)' },
-      { key: 'docs', label: '📖 Documentation', color: 'var(--blue)' },
-      { key: 'other', label: '📦 Other', color: 'var(--purple)' },
-    ];
-    let textOut = '';
-    const content = document.getElementById('clContent');
-    content.innerHTML = '';
-    groups.forEach(g => {
-      const items = d[g.key];
-      if (!items || !items.length) return;
-      textOut += `### ${g.label}\n${items.map(i => `- ${i}`).join('\n')}\n\n`;
-      const div = document.createElement('div');
-      div.className = 'cl-group';
-      div.innerHTML = `<div class="cl-group-title" style="color:${g.color}">${g.label}</div><ul class="cl-items">${items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`;
-      content.appendChild(div);
-    });
-    document.getElementById('clOutput').style.display = 'block';
-    const btn = document.getElementById('clCopyBtn'); btn.textContent = '📋 Copy Changelog'; btn.classList.remove('copied');
-    setTimeout(() => document.getElementById('clOutput').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-    return textOut;
-  }
-
-  function copyChangelog() {
-    if (!lastChangelogText) return;
-    navigator.clipboard.writeText(lastChangelogText).then(() => {
-      const btn = document.getElementById('clCopyBtn');
-      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = '📋 Copy Changelog'; btn.classList.remove('copied'); }, 2000);
-    });
-  }
-
-  // ─── Loading helpers ────────────────────────────────────────
-  function setBugLoading(on) {
-    document.getElementById('explainBtn').disabled = on;
-    document.getElementById('spinner').style.display = on ? 'block' : 'none';
-    document.getElementById('btnText').textContent = on ? 'Analyzing bug...' : '🔍 Explain This Bug';
-  }
-  function setPRLoading(on) {
-    document.getElementById('prBtn').disabled = on;
-    document.getElementById('prSpinner').style.display = on ? 'block' : 'none';
-    document.getElementById('prBtnText').textContent = on ? 'Generating...' : '📋 Generate PR Description';
-  }
-  function setCLLoading(on) {
-    document.getElementById('clBtn').disabled = on;
-    document.getElementById('clSpinner').style.display = on ? 'block' : 'none';
-    document.getElementById('clBtnText').textContent = on ? 'Building changelog...' : '📝 Build Changelog';
-  }
-
-  // ─── Helpers ────────────────────────────────────────────────
-  // ─── Step Tracer ─────────────────────────────────────────────
-  async function traceCodeSteps() {
-    const code = document.getElementById('traceCode').value.trim();
-    const lang = document.getElementById('traceLang').value;
-    if (!code) { showToast('Paste some code first!'); return; }
-    setTraceLoading(true);
-    document.getElementById('traceOutput').style.display = 'none';
-    try {
-      const prompt = `You are a code execution visualizer. Walk through this ${lang} code step-by-step.
-
-CODE:
-${code}
-
-Return ONLY valid JSON (no markdown fences):
-{
-  "summary": "One sentence: what this code does",
-  "steps": [
-    { "lineNum": 1, "code": "actual line", "action": "Plain English what happens", "variables": { "varName": "value" } }
-  ],
-  "finalState": { "varName": "finalValue" },
-  "output": "what gets printed/returned or 'nothing'"
+  document.getElementById('cl-body').textContent = md;
+  document.getElementById('cl-output').style.display = 'block';
+  saveCLHistory({version, date, preview: `${version} — ${date}`, md});
+  renderCLHistory();
 }
-Rules: max 12 steps, skip trivial lines, show all variable changes, write for a beginner.`;
 
-      const raw = await callGemini(prompt);
-      const data = extractJSON(raw);
-      if (!data?.steps) throw new Error('Could not parse trace. Try again.');
-      renderTrace(data);
-    } catch(e) {
-      showToast('Error: ' + (e.message || 'Something went wrong.'));
-    } finally {
-      setTraceLoading(false);
-    }
-  }
+function downloadChangelog() {
+  const content = document.getElementById('cl-body').textContent;
+  if (!content) return;
+  const a = document.createElement('a');
+  a.href = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(content);
+  a.download = 'CHANGELOG.md';
+  a.click();
+}
 
-  function renderTrace(data) {
-    const out = document.getElementById('traceOutput');
-    let html = `<div class="output-card" style="margin-bottom:16px;border-top:3px solid var(--purple);"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple);margin-bottom:8px;">📋 Summary</div><div style="font-size:15px;">${escapeHtml(data.summary)}</div></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">🪜 Execution Trace</div>`;
-    (data.steps||[]).forEach((step, i) => {
-      const vars = Object.entries(step.variables || {});
-      html += `<div style="display:grid;grid-template-columns:28px 1fr;gap:12px;margin-bottom:12px;align-items:start;"><div style="width:28px;height:28px;border-radius:50%;background:var(--purple);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div><div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;"><div style="background:#1f1f1f;padding:8px 14px;font-family:var(--mono);font-size:13px;color:var(--amber);">${escapeHtml(step.code)}</div><div style="padding:10px 14px;"><div style="font-size:13px;margin-bottom:${vars.length?'10px':'0'}">${escapeHtml(step.action)}</div>${vars.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;">${vars.map(([k,v])=>`<span style="background:#1a1a2e;border:1px solid #3b3b5c;border-radius:6px;padding:3px 10px;font-family:var(--mono);font-size:12px;"><span style="color:var(--purple)">${escapeHtml(k)}</span><span style="color:var(--muted)"> = </span><span style="color:var(--green)">${escapeHtml(String(v))}</span></span>`).join('')}</div>`:''}</div></div></div>`;
-    });
-    const fv = Object.entries(data.finalState||{});
-    html += `<div class="output-card" style="border-top:3px solid var(--green);"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:8px;">🏁 Final State</div>${fv.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">${fv.map(([k,v])=>`<span style="background:#0d1f0d;border:1px solid #1a4d1a;border-radius:6px;padding:4px 12px;font-family:var(--mono);font-size:13px;"><span style="color:var(--green)">${escapeHtml(k)}</span><span style="color:var(--muted)"> = </span><span style="color:#86efac">${escapeHtml(String(v))}</span></span>`).join('')}</div>`:''}<div style="font-size:13px;color:var(--muted);">Output: <span style="color:var(--text)">${escapeHtml(data.output||'')}</span></div></div>`;
-    out.innerHTML = html;
-    out.style.display = 'block';
-    out.scrollIntoView({ behavior:'smooth', block:'start' });
-  }
+function saveCLHistory(entry) {
+  const hist = JSON.parse(localStorage.getItem('ag08_cl_hist') || '[]');
+  hist.unshift({...entry, ts: Date.now()});
+  localStorage.setItem('ag08_cl_hist', JSON.stringify(hist.slice(0,3)));
+}
 
-  function setTraceLoading(on) {
-    document.getElementById('traceBtn').disabled = on;
-    document.getElementById('traceSpinner').style.display = on ? 'block' : 'none';
-    document.getElementById('traceBtnText').textContent = on ? 'Tracing...' : '🪜 Trace Step-by-Step';
-  }
+function renderCLHistory() {
+  const hist = JSON.parse(localStorage.getItem('ag08_cl_hist') || '[]');
+  const el = document.getElementById('cl-history');
+  const empty = document.getElementById('cl-hist-empty');
+  if (!hist.length) { el.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  el.innerHTML = hist.map((h,i) => `
+    <div class="hist-item" onclick="reloadCL(${i})">
+      <span class="hist-lang">${escHtml(h.version)}</span>
+      <span class="hist-preview">${escHtml(h.preview)}</span>
+      <span class="hist-time">${timeAgo(h.ts)}</span>
+    </div>`).join('');
+}
 
-  function extractJSON(text) {
-    try { return JSON.parse(text.trim()); } catch {}
-    const m = text.match(/\{[\s\S]*\}/);
-    if (m) { try { return JSON.parse(m[0]); } catch {} }
-    return null;
-  }
-  function escapeHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-  function timeAgo(ts) {
-    const s = Math.floor((Date.now()-ts)/1000);
-    if (s < 60) return 'just now';
-    if (s < 3600) return Math.floor(s/60)+'m ago';
-    if (s < 86400) return Math.floor(s/3600)+'h ago';
-    return Math.floor(s/86400)+'d ago';
-  }
-  let toastTimer;
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
-  }
+function reloadCL(idx) {
+  const hist = JSON.parse(localStorage.getItem('ag08_cl_hist') || '[]');
+  const h = hist[idx];
+  if (!h) return;
+  document.getElementById('cl-version').value = h.version || '';
+  document.getElementById('cl-date').value = h.date || '';
+  document.getElementById('cl-body').textContent = h.md || '';
+  document.getElementById('cl-output').style.display = 'block';
+}
+
+// ── UTILS ──
+function copyEl(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const btn = event.target;
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = btn.textContent.replace('✅ Copied!','📋 Copy ' + id.replace(/-/g,' ')), 1500);
+  });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now()-ts)/1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+// ── INIT HISTORY ──
+renderBugHistory(); renderPRHistory(); renderCLHistory();
 </script>
 </body>
 </html>
