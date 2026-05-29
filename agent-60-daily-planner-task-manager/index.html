@@ -4,552 +4,242 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agent #60 — Daily Planner & Task Manager</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0f1117;
-      --card: #1a1d27;
-      --card2: #1f2334;
-      --border: #2a2d3e;
-      --blue: #4f8ef7;
-      --blue-dim: rgba(79, 142, 247, 0.12);
-      --green: #4ade80;
-      --green-dim: rgba(74, 222, 128, 0.12);
-      --red: #f87171;
-      --red-dim: rgba(248, 113, 113, 0.12);
-      --yellow: #fbbf24;
-      --yellow-dim: rgba(251, 191, 36, 0.12);
-      --purple: #a855f7;
-      --purple-dim: rgba(168, 85, 247, 0.12);
-      --text: #e2e8f0;
-      --text-dim: #94a3b8;
-      --text-muted: #64748b;
-      --radius: 12px;
-      --tr: 0.18s ease;
+      --bg: #0f1117; --card: #1a1d27; --card2: #1f2334; --border: #2a2d3e;
+      --blue: #4f8ef7; --blue-dim: rgba(79,142,247,.12);
+      --green: #4ade80; --green-dim: rgba(74,222,128,.12);
+      --red: #f87171; --red-dim: rgba(248,113,113,.12);
+      --yellow: #fbbf24; --yellow-dim: rgba(251,191,36,.12);
+      --purple: #a855f7; --purple-dim: rgba(168,85,247,.12);
+      --text: #e2e8f0; --text-dim: #94a3b8; --text-muted: #64748b;
+      --radius: 12px; --tr: 0.18s ease;
     }
 
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.5;
-    }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
 
-    /* ── HEADER ───────────────────────────────────── */
-    .header {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 0.9rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(8px);
-    }
-
-    .header-brand { display: flex; align-items: center; gap: 0.75rem; }
+    .header { background: var(--card); border-bottom: 1px solid var(--border); padding: .9rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px); }
+    .header-brand { display: flex; align-items: center; gap: .75rem; }
     .header-icon { font-size: 1.3rem; }
     .header-title { font-size: 1rem; font-weight: 700; }
-    .header-sub { font-size: 0.7rem; color: var(--text-muted); }
+    .header-sub { font-size: .7rem; color: var(--text-muted); }
+    .tag { background: var(--blue-dim); color: var(--blue); font-size: .7rem; font-weight: 700; padding: .25rem .65rem; border-radius: 999px; border: 1px solid rgba(79,142,247,.35); letter-spacing: .03em; }
 
-    .tag {
-      background: var(--blue-dim);
-      color: var(--blue);
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.25rem 0.65rem;
-      border-radius: 999px;
-      border: 1px solid rgba(79, 142, 247, 0.35);
-      letter-spacing: 0.03em;
-    }
-
-    /* ── TABS ─────────────────────────────────────── */
-    .tabs {
-      display: flex;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 0 1rem;
-      gap: 0.1rem;
-      overflow-x: auto;
-    }
-
-    .tab-btn {
-      padding: 0.7rem 1.1rem;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      font-weight: 500;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: var(--tr);
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
+    .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); padding: 0 1rem; gap: .1rem; overflow-x: auto; }
+    .tab-btn { padding: .7rem 1.1rem; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-size: .82rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: var(--tr); display: flex; align-items: center; gap: .4rem; }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
 
-    /* ── LAYOUT ───────────────────────────────────── */
-    .content {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 1.25rem 1.25rem 3rem;
-    }
-
+    .content { max-width: 860px; margin: 0 auto; padding: 1.25rem 1.25rem 3rem; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* ── CARDS ────────────────────────────────────── */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.1rem 1.25rem;
-      margin-bottom: 0.9rem;
-    }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; margin-bottom: .9rem; }
+    .section-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: .85rem; }
 
-    .section-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-muted);
-      margin-bottom: 0.85rem;
-    }
+    .form-row { display: flex; gap: .65rem; flex-wrap: wrap; align-items: flex-end; }
+    .form-group { display: flex; flex-direction: column; gap: .3rem; flex: 1; min-width: 100px; }
+    .form-group label { font-size: .7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
 
-    /* ── FORMS ────────────────────────────────────── */
-    .form-row {
-      display: flex;
-      gap: 0.65rem;
-      flex-wrap: wrap;
-      align-items: flex-end;
+    input[type="text"], input[type="date"], select {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); padding: .55rem .75rem; font-size: .85rem; width: 100%; outline: none; transition: var(--tr);
     }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      flex: 1;
-      min-width: 100px;
-    }
-
-    .form-group label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    input[type="text"],
-    input[type="date"],
-    select {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      padding: 0.55rem 0.75rem;
-      font-size: 0.85rem;
-      width: 100%;
-      outline: none;
-      transition: var(--tr);
-    }
-
-    input[type="text"]:focus,
-    input[type="date"]:focus,
-    select:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px var(--blue-dim);
-    }
-
+    input[type="text"]:focus, input[type="date"]:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
     input::placeholder { color: var(--text-muted); }
     select option { background: #1a1d27; }
+    input[type="range"] { width: 100%; accent-color: var(--blue); cursor: pointer; height: 4px; }
 
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--blue);
-      cursor: pointer;
-      height: 4px;
-    }
-
-    /* ── BUTTONS ──────────────────────────────────── */
-    .btn {
-      padding: 0.55rem 1.1rem;
-      border-radius: 8px;
-      border: none;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--tr);
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
+    .btn { padding: .55rem 1.1rem; border-radius: 8px; border: none; font-size: .82rem; font-weight: 600; cursor: pointer; transition: var(--tr); white-space: nowrap; display: inline-flex; align-items: center; gap: .35rem; }
     .btn-primary { background: var(--blue); color: #fff; }
     .btn-primary:hover { filter: brightness(1.1); }
-
-    .btn-ghost {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-    }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
     .btn-ghost:hover { border-color: var(--text-dim); color: var(--text); }
-
-    .icon-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 0.3rem 0.45rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.78rem;
-      transition: var(--tr);
-      line-height: 1;
-    }
+    .icon-btn { background: transparent; border: none; color: var(--text-muted); padding: .3rem .45rem; border-radius: 6px; cursor: pointer; font-size: .78rem; transition: var(--tr); line-height: 1; }
     .icon-btn:hover { color: var(--red); background: var(--red-dim); }
 
-    /* ── TODAY TAB ────────────────────────────────── */
-    .date-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-    }
-
+    /* TODAY */
+    .date-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .75rem; }
     .date-header h2 { font-size: 1.3rem; font-weight: 700; }
-
-    .day-chips { display: flex; gap: 0.65rem; }
-
-    .chip {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.4rem 0.85rem;
-      text-align: center;
-      min-width: 54px;
-    }
-
+    .day-chips { display: flex; gap: .65rem; }
+    .chip { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: .4rem .85rem; text-align: center; min-width: 54px; }
     .chip-num { font-size: 1.1rem; font-weight: 800; color: var(--blue); line-height: 1; }
-    .chip-lbl { font-size: 0.62rem; color: var(--text-muted); display: block; margin-top: 1px; }
+    .chip-lbl { font-size: .62rem; color: var(--text-muted); display: block; margin-top: 1px; }
 
-    /* Filter pills */
-    .filter-row {
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.85rem;
-    }
-
-    .filter-pill {
-      padding: 0.28rem 0.75rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--tr);
-    }
-
+    .filter-row { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .85rem; }
+    .filter-pill { padding: .28rem .75rem; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: .72rem; font-weight: 500; cursor: pointer; transition: var(--tr); }
     .filter-pill:hover { color: var(--text); border-color: var(--text-dim); }
     .filter-pill.active { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); font-weight: 600; }
 
-    /* Task list */
-    .task-list { display: flex; flex-direction: column; gap: 0.45rem; }
-
-    .task-item {
-      display: flex;
-      align-items: center;
-      gap: 0.7rem;
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.65rem 0.9rem;
-      transition: var(--tr);
-      animation: fadeIn 0.15s ease;
-    }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-
+    .task-list { display: flex; flex-direction: column; gap: .45rem; }
+    .task-item { display: flex; align-items: center; gap: .7rem; background: var(--card2); border: 1px solid var(--border); border-left: 3px solid var(--border); border-radius: 10px; padding: .65rem .9rem; transition: var(--tr); animation: fadeIn .15s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
     .task-item:hover { border-color: #35394f; }
-    .task-item.done { opacity: 0.45; }
+    .task-item.done { opacity: .45; }
     .task-item.done .task-title { text-decoration: line-through; }
+    .task-item.pri-critical { border-left-color: var(--red); }
+    .task-item.pri-important { border-left-color: var(--yellow); }
+    .task-item.pri-normal { border-left-color: var(--green); }
+    .task-item.pri-high { border-left-color: var(--red); }
+    .task-item.pri-medium { border-left-color: var(--yellow); }
+    .task-item.pri-low { border-left-color: var(--green); }
 
-    .task-circle {
-      width: 19px;
-      height: 19px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: var(--tr);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-      font-weight: 700;
-    }
-
+    .task-circle { width: 19px; height: 19px; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; flex-shrink: 0; transition: var(--tr); display: flex; align-items: center; justify-content: center; font-size: .6rem; font-weight: 700; }
     .task-circle:hover { border-color: var(--green); }
     .task-circle.checked { background: var(--green); border-color: var(--green); color: #052e16; }
+    .task-title { flex: 1; font-size: .855rem; word-break: break-word; }
+    .task-tags { display: flex; align-items: center; gap: .4rem; flex-shrink: 0; }
 
-    .task-title { flex: 1; font-size: 0.855rem; word-break: break-word; }
+    .badge { font-size: .62rem; font-weight: 700; padding: .18rem .48rem; border-radius: 999px; text-transform: uppercase; letter-spacing: .03em; }
+    .badge-high, .badge-critical { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,.3); }
+    .badge-medium, .badge-important { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(251,191,36,.3); }
+    .badge-low, .badge-normal { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,.3); }
+    .badge-cat { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(79,142,247,.25); }
+    .badge-weekly { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(79,142,247,.3); font-size:.62rem; font-weight:700; padding:.15rem .48rem; border-radius:999px; text-transform:uppercase; }
+    .badge-monthly { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(168,85,247,.3); font-size:.62rem; font-weight:700; padding:.15rem .48rem; border-radius:999px; text-transform:uppercase; }
+    .badge-deadline { font-size: .65rem; color: var(--text-muted); }
 
-    .task-tags { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+    .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: .85rem; }
+    .empty-icon { font-size: 2.2rem; margin-bottom: .6rem; }
 
-    .badge {
-      font-size: 0.62rem;
-      font-weight: 700;
-      padding: 0.18rem 0.48rem;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
+    /* TEMPLATE MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: .35rem; }
+    .modal-sub { font-size: .78rem; color: var(--text-muted); margin-bottom: 1.1rem; }
+    .tmpl-grid { display: flex; flex-direction: column; gap: .65rem; }
+    .tmpl-card { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; cursor: pointer; transition: var(--tr); }
+    .tmpl-card:hover { border-color: var(--blue); background: rgba(79,142,247,.05); }
+    .tmpl-name { font-size: .9rem; font-weight: 700; margin-bottom: .3rem; }
+    .tmpl-tasks { margin-top: .6rem; display: flex; flex-direction: column; gap: .3rem; }
+    .tmpl-task-row { font-size: .75rem; color: var(--text-dim); display: flex; align-items: center; gap: .4rem; }
+    .tmpl-card.danger { border-color: rgba(248,113,113,.4); }
+    .tmpl-card.danger:hover { border-color: var(--red); }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; }
 
-    .badge-high   { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(248,113,113,.3); }
-    .badge-medium { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(251,191,36,.3);  }
-    .badge-low    { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(74,222,128,.3);  }
-    .badge-cat    { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(79,142,247,.25); }
-
-    .empty-state {
-      text-align: center;
-      padding: 2.5rem 1rem;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-    }
-
-    .empty-icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
-
-    /* ── WEEK TAB ─────────────────────────────────── */
-    .week-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.5rem;
-    }
-
-    @media (max-width: 600px) {
-      .week-grid { grid-template-columns: repeat(4, 1fr); }
-    }
-
-    .week-cell {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.65rem 0.4rem 0.55rem;
-      text-align: center;
-      cursor: pointer;
-      transition: var(--tr);
-      min-height: 115px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
+    /* WEEK */
+    .week-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: .5rem; }
+    @media(max-width:600px) { .week-grid { grid-template-columns: repeat(4,1fr); } }
+    .week-cell { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: .65rem .4rem .55rem; text-align: center; cursor: pointer; transition: var(--tr); min-height: 115px; display: flex; flex-direction: column; align-items: center; }
     .week-cell:hover { border-color: var(--blue); }
     .week-cell.is-today { border-color: var(--blue); background: var(--blue-dim); }
     .week-cell.is-selected { border-color: var(--green); background: var(--green-dim); }
-
-    .wc-name { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.2rem; letter-spacing: 0.04em; }
-    .wc-num  { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .wc-name { font-size: .65rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: .2rem; letter-spacing: .04em; }
+    .wc-num { font-size: 1.05rem; font-weight: 700; margin-bottom: .35rem; }
     .week-cell.is-today .wc-num { color: var(--blue); }
-    .wc-count { font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-
+    .wc-count { font-size: .65rem; color: var(--text-muted); margin-bottom: .4rem; }
     .wc-bar { width: 100%; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: auto; }
-    .wc-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s ease; }
-    .wc-pct { font-size: 0.6rem; color: var(--green); font-weight: 700; margin-top: 0.2rem; }
+    .wc-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width .3s ease; }
+    .wc-pct { font-size: .6rem; color: var(--green); font-weight: 700; margin-top: .2rem; }
+    .wc-dots { display: flex; gap: 2px; justify-content: center; margin-bottom: .25rem; flex-wrap: wrap; }
+    .pri-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot-high, .dot-critical { background: var(--red); }
+    .dot-medium, .dot-important { background: var(--yellow); }
+    .dot-low, .dot-normal { background: var(--green); }
 
-    .day-panel {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.1rem 1.25rem;
-      margin-top: 0.9rem;
-    }
+    .day-panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; margin-top: .9rem; }
+    .day-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .day-panel-header h3 { font-size: .95rem; font-weight: 700; }
 
-    .day-panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-
-    .day-panel-header h3 { font-size: 0.95rem; font-weight: 700; }
-
-    /* ── GOALS TAB ────────────────────────────────── */
-    .goals-list { display: flex; flex-direction: column; gap: 0.7rem; }
-
-    .goal-item {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.95rem 1.1rem;
-      transition: var(--tr);
-      animation: fadeIn 0.15s ease;
-    }
-
-    .goal-item.done { opacity: 0.45; }
-
-    .goal-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.7rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .goal-square {
-      width: 19px;
-      height: 19px;
-      border: 2px solid var(--border);
-      border-radius: 5px;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.62rem;
-      font-weight: 700;
-      transition: var(--tr);
-      margin-top: 2px;
-    }
-
+    /* GOALS */
+    .goals-list { display: flex; flex-direction: column; gap: .7rem; }
+    .goal-item { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: .95rem 1.1rem; transition: var(--tr); animation: fadeIn .15s ease; }
+    .goal-item.done { opacity: .45; }
+    .goal-row { display: flex; align-items: flex-start; gap: .7rem; margin-bottom: .75rem; }
+    .goal-square { width: 19px; height: 19px; border: 2px solid var(--border); border-radius: 5px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: .62rem; font-weight: 700; transition: var(--tr); margin-top: 2px; }
     .goal-square:hover { border-color: var(--green); }
     .goal-square.checked { background: var(--green); border-color: var(--green); color: #052e16; }
-
     .goal-body { flex: 1; }
-    .goal-name { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .goal-name { font-size: .88rem; font-weight: 600; margin-bottom: .3rem; }
     .goal-item.done .goal-name { text-decoration: line-through; }
-
-    .goal-meta { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
-
-    .badge-weekly  { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(79,142,247,.3);  font-size: 0.62rem; font-weight: 700; padding: 0.15rem 0.48rem; border-radius: 999px; text-transform: uppercase; }
-    .badge-monthly { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(168,85,247,.3);  font-size: 0.62rem; font-weight: 700; padding: 0.15rem 0.48rem; border-radius: 999px; text-transform: uppercase; }
-    .badge-deadline { font-size: 0.65rem; color: var(--text-muted); }
-
-    .goal-progress-row { display: flex; align-items: center; gap: 0.75rem; }
+    .goal-meta { display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; }
+    .goal-progress-row { display: flex; align-items: center; gap: .75rem; }
     .goal-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .goal-fill { height: 100%; border-radius: 3px; transition: width 0.25s ease, background 0.25s ease; }
-    .goal-pct { font-size: 0.75rem; font-weight: 700; min-width: 34px; text-align: right; }
+    .goal-fill { height: 100%; border-radius: 3px; transition: width .25s ease, background .25s ease; }
+    .goal-pct { font-size: .75rem; font-weight: 700; min-width: 34px; text-align: right; }
+    .goal-forecast { font-size: .7rem; color: var(--text-muted); margin-top: .4rem; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: .25rem .6rem; }
 
-    /* ── STATS TAB ────────────────────────────────── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-    }
-
-    .stat-box {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.1rem 1rem;
-      text-align: center;
-    }
-
-    .stat-big { font-size: 2.4rem; font-weight: 800; line-height: 1; margin-bottom: 0.3rem; }
-    .stat-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    .stat-sub { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.2rem; }
-
-    .best-day-box {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 0.75rem;
-    }
-
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: .75rem; margin-bottom: 1rem; }
+    .stat-box { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1rem; text-align: center; }
+    .stat-big { font-size: 2.4rem; font-weight: 800; line-height: 1; margin-bottom: .3rem; }
+    .stat-lbl { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+    .stat-sub { font-size: .65rem; color: var(--text-muted); margin-top: .2rem; }
+    .best-day-box { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: .75rem; }
     .best-day-name { font-size: 1.4rem; font-weight: 800; color: var(--blue); }
-    .best-day-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .best-day-sub { font-size: .75rem; color: var(--text-muted); margin-top: .2rem; }
+
+    /* Heatmap */
+    .heatmap-wrap { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: .75rem; }
+    .heatmap-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 8px; }
+    .hm-day-label { text-align: center; font-size: .58rem; font-weight: 700; color: var(--text-muted); padding-bottom: 3px; }
+    .hm-cell { aspect-ratio: 1; border-radius: 3px; cursor: pointer; transition: transform .1s; }
+    .hm-cell:hover { transform: scale(1.15); z-index: 1; position: relative; }
+    .hm-legend { display: flex; gap: 8px; align-items: center; font-size: .65rem; color: var(--text-muted); flex-wrap: wrap; margin-top: 6px; }
+    .hm-swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
 
     /* Chart */
-    .chart-wrap {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1rem 1.25rem;
-    }
-
-    .chart-label-row { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.9rem; }
-
-    .chart-bars {
-      display: flex;
-      align-items: flex-end;
-      gap: 0.5rem;
-      height: 90px;
-    }
-
-    .chart-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      height: 100%;
-      gap: 0.25rem;
-    }
-
-    .chart-bar {
-      width: 100%;
-      background: var(--blue);
-      border-radius: 4px 4px 0 0;
-      min-height: 3px;
-      transition: height 0.35s ease;
-    }
-
+    .chart-wrap { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: .75rem; }
+    .chart-label-row { font-size: .72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .9rem; }
+    .chart-bars { display: flex; align-items: flex-end; gap: .5rem; height: 90px; }
+    .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: .25rem; }
+    .chart-bar { width: 100%; background: var(--blue); border-radius: 4px 4px 0 0; min-height: 3px; transition: height .35s ease; }
     .chart-bar.today { background: var(--green); }
-
-    .chart-day-labels {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-
-    .chart-day-lbl {
-      flex: 1;
-      text-align: center;
-      font-size: 0.62rem;
-      color: var(--text-muted);
-    }
-
+    .chart-day-labels { display: flex; gap: .5rem; margin-top: .5rem; }
+    .chart-day-lbl { flex: 1; text-align: center; font-size: .62rem; color: var(--text-muted); }
     .chart-day-lbl.today { color: var(--green); font-weight: 700; }
 
-    /* ── TEMPLATE PICKER ── */
-    .tmpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-top: 0.75rem; }
-    .tmpl-card { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; cursor: pointer; transition: var(--tr); }
-    .tmpl-card:hover { border-color: var(--blue); background: rgba(79,142,247,0.05); }
-    .tmpl-name { font-size: 0.88rem; font-weight: 700; margin-bottom: 0.35rem; }
-    .tmpl-desc { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.35rem; line-height: 1.4; }
-    .tmpl-count { font-size: 0.65rem; color: var(--blue); font-weight: 600; }
-    .tmpl-hint { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.65rem; }
-    .toast-msg { position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 8px; padding: 0.6rem 1.1rem; font-size: 0.82rem; font-weight: 600; color: var(--green); z-index: 999; animation: fadeIn 0.2s ease; pointer-events: none; }
-    @media (max-width: 480px) { .tmpl-grid { grid-template-columns: 1fr; } }
+    .toast-msg { position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 8px; padding: .6rem 1.1rem; font-size: .82rem; font-weight: 600; color: var(--green); z-index: 999; animation: fadeIn .2s ease; pointer-events: none; }
 
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    /* Responsive */
-    @media (max-width: 480px) {
-      .form-row { flex-direction: column; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .content { padding: 1rem 0.85rem 3rem; }
-    }
+    @media(max-width:480px) { .form-row { flex-direction: column; } .stats-grid { grid-template-columns: 1fr 1fr; } .content { padding: 1rem .85rem 3rem; } }
   </style>
 </head>
 <body>
+
+<!-- TEMPLATE MODAL -->
+<div class="modal-overlay" id="tmpl-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-title">📋 Load a Day Template</div>
+    <div class="modal-sub">Adds tasks to today. Choose a preset or clear all.</div>
+    <div class="tmpl-grid">
+      <div class="tmpl-card" onclick="loadDayTemplate('faang')">
+        <div class="tmpl-name">🏢 FAANG Prep Day</div>
+        <div class="tmpl-tasks">
+          <div class="tmpl-task-row"><span style="color:var(--red)">🔴</span> LeetCode: solve 1 Easy + 1 Medium</div>
+          <div class="tmpl-task-row"><span style="color:var(--red)">🔴</span> System Design: study 1 concept 30 min</div>
+          <div class="tmpl-task-row"><span style="color:var(--yellow)">🟡</span> Review yesterday's solutions</div>
+          <div class="tmpl-task-row"><span style="color:var(--yellow)">🟡</span> Research 1 target company 20 min</div>
+          <div class="tmpl-task-row"><span style="color:var(--yellow)">🟡</span> Work on resume or portfolio 30 min</div>
+          <div class="tmpl-task-row"><span style="color:var(--green)">🟢</span> Read tech news 15 min</div>
+          <div class="tmpl-task-row"><span style="color:var(--green)">🟢</span> Reach out to 1 person on LinkedIn</div>
+        </div>
+      </div>
+      <div class="tmpl-card" onclick="loadDayTemplate('esl')">
+        <div class="tmpl-name">📚 ESL Student Day</div>
+        <div class="tmpl-tasks">
+          <div class="tmpl-task-row"><span style="color:var(--red)">🔴</span> Complete English homework</div>
+          <div class="tmpl-task-row"><span style="color:var(--red)">🔴</span> Review 10 new vocabulary words</div>
+          <div class="tmpl-task-row"><span style="color:var(--yellow)">🟡</span> Read in English 30 min</div>
+          <div class="tmpl-task-row"><span style="color:var(--yellow)">🟡</span> Watch 1 episode in English</div>
+          <div class="tmpl-task-row"><span style="color:var(--green)">🟢</span> Write 5 sentences with today's vocab</div>
+          <div class="tmpl-task-row"><span style="color:var(--green)">🟢</span> Practice pronunciation 15 min</div>
+        </div>
+      </div>
+      <div class="tmpl-card danger" onclick="loadDayTemplate('clear')">
+        <div class="tmpl-name" style="color:var(--red)">🗑️ Clear All Tasks</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem">Removes all tasks for today. Cannot be undone.</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:1rem;width:100%" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -557,7 +247,7 @@
     <span class="header-icon">📋</span>
     <div>
       <div class="header-title">Daily Planner</div>
-      <div class="header-sub">Task Manager &amp; Goal Tracker</div>
+      <div class="header-sub">Task Manager · Goals · Stats</div>
     </div>
   </div>
   <span class="tag">TT #60</span>
@@ -573,27 +263,23 @@
 
 <div class="content">
 
-  <!-- ══ TODAY ══════════════════════════════════════════════ -->
+  <!-- ══ TODAY ═════════════════════════════════════════════════ -->
   <div class="tab-panel active" id="tab-today">
-
     <div class="date-header">
       <h2 id="today-heading"></h2>
       <div class="day-chips">
-        <div class="chip">
-          <div class="chip-num" id="chip-done">0</div>
-          <span class="chip-lbl">Done</span>
-        </div>
-        <div class="chip">
-          <div class="chip-num" id="chip-total">0</div>
-          <span class="chip-lbl">Total</span>
-        </div>
+        <div class="chip"><div class="chip-num" id="chip-done">0</div><span class="chip-lbl">Done</span></div>
+        <div class="chip"><div class="chip-num" id="chip-total">0</div><span class="chip-lbl">Total</span></div>
       </div>
     </div>
 
     <div class="card">
-      <div class="section-label">Add Task</div>
-      <div class="form-row" style="margin-bottom:0.55rem">
-        <div class="form-group" style="flex:1; min-width:200px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
+        <div class="section-label" style="margin-bottom:0">Add Task</div>
+        <button class="btn btn-ghost" style="font-size:.75rem;padding:.3rem .75rem" onclick="openModal()">📋 Load Template</button>
+      </div>
+      <div class="form-row" style="margin-bottom:.55rem">
+        <div class="form-group" style="flex:1;min-width:200px">
           <label>Title</label>
           <input type="text" id="t-title" placeholder="What needs to be done?" />
         </div>
@@ -603,42 +289,49 @@
         <div class="form-group">
           <label>Priority</label>
           <select id="t-priority">
-            <option value="medium">⚡ Medium</option>
-            <option value="high">🔴 High</option>
-            <option value="low">🟢 Low</option>
+            <option value="high">🔴 Critical</option>
+            <option value="medium" selected>🟡 Important</option>
+            <option value="low">🟢 Normal</option>
           </select>
         </div>
         <div class="form-group">
           <label>Category</label>
-          <input type="text" id="t-cat" placeholder="Work, Study…" />
+          <select id="t-cat">
+            <option value="">🌐 Other</option>
+            <option value="🎓 Study">🎓 Study</option>
+            <option value="💼 Career">💼 Career</option>
+            <option value="💻 Coding">💻 Coding</option>
+            <option value="🏃 Health">🏃 Health</option>
+            <option value="📱 Social">📱 Social</option>
+          </select>
         </div>
       </div>
     </div>
 
     <div class="filter-row" id="filter-row"></div>
-
     <div class="task-list" id="today-list"></div>
   </div>
 
-  <!-- ══ WEEK ═══════════════════════════════════════════════ -->
+  <!-- ══ WEEK ══════════════════════════════════════════════════ -->
   <div class="tab-panel" id="tab-week">
     <div class="card">
-      <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem">
+      <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.85rem">
         <span>Weekly Overview — <span id="week-range"></span></span>
-        <button class="btn btn-ghost" id="tmpl-toggle-btn" style="font-size:0.75rem;padding:0.3rem 0.75rem" onclick="toggleTemplatePanel()">📋 Load Template</button>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn btn-ghost" style="font-size:.75rem;padding:.3rem .75rem" onclick="copyWeekMarkdown()">📋 Copy as Markdown</button>
+          <button class="btn btn-ghost" id="tmpl-toggle-btn" style="font-size:.75rem;padding:.3rem .75rem" onclick="toggleTemplatePanel()">📅 Load Week Template</button>
+        </div>
       </div>
-      <div id="tmpl-panel" style="display:none;border-top:1px solid var(--border);padding-top:0.85rem;margin-top:0.5rem">
-        <div class="tmpl-hint">Choose a template to pre-fill this week with tasks (adds to existing tasks):</div>
-        <div class="tmpl-grid">
+      <div id="tmpl-panel" style="display:none;border-top:1px solid var(--border);padding-top:.85rem;margin-top:.5rem;margin-bottom:.85rem">
+        <div style="font-size:.72rem;color:var(--text-muted);margin-bottom:.65rem">Choose a template to pre-fill this week (adds to existing tasks):</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
           <div class="tmpl-card" onclick="loadTemplate('faang')">
             <div class="tmpl-name">🏢 FAANG Prep Week</div>
-            <div class="tmpl-desc">LeetCode daily · System Design · Company Research · Mock Interviews</div>
-            <div class="tmpl-count">Mon–Sun, 3–4 tasks/day</div>
+            <div style="font-size:.72rem;color:var(--text-muted);margin-top:.2rem">LeetCode · System Design · Research · Mocks</div>
           </div>
           <div class="tmpl-card" onclick="loadTemplate('esl')">
             <div class="tmpl-name">📚 ESL Student Week</div>
-            <div class="tmpl-desc">Vocabulary 10 words/day · Reading 30 min · Writing practice · Homework</div>
-            <div class="tmpl-count">Mon–Sun, 3–4 tasks/day</div>
+            <div style="font-size:.72rem;color:var(--text-muted);margin-top:.2rem">Vocabulary · Reading · Writing · Immersion</div>
           </div>
         </div>
       </div>
@@ -648,17 +341,17 @@
     <div class="day-panel" id="day-panel" style="display:none">
       <div class="day-panel-header">
         <h3 id="day-panel-title"></h3>
-        <button class="btn btn-ghost" id="day-panel-close" style="font-size:0.75rem; padding:0.3rem 0.7rem">✕ Close</button>
+        <button class="btn btn-ghost" id="day-panel-close" style="font-size:.75rem;padding:.3rem .7rem">✕ Close</button>
       </div>
-      <div class="form-row" style="margin-bottom:0.85rem">
-        <div class="form-group" style="flex:3; min-width:140px">
+      <div class="form-row" style="margin-bottom:.85rem">
+        <div class="form-group" style="flex:3;min-width:140px">
           <input type="text" id="wt-title" placeholder="Add task for this day…" />
         </div>
         <div class="form-group">
           <select id="wt-priority">
-            <option value="medium">⚡ Medium</option>
-            <option value="high">🔴 High</option>
-            <option value="low">🟢 Low</option>
+            <option value="high">🔴 Critical</option>
+            <option value="medium" selected>🟡 Important</option>
+            <option value="low">🟢 Normal</option>
           </select>
         </div>
         <button class="btn btn-primary" id="wt-add-btn">+ Add</button>
@@ -667,14 +360,24 @@
     </div>
   </div>
 
-  <!-- ══ GOALS ══════════════════════════════════════════════ -->
+  <!-- ══ GOALS ═════════════════════════════════════════════════ -->
   <div class="tab-panel" id="tab-goals">
     <div class="card">
       <div class="section-label">Add Goal</div>
       <div class="form-row">
-        <div class="form-group" style="flex:3; min-width:160px">
+        <div class="form-group" style="flex:3;min-width:160px">
           <label>Goal</label>
           <input type="text" id="g-title" placeholder="What do you want to achieve?" />
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="g-category">
+            <option value="FAANG Prep">🏢 FAANG Prep</option>
+            <option value="English">📚 English</option>
+            <option value="Health">🏃 Health</option>
+            <option value="Career">💼 Career</option>
+            <option value="Personal">✨ Personal</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Type</label>
@@ -690,61 +393,60 @@
         <button class="btn btn-primary" id="g-add-btn">+ Add</button>
       </div>
     </div>
-
     <div class="goals-list" id="goals-list"></div>
   </div>
 
-  <!-- ══ STATS ══════════════════════════════════════════════ -->
+  <!-- ══ STATS ══════════════════════════════════════════════════ -->
   <div class="tab-panel" id="tab-stats">
     <div class="stats-grid">
-      <div class="stat-box">
-        <div class="stat-big" id="s-today" style="color:var(--green)">0</div>
-        <div class="stat-lbl">Completed Today</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-big" id="s-week" style="color:var(--blue)">0</div>
-        <div class="stat-lbl">This Week</div>
-        <div class="stat-sub" id="s-week-sub"></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-big" id="s-rate" style="color:var(--yellow)">0%</div>
-        <div class="stat-lbl">Completion Rate</div>
-        <div class="stat-sub">All time</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-big" id="s-streak" style="color:var(--red)">0</div>
-        <div class="stat-lbl">Day Streak 🔥</div>
-        <div class="stat-sub" id="s-streak-sub"></div>
-      </div>
+      <div class="stat-box"><div class="stat-big" id="s-today" style="color:var(--green)">0</div><div class="stat-lbl">Completed Today</div></div>
+      <div class="stat-box"><div class="stat-big" id="s-week" style="color:var(--blue)">0</div><div class="stat-lbl">This Week</div><div class="stat-sub" id="s-week-sub"></div></div>
+      <div class="stat-box"><div class="stat-big" id="s-rate" style="color:var(--yellow)">0%</div><div class="stat-lbl">Completion Rate</div><div class="stat-sub">All time</div></div>
+      <div class="stat-box"><div class="stat-big" id="s-streak" style="color:var(--red)">0</div><div class="stat-lbl">Day Streak 🔥</div><div class="stat-sub" id="s-streak-sub"></div></div>
     </div>
 
-    <div class="card" style="margin-bottom:0.75rem">
-      <div class="section-label">Most Productive Day</div>
+    <div class="card" style="margin-bottom:.75rem">
+      <div class="section-label">Most Productive Day of Week</div>
       <div id="s-best-day" class="best-day-name">—</div>
       <div id="s-best-day-sub" class="best-day-sub"></div>
     </div>
 
-    <div class="chart-wrap">
+    <div class="chart-wrap" style="margin-bottom:.75rem">
       <div class="chart-label-row">Tasks Completed — This Week</div>
       <div class="chart-bars" id="chart-bars"></div>
       <div class="chart-day-labels" id="chart-day-labels"></div>
     </div>
+
+    <div class="heatmap-wrap">
+      <div class="chart-label-row">30-Day Productivity Heatmap</div>
+      <div class="heatmap-grid" id="heatmap-grid"></div>
+      <div class="hm-legend">
+        <span class="hm-swatch" style="background:#2a2d3e"></span> 0 tasks
+        <span class="hm-swatch" style="background:#1d3a5f;margin-left:8px"></span> 1–2
+        <span class="hm-swatch" style="background:#1e5fb0;margin-left:8px"></span> 3–4
+        <span class="hm-swatch" style="background:#3b82f6;margin-left:8px"></span> 5–6
+        <span class="hm-swatch" style="background:#4ade80;margin-left:8px"></span> 7+
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-label-row">Category Breakdown (All Time)</div>
+      <div style="max-width:340px;margin:0 auto">
+        <canvas id="cat-chart" height="200"></canvas>
+      </div>
+      <div id="cat-chart-empty" style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.82rem;display:none">Add tasks with categories to see breakdown.</div>
+    </div>
   </div>
 
-</div><!-- /content -->
+</div>
 
 <script>
 // ──────────────────────────────────────────────────────────────
 // STORAGE
 // ──────────────────────────────────────────────────────────────
 const KEYS = { tasks: 'planner60_tasks', goals: 'planner60_goals' };
-
-function load(key) {
-  try { return JSON.parse(localStorage.getItem(key)) || []; }
-  catch { return []; }
-}
+function load(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
 function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
-
 const getTasks = () => load(KEYS.tasks);
 const setTasks = v => save(KEYS.tasks, v);
 const getGoals = () => load(KEYS.goals);
@@ -753,56 +455,79 @@ const setGoals = v => save(KEYS.goals, v);
 // ──────────────────────────────────────────────────────────────
 // UTILS
 // ──────────────────────────────────────────────────────────────
-const uid = () => Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+const uid = () => Date.now() + '_' + Math.random().toString(36).slice(2,7);
 const toDS = d => d.toISOString().split('T')[0];
 const todayDS = () => toDS(new Date());
-
 function weekDays(ref) {
-  const d = new Date(ref);
-  d.setHours(0, 0, 0, 0);
-  const dow = d.getDay();
-  const diff = dow === 0 ? -6 : 1 - dow;
-  d.setDate(d.getDate() + diff);
-  return Array.from({ length: 7 }, (_, i) => {
-    const nd = new Date(d); nd.setDate(d.getDate() + i); return nd;
-  });
+  const d = new Date(ref); d.setHours(0,0,0,0);
+  const dow = d.getDay(); const diff = dow===0?-6:1-dow;
+  d.setDate(d.getDate()+diff);
+  return Array.from({length:7},(_,i)=>{ const nd=new Date(d); nd.setDate(d.getDate()+i); return nd; });
 }
-
-function fmtFull(d) {
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-}
-
-function fmtShort(d) {
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function esc(s) {
-  return String(s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
+function fmtFull(d) { return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}); }
+function fmtShort(d) { return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function progressColor(p) {
-  if (p >= 100) return 'var(--green)';
-  if (p > 60)   return 'var(--blue)';
-  if (p > 30)   return 'var(--yellow)';
+  if (p>=100) return 'var(--green)';
+  if (p>60) return 'var(--blue)';
+  if (p>30) return 'var(--yellow)';
   return 'var(--red)';
 }
+const PRI_LABEL = { high:'🔴 Critical', medium:'🟡 Important', low:'🟢 Normal' };
 
 // ──────────────────────────────────────────────────────────────
 // TABS
 // ──────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     const tab = btn.dataset.tab;
-    document.getElementById('tab-' + tab).classList.add('active');
-    if (tab === 'week')  renderWeek();
-    if (tab === 'stats') renderStats();
+    document.getElementById('tab-'+tab).classList.add('active');
+    if (tab==='week') renderWeek();
+    if (tab==='stats') renderStats();
   });
 });
+
+// ──────────────────────────────────────────────────────────────
+// TEMPLATE MODAL
+// ──────────────────────────────────────────────────────────────
+function openModal() { document.getElementById('tmpl-modal').classList.add('open'); }
+function closeModal() { document.getElementById('tmpl-modal').classList.remove('open'); }
+
+const DAY_TEMPLATES = {
+  faang: [
+    {title:'LeetCode: solve 1 Easy + 1 Medium',priority:'high',category:'💻 Coding'},
+    {title:'System Design: study 1 concept 30 min',priority:'high',category:'🎓 Study'},
+    {title:"Review yesterday's solutions",priority:'medium',category:'💻 Coding'},
+    {title:'Research 1 target company 20 min',priority:'medium',category:'💼 Career'},
+    {title:'Work on resume or portfolio 30 min',priority:'medium',category:'💼 Career'},
+    {title:'Read tech news 15 min',priority:'low',category:'🎓 Study'},
+    {title:'Reach out to 1 person on LinkedIn',priority:'low',category:'💼 Career'},
+  ],
+  esl: [
+    {title:'Complete English homework',priority:'high',category:'🎓 Study'},
+    {title:'Review 10 new vocabulary words',priority:'high',category:'🎓 Study'},
+    {title:'Read in English 30 min',priority:'medium',category:'🎓 Study'},
+    {title:'Watch 1 episode in English',priority:'medium',category:'🎓 Study'},
+    {title:"Write 5 sentences with today's vocab",priority:'low',category:'🎓 Study'},
+    {title:'Practice pronunciation 15 min',priority:'low',category:'🎓 Study'},
+  ],
+};
+
+function loadDayTemplate(id) {
+  closeModal();
+  if (id === 'clear') {
+    const tasks = getTasks().filter(t => t.date !== todayDS());
+    setTasks(tasks); renderToday(); toast('🗑️ Today\'s tasks cleared'); return;
+  }
+  const tmpl = DAY_TEMPLATES[id]; if (!tmpl) return;
+  const tasks = getTasks();
+  tmpl.forEach(t => tasks.push({id:uid(), title:t.title, priority:t.priority, category:t.category, date:todayDS(), completed:false, createdAt:Date.now()}));
+  setTasks(tasks); renderToday();
+  toast(id==='faang'?'🏢 FAANG Prep Day loaded!':'📚 ESL Student Day loaded!');
+}
 
 // ──────────────────────────────────────────────────────────────
 // TODAY TAB
@@ -816,100 +541,85 @@ function initToday() {
 }
 
 const FILTERS = [
-  { id: 'all',       label: 'All' },
-  { id: 'active',    label: 'Active' },
-  { id: 'done',      label: 'Completed' },
-  { id: 'high',      label: '🔴 High' },
-  { id: 'medium',    label: '⚡ Medium' },
-  { id: 'low',       label: '🟢 Low' },
+  {id:'all',label:'All'},{id:'active',label:'Active'},{id:'done',label:'Completed'},
+  {id:'high',label:'🔴 Critical'},{id:'medium',label:'🟡 Important'},{id:'low',label:'🟢 Normal'},
 ];
 
 function buildFilters() {
-  document.getElementById('filter-row').innerHTML = FILTERS.map(f =>
-    `<button class="filter-pill${f.id === activeFilter ? ' active' : ''}" data-f="${f.id}">${f.label}</button>`
+  document.getElementById('filter-row').innerHTML = FILTERS.map(f=>
+    `<button class="filter-pill${f.id===activeFilter?' active':''}" data-f="${f.id}">${f.label}</button>`
   ).join('');
   document.getElementById('filter-row').addEventListener('click', e => {
     const btn = e.target.closest('[data-f]'); if (!btn) return;
     activeFilter = btn.dataset.f;
-    document.querySelectorAll('.filter-pill').forEach(b => b.classList.toggle('active', b.dataset.f === activeFilter));
+    document.querySelectorAll('.filter-pill').forEach(b=>b.classList.toggle('active',b.dataset.f===activeFilter));
     renderToday();
   });
 }
 
 function renderToday() {
-  const tasks = getTasks();
-  const today = todayDS();
-  let dayTasks = tasks.filter(t => t.date === today);
-  const done  = dayTasks.filter(t => t.completed).length;
-  document.getElementById('chip-done').textContent  = done;
+  const tasks = getTasks(); const today = todayDS();
+  let dayTasks = tasks.filter(t=>t.date===today);
+  const done = dayTasks.filter(t=>t.completed).length;
+  document.getElementById('chip-done').textContent = done;
   document.getElementById('chip-total').textContent = dayTasks.length;
-
-  if (activeFilter === 'active')   dayTasks = dayTasks.filter(t => !t.completed);
-  else if (activeFilter === 'done') dayTasks = dayTasks.filter(t => t.completed);
-  else if (['high','medium','low'].includes(activeFilter))
-    dayTasks = dayTasks.filter(t => t.priority === activeFilter);
-
-  const pOrd = { high: 0, medium: 1, low: 2 };
-  dayTasks.sort((a, b) => (a.completed - b.completed) || (pOrd[a.priority] - pOrd[b.priority]));
-
+  if (activeFilter==='active') dayTasks=dayTasks.filter(t=>!t.completed);
+  else if (activeFilter==='done') dayTasks=dayTasks.filter(t=>t.completed);
+  else if (['high','medium','low'].includes(activeFilter)) dayTasks=dayTasks.filter(t=>t.priority===activeFilter);
+  const pOrd={high:0,medium:1,low:2};
+  dayTasks.sort((a,b)=>(a.completed-b.completed)||(pOrd[a.priority]-pOrd[b.priority]));
   const el = document.getElementById('today-list');
   el.innerHTML = dayTasks.length
-    ? dayTasks.map(t => taskHTML(t)).join('')
-    : `<div class="empty-state"><div class="empty-icon">✅</div>${activeFilter === 'all' ? 'No tasks yet — add one above!' : 'Nothing matches this filter.'}</div>`;
+    ? dayTasks.map(t=>taskHTML(t)).join('')
+    : `<div class="empty-state"><div class="empty-icon">✅</div>${activeFilter==='all'?'No tasks yet — add one or load a template!':'Nothing matches this filter.'}</div>`;
 }
 
 function taskHTML(t) {
+  const pri = t.priority||'medium';
   return `
-    <div class="task-item${t.completed ? ' done' : ''}" id="ti-${t.id}">
-      <div class="task-circle${t.completed ? ' checked' : ''}" data-toggle="${t.id}">${t.completed ? '✓' : ''}</div>
+    <div class="task-item${t.completed?' done':''} pri-${pri}" id="ti-${t.id}">
+      <div class="task-circle${t.completed?' checked':''}" data-toggle="${t.id}">${t.completed?'✓':''}</div>
       <span class="task-title">${esc(t.title)}</span>
       <div class="task-tags">
-        <span class="badge badge-${t.priority}">${t.priority}</span>
-        ${t.category ? `<span class="badge badge-cat">${esc(t.category)}</span>` : ''}
+        <span class="badge badge-${pri}">${PRI_LABEL[pri]||pri}</span>
+        ${t.category?`<span class="badge badge-cat">${esc(t.category)}</span>`:''}
         <button class="icon-btn" data-del="${t.id}" title="Delete">✕</button>
       </div>
     </div>`;
 }
 
-// delegated events for task list (both today and week day panel)
 function bindTaskListEvents(containerEl, reRenderFn) {
   containerEl.addEventListener('click', e => {
     const toggleId = e.target.closest('[data-toggle]')?.dataset.toggle;
-    const delId    = e.target.closest('[data-del]')?.dataset.del;
+    const delId = e.target.closest('[data-del]')?.dataset.del;
     if (toggleId) {
-      const tasks = getTasks(); const t = tasks.find(x => x.id === toggleId);
-      if (t) t.completed = !t.completed;
+      const tasks=getTasks(); const t=tasks.find(x=>x.id===toggleId);
+      if (t) t.completed=!t.completed;
       setTasks(tasks); reRenderFn();
     }
-    if (delId) {
-      setTasks(getTasks().filter(x => x.id !== delId)); reRenderFn();
-    }
+    if (delId) { setTasks(getTasks().filter(x=>x.id!==delId)); reRenderFn(); }
   });
 }
 
-bindTaskListEvents(document.getElementById('today-list'), () => { renderToday(); });
+bindTaskListEvents(document.getElementById('today-list'), ()=>{renderToday();});
 
-// add task
 function addTask(dateStr) {
   const titleEl = document.getElementById('t-title');
-  const title   = titleEl.value.trim();
-  if (!title) { titleEl.focus(); return; }
+  const title = titleEl.value.trim(); if (!title) { titleEl.focus(); return; }
+  const catEl = document.getElementById('t-cat');
   const tasks = getTasks();
   tasks.push({
-    id: uid(), title,
+    id:uid(), title,
     priority: document.getElementById('t-priority').value,
-    category: document.getElementById('t-cat').value.trim(),
-    date: dateStr || todayDS(),
-    completed: false, createdAt: Date.now()
+    category: catEl.value || '',
+    date: dateStr||todayDS(),
+    completed:false, createdAt:Date.now()
   });
-  setTasks(tasks);
-  titleEl.value = '';
-  document.getElementById('t-cat').value = '';
-  renderToday();
+  setTasks(tasks); titleEl.value=''; renderToday();
 }
 
-document.getElementById('t-add-btn').addEventListener('click', () => addTask());
-document.getElementById('t-title').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+document.getElementById('t-add-btn').addEventListener('click', ()=>addTask());
+document.getElementById('t-title').addEventListener('keydown', e=>{ if(e.key==='Enter') addTask(); });
 
 // ──────────────────────────────────────────────────────────────
 // WEEK TAB
@@ -917,133 +627,172 @@ document.getElementById('t-title').addEventListener('keydown', e => { if (e.key 
 let selectedDS = null;
 
 function renderWeek() {
-  const tasks  = getTasks();
-  const today  = todayDS();
-  const days   = weekDays(new Date());
-  const names  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const tasks=getTasks(), today=todayDS(), days=weekDays(new Date());
+  const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  document.getElementById('week-range').textContent = fmtShort(days[0])+' – '+fmtShort(days[6]);
 
-  document.getElementById('week-range').textContent =
-    fmtShort(days[0]) + ' – ' + fmtShort(days[6]);
-
-  document.getElementById('week-grid').innerHTML = days.map((d, i) => {
-    const ds        = toDS(d);
-    const dayTasks  = tasks.filter(t => t.date === ds);
-    const total     = dayTasks.length;
-    const done      = dayTasks.filter(t => t.completed).length;
-    const pct       = total > 0 ? Math.round((done / total) * 100) : 0;
-    const isToday   = ds === today;
-    const isSel     = ds === selectedDS;
+  document.getElementById('week-grid').innerHTML = days.map((d,i) => {
+    const ds=toDS(d), dayTasks=tasks.filter(t=>t.date===ds);
+    const total=dayTasks.length, done=dayTasks.filter(t=>t.completed).length;
+    const pct=total>0?Math.round((done/total)*100):0;
+    const isToday=ds===today, isSel=ds===selectedDS;
+    const dots = dayTasks.slice(0,8).map(t=>`<span class="pri-dot dot-${t.priority||'medium'}"></span>`).join('');
     return `
-      <div class="week-cell${isToday ? ' is-today' : ''}${isSel ? ' is-selected' : ''}" data-day="${ds}" data-label="${esc(fmtFull(d))}">
+      <div class="week-cell${isToday?' is-today':''}${isSel?' is-selected':''}" data-day="${ds}" data-label="${esc(fmtFull(d))}">
         <div class="wc-name">${names[i]}</div>
         <div class="wc-num">${d.getDate()}</div>
-        <div class="wc-count">${total ? `${done}/${total}` : '–'}</div>
-        ${total ? `
-          <div class="wc-bar" style="margin-top:auto">
-            <div class="wc-fill" style="width:${pct}%"></div>
-          </div>
-          <div class="wc-pct">${pct}%</div>` : ''}
+        <div class="wc-count">${total?`${done}/${total}`:'–'}</div>
+        ${dots?`<div class="wc-dots">${dots}</div>`:''}
+        ${total?`<div class="wc-bar" style="margin-top:auto"><div class="wc-fill" style="width:${pct}%"></div></div><div class="wc-pct">${pct}%</div>`:''}
       </div>`;
   }).join('');
-
-  document.getElementById('week-grid').addEventListener('click', e => {
-    const cell = e.target.closest('[data-day]'); if (!cell) return;
-    selectedDS = cell.dataset.day;
-    document.getElementById('day-panel-title').textContent = cell.dataset.label;
-    document.getElementById('day-panel').style.display = 'block';
-    renderDayPanel();
-    renderWeek();
-  }, { once: true });
-
-  // re-bind after innerHTML overwrite
-  setTimeout(() => {
-    document.getElementById('week-grid').addEventListener('click', e => {
-      const cell = e.target.closest('[data-day]'); if (!cell) return;
-      selectedDS = cell.dataset.day;
-      document.getElementById('day-panel-title').textContent = cell.dataset.label;
-      document.getElementById('day-panel').style.display = 'block';
-      renderDayPanel();
-      renderWeek();
-    });
-  }, 0);
 }
 
-// Use event delegation on the static grid wrapper instead
 document.getElementById('week-grid').addEventListener('click', e => {
-  const cell = e.target.closest('[data-day]'); if (!cell) return;
-  selectedDS = cell.dataset.day;
-  document.getElementById('day-panel-title').textContent = cell.dataset.label;
-  document.getElementById('day-panel').style.display = 'block';
-  renderDayPanel();
-  renderWeek();
+  const cell=e.target.closest('[data-day]'); if(!cell) return;
+  selectedDS=cell.dataset.day;
+  document.getElementById('day-panel-title').textContent=cell.dataset.label;
+  document.getElementById('day-panel').style.display='block';
+  renderDayPanel(); renderWeek();
 });
 
-document.getElementById('day-panel-close').addEventListener('click', () => {
-  selectedDS = null;
-  document.getElementById('day-panel').style.display = 'none';
+document.getElementById('day-panel-close').addEventListener('click',()=>{
+  selectedDS=null;
+  document.getElementById('day-panel').style.display='none';
   renderWeek();
 });
 
 function renderDayPanel() {
   if (!selectedDS) return;
-  const tasks = getTasks().filter(t => t.date === selectedDS);
-  const sorted = [...tasks].sort((a, b) => a.completed - b.completed);
-  const el = document.getElementById('day-task-list');
-  el.innerHTML = sorted.length
-    ? sorted.map(t => taskHTML(t)).join('')
-    : `<div class="empty-state" style="padding:1.5rem"><div class="empty-icon">📝</div>No tasks — add one above!</div>`;
+  const tasks=getTasks().filter(t=>t.date===selectedDS);
+  const sorted=[...tasks].sort((a,b)=>a.completed-b.completed);
+  const el=document.getElementById('day-task-list');
+  el.innerHTML=sorted.length
+    ?sorted.map(t=>taskHTML(t)).join('')
+    :`<div class="empty-state" style="padding:1.5rem"><div class="empty-icon">📝</div>No tasks — add one above!</div>`;
 }
 
-bindTaskListEvents(document.getElementById('day-task-list'), () => {
-  renderDayPanel();
-  renderWeek();
-  renderToday();
-});
+bindTaskListEvents(document.getElementById('day-task-list'),()=>{renderDayPanel();renderWeek();renderToday();});
 
 function addWeekTask() {
   if (!selectedDS) return;
-  const titleEl = document.getElementById('wt-title');
-  const title   = titleEl.value.trim(); if (!title) { titleEl.focus(); return; }
-  const tasks = getTasks();
-  tasks.push({
-    id: uid(), title,
-    priority: document.getElementById('wt-priority').value,
-    category: '', date: selectedDS,
-    completed: false, createdAt: Date.now()
-  });
-  setTasks(tasks);
-  titleEl.value = '';
-  renderDayPanel();
-  renderWeek();
-  if (selectedDS === todayDS()) renderToday();
+  const titleEl=document.getElementById('wt-title');
+  const title=titleEl.value.trim(); if(!title){titleEl.focus();return;}
+  const tasks=getTasks();
+  tasks.push({id:uid(),title,priority:document.getElementById('wt-priority').value,category:'',date:selectedDS,completed:false,createdAt:Date.now()});
+  setTasks(tasks); titleEl.value=''; renderDayPanel(); renderWeek();
+  if(selectedDS===todayDS()) renderToday();
 }
 
 document.getElementById('wt-add-btn').addEventListener('click', addWeekTask);
-document.getElementById('wt-title').addEventListener('keydown', e => { if (e.key === 'Enter') addWeekTask(); });
+document.getElementById('wt-title').addEventListener('keydown', e=>{if(e.key==='Enter') addWeekTask();});
+
+function copyWeekMarkdown() {
+  const tasks=getTasks(), days=weekDays(new Date());
+  const names=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  let md=`# Week of ${fmtShort(days[0])} – ${fmtShort(days[6])}\n\n`;
+  let hasAny=false;
+  days.forEach((d,i)=>{
+    const ds=toDS(d), dayTasks=tasks.filter(t=>t.date===ds);
+    if(!dayTasks.length) return;
+    hasAny=true;
+    const done=dayTasks.filter(t=>t.completed).length;
+    md+=`## ${names[i]} (${done}/${dayTasks.length})\n`;
+    dayTasks.forEach(t=>{
+      const pri={high:'🔴',medium:'🟡',low:'🟢'}[t.priority]||'▪️';
+      md+=`- [${t.completed?'x':' '}] ${pri} ${t.title}${t.category?` [${t.category}]`:''}\n`;
+    });
+    md+='\n';
+  });
+  if(!hasAny) md+='_No tasks this week._\n';
+  navigator.clipboard.writeText(md).then(()=>toast('📋 Week copied as Markdown!')).catch(()=>toast('Copy failed — try again'));
+}
+
+function toggleTemplatePanel() {
+  const panel=document.getElementById('tmpl-panel');
+  const btn=document.getElementById('tmpl-toggle-btn');
+  const open=panel.style.display==='none';
+  panel.style.display=open?'block':'none';
+  btn.textContent=open?'✕ Close':'📅 Load Week Template';
+}
+
+// WEEK TEMPLATES (full 7-day)
+const TEMPLATES = {
+  faang:{tasks:[
+    [{title:'LeetCode: 2 Array / Hash Map problems',priority:'high',category:'💻 Coding'},{title:'System Design: Design a URL Shortener',priority:'high',category:'🎓 Study'},{title:'Company Research: Google Engineering Blog',priority:'medium',category:'💼 Career'},{title:'Mock Interview: 45-min timed coding session',priority:'high',category:'💻 Coding'}],
+    [{title:'LeetCode: 2 Linked List problems',priority:'high',category:'💻 Coding'},{title:'System Design: Design a Social Media Feed',priority:'high',category:'🎓 Study'},{title:'Company Research: Meta Engineering Blog',priority:'medium',category:'💼 Career'}],
+    [{title:'LeetCode: 2 Tree / Binary Search problems',priority:'high',category:'💻 Coding'},{title:'System Design: Design a Distributed Cache',priority:'high',category:'🎓 Study'},{title:'Company Research: Amazon Leadership Principles',priority:'medium',category:'💼 Career'},{title:'Mock Interview: Behavioral STAR questions',priority:'medium',category:'💻 Coding'}],
+    [{title:'LeetCode: 1 Graph BFS + 1 DFS problem',priority:'high',category:'💻 Coding'},{title:'System Design: Design a Video Streaming Service',priority:'high',category:'🎓 Study'},{title:'Company Research: Apple Software Engineering',priority:'medium',category:'💼 Career'}],
+    [{title:'LeetCode: 2 Dynamic Programming problems',priority:'high',category:'💻 Coding'},{title:"System Design: Review week's notes",priority:'medium',category:'🎓 Study'},{title:'Company Research: Netflix Tech Blog',priority:'medium',category:'💼 Career'},{title:'Mock Interview: Full peer mock (1 hr)',priority:'high',category:'💻 Coding'}],
+    [{title:'LeetCode: Weekly Contest',priority:'medium',category:'💻 Coding'},{title:'Review: Patterns & mistakes from the week',priority:'medium',category:'🎓 Study'}],
+    [{title:'LeetCode: Revisit missed problems',priority:'low',category:'💻 Coding'},{title:'Plan: Next week companies & topics',priority:'medium',category:'💼 Career'}],
+  ]},
+  esl:{tasks:[
+    [{title:'English homework: Chapter review',priority:'high',category:'🎓 Study'},{title:'Vocabulary: Learn 10 new words',priority:'high',category:'🎓 Study'},{title:'Reading: 30 min — news article',priority:'medium',category:'🎓 Study'},{title:'Writing: Journal entry (5+ sentences)',priority:'medium',category:'🎓 Study'}],
+    [{title:'English homework: Grammar exercises',priority:'high',category:'🎓 Study'},{title:"Vocabulary: Review Monday's 10 words",priority:'medium',category:'🎓 Study'},{title:'Vocabulary: Learn 10 new words',priority:'high',category:'🎓 Study'}],
+    [{title:'English homework: Listening exercise',priority:'high',category:'🎓 Study'},{title:'Vocabulary: Flashcard review',priority:'medium',category:'🎓 Study'},{title:'Reading: 30 min article + summary',priority:'medium',category:'🎓 Study'}],
+    [{title:'English homework: Speaking prep',priority:'high',category:'🎓 Study'},{title:'Vocabulary: 10 new words',priority:'high',category:'🎓 Study'},{title:'Writing: Email or letter practice',priority:'low',category:'🎓 Study'}],
+    [{title:'English homework: Submit all assignments',priority:'high',category:'🎓 Study'},{title:'Vocabulary: Week recap self-quiz',priority:'high',category:'🎓 Study'},{title:'Writing: Free write — weekend plans',priority:'low',category:'🎓 Study'}],
+    [{title:'Vocabulary: Spaced repetition review',priority:'medium',category:'🎓 Study'},{title:'Reading: 1 hour',priority:'low',category:'🎓 Study'},{title:'Immersion: Watch English show (30 min)',priority:'low',category:'🎓 Study'}],
+    [{title:'Vocabulary: Final spaced repetition pass',priority:'medium',category:'🎓 Study'},{title:'Writing: Weekly reflection',priority:'medium',category:'🎓 Study'},{title:"Plan: Next week's study topics",priority:'low',category:'🎓 Study'}],
+  ]}
+};
+
+function loadTemplate(id) {
+  const tmpl=TEMPLATES[id]; if(!tmpl) return;
+  const days=weekDays(new Date()), tasks=getTasks();
+  days.forEach((day,i)=>{
+    const ds=toDS(day);
+    (tmpl.tasks[i]||[]).forEach(t=>{
+      tasks.push({id:uid(),title:t.title,priority:t.priority,category:t.category,date:ds,completed:false,createdAt:Date.now()});
+    });
+  });
+  setTasks(tasks); toggleTemplatePanel(); renderWeek(); renderToday();
+  toast(id==='faang'?'🏢 FAANG Prep Week loaded!':'📚 ESL Student Week loaded!');
+}
 
 // ──────────────────────────────────────────────────────────────
 // GOALS TAB
 // ──────────────────────────────────────────────────────────────
+const CAT_COLORS = {'FAANG Prep':'var(--blue)','English':'var(--purple)','Health':'var(--green)','Career':'var(--yellow)','Personal':'var(--red)'};
+
+function goalForecast(g) {
+  if (!g.deadline || !g.progress || g.progress>=100) return '';
+  const today=new Date(); today.setHours(0,0,0,0);
+  const deadline=new Date(g.deadline+'T12:00:00');
+  const daysLeft=Math.ceil((deadline-today)/(1000*60*60*24));
+  const needed=100-g.progress;
+  if (daysLeft<=0) return '⚠️ Past deadline!';
+  const pctPerDay=g.progress/Math.max(1,Math.ceil((today-new Date(g.createdAt))/(1000*60*60*24)));
+  const daysToGo=pctPerDay>0?Math.ceil(needed/pctPerDay):null;
+  if (daysLeft>0) {
+    const pctNeeded=(needed/daysLeft).toFixed(1);
+    return `📅 ${daysLeft} days left · need ${pctNeeded}%/day${daysToGo?` · at this rate, ~${daysToGo} more days`:''}`;
+  }
+  return '';
+}
+
 function renderGoals() {
-  const goals = getGoals();
-  const el = document.getElementById('goals-list');
+  const goals=getGoals(); const el=document.getElementById('goals-list');
   if (!goals.length) {
-    el.innerHTML = `<div class="card empty-state"><div class="empty-icon">🎯</div>No goals yet — set one above!</div>`;
+    el.innerHTML=`<div class="card empty-state"><div class="empty-icon">🎯</div>No goals yet — set one above!</div>`;
     return;
   }
-  const sorted = [...goals].sort((a, b) => a.completed - b.completed);
-  el.innerHTML = sorted.map(g => {
-    const p = g.progress || 0;
-    const col = progressColor(p);
+  const sorted=[...goals].sort((a,b)=>a.completed-b.completed);
+  el.innerHTML=sorted.map(g=>{
+    const p=g.progress||0, col=progressColor(p);
+    const catColor=CAT_COLORS[g.category]||'var(--blue)';
+    const forecast=goalForecast(g);
     return `
-      <div class="goal-item${g.completed ? ' done' : ''}">
+      <div class="goal-item${g.completed?' done':''}">
         <div class="goal-row">
-          <div class="goal-square${g.completed ? ' checked' : ''}" data-gtoggle="${g.id}">${g.completed ? '✓' : ''}</div>
+          <div class="goal-square${g.completed?' checked':''}" data-gtoggle="${g.id}">${g.completed?'✓':''}</div>
           <div class="goal-body">
             <div class="goal-name">${esc(g.title)}</div>
             <div class="goal-meta">
+              ${g.category?`<span class="badge" style="background:${catColor}18;color:${catColor};border:1px solid ${catColor}44">${g.category}</span>`:''}
               <span class="badge-${g.type}">${g.type}</span>
-              ${g.deadline ? `<span class="badge-deadline">📅 ${g.deadline}</span>` : ''}
+              ${g.deadline?`<span class="badge-deadline">📅 ${g.deadline}</span>`:''}
             </div>
           </div>
           <button class="icon-btn" data-gdel="${g.id}" title="Delete">✕</button>
@@ -1052,245 +801,151 @@ function renderGoals() {
           <input type="range" min="0" max="100" value="${p}" style="accent-color:${col}" data-gprog="${g.id}" />
           <span class="goal-pct" id="gp-${g.id}" style="color:${col}">${p}%</span>
         </div>
-        <div class="goal-bar" style="margin-top:0.5rem">
-          <div class="goal-fill" id="gpbar-${g.id}" style="width:${p}%; background:${col}"></div>
+        <div class="goal-bar" style="margin-top:.5rem">
+          <div class="goal-fill" id="gpbar-${g.id}" style="width:${p}%;background:${col}"></div>
         </div>
+        ${forecast?`<div class="goal-forecast">${forecast}</div>`:''}
       </div>`;
   }).join('');
 }
 
-document.getElementById('goals-list').addEventListener('click', e => {
-  const tId = e.target.closest('[data-gtoggle]')?.dataset.gtoggle;
-  const dId = e.target.closest('[data-gdel]')?.dataset.gdel;
-  if (tId) {
-    const goals = getGoals(); const g = goals.find(x => x.id === tId);
-    if (g) { g.completed = !g.completed; if (g.completed) g.progress = 100; }
-    setGoals(goals); renderGoals();
-  }
-  if (dId) { setGoals(getGoals().filter(x => x.id !== dId)); renderGoals(); }
+document.getElementById('goals-list').addEventListener('click', e=>{
+  const tId=e.target.closest('[data-gtoggle]')?.dataset.gtoggle;
+  const dId=e.target.closest('[data-gdel]')?.dataset.gdel;
+  if(tId){const goals=getGoals();const g=goals.find(x=>x.id===tId);if(g){g.completed=!g.completed;if(g.completed)g.progress=100;}setGoals(goals);renderGoals();}
+  if(dId){setGoals(getGoals().filter(x=>x.id!==dId));renderGoals();}
 });
 
-document.getElementById('goals-list').addEventListener('input', e => {
-  const gId = e.target.closest('[data-gprog]')?.dataset.gprog;
-  if (!gId) return;
-  const v = parseInt(e.target.value);
-  const goals = getGoals(); const g = goals.find(x => x.id === gId);
-  if (g) g.progress = v;
-  setGoals(goals);
-  const col = progressColor(v);
-  const pctEl = document.getElementById('gp-' + gId);
-  const barEl = document.getElementById('gpbar-' + gId);
-  if (pctEl) { pctEl.textContent = v + '%'; pctEl.style.color = col; }
-  if (barEl) { barEl.style.width = v + '%'; barEl.style.background = col; }
-  e.target.style.accentColor = col;
+document.getElementById('goals-list').addEventListener('input', e=>{
+  const gId=e.target.closest('[data-gprog]')?.dataset.gprog; if(!gId) return;
+  const v=parseInt(e.target.value); const goals=getGoals(); const g=goals.find(x=>x.id===gId);
+  if(g) g.progress=v; setGoals(goals);
+  const col=progressColor(v);
+  const pctEl=document.getElementById('gp-'+gId), barEl=document.getElementById('gpbar-'+gId);
+  if(pctEl){pctEl.textContent=v+'%';pctEl.style.color=col;}
+  if(barEl){barEl.style.width=v+'%';barEl.style.background=col;}
+  e.target.style.accentColor=col;
 });
 
 function addGoal() {
-  const titleEl = document.getElementById('g-title');
-  const title   = titleEl.value.trim(); if (!title) { titleEl.focus(); return; }
-  const goals   = getGoals();
-  goals.push({
-    id: uid(), title,
-    type: document.getElementById('g-type').value,
-    deadline: document.getElementById('g-deadline').value,
-    progress: 0, completed: false, createdAt: Date.now()
-  });
-  setGoals(goals);
-  titleEl.value = '';
-  renderGoals();
+  const titleEl=document.getElementById('g-title');
+  const title=titleEl.value.trim(); if(!title){titleEl.focus();return;}
+  const goals=getGoals();
+  goals.push({id:uid(),title,category:document.getElementById('g-category').value,type:document.getElementById('g-type').value,deadline:document.getElementById('g-deadline').value,progress:0,completed:false,createdAt:Date.now()});
+  setGoals(goals); titleEl.value=''; renderGoals();
 }
 
 document.getElementById('g-add-btn').addEventListener('click', addGoal);
-document.getElementById('g-title').addEventListener('keydown', e => { if (e.key === 'Enter') addGoal(); });
+document.getElementById('g-title').addEventListener('keydown', e=>{if(e.key==='Enter') addGoal();});
 
 // ──────────────────────────────────────────────────────────────
 // STATS TAB
 // ──────────────────────────────────────────────────────────────
+let catChart = null;
+
 function renderStats() {
-  const tasks  = getTasks();
-  const today  = todayDS();
-  const days   = weekDays(new Date()).map(d => toDS(d));
+  const tasks=getTasks(), today=todayDS(), days=weekDays(new Date()).map(d=>toDS(d));
+  const todayDone=tasks.filter(t=>t.date===today&&t.completed).length;
+  document.getElementById('s-today').textContent=todayDone;
+  const weekT=tasks.filter(t=>days.includes(t.date)), weekD=weekT.filter(t=>t.completed).length;
+  document.getElementById('s-week').textContent=weekD;
+  document.getElementById('s-week-sub').textContent=`of ${weekT.length} total`;
+  const allDone=tasks.filter(t=>t.completed).length;
+  const rate=tasks.length?Math.round((allDone/tasks.length)*100):0;
+  document.getElementById('s-rate').textContent=rate+'%';
+  const streak=calcStreak(tasks);
+  document.getElementById('s-streak').textContent=streak;
+  document.getElementById('s-streak-sub').textContent=streak>1?'Days in a row!':streak===1?'Keep it up!':'Start today!';
 
-  // Today completed
-  const todayDone = tasks.filter(t => t.date === today && t.completed).length;
-  document.getElementById('s-today').textContent = todayDone;
+  // Best day
+  const dayCounts=[0,0,0,0,0,0,0];
+  tasks.filter(t=>t.completed).forEach(t=>{ const dow=new Date(t.date+'T12:00:00').getDay(); dayCounts[dow]++; });
+  const maxVal=Math.max(...dayCounts), maxDow=dayCounts.indexOf(maxVal);
+  const DOW=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  document.getElementById('s-best-day').textContent=maxVal>0?DOW[maxDow]:'—';
+  document.getElementById('s-best-day-sub').textContent=maxVal>0?`${maxVal} task${maxVal===1?'':'s'} completed on ${DOW[maxDow]}s`:'Complete tasks to see your most productive day';
 
-  // Week
-  const weekT  = tasks.filter(t => days.includes(t.date));
-  const weekD  = weekT.filter(t => t.completed).length;
-  document.getElementById('s-week').textContent = weekD;
-  document.getElementById('s-week-sub').textContent = `of ${weekT.length} total`;
-
-  // Completion rate
-  const allDone = tasks.filter(t => t.completed).length;
-  const rate    = tasks.length ? Math.round((allDone / tasks.length) * 100) : 0;
-  document.getElementById('s-rate').textContent = rate + '%';
-
-  // Streak
-  const streak = calcStreak(tasks);
-  document.getElementById('s-streak').textContent = streak;
-  document.getElementById('s-streak-sub').textContent =
-    streak > 1 ? 'Days in a row!' : streak === 1 ? 'Keep it up!' : 'Start today!';
-
-  // Most productive day of week
-  const dayCounts = [0,0,0,0,0,0,0];
-  tasks.filter(t => t.completed).forEach(t => {
-    const dow = new Date(t.date + 'T12:00:00').getDay();
-    dayCounts[dow]++;
-  });
-  const maxVal = Math.max(...dayCounts);
-  const maxDow = dayCounts.indexOf(maxVal);
-  const DOW_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  document.getElementById('s-best-day').textContent = maxVal > 0 ? DOW_NAMES[maxDow] : '—';
-  document.getElementById('s-best-day-sub').textContent = maxVal > 0
-    ? `${maxVal} task${maxVal === 1 ? '' : 's'} completed on ${DOW_NAMES[maxDow]}s`
-    : 'Complete tasks to see your most productive day';
-
-  // Chart
-  const DAY_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const counts  = days.map(ds => tasks.filter(t => t.date === ds && t.completed).length);
-  const maxCnt  = Math.max(...counts, 1);
-
-  document.getElementById('chart-bars').innerHTML = counts.map((c, i) => {
-    const h   = Math.max(Math.round((c / maxCnt) * 100), c > 0 ? 5 : 0);
-    const isT = days[i] === today;
-    return `<div class="chart-col">
-      <span style="font-size:0.62rem; color:var(--text-muted); font-weight:600">${c || ''}</span>
-      <div class="chart-bar${isT ? ' today' : ''}" style="height:${h}%"></div>
-    </div>`;
+  // Week bar chart
+  const DAY_SHORT=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const counts=days.map(ds=>tasks.filter(t=>t.date===ds&&t.completed).length);
+  const maxCnt=Math.max(...counts,1);
+  document.getElementById('chart-bars').innerHTML=counts.map((c,i)=>{
+    const h=Math.max(Math.round((c/maxCnt)*100),c>0?5:0);
+    const isT=days[i]===today;
+    return `<div class="chart-col"><span style="font-size:.62rem;color:var(--text-muted);font-weight:600">${c||''}</span><div class="chart-bar${isT?' today':''}" style="height:${h}%"></div></div>`;
   }).join('');
-
-  document.getElementById('chart-day-labels').innerHTML = DAY_SHORT.map((n, i) =>
-    `<div class="chart-day-lbl${days[i] === today ? ' today' : ''}">${n}</div>`
+  document.getElementById('chart-day-labels').innerHTML=DAY_SHORT.map((n,i)=>
+    `<div class="chart-day-lbl${days[i]===today?' today':''}">${n}</div>`
   ).join('');
+
+  // 30-day heatmap
+  renderHeatmap(tasks, today);
+
+  // Category breakdown
+  renderCatChart(tasks);
+}
+
+function renderHeatmap(tasks, today) {
+  const grid=document.getElementById('heatmap-grid');
+  const d30ago=new Date(); d30ago.setDate(d30ago.getDate()-29);
+  const startDow=d30ago.getDay();
+  const dayLabels=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html=dayLabels.map(d=>`<div class="hm-day-label">${d}</div>`).join('');
+  for(let i=0;i<startDow;i++) html+='<div></div>';
+  for(let i=29;i>=0;i--) {
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const cnt=tasks.filter(t=>t.date===ds&&t.completed).length;
+    const bg=cnt===0?'#2a2d3e':cnt<=2?'#1d3a5f':cnt<=4?'#1e5fb0':cnt<=6?'#3b82f6':'#4ade80';
+    const lbl=d.toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
+    html+=`<div class="hm-cell" style="background:${bg}" title="${lbl}: ${cnt} task${cnt!==1?'s':''} done"></div>`;
+  }
+  grid.innerHTML=html;
+}
+
+function renderCatChart(tasks) {
+  const catCounts={};
+  tasks.filter(t=>t.completed&&t.category).forEach(t=>{
+    catCounts[t.category]=(catCounts[t.category]||0)+1;
+  });
+  const entries=Object.entries(catCounts).sort((a,b)=>b[1]-a[1]);
+  const canvas=document.getElementById('cat-chart');
+  const emptyEl=document.getElementById('cat-chart-empty');
+  if (!entries.length) {
+    canvas.style.display='none'; emptyEl.style.display='block'; return;
+  }
+  canvas.style.display='block'; emptyEl.style.display='none';
+  const COLORS=['#4f8ef7','#a855f7','#4ade80','#fbbf24','#f87171','#34d399','#fb923c','#818cf8'];
+  if (catChart) catChart.destroy();
+  catChart=new Chart(canvas,{
+    type:'doughnut',
+    data:{labels:entries.map(e=>e[0]),datasets:[{data:entries.map(e=>e[1]),backgroundColor:entries.map((_,i)=>COLORS[i%COLORS.length]),borderColor:'#1a1d27',borderWidth:2}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11},boxWidth:12,padding:12}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} tasks (${Math.round(ctx.raw/entries.reduce((s,e)=>s+e[1],0)*100)}%)`}}}}
+  });
 }
 
 function calcStreak(tasks) {
-  let streak = 0;
-  const d = new Date(); d.setHours(12, 0, 0, 0);
-  for (let i = 0; i < 366; i++) {
-    const ds   = toDS(d);
-    const done = tasks.filter(t => t.date === ds && t.completed).length;
-    if (done > 0) { streak++; }
-    else if (ds === todayDS()) { /* today with 0 — don't break yet */ }
-    else { break; }
-    d.setDate(d.getDate() - 1);
+  let streak=0; const d=new Date(); d.setHours(12,0,0,0);
+  for(let i=0;i<366;i++){
+    const ds=toDS(d), done=tasks.filter(t=>t.date===ds&&t.completed).length;
+    if(done>0){streak++;}else if(ds===todayDS()){}else{break;}
+    d.setDate(d.getDate()-1);
   }
   return streak;
 }
 
 // ──────────────────────────────────────────────────────────────
-// TEMPLATES
+// TOAST
 // ──────────────────────────────────────────────────────────────
-const TEMPLATES = {
-  faang: {
-    tasks: [
-      // Mon
-      [{ title: 'LeetCode: 2 Array / Hash Map problems', priority: 'high', category: 'LeetCode' },
-       { title: 'System Design: Design a URL Shortener', priority: 'high', category: 'System Design' },
-       { title: 'Company Research: Google Engineering Blog', priority: 'medium', category: 'Research' },
-       { title: 'Mock Interview: 45-min timed coding session', priority: 'high', category: 'Mock Interview' }],
-      // Tue
-      [{ title: 'LeetCode: 2 Linked List problems', priority: 'high', category: 'LeetCode' },
-       { title: 'System Design: Design a Social Media Feed', priority: 'high', category: 'System Design' },
-       { title: 'Company Research: Meta Engineering Blog', priority: 'medium', category: 'Research' }],
-      // Wed
-      [{ title: 'LeetCode: 2 Tree / Binary Search problems', priority: 'high', category: 'LeetCode' },
-       { title: 'System Design: Design a Distributed Cache', priority: 'high', category: 'System Design' },
-       { title: 'Company Research: Amazon Leadership Principles', priority: 'medium', category: 'Research' },
-       { title: 'Mock Interview: Behavioral STAR questions', priority: 'medium', category: 'Mock Interview' }],
-      // Thu
-      [{ title: 'LeetCode: 1 Graph BFS + 1 DFS problem', priority: 'high', category: 'LeetCode' },
-       { title: 'System Design: Design a Video Streaming Service', priority: 'high', category: 'System Design' },
-       { title: 'Company Research: Apple Software Engineering', priority: 'medium', category: 'Research' }],
-      // Fri
-      [{ title: 'LeetCode: 2 Dynamic Programming problems', priority: 'high', category: 'LeetCode' },
-       { title: 'System Design: Review week\'s notes', priority: 'medium', category: 'System Design' },
-       { title: 'Company Research: Netflix Tech Blog', priority: 'medium', category: 'Research' },
-       { title: 'Mock Interview: Full peer mock (1 hr)', priority: 'high', category: 'Mock Interview' }],
-      // Sat
-      [{ title: 'LeetCode: Weekly Contest', priority: 'medium', category: 'LeetCode' },
-       { title: 'Review: Patterns & mistakes from the week', priority: 'medium', category: 'Review' }],
-      // Sun
-      [{ title: 'LeetCode: Revisit missed problems', priority: 'low', category: 'LeetCode' },
-       { title: 'Plan: Next week companies & topics', priority: 'medium', category: 'Planning' }],
-    ]
-  },
-  esl: {
-    tasks: [
-      // Mon
-      [{ title: 'English homework: Chapter review', priority: 'high', category: 'Homework' },
-       { title: 'Vocabulary: Learn 10 new words + example sentences', priority: 'high', category: 'Vocabulary' },
-       { title: 'Reading: 30 min — news article or book', priority: 'medium', category: 'Reading' },
-       { title: 'Writing: Journal entry (5+ sentences)', priority: 'medium', category: 'Writing' }],
-      // Tue
-      [{ title: 'English homework: Grammar exercises', priority: 'high', category: 'Homework' },
-       { title: 'Vocabulary: Review Monday\'s 10 words', priority: 'medium', category: 'Vocabulary' },
-       { title: 'Vocabulary: Learn 10 new words', priority: 'high', category: 'Vocabulary' },
-       { title: 'Reading: 30 min — note unfamiliar words', priority: 'medium', category: 'Reading' }],
-      // Wed
-      [{ title: 'English homework: Listening exercise', priority: 'high', category: 'Homework' },
-       { title: 'Vocabulary: Flashcard review (week so far)', priority: 'medium', category: 'Vocabulary' },
-       { title: 'Reading: 30 min article + one-paragraph summary', priority: 'medium', category: 'Reading' },
-       { title: 'Writing: Topic sentence paragraph practice', priority: 'medium', category: 'Writing' }],
-      // Thu
-      [{ title: 'English homework: Speaking prep / oral practice', priority: 'high', category: 'Homework' },
-       { title: 'Vocabulary: 10 new words + use in sentences', priority: 'high', category: 'Vocabulary' },
-       { title: 'Reading: 30 min — challenging text', priority: 'medium', category: 'Reading' },
-       { title: 'Writing: Email or letter practice', priority: 'low', category: 'Writing' }],
-      // Fri
-      [{ title: 'English homework: Submit / review all assignments', priority: 'high', category: 'Homework' },
-       { title: 'Vocabulary: Week recap self-quiz (all 40 words)', priority: 'high', category: 'Vocabulary' },
-       { title: 'Reading: 30 min + notes on new phrases', priority: 'medium', category: 'Reading' },
-       { title: 'Writing: Free write — weekend plans', priority: 'low', category: 'Writing' }],
-      // Sat
-      [{ title: 'Vocabulary: Spaced repetition review (full week)', priority: 'medium', category: 'Vocabulary' },
-       { title: 'Reading: 1 hour — book or magazine', priority: 'low', category: 'Reading' },
-       { title: 'Immersion: Watch English show with subtitles (30 min)', priority: 'low', category: 'Immersion' }],
-      // Sun
-      [{ title: 'Vocabulary: Final spaced repetition pass', priority: 'medium', category: 'Vocabulary' },
-       { title: 'Reading: 30 min — Sunday newspaper or podcast', priority: 'low', category: 'Reading' },
-       { title: 'Writing: Weekly reflection — what did I learn?', priority: 'medium', category: 'Writing' },
-       { title: 'Plan: Next week\'s study topics', priority: 'low', category: 'Planning' }],
-    ]
-  }
-};
-
-function toggleTemplatePanel() {
-  const panel = document.getElementById('tmpl-panel');
-  const btn   = document.getElementById('tmpl-toggle-btn');
-  const open  = panel.style.display === 'none';
-  panel.style.display = open ? 'block' : 'none';
-  btn.textContent = open ? '✕ Close' : '📋 Load Template';
-}
-
-function loadTemplate(id) {
-  const tmpl = TEMPLATES[id]; if (!tmpl) return;
-  const days  = weekDays(new Date());
-  const tasks = getTasks();
-  days.forEach((day, i) => {
-    const ds = toDS(day);
-    (tmpl.tasks[i] || []).forEach(t => {
-      tasks.push({ id: uid(), title: t.title, priority: t.priority,
-        category: t.category, date: ds, completed: false, createdAt: Date.now() });
-    });
-  });
-  setTasks(tasks);
-  toggleTemplatePanel();
-  renderWeek();
-  renderToday();
-  // brief toast
-  const toast = document.createElement('div');
-  toast.className = 'toast-msg';
-  toast.textContent = id === 'faang' ? '🏢 FAANG Prep Week loaded!' : '📚 ESL Student Week loaded!';
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2500);
+function toast(msg) {
+  const el=document.createElement('div'); el.className='toast-msg'; el.textContent=msg;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),2500);
 }
 
 // ──────────────────────────────────────────────────────────────
 // INIT
 // ──────────────────────────────────────────────────────────────
-document.getElementById('g-deadline').value = todayDS();
+document.getElementById('g-deadline').value=todayDS();
 initToday();
 renderGoals();
 </script>
