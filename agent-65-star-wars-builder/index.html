@@ -3,1163 +3,659 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Creative Story Builder — Agent #65</title>
+<title>Star Wars Creative Hub — Agent #65</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0f1117;
-    --card: #1a1d27;
-    --border: #2a2d3a;
-    --blue: #4f8ef7;
-    --green: #4ade80;
-    --yellow: #fbbf24;
-    --red: #f87171;
-    --purple: #a78bfa;
-    --teal: #2dd4bf;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-  }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
-  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  header .logo { font-size: 24px; }
-  header h1 { font-size: 20px; font-weight: 700; color: var(--blue); }
-  header .sub { font-size: 13px; color: var(--muted); margin-left: auto; }
-  .api-key-row { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; width: 280px; }
-  .api-key-row input { background: none; border: none; color: var(--text); font-size: 13px; font-family: monospace; outline: none; flex: 1; width: 0; }
-  .api-key-row input::placeholder { color: var(--muted); }
-  .api-key-row .api-label { font-size: 11px; color: var(--muted); white-space: nowrap; font-weight: 600; }
-  .api-saved { font-size: 11px; color: var(--green); font-weight: 700; white-space: nowrap; }
-  @media(max-width:640px){ .api-key-row { width: 100%; } header { gap: 8px; } }
-  .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; gap: 4px; overflow-x: auto; }
-  .tabs::-webkit-scrollbar { height: 3px; }
-  .tabs::-webkit-scrollbar-thumb { background: var(--border); }
-  .tab { padding: 14px 16px; cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 500; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; flex-shrink: 0; }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-  .page { display: none; padding: 24px; max-width: 960px; margin: 0 auto; }
-  .page.active { display: block; }
-  .section-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; font-weight: 600; }
-  .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
-  .btn:disabled { opacity: .45; cursor: not-allowed; }
-  .btn-primary { background: var(--blue); color: #fff; }
-  .btn-primary:hover:not(:disabled) { opacity: .85; }
-  .btn-green { background: var(--green); color: #0f1117; }
-  .btn-green:hover:not(:disabled) { opacity: .85; }
-  .btn-yellow { background: var(--yellow); color: #0f1117; }
-  .btn-yellow:hover:not(:disabled) { opacity: .85; }
-  .btn-purple { background: var(--purple); color: #0f1117; }
-  .btn-purple:hover:not(:disabled) { opacity: .85; }
-  .btn-danger { background: var(--red); color: #fff; font-size: 12px; padding: 6px 12px; }
-  .btn-danger:hover:not(:disabled) { opacity: .85; }
-  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 12px; padding: 6px 12px; }
-  .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-  .badge-light { background: rgba(251,191,36,.2); color: var(--yellow); }
-  .badge-dark { background: rgba(248,113,113,.2); color: var(--red); }
-  /* Lore */
-  .lore-categories { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-  @media(max-width:640px){ .lore-categories { grid-template-columns: repeat(2,1fr); } }
-  .lore-cat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; transition: all .15s; }
-  .lore-cat:hover { border-color: var(--blue); }
-  .lore-cat.active { border-color: var(--blue); background: rgba(79,142,247,.1); }
-  .lore-cat .icon { font-size: 24px; margin-bottom: 4px; }
-  .lore-cat .name { font-size: 12px; font-weight: 600; }
-  .lore-facts { list-style: none; }
-  .lore-facts li { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
-  .lore-facts li::before { content: '⟩'; color: var(--blue); flex-shrink: 0; font-weight: 700; }
-  .lore-facts li:last-child { border-bottom: none; }
-  /* Quiz */
-  .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .progress-bar { background: var(--border); border-radius: 4px; height: 6px; flex: 1; margin: 0 16px; }
-  .progress-fill { height: 100%; background: var(--blue); border-radius: 4px; transition: width .3s; }
-  .question-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 16px; }
-  .diff-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; margin-bottom: 12px; display: inline-block; }
-  .diff-easy { background: rgba(74,222,128,.2); color: var(--green); }
-  .diff-medium { background: rgba(251,191,36,.2); color: var(--yellow); }
-  .diff-hard { background: rgba(248,113,113,.2); color: var(--red); }
-  .question-text { font-size: 18px; font-weight: 600; margin-bottom: 20px; line-height: 1.4; }
-  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media(max-width:500px){ .choices { grid-template-columns: 1fr; } }
-  .choice { padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; font-size: 14px; text-align: left; transition: all .15s; }
-  .choice:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
-  .choice.correct { background: rgba(74,222,128,.15); border-color: var(--green); color: var(--green); }
-  .choice.wrong { background: rgba(248,113,113,.15); border-color: var(--red); color: var(--red); }
-  .feedback { padding: 12px 16px; border-radius: 8px; margin-top: 12px; font-size: 13px; }
-  .feedback.correct { background: rgba(74,222,128,.1); color: var(--green); }
-  .feedback.wrong { background: rgba(248,113,113,.1); color: var(--red); }
-  .result-card { text-align: center; padding: 40px; }
-  .result-rank { font-size: 56px; margin-bottom: 8px; }
-  .result-title { font-size: 28px; font-weight: 700; color: var(--yellow); margin-bottom: 8px; }
-  .result-score { font-size: 48px; font-weight: 700; color: var(--blue); }
-  /* Collection */
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-  @media(max-width:640px){ .grid2 { grid-template-columns: 1fr; } }
-  .options { display: flex; flex-wrap: wrap; gap: 8px; }
-  .opt { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; font-size: 13px; transition: all .15s; }
-  .opt:hover { border-color: var(--blue); color: var(--blue); }
-  .opt.selected { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600; }
-  .collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-  .coll-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
-  .coll-avatar { font-size: 40px; margin-bottom: 8px; }
-  .coll-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-  .coll-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-  .coll-actions { display: flex; gap: 8px; justify-content: center; }
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
-  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(79,142,247,.15); color: var(--blue); margin: 2px; }
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #0f1117; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; transform: translateY(80px); opacity: 0; transition: all .3s; z-index: 999; }
-  .toast.show { transform: translateY(0); opacity: 1; }
-
-  /* ── Story Builder ── */
-  .char-select { width: 100%; background: #111; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; padding: 10px 12px; outline: none; appearance: none; cursor: pointer; }
-  .char-select:focus { border-color: var(--blue); }
-  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media(max-width:500px){ .scenario-grid { grid-template-columns: 1fr; } }
-  .scenario-card { padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; font-size: 13px; text-align: left; transition: all .15s; line-height: 1.4; }
-  .scenario-card:hover { border-color: var(--yellow); color: var(--yellow); }
-  .scenario-card.selected { border-color: var(--yellow); background: rgba(251,191,36,.08); color: var(--yellow); }
-  .story-block { margin-bottom: 20px; }
-  .story-para {
-    font-size: 15px;
-    line-height: 1.9;
-    color: var(--text);
-    margin-bottom: 16px;
-    padding: 16px 20px;
-    background: rgba(255,255,255,.02);
-    border-radius: 10px;
-    border-left: 3px solid var(--blue);
-  }
-  .story-para.user-para {
-    border-left-color: var(--green);
-    background: rgba(74,222,128,.03);
-  }
-  .vocab-section { margin-top: 10px; margin-bottom: 16px; }
-  .vocab-title { font-size: 11px; color: var(--yellow); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-  .vocab-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-  .vocab-pill {
-    background: rgba(251,191,36,.1);
-    border: 1px solid rgba(251,191,36,.3);
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 12px;
-    cursor: help;
-    position: relative;
-    color: var(--yellow);
-  }
-  .vocab-pill:hover .vocab-tooltip { opacity: 1; pointer-events: auto; }
-  .vocab-tooltip {
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1a1d27;
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-size: 12px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    width: 220px;
-    text-align: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s;
-    z-index: 20;
-    white-space: normal;
-    line-height: 1.5;
-  }
-  .vocab-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: var(--border);
-  }
-  .story-highlighted [data-def] {
-    color: var(--yellow);
-    border-bottom: 1px dashed rgba(251,191,36,.5);
-    cursor: help;
-  }
-  textarea.story-input {
-    width: 100%;
-    background: #111;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 14px;
-    padding: 14px;
-    outline: none;
-    resize: vertical;
-    min-height: 100px;
-    line-height: 1.6;
-    font-family: inherit;
-    transition: border-color .2s;
-  }
-  textarea.story-input:focus { border-color: var(--green); }
-  textarea.story-input::placeholder { color: var(--muted); }
-  .story-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-  .spinner-sm { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
-  .spinner-sm.dark { border-color: rgba(0,0,0,.2); border-top-color: #000; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .error-box { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3); color: #fca5a5; border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-bottom: 12px; display: none; }
-
-  /* ── Fan Wiki ── */
-  .wiki-form textarea { width: 100%; background: #111; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; padding: 12px 14px; outline: none; resize: vertical; min-height: 120px; line-height: 1.6; font-family: inherit; }
-  .wiki-form textarea:focus { border-color: var(--purple); }
-  .wiki-form input[type="text"] { width: 100%; background: #111; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 15px; padding: 11px 14px; outline: none; font-family: inherit; transition: border-color .2s; }
-  .wiki-form input[type="text"]:focus { border-color: var(--purple); }
-  .wiki-output { display: none; }
-  .wiki-output.visible { display: block; }
-  .wiki-article { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .wiki-header { background: linear-gradient(135deg, #1a1d27, #0f1117); padding: 24px; border-bottom: 1px solid var(--border); }
-  .wiki-name { font-size: 28px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
-  .wiki-tagline { font-size: 14px; color: var(--muted); font-style: italic; }
-  .wiki-body { padding: 24px; display: grid; grid-template-columns: 240px 1fr; gap: 24px; }
-  @media(max-width:640px){ .wiki-body { grid-template-columns: 1fr; } }
-  .wiki-infobox { background: rgba(79,142,247,.05); border: 1px solid rgba(79,142,247,.2); border-radius: 10px; padding: 16px; font-size: 13px; }
-  .wiki-infobox-title { font-size: 12px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
-  .wiki-info-row { display: flex; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); line-height: 1.4; }
-  .wiki-info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .wiki-info-key { font-weight: 600; color: var(--muted); min-width: 80px; flex-shrink: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .3px; }
-  .wiki-info-val { color: var(--text); }
-  .wiki-content-sections { display: flex; flex-direction: column; gap: 20px; }
-  .wiki-section-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
-  .wiki-section-body { font-size: 14px; color: #cbd5e1; line-height: 1.75; }
-  .wiki-section-body ul { list-style: none; display: flex; flex-direction: column; gap: 6px; padding: 0; }
-  .wiki-section-body ul li { padding-left: 16px; position: relative; }
-  .wiki-section-body ul li::before { content: '•'; position: absolute; left: 0; color: var(--purple); }
-  .wiki-export-row { display: flex; gap: 10px; justify-content: flex-end; padding: 16px 24px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--card:#21262d;--border:#30363d;--text:#e6edf3;--sub:#8b949e;--gold:#FFD700;--gold2:#b8860b;--red:#f85149;--green:#3fb950;--blue:#58a6ff;--mono:'Fira Code',Consolas,monospace}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+header{background:#0a0c10;border-bottom:2px solid var(--gold);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.1rem;font-weight:800;color:var(--gold);letter-spacing:.05em}
+header h1 span{color:var(--sub);font-weight:400;font-size:.8rem;margin-left:8px;letter-spacing:0}
+.api-row{display:flex;align-items:center;gap:8px;margin-left:auto}
+.api-row label{font-size:.75rem;color:var(--sub)}
+.api-row input{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:.78rem;font-family:var(--mono);width:240px;outline:none}
+.api-row input:focus{border-color:var(--gold)}
+.tabs{display:flex;background:#0a0c10;border-bottom:1px solid var(--gold)50;padding:0 20px;gap:4px}
+.tab{padding:11px 18px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--sub);border-bottom:2px solid transparent;transition:.15s;white-space:nowrap}
+.tab:hover{color:var(--gold)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.page{display:none;padding:24px 20px;max-width:1000px;margin:0 auto}
+.page.active{display:block}
+label.lbl{display:block;font-size:.78rem;font-weight:600;color:var(--sub);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+select,input[type=text]{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:.88rem;outline:none;width:100%;transition:.15s}
+select:focus,input:focus{border-color:var(--gold)}
+textarea{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:.9rem;line-height:1.7;resize:vertical;outline:none;width:100%;transition:.15s}
+textarea:focus{border-color:var(--gold)}
+.btn{padding:9px 20px;border-radius:7px;border:none;cursor:pointer;font-size:.85rem;font-weight:700;transition:.15s}
+.btn-gold{background:var(--gold);color:#0d1117}
+.btn-gold:hover{background:#e6c200}
+.btn-sm{padding:5px 12px;font-size:.75rem;border-radius:5px;background:var(--card);color:var(--sub);border:1px solid var(--border);cursor:pointer}
+.btn-sm:hover{border-color:var(--gold);color:var(--gold)}
+.row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.col{flex:1;min-width:180px}
+.sec-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--sub);margin-bottom:10px}
+/* Character grid */
+.char-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.char-btn{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:.82rem;color:var(--text);transition:.15s;white-space:nowrap}
+.char-btn:hover{border-color:var(--gold);color:var(--gold)}
+.char-btn.active{border-color:var(--gold);background:#21262d;color:var(--gold)}
+/* Mission cards */
+.mission-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.mission-card{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;text-align:center;transition:.15s}
+.mission-card:hover{border-color:var(--gold)}
+.mission-card.active{border-color:var(--gold);background:#21262d}
+.mission-icon{font-size:1.6rem;display:block;margin-bottom:4px}
+.mission-name{font-size:.8rem;color:var(--text);font-weight:600}
+/* Story area */
+.story-box{background:#0a0c10;border:1px solid var(--gold)40;border-radius:10px;padding:20px;font-size:.92rem;line-height:1.9;color:#e8d5a0;min-height:100px;margin-bottom:12px;font-family:Georgia,'Times New Roman',serif}
+.story-box .vocab-word{color:var(--gold);cursor:pointer;border-bottom:1px dashed var(--gold);position:relative}
+.vocab-popup{display:none;position:absolute;bottom:calc(100% + 6px);left:0;background:var(--surface);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:.78rem;min-width:200px;z-index:10;color:var(--text);font-family:'Segoe UI',sans-serif;box-shadow:0 4px 20px #00000080}
+.vocab-popup.show{display:block}
+.vocab-popup strong{color:var(--gold)}
+.exchange-count{font-size:.75rem;color:var(--sub);margin-bottom:10px}
+/* Wiki */
+.wiki-output{background:#0a0c10;border:1px solid var(--gold)30;border-radius:10px;padding:20px;line-height:1.8}
+.wiki-infobox{float:right;margin:0 0 16px 16px;background:var(--card);border:2px solid var(--gold)50;border-radius:8px;padding:12px;min-width:200px;font-size:.8rem}
+.wiki-infobox h4{color:var(--gold);font-size:.88rem;font-weight:700;margin-bottom:8px;border-bottom:1px solid var(--gold)30;padding-bottom:4px}
+.wiki-infobox tr td:first-child{color:var(--sub);padding-right:10px;font-weight:600;white-space:nowrap}
+.wiki-infobox tr td{padding:3px 0;vertical-align:top}
+.wiki-h2{font-size:1.1rem;font-weight:700;color:var(--gold);margin:16px 0 8px;border-bottom:1px solid var(--gold)30;padding-bottom:4px}
+.wiki-h3{font-size:.95rem;font-weight:700;color:#e8d5a0;margin:12px 0 6px}
+.wiki-p{font-size:.88rem;color:#c8c0a8;margin-bottom:8px;line-height:1.7}
+/* Trivia */
+.trivia-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.diff-btn{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:8px 18px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--sub);transition:.15s}
+.diff-btn:hover,.diff-btn.active{border-color:var(--gold);color:var(--gold);background:#21262d}
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:12px}
+.q-text{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:16px;line-height:1.5}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.options-grid{grid-template-columns:1fr}}
+.opt-btn{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;font-size:.85rem;color:var(--text);text-align:left;transition:.15s}
+.opt-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.opt-btn.correct{border-color:var(--green);background:#0e2a14;color:var(--green)!important}
+.opt-btn.wrong{border-color:var(--red);background:#2a0e0e;color:var(--red)!important}
+.timer-bar-wrap{background:var(--border);border-radius:4px;height:6px;overflow:hidden;margin-bottom:12px}
+.timer-bar-fill{height:100%;border-radius:4px;background:var(--gold);transition:width 1s linear}
+.timer-label{font-size:.78rem;color:var(--sub);margin-bottom:6px}
+.score-display{font-size:3rem;font-weight:800;text-align:center;color:var(--gold);margin:16px 0 6px}
+.rank-display{text-align:center;font-size:1.1rem;color:#e8d5a0;margin-bottom:16px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="logo">⭐</div>
-  <h1>Creative Story Builder</h1>
-  <div class="api-key-row">
-    <span class="api-label">API KEY</span>
-    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" />
-    <span id="apiSaved" class="api-saved" style="display:none">✓ Saved</span>
+  <h1>⭐ STAR WARS CREATIVE HUB <span>Agent #65</span></h1>
+  <div class="api-row">
+    <label>Gemini API Key</label>
+    <input type="password" id="api-key" placeholder="AIza..." oninput="localStorage.setItem('ag65_key',this.value)">
   </div>
-  <div class="sub">Agent #65 · 100 AI Agents</div>
 </header>
 
-<nav class="tabs">
-  <div class="tab active" onclick="showTab('story', event)">📖 Story Builder</div>
-  <div class="tab" onclick="showTab('wiki', event)">🌐 Fan Wiki</div>
-  <div class="tab" onclick="showTab('lore', event)">📚 Lore</div>
-  <div class="tab" onclick="showTab('quiz', event)">🎯 Quiz</div>
-  <div class="tab" onclick="showTab('collection', event)">🗂️ Collection</div>
-  <div class="tab" onclick="showTab('webdev', event)">🎓 Web Dev</div>
-</nav>
-
-<!-- ═══════════════════════════ STORY BUILDER TAB ═══════════════════════════ -->
-<div id="tab-story" class="page active">
-  <div class="section-title">📖 AI Story Builder</div>
-
-  <div class="card">
-    <div class="label">Choose a Character</div>
-    <select class="char-select" id="storyChar">
-      <option value="">— Select a character —</option>
-      <option>Luke Skywalker</option>
-      <option>Leia Organa</option>
-      <option>Han Solo</option>
-      <option>Darth Vader</option>
-      <option>Yoda</option>
-      <option>Obi-Wan Kenobi</option>
-      <option>Rey</option>
-      <option>Finn</option>
-      <option>Kylo Ren</option>
-      <option>Ahsoka Tano</option>
-      <option>Din Djarin (The Mandalorian)</option>
-      <option>Grogu</option>
-      <option>Padmé Amidala</option>
-      <option>Anakin Skywalker</option>
-      <option>Qui-Gon Jinn</option>
-      <option>Mace Windu</option>
-      <option>Count Dooku</option>
-      <option>Boba Fett</option>
-      <option>Darth Maul</option>
-      <option>Ezra Bridger</option>
-    </select>
-  </div>
-
-  <div class="card">
-    <div class="label">Choose a Mission Scenario</div>
-    <div class="scenario-grid">
-      <div class="scenario-card" onclick="selectScenario(this, 'Rescue a captured Jedi from an Imperial prison facility')">⛓️ Rescue a captured Jedi from an Imperial prison</div>
-      <div class="scenario-card" onclick="selectScenario(this, 'Infiltrate an Imperial Star Destroyer to steal battle plans')">🕵️ Infiltrate an Imperial Star Destroyer</div>
-      <div class="scenario-card" onclick="selectScenario(this, 'Escort a Rebel diplomat safely through hostile Outer Rim space')">🛸 Escort a Rebel diplomat through hostile space</div>
-      <div class="scenario-card" onclick="selectScenario(this, 'Destroy an ancient Sith artifact before it falls into enemy hands')">💀 Destroy a dangerous Sith artifact</div>
-      <div class="scenario-card" onclick="selectScenario(this, 'Navigate the deadly Unknown Regions to find a lost Jedi Temple')">🗺️ Navigate the Unknown Regions to find a lost Temple</div>
-      <div class="scenario-card" onclick="selectScenario(this, 'Broker peace between warring Mandalorian clans before war erupts')">⚔️ Broker peace between warring Mandalorian clans</div>
-    </div>
-  </div>
-
-  <div class="error-box" id="storyError"></div>
-
-  <button class="btn btn-yellow" id="beginStoryBtn" onclick="beginStory()">
-    <span class="spinner-sm dark" id="beginSpinner"></span>
-    ✦ Begin Story
-  </button>
-
-  <div id="storyOutput" style="margin-top:24px;"></div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('story',this)">✍️ Co-Write an Adventure</div>
+  <div class="tab" onclick="switchTab('wiki',this)">📖 Fan Wiki Generator</div>
+  <div class="tab" onclick="switchTab('trivia',this)">🏆 Trivia Challenge</div>
 </div>
 
-<!-- ═══════════════════════════ FAN WIKI TAB ═══════════════════════════════ -->
-<div id="tab-wiki" class="page">
-  <div class="section-title">🌐 Fan Wiki Generator</div>
+<!-- ══════════════ TAB 1 — CO-WRITE ══════════════ -->
+<div class="page active" id="tab-story">
+  <div id="story-setup">
+    <div class="sec-title">Step 1 — Choose Your Character</div>
+    <div class="char-grid" id="char-grid"></div>
 
-  <div class="card wiki-form">
-    <div style="margin-bottom:14px;">
-      <div class="label">Character or Concept Name</div>
-      <input type="text" id="wikiName" placeholder="e.g. Ahsoka Tano, The Darksaber, Mandalore..." />
-    </div>
-    <div>
-      <div class="label">Key Facts (one per line)</div>
-      <textarea id="wikiFacts" placeholder="e.g.&#10;Togruta Jedi Padawan trained by Anakin Skywalker&#10;Left the Jedi Order after being falsely accused&#10;Fought in the Clone Wars as Commander Ahsoka&#10;Survived Order 66 and joined the Rebellion&#10;Known for her twin white lightsabers"></textarea>
-    </div>
-  </div>
+    <div class="sec-title">Step 2 — Mission Type</div>
+    <div class="mission-grid" id="mission-grid"></div>
 
-  <div class="error-box" id="wikiError"></div>
-
-  <button class="btn btn-purple" id="wikiBtn" onclick="generateWiki()">
-    <span class="spinner-sm" id="wikiSpinner"></span>
-    🌐 Generate Wiki Article
-  </button>
-
-  <div class="wiki-output" id="wikiOutput" style="margin-top:24px;">
-    <div class="wiki-article">
-      <div class="wiki-header">
-        <div class="wiki-name" id="wikiArticleName"></div>
-        <div class="wiki-tagline" id="wikiTagline"></div>
+    <div class="row" style="align-items:flex-end">
+      <div class="col" style="max-width:240px">
+        <label class="lbl">Setting</label>
+        <select id="story-setting">
+          <option>Death Star</option><option>Tatooine</option><option>Hoth</option>
+          <option>Dagobah</option><option>Coruscant</option><option>Mandalore</option>
+          <option>Ahch-To</option><option>Random</option>
+        </select>
       </div>
-      <div class="wiki-body">
-        <div>
-          <div class="wiki-infobox">
-            <div class="wiki-infobox-title">📋 Infobox</div>
-            <div id="wikiInfobox"></div>
-          </div>
-        </div>
-        <div class="wiki-content-sections">
-          <div>
-            <div class="wiki-section-title">📜 History</div>
-            <div class="wiki-section-body" id="wikiHistory"></div>
-          </div>
-          <div>
-            <div class="wiki-section-title">🤝 Relationships</div>
-            <div class="wiki-section-body" id="wikiRelationships"></div>
-          </div>
-          <div>
-            <div class="wiki-section-title">🎬 Behind the Scenes</div>
-            <div class="wiki-section-body" id="wikiBehind"></div>
-          </div>
-        </div>
-      </div>
-      <div class="wiki-export-row">
-        <button class="btn btn-outline" onclick="copyWikiText()">📋 Copy text</button>
-        <button class="btn btn-purple" onclick="exportWikiHTML()">⬇️ Export HTML</button>
-      </div>
+      <button class="btn btn-gold" id="story-begin-btn" onclick="beginStory()" disabled>⭐ Begin Story</button>
+    </div>
+  </div>
+
+  <div id="story-area" style="display:none">
+    <div class="exchange-count" id="exchange-count">Exchange 0 / 10</div>
+    <div class="story-box" id="story-display"></div>
+
+    <div style="margin-bottom:10px">
+      <label class="lbl">Continue the story...</label>
+      <textarea id="story-input" rows="3" placeholder="Write your next paragraph..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-gold" id="continue-btn" onclick="continueStory()">➡️ Continue Story</button>
+      <button class="btn-sm" onclick="downloadStory()">⬇️ Save Story (.txt)</button>
+      <button class="btn-sm" onclick="resetStory()">↺ New Story</button>
+    </div>
+    <div id="vocab-section" style="display:none">
+      <div class="sec-title">📚 Vocabulary — click any gold word in the story</div>
+      <div id="vocab-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════ LORE TAB ═══════════════════════════════════ -->
-<div id="tab-lore" class="page">
-  <div class="section-title">📚 Star Wars Universe Guide</div>
-  <div class="lore-categories" id="lore-cats">
-    <div class="lore-cat active" onclick="showLore(0,this)"><div class="icon">✨</div><div class="name">Jedi Order</div></div>
-    <div class="lore-cat" onclick="showLore(1,this)"><div class="icon">⚡</div><div class="name">Sith</div></div>
-    <div class="lore-cat" onclick="showLore(2,this)"><div class="icon">🌍</div><div class="name">Planets</div></div>
-    <div class="lore-cat" onclick="showLore(3,this)"><div class="icon">🚀</div><div class="name">Ships</div></div>
-    <div class="lore-cat" onclick="showLore(4,this)"><div class="icon">⚔️</div><div class="name">Weapons</div></div>
-    <div class="lore-cat" onclick="showLore(5,this)"><div class="icon">🐉</div><div class="name">Creatures</div></div>
-    <div class="lore-cat" onclick="showLore(6,this)"><div class="icon">🏛️</div><div class="name">Factions</div></div>
-    <div class="lore-cat" onclick="showLore(7,this)"><div class="icon">🌀</div><div class="name">The Force</div></div>
-  </div>
-  <div class="card" id="lore-content"></div>
-</div>
-
-<!-- ═══════════════════════════ QUIZ TAB ═══════════════════════════════════ -->
-<div id="tab-quiz" class="page">
-  <div class="section-title">🎯 Star Wars Trivia</div>
-  <div id="quiz-area"></div>
-</div>
-
-<!-- ═══════════════════════════ COLLECTION TAB ══════════════════════════════ -->
-<div id="tab-collection" class="page">
-  <div class="section-title">🗂️ My Characters</div>
-  <div id="collection-area"></div>
-</div>
-
-<!-- ═══════════════════════════ WEB DEV TAB ═══════════════════════════════════ -->
-<div id="tab-webdev" class="page">
-  <div class="section-title">🎓 Build Your Own Fan Wiki — Web Dev Guide</div>
-  <p style="color:var(--muted);font-size:14px;margin-bottom:24px;line-height:1.6;">The Fan Wiki tab generates a real HTML page you can export and deploy. This guide teaches the web dev concepts powering it — use it to learn how to build your own fan wiki from scratch.</p>
-
-  <!-- Step-by-step learn panel -->
-  <div class="card" style="margin-bottom:16px;">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="webdev-tabs">
-      <button class="btn btn-primary" onclick="showWebDevSection('html', this)">🧱 HTML Structure</button>
-      <button class="btn btn-outline" onclick="showWebDevSection('css', this)">🎨 CSS Styling</button>
-      <button class="btn btn-outline" onclick="showWebDevSection('js', this)">⚡ JavaScript</button>
-      <button class="btn btn-outline" onclick="showWebDevSection('deploy', this)">🚀 Deploy to GitHub Pages</button>
+<!-- ══════════════ TAB 2 — FAN WIKI ══════════════ -->
+<div class="page" id="tab-wiki">
+  <div class="row">
+    <div class="col">
+      <label class="lbl">Name</label>
+      <input type="text" id="wiki-name" placeholder="Ahsoka Tano, Mandalore, etc.">
     </div>
-    <div id="webdev-content"></div>
-  </div>
-
-  <!-- Live code preview -->
-  <div class="card" style="margin-bottom:16px;">
-    <div style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:12px;">✏️ Mini Wiki Builder — Learn by Doing</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5;">Fill in the form below to generate raw HTML for a simple wiki page. Click "Show HTML" to see and copy the code — then paste it into a file and open it in your browser!</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div>
-        <div class="label">Page Title</div>
-        <input type="text" id="miniTitle" placeholder="e.g. Ahsoka Tano" style="width:100%;background:#111;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:9px 12px;outline:none;">
-      </div>
-      <div>
-        <div class="label">Tagline</div>
-        <input type="text" id="miniTagline" placeholder="e.g. Jedi Padawan, hero of the Clone Wars" style="width:100%;background:#111;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:9px 12px;outline:none;">
-      </div>
+    <div class="col" style="max-width:200px">
+      <label class="lbl">Type</label>
+      <select id="wiki-type">
+        <option>Character</option><option>Planet</option><option>Faction</option>
+        <option>Vehicle</option><option>Weapon</option><option>Event</option>
+      </select>
     </div>
-    <div style="margin-bottom:10px;">
-      <div class="label">Description</div>
-      <textarea id="miniDesc" placeholder="Write a short description of your character or topic..." style="width:100%;background:#111;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px 12px;outline:none;min-height:80px;resize:vertical;font-family:inherit;"></textarea>
+    <div class="col" style="max-width:220px">
+      <label class="lbl">Era</label>
+      <select id="wiki-era">
+        <option>Old Republic</option><option>Prequel / Clone Wars</option>
+        <option>Original Trilogy</option><option>New Republic</option>
+        <option>Sequel Era</option><option>Legends</option>
+      </select>
     </div>
-    <button class="btn btn-primary" onclick="buildMiniWiki()">🔨 Build HTML</button>
-    <button class="btn btn-outline" onclick="copyMiniWiki()" id="miniCopyBtn" style="display:none;margin-left:8px;">📋 Copy HTML</button>
-    <div id="miniCode" style="display:none;margin-top:14px;background:#0a0a0a;border:1px solid var(--border);border-radius:8px;overflow:auto;max-height:320px;padding:14px;font-family:monospace;font-size:12px;line-height:1.6;color:#a5f3fc;white-space:pre;"></div>
   </div>
-
-  <!-- GitHub Pages deploy checklist -->
-  <div class="card">
-    <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:12px;">✅ Your Portfolio Checklist</div>
-    <div id="webdev-checklist" style="display:flex;flex-direction:column;gap:8px;"></div>
+  <div style="margin-bottom:14px">
+    <label class="lbl">Known Facts (3–5 bullet points)</label>
+    <textarea id="wiki-facts" rows="5" placeholder="- Former Jedi Padawan to Anakin Skywalker
+- Left the Jedi Order after the Siege of Mandalore
+- Uses twin white lightsabers
+- Became a key figure in the early Rebellion"></textarea>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn btn-gold" id="wiki-btn" onclick="generateWiki()">📖 Generate Wiki Article</button>
+    <button class="btn-sm" id="wiki-copy-html" style="display:none" onclick="copyWikiHTML()">📋 Copy as HTML</button>
+    <button class="btn-sm" id="wiki-download" style="display:none" onclick="downloadWiki()">⬇️ Download Wiki Page</button>
+  </div>
+  <div id="wiki-output" style="display:none">
+    <div class="wiki-output" id="wiki-content"></div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- ══════════════ TAB 3 — TRIVIA ══════════════ -->
+<div class="page" id="tab-trivia">
+  <div id="trivia-start">
+    <div class="sec-title">Choose Difficulty</div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="diff-btn active" id="diff-easy" onclick="selectDiff('easy',this)">⭐ Easy</button>
+      <button class="diff-btn" id="diff-medium" onclick="selectDiff('medium',this)">⭐⭐ Medium</button>
+      <button class="diff-btn" id="diff-hard" onclick="selectDiff('hard',this)">⭐⭐⭐ Hard</button>
+    </div>
+    <div id="high-scores" style="margin-bottom:16px;font-size:.85rem;color:var(--sub)"></div>
+    <button class="btn btn-gold" onclick="startTrivia()">▶ Start Trivia</button>
+  </div>
+  <div id="trivia-game" style="display:none">
+    <div class="trivia-meta">
+      <span id="q-progress" style="font-size:.85rem;color:var(--sub)">Question 1 / 10</span>
+      <span id="q-score" style="font-size:.85rem;color:var(--gold);font-weight:700">Score: 0</span>
+    </div>
+    <div class="timer-label" id="timer-label">⏱ 30 seconds</div>
+    <div class="timer-bar-wrap"><div class="timer-bar-fill" id="trivia-timer-bar"></div></div>
+    <div class="q-card">
+      <div class="q-text" id="q-text"></div>
+      <div class="options-grid" id="q-options"></div>
+    </div>
+    <div id="q-feedback" style="font-size:.85rem;color:var(--sub);min-height:20px;margin-top:6px"></div>
+  </div>
+  <div id="trivia-result" style="display:none;text-align:center">
+    <div class="score-display" id="final-score"></div>
+    <div class="rank-display" id="final-rank"></div>
+    <div id="high-score-note" style="color:var(--sub);font-size:.82rem;margin-bottom:16px"></div>
+    <button class="btn btn-gold" onclick="restartTrivia()">↺ Play Again</button>
+    <button class="btn-sm" onclick="showTriviaStart()" style="margin-left:10px">← Change Difficulty</button>
+  </div>
+</div>
 
 <script>
-// ── API Key ─────────────────────────────────────────────────────────────────
-(function initApiKey() {
-  const saved = localStorage.getItem('gemini_api_key');
-  if (saved) { document.getElementById('apiKey').value = saved; document.getElementById('apiSaved').style.display = 'inline'; }
-  document.getElementById('apiKey').addEventListener('input', (e) => {
-    const v = e.target.value.trim();
-    localStorage.setItem('gemini_api_key', v);
-    document.getElementById('apiSaved').style.display = v ? 'inline' : 'none';
-  });
-})();
+document.getElementById('api-key').value = localStorage.getItem('ag65_key') || '';
 
-function getApiKey() {
-  return (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
+// ── QUESTIONS DATA ──
+const QUESTIONS = {
+  easy:[
+    {q:"What color is Luke Skywalker's lightsaber in Return of the Jedi?",opts:["Blue","Green","Red","Purple"],a:1},
+    {q:"What is the name of Han Solo's ship?",opts:["X-Wing","Millennium Falcon","Star Destroyer","TIE Fighter"],a:1},
+    {q:"Who says 'I am your father'?",opts:["Emperor Palpatine","Grand Moff Tarkin","Darth Vader","Darth Maul"],a:2},
+    {q:"What planet is Luke Skywalker from?",opts:["Coruscant","Hoth","Endor","Tatooine"],a:3},
+    {q:"What creature does Yoda belong to?",opts:["Wookiee","Unknown species","Ewok","Togruta"],a:1},
+    {q:"Who is R2-D2's constant companion droid?",opts:["BB-8","C-3PO","K-2SO","R4-P17"],a:1},
+    {q:"What is the name of the Rebel base on the ice planet?",opts:["Echo Base","Yavin Base","Hoth Base","Rebel HQ"],a:0},
+    {q:"What weapon do Jedi use?",opts:["Blaster","Lightsaber","Force lightning","Vibroblade"],a:1},
+    {q:"What is the name of the small bear-like creatures on Endor?",opts:["Jawas","Ewoks","Gungans","Porgs"],a:1},
+    {q:"Who trained Obi-Wan Kenobi?",opts:["Yoda","Qui-Gon Jinn","Mace Windu","Count Dooku"],a:1},
+  ],
+  medium:[
+    {q:"Who trained Count Dooku as a Jedi?",opts:["Mace Windu","Yoda","Ki-Adi-Mundi","Plo Koon"],a:1},
+    {q:"What is the name of Darth Vader's Star Destroyer?",opts:["Vengeance","Devastator","Conquest","Eclipse"],a:1},
+    {q:"Which planet is the Jedi Temple located on?",opts:["Naboo","Alderaan","Coruscant","Ilum"],a:2},
+    {q:"What is the name of Anakin Skywalker's mother?",opts:["Padmé","Shmi","Jocasta","Maz"],a:1},
+    {q:"Who is the Mandalorian's real name?",opts:["Jango","Boba","Din Djarin","Paz Vizsla"],a:2},
+    {q:"What color is Mace Windu's lightsaber?",opts:["Blue","Green","Purple","Yellow"],a:2},
+    {q:"What species is Ahsoka Tano?",opts:["Twi'lek","Togruta","Zabrak","Mirialan"],a:1},
+    {q:"What is the Clone Army's order to kill the Jedi called?",opts:["Order 65","Order 66","Operation Knightfall","Contingency"],a:1},
+    {q:"Who is Rey's father?",opts:["Han Solo","Luke Skywalker","Sheev Palpatine","Snoke"],a:2},
+    {q:"What system contains the planet Naboo?",opts:["Chommell sector","Outer Rim","Corellian system","Sullust system"],a:0},
+  ],
+  hard:[
+    {q:"What is the name of Boba Fett's ship?",opts:["Slave I (Firespray)","Razor Crest","The Mandator","Punishing One"],a:0},
+    {q:"What is Grand Admiral Thrawn's full name?",opts:["Eli Thrawn","Mitth'raw'nuruodo","Thrawn Zahn","Raw Nuruodo"],a:1},
+    {q:"What Sith Rule limits the Sith to only two at any time?",opts:["Rule of One","Rule of Two","Rule of Three","Darth Bane's Code"],a:1},
+    {q:"What is the name of the planet where Qui-Gon Jinn is buried?",opts:["Naboo","Coruscant","Tatooine","Ossus"],a:0},
+    {q:"Who killed Darth Plagueis?",opts:["Darth Sidious","Darth Maul","Count Dooku","Darth Vader"],a:0},
+    {q:"What species built the Death Star?",opts:["Geonosians","Kaminoans","Separatists","Mandalorians"],a:0},
+    {q:"In what year was the Battle of Geonosis?",opts:["22 BBY","19 BBY","32 BBY","0 BBY"],a:0},
+    {q:"What is the name of Obi-Wan Kenobi's master who died on Naboo?",opts:["Mace Windu","Dooku","Qui-Gon Jinn","Sifo-Dyas"],a:2},
+    {q:"What is the Darksaber?",opts:["A Sith weapon","An ancient Mandalorian black lightsaber","A double-bladed red saber","Revan's blade"],a:1},
+    {q:"What was Luke Skywalker's callsign in the Battle of Yavin?",opts:["Red Leader","Gold One","Red Five","Rogue One"],a:2},
+  ]
+};
+
+const CHARACTERS = [
+  {name:'Luke Skywalker',emoji:'⚔️'},{name:'Leia Organa',emoji:'👸'},{name:'Han Solo',emoji:'🚀'},
+  {name:'Rey',emoji:'🌟'},{name:'Finn',emoji:'🛡️'},{name:'Poe Dameron',emoji:'✈️'},
+  {name:'Ahsoka Tano',emoji:'🤺'},{name:'Obi-Wan Kenobi',emoji:'🧘'},{name:'Darth Vader',emoji:'😮‍💨'},
+  {name:'Yoda',emoji:'🌿'},{name:'The Mandalorian',emoji:'🪖'},{name:'Grogu',emoji:'🐸'},
+  {name:'Padmé Amidala',emoji:'💫'},{name:'Darth Maul',emoji:'🔴'},{name:'Grand Admiral Thrawn',emoji:'🎨'}
+];
+
+const MISSIONS = [
+  {name:'Rescue Mission',emoji:'🚁'},{name:'Infiltration',emoji:'🕵️'},{name:'Escape',emoji:'🏃'},
+  {name:'Diplomatic Negotiation',emoji:'🤝'},{name:'Battle',emoji:'⚔️'},{name:'Discovery',emoji:'🔭'}
+];
+
+// ── STORY STATE ──
+let storyState = {char:'', mission:'', setting:'', exchanges:0, storyText:'', vocab:[]};
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
 }
 
 async function callGemini(prompt) {
-  const key = getApiKey();
-  if (!key) throw new Error('Please enter your Gemini API key in the header.');
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.85, maxOutputTokens: 2000 }
-      })
-    }
-  );
-  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.error?.message || `API error ${res.status}`); }
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) throw new Error('Enter your Gemini API key in the header.');
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  const d = await res.json();
+  return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
 
-function extractJSON(raw) {
-  const c = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-  try { return JSON.parse(c); } catch {}
-  const m = c.match(/\{[\s\S]*\}/);
-  if (m) { try { return JSON.parse(m[0]); } catch {} }
-  return null;
+function extractJSON(raw){const m=raw.match(/```(?:json)?\s*([\s\S]*?)```/);return m?m[1].trim():raw.trim()}
+
+// ── BUILD CHARACTER GRID ──
+(function() {
+  const grid = document.getElementById('char-grid');
+  grid.innerHTML = CHARACTERS.map(c => `
+    <button class="char-btn" onclick="selectChar('${escJs(c.name)}',this)">${c.emoji} ${c.name}</button>`).join('');
+  const mg = document.getElementById('mission-grid');
+  mg.innerHTML = MISSIONS.map(m => `
+    <div class="mission-card" onclick="selectMission('${escJs(m.name)}',this)">
+      <span class="mission-icon">${m.emoji}</span>
+      <div class="mission-name">${m.name}</div>
+    </div>`).join('');
+})();
+
+function selectChar(name, btn) {
+  storyState.char = name;
+  document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  checkStoryReady();
 }
 
-// ── Tab system ───────────────────────────────────────────────────────────────
-function showTab(t, ev) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-'+t).classList.add('active');
-  if (ev) ev.currentTarget.classList.add('active');
-  if (t === 'lore') showLore(0, document.querySelector('.lore-cat'));
-  if (t === 'quiz') initQuiz();
-  if (t === 'collection') renderCollection();
+function selectMission(name, el) {
+  storyState.mission = name;
+  document.querySelectorAll('.mission-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  checkStoryReady();
 }
 
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ── STORY BUILDER ────────────────────────────────────────────────────────────
-let storyScenario = '';
-let storyChunks = [];   // { type: 'ai'|'user', text: string, vocab: [] }
-
-function selectScenario(el, scenario) {
-  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  storyScenario = scenario;
+function checkStoryReady() {
+  document.getElementById('story-begin-btn').disabled = !(storyState.char && storyState.mission);
 }
 
 async function beginStory() {
-  const char = document.getElementById('storyChar').value;
-  const errEl = document.getElementById('storyError');
-  errEl.style.display = 'none';
-  if (!char) { errEl.textContent = 'Please select a character.'; errEl.style.display = 'block'; return; }
-  if (!storyScenario) { errEl.textContent = 'Please choose a mission scenario.'; errEl.style.display = 'block'; return; }
-
-  storyChunks = [];
-  document.getElementById('storyOutput').innerHTML = '';
-
-  const btn = document.getElementById('beginStoryBtn');
-  const spinner = document.getElementById('beginSpinner');
+  storyState.setting = document.getElementById('story-setting').value;
+  storyState.exchanges = 0;
+  storyState.storyText = '';
+  storyState.vocab = [];
+  const btn = document.getElementById('story-begin-btn');
   btn.disabled = true;
-  spinner.style.display = 'inline-block';
-
+  btn.innerHTML = '<span class="spinner"></span>Opening crawl...';
   try {
-    const prompt = `You are writing a Star Wars fan fiction story. Write the opening 2 paragraphs (around 150-200 words total) for this story:
+    const prompt = `You are co-writing a Star Wars adventure story.
 
-Character: ${char}
-Mission: ${storyScenario}
+Character: ${storyState.char}
+Mission: ${storyState.mission}
+Setting: ${storyState.setting === 'Random' ? 'a dramatic Star Wars location of your choice' : storyState.setting}
 
-Rules:
-- Write in third-person present tense, cinematic style
-- Reference the Star Wars universe authentically (planets, technology, lore)
-- End the second paragraph at a tense moment that invites the reader to continue
-- Choose exactly 5 interesting Star Wars vocabulary words used in your text and define them
+Write the opening 2 paragraphs of the adventure in the character's voice and perspective.
+Make it exciting and immersive. Use rich Star Wars vocabulary.
 
-Return ONLY this JSON (no markdown):
+Respond ONLY with JSON:
 {
-  "paragraphs": ["paragraph 1 text", "paragraph 2 text"],
+  "story": "Two vivid opening paragraphs. Total 150-200 words.",
   "vocab": [
-    { "word": "Hyperspace", "definition": "Alternate dimension allowing faster-than-light travel" },
-    { "word": "Kyber crystal", "definition": "Force-attuned gem powering every lightsaber" }
+    {"word":"VocabWord1","definition":"plain English definition","example":"example sentence"},
+    {"word":"VocabWord2","definition":"...","example":"..."},
+    {"word":"VocabWord3","definition":"...","example":"..."},
+    {"word":"VocabWord4","definition":"...","example":"..."},
+    {"word":"VocabWord5","definition":"...","example":"..."}
   ]
 }`;
-
     const raw = await callGemini(prompt);
-    const data = extractJSON(raw);
-    if (!data?.paragraphs) throw new Error('Unexpected response. Try again.');
-
-    storyChunks.push({ type: 'ai', paragraphs: data.paragraphs, vocab: data.vocab || [] });
+    const d = JSON.parse(extractJSON(raw));
+    storyState.storyText = d.story || '';
+    storyState.vocab = d.vocab || [];
+    storyState.exchanges = 1;
+    document.getElementById('story-setup').style.display = 'none';
+    document.getElementById('story-area').style.display = 'block';
     renderStory();
-  } catch(e) {
-    errEl.textContent = 'Error: ' + (e.message || 'Something went wrong.');
-    errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    spinner.style.display = 'none';
-  }
+  } catch(e) { alert('Error: ' + e.message); }
+  btn.disabled = false;
+  btn.innerHTML = '⭐ Begin Story';
 }
 
 async function continueStory() {
-  const userText = document.getElementById('userParagraph')?.value?.trim();
-  if (!userText) { alert('Please write your paragraph before continuing.'); return; }
-
-  storyChunks.push({ type: 'user', paragraphs: [userText], vocab: [] });
-
-  const btn = document.getElementById('continueBtn');
-  const spinner = document.getElementById('continueSpinner');
+  if (storyState.exchanges >= 10) { alert('Story complete! Save it before starting a new one.'); return; }
+  const userInput = document.getElementById('story-input').value.trim();
+  if (!userInput) { alert('Write your paragraph first!'); return; }
+  const btn = document.getElementById('continue-btn');
   btn.disabled = true;
-  spinner.style.display = 'inline-block';
-
-  const errEl = document.getElementById('storyError');
-  errEl.style.display = 'none';
-
+  btn.innerHTML = '<span class="spinner"></span>Writing...';
   try {
-    const char = document.getElementById('storyChar').value;
-    const allText = storyChunks.map(c => c.paragraphs.join('\n\n')).join('\n\n');
+    const prompt = `Continue this Star Wars co-written adventure story. Stay in the same tone and setting.
 
-    const prompt = `Continue this Star Wars fan fiction story. Write the next 2 paragraphs (around 150-200 words).
+Character: ${storyState.char}, Mission: ${storyState.mission}, Setting: ${storyState.setting}
+Story so far (last 500 chars): ...${storyState.storyText.slice(-500)}
 
-Character: ${char}
-Mission: ${storyScenario}
+User continues with: ${userInput}
 
-Story so far:
-${allText}
+Write the next 2 paragraphs that naturally follow and build on what the user wrote.
 
-Rules:
-- Maintain the tone, tense, and style of what's already written
-- Advance the plot and raise the stakes further
-- End at a new cliffhanger moment
-- Pick exactly 5 different Star Wars vocabulary words from your new text
-
-Return ONLY this JSON (no markdown):
+Respond ONLY with JSON:
 {
-  "paragraphs": ["paragraph 3 text", "paragraph 4 text"],
+  "story": "Next 2 paragraphs, 100-150 words total, picking up from user input.",
   "vocab": [
-    { "word": "word", "definition": "definition" }
+    {"word":"Word1","definition":"definition","example":"example"},
+    {"word":"Word2","definition":"...","example":"..."},
+    {"word":"Word3","definition":"...","example":"..."},
+    {"word":"Word4","definition":"...","example":"..."},
+    {"word":"Word5","definition":"...","example":"..."}
   ]
 }`;
-
     const raw = await callGemini(prompt);
-    const data = extractJSON(raw);
-    if (!data?.paragraphs) throw new Error('Unexpected response. Try again.');
-
-    storyChunks.push({ type: 'ai', paragraphs: data.paragraphs, vocab: data.vocab || [] });
+    const d = JSON.parse(extractJSON(raw));
+    storyState.storyText += '\n\n' + userInput + '\n\n' + (d.story || '');
+    storyState.vocab = d.vocab || [];
+    storyState.exchanges++;
+    document.getElementById('story-input').value = '';
     renderStory();
-  } catch(e) {
-    errEl.textContent = 'Error: ' + (e.message || 'Something went wrong.');
-    errEl.style.display = 'block';
-  } finally {
-    if (btn) { btn.disabled = false; spinner.style.display = 'none'; }
-  }
+  } catch(e) { alert('Error: ' + e.message); }
+  btn.disabled = false;
+  btn.innerHTML = '➡️ Continue Story';
 }
 
 function renderStory() {
-  const out = document.getElementById('storyOutput');
-  let html = '';
-
-  storyChunks.forEach((chunk, ci) => {
-    chunk.paragraphs.forEach(para => {
-      const cls = chunk.type === 'user' ? 'story-para user-para' : 'story-para';
-      const label = chunk.type === 'user'
-        ? '<div style="font-size:11px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">✍️ Your paragraph</div>'
-        : '<div style="font-size:11px;color:var(--blue);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📖 Story continues...</div>';
-      html += `<div class="${cls}">${label}${escapeHtml(para)}</div>`;
-    });
-    if (chunk.type === 'ai' && chunk.vocab && chunk.vocab.length) {
-      html += `<div class="vocab-section">
-        <div class="vocab-title">📚 Vocabulary Challenge</div>
-        <div class="vocab-pills">${chunk.vocab.map(v => `
-          <span class="vocab-pill">${escapeHtml(v.word)}
-            <span class="vocab-tooltip">${escapeHtml(v.definition)}</span>
-          </span>`).join('')}</div>
-      </div>`;
-    }
+  const display = document.getElementById('story-display');
+  // Highlight vocab words
+  let html = escHtml(storyState.storyText).replace(/\n/g,'<br>');
+  storyState.vocab.forEach((v, i) => {
+    const re = new RegExp(`\\b${escHtml(v.word)}\\b`, 'g');
+    html = html.replace(re, `<span class="vocab-word" onclick="showVocab(${i},event)">${escHtml(v.word)}<div class="vocab-popup" id="vp-${i}"><strong>${escHtml(v.word)}</strong><br>${escHtml(v.definition)}<br><em style="color:var(--sub)">"${escHtml(v.example)}"</em></div></span>`);
   });
-
-  // Last chunk is AI → show user input
-  const lastChunk = storyChunks[storyChunks.length - 1];
-  if (lastChunk && lastChunk.type === 'ai') {
-    html += `<div class="card" style="border-color:rgba(74,222,128,.3);">
-      <div class="label" style="color:var(--green);">✍️ Your turn — write the next paragraph</div>
-      <textarea class="story-input" id="userParagraph" placeholder="Continue the story in your own words..."></textarea>
-      <div class="story-actions">
-        <button class="btn btn-green" id="continueBtn" onclick="continueStory()">
-          <span class="spinner-sm dark" id="continueSpinner"></span>
-          Continue Story →
-        </button>
-        <button class="btn btn-outline" onclick="exportStory()">📄 Export .txt</button>
-      </div>
-    </div>`;
-  }
-
-  out.innerHTML = html;
-  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  display.innerHTML = html;
+  document.getElementById('exchange-count').textContent = `Exchange ${storyState.exchanges} / 10`;
+  // Vocab list
+  const vl = document.getElementById('vocab-list');
+  vl.innerHTML = storyState.vocab.map((v,i) => `<button class="btn-sm" onclick="showVocab(${i},event)">${escHtml(v.word)}</button>`).join('');
+  document.getElementById('vocab-section').style.display = storyState.vocab.length ? 'block' : 'none';
 }
 
-function exportStory() {
-  const char = document.getElementById('storyChar').value;
-  const lines = [`STAR WARS FAN FICTION\nCharacter: ${char}\nMission: ${storyScenario}\n\n${'─'.repeat(50)}\n`];
-  storyChunks.forEach(chunk => {
-    chunk.paragraphs.forEach(p => lines.push(p));
-    lines.push('');
-    if (chunk.vocab?.length) {
-      lines.push('VOCABULARY:');
-      chunk.vocab.forEach(v => lines.push(`  • ${v.word}: ${v.definition}`));
-      lines.push('');
-    }
-  });
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+function showVocab(idx, e) {
+  e.stopPropagation();
+  document.querySelectorAll('.vocab-popup').forEach(p => p.classList.remove('show'));
+  const popup = document.getElementById('vp-' + idx);
+  if (popup) popup.classList.add('show');
+}
+document.addEventListener('click', () => document.querySelectorAll('.vocab-popup').forEach(p => p.classList.remove('show')));
+
+function downloadStory() {
+  const text = `STAR WARS ADVENTURE\n${'='.repeat(40)}\nCharacter: ${storyState.char}\nMission: ${storyState.mission}\nSetting: ${storyState.setting}\n${'='.repeat(40)}\n\n${storyState.storyText}`;
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${char.replace(/\s+/g,'_')}_story.txt`;
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+  a.download = `star-wars-${storyState.char.replace(/\s+/g,'-').toLowerCase()}.txt`;
   a.click();
-  URL.revokeObjectURL(a.href);
-  toast('Story exported!');
 }
 
-// ── FAN WIKI GENERATOR ────────────────────────────────────────────────────────
-let currentWikiData = null;
+function resetStory() {
+  storyState = {char:'',mission:'',setting:'',exchanges:0,storyText:'',vocab:[]};
+  document.getElementById('story-setup').style.display = 'block';
+  document.getElementById('story-area').style.display = 'none';
+  document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mission-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('story-begin-btn').disabled = true;
+}
 
+// ── WIKI GENERATOR ──
 async function generateWiki() {
-  const name = document.getElementById('wikiName').value.trim();
-  const facts = document.getElementById('wikiFacts').value.trim();
-  const errEl = document.getElementById('wikiError');
-  errEl.style.display = 'none';
-  if (!name) { errEl.textContent = 'Please enter a character or concept name.'; errEl.style.display = 'block'; return; }
-
-  const btn = document.getElementById('wikiBtn');
-  const spinner = document.getElementById('wikiSpinner');
+  const name = document.getElementById('wiki-name').value.trim();
+  const type = document.getElementById('wiki-type').value;
+  const era = document.getElementById('wiki-era').value;
+  const facts = document.getElementById('wiki-facts').value.trim();
+  if (!name) { alert('Enter a name first.'); return; }
+  const btn = document.getElementById('wiki-btn');
   btn.disabled = true;
-  spinner.style.display = 'inline-block';
-
+  btn.innerHTML = '<span class="spinner"></span>Generating...';
   try {
-    const prompt = `You are a Star Wars wiki writer. Generate a detailed wiki article for:
-
+    const fieldMap = {
+      Character:['Homeworld','Species','Affiliation','Occupation','Born','Status'],
+      Planet:['Region','System','Climate','Terrain','Population','Affiliation'],
+      Faction:['Founded','Headquarters','Leader','Members','Ideology','Status'],
+      Vehicle:['Class','Manufacturer','Length','Crew','Speed','Armament'],
+      Weapon:['Type','Creator','Length','Color','Owner','Status'],
+      Event:['Date','Location','Participants','Outcome','Casualties','Significance']
+    };
+    const fields = fieldMap[type] || fieldMap.Character;
+    const prompt = `Write a Wookieepedia-style Star Wars wiki article for:
 Name: ${name}
-${facts ? 'Known facts:\n' + facts : ''}
+Type: ${type}
+Era: ${era}
+Known facts: ${facts}
 
-Return ONLY this JSON (no markdown fences):
+Respond ONLY with JSON:
 {
-  "tagline": "Short one-line description (e.g. 'Togruta Jedi Padawan and hero of the Clone Wars')",
-  "infobox": [
-    { "key": "Species", "value": "Togruta" },
-    { "key": "Affiliation", "value": "Jedi Order, Galactic Republic" },
-    { "key": "Homeworld", "value": "Shili" },
-    { "key": "Era", "value": "Clone Wars, Galactic Civil War" },
-    { "key": "Status", "value": "Active" }
-  ],
-  "history": "3-4 paragraph narrative history. Write in encyclopedic third-person style.",
-  "relationships": ["Relationship 1 — short description", "Relationship 2", "Relationship 3", "Relationship 4", "Relationship 5"],
-  "behindTheScenes": "2 paragraph production notes: creation, voice actors, cultural impact, interesting development facts."
+  "infobox": { ${fields.map(f=>`"${f}":"value"`).join(',')} },
+  "biography": ["paragraph 1 (3-4 sentences)","paragraph 2 (3-4 sentences)","paragraph 3 (3-4 sentences)"],
+  "personality": ["paragraph 1 (2-3 sentences)","paragraph 2 (2-3 sentences)"],
+  "relationships": [{"name":"Character/Entity","relation":"1-sentence description"},{"name":"...","relation":"..."},{"name":"...","relation":"..."}],
+  "behindScenes": "1 paragraph about real-world production, inspirations, or concept art notes"
 }`;
-
     const raw = await callGemini(prompt);
-    const data = extractJSON(raw);
-    if (!data?.infobox) throw new Error('Could not generate wiki. Try again.');
-    currentWikiData = { ...data, name };
-    renderWiki(data, name);
-  } catch(e) {
-    errEl.textContent = 'Error: ' + (e.message || 'Something went wrong.');
-    errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    spinner.style.display = 'none';
-  }
+    const d = JSON.parse(extractJSON(raw));
+    const wikiEl = document.getElementById('wiki-content');
+    let html = `<div class="wiki-infobox"><h4>${escHtml(name)}</h4><table>`;
+    Object.entries(d.infobox||{}).forEach(([k,v]) => {
+      html += `<tr><td>${escHtml(k)}</td><td>${escHtml(v)}</td></tr>`;
+    });
+    html += '</table></div>';
+    html += `<h2 class="wiki-h2">${escHtml(type === 'Character' ? 'Biography' : 'History')}</h2>`;
+    (d.biography||[]).forEach(p => { html += `<p class="wiki-p">${escHtml(p)}</p>`; });
+    html += '<div style="clear:both"></div>';
+    html += `<h2 class="wiki-h2">${type==='Character'?'Personality &amp; Traits':'Characteristics'}</h2>`;
+    (d.personality||[]).forEach(p => { html += `<p class="wiki-p">${escHtml(p)}</p>`; });
+    if (d.relationships?.length) {
+      html += '<h2 class="wiki-h2">Relationships</h2>';
+      d.relationships.forEach(r => { html += `<h3 class="wiki-h3">${escHtml(r.name)}</h3><p class="wiki-p">${escHtml(r.relation)}</p>`; });
+    }
+    html += '<h2 class="wiki-h2">Behind the Scenes</h2>';
+    html += `<p class="wiki-p">${escHtml(d.behindScenes||'')}</p>`;
+    wikiEl.innerHTML = html;
+    document.getElementById('wiki-output').style.display = 'block';
+    document.getElementById('wiki-copy-html').style.display = 'inline';
+    document.getElementById('wiki-download').style.display = 'inline';
+    // Store for download
+    wikiEl.dataset.name = name;
+  } catch(e) { alert('Error: ' + e.message); }
+  btn.disabled = false;
+  btn.innerHTML = '📖 Generate Wiki Article';
 }
 
-function renderWiki(d, name) {
-  document.getElementById('wikiArticleName').textContent = name;
-  document.getElementById('wikiTagline').textContent = d.tagline || '';
-  document.getElementById('wikiInfobox').innerHTML = (d.infobox || []).map(row =>
-    `<div class="wiki-info-row"><span class="wiki-info-key">${escapeHtml(row.key)}</span><span class="wiki-info-val">${escapeHtml(row.value)}</span></div>`
-  ).join('');
-  document.getElementById('wikiHistory').innerHTML = escapeHtml(d.history || '').replace(/\n\n/g, '</p><p style="margin-top:10px;">').replace(/^/, '<p>').replace(/$/, '</p>');
-  const rels = d.relationships || [];
-  document.getElementById('wikiRelationships').innerHTML = `<ul>${rels.map(r => `<li>${escapeHtml(r)}</li>`).join('')}</ul>`;
-  document.getElementById('wikiBehind').innerHTML = escapeHtml(d.behindTheScenes || '').replace(/\n\n/g, '</p><p style="margin-top:10px;">').replace(/^/, '<p>').replace(/$/, '</p>');
-  const out = document.getElementById('wikiOutput');
-  out.classList.add('visible');
-  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+function copyWikiHTML() {
+  const content = document.getElementById('wiki-content').innerHTML;
+  navigator.clipboard.writeText(content).then(() => {
+    document.getElementById('wiki-copy-html').textContent = '✅ Copied!';
+    setTimeout(() => document.getElementById('wiki-copy-html').textContent = '📋 Copy as HTML', 1500);
+  });
 }
 
-function copyWikiText() {
-  if (!currentWikiData) return;
-  const d = currentWikiData;
-  const lines = [
-    `== ${d.name} ==`,
-    d.tagline,
-    '',
-    '=== Infobox ===',
-    ...(d.infobox || []).map(r => `${r.key}: ${r.value}`),
-    '',
-    '=== History ===',
-    d.history,
-    '',
-    '=== Relationships ===',
-    ...(d.relationships || []).map(r => `• ${r}`),
-    '',
-    '=== Behind the Scenes ===',
-    d.behindTheScenes,
-  ];
-  navigator.clipboard.writeText(lines.join('\n')).then(() => toast('Copied to clipboard!'));
-}
-
-function exportWikiHTML() {
-  if (!currentWikiData) return;
-  const d = currentWikiData;
-  const html = `<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><title>${d.name} — Star Wars Wiki</title>
-<style>body{font-family:sans-serif;max-width:860px;margin:40px auto;padding:20px;background:#0f1117;color:#e2e8f0}
-h1{color:#4f8ef7;border-bottom:2px solid #2a2d3a;padding-bottom:12px}
-h2{color:#94a3b8;margin-top:24px;font-size:18px;border-bottom:1px solid #2a2d3a;padding-bottom:6px}
-.infobox{float:right;margin:0 0 20px 20px;background:#1a1d27;border:1px solid #2a2d3a;border-radius:8px;padding:16px;min-width:220px;font-size:13px}
-.infobox td{padding:4px 8px;vertical-align:top}.infobox td:first-child{font-weight:700;color:#94a3b8}
-p{line-height:1.7;margin-bottom:12px}ul{list-style:disc;padding-left:20px}li{margin-bottom:6px}
-</style></head><body>
-<h1>${d.name}</h1>
-<em>${d.tagline}</em>
-<div class="infobox"><table>${(d.infobox||[]).map(r=>`<tr><td>${r.key}</td><td>${r.value}</td></tr>`).join('')}</table></div>
-<h2>History</h2><p>${(d.history||'').replace(/\n\n/g,'</p><p>')}</p>
-<h2>Relationships</h2><ul>${(d.relationships||[]).map(r=>`<li>${r}</li>`).join('')}</ul>
-<h2>Behind the Scenes</h2><p>${(d.behindTheScenes||'').replace(/\n\n/g,'</p><p>')}</p>
-</body></html>`;
-  const blob = new Blob([html], { type: 'text/html' });
+function downloadWiki() {
+  const name = document.getElementById('wiki-content').dataset.name || 'wiki';
+  const content = document.getElementById('wiki-content').innerHTML;
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escHtml(name)} - Star Wars Wiki</title>
+<style>body{max-width:900px;margin:40px auto;font-family:Georgia,serif;background:#fff;color:#202122;padding:0 20px}
+h2{font-size:1.2rem;border-bottom:1px solid #a2a9b1;margin:16px 0 8px}
+h3{font-size:1rem;margin:10px 0 4px}
+.wiki-infobox{float:right;margin:0 0 16px 16px;background:#f8f9fa;border:1px solid #a2a9b1;padding:10px;font-size:.85rem;min-width:200px}
+.wiki-infobox h4{text-align:center;font-size:.95rem;border-bottom:1px solid #a2a9b1;padding-bottom:4px;margin-bottom:6px}
+table{border-collapse:collapse;width:100%}td{padding:3px 4px;vertical-align:top}
+td:first-child{font-weight:600;white-space:nowrap;padding-right:8px}p{margin-bottom:8px;line-height:1.7}
+</style></head><body>${content}<br style="clear:both">
+<hr><p style="font-size:.75rem;color:#666">Generated by <a href="https://hhanng.github.io/agent-65-star-wars-builder/">Star Wars Creative Hub</a></p></body></html>`;
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${d.name.replace(/\s+/g,'_')}_wiki.html`;
+  a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+  a.download = name.replace(/\s+/g,'-').toLowerCase() + '-wiki.html';
   a.click();
-  URL.revokeObjectURL(a.href);
-  toast('HTML exported!');
 }
 
-// ── LORE DATA ─────────────────────────────────────────────────────────────────
-const LORE = [
-  { name: 'Jedi Order', icon: '✨', facts: [
-    'The Jedi Order was founded over 25,000 years before the Battle of Yavin on the planet Tython.',
-    'Jedi initiates are called Younglings and begin training as early as infancy, selected for high midichlorian counts.',
-    'The four Jedi ranks are Youngling, Padawan, Knight, and Master — with the High Council at the apex.',
-    'The Jedi Code: "There is no emotion, there is peace. There is no ignorance, there is knowledge. There is no passion, there is serenity. There is no chaos, there is harmony. There is no death, there is the Force."',
-    'Jedi are forbidden from forming personal attachments, as the fear of loss can lead to the dark side.',
-    'Master Yoda lived to be 900 years old and trained Jedi for over 800 years on Coruscant and later Dagobah.',
-    'The Jedi Temple on Coruscant was built atop an ancient Sith shrine, which some believe subtly clouded Jedi visions.',
-    'Order 66 was a clone trooper protocol that caused them to execute their Jedi commanders simultaneously.',
-  ]},
-  { name: 'Sith', icon: '⚡', facts: [
-    'The Rule of Two was established by Darth Bane: always two Sith — a Master and an Apprentice, no more, no less.',
-    'The Sith originated as a group of fallen Jedi who embraced the dark side thousands of years before the Empire.',
-    'Sith lightsabers are red because they "bleed" their kyber crystals by channeling their pain and rage into them.',
-    "Darth Plagueis, Palpatine's master, had learned to create and sustain life through the Force.",
-    'The Sith code: "Peace is a lie, there is only passion. Through passion, I gain strength. Through strength, I gain power. Through power, I gain victory. Through victory, my chains are broken."',
-    'The ancient Sith were a species on Korriban, later mixed with exiled Dark Jedi who became their rulers.',
-    'Darth Sidious/Palpatine was the most powerful Sith in recorded history, hiding in plain sight as Supreme Chancellor.',
-  ]},
-  { name: 'Planets', icon: '🌍', facts: [
-    'Coruscant is an entire planet covered by a single massive city, home to the Senate and former Jedi Temple.',
-    'Tatooine is a desert world with twin suns orbiting Tatoo I and Tatoo II — a binary star system.',
-    "Hoth's surface temperature drops to -60°C at night, yet the Rebel Alliance established Echo Base there.",
-    'Dagobah is a swampy world strong in the Force; Yoda hid there for years after Order 66.',
-    'Mustafar is a volcanic planet where the duel between Obi-Wan Kenobi and Anakin Skywalker took place.',
-    "Mandalore has had a complex history — once a world of warrior clans, it sought peace then was repeatedly invaded.",
-    "Endor's moon is inhabited by Ewoks, small bear-like creatures who allied with the Rebel Alliance to defeat the Empire.",
-    'Exegol is a hidden Sith world in the Unknown Regions where Palpatine rebuilt his Final Order fleet.',
-  ]},
-  { name: 'Ships', icon: '🚀', facts: [
-    'The Millennium Falcon made the Kessel Run in less than 12 parsecs — a feat requiring risky navigation through dangerous space.',
-    "Star Destroyers are 1,600 meters long and can hold 9,235 troops, 72 TIE fighters, and enough firepower to devastate a planet's surface.",
-    'The Death Star I was 160 km in diameter; Death Star II was 900 km — and both were destroyed by the Rebellion.',
-    "X-wings are the Rebel Alliance's primary starfighter, equipped with four laser cannons and proton torpedoes.",
-    'TIE fighters have no hyperdrive or shields — they rely on swarm tactics and are considered expendable.',
-    "The Executor, Vader's personal flagship, was a Super Star Destroyer stretching 19 kilometers.",
-    "The Ghost is the VCX-100 light freighter used by the Spectres rebel cell in the years before the Battle of Yavin.",
-  ]},
-  { name: 'Weapons', icon: '⚔️', facts: [
-    'Lightsaber kyber crystals are Force-attuned — Jedi must find theirs on Ilum in a rite called "The Gathering."',
-    'The Darksaber is an ancient black-bladed lightsaber created by Tarre Vizsla, the first Mandalorian Jedi, over 1,000 years ago.',
-    'A blaster bolt travels slower than the speed of light, which is why Jedi can deflect them with a lightsaber.',
-    'Wookiee bowcasters use magnetic accelerators to fire explosive metal quarrels wrapped in energy.',
-    'The Mandalorian Darksaber passes by conquest — it must be won in combat for the wielder to be considered a true leader.',
-  ]},
-  { name: 'Creatures', icon: '🐉', facts: [
-    "Tauntauns are reptomammals native to Hoth used as mounts by Rebels — Han Solo cut one open to save Luke from freezing.",
-    "Rancors are large predatory creatures kept as pets by Hutts and crime lords — like Jabba's palace rancor.",
-    'Sarlacc are ancient sessile creatures buried in desert pits; they digest prey over thousands of years.',
-    'Porg are cliff-dwelling seabirds native to Ahch-To with large eyes and small wings.',
-    'Banthas are large mammals with curved horns used by Tusken Raiders as mounts on Tatooine.',
-    'Space whales (Purrgil) are massive creatures that can travel through hyperspace naturally — inspiring early hyperdrive technology.',
-    'Zillo Beasts are near-indestructible ancient creatures whose scales resist lightsabers and blasters alike.',
-  ]},
-  { name: 'Factions', icon: '🏛️', facts: [
-    'The Galactic Republic lasted 25,000 years before Palpatine declared it the Galactic Empire in 19 BBY.',
-    'The Rebel Alliance was formally established by Mon Mothma and Bail Organa as a secret network of resistance cells.',
-    'The First Order rose from remnants of the Empire in the Unknown Regions, secretly building a military for decades.',
-    'The Mandalorian clans have a complex code called the Creed — "This is the Way" — governing their warrior culture.',
-    "The Hutt Clans control a vast criminal empire spanning dozens of systems.",
-    'The Resistance is distinct from the New Republic — a private force funded by Leia Organa to counter the First Order.',
-  ]},
-  { name: 'The Force', icon: '🌀', facts: [
-    'The Force is an energy field created by all living things — binding the galaxy together and giving Jedi their power.',
-    'Midichlorians are microscopic organisms that exist in all living cells and communicate with the Force; a high count indicates Force sensitivity.',
-    'The dark side is fed by powerful emotions: fear, anger, hatred, and aggression — offering quick power at a great cost.',
-    'Force abilities include telekinesis (Force push/pull), mind tricks, Force lightning, Force heal, and foresight.',
-    "Force ghosts are spirits of deceased Jedi who learned to retain their consciousness after death from Qui-Gon Jinn's teachings.",
-    'The dyad in the Force — two beings sharing one Force bond as if they were one — is said to happen once in a generation.',
-    'Grogu (Baby Yoda) demonstrated Force abilities at 50 years old, including healing wounds and lifting objects far heavier than himself.',
-  ]},
-];
+// ── TRIVIA ──
+let trivia = {diff:'easy', qIdx:0, score:0, answered:false, timerInterval:null};
 
-function showLore(idx, el) {
-  document.querySelectorAll('.lore-cat').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  const cat = LORE[idx];
-  document.getElementById('lore-content').innerHTML = `
-    <div style="font-size:20px;font-weight:700;margin-bottom:16px;">${cat.icon} ${cat.name}</div>
-    <ul class="lore-facts">${cat.facts.map(f => `<li>${f}</li>`).join('')}</ul>`;
+function selectDiff(d, btn) {
+  trivia.diff = d;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHighScores();
 }
 
-// ── QUIZ DATA ─────────────────────────────────────────────────────────────────
-const QUESTIONS = [
-  { q: "Who is Luke Skywalker's father?", a: 'Darth Vader', choices: ['Darth Vader','Emperor Palpatine','Obi-Wan Kenobi','Boba Fett'], diff: 'easy' },
-  { q: "What is the homeworld of the Ewoks?", a: "Endor's moon", choices: ["Endor's moon",'Hoth','Dagobah','Mustafar'], diff: 'easy' },
-  { q: "What color is Yoda's lightsaber?", a: 'Green', choices: ['Green','Blue','Purple','Yellow'], diff: 'easy' },
-  { q: "What is the ship Han Solo pilots?", a: 'Millennium Falcon', choices: ['Millennium Falcon','X-wing','Slave I','Ghost'], diff: 'easy' },
-  { q: "What color is Darth Vader's lightsaber?", a: 'Red', choices: ['Red','Blue','Orange','Black'], diff: 'easy' },
-  { q: "What planet is Luke Skywalker from?", a: 'Tatooine', choices: ['Tatooine','Coruscant','Alderaan','Endor'], diff: 'easy' },
-  { q: "What creature does Han Solo hide inside on Hoth?", a: 'Tauntaun', choices: ['Tauntaun','Bantha','Rancor','Wampa'], diff: 'easy' },
-  { q: "Who says 'I am your father'?", a: 'Darth Vader', choices: ['Darth Vader','Emperor Palpatine','Darth Maul','Kylo Ren'], diff: 'easy' },
-  { q: "What is R2-D2?", a: 'An astromech droid', choices: ['An astromech droid','A protocol droid','A battle droid','A medical droid'], diff: 'easy' },
-  { q: "What is the Rule of Two?", a: 'Only a Master and an Apprentice — no more, no less', choices: ['Only a Master and an Apprentice — no more, no less','Two Sith lords rule the galaxy','A Sith must kill two Jedi','The Sith must have two weapons'], diff: 'medium' },
-  { q: "Where did Yoda go into exile?", a: 'Dagobah', choices: ['Dagobah','Tatooine','Ilum','Ahch-To'], diff: 'medium' },
-  { q: "What is Order 66?", a: 'A clone trooper command to kill all Jedi', choices: ['A clone trooper command to kill all Jedi','An Imperial invasion plan','A Sith ritual','A Rebel escape plan'], diff: 'medium' },
-  { q: "Who created the Darksaber?", a: 'Tarre Vizsla, the first Mandalorian Jedi', choices: ['Tarre Vizsla, the first Mandalorian Jedi','Darth Maul','Pre Vizsla','Bo-Katan Kryze'], diff: 'medium' },
-  { q: "What planet is Darth Maul from?", a: 'Dathomir', choices: ['Dathomir','Zabrak Prime','Tatooine','Mustafar'], diff: 'medium' },
-  { q: "Who trained Obi-Wan Kenobi?", a: 'Qui-Gon Jinn', choices: ['Qui-Gon Jinn','Yoda','Mace Windu','Count Dooku'], diff: 'medium' },
-  { q: "What does TIE stand for in TIE Fighter?", a: 'Twin Ion Engine', choices: ['Twin Ion Engine','Tactical Imperial Enforcer','Total Inertial Engine','Targeted Intercept Element'], diff: 'medium' },
-  { q: "Which planet was the seat of the Galactic Empire?", a: 'Coruscant', choices: ['Coruscant','Mustafar','Exegol','Naboo'], diff: 'medium' },
-  { q: "What is the diameter of the original Death Star?", a: '160 km', choices: ['160 km','120 km','250 km','900 km'], diff: 'hard' },
-  { q: "What Jedi philosophy did Qui-Gon Jinn champion?", a: 'The Living Force', choices: ['The Living Force','The Cosmic Force','The Unifying Force','The Eternal Force'], diff: 'hard' },
-  { q: "How long is a Super Star Destroyer Executor class?", a: '19 kilometers', choices: ['19 kilometers','12 kilometers','8 kilometers','32 kilometers'], diff: 'hard' },
-  { q: "What does 'BBY' mean in Star Wars dating?", a: 'Before the Battle of Yavin', choices: ['Before the Battle of Yavin','Before the Battle of Yavin II',"Before Boba's Year",'Before Bespin Year'], diff: 'hard' },
-  { q: "What is a Zillo Beast known for?", a: 'Nearly indestructible scales that resist lightsabers', choices: ['Nearly indestructible scales that resist lightsabers','The ability to turn invisible','Extreme speed in space','Force sensitivity'], diff: 'hard' },
-  { q: "Who first learned to retain consciousness after death?", a: 'Qui-Gon Jinn', choices: ['Qui-Gon Jinn','Yoda','Obi-Wan Kenobi','Anakin Skywalker'], diff: 'hard' },
-  { q: "What material is Mandalorian armor traditionally made from?", a: 'Beskar (Mandalorian iron)', choices: ['Beskar (Mandalorian iron)','Durasteel','Cortosis','Phrik alloy'], diff: 'hard' },
-  { q: "Who was Darth Plagueis's master?", a: 'Darth Tenebrous', choices: ['Darth Tenebrous','Darth Bane','Darth Sidious','Count Dooku'], diff: 'hard' },
-];
-
-const RANKS = [
-  { min: 0,  max: 5,  rank: 'Youngling',   icon: '🌱' },
-  { min: 6,  max: 10, rank: 'Padawan',      icon: '📚' },
-  { min: 11, max: 17, rank: 'Jedi Knight',  icon: '⚔️' },
-  { min: 18, max: 22, rank: 'Jedi Master',  icon: '✨' },
-  { min: 23, max: 25, rank: 'Grand Master', icon: '🌌' },
-];
-
-let qState = { current: 0, score: 0, answered: false, shuffled: [] };
-
-function initQuiz() {
-  qState = { current: 0, score: 0, answered: false, shuffled: [...QUESTIONS].sort(() => Math.random()-.5) };
-  renderQuestion();
+function renderHighScores() {
+  const scores = JSON.parse(localStorage.getItem('ag65_trivia_scores') || '{}');
+  const el = document.getElementById('high-scores');
+  const diffs = ['easy','medium','hard'];
+  el.innerHTML = 'High Scores: ' + diffs.map(d => `${d}: ${scores[d] !== undefined ? scores[d] + '/10' : '—'}`).join(' · ');
 }
 
-function renderQuestion() {
-  const area = document.getElementById('quiz-area');
-  if (qState.current >= qState.shuffled.length) { renderResult(); return; }
-  const q = qState.shuffled[qState.current];
-  const pct = (qState.current / qState.shuffled.length) * 100;
-  area.innerHTML = `
-    <div class="quiz-header">
-      <span style="color:var(--muted);font-size:13px">${qState.current + 1} / ${qState.shuffled.length}</span>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-      <span style="color:var(--green);font-weight:700">${qState.score} pts</span>
-    </div>
-    <div class="question-card">
-      <div class="diff-badge diff-${q.diff}">${q.diff.toUpperCase()}</div>
-      <div class="question-text">${q.q}</div>
-      <div class="choices" id="choices">
-        ${q.choices.map(c => `<button class="choice" onclick="answerQ('${c.replace(/'/g,"\\'")}','${q.a.replace(/'/g,"\\'")}',this)">${c}</button>`).join('')}
-      </div>
-      <div id="feedback"></div>
-    </div>`;
+function startTrivia() {
+  trivia.qIdx = 0; trivia.score = 0; trivia.answered = false;
+  document.getElementById('trivia-start').style.display = 'none';
+  document.getElementById('trivia-result').style.display = 'none';
+  document.getElementById('trivia-game').style.display = 'block';
+  showQuestion();
 }
 
-function answerQ(chosen, correct, el) {
-  if (qState.answered) return;
-  qState.answered = true;
-  const isCorrect = chosen === correct;
-  if (isCorrect) qState.score++;
-  document.querySelectorAll('.choice').forEach(b => { b.disabled = true; if (b.textContent === correct) b.classList.add('correct'); });
-  if (!isCorrect) el.classList.add('wrong');
-  document.getElementById('feedback').innerHTML = `<div class="feedback ${isCorrect?'correct':'wrong'}">${isCorrect ? '✅ Correct!' : `❌ The answer was: ${correct}`}</div>`;
-  document.getElementById('quiz-area').insertAdjacentHTML('beforeend','<div style="text-align:center;margin-top:12px;"><button class="btn btn-primary" onclick="nextQ()">Next →</button></div>');
+function showQuestion() {
+  const qs = QUESTIONS[trivia.diff];
+  if (trivia.qIdx >= qs.length) { endTrivia(); return; }
+  const q = qs[trivia.qIdx];
+  trivia.answered = false;
+  document.getElementById('q-progress').textContent = `Question ${trivia.qIdx+1} / ${qs.length}`;
+  document.getElementById('q-score').textContent = `Score: ${trivia.score}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-feedback').textContent = '';
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = q.opts.map((o,i) => `<button class="opt-btn" onclick="answerTrivia(${i})">${o}</button>`).join('');
+  startQTimer();
 }
 
-function nextQ() {
-  qState.current++;
-  qState.answered = false;
-  renderQuestion();
+function startQTimer() {
+  if (trivia.timerInterval) clearInterval(trivia.timerInterval);
+  let secs = 30;
+  document.getElementById('trivia-timer-bar').style.width = '100%';
+  document.getElementById('trivia-timer-bar').style.background = 'var(--gold)';
+  document.getElementById('timer-label').textContent = '⏱ 30 seconds';
+  trivia.timerInterval = setInterval(() => {
+    secs--;
+    const pct = (secs/30*100);
+    document.getElementById('trivia-timer-bar').style.width = pct + '%';
+    document.getElementById('trivia-timer-bar').style.background = secs <= 10 ? 'var(--red)' : secs <= 20 ? 'var(--amber, #e3b341)' : 'var(--gold)';
+    document.getElementById('timer-label').textContent = `⏱ ${secs} second${secs!==1?'s':''}`;
+    if (secs <= 0) {
+      clearInterval(trivia.timerInterval);
+      if (!trivia.answered) {
+        trivia.answered = true;
+        const qs = QUESTIONS[trivia.diff];
+        const a = qs[trivia.qIdx].a;
+        document.querySelectorAll('.opt-btn')[a].classList.add('correct');
+        document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+        document.getElementById('q-feedback').textContent = '⏰ Time\'s up!';
+        setTimeout(() => { trivia.qIdx++; showQuestion(); }, 1500);
+      }
+    }
+  }, 1000);
 }
 
-function renderResult() {
-  const rank = RANKS.find(r => qState.score >= r.min && qState.score <= r.max) || RANKS[RANKS.length-1];
-  const pct = Math.round((qState.score / qState.shuffled.length) * 100);
-  document.getElementById('quiz-area').innerHTML = `
-    <div class="card result-card">
-      <div class="result-rank">${rank.icon}</div>
-      <div class="result-title">You are a ${rank.rank}!</div>
-      <div class="result-score">${qState.score}<span style="font-size:24px;color:var(--muted)">/${qState.shuffled.length}</span></div>
-      <div style="color:var(--muted);margin:12px 0;font-size:14px">${pct}% correct</div>
-      <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
-        <button class="btn btn-primary" onclick="initQuiz()">Play Again</button>
-      </div>
-    </div>`;
-}
-
-// ── COLLECTION ────────────────────────────────────────────────────────────────
-function renderCollection() {
-  const saved = JSON.parse(localStorage.getItem('sw65_collection') || '[]');
-  const area = document.getElementById('collection-area');
-  if (!saved.length) {
-    area.innerHTML = `<div class="empty-state"><div class="icon">🌌</div><div>No characters yet.<br>Create characters by using the Lore and Quiz tabs to inspire you!</div></div>`;
-    return;
+function answerTrivia(idx) {
+  if (trivia.answered) return;
+  trivia.answered = true;
+  clearInterval(trivia.timerInterval);
+  const q = QUESTIONS[trivia.diff][trivia.qIdx];
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+  if (idx === q.a) {
+    btns[idx].classList.add('correct');
+    trivia.score++;
+    document.getElementById('q-feedback').textContent = '✅ Correct! The Force is strong with you.';
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.a].classList.add('correct');
+    document.getElementById('q-feedback').textContent = `❌ The answer was: ${q.opts[q.a]}`;
   }
-  area.innerHTML = `
-    <div style="color:var(--muted);font-size:13px;margin-bottom:16px;">${saved.length} character${saved.length>1?'s':''} saved</div>
-    <div class="collection-grid">
-      ${saved.map((c,i) => `
-        <div class="coll-card">
-          <div class="coll-avatar">${c.avatar || '⭐'}</div>
-          <div class="coll-name">${escapeHtml(c.name)}</div>
-          <div class="coll-sub">${escapeHtml(c.species || '')} ${escapeHtml(c.cls || '')}</div>
-          <div style="margin-bottom:10px;">
-            <span class="badge ${c.side==='Light Side'?'badge-light':'badge-dark'}">${escapeHtml(c.side || '')}</span>
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">⚔️ ${escapeHtml(c.weapon || '')}</div>
-          <div class="coll-actions">
-            <button class="btn btn-outline" onclick="shareChar(${i})">📋 Share</button>
-            <button class="btn btn-danger" onclick="deleteChar(${i})">🗑️</button>
-          </div>
-        </div>`).join('')}
-    </div>`;
+  document.getElementById('q-score').textContent = `Score: ${trivia.score}`;
+  setTimeout(() => { trivia.qIdx++; showQuestion(); }, 1800);
 }
 
-function deleteChar(i) {
-  const saved = JSON.parse(localStorage.getItem('sw65_collection') || '[]');
-  saved.splice(i, 1);
-  localStorage.setItem('sw65_collection', JSON.stringify(saved));
-  toast('Character removed.');
-  renderCollection();
-}
-
-function shareChar(i) {
-  const saved = JSON.parse(localStorage.getItem('sw65_collection') || '[]');
-  const c = saved[i];
-  const text = `⭐ ${c.name} — ${c.species || ''} ${c.cls || ''} (${c.side || ''})\nWeapon: ${c.weapon || ''}\nBuilt at hhanng.github.io/agent-65-star-wars-builder/`;
-  navigator.clipboard.writeText(text).then(() => toast('Copied!')).catch(() => alert(text));
-}
-
-function escapeHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// Init lore on load
-showLore(0, document.querySelector('.lore-cat'));
-
-// ── WEB DEV TAB ──────────────────────────────────────────────────────────────
-const WEBDEV_SECTIONS = {
-  html: {
-    title: '🧱 HTML Structure — The Skeleton',
-    content: [
-      { heading: 'What is HTML?', text: 'HTML (HyperText Markup Language) is the skeleton of every web page. It defines structure using <strong>elements</strong> — wrapped in opening <code>&lt;tag&gt;</code> and closing <code>&lt;/tag&gt;</code> tags.' },
-      { heading: 'The Wiki Page Structure', code: `&lt;!DOCTYPE html&gt;\n&lt;html lang="en"&gt;\n  &lt;head&gt;\n    &lt;title&gt;Character Name — Star Wars Wiki&lt;/title&gt;\n  &lt;/head&gt;\n  &lt;body&gt;\n    &lt;h1&gt;Character Name&lt;/h1&gt;       &lt;!-- Heading --&gt;\n    &lt;em&gt;Tagline here&lt;/em&gt;          &lt;!-- Italic tagline --&gt;\n    &lt;div class="infobox"&gt;...&lt;/div&gt; &lt;!-- Sidebar card --&gt;\n    &lt;h2&gt;History&lt;/h2&gt;\n    &lt;p&gt;Narrative text...&lt;/p&gt;\n  &lt;/body&gt;\n&lt;/html&gt;` },
-      { heading: 'Key HTML elements used', text: '<code>&lt;h1&gt;–&lt;h6&gt;</code> for headings &bull; <code>&lt;p&gt;</code> for paragraphs &bull; <code>&lt;div&gt;</code> for grouping &bull; <code>&lt;ul&gt;&lt;li&gt;</code> for lists &bull; <code>&lt;table&gt;</code> for the infobox grid &bull; <code>&lt;em&gt;</code> for italic text' },
-    ]
-  },
-  css: {
-    title: '🎨 CSS Styling — The Look',
-    content: [
-      { heading: 'What is CSS?', text: 'CSS (Cascading Style Sheets) controls how HTML looks: colors, fonts, spacing, layout. You write rules like <code>selector { property: value; }</code>.' },
-      { heading: 'Dark theme — key CSS rules', code: `body {\n  background: #0f1117;  /* Dark background */\n  color: #e2e8f0;        /* Light text */\n  font-family: sans-serif;\n}\nh1 {\n  color: #4f8ef7;        /* Blue accent color */\n  border-bottom: 2px solid #2a2d3a;\n  padding-bottom: 12px;\n}\n.infobox {\n  float: right;          /* Sidebar on the right */\n  background: #1a1d27;\n  border: 1px solid #2a2d3a;\n  border-radius: 8px;\n  padding: 16px;\n  min-width: 220px;\n}` },
-      { heading: 'CSS concepts in this wiki', text: '<strong>float</strong> — puts the infobox on the right &bull; <strong>border-radius</strong> — rounded corners &bull; <strong>color</strong> — text color &bull; <strong>background</strong> — background color &bull; <strong>line-height</strong> — spacing between lines' },
-    ]
-  },
-  js: {
-    title: '⚡ JavaScript — The Behavior',
-    content: [
-      { heading: 'What is JavaScript?', text: 'JavaScript makes pages interactive. In this wiki generator, JS calls the Gemini API, parses the JSON response, and builds the HTML string you see on screen.' },
-      { heading: 'The core pattern', code: `// 1. Call the AI API\nconst response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(prompt) });\n\n// 2. Parse the JSON response\nconst data = await response.json();\n\n// 3. Build HTML from the data\ndocument.getElementById('title').textContent = data.name;\ndocument.getElementById('history').innerHTML = data.history;` },
-      { heading: 'Key concepts used', text: '<strong>async/await</strong> — waits for the API call without freezing the page &bull; <strong>JSON</strong> — the data format the AI returns &bull; <strong>DOM manipulation</strong> — changing the page content with JS &bull; <strong>template strings</strong> — building HTML strings with backticks' },
-    ]
-  },
-  deploy: {
-    title: '🚀 Deploy to GitHub Pages — Free Hosting',
-    content: [
-      { heading: 'What is GitHub Pages?', text: 'GitHub Pages is a free hosting service by GitHub. You push a folder of HTML/CSS/JS files to a repo and your wiki is live at <code>username.github.io/repo-name</code> in minutes.' },
-      { heading: 'Step-by-step deployment', text: '<strong>1.</strong> Create a free account at <a href="https://github.com" target="_blank" style="color:var(--blue)">github.com</a><br><strong>2.</strong> Click "+ New repository" — name it <code>my-star-wars-wiki</code><br><strong>3.</strong> Click "Add file" → "Create new file" → name it <code>index.html</code><br><strong>4.</strong> Paste your wiki HTML and click "Commit changes"<br><strong>5.</strong> Go to Settings → Pages → Source: "Deploy from a branch" → main<br><strong>6.</strong> Visit <code>username.github.io/my-star-wars-wiki</code> 🎉' },
-      { heading: 'Pro tips', text: '&bull; Add more pages: create <code>ahsoka.html</code>, <code>vader.html</code>, etc. and link them with <code>&lt;a href="ahsoka.html"&gt;</code><br>&bull; Add a <code>style.css</code> file and link it from each page: <code>&lt;link rel="stylesheet" href="style.css"&gt;</code><br>&bull; Free domain: your site is live at <code>https://username.github.io/repo-name</code> with HTTPS included' },
-    ]
+function endTrivia() {
+  document.getElementById('trivia-game').style.display = 'none';
+  document.getElementById('trivia-result').style.display = 'block';
+  const s = trivia.score;
+  document.getElementById('final-score').textContent = `${s} / 10`;
+  const ranks = [{max:5,r:'Youngling 🌱',d:'Keep studying the ways of the Force.'},{max:10,r:'Padawan 📚',d:'Your training is progressing.'},{max:15,r:'Jedi Knight ⚔️',d:'A true Guardian of peace.'},{max:20,r:'Jedi Master 🧘',d:'Your mastery is extraordinary.'},{max:30,r:'Grand Master 👑',d:'The Council bows to your wisdom.'}];
+    // Scale for 10 questions
+  const rank = s >= 9 ? ranks[4] : s >= 7 ? ranks[3] : s >= 5 ? ranks[2] : s >= 3 ? ranks[1] : ranks[0];
+  document.getElementById('final-rank').textContent = `${rank.r} — ${rank.d}`;
+  const scores = JSON.parse(localStorage.getItem('ag65_trivia_scores') || '{}');
+  const prev = scores[trivia.diff];
+  if (prev === undefined || s > prev) {
+    scores[trivia.diff] = s;
+    localStorage.setItem('ag65_trivia_scores', JSON.stringify(scores));
+    document.getElementById('high-score-note').textContent = prev === undefined ? '🌟 First score saved!' : `🏆 New high score! Previous best: ${prev}/10`;
+  } else {
+    document.getElementById('high-score-note').textContent = `Personal best: ${prev}/10`;
   }
-};
-
-const PORTFOLIO_CHECKLIST = [
-  { done: false, task: 'Export a Fan Wiki article using the "Fan Wiki" tab above' },
-  { done: false, task: 'Create a GitHub account at github.com' },
-  { done: false, task: 'Create a new public repository named my-fan-wiki' },
-  { done: false, task: 'Upload your exported wiki HTML as index.html' },
-  { done: false, task: 'Enable GitHub Pages in Settings → Pages' },
-  { done: false, task: 'Visit your live site at username.github.io/my-fan-wiki' },
-  { done: false, task: 'Create a second character page and link between them with <a> tags' },
-  { done: false, task: 'Customize the CSS — change colors, fonts, or layout to make it yours' },
-];
-
-let checklistState = JSON.parse(localStorage.getItem('sw65_checklist') || 'null') || PORTFOLIO_CHECKLIST.map(() => false);
-let miniWikiHTML = '';
-
-function showWebDevSection(section, btn) {
-  document.querySelectorAll('#webdev-tabs .btn').forEach(b => { b.className = 'btn btn-outline'; });
-  btn.className = 'btn btn-primary';
-  const s = WEBDEV_SECTIONS[section];
-  if (!s) return;
-  let html = `<div style="font-size:16px;font-weight:700;color:var(--blue);margin-bottom:16px;">${s.title}</div>`;
-  s.content.forEach(item => {
-    html += `<div style="margin-bottom:18px;">`;
-    if (item.heading) html += `<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;">${item.heading}</div>`;
-    if (item.text) html += `<div style="font-size:13px;color:#cbd5e1;line-height:1.7;">${item.text}</div>`;
-    if (item.code) html += `<pre style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12px;line-height:1.7;color:#a5f3fc;overflow-x:auto;margin-top:8px;">${item.code}</pre>`;
-    html += '</div>';
-  });
-  document.getElementById('webdev-content').innerHTML = html;
 }
 
-function buildMiniWiki() {
-  const title = document.getElementById('miniTitle').value.trim() || 'My Character';
-  const tagline = document.getElementById('miniTagline').value.trim() || 'A hero of the galaxy';
-  const desc = document.getElementById('miniDesc').value.trim() || 'Write your description here.';
-  miniWikiHTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>${title} — Fan Wiki</title>
-  <style>
-    body { background:#0f1117; color:#e2e8f0; font-family:sans-serif; max-width:800px; margin:40px auto; padding:20px; }
-    h1 { color:#4f8ef7; border-bottom:2px solid #2a2d3a; padding-bottom:10px; }
-    h2 { color:#94a3b8; margin-top:24px; font-size:1.1rem; border-bottom:1px solid #2a2d3a; padding-bottom:4px; }
-    p { line-height:1.7; color:#cbd5e1; }
-    .tagline { font-style:italic; color:#64748b; margin-bottom:20px; }
-    .footer { margin-top:40px; font-size:0.8rem; color:#374151; border-top:1px solid #2a2d3a; padding-top:12px; }
-  </style>
-</head>
-<body>
-  <h1>${title}</h1>
-  <p class="tagline">${tagline}</p>
-  <h2>Overview</h2>
-  <p>${desc}</p>
-  <h2>History</h2>
-  <p>Add your character's history here...</p>
-  <h2>Relationships</h2>
-  <p>Describe key relationships here...</p>
-  <div class="footer">Built with the Star Wars Fan Wiki Builder · <a href="https://hhanng.github.io/agent-65-star-wars-builder/" style="color:#4f8ef7">hhanng.github.io</a></div>
-</body>
-</html>`;
-  const display = miniWikiHTML.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  document.getElementById('miniCode').textContent = miniWikiHTML;
-  document.getElementById('miniCode').style.display = 'block';
-  document.getElementById('miniCopyBtn').style.display = 'inline-flex';
+function restartTrivia() { startTrivia(); }
+function showTriviaStart() {
+  document.getElementById('trivia-game').style.display = 'none';
+  document.getElementById('trivia-result').style.display = 'none';
+  document.getElementById('trivia-start').style.display = 'block';
+  renderHighScores();
 }
 
-function copyMiniWiki() {
-  if (!miniWikiHTML) return;
-  navigator.clipboard.writeText(miniWikiHTML).then(() => {
-    const btn = document.getElementById('miniCopyBtn');
-    btn.textContent = '✓ Copied!';
-    setTimeout(() => btn.textContent = '📋 Copy HTML', 2000);
-    toast('HTML copied! Paste into a .html file and open in your browser.');
-  });
-}
-
-function renderChecklist() {
-  const el = document.getElementById('webdev-checklist');
-  el.innerHTML = PORTFOLIO_CHECKLIST.map((item, i) => `
-    <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:8px;background:${checklistState[i]?'rgba(74,222,128,.08)':'var(--card)'};border:1px solid ${checklistState[i]?'rgba(74,222,128,.25)':'var(--border)'};cursor:pointer;" onclick="toggleChecklist(${i})">
-      <div style="width:20px;height:20px;border-radius:4px;border:2px solid ${checklistState[i]?'var(--green)':'var(--border)'};background:${checklistState[i]?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:#000;">${checklistState[i]?'✓':''}</div>
-      <div style="font-size:13px;color:${checklistState[i]?'var(--green)':'var(--text)'};line-height:1.4;${checklistState[i]?'text-decoration:line-through;opacity:0.7;':''}">${item.task}</div>
-    </div>
-  `).join('');
-}
-
-function toggleChecklist(i) {
-  checklistState[i] = !checklistState[i];
-  localStorage.setItem('sw65_checklist', JSON.stringify(checklistState));
-  renderChecklist();
-}
-
-// Init web dev tab
-showWebDevSection('html', document.querySelector('#webdev-tabs .btn'));
-renderChecklist();
+function escJs(s){return s.replace(/'/g,"\\'")}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+renderHighScores();
 </script>
 </body>
 </html>
