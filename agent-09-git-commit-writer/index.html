@@ -658,6 +658,7 @@
     <button class="tab-btn active" onclick="switchTab('commits', this)">📝 Commit Writer</button>
     <button class="tab-btn" onclick="switchTab('pr', this)">🔀 PR Description</button>
     <button class="tab-btn" onclick="switchTab('sprint', this)">📊 Sprint Summary</button>
+    <button class="tab-btn" onclick="switchTab('branch', this)">🌿 Branch Namer</button>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════ TAB 1: Commit Writer -->
@@ -867,6 +868,52 @@
 
   </div><!-- /tab-sprint -->
 
+  <!-- ══ TAB 4: Branch Namer ══ -->
+  <div class="tab-panel" id="tab-branch">
+    <div class="card">
+      <div class="card-title">🌿 Branch Name Generator</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div>
+          <div class="card-title" style="margin-bottom:6px;">Branch Type</div>
+          <select id="branchType" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:9px 12px;outline:none;cursor:pointer;">
+            <option value="feature">feature — new functionality</option>
+            <option value="fix">fix — bug fix</option>
+            <option value="hotfix">hotfix — urgent production fix</option>
+            <option value="chore">chore — maintenance / tooling</option>
+            <option value="release">release — release prep</option>
+            <option value="refactor">refactor — code cleanup</option>
+            <option value="docs">docs — documentation</option>
+            <option value="test">test — add / fix tests</option>
+          </select>
+        </div>
+        <div>
+          <div class="card-title" style="margin-bottom:6px;">Ticket / Issue # <span style="font-weight:400;text-transform:none;font-size:11px;">(optional)</span></div>
+          <input type="text" id="branchTicket" placeholder="e.g. PROJ-123 or #456" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:9px 12px;outline:none;font-family:monospace;" />
+        </div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div class="card-title" style="margin-bottom:6px;">What are you working on?</div>
+        <input type="text" id="branchDescription" placeholder="e.g. add user authentication with JWT tokens" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px 12px;outline:none;" />
+      </div>
+      <button onclick="generateBranchNames()" id="branchBtn" disabled style="width:100%;background:var(--accent);color:#000;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.5;">
+        <span class="btn-spinner" id="branchSpinner"></span>
+        <span>🌿 Generate Branch Names</span>
+      </button>
+      <div class="error-box" id="branchErrorBox" style="display:none;"></div>
+    </div>
+
+    <div id="branchOutput" style="display:none;">
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-title" style="margin-bottom:14px;">Suggested Branch Names</div>
+        <div id="branchResults"></div>
+      </div>
+      <div class="card" style="border-color:rgba(249,115,22,.25);background:rgba(249,115,22,.04);">
+        <div class="card-title" style="color:var(--accent);margin-bottom:10px;">📖 Git Flow Reference</div>
+        <div id="branchRef" style="font-size:13px;color:var(--muted);line-height:1.7;"></div>
+      </div>
+    </div>
+  </div><!-- /tab-branch -->
+
   <footer>
     <p>Built with Gemini 2.0 Flash · <a href="https://hhanng.github.io" target="_blank">100 AI Agents Challenge</a></p>
   </footer>
@@ -914,6 +961,14 @@
     });
 
     renderHistory();
+
+    // Branch namer — enable button when description is filled
+    document.getElementById('branchDescription').addEventListener('input', e => {
+      const btn = document.getElementById('branchBtn');
+      const has = !!e.target.value.trim();
+      btn.disabled = !has;
+      btn.style.opacity = has ? '1' : '0.5';
+    });
   })();
 
   function setApiStatus(saved) {
@@ -1349,6 +1404,75 @@ Return ONLY the plain text summary, no JSON, no markdown headings, no code block
       btn.textContent = '✓ Copied!';
       btn.classList.add('copied');
       setTimeout(() => { btn.textContent = '📋 Copy Summary'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── Branch Namer ───────────────────────────────────────────────────────────
+  async function generateBranchNames() {
+    const type = document.getElementById('branchType').value;
+    const ticket = document.getElementById('branchTicket').value.trim();
+    const desc = document.getElementById('branchDescription').value.trim();
+    if (!desc) return;
+
+    const btn = document.getElementById('branchBtn');
+    const spinner = document.getElementById('branchSpinner');
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+    showError('branchErrorBox', '');
+    document.getElementById('branchOutput').style.display = 'none';
+
+    try {
+      const prompt = `Generate git branch names for this change:
+Type: ${type}
+Ticket: ${ticket || 'none'}
+Description: ${desc}
+
+Return ONLY valid JSON (no markdown):
+{
+  "branches": [
+    { "name": "feature/PROJ-123-add-user-auth", "style": "Standard git-flow", "notes": "Most common — type/ticket-description in kebab-case" },
+    { "name": "feature/add-user-authentication", "style": "No ticket prefix", "notes": "For teams not using issue trackers" },
+    { "name": "PROJ-123/feature-user-auth", "style": "Ticket-first (Jira)", "notes": "Jira-style: ticket first for easy filtering" },
+    { "name": "feature/auth/jwt-login", "style": "Scoped (monorepo)", "notes": "Scope prefix — great for monorepos" }
+  ],
+  "gitflowNote": "2–3 sentences about git flow conventions for the '${type}' branch type: when to use it, where it merges into, and key naming tips."
+}`;
+
+      const raw = await callGemini(prompt);
+      const data = extractJSON(raw);
+      if (!data?.branches) throw new Error('Could not generate names. Try again.');
+      renderBranchNames(data);
+    } catch(e) {
+      showError('branchErrorBox', 'Error: ' + (e.message || 'Something went wrong.'));
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function renderBranchNames(data) {
+    document.getElementById('branchResults').innerHTML = (data.branches || []).map(b => `
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <code style="font-family:monospace;font-size:14px;color:var(--accent);display:block;margin-bottom:4px;">${escapeHtml(b.name)}</code>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:3px;font-weight:600;">${escapeHtml(b.style)}</div>
+          <div style="font-size:12px;color:#666;">${escapeHtml(b.notes)}</div>
+        </div>
+        <button onclick="copyBranchName(this, '${escapeHtml(b.name).replace(/'/g,"&#39;")}')" style="background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s;">📋 Copy</button>
+      </div>
+    `).join('');
+    document.getElementById('branchRef').innerHTML = escapeHtml(data.gitflowNote || '').replace(/\n/g, '<br>');
+    const out = document.getElementById('branchOutput');
+    out.style.display = 'block';
+    out.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  function copyBranchName(btn, name) {
+    navigator.clipboard.writeText(name).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.style.color = 'var(--accent)';
+      btn.style.borderColor = 'var(--accent)';
+      setTimeout(() => { btn.textContent = '📋 Copy'; btn.style.color = ''; btn.style.borderColor = ''; }, 1800);
     });
   }
 </script>

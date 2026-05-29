@@ -207,6 +207,7 @@
     <button class="tab-btn active" onclick="switchTab('bug',this)">🐛 Bug Explainer</button>
     <button class="tab-btn" onclick="switchTab('pr',this)">📋 PR Description</button>
     <button class="tab-btn" onclick="switchTab('changelog',this)">📝 Changelog</button>
+    <button class="tab-btn" onclick="switchTab('trace',this)">🪜 Step Tracer</button>
   </div>
 
   <!-- ══ TAB 1: Bug Explainer ══ -->
@@ -367,6 +368,28 @@
       <div class="output-card" id="clContent"></div>
       <button class="action-copy-btn action-copy-btn-teal" id="clCopyBtn" onclick="copyChangelog()">📋 Copy Changelog</button>
     </div>
+  </div>
+
+  <!-- ══ TAB 4: Step Tracer ══ -->
+  <div class="tab-panel" id="tab-trace">
+    <div class="form-group">
+      <label>Code to Trace</label>
+      <textarea class="form-textarea" id="traceCode" style="min-height:180px" placeholder="Paste code here to walk through it step-by-step...&#10;&#10;def factorial(n):&#10;    if n &lt;= 1:&#10;        return 1&#10;    return n * factorial(n - 1)&#10;&#10;result = factorial(5)&#10;print(result)"></textarea>
+    </div>
+    <div class="controls">
+      <div class="select-wrap">
+        <label>Language</label>
+        <select id="traceLang">
+          <option>Python</option><option>JavaScript</option><option>Java</option>
+          <option>C++</option><option>TypeScript</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <button class="main-btn" style="background:var(--purple);color:#fff;" id="traceBtn" onclick="traceCodeSteps()">
+      <div class="spinner" id="traceSpinner"></div>
+      <span id="traceBtnText">🪜 Trace Step-by-Step</span>
+    </button>
+    <div id="traceOutput" style="display:none;"></div>
   </div>
 
 </div>
@@ -1136,6 +1159,61 @@
   }
 
   // ─── Helpers ────────────────────────────────────────────────
+  // ─── Step Tracer ─────────────────────────────────────────────
+  async function traceCodeSteps() {
+    const code = document.getElementById('traceCode').value.trim();
+    const lang = document.getElementById('traceLang').value;
+    if (!code) { showToast('Paste some code first!'); return; }
+    setTraceLoading(true);
+    document.getElementById('traceOutput').style.display = 'none';
+    try {
+      const prompt = `You are a code execution visualizer. Walk through this ${lang} code step-by-step.
+
+CODE:
+${code}
+
+Return ONLY valid JSON (no markdown fences):
+{
+  "summary": "One sentence: what this code does",
+  "steps": [
+    { "lineNum": 1, "code": "actual line", "action": "Plain English what happens", "variables": { "varName": "value" } }
+  ],
+  "finalState": { "varName": "finalValue" },
+  "output": "what gets printed/returned or 'nothing'"
+}
+Rules: max 12 steps, skip trivial lines, show all variable changes, write for a beginner.`;
+
+      const raw = await callGemini(prompt);
+      const data = extractJSON(raw);
+      if (!data?.steps) throw new Error('Could not parse trace. Try again.');
+      renderTrace(data);
+    } catch(e) {
+      showToast('Error: ' + (e.message || 'Something went wrong.'));
+    } finally {
+      setTraceLoading(false);
+    }
+  }
+
+  function renderTrace(data) {
+    const out = document.getElementById('traceOutput');
+    let html = `<div class="output-card" style="margin-bottom:16px;border-top:3px solid var(--purple);"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple);margin-bottom:8px;">📋 Summary</div><div style="font-size:15px;">${escapeHtml(data.summary)}</div></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">🪜 Execution Trace</div>`;
+    (data.steps||[]).forEach((step, i) => {
+      const vars = Object.entries(step.variables || {});
+      html += `<div style="display:grid;grid-template-columns:28px 1fr;gap:12px;margin-bottom:12px;align-items:start;"><div style="width:28px;height:28px;border-radius:50%;background:var(--purple);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div><div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;"><div style="background:#1f1f1f;padding:8px 14px;font-family:var(--mono);font-size:13px;color:var(--amber);">${escapeHtml(step.code)}</div><div style="padding:10px 14px;"><div style="font-size:13px;margin-bottom:${vars.length?'10px':'0'}">${escapeHtml(step.action)}</div>${vars.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;">${vars.map(([k,v])=>`<span style="background:#1a1a2e;border:1px solid #3b3b5c;border-radius:6px;padding:3px 10px;font-family:var(--mono);font-size:12px;"><span style="color:var(--purple)">${escapeHtml(k)}</span><span style="color:var(--muted)"> = </span><span style="color:var(--green)">${escapeHtml(String(v))}</span></span>`).join('')}</div>`:''}</div></div></div>`;
+    });
+    const fv = Object.entries(data.finalState||{});
+    html += `<div class="output-card" style="border-top:3px solid var(--green);"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:8px;">🏁 Final State</div>${fv.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">${fv.map(([k,v])=>`<span style="background:#0d1f0d;border:1px solid #1a4d1a;border-radius:6px;padding:4px 12px;font-family:var(--mono);font-size:13px;"><span style="color:var(--green)">${escapeHtml(k)}</span><span style="color:var(--muted)"> = </span><span style="color:#86efac">${escapeHtml(String(v))}</span></span>`).join('')}</div>`:''}<div style="font-size:13px;color:var(--muted);">Output: <span style="color:var(--text)">${escapeHtml(data.output||'')}</span></div></div>`;
+    out.innerHTML = html;
+    out.style.display = 'block';
+    out.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function setTraceLoading(on) {
+    document.getElementById('traceBtn').disabled = on;
+    document.getElementById('traceSpinner').style.display = on ? 'block' : 'none';
+    document.getElementById('traceBtnText').textContent = on ? 'Tracing...' : '🪜 Trace Step-by-Step';
+  }
+
   function extractJSON(text) {
     try { return JSON.parse(text.trim()); } catch {}
     const m = text.match(/\{[\s\S]*\}/);

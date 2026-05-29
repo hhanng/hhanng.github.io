@@ -253,6 +253,7 @@
   <div class="tab" onclick="showTab('lore', event)">📚 Lore</div>
   <div class="tab" onclick="showTab('quiz', event)">🎯 Quiz</div>
   <div class="tab" onclick="showTab('collection', event)">🗂️ Collection</div>
+  <div class="tab" onclick="showTab('webdev', event)">🎓 Web Dev</div>
 </nav>
 
 <!-- ═══════════════════════════ STORY BUILDER TAB ═══════════════════════════ -->
@@ -392,6 +393,52 @@
 <div id="tab-collection" class="page">
   <div class="section-title">🗂️ My Characters</div>
   <div id="collection-area"></div>
+</div>
+
+<!-- ═══════════════════════════ WEB DEV TAB ═══════════════════════════════════ -->
+<div id="tab-webdev" class="page">
+  <div class="section-title">🎓 Build Your Own Fan Wiki — Web Dev Guide</div>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:24px;line-height:1.6;">The Fan Wiki tab generates a real HTML page you can export and deploy. This guide teaches the web dev concepts powering it — use it to learn how to build your own fan wiki from scratch.</p>
+
+  <!-- Step-by-step learn panel -->
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="webdev-tabs">
+      <button class="btn btn-primary" onclick="showWebDevSection('html', this)">🧱 HTML Structure</button>
+      <button class="btn btn-outline" onclick="showWebDevSection('css', this)">🎨 CSS Styling</button>
+      <button class="btn btn-outline" onclick="showWebDevSection('js', this)">⚡ JavaScript</button>
+      <button class="btn btn-outline" onclick="showWebDevSection('deploy', this)">🚀 Deploy to GitHub Pages</button>
+    </div>
+    <div id="webdev-content"></div>
+  </div>
+
+  <!-- Live code preview -->
+  <div class="card" style="margin-bottom:16px;">
+    <div style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:12px;">✏️ Mini Wiki Builder — Learn by Doing</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5;">Fill in the form below to generate raw HTML for a simple wiki page. Click "Show HTML" to see and copy the code — then paste it into a file and open it in your browser!</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div>
+        <div class="label">Page Title</div>
+        <input type="text" id="miniTitle" placeholder="e.g. Ahsoka Tano" style="width:100%;background:#111;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:9px 12px;outline:none;">
+      </div>
+      <div>
+        <div class="label">Tagline</div>
+        <input type="text" id="miniTagline" placeholder="e.g. Jedi Padawan, hero of the Clone Wars" style="width:100%;background:#111;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:9px 12px;outline:none;">
+      </div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div class="label">Description</div>
+      <textarea id="miniDesc" placeholder="Write a short description of your character or topic..." style="width:100%;background:#111;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px 12px;outline:none;min-height:80px;resize:vertical;font-family:inherit;"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="buildMiniWiki()">🔨 Build HTML</button>
+    <button class="btn btn-outline" onclick="copyMiniWiki()" id="miniCopyBtn" style="display:none;margin-left:8px;">📋 Copy HTML</button>
+    <div id="miniCode" style="display:none;margin-top:14px;background:#0a0a0a;border:1px solid var(--border);border-radius:8px;overflow:auto;max-height:320px;padding:14px;font-family:monospace;font-size:12px;line-height:1.6;color:#a5f3fc;white-space:pre;"></div>
+  </div>
+
+  <!-- GitHub Pages deploy checklist -->
+  <div class="card">
+    <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:12px;">✅ Your Portfolio Checklist</div>
+    <div id="webdev-checklist" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -981,6 +1028,138 @@ function escapeHtml(str) {
 
 // Init lore on load
 showLore(0, document.querySelector('.lore-cat'));
+
+// ── WEB DEV TAB ──────────────────────────────────────────────────────────────
+const WEBDEV_SECTIONS = {
+  html: {
+    title: '🧱 HTML Structure — The Skeleton',
+    content: [
+      { heading: 'What is HTML?', text: 'HTML (HyperText Markup Language) is the skeleton of every web page. It defines structure using <strong>elements</strong> — wrapped in opening <code>&lt;tag&gt;</code> and closing <code>&lt;/tag&gt;</code> tags.' },
+      { heading: 'The Wiki Page Structure', code: `&lt;!DOCTYPE html&gt;\n&lt;html lang="en"&gt;\n  &lt;head&gt;\n    &lt;title&gt;Character Name — Star Wars Wiki&lt;/title&gt;\n  &lt;/head&gt;\n  &lt;body&gt;\n    &lt;h1&gt;Character Name&lt;/h1&gt;       &lt;!-- Heading --&gt;\n    &lt;em&gt;Tagline here&lt;/em&gt;          &lt;!-- Italic tagline --&gt;\n    &lt;div class="infobox"&gt;...&lt;/div&gt; &lt;!-- Sidebar card --&gt;\n    &lt;h2&gt;History&lt;/h2&gt;\n    &lt;p&gt;Narrative text...&lt;/p&gt;\n  &lt;/body&gt;\n&lt;/html&gt;` },
+      { heading: 'Key HTML elements used', text: '<code>&lt;h1&gt;–&lt;h6&gt;</code> for headings &bull; <code>&lt;p&gt;</code> for paragraphs &bull; <code>&lt;div&gt;</code> for grouping &bull; <code>&lt;ul&gt;&lt;li&gt;</code> for lists &bull; <code>&lt;table&gt;</code> for the infobox grid &bull; <code>&lt;em&gt;</code> for italic text' },
+    ]
+  },
+  css: {
+    title: '🎨 CSS Styling — The Look',
+    content: [
+      { heading: 'What is CSS?', text: 'CSS (Cascading Style Sheets) controls how HTML looks: colors, fonts, spacing, layout. You write rules like <code>selector { property: value; }</code>.' },
+      { heading: 'Dark theme — key CSS rules', code: `body {\n  background: #0f1117;  /* Dark background */\n  color: #e2e8f0;        /* Light text */\n  font-family: sans-serif;\n}\nh1 {\n  color: #4f8ef7;        /* Blue accent color */\n  border-bottom: 2px solid #2a2d3a;\n  padding-bottom: 12px;\n}\n.infobox {\n  float: right;          /* Sidebar on the right */\n  background: #1a1d27;\n  border: 1px solid #2a2d3a;\n  border-radius: 8px;\n  padding: 16px;\n  min-width: 220px;\n}` },
+      { heading: 'CSS concepts in this wiki', text: '<strong>float</strong> — puts the infobox on the right &bull; <strong>border-radius</strong> — rounded corners &bull; <strong>color</strong> — text color &bull; <strong>background</strong> — background color &bull; <strong>line-height</strong> — spacing between lines' },
+    ]
+  },
+  js: {
+    title: '⚡ JavaScript — The Behavior',
+    content: [
+      { heading: 'What is JavaScript?', text: 'JavaScript makes pages interactive. In this wiki generator, JS calls the Gemini API, parses the JSON response, and builds the HTML string you see on screen.' },
+      { heading: 'The core pattern', code: `// 1. Call the AI API\nconst response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(prompt) });\n\n// 2. Parse the JSON response\nconst data = await response.json();\n\n// 3. Build HTML from the data\ndocument.getElementById('title').textContent = data.name;\ndocument.getElementById('history').innerHTML = data.history;` },
+      { heading: 'Key concepts used', text: '<strong>async/await</strong> — waits for the API call without freezing the page &bull; <strong>JSON</strong> — the data format the AI returns &bull; <strong>DOM manipulation</strong> — changing the page content with JS &bull; <strong>template strings</strong> — building HTML strings with backticks' },
+    ]
+  },
+  deploy: {
+    title: '🚀 Deploy to GitHub Pages — Free Hosting',
+    content: [
+      { heading: 'What is GitHub Pages?', text: 'GitHub Pages is a free hosting service by GitHub. You push a folder of HTML/CSS/JS files to a repo and your wiki is live at <code>username.github.io/repo-name</code> in minutes.' },
+      { heading: 'Step-by-step deployment', text: '<strong>1.</strong> Create a free account at <a href="https://github.com" target="_blank" style="color:var(--blue)">github.com</a><br><strong>2.</strong> Click "+ New repository" — name it <code>my-star-wars-wiki</code><br><strong>3.</strong> Click "Add file" → "Create new file" → name it <code>index.html</code><br><strong>4.</strong> Paste your wiki HTML and click "Commit changes"<br><strong>5.</strong> Go to Settings → Pages → Source: "Deploy from a branch" → main<br><strong>6.</strong> Visit <code>username.github.io/my-star-wars-wiki</code> 🎉' },
+      { heading: 'Pro tips', text: '&bull; Add more pages: create <code>ahsoka.html</code>, <code>vader.html</code>, etc. and link them with <code>&lt;a href="ahsoka.html"&gt;</code><br>&bull; Add a <code>style.css</code> file and link it from each page: <code>&lt;link rel="stylesheet" href="style.css"&gt;</code><br>&bull; Free domain: your site is live at <code>https://username.github.io/repo-name</code> with HTTPS included' },
+    ]
+  }
+};
+
+const PORTFOLIO_CHECKLIST = [
+  { done: false, task: 'Export a Fan Wiki article using the "Fan Wiki" tab above' },
+  { done: false, task: 'Create a GitHub account at github.com' },
+  { done: false, task: 'Create a new public repository named my-fan-wiki' },
+  { done: false, task: 'Upload your exported wiki HTML as index.html' },
+  { done: false, task: 'Enable GitHub Pages in Settings → Pages' },
+  { done: false, task: 'Visit your live site at username.github.io/my-fan-wiki' },
+  { done: false, task: 'Create a second character page and link between them with <a> tags' },
+  { done: false, task: 'Customize the CSS — change colors, fonts, or layout to make it yours' },
+];
+
+let checklistState = JSON.parse(localStorage.getItem('sw65_checklist') || 'null') || PORTFOLIO_CHECKLIST.map(() => false);
+let miniWikiHTML = '';
+
+function showWebDevSection(section, btn) {
+  document.querySelectorAll('#webdev-tabs .btn').forEach(b => { b.className = 'btn btn-outline'; });
+  btn.className = 'btn btn-primary';
+  const s = WEBDEV_SECTIONS[section];
+  if (!s) return;
+  let html = `<div style="font-size:16px;font-weight:700;color:var(--blue);margin-bottom:16px;">${s.title}</div>`;
+  s.content.forEach(item => {
+    html += `<div style="margin-bottom:18px;">`;
+    if (item.heading) html += `<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;">${item.heading}</div>`;
+    if (item.text) html += `<div style="font-size:13px;color:#cbd5e1;line-height:1.7;">${item.text}</div>`;
+    if (item.code) html += `<pre style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12px;line-height:1.7;color:#a5f3fc;overflow-x:auto;margin-top:8px;">${item.code}</pre>`;
+    html += '</div>';
+  });
+  document.getElementById('webdev-content').innerHTML = html;
+}
+
+function buildMiniWiki() {
+  const title = document.getElementById('miniTitle').value.trim() || 'My Character';
+  const tagline = document.getElementById('miniTagline').value.trim() || 'A hero of the galaxy';
+  const desc = document.getElementById('miniDesc').value.trim() || 'Write your description here.';
+  miniWikiHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${title} — Fan Wiki</title>
+  <style>
+    body { background:#0f1117; color:#e2e8f0; font-family:sans-serif; max-width:800px; margin:40px auto; padding:20px; }
+    h1 { color:#4f8ef7; border-bottom:2px solid #2a2d3a; padding-bottom:10px; }
+    h2 { color:#94a3b8; margin-top:24px; font-size:1.1rem; border-bottom:1px solid #2a2d3a; padding-bottom:4px; }
+    p { line-height:1.7; color:#cbd5e1; }
+    .tagline { font-style:italic; color:#64748b; margin-bottom:20px; }
+    .footer { margin-top:40px; font-size:0.8rem; color:#374151; border-top:1px solid #2a2d3a; padding-top:12px; }
+  </style>
+</head>
+<body>
+  <h1>${title}</h1>
+  <p class="tagline">${tagline}</p>
+  <h2>Overview</h2>
+  <p>${desc}</p>
+  <h2>History</h2>
+  <p>Add your character's history here...</p>
+  <h2>Relationships</h2>
+  <p>Describe key relationships here...</p>
+  <div class="footer">Built with the Star Wars Fan Wiki Builder · <a href="https://hhanng.github.io/agent-65-star-wars-builder/" style="color:#4f8ef7">hhanng.github.io</a></div>
+</body>
+</html>`;
+  const display = miniWikiHTML.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  document.getElementById('miniCode').textContent = miniWikiHTML;
+  document.getElementById('miniCode').style.display = 'block';
+  document.getElementById('miniCopyBtn').style.display = 'inline-flex';
+}
+
+function copyMiniWiki() {
+  if (!miniWikiHTML) return;
+  navigator.clipboard.writeText(miniWikiHTML).then(() => {
+    const btn = document.getElementById('miniCopyBtn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy HTML', 2000);
+    toast('HTML copied! Paste into a .html file and open in your browser.');
+  });
+}
+
+function renderChecklist() {
+  const el = document.getElementById('webdev-checklist');
+  el.innerHTML = PORTFOLIO_CHECKLIST.map((item, i) => `
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:8px;background:${checklistState[i]?'rgba(74,222,128,.08)':'var(--card)'};border:1px solid ${checklistState[i]?'rgba(74,222,128,.25)':'var(--border)'};cursor:pointer;" onclick="toggleChecklist(${i})">
+      <div style="width:20px;height:20px;border-radius:4px;border:2px solid ${checklistState[i]?'var(--green)':'var(--border)'};background:${checklistState[i]?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:#000;">${checklistState[i]?'✓':''}</div>
+      <div style="font-size:13px;color:${checklistState[i]?'var(--green)':'var(--text)'};line-height:1.4;${checklistState[i]?'text-decoration:line-through;opacity:0.7;':''}">${item.task}</div>
+    </div>
+  `).join('');
+}
+
+function toggleChecklist(i) {
+  checklistState[i] = !checklistState[i];
+  localStorage.setItem('sw65_checklist', JSON.stringify(checklistState));
+  renderChecklist();
+}
+
+// Init web dev tab
+showWebDevSection('html', document.querySelector('#webdev-tabs .btn'));
+renderChecklist();
 </script>
 </body>
 </html>

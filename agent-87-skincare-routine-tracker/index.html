@@ -176,6 +176,7 @@
   <button class="tab-btn" onclick="switchTab('lookup',this)">🔍 LOOKUP</button>
   <button class="tab-btn" onclick="switchTab('journal',this)">📅 JOURNAL</button>
   <button class="tab-btn" onclick="switchTab('safety',this)">🧪 SAFETY</button>
+  <button class="tab-btn" onclick="switchTab('budget',this)">💚 BUDGET</button>
 </div>
 
 <!-- ===== ROUTINE ===== -->
@@ -457,6 +458,35 @@
   </div>
 </div>
 
+<!-- ===== BUDGET ===== -->
+<div class="tab-content" id="tab-budget">
+  <div style="margin-top:14px">
+
+    <div class="card">
+      <div class="card-title">💚 Routine on a Budget</div>
+      <p class="info-text" style="margin-bottom:12px">Effective skincare doesn't have to be expensive. Below are complete beginner and intermediate routines using US drugstore products totaling under $50 — all EWG verified.</p>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;" id="budget-type-tabs">
+        <button class="sess-btn active" onclick="showBudgetType('beginner',this)">🌱 Beginner (~$30)</button>
+        <button class="sess-btn" onclick="showBudgetType('intermediate',this)">⭐ Intermediate (~$50)</button>
+        <button class="sess-btn" onclick="showBudgetType('acne',this)">🎯 Acne-Focused (~$45)</button>
+      </div>
+      <div id="budget-routine-display"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title cyan">💡 Budget Shopping Tips</div>
+      <div id="budget-tips-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏪 Best Budget-to-Value Ingredients</div>
+      <p class="info-text" style="margin-bottom:10px">These affordable ingredients give the highest skincare return for your money.</p>
+      <div id="budget-ingredients" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
+    </div>
+
+  </div>
+</div>
+
 <script>
 // ==============================
 // DATA
@@ -479,25 +509,25 @@ const STEPS = [
 ];
 
 const INGREDIENTS = [
-  {name:'Niacinamide',alias:['niacinamide','vitamin b3'],what:'Reduces pores, fades dark spots, controls oil, strengthens the skin barrier.',vi:'Giảm lỗ chân lông, mờ vết thâm, kiểm soát dầu, tăng cường hàng rào bảo vệ da.',suits:'oily,combo,acne-prone,all',use:'Apply morning or night after toner.',caution:''},
-  {name:'Retinol',alias:['retinol','vitamin a','retinoid'],what:'Speeds up cell turnover, reduces fine lines, fades dark spots, fights acne. The gold standard anti-aging ingredient.',vi:'Đẩy nhanh quá trình tái tạo tế bào, giảm nếp nhăn, mờ vết thâm, trị mụn.',suits:'acne,aging,hyperpigmentation',use:'PM only. Start 1-2x per week. Always wear SPF next morning.',caution:'Do not use with AHA/BHA, Vitamin C in same routine. Avoid if pregnant.'},
-  {name:'Hyaluronic Acid',alias:['hyaluronic acid','sodium hyaluronate','ha'],what:'Draws water into the skin for deep hydration. Can hold 1000x its weight in water.',vi:'Hút nước vào da, cấp nước sâu. Giữ lượng nước gấp 1000 lần trọng lượng của nó.',suits:'all',use:'Apply on damp skin before moisturizer for best results.',caution:''},
-  {name:'Salicylic Acid (BHA)',alias:['salicylic acid','bha','beta hydroxy'],what:'Oil-soluble acid that goes deep into pores to clear blackheads and acne. Great for oily skin.',vi:'Axit tan trong dầu, thấm sâu vào lỗ chân lông, trị mụn đầu đen và mụn trứng cá.',suits:'oily,acne-prone,combo',use:'Use 1-3x per week. Start low frequency. Avoid sun after use.',caution:'Don\'t layer with other exfoliants on the same day.'},
-  {name:'Glycolic Acid (AHA)',alias:['glycolic acid','aha','alpha hydroxy','lactic acid','mandelic acid'],what:'Exfoliates the surface of skin, revealing brighter, smoother skin. Fades dark spots and texture.',vi:'Tẩy tế bào chết trên bề mặt da, làm sáng và mịn da, mờ vết thâm.',suits:'dull,uneven,hyperpigmentation,dry',use:'PM only 2-3x per week. Always SPF next morning — skin is photosensitive.',caution:'Don\'t mix with Vitamin C or retinol in same session.'},
-  {name:'Ceramides',alias:['ceramide','ceramides'],what:'Lipids that form the skin barrier. Restore and protect the barrier — essential for dry, sensitive, or eczema-prone skin.',vi:'Chất béo tự nhiên tạo hàng rào bảo vệ da. Phục hồi và bảo vệ da khô, nhạy cảm.',suits:'dry,sensitive,damaged-barrier,all',use:'Use anytime, especially in moisturizers.',caution:''},
-  {name:'Vitamin C (Ascorbic Acid)',alias:['vitamin c','ascorbic acid','l-ascorbic acid','ascorbyl','sodium ascorbyl'],what:'Antioxidant that brightens skin, fades dark spots, boosts collagen, and protects from UV damage.',vi:'Chất chống oxy hóa làm sáng da, mờ vết thâm, tăng collagen, bảo vệ da khỏi tia UV.',suits:'dull,hyperpigmentation,all',use:'AM preferred. Use before SPF. Start with lower concentration (10%).', caution:'Don\'t mix with Retinol or Niacinamide (may reduce effectiveness). Store in cool, dark place.'},
-  {name:'Benzoyl Peroxide',alias:['benzoyl peroxide','bp'],what:'Kills acne-causing bacteria. Best for inflammatory acne (red, pus-filled pimples).',vi:'Tiêu diệt vi khuẩn gây mụn. Tốt nhất cho mụn viêm (mụn đỏ, có mủ).',suits:'acne-prone',use:'Apply only on acne spots. Start with 2.5% or 5%.',caution:'Bleaches fabric — use white towels and pillowcases. Very drying — moisturize after.'},
-  {name:'Centella Asiatica (Cica)',alias:['centella','cica','centella asiatica','gotu kola'],what:'Calming and healing ingredient. Reduces redness, soothes irritation, helps repair damaged skin. Very popular in Korean skincare.',vi:'Nguyên liệu từ rau má — làm dịu da, giảm đỏ, phục hồi da tổn thương. Phổ biến trong mỹ phẩm Hàn Quốc.',suits:'sensitive,acne,redness,all',use:'Use anytime. Great after exfoliation.',caution:''},
-  {name:'Snail Mucin (Secretion Filtrate)',alias:['snail mucin','snail secretion','snail filtrate'],what:'Hydrates deeply, heals and repairs skin, fades scars and dark spots. Popular Korean skincare ingredient.',vi:'Cấp nước sâu, chữa lành và sửa chữa da, mờ sẹo và vết thâm. Nguyên liệu phổ biến trong mỹ phẩm Hàn Quốc.',suits:'dry,acne-scars,all',use:'Apply after toner. Layer under heavier products.',caution:''},
-  {name:'SPF / Sunscreen',alias:['spf','sunscreen','uva','uvb','sun protection'],what:'Protects skin from UV damage, prevents hyperpigmentation, aging, and skin cancer. Non-negotiable every morning.',vi:'Bảo vệ da khỏi tia UV, ngăn ngừa thâm nám, lão hóa và ung thư da. Bắt buộc mỗi sáng.',suits:'all',use:'Apply last in AM routine. Use at least SPF 30. Reapply every 2 hours outdoors.',caution:'Sunscreen MUST be last step before makeup.'},
-  {name:'Zinc Oxide',alias:['zinc oxide','zinc'],what:'Physical sunscreen ingredient. Gentle, effective, reef-safe. Also helps control oil and calm acne.',vi:'Thành phần chống nắng vật lý. Nhẹ nhàng, hiệu quả. Cũng giúp kiểm soát dầu và làm dịu mụn.',suits:'sensitive,acne,all',use:'In sunscreen as the last step.',caution:''},
-  {name:'Peptides',alias:['peptide','peptides','matrixyl','argireline'],what:'Protein fragments that signal skin to produce more collagen. Anti-aging, firmness-boosting.',vi:'Chuỗi protein nhỏ ra hiệu cho da tạo thêm collagen. Chống lão hóa, làm săn chắc da.',suits:'aging,all',use:'Apply after essence, before moisturizer.',caution:''},
-  {name:'Collagen',alias:['collagen','marine collagen'],what:'Protein that gives skin elasticity and firmness. In topical products, provides surface hydration (molecules are too large to penetrate deeply).',vi:'Protein giúp da đàn hồi và săn chắc. Trong mỹ phẩm bôi ngoài da, cung cấp độ ẩm bề mặt.',suits:'dry,aging,all',use:'Apply in any hydrating step.',caution:'Topical collagen doesn\'t penetrate deep — focus on peptides and retinol to boost internal collagen.'},
-  {name:'Aloe Vera',alias:['aloe','aloe vera','aloe barbadensis'],what:'Calms irritated skin, provides light hydration, reduces redness and sunburn.',vi:'Làm dịu da kích ứng, cấp nước nhẹ, giảm đỏ và cháy nắng.',suits:'sensitive,oily,sunburned,all',use:'Anytime as a soothing layer.',caution:''},
-  {name:'Tea Tree Oil',alias:['tea tree','melaleuca'],what:'Natural antibacterial ingredient. Good for spot-treating individual pimples.',vi:'Kháng khuẩn tự nhiên. Tốt để chấm điểm trên từng nốt mụn.',suits:'acne-prone,oily',use:'Diluted only. Never apply undiluted. Spot treat only.',caution:'Never apply undiluted directly — causes burns and irritation. Always dilute or use formulated products.'},
-  {name:'Kojic Acid',alias:['kojic acid','kojic'],what:'Brightening ingredient that inhibits melanin production. Fades dark spots, hyperpigmentation, melasma.',vi:'Thành phần làm sáng da, ức chế sản xuất melanin. Làm mờ vết thâm, nám da.',suits:'hyperpigmentation,dull',use:'PM preferred. Always follow with SPF next morning.',caution:''},
-  {name:'Tranexamic Acid',alias:['tranexamic acid','txa'],what:'Brightening ingredient for hyperpigmentation, melasma, and post-acne dark spots. Gentler than hydroquinone.',vi:'Thành phần làm sáng da cho vết thâm, nám da. Nhẹ nhàng hơn hydroquinone.',suits:'hyperpigmentation,dull,sensitive',use:'Morning or night. Well-tolerated — can layer with niacinamide.',caution:''},
-  {name:'Propylene Glycol / Glycerin',alias:['glycerin','glycerol','propylene glycol','butylene glycol'],what:'Humectants that draw moisture to the skin. Lightweight, compatible with all skin types.',vi:'Chất giữ ẩm giúp hút nước vào da. Nhẹ, phù hợp với mọi loại da.',suits:'all',use:'In toners, serums, moisturizers.',caution:''},
+  {name:'Niacinamide',alias:['niacinamide','vitamin b3'],what:'Reduces pores, fades dark spots, controls oil, strengthens the skin barrier.',vi:'Giảm lỗ chân lông, mờ vết thâm, kiểm soát dầu, tăng cường hàng rào bảo vệ da.',suits:'oily,combo,acne-prone,all',use:'Apply morning or night after toner.',caution:'',ewg:1},
+  {name:'Retinol',alias:['retinol','vitamin a','retinoid'],what:'Speeds up cell turnover, reduces fine lines, fades dark spots, fights acne. The gold standard anti-aging ingredient.',vi:'Đẩy nhanh quá trình tái tạo tế bào, giảm nếp nhăn, mờ vết thâm, trị mụn.',suits:'acne,aging,hyperpigmentation',use:'PM only. Start 1-2x per week. Always wear SPF next morning.',caution:'Do not use with AHA/BHA, Vitamin C in same routine. Avoid if pregnant.',ewg:3},
+  {name:'Hyaluronic Acid',alias:['hyaluronic acid','sodium hyaluronate','ha'],what:'Draws water into the skin for deep hydration. Can hold 1000x its weight in water.',vi:'Hút nước vào da, cấp nước sâu. Giữ lượng nước gấp 1000 lần trọng lượng của nó.',suits:'all',use:'Apply on damp skin before moisturizer for best results.',caution:'',ewg:1},
+  {name:'Salicylic Acid (BHA)',alias:['salicylic acid','bha','beta hydroxy'],what:'Oil-soluble acid that goes deep into pores to clear blackheads and acne. Great for oily skin.',vi:'Axit tan trong dầu, thấm sâu vào lỗ chân lông, trị mụn đầu đen và mụn trứng cá.',suits:'oily,acne-prone,combo',use:'Use 1-3x per week. Start low frequency. Avoid sun after use.',caution:'Don\'t layer with other exfoliants on the same day.',ewg:3},
+  {name:'Glycolic Acid (AHA)',alias:['glycolic acid','aha','alpha hydroxy','lactic acid','mandelic acid'],what:'Exfoliates the surface of skin, revealing brighter, smoother skin. Fades dark spots and texture.',vi:'Tẩy tế bào chết trên bề mặt da, làm sáng và mịn da, mờ vết thâm.',suits:'dull,uneven,hyperpigmentation,dry',use:'PM only 2-3x per week. Always SPF next morning — skin is photosensitive.',caution:'Don\'t mix with Vitamin C or retinol in same session.',ewg:4},
+  {name:'Ceramides',alias:['ceramide','ceramides'],what:'Lipids that form the skin barrier. Restore and protect the barrier — essential for dry, sensitive, or eczema-prone skin.',vi:'Chất béo tự nhiên tạo hàng rào bảo vệ da. Phục hồi và bảo vệ da khô, nhạy cảm.',suits:'dry,sensitive,damaged-barrier,all',use:'Use anytime, especially in moisturizers.',caution:'',ewg:1},
+  {name:'Vitamin C (Ascorbic Acid)',alias:['vitamin c','ascorbic acid','l-ascorbic acid','ascorbyl','sodium ascorbyl'],what:'Antioxidant that brightens skin, fades dark spots, boosts collagen, and protects from UV damage.',vi:'Chất chống oxy hóa làm sáng da, mờ vết thâm, tăng collagen, bảo vệ da khỏi tia UV.',suits:'dull,hyperpigmentation,all',use:'AM preferred. Use before SPF. Start with lower concentration (10%).', caution:'Don\'t mix with Retinol or Niacinamide (may reduce effectiveness). Store in cool, dark place.',ewg:1},
+  {name:'Benzoyl Peroxide',alias:['benzoyl peroxide','bp'],what:'Kills acne-causing bacteria. Best for inflammatory acne (red, pus-filled pimples).',vi:'Tiêu diệt vi khuẩn gây mụn. Tốt nhất cho mụn viêm (mụn đỏ, có mủ).',suits:'acne-prone',use:'Apply only on acne spots. Start with 2.5% or 5%.',caution:'Bleaches fabric — use white towels and pillowcases. Very drying — moisturize after.',ewg:3},
+  {name:'Centella Asiatica (Cica)',alias:['centella','cica','centella asiatica','gotu kola'],what:'Calming and healing ingredient. Reduces redness, soothes irritation, helps repair damaged skin. Very popular in Korean skincare.',vi:'Nguyên liệu từ rau má — làm dịu da, giảm đỏ, phục hồi da tổn thương. Phổ biến trong mỹ phẩm Hàn Quốc.',suits:'sensitive,acne,redness,all',use:'Use anytime. Great after exfoliation.',caution:'',ewg:1},
+  {name:'Snail Mucin (Secretion Filtrate)',alias:['snail mucin','snail secretion','snail filtrate'],what:'Hydrates deeply, heals and repairs skin, fades scars and dark spots. Popular Korean skincare ingredient.',vi:'Cấp nước sâu, chữa lành và sửa chữa da, mờ sẹo và vết thâm. Nguyên liệu phổ biến trong mỹ phẩm Hàn Quốc.',suits:'dry,acne-scars,all',use:'Apply after toner. Layer under heavier products.',caution:'',ewg:1},
+  {name:'SPF / Sunscreen',alias:['spf','sunscreen','uva','uvb','sun protection'],what:'Protects skin from UV damage, prevents hyperpigmentation, aging, and skin cancer. Non-negotiable every morning.',vi:'Bảo vệ da khỏi tia UV, ngăn ngừa thâm nám, lão hóa và ung thư da. Bắt buộc mỗi sáng.',suits:'all',use:'Apply last in AM routine. Use at least SPF 30. Reapply every 2 hours outdoors.',caution:'Sunscreen MUST be last step before makeup.',ewg:1},
+  {name:'Zinc Oxide',alias:['zinc oxide','zinc'],what:'Physical sunscreen ingredient. Gentle, effective, reef-safe. Also helps control oil and calm acne.',vi:'Thành phần chống nắng vật lý. Nhẹ nhàng, hiệu quả. Cũng giúp kiểm soát dầu và làm dịu mụn.',suits:'sensitive,acne,all',use:'In sunscreen as the last step.',caution:'',ewg:1},
+  {name:'Peptides',alias:['peptide','peptides','matrixyl','argireline'],what:'Protein fragments that signal skin to produce more collagen. Anti-aging, firmness-boosting.',vi:'Chuỗi protein nhỏ ra hiệu cho da tạo thêm collagen. Chống lão hóa, làm săn chắc da.',suits:'aging,all',use:'Apply after essence, before moisturizer.',caution:'',ewg:1},
+  {name:'Collagen',alias:['collagen','marine collagen'],what:'Protein that gives skin elasticity and firmness. In topical products, provides surface hydration (molecules are too large to penetrate deeply).',vi:'Protein giúp da đàn hồi và săn chắc. Trong mỹ phẩm bôi ngoài da, cung cấp độ ẩm bề mặt.',suits:'dry,aging,all',use:'Apply in any hydrating step.',caution:'Topical collagen doesn\'t penetrate deep — focus on peptides and retinol to boost internal collagen.',ewg:1},
+  {name:'Aloe Vera',alias:['aloe','aloe vera','aloe barbadensis'],what:'Calms irritated skin, provides light hydration, reduces redness and sunburn.',vi:'Làm dịu da kích ứng, cấp nước nhẹ, giảm đỏ và cháy nắng.',suits:'sensitive,oily,sunburned,all',use:'Anytime as a soothing layer.',caution:'',ewg:1},
+  {name:'Tea Tree Oil',alias:['tea tree','melaleuca'],what:'Natural antibacterial ingredient. Good for spot-treating individual pimples.',vi:'Kháng khuẩn tự nhiên. Tốt để chấm điểm trên từng nốt mụn.',suits:'acne-prone,oily',use:'Diluted only. Never apply undiluted. Spot treat only.',caution:'Never apply undiluted directly — causes burns and irritation. Always dilute or use formulated products.',ewg:2},
+  {name:'Kojic Acid',alias:['kojic acid','kojic'],what:'Brightening ingredient that inhibits melanin production. Fades dark spots, hyperpigmentation, melasma.',vi:'Thành phần làm sáng da, ức chế sản xuất melanin. Làm mờ vết thâm, nám da.',suits:'hyperpigmentation,dull',use:'PM preferred. Always follow with SPF next morning.',caution:'',ewg:3},
+  {name:'Tranexamic Acid',alias:['tranexamic acid','txa'],what:'Brightening ingredient for hyperpigmentation, melasma, and post-acne dark spots. Gentler than hydroquinone.',vi:'Thành phần làm sáng da cho vết thâm, nám da. Nhẹ nhàng hơn hydroquinone.',suits:'hyperpigmentation,dull,sensitive',use:'Morning or night. Well-tolerated — can layer with niacinamide.',caution:'',ewg:1},
+  {name:'Propylene Glycol / Glycerin',alias:['glycerin','glycerol','propylene glycol','butylene glycol'],what:'Humectants that draw moisture to the skin. Lightweight, compatible with all skin types.',vi:'Chất giữ ẩm giúp hút nước vào da. Nhẹ, phù hợp với mọi loại da.',suits:'all',use:'In toners, serums, moisturizers.',caution:'',ewg:1},
   {name:'Parabens',alias:['methylparaben','propylparaben','paraben','parabens'],what:'Common preservatives in skincare. Keep products from growing bacteria. Controversy around safety, but FDA considers them safe at current levels.',vi:'Chất bảo quản phổ biến trong mỹ phẩm. FDA xem là an toàn ở nồng độ hiện tại, nhưng nhiều người vẫn chọn tránh.',suits:'all',use:'Present in many mainstream products.',caution:'If concerned, look for "paraben-free" labels. Parabens are considered safe by most regulatory bodies at cosmetic levels.'},
   {name:'Fragrance / Parfum',alias:['fragrance','parfum','scent','perfume'],what:'Added scent to skincare. Makes products smell nice but is a common irritant, especially for sensitive or acne-prone skin.',vi:'Hương liệu thêm vào mỹ phẩm. Làm sản phẩm thơm nhưng dễ gây kích ứng, đặc biệt cho da nhạy cảm.',suits:'normal',use:'Avoid if you have sensitive or reactive skin.',caution:'One of the most common causes of contact dermatitis. Look for "fragrance-free" if you have sensitive skin.'},
   {name:'Shea Butter',alias:['shea butter','butyrospermum'],what:'Rich emollient that seals moisture into the skin. Great for very dry skin, body, and lips.',vi:'Dưỡng ẩm phong phú, giúp giữ ẩm trong da. Tốt cho da rất khô, cơ thể và môi.',suits:'dry,very-dry',use:'Last step in PM. Great for body lotions.',caution:'May be too heavy for oily/combo face skin.'},
@@ -770,9 +800,14 @@ function decodeIngredient() {
     return;
   }
   const suitTags = match.suits.split(',').map(s => `<span class="ing-tag tag-all">${s.trim()}</span>`).join('');
+  const ewgScore = match.ewg != null ? match.ewg : null;
+  const ewgColor = ewgScore == null ? '#94a3b8' : ewgScore <= 2 ? '#059669' : ewgScore <= 4 ? '#d97706' : '#dc2626';
+  const ewgLabel = ewgScore == null ? 'N/A' : ewgScore <= 2 ? 'Low concern' : ewgScore <= 4 ? 'Moderate' : 'High concern';
+  const ewgBadge = ewgScore != null ? `<div style="display:inline-flex;align-items:center;gap:6px;background:${ewgColor}18;border:1px solid ${ewgColor}44;border-radius:8px;padding:4px 10px;margin-left:8px;"><span style="font-size:0.72rem;font-weight:700;color:${ewgColor};">EWG ${ewgScore}/10</span><span style="font-size:0.68rem;color:${ewgColor};">${ewgLabel}</span></div>` : '';
   result.innerHTML = `
     <div class="ingredient-result">
-      <div class="ing-name">${match.name}</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:8px;"><div class="ing-name" style="margin-bottom:0">${match.name}</div>${ewgBadge}</div>
+      ${ewgScore != null ? `<div style="font-size:0.7rem;color:#64748b;margin-bottom:10px;">EWG Skin Deep® score (1 = safest, 10 = highest concern) — based on ingredient hazard data</div>` : ''}
       <div class="ing-section"><div class="ing-label">What it does</div><div class="ing-text">${match.what}</div><div class="ing-vi">🇻🇳 ${match.vi}</div></div>
       <div class="ing-section"><div class="ing-label">Best for</div><div>${suitTags}</div></div>
       ${match.use ? `<div class="ing-section"><div class="ing-label">How to use</div><div class="ing-text">${match.use}</div></div>` : ''}
@@ -944,6 +979,7 @@ function switchTab(tab, btn) {
   renderLogs();
   renderTrend();
   initJournal();
+  initBudget();
 })();
 
 // ==============================
@@ -1308,6 +1344,146 @@ function checkSafety() {
 
   document.getElementById('safety-output').style.display = 'block';
   document.getElementById('safety-output').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ==============================
+// BUDGET TAB
+// ==============================
+const BUDGET_ROUTINES = {
+  beginner: {
+    label: '🌱 Beginner Budget Routine (~$30 total)',
+    subtitle: 'The essential 4-step routine. Perfect for first-timers — clean, moisturize, protect.',
+    am: [
+      { step:'1. Cleanser', product:'CeraVe Hydrating Cleanser (12 oz)', price:'$17', brand:'CeraVe', why:'Gentle, fragrance-free, ceramides. Dermatologist #1 recommendation.', ewg:1 },
+      { step:'2. Moisturizer', product:'Neutrogena Hydro Boost Water Gel (1.7 oz)', price:'$20', brand:'Neutrogena', why:'Oil-free, lightweight. Great for oily or combo skin types.', ewg:2 },
+      { step:'3. SPF', product:'Cetaphil Daily Facial Moisturizer SPF 50 (3 oz)', price:'$16', brand:'Cetaphil', why:'Lightweight mineral SPF. Gentle enough for sensitive skin.', ewg:2 },
+    ],
+    pm: [
+      { step:'1. Cleanser', product:'CeraVe Hydrating Cleanser (same)', price:'$0 extra', brand:'CeraVe', why:'Use the same cleanser AM and PM.', ewg:1 },
+      { step:'2. Moisturizer', product:'Neutrogena Hydro Boost Water Gel (same)', price:'$0 extra', brand:'Neutrogena', why:'Lock in hydration overnight.', ewg:2 },
+    ],
+    total: '$33',
+    tip: 'Start here! Use this routine consistently for 4 weeks before adding anything new. Consistency beats complexity every time.'
+  },
+  intermediate: {
+    label: '⭐ Intermediate Budget Routine (~$50 total)',
+    subtitle: 'The complete 5-step routine with actives targeting dark spots and texture.',
+    am: [
+      { step:'1. Cleanser', product:'CeraVe Foaming Cleanser (12 oz)', price:'$15', brand:'CeraVe', why:'Great for oily skin — removes excess oil without stripping.', ewg:1 },
+      { step:'2. Serum', product:'The Ordinary Niacinamide 10% + Zinc 1% (1 oz)', price:'$6', brand:'The Ordinary', why:'Best value serum. Fades dark spots, controls oil.', ewg:1 },
+      { step:'3. Moisturizer', product:'Neutrogena Hydro Boost Water Gel', price:'$20', brand:'Neutrogena', why:'Lightweight hydration layer.', ewg:2 },
+      { step:'4. SPF', product:'La Roche-Posay Anthelios Clear Skin SPF 60 (2.5 oz)', price:'$22', brand:'La Roche-Posay', why:'Best-in-class drugstore SPF. Oil-free, no white cast.', ewg:2 },
+    ],
+    pm: [
+      { step:'1. Cleanser', product:'CeraVe Foaming Cleanser', price:'$0 extra', brand:'CeraVe', why:'Remove sunscreen and makeup.', ewg:1 },
+      { step:'2. Serum (2-3x/week)', product:'Differin Adapalene Gel 0.1% (1.6 oz)', price:'$14', brand:'Differin', why:'Only OTC retinoid. Proven for acne AND anti-aging.', ewg:3 },
+      { step:'3. Moisturizer', product:'CeraVe PM Facial Moisturizing Lotion (3 oz)', price:'$16', brand:'CeraVe', why:'PM formula with niacinamide — targets dark spots overnight.', ewg:1 },
+    ],
+    total: '$49',
+    tip: 'Add Differin (adapalene) slowly — start 2x/week. It purges before clearing. Stick with it for 12 weeks for full results.'
+  },
+  acne: {
+    label: '🎯 Acne-Focused Budget Routine (~$45 total)',
+    subtitle: 'Targets acne, blackheads, and post-acne dark spots with salicylic acid + niacinamide.',
+    am: [
+      { step:'1. Cleanser', product:'CeraVe SA Cleanser (8 oz)', price:'$14', brand:'CeraVe', why:'Salicylic acid + ceramides. Unclogs pores while protecting barrier.', ewg:2 },
+      { step:'2. Serum', product:'The Ordinary Niacinamide 10% + Zinc 1%', price:'$6', brand:'The Ordinary', why:'Controls oil production, minimizes pores, fades acne marks.', ewg:1 },
+      { step:'3. Moisturizer', product:'Neutrogena Oil-Free Moisture (2.5 oz)', price:'$13', brand:'Neutrogena', why:'Oil-free moisturizer — non-comedogenic, won\'t clog pores.', ewg:2 },
+      { step:'4. SPF', product:'EltaMD UV Clear SPF 46 (1.7 oz)', price:'$39', brand:'EltaMD', why:'Zinc oxide SPF made specifically for acne-prone skin.', ewg:1 },
+    ],
+    pm: [
+      { step:'1. Cleanser', product:'CeraVe SA Cleanser', price:'$0 extra', brand:'CeraVe', why:'Double cleanse to remove sunscreen and oil.', ewg:2 },
+      { step:'2. Spot Treatment', product:'Differin Adapalene Gel 0.1%', price:'$14', brand:'Differin', why:'Retinoid that treats AND prevents acne. Apply thin layer to full face.', ewg:3 },
+      { step:'3. Moisturizer', product:'CeraVe PM Moisturizing Lotion', price:'$16', brand:'CeraVe', why:'Repair the barrier retinoid can dry out.', ewg:1 },
+    ],
+    total: '$48',
+    tip: 'Never use benzoyl peroxide and adapalene on the same night — they deactivate each other. Alternate if needed. Niacinamide is safe to layer with everything here.'
+  }
+};
+
+const BUDGET_TIPS = [
+  { icon:'🛒', tip:'Buy fragrance-free versions — they cost the same but cause fewer breakouts.' },
+  { icon:'📦', tip:'Larger sizes = better per-oz value. CeraVe cleanser in 12 oz is cheaper per use than the travel size.' },
+  { icon:'🔄', tip:'Stick with a routine for 4–8 weeks before judging results. Skin takes time to respond.' },
+  { icon:'💊', tip:'The Ordinary is the best budget brand for actives. Niacinamide 10% for $6 is unbeatable value.' },
+  { icon:'☀️', tip:'Never skip SPF — sun damage causes more dark spots, aging, and hyperpigmentation than skipping any serum.' },
+  { icon:'🏪', tip:'Check CVS, Walgreens, and Target apps for weekly coupons — CeraVe and Neutrogena go on sale regularly.' },
+  { icon:'🇻🇳', tip:'Asian grocery stores (H Mart, 99 Ranch) stock Korean skincare (COSRX, Some By Mi) at much lower prices than Sephora.' },
+];
+
+const BUDGET_INGREDIENTS = [
+  { name:'Niacinamide', price:'~$6 (The Ordinary)', benefit:'Fades dark spots + controls oil', ewg:1 },
+  { name:'Salicylic Acid', price:'~$10 (CeraVe SA)', benefit:'Clears blackheads + prevents acne', ewg:3 },
+  { name:'Hyaluronic Acid', price:'~$7 (The Ordinary)', benefit:'Deep hydration for all skin types', ewg:1 },
+  { name:'Ceramides', price:'~$17 (CeraVe)', benefit:'Repairs skin barrier — dry/sensitive skin hero', ewg:1 },
+  { name:'Adapalene (Differin)', price:'~$14', benefit:'OTC retinoid — acne + anti-aging', ewg:3 },
+  { name:'Zinc Oxide SPF', price:'~$16 (Cetaphil SPF 50)', benefit:'Gentle mineral sun protection', ewg:1 },
+];
+
+function initBudget() {
+  showBudgetType('beginner', document.querySelector('#budget-type-tabs .sess-btn'));
+  renderBudgetTips();
+  renderBudgetIngredients();
+}
+
+function showBudgetType(type, btn) {
+  document.querySelectorAll('#budget-type-tabs .sess-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const r = BUDGET_ROUTINES[type];
+  if (!r) return;
+  const renderSteps = (steps) => steps.map(s => {
+    const ewgC = s.ewg <= 1 ? '#059669' : s.ewg <= 3 ? '#d97706' : '#dc2626';
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:6px;">
+      <div style="min-width:90px;font-size:0.72rem;font-weight:700;color:#0891b2;flex-shrink:0;line-height:1.4;">${s.step}</div>
+      <div style="flex:1;">
+        <div style="font-size:0.82rem;font-weight:700;color:#0f172a;">${s.product}</div>
+        <div style="font-size:0.72rem;color:#64748b;margin:2px 0;">${s.why}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:0.8rem;font-weight:700;color:#059669;">${s.price}</div>
+        <div style="font-size:0.65rem;color:${ewgC};font-weight:600;margin-top:2px;">EWG ${s.ewg}/10</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('budget-routine-display').innerHTML = `
+    <div style="font-size:0.82rem;font-weight:700;color:#059669;margin-bottom:6px;">${r.label}</div>
+    <div style="font-size:0.78rem;color:#64748b;margin-bottom:14px;">${r.subtitle}</div>
+    <div style="font-size:0.75rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">☀️ Morning (AM)</div>
+    ${renderSteps(r.am)}
+    <div style="font-size:0.75rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 8px;">🌙 Night (PM)</div>
+    ${renderSteps(r.pm)}
+    <div style="margin-top:14px;padding:12px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;display:flex;align-items:flex-start;gap:8px;">
+      <span style="font-size:1rem;flex-shrink:0;">💰</span>
+      <div>
+        <div style="font-size:0.8rem;font-weight:700;color:#059669;">Total: ${r.total}</div>
+        <div style="font-size:0.75rem;color:#374151;margin-top:3px;">${r.tip}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderBudgetTips() {
+  document.getElementById('budget-tips-list').innerHTML = BUDGET_TIPS.map(t => `
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:0.78rem;color:#374151;line-height:1.5;">
+      <span style="font-size:1rem;flex-shrink:0;">${t.icon}</span>
+      <span>${t.tip}</span>
+    </div>
+  `).join('');
+}
+
+function renderBudgetIngredients() {
+  document.getElementById('budget-ingredients').innerHTML = BUDGET_INGREDIENTS.map(ing => {
+    const ewgC = ing.ewg <= 1 ? '#059669' : ing.ewg <= 3 ? '#d97706' : '#dc2626';
+    return `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="font-size:0.85rem;font-weight:700;color:#0f172a;">${ing.name}</div>
+        <span style="font-size:0.65rem;font-weight:700;color:${ewgC};background:${ewgC}18;border:1px solid ${ewgC}44;padding:2px 7px;border-radius:10px;">EWG ${ing.ewg}</span>
+      </div>
+      <div style="font-size:0.72rem;color:#059669;font-weight:600;margin-bottom:3px;">${ing.price}</div>
+      <div style="font-size:0.72rem;color:#475569;">${ing.benefit}</div>
+    </div>`;
+  }).join('');
 }
 </script>
 </body>

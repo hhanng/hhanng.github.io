@@ -621,6 +621,7 @@
     <button class="tab-btn active" onclick="switchTab('docstring', this)">📄 Docstring Generator</button>
     <button class="tab-btn" onclick="switchTab('readme', this)">📖 README Generator</button>
     <button class="tab-btn" onclick="switchTab('whiteboard', this)">🧠 Whiteboard Mode</button>
+    <button class="tab-btn" onclick="switchTab('prreview', this)">🔍 PR Explainer</button>
   </div>
 
   <!-- ═══════════ TAB 1: Docstring Generator ═══════════ -->
@@ -923,6 +924,58 @@
     </div>
 
   </div><!-- /tab-whiteboard -->
+
+  <!-- ══ TAB 4: PR Explainer ══ -->
+  <div class="tab-panel" id="tab-prreview">
+    <div class="card">
+      <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">Paste code changes (before/after, a diff, or just the new code). Get a clear, reviewer-friendly PR explanation you can paste into your PR description or review comment.</div>
+
+      <label>Language</label>
+      <select id="prLang" style="margin-bottom:14px;">
+        <option>Python</option><option>JavaScript</option><option>TypeScript</option>
+        <option>Java</option><option>C++</option><option>Go</option><option>Rust</option><option>Other</option>
+      </select>
+
+      <label>PR Explanation Style</label>
+      <select id="prStyle" style="margin-bottom:14px;">
+        <option value="description">PR Description — what changed and why</option>
+        <option value="review">Code Review Comment — detailed inline reviewer notes</option>
+        <option value="summary">Standup-ready — short summary for team meetings</option>
+        <option value="beginner">Explain to a Beginner — plain English, no jargon</option>
+      </select>
+
+      <label>Paste your code changes</label>
+      <textarea id="prCode" style="min-height:200px;" placeholder="Paste a git diff, before/after code, or just the new implementation here...&#10;&#10;Example:&#10;- def get_user(id):&#10;-     return db.query(f'SELECT * FROM users WHERE id={id}')&#10;+ def get_user(user_id: int) -> Optional[User]:&#10;+     return db.query(User).filter(User.id == user_id).first()"></textarea>
+
+      <div id="prError" class="error-msg" style="display:none;margin-top:10px;"></div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn" style="background:var(--accent);color:#000;flex:1;" id="prReviewBtn" onclick="generatePRExplainer()">
+          <span class="spinner-inline" id="prReviewSpinner"></span>
+          🔍 Generate PR Explanation
+        </button>
+      </div>
+    </div>
+
+    <div id="prReviewOutput" style="display:none;">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <div style="font-size:0.85rem;font-weight:700;color:var(--accent);">📋 Generated Explanation</div>
+          <button class="btn" id="prCopyBtn" onclick="copyPRExplainer()" style="font-size:0.75rem;padding:6px 14px;background:var(--accent-dim);color:var(--accent);">📋 Copy</button>
+        </div>
+        <div id="prExplanationText" style="font-size:0.88rem;line-height:1.8;color:var(--text);white-space:pre-wrap;font-family:inherit;"></div>
+      </div>
+
+      <div class="card" id="prImpactCard" style="display:none;">
+        <div style="font-size:0.85rem;font-weight:700;color:var(--amber);margin-bottom:12px;">⚠️ Potential Concerns for Reviewers</div>
+        <ul id="prConcerns" style="padding-left:18px;font-size:0.83rem;color:var(--muted);line-height:1.8;"></ul>
+      </div>
+
+      <div class="card" style="background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.2);">
+        <div style="font-size:0.75rem;color:var(--muted);line-height:1.6;">💡 <strong>Tip:</strong> Paste the explanation into your GitHub PR description under a <code>## What Changed</code> heading. Good PR descriptions save review time and create a searchable record.</div>
+      </div>
+    </div>
+  </div><!-- /tab-prreview -->
 
 </div>
 
@@ -1418,6 +1471,80 @@ Return ONLY this JSON (no markdown fences):
       btn.textContent = '✓ Copied!';
       btn.classList.add('copied');
       setTimeout(() => { btn.textContent = '📋 Copy script'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── PR Explainer ───────────────────────────────────────────────────────────
+  let currentPRText = '';
+
+  async function generatePRExplainer() {
+    const code = document.getElementById('prCode').value.trim();
+    const lang = document.getElementById('prLang').value;
+    const style = document.getElementById('prStyle').value;
+    const errEl = document.getElementById('prError');
+    errEl.style.display = 'none';
+    if (!code) { errEl.textContent = 'Please paste code changes first.'; errEl.style.display = 'block'; return; }
+
+    const btn = document.getElementById('prReviewBtn');
+    const spinner = document.getElementById('prReviewSpinner');
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+    document.getElementById('prReviewOutput').style.display = 'none';
+
+    const styleGuide = {
+      description: 'Write a professional PR description (3-5 paragraphs): what changed, why it changed, how it works, and any important notes. Use markdown headers.',
+      review: 'Write a detailed code review comment (2-4 paragraphs): acknowledge the approach, note what the code does well, point out any areas to watch. Be constructive.',
+      summary: 'Write a 2-3 sentence standup-ready summary: what was changed, what problem it solves.',
+      beginner: 'Explain the change in plain English for someone learning to code. Avoid jargon. Focus on the "why" and "what".'
+    };
+
+    try {
+      const prompt = `You are a senior ${lang} engineer reviewing code changes for a PR.
+
+CODE CHANGES:
+${code}
+
+Task: ${styleGuide[style] || styleGuide.description}
+
+Return ONLY valid JSON (no markdown):
+{
+  "explanation": "The full explanation text (use \\n for line breaks)",
+  "concerns": ["concern 1 for reviewers to consider", "concern 2"]
+}
+
+If there are no concerns, return an empty array for concerns.`;
+
+      const raw = await callGemini(prompt);
+      const data = extractJSON(raw);
+      if (!data?.explanation) throw new Error('Could not generate explanation. Try again.');
+      currentPRText = data.explanation;
+
+      document.getElementById('prExplanationText').textContent = data.explanation;
+      const concerns = data.concerns || [];
+      if (concerns.length) {
+        document.getElementById('prConcerns').innerHTML = concerns.map(c => `<li>${escapeHtml(c)}</li>`).join('');
+        document.getElementById('prImpactCard').style.display = 'block';
+      } else {
+        document.getElementById('prImpactCard').style.display = 'none';
+      }
+      const out = document.getElementById('prReviewOutput');
+      out.style.display = 'block';
+      out.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    } catch(e) {
+      errEl.textContent = 'Error: ' + (e.message || 'Something went wrong.');
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function copyPRExplainer() {
+    if (!currentPRText) return;
+    navigator.clipboard.writeText(currentPRText).then(() => {
+      const btn = document.getElementById('prCopyBtn');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = '📋 Copy', 2000);
     });
   }
 </script>

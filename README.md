@@ -32,10 +32,10 @@ tools for devs, built by a dev (me!)
 | [#05](./agent-05-agent-idea-generator/) | AI Agent Idea Generator | brainstorm AI project ideas by category & difficulty |
 | [#06](./agent-06-api-error-debugger/) | API Error Debugger | paste any error → get a plain-English fix with code |
 | [#07](./agent-07-code-review-bot/) | Code Review Bot | senior-dev feedback: score, issues, fixed version |
-| [#08](./agent-08-bug-explainer/) | Bug Explainer | explain + fix buggy code at your skill level |
-| [#09](./agent-09-git-commit-writer/) | Git Commit Writer | 3 perfect conventional commit messages, instantly |
+| [#08](./agent-08-bug-explainer/) | Dev Workflow Companion | Bug Explainer + PR Description + Changelog + 🪜 Step Tracer (step-by-step code execution with variable state) |
+| [#09](./agent-09-git-commit-writer/) | Dev Workflow Companion Lite | Commit Writer (3 styles) + PR Description + Sprint Summary + 🌿 Branch Namer with git-flow conventions |
 | [#10](./agent-10-readme-generator/) | README Generator | professional GitHub README with badges + live preview |
-| [#11](./agent-11-code-comment-generator/) | Code Comment Generator | auto-add inline comments & docstrings to any code |
+| [#11](./agent-11-code-comment-generator/) | Code Documentation Suite | Docstring Generator (Google/NumPy/JSDoc) + README + Whiteboard Mode + 🔍 PR Explainer (reviewer-friendly change descriptions) |
 | [#28](https://hhanng.github.io/agent-28-chatbot-builder-guide/) | AI Chatbot Builder Guide | 8-step interactive tutorial to build your own chatbot |
 | [#29](https://hhanng.github.io/agent-29-json-formatter/) | JSON Formatter & Explainer | format, validate, tree-explore, and explain any JSON |
 | [#30](https://hhanng.github.io/agent-30-css-style-generator/) | CSS Style Generator | pick a component + vibe → beautiful CSS with live preview |
@@ -114,6 +114,7 @@ for when you need a break from studying lol
 | [#35](./agent-35-mandala-designer/) | Mandala Pattern Designer | describe a mood → AI draws a custom mandala 🌀 |
 | [#36](https://hhanng.github.io/agent-36-recipe-remix-bot/) | Recipe Remix Bot | remix any recipe — healthier, fusion, or budget-friendly |
 | [#37](https://hhanng.github.io/agent-37-this-day-in-history/) | This Day in History Bot | fascinating stories for any date + Vietnam connection mode |
+| [#65](https://hhanng.github.io/agent-65-star-wars-builder/) | Fan Wiki Builder | AI story builder, fan wiki generator (exportable HTML), lore guide, trivia quiz, character collection — plus 🎓 Web Dev tab teaching HTML/CSS/JS with GitHub Pages deployment guide |
 
 ### 🗂️ productivity tools
 for getting things out of your head and onto the page
@@ -147,7 +148,7 @@ for founders, indie hackers, and anyone shipping something
 | [#84](https://hhanng.github.io/agent-84-coders-hiit-timer/) | Coder's HIIT Timer | Pomodoro-HIIT hybrid timer, Tabata & Pure HIIT modes, 10 desk-friendly routines, SVG ring countdown, session history with streak tracking |
 | [#85](https://hhanng.github.io/agent-85-pr-strength-tracker/) | PR & Strength Tracker | workout log with auto-PR detection, e1RM estimates, plateau detector, progress charts, 4-week Big 3 progression planner |
 | [#86](https://hhanng.github.io/agent-86-period-cycle-tracker/) | Period & Cycle Tracker (Bilingual) | cycle calendar, 22-symptom log with EN/VI labels, 50 health terms EN/VI, doctor scripts with side-by-side EN/Vietnamese, and "Giải thích với Ba Mẹ" with 5 culturally respectful parent conversation scenarios |
-| [#87](https://hhanng.github.io/agent-87-skincare-routine-tracker/) | Skincare Routine Tracker | AM/PM routine builder with streaks, ingredient decoder (50 terms EN/VI), Vietnamese skin in America guide, 15 brand reviews, 30-day skin log |
+| [#87](https://hhanng.github.io/agent-87-skincare-routine-tracker/) | Skincare Routine Tracker | AM/PM routine builder, ingredient decoder with EWG Skin Deep® scores (1–10), safety checker, 30-day skin journal, and 💚 Budget tab with 3 drugstore routines (~$30–$50) and best-value ingredient breakdowns |
 | [#88](https://hhanng.github.io/agent-88-glowup-tracker-vision-board/) | Glow-Up Tracker & Vision Board | vision board across 6 life categories, 30 "First Year in America" milestone cards, bilingual EN/VI journal, weekly radar glow chart |
 | [#89](https://hhanng.github.io/agent-89-meal-macro-tracker/) | Vietnamese-American Meal & Macro Tracker | 40 Vietnamese + 40 American foods with real macros, traditional recipes with US pantry substitutions, bilingual EN/VI nutrition vocab, daily calorie tracking |
 | [#90](https://hhanng.github.io/agent-90-body-composition-tracker/) | Body Composition Tracker | weekly check-in log with Cut/Bulk/Maintain/Recomp modes, lean/fat mass dashboard, trend chart with moving average, TDEE calc, US Navy body fat estimator |
@@ -215,4 +216,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-28 · 100/100 complete 🏆 · agent #100 Behavioral Interview STAR Bank: https://hhanng.github.io/agent-100-behavioral-interview-star-bank/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-29 · 100/100 complete 🏆 · agent #100 Behavioral Interview STAR Bank: https://hhanng.github.io/agent-100-behavioral-interview-star-bank/</sub>
