@@ -44,7 +44,7 @@
   .btn-secondary:hover{background:#3a3f5c}
   .game-over{background:#1a1d27;border:1px solid #2d3148;border-radius:16px;padding:32px;text-align:center}
   .game-over h2{font-size:1.5rem;margin-bottom:8px;color:#4ade80}
-  .game-over .score-row{display:flex;justify-content:center;gap:32px;margin:20px 0}
+  .game-over .score-row{display:flex;justify-content:center;gap:32px;margin:20px 0;flex-wrap:wrap}
   .game-over .score-item{text-align:center}
   .game-over .score-item .v{font-size:2rem;font-weight:700;color:#4f8ef7}
   .game-over .score-item .k{font-size:.8rem;color:#94a3b8}
@@ -68,7 +68,6 @@
   .lb-table{width:100%;border-collapse:collapse}
   .lb-table th{text-align:left;padding:12px 16px;color:#94a3b8;font-size:.82rem;font-weight:500;border-bottom:1px solid #2d3148;text-transform:uppercase;letter-spacing:.05em}
   .lb-table td{padding:14px 16px;border-bottom:1px solid #1a1d27;font-size:.9rem}
-  .lb-table tr:first-child td{border-top-left-radius:12px}
   .lb-table tr.gold td:first-child{color:#fbbf24}
   .lb-table tr.silver td:first-child{color:#94a3b8}
   .lb-table tr.bronze td:first-child{color:#b87333}
@@ -88,6 +87,15 @@
   .missed-item .mw{color:#e2e8f0;font-size:.9rem}
   .missed-item .mc{background:#f8717120;color:#f87171;font-size:.78rem;padding:3px 10px;border-radius:20px}
   .no-data{text-align:center;padding:40px;color:#94a3b8}
+  .mastery-bar-wrap{background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:18px;margin-bottom:16px}
+  .mastery-bar-label{display:flex;justify-content:space-between;font-size:.82rem;color:#94a3b8;margin-bottom:8px}
+  .mastery-bar-label strong{color:#4ade80}
+  .mastery-bar-bg{background:#0f1117;border-radius:99px;height:10px;overflow:hidden}
+  .mastery-bar-fill{height:100%;background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:99px;transition:width .8s ease}
+  .weakest-item{background:#1a1d27;border:1px solid #2d3148;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .weakest-item .wt{color:#e2e8f0;font-size:.9rem}
+  .weakest-item .wr{background:#fb923c20;color:#fb923c;font-size:.78rem;padding:3px 10px;border-radius:20px}
+  .kstreak-badge{display:inline-flex;align-items:center;gap:8px;background:#7c3aed20;border:1px solid #7c3aed50;border-radius:12px;padding:14px 20px;font-size:1rem;color:#a78bfa;font-weight:600;margin-bottom:20px}
 
   /* DECK + MODE SELECTOR */
   .deck-row,.mode-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
@@ -108,6 +116,14 @@
   .know-score.err{color:#f87171}
   #knowSubmitBtn{display:block;margin:8px auto 0;padding:10px 32px;background:#7c3aed;border:none;border-radius:8px;color:#fff;font-size:.92rem;font-weight:600;cursor:pointer;transition:background .2s}
   #knowSubmitBtn:hover{background:#6d28d9}
+  .know-model-answer{margin-top:12px;background:#0f1117;border:1px solid #2d3148;border-radius:10px;padding:14px 16px}
+  .know-model-hdr{font-size:.7rem;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700}
+  .know-model-text{font-size:.87rem;color:#e2e8f0;line-height:1.6}
+  .know-mastery-btns{display:flex;gap:12px;justify-content:center;margin-top:14px}
+  .btn-got-it{padding:10px 26px;border:none;border-radius:8px;background:#4ade80;color:#000;font-weight:700;cursor:pointer;font-size:.9rem;transition:opacity .2s}
+  .btn-got-it:hover{opacity:.85}
+  .btn-review{padding:10px 26px;border:none;border-radius:8px;background:#f87171;color:#fff;font-weight:700;cursor:pointer;font-size:.9rem;transition:opacity .2s}
+  .btn-review:hover{opacity:.85}
 </style>
 </head>
 <body>
@@ -131,15 +147,18 @@
       <div style="font-size:3rem;margin-bottom:16px">⌨️</div>
       <h2 style="font-size:1.5rem;margin-bottom:8px">CS Vocabulary Speed Typer</h2>
       <p style="color:#94a3b8;margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto">Choose a deck and mode, then race the clock!</p>
-      <div class="deck-row">
-        <button class="deck-btn active" id="deckBtnCs" onclick="selectDeck('cs',this)">CS Terms</button>
-        <button class="deck-btn" id="deckBtnTttt" onclick="selectDeck('tttt',this)">TTTT (8th Grade DS)</button>
-      </div>
-      <div class="mode-row" style="margin-bottom:24px">
+      <div class="mode-row" style="margin-bottom:18px">
         <button class="mode-btn active" id="modeBtnSpeed" onclick="selectMode('speed',this)">⚡ Speed Mode</button>
         <button class="mode-btn" id="modeBtnKnow" onclick="selectMode('knowledge',this)">🧠 Knowledge Mode</button>
       </div>
-      <button class="btn btn-primary" onclick="startGame()">Start Round</button>
+      <div class="deck-row">
+        <button class="deck-btn active" id="deckBtnCs" onclick="selectDeck('cs',this)">CS Terms (<span id="csCount">—</span>)</button>
+        <button class="deck-btn" id="deckBtnTttt" onclick="selectDeck('tttt',this)">TTTT 8th Grade (<span id="ttttCount">—</span>)</button>
+        <button class="deck-btn" id="deckBtnAll" onclick="selectDeck('all',this)">All (<span id="allCount">—</span>)</button>
+      </div>
+      <div style="margin-top:24px">
+        <button class="btn btn-primary" onclick="startGame()">Start Round</button>
+      </div>
     </div>
   </div>
 
@@ -160,10 +179,19 @@
       <input id="typeInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Type the term above...">
     </div>
     <div id="knowArea" class="hidden">
-      <div class="know-hint">Describe the term in your own words — hit Submit (or Enter) to check keywords.</div>
-      <textarea id="knowInput" placeholder="Type your definition here..."></textarea>
+      <div class="know-hint">Define this term in your own words. Use keywords — then click Submit.</div>
+      <textarea id="knowInput" placeholder="Type your definition here…"></textarea>
       <div class="know-score" id="knowScore"></div>
       <button id="knowSubmitBtn" onclick="submitKnowledge()">Submit</button>
+      <!-- Model answer + mastery buttons (shown after submit) -->
+      <div id="knowModelAnswer" class="know-model-answer hidden">
+        <div class="know-model-hdr">Model Answer</div>
+        <div id="knowModelText" class="know-model-text"></div>
+      </div>
+      <div id="knowMasteryBtns" class="know-mastery-btns hidden">
+        <button class="btn-got-it" onclick="markMastery(true)">✓ Got It</button>
+        <button class="btn-review" onclick="markMastery(false)">↺ Needs Review</button>
+      </div>
     </div>
     <div class="feedback" id="feedback"></div>
     <div style="text-align:center">
@@ -205,6 +233,20 @@
 
 <!-- STATS -->
 <div id="tab-stats" class="panel">
+  <!-- Knowledge Mode stats -->
+  <div id="knowStatsSection" style="margin-bottom:28px">
+    <div class="section-head">🧠 Knowledge Mode</div>
+    <div id="kstreakBadge" class="kstreak-badge" style="margin-bottom:20px">🔥 Knowledge Streak: <strong id="kstreakVal">0</strong> in a row</div>
+    <div class="mastery-bar-wrap">
+      <div class="mastery-bar-label"><span>Mastered Terms</span><strong id="masteredPctTxt">0%</strong></div>
+      <div class="mastery-bar-bg"><div class="mastery-bar-fill" id="masteryBarFill" style="width:0%"></div></div>
+      <div style="font-size:.78rem;color:#94a3b8;margin-top:6px" id="masteredCountTxt">0 / 0 terms reviewed</div>
+    </div>
+    <div class="section-head" style="font-size:.88rem;margin-bottom:10px">Weakest 5 Terms (most Needs Review)</div>
+    <div id="weakestList"></div>
+  </div>
+  <!-- Speed Mode stats -->
+  <div class="section-head">⚡ Speed Mode</div>
   <div class="stats-grid" id="statsGrid"></div>
   <div class="section-head">Most Missed Terms</div>
   <div id="missedList"></div>
@@ -230,7 +272,6 @@ const TERMS = [
   {t:"bloom filter",c:"Data Structures",d:"A probabilistic data structure that tests whether an element is a set member (false positives possible)."},
   {t:"segment tree",c:"Data Structures",d:"A tree for storing intervals or segments, allowing efficient range queries and updates."},
   {t:"disjoint set",c:"Data Structures",d:"A data structure tracking elements partitioned into non-overlapping subsets; supports union-find."},
-
   // Algorithms
   {t:"recursion",c:"Algorithms",d:"A method where a function calls itself to solve smaller instances of the same problem."},
   {t:"dynamic programming",c:"Algorithms",d:"Optimization technique breaking problems into overlapping subproblems, storing solutions to avoid recomputation."},
@@ -247,7 +288,6 @@ const TERMS = [
   {t:"heapsort",c:"Algorithms",d:"In-place comparison sort using a binary heap; O(n log n) worst case."},
   {t:"big O notation",c:"Algorithms",d:"Mathematical notation describing the upper bound of an algorithm's time or space complexity."},
   {t:"two pointers",c:"Algorithms",d:"Technique using two indices moving through a data structure to solve problems efficiently."},
-
   // Operating Systems
   {t:"mutex",c:"OS",d:"Mutual exclusion lock ensuring only one thread accesses a critical section at a time."},
   {t:"deadlock",c:"OS",d:"Situation where two or more processes wait forever for resources held by each other."},
@@ -263,7 +303,6 @@ const TERMS = [
   {t:"interrupt",c:"OS",d:"A signal to the CPU indicating that an event needs immediate attention, causing a context switch."},
   {t:"cache coherence",c:"OS",d:"Consistency of shared data stored in multiple local caches in a multiprocessor system."},
   {t:"memory leak",c:"OS",d:"A bug where a program fails to release memory it no longer needs, causing gradual memory exhaustion."},
-
   // Networking
   {t:"TCP",c:"Networking",d:"Transmission Control Protocol — reliable, connection-oriented protocol ensuring ordered packet delivery."},
   {t:"UDP",c:"Networking",d:"User Datagram Protocol — fast, connectionless protocol with no delivery guarantees."},
@@ -279,7 +318,6 @@ const TERMS = [
   {t:"subnet",c:"Networking",d:"A logical subdivision of an IP network, grouping devices with the same network prefix."},
   {t:"proxy",c:"Networking",d:"Intermediary server that forwards requests from clients to other servers, providing caching or filtering."},
   {t:"WebSocket",c:"Networking",d:"Protocol providing full-duplex communication channels over a single TCP connection."},
-
   // OOP
   {t:"polymorphism",c:"OOP",d:"Ability of objects of different types to be treated as a common type through a shared interface."},
   {t:"encapsulation",c:"OOP",d:"Bundling data and methods that operate on it into a single unit, hiding internal implementation."},
@@ -295,7 +333,6 @@ const TERMS = [
   {t:"coupling",c:"OOP",d:"The degree to which one module depends on another; low coupling is preferred for maintainability."},
   {t:"cohesion",c:"OOP",d:"The degree to which elements within a module belong together; high cohesion is preferred."},
   {t:"polymorphic dispatch",c:"OOP",d:"Runtime selection of which method implementation to invoke based on the actual object type."},
-
   // Web
   {t:"REST",c:"Web",d:"Representational State Transfer — architectural style for distributed systems using HTTP methods."},
   {t:"GraphQL",c:"Web",d:"A query language for APIs allowing clients to request exactly the data they need."},
@@ -311,7 +348,6 @@ const TERMS = [
   {t:"caching",c:"Web",d:"Storing copies of frequently accessed data in a faster storage layer to improve performance."},
   {t:"rate limiting",c:"Web",d:"Controlling how many requests a client can make to an API within a given time window."},
   {t:"middleware",c:"Web",d:"Software that acts as a bridge between the request/response cycle, processing data before it reaches handlers."},
-
   // Database
   {t:"SQL",c:"Database",d:"Structured Query Language — standard language for managing and querying relational databases."},
   {t:"NoSQL",c:"Database",d:"Non-relational databases storing data in formats other than relational tables (documents, key-value, graphs)."},
@@ -327,7 +363,6 @@ const TERMS = [
   {t:"ORM",c:"Database",d:"Object-Relational Mapper — tool converting data between incompatible type systems (objects and tables)."},
   {t:"CAP theorem",c:"Database",d:"States a distributed system can only guarantee two of three: Consistency, Availability, Partition tolerance."},
   {t:"eventual consistency",c:"Database",d:"A consistency model ensuring all replicas converge to the same value given enough time without updates."},
-
   // Security
   {t:"encryption",c:"Security",d:"Process of encoding data so only authorized parties can read it using a key."},
   {t:"hashing",c:"Security",d:"One-way function mapping input data to a fixed-size digest; used for data integrity and passwords."},
@@ -345,7 +380,6 @@ const TERMS = [
   {t:"private key",c:"Security",d:"In asymmetric cryptography, the secret key kept by the owner for decryption or signing."},
   {t:"salt",c:"Security",d:"Random data added to a password before hashing to prevent rainbow table attacks."},
   {t:"2FA",c:"Security",d:"Two-Factor Authentication — requires a second form of verification beyond a password."},
-
   // Additional
   {t:"kubernetes",c:"Web",d:"Open-source container orchestration system for automating deployment, scaling, and management."},
   {t:"docker",c:"Web",d:"Platform for developing, shipping, and running applications in containers."},
@@ -364,8 +398,9 @@ const TERMS = [
   {t:"containerization",c:"Web",d:"Packaging an application with its dependencies into a container for consistent deployment."}
 ];
 
-// TTTT deck — data structures explained for 8th graders with real-world analogies
+// TTTT deck — 50 cards explained for 8th graders with real-world analogies
 const TTTT_TERMS = [
+  // Data Structures (14)
   {t:"array",c:"DS",d:"Like seats in a theater — numbered in order so you can jump straight to any seat without walking past others.",keywords:["numbered","order","index","seat","jump","direct","row"]},
   {t:"linked list",c:"DS",d:"Like a scavenger hunt — each clue tells you where to find the next one. You must follow the chain from the very start.",keywords:["chain","next","follow","node","pointer","clue","sequence"]},
   {t:"stack",c:"DS",d:"Like a stack of pancakes — always add and remove from the top. The last pancake added is the first one you eat.",keywords:["top","last","first","LIFO","add","remove","pancake"]},
@@ -379,7 +414,47 @@ const TTTT_TERMS = [
   {t:"binary search tree",c:"DS",d:"A tree where smaller values always go left and bigger values always go right — keeps things sorted so you can find any item fast.",keywords:["left","right","smaller","bigger","sorted","fast","search"]},
   {t:"bloom filter",c:"DS",d:"Like a club bouncer with a checklist — very space-efficient but occasionally lets a non-member in by mistake.",keywords:["space","false positive","membership","check","efficient","probable","filter"]},
   {t:"segment tree",c:"DS",d:"Like a bracket chart for number ranges — helps you quickly find the sum or minimum across any stretch of a list.",keywords:["range","sum","minimum","query","interval","bracket","fast"]},
-  {t:"disjoint set",c:"DS",d:"Like sorting students into friend groups — each group has one leader. When two groups merge, one leader takes over both.",keywords:["group","leader","union","find","merge","connected","partition"]}
+  {t:"disjoint set",c:"DS",d:"Like sorting students into friend groups — each group has one leader. When two groups merge, one leader takes over both.",keywords:["group","leader","union","find","merge","connected","partition"]},
+  // Algorithms (11)
+  {t:"recursion",c:"Algorithms",d:"Like Russian nesting dolls — the function calls a smaller version of itself until it hits the tiniest doll that answers directly.",keywords:["smaller","itself","call","base","case","nest","function"]},
+  {t:"sorting",c:"Algorithms",d:"Like organizing your bookshelf — arranging a messy list into a specific order, smallest-to-largest or A-to-Z.",keywords:["order","arrange","list","compare","swap","sequence","organize"]},
+  {t:"binary search",c:"Algorithms",d:"Like guessing a number 1-100 by always guessing the middle. Each guess cuts the possibilities in half.",keywords:["middle","half","sorted","guess","split","range","fast"]},
+  {t:"bubble sort",c:"Algorithms",d:"Like pushing big bubbles up to the surface — repeatedly compare neighbors and swap if out of order until the largest values float to the end.",keywords:["bubble","swap","neighbor","compare","largest","end","float"]},
+  {t:"dynamic programming",c:"Algorithms",d:"Like keeping a cheat sheet — solve small sub-problems once, write down the answers, and reuse them to solve bigger problems without repeating work.",keywords:["cheat","subproblem","reuse","store","save","overlap","memo"]},
+  {t:"greedy algorithm",c:"Algorithms",d:"Like always eating the biggest slice of pizza available right now — grab whatever looks locally best at each step, hoping it leads to the best overall result.",keywords:["local","best","step","choice","optimal","now","each"]},
+  {t:"backtracking",c:"Algorithms",d:"Like solving a maze by trial and error — go down a path, and if you hit a dead end, back up and try a different direction.",keywords:["maze","back","undo","try","dead end","branch","explore"]},
+  {t:"depth first search",c:"Algorithms",d:"Like exploring a cave — go as deep as you can down one tunnel before coming back to explore the next branch.",keywords:["deep","tunnel","branch","stack","explore","back","recursive"]},
+  {t:"breadth first search",c:"Algorithms",d:"Like ripples spreading in a pond — explore everything one step away first, then two steps, then three, layer by layer.",keywords:["ripple","layer","level","queue","neighbor","wide","distance"]},
+  {t:"big O notation",c:"Algorithms",d:"A report card for algorithms — O(n) means work grows with n, O(n²) means it grows much faster. Lower is better.",keywords:["report","complexity","grow","time","space","n","worst"]},
+  {t:"algorithm",c:"Algorithms",d:"A step-by-step recipe for solving a problem — just like a cooking recipe tells you exactly what to do in what order.",keywords:["step","recipe","solve","instructions","order","problem","procedure"]},
+  // Programming concepts (9)
+  {t:"variable",c:"Programming",d:"Like a labeled box — stores one piece of information with a name so your program can use or change it later.",keywords:["box","store","name","value","hold","labeled","change"]},
+  {t:"loop",c:"Programming",d:"Like running laps around a track — repeat the same block of code over and over until a condition says stop.",keywords:["repeat","condition","over","block","iterate","while","for"]},
+  {t:"function",c:"Programming",d:"Like a reusable machine — give it some input, it does a specific job, and gives back an output. Call it any time you need it.",keywords:["reuse","input","output","call","return","block","machine"]},
+  {t:"conditional",c:"Programming",d:"Like an if-then decision — 'if it's raining, take an umbrella; otherwise, wear sunglasses.' Controls which code runs.",keywords:["if","else","decision","condition","branch","true","false"]},
+  {t:"class",c:"Programming",d:"A blueprint for creating objects — like a cookie cutter that shapes all your cookies the same way. Describes data and behavior.",keywords:["blueprint","object","template","cookie cutter","describe","create","mold"]},
+  {t:"object",c:"Programming",d:"Like a filled-in form from a blueprint — a specific thing with its own values, like 'myDog' which is a Dog with name=Rex and age=3.",keywords:["instance","blueprint","class","specific","values","properties","own"]},
+  {t:"inheritance",c:"Programming",d:"Like passing down family traits — a child class automatically gets all properties and abilities of its parent class, plus adds its own extras.",keywords:["parent","child","trait","extend","pass down","reuse","subclass"]},
+  {t:"boolean",c:"Programming",d:"The simplest value in computing — only two choices: true or false, yes or no, 1 or 0.",keywords:["true","false","binary","yes","no","two","simple"]},
+  {t:"integer",c:"Programming",d:"A whole number with no decimal point — like 5, -3, or 100. Computers store it differently than numbers with decimals.",keywords:["whole","number","decimal","positive","negative","type","int"]},
+  // Computer basics (8)
+  {t:"CPU",c:"Hardware",d:"The brain of the computer — reads and carries out instructions billions of times per second.",keywords:["brain","process","instruction","execute","core","speed","compute"]},
+  {t:"RAM",c:"Hardware",d:"Your computer's short-term memory — holds everything programs are actively using right now. Forgets everything when power off.",keywords:["short-term","memory","active","temporary","volatile","hold","fast"]},
+  {t:"operating system",c:"Software",d:"The manager software that runs everything else — gives apps access to hardware, manages files, and stops programs from crashing into each other.",keywords:["manager","hardware","file","process","app","manage","kernel"]},
+  {t:"compiler",c:"Software",d:"Like a translator — converts code written in a human-friendly language into binary instructions the CPU can actually run.",keywords:["translate","binary","source","code","machine","language","convert"]},
+  {t:"bug",c:"Software",d:"An error or mistake in code that makes it behave unexpectedly. Named after a real moth that got stuck in an early computer.",keywords:["error","mistake","unexpected","wrong","code","fix","problem"]},
+  {t:"version control",c:"Software",d:"Like a save history for your code — tracks every change, who made it, and lets you roll back to any past version at any time.",keywords:["history","save","change","track","rollback","git","commit"]},
+  {t:"debugging",c:"Software",d:"The detective work of finding and fixing bugs — reproducing the problem, reading error messages, and tracing exactly where things go wrong.",keywords:["find","fix","trace","error","problem","detective","test"]},
+  {t:"source code",c:"Software",d:"The actual text instructions a programmer writes — human-readable before being compiled or interpreted into something the machine runs.",keywords:["text","human","readable","write","program","instructions","code"]},
+  // General CS (8)
+  {t:"API",c:"General",d:"Like a menu at a restaurant — lists what services are available and tells you exactly how to order them, without showing you the kitchen.",keywords:["menu","interface","request","response","service","endpoint","connect"]},
+  {t:"database",c:"General",d:"Like a giant organized filing cabinet — stores large amounts of data permanently and lets you search, add, or update records quickly.",keywords:["store","data","search","record","query","table","permanent"]},
+  {t:"encryption",c:"General",d:"Like a secret code — scrambles data so only someone with the right key can read it. Protects passwords and messages online.",keywords:["secret","code","key","scramble","protect","secure","decode"]},
+  {t:"internet",c:"General",d:"A massive worldwide network connecting billions of devices that communicate using shared rules called protocols.",keywords:["network","worldwide","connect","device","protocol","global","web"]},
+  {t:"server",c:"General",d:"A computer that serves data to other computers — always on, waiting for requests, and sending back responses like a waiter at a restaurant.",keywords:["serve","request","response","host","always on","waiter","client"]},
+  {t:"protocol",c:"General",d:"A set of rules both sides agree to follow when communicating — like how a phone call has rules: say hello, take turns, say goodbye.",keywords:["rules","agree","communication","standard","format","exchange","both"]},
+  {t:"bandwidth",c:"General",d:"How wide the road is for data — high bandwidth means lots of data can travel at once, like a 10-lane highway vs a 1-lane road.",keywords:["width","road","data","speed","lane","capacity","transfer"]},
+  {t:"cache",c:"General",d:"A small super-fast storage spot that keeps copies of data you use a lot — so your computer doesn't need to fetch it from far away every time.",keywords:["fast","copy","nearby","reuse","store","temporary","quick"]},
 ];
 
 const CATEGORIES = [...new Set(TERMS.map(t=>t.c))];
@@ -389,8 +464,14 @@ const LS = 'typer63_';
 let currentDeck = 'cs';
 let gameMode = 'speed';
 let knowWaiting = false;
+let masteryStreak = 0;
+let kBestStreak = 0;
 
-function activeDeck(){ return currentDeck==='tttt' ? TTTT_TERMS : TERMS; }
+function activeDeck(){
+  if(currentDeck==='tttt') return TTTT_TERMS;
+  if(currentDeck==='all') return [...TERMS, ...TTTT_TERMS];
+  return TERMS;
+}
 
 function selectDeck(id, btn){
   currentDeck = id;
@@ -404,6 +485,12 @@ function selectMode(mode, btn){
   btn.classList.add('active');
 }
 
+function initDeckCounts(){
+  document.getElementById('csCount').textContent = TERMS.length;
+  document.getElementById('ttttCount').textContent = TTTT_TERMS.length;
+  document.getElementById('allCount').textContent = TERMS.length + TTTT_TERMS.length;
+}
+
 function extractKeywords(def){
   const stops = new Set(['their','there','where','which','other','about','these','those','being','using','after','before','every','often','given','first','second','third','while','since','makes','takes','gives','provides','allows','ensures','requires']);
   return def.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w=>w.length>4&&!stops.has(w)).slice(0,6);
@@ -411,8 +498,14 @@ function extractKeywords(def){
 
 function getKeywords(term){ return term.keywords || extractKeywords(term.d); }
 
+// Knowledge Mode — mastery tracking
+function getMastery(){ return JSON.parse(localStorage.getItem(LS+'mastery')||'{}'); }
+function saveMastery(m){ localStorage.setItem(LS+'mastery',JSON.stringify(m)); }
+function getKStreak(){ return parseInt(localStorage.getItem(LS+'kStreak')||'0'); }
+function saveKStreak(n){ localStorage.setItem(LS+'kStreak',String(n)); }
+
 function submitKnowledge(){
-  if(knowWaiting){ nextKnowledgeTerm(); return; }
+  if(knowWaiting) return;
   const answer = document.getElementById('knowInput').value.toLowerCase();
   const kws = getKeywords(currentTerm);
   const matched = kws.filter(k=>answer.includes(k));
@@ -439,12 +532,36 @@ function submitKnowledge(){
     scoreEl.textContent = `Partial ${pct}% — missed: ${missing.slice(0,3).join(', ')}`;
     scoreEl.className = 'know-score partial';
   } else {
-    scoreEl.textContent = `Try again — key concepts missed: ${missing.slice(0,3).join(', ')}`;
+    scoreEl.textContent = `Key concepts missed: ${missing.slice(0,3).join(', ')}`;
     scoreEl.className = 'know-score err';
   }
+
+  // Show model answer
+  document.getElementById('knowModelText').textContent = currentTerm.d;
+  document.getElementById('knowModelAnswer').classList.remove('hidden');
+
+  // Hide submit, show mastery buttons
+  document.getElementById('knowSubmitBtn').classList.add('hidden');
+  document.getElementById('knowMasteryBtns').classList.remove('hidden');
   document.getElementById('knowInput').disabled = true;
-  document.getElementById('knowSubmitBtn').textContent = 'Next →';
   knowWaiting = true;
+}
+
+function markMastery(gotIt){
+  const mastery = getMastery();
+  if(!mastery[currentTerm.t]) mastery[currentTerm.t] = {m:0,r:0};
+  if(gotIt){
+    mastery[currentTerm.t].m++;
+    masteryStreak++;
+    if(masteryStreak>kBestStreak) kBestStreak=masteryStreak;
+    const best = getKStreak();
+    if(masteryStreak > best) saveKStreak(masteryStreak);
+  } else {
+    mastery[currentTerm.t].r++;
+    masteryStreak=0;
+  }
+  saveMastery(mastery);
+  nextKnowledgeTerm();
 }
 
 function nextKnowledgeTerm(){
@@ -452,7 +569,9 @@ function nextKnowledgeTerm(){
   document.getElementById('knowInput').value = '';
   document.getElementById('knowInput').disabled = false;
   document.getElementById('knowScore').textContent = '';
-  document.getElementById('knowSubmitBtn').textContent = 'Submit';
+  document.getElementById('knowModelAnswer').classList.add('hidden');
+  document.getElementById('knowMasteryBtns').classList.add('hidden');
+  document.getElementById('knowSubmitBtn').classList.remove('hidden');
   nextTerm();
   document.getElementById('knowInput').focus();
 }
@@ -490,7 +609,7 @@ function pickTerm(){
 function startGame(){
   typedChars=0; correctTerms=0; incorrectAttempts=0;
   currentStreak=0; bestStreak=0; timeLeft=60; usedTerms=[]; missedMap={};
-  knowWaiting=false;
+  knowWaiting=false; masteryStreak=0; kBestStreak=0;
   document.getElementById('gameReady').classList.add('hidden');
   document.getElementById('gameOver').classList.add('hidden');
   document.getElementById('gameActive').classList.remove('hidden');
@@ -500,7 +619,9 @@ function startGame(){
   document.getElementById('knowInput').value='';
   document.getElementById('knowInput').disabled=false;
   document.getElementById('knowScore').textContent='';
-  document.getElementById('knowSubmitBtn').textContent='Submit';
+  document.getElementById('knowSubmitBtn').classList.remove('hidden');
+  document.getElementById('knowModelAnswer').classList.add('hidden');
+  document.getElementById('knowMasteryBtns').classList.add('hidden');
   updateStats();
   nextTerm();
   clearInterval(gameTimer);
@@ -530,6 +651,7 @@ function nextTerm(){
 
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('typeInput').addEventListener('input',onType);
+  initDeckCounts();
 });
 
 function onType(e){
@@ -537,19 +659,15 @@ function onType(e){
   const val=e.target.value.trim().toLowerCase();
   const target=currentTerm.t.toLowerCase();
   if(val===target){
-    // correct
-    correctTerms++;
-    currentStreak++;
+    correctTerms++; currentStreak++;
     if(currentStreak>bestStreak) bestStreak=currentStreak;
-    const chars=target.length+1;
-    typedChars+=chars;
+    const chars=target.length+1; typedChars+=chars;
     e.target.classList.add('correct');
     showFeedback('✓ Correct! +1','ok');
     updateStats();
     setTimeout(nextTerm,300);
   } else if(target.startsWith(val)){
-    e.target.classList.remove('wrong');
-    e.target.classList.remove('correct');
+    e.target.classList.remove('wrong'); e.target.classList.remove('correct');
   } else {
     e.target.classList.add('wrong');
   }
@@ -560,7 +678,8 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Enter'){
     if(gameMode==='knowledge'){
       e.preventDefault();
-      if(knowWaiting) nextKnowledgeTerm(); else submitKnowledge();
+      if(knowWaiting) return;
+      submitKnowledge();
       return;
     }
     const val=document.getElementById('typeInput').value.trim().toLowerCase();
@@ -568,8 +687,7 @@ document.addEventListener('keydown',function(e){
       incorrectAttempts++;
       const missed=getMissedLocal();
       missed[currentTerm.t]=(missed[currentTerm.t]||0)+1;
-      missedMap=missed;
-      currentStreak=0;
+      missedMap=missed; currentStreak=0;
       document.getElementById('typeInput').classList.add('wrong');
       showFeedback('✗ Try again or press Tab to skip','err');
       updateStats();
@@ -582,21 +700,23 @@ document.addEventListener('keydown',function(e){
         const missed=getMissedLocal();
         missed[currentTerm.t]=(missed[currentTerm.t]||0)+1;
         missedMap=missed;
-        incorrectAttempts++; currentStreak=0; knowWaiting=false;
+        incorrectAttempts++; currentStreak=0; masteryStreak=0;
         updateStats();
+        // Skip: show skipped message then advance
         document.getElementById('knowInput').value='';
         document.getElementById('knowInput').disabled=false;
         document.getElementById('knowScore').textContent='Skipped: '+currentTerm.t;
         document.getElementById('knowScore').className='know-score err';
-        document.getElementById('knowSubmitBtn').textContent='Submit';
+        document.getElementById('knowModelAnswer').classList.add('hidden');
+        document.getElementById('knowMasteryBtns').classList.add('hidden');
+        document.getElementById('knowSubmitBtn').classList.remove('hidden');
+        knowWaiting=false;
         setTimeout(()=>{document.getElementById('knowScore').textContent='';nextTerm();document.getElementById('knowInput').focus();},700);
         return;
       }
       const missed=getMissedLocal();
       missed[currentTerm.t]=(missed[currentTerm.t]||0)+1;
-      missedMap=missed;
-      incorrectAttempts++;
-      currentStreak=0;
+      missedMap=missed; incorrectAttempts++; currentStreak=0;
       showFeedback('Skipped: '+currentTerm.t,'err');
       updateStats();
       setTimeout(nextTerm,400);
@@ -627,9 +747,6 @@ function endGame(){
   document.getElementById('gameActive').classList.add('hidden');
   const total=correctTerms+incorrectAttempts;
   const acc=total===0?100:Math.round(correctTerms/total*100);
-  const wpm=Math.round(typedChars/5/1);// per 60s
-  const actualWpm=Math.round(typedChars/5/(60/60));
-  // calculate proper WPM
   const trueWpm=Math.round((typedChars/5)/((60-timeLeft)/60));
 
   document.getElementById('finalWpm').textContent=trueWpm||0;
@@ -637,16 +754,13 @@ function endGame(){
   document.getElementById('finalCorrect').textContent=correctTerms;
   document.getElementById('finalBest').textContent=bestStreak;
 
-  // save to leaderboard
   const lb=getLeaderboard();
   lb.push({wpm:trueWpm,acc,correct:correctTerms,streak:bestStreak,date:new Date().toLocaleDateString()});
-  lb.sort((a,b)=>b.wpm-a.wpm);
-  lb.splice(5);
+  lb.sort((a,b)=>b.wpm-a.wpm); lb.splice(5);
   const isNewBest=lb.length===1||(lb[0].wpm===trueWpm&&lb.filter(x=>x.wpm===trueWpm).length===1);
   document.getElementById('newBestMsg').textContent=isNewBest&&lb.length>0&&lb[0].wpm===trueWpm?'New Personal Best!':'';
   saveLeaderboard(lb);
 
-  // update global stats
   const s=getStats();
   s.games=(s.games||0)+1;
   s.totalWpm=(s.totalWpm||0)+trueWpm;
@@ -654,7 +768,6 @@ function endGame(){
   s.bestStreak=Math.max(s.bestStreak||0,bestStreak);
   saveStats(s);
 
-  // merge missed
   const gm=getMissed();
   Object.keys(missedMap).forEach(k=>{gm[k]=(gm[k]||0)+missedMap[k];});
   saveMissed(gm);
@@ -723,17 +836,18 @@ function renderLeaderboard(){
 
 // STATS
 function renderStats(){
+  // Speed mode stats
   const s=getStats();
   const games=s.games||0;
   const avgWpm=games?Math.round(s.totalWpm/games):0;
   const avgAcc=games?Math.round(s.totalAcc/games):0;
-  const bestStreak=s.bestStreak||0;
+  const bStreak=s.bestStreak||0;
 
   document.getElementById('statsGrid').innerHTML=`
     <div class="stats-card"><div class="sv">${games}</div><div class="sk">Total Games</div></div>
     <div class="stats-card"><div class="sv">${avgWpm}</div><div class="sk">Avg WPM</div></div>
     <div class="stats-card"><div class="sv">${avgAcc}%</div><div class="sk">Avg Accuracy</div></div>
-    <div class="stats-card"><div class="sv">${bestStreak}</div><div class="sk">Best Streak</div></div>
+    <div class="stats-card"><div class="sv">${bStreak}</div><div class="sk">Best Streak</div></div>
   `;
 
   const missed=getMissed();
@@ -745,6 +859,31 @@ function renderStats(){
     ml.innerHTML='<div class="missed-list">'+sortedMissed.map(([w,c])=>
       `<div class="missed-item"><span class="mw">${w}</span><span class="mc">missed ${c}x</span></div>`
     ).join('')+'</div>';
+  }
+
+  // Knowledge Mode stats
+  const mastery = getMastery();
+  const allCount = TERMS.length + TTTT_TERMS.length;
+  const masteredKeys = Object.keys(mastery).filter(k=>mastery[k].m > mastery[k].r);
+  const masteredPct = allCount > 0 ? Math.round(masteredKeys.length/allCount*100) : 0;
+  document.getElementById('masteredPctTxt').textContent = masteredPct+'%';
+  document.getElementById('masteryBarFill').style.width = masteredPct+'%';
+  document.getElementById('masteredCountTxt').textContent = `${masteredKeys.length} / ${allCount} terms mastered`;
+
+  const kStreak = getKStreak();
+  document.getElementById('kstreakVal').textContent = kStreak;
+
+  const weakest = Object.entries(mastery)
+    .sort((a,b)=>b[1].r-a[1].r)
+    .filter(([,v])=>v.r>0)
+    .slice(0,5);
+  const wl = document.getElementById('weakestList');
+  if(!weakest.length){
+    wl.innerHTML='<div class="no-data">No review data yet. Play Knowledge Mode!</div>';
+  } else {
+    wl.innerHTML=weakest.map(([term,v])=>
+      `<div class="weakest-item"><span class="wt">${term}</span><span class="wr">needs review ${v.r}x</span></div>`
+    ).join('');
   }
 }
 
@@ -762,6 +901,7 @@ function switchTab(name){
 }
 
 // Init
+initDeckCounts();
 initTermsTab();
 </script>
 </body>
