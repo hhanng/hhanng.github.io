@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Structures Visualizer Suite — Agent #111</title>
+<style>
+:root{--bg:#0f1117;--card:#1a1d27;--card2:#20243a;--blue:#4f8ef7;--green:#4ade80;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--text:#e2e8f0;--muted:#64748b;--border:#2d3150;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:12px;}
+header h1{font-size:1.1rem;font-weight:700;color:var(--blue);}
+header span{font-size:.8rem;color:var(--muted);}
+.struct-tabs{display:flex;gap:0;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--border);scrollbar-width:none;}
+.struct-tabs::-webkit-scrollbar{display:none;}
+.st-btn{padding:12px 18px;background:none;border:none;color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;letter-spacing:.5px;text-transform:uppercase;transition:all .2s;}
+.st-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.st-btn:hover:not(.active){color:var(--text);}
+.s-panel{display:none;padding:16px;max-width:1100px;margin:0 auto;}
+.s-panel.active{display:block;}
+.viz-wrap{display:grid;grid-template-columns:1fr 300px;gap:14px;margin-bottom:14px;}
+@media(max-width:800px){.viz-wrap{grid-template-columns:1fr;}}
+.viz-box{background:var(--card);border:1px solid var(--border);border-radius:12px;min-height:260px;padding:16px;overflow:auto;}
+.viz-title{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+.op-log{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;font-size:.82rem;color:var(--muted);line-height:1.7;max-height:260px;overflow-y:auto;}
+.op-log .step{padding:3px 0;border-bottom:1px solid var(--border);}
+.op-log .step:last-child{color:var(--text);font-weight:600;}
+.ctrl-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;align-items:center;}
+.inp{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:.85rem;outline:none;width:80px;}
+.inp:focus{border-color:var(--blue);}
+.inp-w{width:120px;}
+.cbtn{padding:7px 16px;border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.cbtn-blue{background:var(--blue);color:#fff;}
+.cbtn-green{background:var(--green);color:#000;}
+.cbtn-red{background:var(--red);color:#fff;}
+.cbtn-yellow{background:var(--yellow);color:#000;}
+.cbtn-purple{background:var(--purple);color:#000;}
+.cbtn-muted{background:var(--card2);color:var(--muted);border:1px solid var(--border);}
+.cbtn:hover{opacity:.85;transform:translateY(-1px);}
+.cbtn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.speed-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.speed-row label{font-size:.78rem;color:var(--muted);}
+.speed-btn{padding:5px 12px;border:1px solid var(--border);background:none;color:var(--muted);border-radius:20px;font-size:.75rem;cursor:pointer;transition:all .2s;}
+.speed-btn.active{background:var(--card2);border-color:var(--blue);color:var(--blue);}
+.step-toggle{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);}
+.step-toggle input{accent-color:var(--blue);}
+.toggle-section{margin-top:12px;}
+.toggle-btn{padding:6px 16px;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;font-size:.78rem;cursor:pointer;margin-right:8px;transition:all .2s;}
+.toggle-btn:hover{border-color:var(--blue);color:var(--blue);}
+.collapsible{display:none;margin-top:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.collapsible.open{display:block;}
+.notes-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:14px;}
+.notes-table th{text-align:left;padding:8px 10px;color:var(--muted);border-bottom:1px solid var(--border);font-size:.72rem;text-transform:uppercase;}
+.notes-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+.notes-table td:first-child{color:var(--blue);font-weight:600;}
+.q-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.q-list li{background:var(--card2);border-radius:8px;padding:10px 14px;font-size:.85rem;border-left:3px solid var(--blue);}
+pre{background:#0d1117;border-radius:8px;padding:14px;overflow-x:auto;font-size:.78rem;line-height:1.6;color:#a0d8ef;border:1px solid var(--border);}
+pre .kw{color:#ff79c6;}
+pre .fn{color:#50fa7b;}
+pre .cm{color:#6272a4;font-style:italic;}
+pre .str{color:#f1fa8c;}
+
+/* Array cells */
+.arr-cells{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;}
+.arr-cell{width:48px;height:48px;background:var(--card2);border:2px solid var(--border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:1rem;transition:all .3s;position:relative;}
+.arr-cell .idx{font-size:.6rem;color:var(--muted);position:absolute;bottom:2px;right:4px;}
+.arr-cell.hl-yellow{background:#fbbf2440;border-color:var(--yellow);color:var(--yellow);}
+.arr-cell.hl-green{background:#4ade8040;border-color:var(--green);color:var(--green);}
+.arr-cell.hl-red{background:#f8717140;border-color:var(--red);color:var(--red);}
+.arr-cell.hl-blue{background:#4f8ef740;border-color:var(--blue);color:var(--blue);}
+.complexity-badge{display:inline-block;background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.75rem;color:var(--blue);font-weight:600;}
+
+/* LL nodes */
+.ll-svg-wrap{overflow-x:auto;min-height:100px;}
+.ll-node rect{fill:var(--card2);stroke:var(--border);stroke-width:2;}
+.ll-node.hl-blue rect{fill:#4f8ef720;stroke:var(--blue);}
+.ll-node.hl-green rect{fill:#4ade8020;stroke:var(--green);}
+.ll-node.hl-red rect{fill:#f8717120;stroke:var(--red);}
+.ll-node text{fill:var(--text);font-family:Inter,sans-serif;font-size:13px;font-weight:600;}
+.ll-node .addr{fill:var(--muted);font-size:9px;}
+.ll-arrow{stroke:var(--muted);stroke-width:2;fill:none;marker-end:url(#arrowhead);}
+.ll-arrow.hl-blue{stroke:var(--blue);}
+
+/* Stack blocks */
+.stack-container{display:flex;flex-direction:column-reverse;gap:6px;align-items:center;min-height:200px;justify-content:flex-start;}
+.stack-block{width:160px;height:40px;background:var(--card2);border:2px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;transition:all .4s;position:relative;}
+.stack-block.hl-green{background:#4ade8040;border-color:var(--green);color:var(--green);}
+.stack-block.hl-red{background:#f8717140;border-color:var(--red);color:var(--red);}
+.stack-block.hl-blue{background:#4f8ef740;border-color:var(--blue);color:var(--blue);}
+.stack-label{font-size:.65rem;color:var(--muted);position:absolute;right:8px;font-weight:400;}
+.stack-overflow{color:var(--red);font-weight:700;font-size:.9rem;text-align:center;margin-top:8px;}
+
+/* Queue blocks */
+.queue-container{display:flex;gap:6px;align-items:center;overflow-x:auto;padding:8px 0;min-height:60px;}
+.queue-block{min-width:56px;height:56px;background:var(--card2);border:2px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;transition:all .4s;flex-shrink:0;}
+.queue-block.hl-green{background:#4ade8040;border-color:var(--green);color:var(--green);}
+.queue-block.hl-red{background:#f8717140;border-color:var(--red);color:var(--red);}
+.queue-block.hl-blue{background:#4f8ef740;border-color:var(--blue);color:var(--blue);}
+.queue-label{font-size:.7rem;color:var(--muted);text-align:center;margin-top:4px;}
+
+/* BST/Heap SVG */
+.tree-svg{width:100%;overflow:visible;}
+.t-node circle{fill:var(--card2);stroke:var(--border);stroke-width:2;}
+.t-node.hl-blue circle{fill:#4f8ef740;stroke:var(--blue);}
+.t-node.hl-green circle{fill:#4ade8040;stroke:var(--green);}
+.t-node.hl-red circle{fill:#f8717140;stroke:var(--red);}
+.t-node.hl-yellow circle{fill:#fbbf2440;stroke:var(--yellow);}
+.t-node text{fill:var(--text);font-family:Inter,sans-serif;font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:central;}
+.t-edge{stroke:var(--border);stroke-width:1.5;fill:none;}
+.t-edge.hl-blue{stroke:var(--blue);stroke-width:2;}
+.t-edge.hl-green{stroke:var(--green);}
+.balance-badge{font-size:.8rem;padding:4px 12px;border-radius:20px;display:inline-block;margin-left:8px;}
+.balanced{background:#4ade8030;border:1px solid var(--green);color:var(--green);}
+.unbalanced{background:#f8717130;border:1px solid var(--red);color:var(--red);}
+
+/* Heap array row */
+.heap-arr{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;}
+.heap-arr-cell{min-width:40px;height:36px;background:var(--card2);border:1px solid var(--border);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;}
+.heap-arr-cell .ai{font-size:.6rem;color:var(--muted);}
+.heap-arr-cell.hl-red{background:#f8717130;border-color:var(--red);color:var(--red);}
+.heap-arr-cell.hl-yellow{background:#fbbf2430;border-color:var(--yellow);color:var(--yellow);}
+.heap-arr-cell.hl-green{background:#4ade8030;border-color:var(--green);color:var(--green);}
+
+/* Hash table */
+.ht-grid{display:grid;gap:6px;}
+.ht-bucket{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;min-height:44px;}
+.ht-bucket-idx{font-size:.65rem;color:var(--muted);margin-bottom:4px;}
+.ht-chain{display:flex;gap:4px;flex-wrap:wrap;}
+.ht-entry{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:.78rem;}
+.ht-entry.hl-green{border-color:var(--green);color:var(--green);}
+.ht-entry.hl-red{border-color:var(--red);color:var(--red);text-decoration:line-through;}
+.ht-entry.hl-blue{border-color:var(--blue);color:var(--blue);}
+.load-bar-wrap{margin-top:10px;}
+.load-bar-bg{height:8px;background:var(--card2);border-radius:99px;overflow:hidden;}
+.load-bar-fill{height:100%;border-radius:99px;transition:width .4s,background .4s;}
+
+/* Trie */
+.trie-ac{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.trie-word{background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.82rem;}
+.trie-word.match{border-color:var(--green);color:var(--green);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Data Structures Visualizer Suite</h1>
+  <span>Agent #111 · 100 AI Agents Challenge</span>
+</header>
+
+<div class="struct-tabs">
+  <button class="st-btn active" onclick="switchStruct('array')">📦 Array</button>
+  <button class="st-btn" onclick="switchStruct('ll')">🔗 Linked List</button>
+  <button class="st-btn" onclick="switchStruct('stack')">📚 Stack</button>
+  <button class="st-btn" onclick="switchStruct('queue')">🚶 Queue</button>
+  <button class="st-btn" onclick="switchStruct('bst')">🌲 BST</button>
+  <button class="st-btn" onclick="switchStruct('heap')">⛰️ Heap</button>
+  <button class="st-btn" onclick="switchStruct('ht')">🗂️ Hash Table</button>
+  <button class="st-btn" onclick="switchStruct('trie')">🔤 Trie</button>
+</div>
+
+<!-- ARRAY -->
+<div class="s-panel active" id="s-array">
+  <div class="viz-wrap">
+    <div class="viz-box">
+      <div class="viz-title">
+        <span>Array Visualization</span>
+        <span id="arr-complexity" class="complexity-badge">O(?)</span>
+      </div>
+      <div id="arr-viz"></div>
+    </div>
+    <div class="op-log" id="arr-log"><div class="step">Ready. Choose an operation.</div></div>
+  </div>
+  <div class="ctrl-row">
+    <input type="number" class="inp" id="arr-idx" placeholder="Index" min="0">
+    <input type="number" class="inp" id="arr-val" placeholder="Value">
+    <button class="cbtn cbtn-blue" onclick="arrInsert()">Insert</button>
+    <button class="cbtn cbtn-red" onclick="arrDelete()">Delete</button>
+    <button class="cbtn cbtn-yellow" onclick="arrSearch()">Search</button>
+    <button class="cbtn cbtn-green" onclick="arrSort()">Bubble Sort</button>
+    <button class="cbtn cbtn-muted" onclick="arrReset()">Reset</button>
+  </div>
+  <div class="speed-row">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(900,this)">Slow</button>
+    <button class="speed-btn active" onclick="setSpeed(400,this)">Normal</button>
+    <button class="speed-btn" onclick="setSpeed(100,this)">Fast</button>
+    <span style="margin-left:16px" class="step-toggle"><input type="checkbox" id="arr-step" onchange="toggleStep(this)"> Step Mode</span>
+    <button class="cbtn cbtn-muted" id="arr-next" style="display:none" onclick="doNextStep()">▶ Next Step</button>
+  </div>
+  <div class="toggle-section">
+    <button class="toggle-btn" onclick="togglePanel('arr-notes')">📋 Interview Notes</button>
+    <button class="toggle-btn" onclick="togglePanel('arr-code')">🐍 Python Code</button>
+  </div>
+  <div class="collapsible" id="arr-notes">
+    <table class="notes-table">
+      <tr><th>Operation</th><th>Time</th><th>Space</th></tr>
+      <tr><td>Access by index</td><td>O(1)</td><td>O(1)</td></tr>
+      <tr><td>Search (unsorted)</td><td>O(n)</td><td>O(1)</td></tr>
+      <tr><td>Insert at end</td><td>O(1) amortized</td><td>O(1)</td></tr>
+      <tr><td>Insert at index</td><td>O(n)</td><td>O(1)</td></tr>
+      <tr><td>Delete at index</td><td>O(n)</td><td>O(1)</td></tr>
+      <tr><td>Sort (bubble)</td><td>O(n²)</td><td>O(1)</td></tr>
+    </table>
+    <ul class="q-list">
+      <li>📌 "Find two numbers in an array that sum to a target." → Two-pointer or hash map approach. O(n) time.</li>
+      <li>📌 "Rotate an array k positions to the right." → Reverse entire array, then reverse first k and last n-k elements.</li>
+      <li>📌 "Find the maximum subarray sum." → Kadane's algorithm: track current_sum and max_sum as you scan.</li>
+    </ul>
+  </div>
+  <div class="collapsible" id="arr-code">
+    <pre><span class="cm"># Python Array (list) operations</span>
+<span class="cm"># Insert at index</span>
+<span class="kw">def</span> <span class="fn">insert</span>(arr, idx, val):
+    arr.insert(idx, val)  <span class="cm"># O(n) — shifts elements right</span>
+
+<span class="cm"># Delete at index</span>
+<span class="kw">def</span> <span class="fn">delete</span>(arr, idx):
+    <span class="kw">return</span> arr.pop(idx)   <span class="cm"># O(n) — shifts elements left</span>
+
+<span class="cm"># Linear search</span>
+<span class="kw">def</span> <span class="fn">search</span>(arr, val):
+    <span class="kw">for</span> i, x <span class="kw">in</span> enumerate(arr):
+        <span class="kw">if</span> x == val: <span class="kw">return</span> i
+    <span class="kw">return</span> -1  <span class="cm"># O(n)</span>
+
+<span class="cm"># Bubble sort</span>
+<span class="kw">def</span> <span class="fn">bubble_sort</span>(arr):
+    n = len(arr)
+    <span class="kw">for</span> i <span class="kw">in</span> range(n):
+        <span class="kw">for</span> j <span class="kw">in</span> range(n-i-1):
+            <span class="kw">if</span> arr[j] > arr[j+1]:
+                arr[j], arr[j+1] = arr[j+1], arr[j]
+    <span class="cm"># O(n²) time, O(1) space</span></pre>
+  </div>
+</div>
+
+<!-- LINKED LIST -->
+<div class="s-panel" id="s-ll">
+  <div class="viz-wrap">
+    <div class="viz-box">
+      <div class="viz-title">
+        <span>Linked List Visualization</span>
+        <span>
+          <button class="cbtn cbtn-muted" style="font-size:.72rem;padding:4px 10px" onclick="toggleLLType()">Toggle: <span id="ll-type-label">Singly</span></button>
+        </span>
+      </div>
+      <div class="ll-svg-wrap" id="ll-viz"></div>
+    </div>
+    <div class="op-log" id="ll-log"><div class="step">Ready. Choose an operation.</div></div>
+  </div>
+  <div class="ctrl-row">
+    <input type="number" class="inp" id="ll-val" placeholder="Value">
+    <input type="number" class="inp" id="ll-pos" placeholder="Position">
+    <button class="cbtn cbtn-blue" onclick="llAppend()">Append</button>
+    <button class="cbtn cbtn-green" onclick="llPrepend()">Prepend</button>
+    <button class="cbtn cbtn-purple" onclick="llInsertAt()">Insert At</button>
+    <button class="cbtn cbtn-red" onclick="llDelete()">Delete</button>
+    <button class="cbtn cbtn-yellow" onclick="llReverse()">Reverse</button>
+    <button class="cbtn cbtn-muted" onclick="llReset()">Reset</button>
+  </div>
+  <div class="speed-row">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(900,this)">Slow</button>
+    <button class="speed-btn active" onclick="setSpeed(400,this)">Normal</button>
+    <button class="speed-btn" onclick="setSpeed(100,this)">Fast</button>
+    <span style="margin-left:16px" class="step-toggle"><input type="checkbox" id="ll-step" onchange="toggleStep(this)"> Step Mode</span>
+    <button class="cbtn cbtn-muted" id="ll-next" style="display:none" onclick="doNextStep()">▶ Next Step</button>
+  </div>
+  <div class="toggle-section">
+    <button class="toggle-btn" onclick="togglePanel('ll-notes')">📋 Interview Notes</button>
+    <button class="toggle-btn" onclick="togglePanel('ll-code')">🐍 Python Code</button>
+  </div>
+  <div class="collapsible" id="ll-notes">
+    <table class="notes-table">
+      <tr><th>Operation</th><th>Time</th><th>Space</th></tr>
+      <tr><td>Access/Search</td><td>O(n)</td><td>O(1)</td></tr>
+      <tr><td>Insert at head</td><td>O(1)</td><td>O(1)</td></tr>
+      <tr><td>Insert at tail (with tail ptr)</td><td>O(1)</td><td>O(1)</td></tr>
+      <tr><td>Insert at position</td><td>O(n)</td><td>O(1)</td></tr>
+      <tr><td>Delete at head</td><td>O(1)</td><td>O(1)</td></tr>
+      <tr><td>Reverse</td><td>O(n)</td><td>O(1)</td></tr>
+    </table>
+    <ul class="q-list">
+      <li>📌 "Reverse a linked list." → Three pointers: prev, curr, next. Iterate and reassign. O(n) time, O(1) space.</li>
+      <li>📌 "Detect a cycle in a linked list." → Floyd's tortoise-and-hare: fast (2 steps) and slow (1 step) meet inside cycle.</li>
+      <li>📌 "Find the middle of a linked list." → Two pointers: slow moves 1, fast moves 2. When fast reaches end, slow is at middle.</li>
+    </ul>
+  </div>
+  <div class="collapsible" id="ll-code">
+    <pre><span class="kw">class</span> <span class="fn">ListNode</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, val=0, next=<span class="str">None</span>):
+        self.val = val; self.next = next
+
+<span class="kw">class</span> <span class="fn">LinkedList</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.head = <span class="str">None</span>
+
+    <span class="kw">def</span> <span class="fn">append</span>(self, val):
+        node = ListNode(val)
+        <span class="kw">if not</span> self.head: self.head = node; <span class="kw">return</span>
+        curr = self.head
+        <span class="kw">while</span> curr.next: curr = curr.next
+        curr.next = node
+
+    <span class="kw">def</span> <span class="fn">reverse</span>(self):
+        prev, curr = <span class="str">None</span>, self.head
+        <span class="kw">while</span> curr:
+            nxt = curr.next
+            curr.next = prev
+            prev = curr; curr = nxt
+        self.head = prev
+
+    <span class="kw">def</span> <span class="fn">has_cycle</span>(self):
+        slow = fast = self.head
+        <span class="kw">while</span> fast <span class="kw">and</span> fast.next:
+            slow = slow.next; fast = fast.next.next
+            <span class="kw">if</span> slow == fast: <span class="kw">return True</span>
+        <span class="kw">return False</span></pre>
+  </div>
+</div>
+
+<!-- STACK -->
+<div class="s-panel" id="s-stack">
+  <div class="viz-wrap">
+    <div class="viz-box">
+      <div class="viz-title"><span>Stack Visualization (LIFO)</span></div>
+      <div id="stack-viz">
+        <div class="stack-container" id="stack-blocks"></div>
+        <div id="stack-overflow"></div>
+      </div>
+    </div>
+    <div class="op-log" id="stack-log"><div class="step">Ready. Push some values.</div></div>
+  </div>
+  <div class="ctrl-row">
+    <input type="number" class="inp" id="stack-val" placeholder="Value">
+    <button class="cbtn cbtn-blue" onclick="stackPush()">Push</button>
+    <button class="cbtn cbtn-red" onclick="stackPop()">Pop</button>
+    <button class="cbtn cbtn-yellow" onclick="stackPeek()">Peek</button>
+    <button class="cbtn cbtn-muted" onclick="stackReset()">Reset</button>
+  </div>
+  <div class="speed-row">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(900,this)">Slow</button>
+    <button class="speed-btn active" onclick="setSpeed(400,this)">Normal</button>
+    <button class="speed-btn" onclick="setSpeed(100,this)">Fast</button>
+  </div>
+  <div class="toggle-section">
+    <button class="toggle-btn" onclick="togglePanel('stack-notes')">📋 Interview Notes</button>
+    <button class="toggle-btn" onclick="togglePanel('stack-code')">🐍 Python Code</button>
+  </div>
+  <div class="collapsible" id="stack-notes">
+    <table class="notes-table">
+      <tr><th>Operation</th><th>Time</th><th>Space</th></tr>
+      <tr><td>Push</td><td>O(1)</td><td>O(1)</td></tr>
+      <tr><td>Pop</td><td>O(1)</td><td>O(1)</td></tr>
+      <tr><td>Peek/Top</td><td>O(1)</td><td>O(1)</td></tr>
+      <tr><td>Search</td><td>O(n)</td><td>O(1)</td></tr>
+    </table>
+    <ul class="q-list">
+      <li>📌 "Valid Parentheses." → Push open brackets; pop and match when close bracket seen. Return stack.isEmpty() at end.</li>
+      <li>📌 "Next Greater Element." → Monotonic decreasing stack. Pop when you find a larger element — that larger element is the answer.</li>
+      <li>📌 "Min Stack — support getMin() in O(1)." → Maintain a second stack tracking minimums. Push current min alongside each value.</li>
+    </ul>
+  </div>
+  <div class="collapsible" id="stack-code">
+    <pre><span class="kw">class</span> <span class="fn">Stack</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self): self._data = []
+    <span class="kw">def</span> <span class="fn">push</span>(self, val): self._data.append(val)   <span class="cm"># O(1)</span>
+    <span class="kw">def</span> <span class="fn">pop</span>(self):
+        <span class="kw">if not</span> self._data: <span class="kw">raise</span> IndexError(<span class="str">"Empty stack"</span>)
+        <span class="kw">return</span> self._data.pop()   <span class="cm"># O(1)</span>
+    <span class="kw">def</span> <span class="fn">peek</span>(self):
+        <span class="kw">if not</span> self._data: <span class="kw">raise</span> IndexError(<span class="str">"Empty stack"</span>)
+        <span class="kw">return</span> self._data[-1]   <span class="cm"># O(1)</span>
+    <span class="kw">def</span> <span class="fn">is_empty</span>(self): <span class="kw">return</span> len(self._data) == 0
+
+<span class="cm"># Classic: Valid Parentheses</span>
+<span class="kw">def</span> <span class="fn">is_valid</span>(s):
+    stack, match = [], {')':'(', ']':'[', '}':'{'}
+    <span class="kw">for</span> c <span class="kw">in</span> s:
+        <span class="kw">if</span> c <span class="kw">in</span> <span class="str">"([{"</span>: stack.append(c)
+        <span class="kw">elif not</span> stack <span class="kw">or</span> stack[-1] != match[c]: <span class="kw">return False</span>
+        <span class="kw">else</span>: stack.pop()
+    <span class="kw">return not</span> stack</pre>
+  </div>
+</div>
+
+<!-- QUEUE -->
+<div class="s-panel" id="s-queue">
+  <div class="viz-wrap">
+    <div class="viz-box">
+      <div class="viz-title">
+        <span>Queue Visualization (FIFO)</span>
+        <button class="cbtn cbtn-muted" style="font-size:.72rem;padding:4px 10px" onclick="toggleCircular()">Mode: <span id="q-mode-label">Linear</span></button>
+      </div>
+      <div id="q-viz">
+        <div style="display:flex;gap:12px;margin-bottom:8px;">
+          <span id="q-front-label" style="font-size:.75rem;color:var(--green);">← FRONT (Dequeue)</span>
+          <span style="flex:1"></span>
+          <span id="q-rear-label" style="font-size:.75rem;color:var(--blue);">REAR (Enqueue) →</span>
+        </div>
+        <div class="queue-container" id="queue-blocks"></div>
+      </div>
+    </div>
+    <div class="op-log" id="q-log"><div class="step">Ready. Enqueue some values.</div></div>
+  </div>
+  <div class="ctrl-row">
+    <input type="number" class="inp" id="q-val" placeholder="Value">
+    <button class="cbtn cbtn-blue" onclick="enqueue()">Enqueue</button>
+    <button class="cbtn cbtn-red" onclick="dequeue()">Dequeue</button>
+    <button class="cbtn cbtn-yellow" onclick="peekFront()">Peek Front</button>
+    <button class="cbtn cbtn-muted" onclick="queueReset()">Reset</button>
+  </div>
+  <div class="speed-row">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(900,this)">Slow</button>
+    <button class="speed-btn active" onclick="setSpeed(400,this)">Normal</button>
+    <button class="speed-btn" onclick="setSpeed(100,this)">Fast</button>
+  </div>
+  <div class="toggle-section">
+    <button class="toggle-btn" onclick="togglePanel('q-notes')">📋 Interview Notes</button>
+    <button class="toggle-btn" onclick="togglePanel('q-code')">🐍 Python Code</button>
+  </div>
+  <div class="collapsible" id="q-notes">
+    <table class="notes-table">
+      <tr><th>Operation</th><th>Time</th><th>Space</th></tr>
+      <tr><td>Enqueue</td><td>O(1)</td><td>O(1)</td></tr>
+      <tr><td>Dequeue</td><td>O(1) with deque</td><td>O(1)</td></tr>
+      <tr><td>Peek</td><td>O(1)</td><td>O(1)</td></tr>
+      <tr><td>BFS traversal</td><td>O(V+E)</td><td>O(V)</td></tr>
+    </table>
+    <ul class="q-list">
+      <li>📌 "Level order traversal of a binary tree." → Use a queue. Process each node and enqueue its children. Each level is one BFS iteration.</li>
+      <li>📌 "Implement a queue using two stacks." → Stack1 for enqueue. For dequeue, if Stack2 empty, pop everything from Stack1 into Stack2, then pop Stack2.</li>
+      <li>📌 "Sliding window maximum." → Use a deque (monotonic decreasing). Remove smaller elements as window slides right.</li>
+    </ul>
+  </div>
+  <div class="collapsible" id="q-code">
+    <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">class</span> <span class="fn">Queue</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self): self._q = deque()
+    <span class="kw">def</span> <span class="fn">enqueue</span>(self, val): self._q.append(val)      <span class="cm"># O(1)</span>
+    <span class="kw">def</span> <span class="fn">dequeue</span>(self):
+        <span class="kw">if not</span> self._q: <span class="kw">raise</span> IndexError(<span class="str">"Empty queue"</span>)
+        <span class="kw">return</span> self._q.popleft()   <span class="cm"># O(1)</span>
+    <span class="kw">def</span> <span class="fn">peek</span>(self): <span class="kw">return</span> self._q[0] <span class="kw">if</span> self._q <span class="kw">else None</span>
+
+<span class="cm"># BFS skeleton</span>
+<span class="kw">def</span> <span class="fn">bfs</span>(graph, start):
+    visited, q = {start}, deque([start])
+    <span class="kw">while</span> q:
+        node = q.popleft()
+        <span class="kw">for</span> neighbor <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> neighbor <span class="kw">not in</span> visited:
+                visited.add(neighbor); q.append(neighbor)</pre>
+  </div>
+</div>
+
+<!-- BST -->
+<div class="s-panel" id="s-bst">
+  <div class="viz-wrap">
+    <div class="viz-box">
+      <div class="viz-title">
+        <span>Binary Search Tree</span>
+        <span id="bst-balance-badge" class="balance-badge balanced">Balanced ✓</span>
+      </div>
+      <div id="bst-viz" style="overflow:auto;"></div>
+    </div>
+    <div class="op-log" id="bst-log"><div class="step">Ready. Insert nodes to build the tree.</div></div>
+  </div>
+  <div class="ctrl-row">
+    <input type="number" class="inp" id="bst-val" placeholder="Value">
+    <button class="cbtn cbtn-blue" onclick="bstInsert()">Insert</button>
+    <button class="cbtn cbtn-red" onclick="bstDelete()">Delete</button>
+    <button class="cbtn cbtn-yellow" onclick="bstSearch()">Search</button>
+    <button class="cbtn cbtn-green" onclick="bstTraverse('inorder')">In-Order</button>
+    <button class="cbtn cbtn-purple" onclick="bstTraverse('preorder')">Pre-Order</button>
+    <button class="cbtn cbtn-muted" onclick="bstTraverse('postorder')">Post-Order</button>
+    <button class="cbtn cbtn-muted" onclick="bstReset()">Reset</button>
+  </div>
+  <div class="speed-row">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(900,this)">Slow</button>
+    <button class="speed-btn active" onclick="setSpeed(400,this)">Normal</button>
+    <button class="speed-btn" onclick="setSpeed(100,this)">Fast</button>
+    <span style="margin-left:16px" class="step-toggle"><input type="checkbox" id="bst-step" onchange="toggleStep(this)"> Step Mode</span>
+    <button class="cbtn cbtn-muted" id="bst-next" style="display:none" onclick="doNextStep()">▶ Next Step</button>
+  </div>
+  <div class="toggle-section">
+    <button class="toggle-btn" onclick="togglePanel('bst-notes')">📋 Interview Notes</button>
+    <button class="toggle-btn" onclick="togglePanel('bst-code')">🐍 Python Code</button>
+  </div>
+  <div class="collapsible" id="bst-notes">
+    <table class="notes-table">
+      <tr><th>Operation</th><th>Average</th><th>Worst (degenerate)</th></tr>
+      <tr><td>Search/Insert/Delete</td><td>O(log n)</td><td>O(n)</td></tr>
+      <tr><td>Min/Max</td><td>O(log n)</td><td>O(n)</td></tr>
+      <tr><td>In-order traversal</td><td>O(n)</td><td>O(n)</td></tr>
+    </table>
+    <ul class="q-list">
+      <li>📌 "Validate a BST." → Pass min/max bounds down recursively: left subtree values must be &lt; node, right must be &gt; node.</li>
+      <li>📌 "Find Lowest Common Ancestor of two nodes in a BST." → If both values &lt; node go left; if both &gt; go right; otherwise current node is LCA.</li>
+      <li>📌 "Convert sorted array to BST." → Recursively pick midpoint as root, left half as left subtree, right half as right subtree. O(n).</li>
+    </ul>
+  </div>
+  <div class="collapsible" id="bst-code">
+    <pre><span class="kw">class</span> <span class="fn">BST</span>:
+    <span class="kw">class</span> <span class="fn">Node</span>:
+        <span class="kw">def</span> <span class="fn">__init__</span>(self,v): self.v=v; self.l=self.r=<span class="str">None</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self): self.root=<span class="str">None</span>
+
+    <span class="kw">def</span> <span class="fn">insert</span>(self, v):
+        <span class="kw">def</span> _ins(n,v):
+            <span class="kw">if not</span> n: <span class="kw">return</span> self.Node(v)
+            <span class="kw">if</span> v < n.v: n.l = _ins(n.l,v)
+            <span class="kw">elif</span> v > n.v: n.r = _ins(n.r,v)
+            <span class="kw">return</span> n
+        self.root = _ins(self.root, v)
+
+    <span class="kw">def</span> <span class="fn">inorder</span>(self):
+        result=[]
+        <span class="kw">def</span> _io(n):
+            <span class="kw">if not</span> n: <span class="kw">return</span>
+            _io(n.l); result.append(n.v); _io(n.r)
+        _io(self.root); <span class="kw">return</span> result</pre>
+  </div>
+</div>
+
+<!-- HEAP -->
+<div class="s-panel" id="s-heap">
+  <div class="viz-wrap">
+    <div class="viz-box">
+      <div class="viz-title">
+        <span>Heap Visualization</span>
+        <button class="cbtn cbtn-muted" style="font-size:.72rem;padding:4px 10px" onclick="toggleHeapType()">Type: <span id="heap-type-label">Min-Heap</span></button>
+      </div>
+      <div id="heap-tree-viz"></div>
+      <div style="margin-top:10px;font-size:.72rem;color:var(--muted);">Array representation:</div>
+      <div class="heap-arr" id="heap-arr-viz"></div>
+    </div>
+    <div class="op-log" id="heap-log"><div class="step">Ready. Insert values.</div></div>
+  </div>
+  <div class="ctrl-row">
+    <input type="number" class="inp" id="heap-val" placeholder="Value">
+    <button class="cbtn cbtn-blue" onclick="heapInsert()">Insert</button>
+    <button class="cbtn cbtn-red" onclick="heapExtract()">Extract Min/Max</button>
+    <button class="cbtn cbtn-yellow" onclick="heapify()">Heapify</button>
+    <button class="cbtn cbtn-muted" onclick="heapReset()">Reset</button>
+  </div>
+  <div class="speed-row">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(900,this)">Slow</button>
+    <button class="speed-btn active" onclick="setSpeed(400,this)">Normal</button>
+    <button class="speed-btn" onclick="setSpeed(100,this)">Fast</button>
+    <span style="margin-left:16px" class="step-toggle"><input type="checkbox" id="heap-step" onchange="toggleStep(this)"> Step Mode</span>
+    <button class="cbtn cbtn-muted" id="heap-next" style="display:none" onclick="doNextStep()">▶ Next Step</button>
+  </div>
+  <div class="toggle-section">
+    <button class="toggle-btn" onclick="togglePanel('heap-notes')">📋 Interview Notes</button>
+    <button class="toggle-btn" onclick="togglePanel('heap-code')">🐍 Python Code</button>
+  </div>
+  <div class="collapsible" id="heap-notes">
+    <table class="notes-table">
+      <tr><th>Operation</th><th>Time</th><th>Space</th></tr>
+      <tr><td>Insert</td><td>O(log n)</td><td>O(1)</td></tr>
+      <tr><td>Extract min/max</td><td>O(log n)</td><td>O(1)</td></tr>
+      <tr><td>Peek min/max</td><td>O(1)</td><td>O(1)</td></tr>
+      <tr><td>Build from array</td><td>O(n)</td><td>O(1)</td></tr>
+      <tr><td>Heapsort</td><td>O(n log n)</td><td>O(1)</td></tr>
+    </table>
+    <ul class="q-list">
+      <li>📌 "Find the K largest elements." → Min-heap of size K. For each element, if larger than heap min, replace and heapify down. O(n log k).</li>
+      <li>📌 "Merge K sorted lists." → Push first element of each list into min-heap. Extract min, push next from that list. O(n log k).</li>
+      <li>📌 "Find the median from a data stream." → Two heaps: max-heap for lower half, min-heap for upper half. Balance sizes after each insert.</li>
+    </ul>
+  </div>
+  <div class="collapsible" id="heap-code">
+    <pre><span class="kw">import</span> heapq
+
+<span class="cm"># Min-heap (Python default)</span>
+h = []
+heapq.heappush(h, 5)   <span class="cm"># O(log n)</span>
+heapq.heappush(h, 2)
+heapq.heappush(h, 8)
+minimum = heapq.heappop(h)  <span class="cm"># O(log n) → returns 2</span>
+
+<span class="cm"># Max-heap: negate values</span>
+maxh = []
+heapq.heappush(maxh, -5)
+heapq.heappush(maxh, -2)
+maximum = -heapq.heappop(maxh)  <span class="cm"># → 5</span>
+
+<span class="cm"># Build heap from list O(n)</span>
+nums = [3,1,4,1,5,9,2,6]
+heapq.heapify(nums)
+
+<span class="cm"># K largest elements</span>
+<span class="kw">def</span> <span class="fn">k_largest</span>(nums, k):
+    <span class="kw">return</span> heapq.nlargest(k, nums)  <span class="cm"># O(n log k)</span></pre>
+  </div>
+</div>
+
+<!-- HASH TABLE -->
+<div class="s-panel" id="s-ht">
+  <div class="viz-wrap">
+    <div class="viz-box">
+      <div class="viz-title"><span>Hash Table Visualization (Chaining)</span></div>
+      <div id="ht-viz"></div>
+      <div class="load-bar-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:4px;">
+          <span style="color:var(--muted)">Load Factor</span>
+          <span id="ht-lf-text" style="color:var(--blue);font-weight:700">0.00</span>
+        </div>
+        <div class="load-bar-bg"><div class="load-bar-fill" id="ht-lf-bar" style="width:0%;background:var(--green)"></div></div>
+      </div>
+    </div>
+    <div class="op-log" id="ht-log"><div class="step">Ready. Insert key-value pairs.</div></div>
+  </div>
+  <div class="ctrl-row">
+    <input type="text" class="inp inp-w" id="ht-key" placeholder="Key">
+    <input type="text" class="inp inp-w" id="ht-val" placeholder="Value">
+    <button class="cbtn cbtn-blue" onclick="htInsert()">Insert</button>
+    <button class="cbtn cbtn-yellow" onclick="htGet()">Get</button>
+    <button class="cbtn cbtn-red" onclick="htDelete()">Delete</button>
+    <button class="cbtn cbtn-muted" onclick="htReset()">Reset</button>
+  </div>
+  <div class="speed-row">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(900,this)">Slow</button>
+    <button class="speed-btn active" onclick="setSpeed(400,this)">Normal</button>
+    <button class="speed-btn" onclick="setSpeed(100,this)">Fast</button>
+  </div>
+  <div class="toggle-section">
+    <button class="toggle-btn" onclick="togglePanel('ht-notes')">📋 Interview Notes</button>
+    <button class="toggle-btn" onclick="togglePanel('ht-code')">🐍 Python Code</button>
+  </div>
+  <div class="collapsible" id="ht-notes">
+    <table class="notes-table">
+      <tr><th>Operation</th><th>Average</th><th>Worst</th></tr>
+      <tr><td>Insert/Get/Delete</td><td>O(1)</td><td>O(n) — all keys hash to same bucket</td></tr>
+      <tr><td>Space</td><td>O(n)</td><td>O(n)</td></tr>
+    </table>
+    <ul class="q-list">
+      <li>📌 "Two Sum." → Hash map from value → index. For each num, check if target-num is in map. O(n).</li>
+      <li>📌 "Group Anagrams." → Hash map from sorted string → list of originals. O(n·k log k) where k = max word length.</li>
+      <li>📌 "Longest Consecutive Sequence." → Put all nums in a set. For each num that has no num-1 in set, expand right. O(n).</li>
+    </ul>
+  </div>
+  <div class="collapsible" id="ht-code">
+    <pre><span class="cm"># Python dict is a hash map</span>
+ht = {}
+ht[<span class="str">"name"</span>] = <span class="str">"Alice"</span>   <span class="cm"># Insert O(1)</span>
+val = ht.get(<span class="str">"name"</span>)  <span class="cm"># Get O(1)</span>
+<span class="kw">del</span> ht[<span class="str">"name"</span>]        <span class="cm"># Delete O(1)</span>
+
+<span class="cm"># Two Sum — classic hash map problem</span>
+<span class="kw">def</span> <span class="fn">two_sum</span>(nums, target):
+    seen = {}
+    <span class="kw">for</span> i, n <span class="kw">in</span> enumerate(nums):
+        complement = target - n
+        <span class="kw">if</span> complement <span class="kw">in</span> seen:
+            <span class="kw">return</span> [seen[complement], i]
+        seen[n] = i
+    <span class="kw">return</span> []   <span class="cm"># O(n) time, O(n) space</span>
+
+<span class="cm"># Collision handling (chaining concept)</span>
+<span class="kw">def</span> <span class="fn">hash_fn</span>(key, size):
+    <span class="kw">return</span> sum(ord(c) <span class="kw">for</span> c <span class="kw">in</span> str(key)) % size</pre>
+  </div>
+</div>
+
+<!-- TRIE -->
+<div class="s-panel" id="s-trie">
+  <div class="viz-wrap">
+    <div class="viz-box">
+      <div class="viz-title"><span>Trie Visualization</span></div>
+      <div id="trie-viz" style="overflow:auto;"></div>
+    </div>
+    <div class="op-log" id="trie-log"><div class="step">Ready. Insert words to build the trie.</div></div>
+  </div>
+  <div class="ctrl-row">
+    <input type="text" class="inp inp-w" id="trie-word" placeholder="Word">
+    <button class="cbtn cbtn-blue" onclick="trieInsert()">Insert</button>
+    <button class="cbtn cbtn-yellow" onclick="trieSearch()">Search</button>
+    <button class="cbtn cbtn-red" onclick="trieDelete()">Delete</button>
+    <button class="cbtn cbtn-green" onclick="trieAutoComplete()">Auto-complete</button>
+    <button class="cbtn cbtn-muted" onclick="trieReset()">Reset</button>
+  </div>
+  <div id="trie-ac-results" style="margin-top:8px;font-size:.8rem;color:var(--muted);"></div>
+  <div class="speed-row">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(900,this)">Slow</button>
+    <button class="speed-btn active" onclick="setSpeed(400,this)">Normal</button>
+    <button class="speed-btn" onclick="setSpeed(100,this)">Fast</button>
+    <span style="margin-left:16px" class="step-toggle"><input type="checkbox" id="trie-step" onchange="toggleStep(this)"> Step Mode</span>
+    <button class="cbtn cbtn-muted" id="trie-next" style="display:none" onclick="doNextStep()">▶ Next Step</button>
+  </div>
+  <div class="toggle-section">
+    <button class="toggle-btn" onclick="togglePanel('trie-notes')">📋 Interview Notes</button>
+    <button class="toggle-btn" onclick="togglePanel('trie-code')">🐍 Python Code</button>
+  </div>
+  <div class="collapsible" id="trie-notes">
+    <table class="notes-table">
+      <tr><th>Operation</th><th>Time</th><th>Space</th></tr>
+      <tr><td>Insert word (len L)</td><td>O(L)</td><td>O(L)</td></tr>
+      <tr><td>Search word</td><td>O(L)</td><td>O(1)</td></tr>
+      <tr><td>Prefix search</td><td>O(P)</td><td>O(1)</td></tr>
+      <tr><td>Space total</td><td>—</td><td>O(total chars)</td></tr>
+    </table>
+    <ul class="q-list">
+      <li>📌 "Implement autocomplete." → Insert all words into Trie. For prefix, find the prefix node, then DFS to collect all complete words below it.</li>
+      <li>📌 "Word Search II (find all words in a board)." → Build trie of target words, then DFS on board following trie edges. Prune branches not in trie.</li>
+      <li>📌 "Replace words with root in a sentence." → Build trie of root words. For each sentence word, find shortest prefix in trie and replace.</li>
+    </ul>
+  </div>
+  <div class="collapsible" id="trie-code">
+    <pre><span class="kw">class</span> <span class="fn">TrieNode</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.children = {}  <span class="cm"># char → TrieNode</span>
+        self.is_end = <span class="str">False</span>
+
+<span class="kw">class</span> <span class="fn">Trie</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self): self.root = TrieNode()
+
+    <span class="kw">def</span> <span class="fn">insert</span>(self, word):  <span class="cm"># O(L)</span>
+        node = self.root
+        <span class="kw">for</span> ch <span class="kw">in</span> word:
+            node = node.children.setdefault(ch, TrieNode())
+        node.is_end = <span class="str">True</span>
+
+    <span class="kw">def</span> <span class="fn">search</span>(self, word):  <span class="cm"># O(L)</span>
+        node = self.root
+        <span class="kw">for</span> ch <span class="kw">in</span> word:
+            <span class="kw">if</span> ch <span class="kw">not in</span> node.children: <span class="kw">return False</span>
+            node = node.children[ch]
+        <span class="kw">return</span> node.is_end
+
+    <span class="kw">def</span> <span class="fn">starts_with</span>(self, prefix):  <span class="cm"># O(P)</span>
+        node = self.root
+        <span class="kw">for</span> ch <span class="kw">in</span> prefix:
+            <span class="kw">if</span> ch <span class="kw">not in</span> node.children: <span class="kw">return False</span>
+            node = node.children[ch]
+        <span class="kw">return True</span></pre>
+  </div>
+</div>
+
+<script>
+// ─── SHARED INFRASTRUCTURE ───────────────────────────────────────
+let animSpeed = 400;
+let stepMode = false;
+let resolveStep = null;
+let currentStruct = 'array';
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+async function waitStep(){
+  if(stepMode){ await new Promise(r=>{resolveStep=r;}); }
+  else await sleep(animSpeed);
+}
+function doNextStep(){ if(resolveStep){const r=resolveStep;resolveStep=null;r();} }
+function toggleStep(cb){
+  stepMode=cb.checked;
+  const struct=currentStruct;
+  const nextBtns=['arr-next','ll-next','bst-next','heap-next','trie-next'];
+  nextBtns.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=cb.checked?'inline-block':'none';});
+}
+function setSpeed(ms,btn){
+  animSpeed=ms;
+  document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active'));
+  // Only update buttons in current panel
+  btn.classList.add('active');
+}
+function switchStruct(name){
+  document.querySelectorAll('.s-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.st-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('s-'+name).classList.add('active');
+  event.target.classList.add('active');
+  currentStruct=name;
+}
+function togglePanel(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+}
+function log(logId,msg,isStep=false){
+  const el=document.getElementById(logId);
+  const div=document.createElement('div');
+  div.className='step';
+  div.textContent=msg;
+  el.appendChild(div);
+  el.scrollTop=el.scrollHeight;
+  if(el.children.length>30) el.removeChild(el.children[0]);
+}
+function clearLog(logId){
+  document.getElementById(logId).innerHTML='';
+}
+
+// ─── ARRAY ───────────────────────────────────────────────────────
+let arrData=[5,2,8,1,9,3,7,4];
+let arrHighlights={};
+let arrBusy=false;
+
+function renderArr(){
+  const viz=document.getElementById('arr-viz');
+  viz.innerHTML='';
+  const wrap=document.createElement('div');
+  wrap.className='arr-cells';
+  arrData.forEach((v,i)=>{
+    const cell=document.createElement('div');
+    cell.className='arr-cell'+(arrHighlights[i]?' hl-'+arrHighlights[i]:'');
+    cell.id='arr-cell-'+i;
+    cell.innerHTML=v+'<span class="idx">'+i+'</span>';
+    wrap.appendChild(cell);
+  });
+  viz.appendChild(wrap);
+}
+function hlArr(idx,color){ arrHighlights[idx]=color; renderArr(); }
+function clrArr(){ arrHighlights={}; renderArr(); }
+function setArrComplexity(txt){ document.getElementById('arr-complexity').textContent=txt; }
+
+async function arrInsert(){
+  if(arrBusy)return; arrBusy=true;
+  const idx=parseInt(document.getElementById('arr-idx').value);
+  const val=parseInt(document.getElementById('arr-val').value);
+  if(isNaN(val)){ arrBusy=false; return; }
+  const i=isNaN(idx)?arrData.length:Math.max(0,Math.min(idx,arrData.length));
+  setArrComplexity('O(n)');
+  clearLog('arr-log');
+  log('arr-log','Inserting '+val+' at index '+i+'…');
+  // highlight cells to the right
+  for(let j=arrData.length-1;j>=i;j--){
+    hlArr(j,'yellow');
+    log('arr-log','Shifting index '+j+' → '+(j+1));
+    await waitStep();
+  }
+  arrData.splice(i,0,val);
+  clrArr();
+  hlArr(i,'green');
+  log('arr-log','✓ Inserted '+val+' at index '+i);
+  await sleep(animSpeed);
+  clrArr();
+  arrBusy=false;
+}
+async function arrDelete(){
+  if(arrBusy)return; arrBusy=true;
+  const idx=parseInt(document.getElementById('arr-idx').value);
+  if(isNaN(idx)||idx<0||idx>=arrData.length){ arrBusy=false; return; }
+  setArrComplexity('O(n)');
+  clearLog('arr-log');
+  log('arr-log','Deleting index '+idx+' (value '+arrData[idx]+')…');
+  hlArr(idx,'red');
+  await waitStep();
+  arrData.splice(idx,1);
+  clrArr();
+  for(let j=idx;j<arrData.length;j++){
+    hlArr(j,'yellow');
+    log('arr-log','Element at '+j+' shifted left');
+  }
+  await sleep(animSpeed);
+  clrArr();
+  log('arr-log','✓ Deleted. Array length now '+arrData.length);
+  arrBusy=false;
+}
+async function arrSearch(){
+  if(arrBusy)return; arrBusy=true;
+  const val=parseInt(document.getElementById('arr-val').value);
+  if(isNaN(val)){ arrBusy=false; return; }
+  setArrComplexity('O(n)');
+  clearLog('arr-log');
+  log('arr-log','Searching for '+val+'…');
+  for(let i=0;i<arrData.length;i++){
+    hlArr(i,'yellow');
+    log('arr-log','Checking index '+i+': '+arrData[i]+(arrData[i]===val?' ← MATCH!':''));
+    await waitStep();
+    if(arrData[i]===val){
+      hlArr(i,'green');
+      await sleep(animSpeed*2);
+      clrArr();
+      log('arr-log','✓ Found '+val+' at index '+i);
+      arrBusy=false; return;
+    }
+    clrArr();
+  }
+  log('arr-log','✗ '+val+' not found in array');
+  arrBusy=false;
+}
+async function arrSort(){
+  if(arrBusy)return; arrBusy=true;
+  setArrComplexity('O(n²)');
+  clearLog('arr-log');
+  log('arr-log','Starting Bubble Sort…');
+  const n=arrData.length;
+  for(let i=0;i<n;i++){
+    for(let j=0;j<n-i-1;j++){
+      hlArr(j,'yellow'); hlArr(j+1,'yellow');
+      log('arr-log','Comparing index '+j+'('+arrData[j]+') and '+(j+1)+'('+arrData[j+1]+')');
+      await waitStep();
+      if(arrData[j]>arrData[j+1]){
+        log('arr-log','Swapping '+arrData[j]+' ↔ '+arrData[j+1]);
+        [arrData[j],arrData[j+1]]=[arrData[j+1],arrData[j]];
+        clrArr(); hlArr(j,'blue'); hlArr(j+1,'blue');
+        await sleep(animSpeed/2);
+      }
+      clrArr();
+    }
+    hlArr(n-i-1,'green');
+  }
+  await sleep(animSpeed);
+  clrArr();
+  log('arr-log','✓ Array sorted!');
+  arrBusy=false;
+}
+function arrReset(){
+  arrData=[5,2,8,1,9,3,7,4];
+  clrArr(); clearLog('arr-log'); log('arr-log','Array reset.');
+  setArrComplexity('O(?)'); arrBusy=false;
+}
+renderArr();
+
+// ─── LINKED LIST ────────────────────────────────────────────────
+class LLNode{constructor(v){this.val=v;this.next=null;this.prev=null;this.id=Math.random().toString(36).slice(2,6);}}
+let llHead=null;
+let llType='singly';
+let llHighlights={};
+let llBusy=false;
+
+function llNodes(){const nodes=[];let n=llHead;while(n){nodes.push(n);n=n.next;}return nodes;}
+function renderLL(){
+  const nodes=llNodes();
+  const W=90,GAP=50,R=20,SVG_H=80;
+  const totalW=nodes.length*(W+GAP)+20;
+  const svgNS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(svgNS,'svg');
+  svg.setAttribute('width',Math.max(totalW,300));
+  svg.setAttribute('height',SVG_H);
+  // arrowhead marker
+  const defs=document.createElementNS(svgNS,'defs');
+  const marker=document.createElementNS(svgNS,'marker');
+  marker.setAttribute('id','arrowhead'); marker.setAttribute('markerWidth','8');
+  marker.setAttribute('markerHeight','6'); marker.setAttribute('refX','7'); marker.setAttribute('refY','3');
+  marker.setAttribute('orient','auto');
+  const poly=document.createElementNS(svgNS,'polygon');
+  poly.setAttribute('points','0 0, 8 3, 0 6'); poly.setAttribute('fill','#64748b');
+  marker.appendChild(poly); defs.appendChild(marker); svg.appendChild(defs);
+
+  nodes.forEach((node,i)=>{
+    const x=i*(W+GAP)+10;
+    const cx=x+W/2, cy=SVG_H/2;
+    const g=document.createElementNS(svgNS,'g');
+    g.setAttribute('class','ll-node'+(llHighlights[node.id]?' hl-'+llHighlights[node.id]:''));
+    // rect
+    const rect=document.createElementNS(svgNS,'rect');
+    rect.setAttribute('x',x); rect.setAttribute('y',cy-R);
+    rect.setAttribute('width',W); rect.setAttribute('height',R*2); rect.setAttribute('rx',8);
+    g.appendChild(rect);
+    // value text
+    const vt=document.createElementNS(svgNS,'text');
+    vt.setAttribute('x',x+W*0.4); vt.setAttribute('y',cy+5); vt.textContent=node.val;
+    g.appendChild(vt);
+    // divider line (val | next)
+    const line=document.createElementNS(svgNS,'line');
+    line.setAttribute('x1',x+W*0.65); line.setAttribute('y1',cy-R);
+    line.setAttribute('x2',x+W*0.65); line.setAttribute('y2',cy+R);
+    line.setAttribute('stroke','#2d3150'); line.setAttribute('stroke-width','1');
+    g.appendChild(line);
+    // next pointer text
+    const pt=document.createElementNS(svgNS,'text');
+    pt.setAttribute('class','addr');
+    pt.setAttribute('x',x+W*0.8); pt.setAttribute('y',cy+4);
+    pt.textContent=node.next?'→'+node.next.id.slice(0,3):'null';
+    g.appendChild(pt);
+    svg.appendChild(g);
+    // arrow to next
+    if(node.next){
+      const ax1=x+W,ay1=cy,ax2=x+W+GAP-4,ay2=cy;
+      const arr=document.createElementNS(svgNS,'line');
+      arr.setAttribute('class','ll-arrow'+(llHighlights[node.id]?' hl-blue':''));
+      arr.setAttribute('x1',ax1); arr.setAttribute('y1',ay1);
+      arr.setAttribute('x2',ax2); arr.setAttribute('y2',ay2);
+      arr.setAttribute('marker-end','url(#arrowhead)');
+      svg.appendChild(arr);
+    }
+    // prev pointer for doubly
+    if(llType==='doubly'&&node.prev&&i>0){
+      const bx1=x,by1=cy+6,bx2=x-GAP+4,by2=cy+6;
+      const bar=document.createElementNS(svgNS,'line');
+      bar.setAttribute('class','ll-arrow'); bar.setAttribute('stroke',getComputedStyle(document.body).getPropertyValue('--purple')||'#a78bfa');
+      bar.setAttribute('x1',bx1); bar.setAttribute('y1',by1);
+      bar.setAttribute('x2',bx2); bar.setAttribute('y2',by2);
+      bar.setAttribute('marker-end','url(#arrowhead)');
+      svg.appendChild(bar);
+    }
+    // NULL at end
+    if(!node.next){
+      const nt=document.createElementNS(svgNS,'text');
+      nt.setAttribute('x',x+W+10); nt.setAttribute('y',cy+5);
+      nt.setAttribute('fill','#64748b'); nt.setAttribute('font-size','12');
+      nt.textContent='null';
+      svg.appendChild(nt);
+    }
+  });
+  if(!nodes.length){
+    const t=document.createElementNS(svgNS,'text');
+    t.setAttribute('x',20); t.setAttribute('y',40);
+    t.setAttribute('fill','#64748b'); t.setAttribute('font-size','14');
+    t.textContent='(empty)';
+    svg.appendChild(t);
+  }
+  document.getElementById('ll-viz').innerHTML='';
+  document.getElementById('ll-viz').appendChild(svg);
+}
+function hlLL(id,color){ llHighlights[id]=color; renderLL(); }
+function clrLL(){ llHighlights={}; renderLL(); }
+function toggleLLType(){
+  llType=llType==='singly'?'doubly':'singly';
+  document.getElementById('ll-type-label').textContent=llType==='singly'?'Singly':'Doubly';
+  // rebuild with prev pointers
+  const nodes=llNodes();
+  nodes.forEach((n,i)=>{ n.prev=i>0?nodes[i-1]:null; });
+  renderLL();
+}
+async function llAppend(){
+  if(llBusy)return; llBusy=true;
+  const val=parseInt(document.getElementById('ll-val').value); if(isNaN(val)){llBusy=false;return;}
+  clearLog('ll-log'); log('ll-log','Appending '+val+'…');
+  const node=new LLNode(val);
+  if(!llHead){llHead=node;renderLL();hlLL(node.id,'green');}
+  else{
+    let cur=llHead;
+    while(cur.next){hlLL(cur.id,'yellow');await waitStep();clrLL();cur=cur.next;}
+    hlLL(cur.id,'yellow');log('ll-log','Reached tail node '+cur.val);
+    await waitStep();
+    cur.next=node; if(llType==='doubly')node.prev=cur;
+    renderLL(); hlLL(node.id,'green');
+  }
+  log('ll-log','✓ Appended '+val);
+  await sleep(animSpeed); clrLL(); llBusy=false;
+}
+async function llPrepend(){
+  if(llBusy)return; llBusy=true;
+  const val=parseInt(document.getElementById('ll-val').value); if(isNaN(val)){llBusy=false;return;}
+  clearLog('ll-log'); log('ll-log','Prepending '+val+' at head…');
+  const node=new LLNode(val);
+  node.next=llHead; if(llType==='doubly'&&llHead)llHead.prev=node;
+  llHead=node; renderLL(); hlLL(node.id,'green');
+  log('ll-log','✓ New head is '+val);
+  await sleep(animSpeed); clrLL(); llBusy=false;
+}
+async function llInsertAt(){
+  if(llBusy)return; llBusy=true;
+  const val=parseInt(document.getElementById('ll-val').value);
+  const pos=parseInt(document.getElementById('ll-pos').value);
+  if(isNaN(val)||isNaN(pos)){llBusy=false;return;}
+  clearLog('ll-log'); log('ll-log','Inserting '+val+' at position '+pos+'…');
+  if(pos===0){await llPrepend();llBusy=false;return;}
+  let cur=llHead,i=0;
+  while(cur&&i<pos-1){hlLL(cur.id,'yellow');log('ll-log','At position '+i);await waitStep();clrLL();cur=cur.next;i++;}
+  if(!cur){log('ll-log','Position out of bounds');llBusy=false;return;}
+  const node=new LLNode(val);
+  node.next=cur.next; if(llType==='doubly'){node.prev=cur;if(cur.next)cur.next.prev=node;}
+  cur.next=node; renderLL(); hlLL(node.id,'green');
+  log('ll-log','✓ Inserted '+val+' at position '+pos);
+  await sleep(animSpeed); clrLL(); llBusy=false;
+}
+async function llDelete(){
+  if(llBusy)return; llBusy=true;
+  const pos=parseInt(document.getElementById('ll-pos').value); if(isNaN(pos)){llBusy=false;return;}
+  clearLog('ll-log'); log('ll-log','Deleting position '+pos+'…');
+  if(!llHead){log('ll-log','List is empty');llBusy=false;return;}
+  if(pos===0){hlLL(llHead.id,'red');await waitStep();llHead=llHead.next;if(llHead&&llType==='doubly')llHead.prev=null;clrLL();log('ll-log','✓ Head deleted');llBusy=false;return;}
+  let cur=llHead,i=0;
+  while(cur&&i<pos-1){hlLL(cur.id,'yellow');await waitStep();clrLL();cur=cur.next;i++;}
+  if(!cur||!cur.next){log('ll-log','Position out of bounds');llBusy=false;return;}
+  hlLL(cur.next.id,'red'); log('ll-log','Removing node '+cur.next.val);
+  await waitStep();
+  cur.next=cur.next.next; if(llType==='doubly'&&cur.next)cur.next.prev=cur;
+  clrLL(); log('ll-log','✓ Node deleted'); llBusy=false;
+}
+async function llReverse(){
+  if(llBusy)return; llBusy=true;
+  clearLog('ll-log'); log('ll-log','Reversing linked list…');
+  let prev=null,cur=llHead;
+  while(cur){
+    hlLL(cur.id,'yellow'); log('ll-log','Processing node '+cur.val);
+    await waitStep(); clrLL();
+    const nxt=cur.next; cur.next=prev;
+    if(llType==='doubly')cur.prev=nxt;
+    prev=cur; cur=nxt;
+  }
+  llHead=prev; renderLL(); hlLL(llHead?llHead.id:null,'green');
+  log('ll-log','✓ List reversed');
+  await sleep(animSpeed); clrLL(); llBusy=false;
+}
+function llReset(){llHead=null;llHighlights={};renderLL();clearLog('ll-log');log('ll-log','Reset.');llBusy=false;}
+// Init linked list with some data
+[3,7,1,5].forEach(v=>{const n=new LLNode(v);if(!llHead){llHead=n;}else{let c=llHead;while(c.next)c=c.next;c.next=n;}});
+renderLL();
+
+// ─── STACK ─────────────────────────────────────────────────────
+let stackData=[];
+let stackBusy=false;
+const STACK_MAX=10;
+
+function renderStack(){
+  const el=document.getElementById('stack-blocks');
+  el.innerHTML='';
+  stackData.forEach((v,i)=>{
+    const div=document.createElement('div');
+    div.className='stack-block';
+    div.id='sb-'+i;
+    div.innerHTML=v+(i===stackData.length-1?'<span class="stack-label">TOP</span>':'');
+    el.appendChild(div);
+  });
+  document.getElementById('stack-overflow').innerHTML=
+    stackData.length>=STACK_MAX?'<div class="stack-overflow">⚠ Stack overflow limit reached (max '+STACK_MAX+')</div>':'';
+}
+async function stackPush(){
+  if(stackBusy)return; stackBusy=true;
+  const val=parseInt(document.getElementById('stack-val').value); if(isNaN(val)){stackBusy=false;return;}
+  if(stackData.length>=STACK_MAX){log('stack-log','⚠ Stack overflow!');stackBusy=false;return;}
+  clearLog('stack-log'); log('stack-log','Pushing '+val+' onto stack…');
+  stackData.push(val); renderStack();
+  const top=document.getElementById('sb-'+(stackData.length-1));
+  if(top){top.classList.add('hl-green');}
+  log('stack-log','✓ '+val+' pushed. Stack size: '+stackData.length);
+  await sleep(animSpeed);
+  if(top)top.classList.remove('hl-green');
+  stackBusy=false;
+}
+async function stackPop(){
+  if(stackBusy)return; stackBusy=true;
+  if(!stackData.length){log('stack-log','⚠ Stack underflow!');stackBusy=false;return;}
+  clearLog('stack-log');
+  const top=document.getElementById('sb-'+(stackData.length-1));
+  if(top)top.classList.add('hl-red');
+  log('stack-log','Popping top element: '+stackData[stackData.length-1]);
+  await sleep(animSpeed);
+  const val=stackData.pop(); renderStack();
+  log('stack-log','✓ Popped '+val+'. Stack size: '+stackData.length);
+  stackBusy=false;
+}
+async function stackPeek(){
+  if(!stackData.length){log('stack-log','Stack is empty');return;}
+  clearLog('stack-log');
+  const top=document.getElementById('sb-'+(stackData.length-1));
+  if(top)top.classList.add('hl-blue');
+  log('stack-log','Peek → top element is '+stackData[stackData.length-1]);
+  await sleep(animSpeed*2);
+  if(top)top.classList.remove('hl-blue');
+}
+function stackReset(){stackData=[4,2,7,1];clearLog('stack-log');log('stack-log','Stack reset.');stackBusy=false;renderStack();}
+[4,2,7,1].forEach(v=>stackData.push(v));
+renderStack();
+
+// ─── QUEUE ─────────────────────────────────────────────────────
+let queueData=[];
+let qBusy=false;
+let qCircular=false;
+
+function renderQueue(){
+  const el=document.getElementById('queue-blocks');
+  el.innerHTML='';
+  queueData.forEach((v,i)=>{
+    const wrap=document.createElement('div');
+    const block=document.createElement('div');
+    block.className='queue-block';
+    block.id='qb-'+i;
+    block.textContent=v;
+    const lbl=document.createElement('div');
+    lbl.className='queue-label';
+    lbl.textContent=i===0?'Front':i===queueData.length-1?'Rear':'';
+    wrap.appendChild(block); wrap.appendChild(lbl);
+    el.appendChild(wrap);
+  });
+  if(!queueData.length){
+    const empty=document.createElement('span');
+    empty.style.cssText='color:var(--muted);font-size:.85rem;';
+    empty.textContent='(empty)';
+    el.appendChild(empty);
+  }
+  // circular indicator
+  if(qCircular&&queueData.length>1){
+    const circ=document.createElement('span');
+    circ.style.cssText='font-size:.75rem;color:var(--purple);margin-left:8px;';
+    circ.textContent='↪ circular';
+    el.appendChild(circ);
+  }
+}
+function toggleCircular(){
+  qCircular=!qCircular;
+  document.getElementById('q-mode-label').textContent=qCircular?'Circular':'Linear';
+  renderQueue();
+}
+async function enqueue(){
+  if(qBusy)return; qBusy=true;
+  const val=parseInt(document.getElementById('q-val').value); if(isNaN(val)){qBusy=false;return;}
+  clearLog('q-log'); log('q-log','Enqueueing '+val+' at rear…');
+  queueData.push(val); renderQueue();
+  const rear=document.getElementById('qb-'+(queueData.length-1));
+  if(rear)rear.classList.add('hl-green');
+  log('q-log','✓ '+val+' enqueued. Queue size: '+queueData.length);
+  await sleep(animSpeed);
+  if(rear)rear.classList.remove('hl-green');
+  qBusy=false;
+}
+async function dequeue(){
+  if(qBusy)return; qBusy=true;
+  if(!queueData.length){log('q-log','Queue is empty');qBusy=false;return;}
+  clearLog('q-log');
+  const front=document.getElementById('qb-0');
+  if(front)front.classList.add('hl-red');
+  log('q-log','Dequeueing front element: '+queueData[0]);
+  await sleep(animSpeed);
+  const val=queueData.shift(); renderQueue();
+  log('q-log','✓ Dequeued '+val+'. Queue size: '+queueData.length);
+  qBusy=false;
+}
+async function peekFront(){
+  if(!queueData.length){log('q-log','Queue is empty');return;}
+  clearLog('q-log');
+  const front=document.getElementById('qb-0');
+  if(front)front.classList.add('hl-blue');
+  log('q-log','Peek → front element is '+queueData[0]);
+  await sleep(animSpeed*2);
+  if(front)front.classList.remove('hl-blue');
+}
+function queueReset(){queueData=[3,8,5,2];clearLog('q-log');log('q-log','Queue reset.');qBusy=false;renderQueue();}
+[3,8,5,2].forEach(v=>queueData.push(v));
+renderQueue();
+
+// ─── BST ────────────────────────────────────────────────────────
+class BSTNode{constructor(v){this.v=v;this.l=null;this.r=null;}}
+let bstRoot=null;
+let bstHighlights={};
+let bstBusy=false;
+
+function bstInsertNode(root,v){
+  if(!root)return new BSTNode(v);
+  if(v<root.v)root.l=bstInsertNode(root.l,v);
+  else if(v>root.v)root.r=bstInsertNode(root.r,v);
+  return root;
+}
+function bstMin(node){while(node.l)node=node.l;return node;}
+function bstDeleteNode(root,v){
+  if(!root)return null;
+  if(v<root.v){root.l=bstDeleteNode(root.l,v);}
+  else if(v>root.v){root.r=bstDeleteNode(root.r,v);}
+  else{
+    if(!root.l)return root.r;
+    if(!root.r)return root.l;
+    const minRight=bstMin(root.r);
+    root.v=minRight.v;
+    root.r=bstDeleteNode(root.r,minRight.v);
+  }
+  return root;
+}
+function bstHeight(node){if(!node)return 0;return 1+Math.max(bstHeight(node.l),bstHeight(node.r));}
+function bstIsBalanced(node){
+  if(!node)return true;
+  const ld=bstHeight(node.l),rd=bstHeight(node.r);
+  return Math.abs(ld-rd)<=1&&bstIsBalanced(node.l)&&bstIsBalanced(node.r);
+}
+function bstLayout(root){
+  const pos=new Map(); let counter=0;
+  function inOrder(n,depth){
+    if(!n)return;
+    inOrder(n.l,depth+1);
+    pos.set(n,{x:counter*60+30,y:depth*70+30,rank:counter});
+    counter++;
+    inOrder(n.r,depth+1);
+  }
+  inOrder(root,0);
+  return pos;
+}
+function renderBST(){
+  const pos=bstLayout(bstRoot);
+  if(!pos.size){document.getElementById('bst-viz').innerHTML='<div style="color:var(--muted);padding:20px">Insert nodes to build the tree</div>';return;}
+  const maxX=Math.max(...[...pos.values()].map(p=>p.x))+40;
+  const maxY=Math.max(...[...pos.values()].map(p=>p.y))+40;
+  const svgNS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(svgNS,'svg');
+  svg.setAttribute('width',Math.max(maxX,300)); svg.setAttribute('height',Math.max(maxY,200));
+  svg.setAttribute('class','tree-svg');
+  // edges first
+  pos.forEach((p,n)=>{
+    if(n.l){const cp=pos.get(n.l);const edge=document.createElementNS(svgNS,'line');edge.setAttribute('class','t-edge'+(bstHighlights[n.l.v]?' hl-'+bstHighlights[n.l.v]:''));edge.setAttribute('x1',p.x);edge.setAttribute('y1',p.y+18);edge.setAttribute('x2',cp.x);edge.setAttribute('y2',cp.y-18);svg.appendChild(edge);}
+    if(n.r){const cp=pos.get(n.r);const edge=document.createElementNS(svgNS,'line');edge.setAttribute('class','t-edge'+(bstHighlights[n.r.v]?' hl-'+bstHighlights[n.r.v]:''));edge.setAttribute('x1',p.x);edge.setAttribute('y1',p.y+18);edge.setAttribute('x2',cp.x);edge.setAttribute('y2',cp.y-18);svg.appendChild(edge);}
+  });
+  // nodes
+  pos.forEach((p,n)=>{
+    const g=document.createElementNS(svgNS,'g');
+    g.setAttribute('class','t-node'+(bstHighlights[n.v]?' hl-'+bstHighlights[n.v]:''));
+    const c=document.createElementNS(svgNS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',18);g.appendChild(c);
+    const t=document.createElementNS(svgNS,'text');t.setAttribute('x',p.x);t.setAttribute('y',p.y);t.textContent=n.v;g.appendChild(t);
+    svg.appendChild(g);
+  });
+  document.getElementById('bst-viz').innerHTML=''; document.getElementById('bst-viz').appendChild(svg);
+  const balanced=bstIsBalanced(bstRoot);
+  const badge=document.getElementById('bst-balance-badge');
+  badge.textContent=balanced?'Balanced ✓':'Degenerate ⚠';
+  badge.className='balance-badge '+(balanced?'balanced':'unbalanced');
+}
+function hlBST(v,color){bstHighlights[v]=color;renderBST();}
+function clrBST(){bstHighlights={};renderBST();}
+async function bstInsert(){
+  if(bstBusy)return; bstBusy=true;
+  const val=parseInt(document.getElementById('bst-val').value); if(isNaN(val)){bstBusy=false;return;}
+  clearLog('bst-log'); log('bst-log','Inserting '+val+'…');
+  // Animate the search path
+  let cur=bstRoot;
+  while(cur){
+    hlBST(cur.v,'yellow'); log('bst-log','At node '+cur.v+': going '+(val<cur.v?'left':'right'));
+    await waitStep(); clrBST();
+    if(val<cur.v)cur=cur.l; else if(val>cur.v)cur=cur.r; else{log('bst-log',val+' already exists');bstBusy=false;return;}
+  }
+  bstRoot=bstInsertNode(bstRoot,val); renderBST(); hlBST(val,'green');
+  log('bst-log','✓ Inserted '+val); await sleep(animSpeed); clrBST(); bstBusy=false;
+}
+async function bstSearch(){
+  if(bstBusy)return; bstBusy=true;
+  const val=parseInt(document.getElementById('bst-val').value); if(isNaN(val)){bstBusy=false;return;}
+  clearLog('bst-log'); log('bst-log','Searching for '+val+'…');
+  let cur=bstRoot;
+  while(cur){
+    hlBST(cur.v,'yellow'); log('bst-log','Visiting '+cur.v+(cur.v===val?' ← FOUND!':''));
+    await waitStep();
+    if(cur.v===val){hlBST(val,'green');await sleep(animSpeed);clrBST();log('bst-log','✓ Found '+val);bstBusy=false;return;}
+    clrBST(); cur=val<cur.v?cur.l:cur.r;
+  }
+  log('bst-log','✗ '+val+' not found'); bstBusy=false;
+}
+async function bstDelete(){
+  if(bstBusy)return; bstBusy=true;
+  const val=parseInt(document.getElementById('bst-val').value); if(isNaN(val)){bstBusy=false;return;}
+  clearLog('bst-log'); log('bst-log','Deleting '+val+'…');
+  hlBST(val,'red'); await sleep(animSpeed);
+  bstRoot=bstDeleteNode(bstRoot,val); clrBST();
+  log('bst-log','✓ Deleted '+val); bstBusy=false;
+}
+async function bstTraverse(type){
+  if(bstBusy||!bstRoot)return; bstBusy=true;
+  clearLog('bst-log'); log('bst-log',type+' traversal:');
+  const result=[];
+  async function inorder(n){if(!n)return;await inorder(n.l);hlBST(n.v,'blue');log('bst-log','Visit: '+n.v);result.push(n.v);await waitStep();clrBST();await inorder(n.r);}
+  async function preorder(n){if(!n)return;hlBST(n.v,'blue');log('bst-log','Visit: '+n.v);result.push(n.v);await waitStep();clrBST();await preorder(n.l);await preorder(n.r);}
+  async function postorder(n){if(!n)return;await postorder(n.l);await postorder(n.r);hlBST(n.v,'blue');log('bst-log','Visit: '+n.v);result.push(n.v);await waitStep();clrBST();}
+  if(type==='inorder')await inorder(bstRoot);
+  else if(type==='preorder')await preorder(bstRoot);
+  else await postorder(bstRoot);
+  log('bst-log','Result: ['+result.join(', ')+']'); bstBusy=false;
+}
+function bstReset(){bstRoot=null;bstHighlights={};renderBST();clearLog('bst-log');log('bst-log','BST reset.');bstBusy=false;}
+[5,3,8,1,4,7,9].forEach(v=>{bstRoot=bstInsertNode(bstRoot,v);});
+renderBST();
+
+// ─── HEAP ────────────────────────────────────────────────────────
+let heapData=[2,4,6,8,10,12];
+let heapType='min';
+let heapBusy=false;
+
+function heapCmp(a,b){return heapType==='min'?a<b:a>b;}
+function heapSiftUp(arr,i){
+  while(i>0){const p=Math.floor((i-1)/2);if(heapCmp(arr[i],arr[p])){[arr[i],arr[p]]=[arr[p],arr[i]];i=p;}else break;}
+}
+function heapSiftDown(arr,i,n){
+  while(true){let best=i;const l=2*i+1,r=2*i+2;
+    if(l<n&&heapCmp(arr[l],arr[best]))best=l;
+    if(r<n&&heapCmp(arr[r],arr[best]))best=r;
+    if(best===i)break;[arr[i],arr[best]]=[arr[best],arr[i]];i=best;}
+}
+function renderHeap(highlights={}){
+  // Tree view
+  function heapTreeLayout(arr){
+    const pos=new Map(); const n=arr.length;
+    for(let i=0;i<n;i++){
+      const depth=Math.floor(Math.log2(i+1));
+      const posInLevel=i-((1<<depth)-1);
+      const levelWidth=1<<depth;
+      const x=(posInLevel+0.5)*(600/levelWidth);
+      const y=depth*65+30;
+      pos.set(i,{x,y});
+    }
+    return pos;
+  }
+  const pos=heapTreeLayout(heapData);
+  const svgNS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(svgNS,'svg');
+  const maxY=heapData.length>0?Math.floor(Math.log2(heapData.length))*65+70:80;
+  svg.setAttribute('width','100%'); svg.setAttribute('height',maxY); svg.setAttribute('viewBox','0 0 600 '+maxY);
+  svg.setAttribute('class','tree-svg');
+  // edges
+  for(let i=1;i<heapData.length;i++){
+    const p=Math.floor((i-1)/2);
+    const {x:px,y:py}=pos.get(p); const {x:cx,y:cy}=pos.get(i);
+    const edge=document.createElementNS(svgNS,'line');
+    edge.setAttribute('class','t-edge'+(highlights[i]?' hl-'+highlights[i]:''));
+    edge.setAttribute('x1',px);edge.setAttribute('y1',py+16);edge.setAttribute('x2',cx);edge.setAttribute('y2',cy-16);
+    svg.appendChild(edge);
+  }
+  // nodes
+  pos.forEach(({x,y},i)=>{
+    const g=document.createElementNS(svgNS,'g');
+    g.setAttribute('class','t-node'+(highlights[i]?' hl-'+highlights[i]:''));
+    const c=document.createElementNS(svgNS,'circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',16);g.appendChild(c);
+    const t=document.createElementNS(svgNS,'text');t.setAttribute('x',x);t.setAttribute('y',y);t.textContent=heapData[i];g.appendChild(t);
+    svg.appendChild(g);
+  });
+  document.getElementById('heap-tree-viz').innerHTML='';
+  document.getElementById('heap-tree-viz').appendChild(svg);
+  // Array view
+  const arrEl=document.getElementById('heap-arr-viz');
+  arrEl.innerHTML='';
+  heapData.forEach((v,i)=>{
+    const cell=document.createElement('div');
+    cell.className='heap-arr-cell'+(highlights[i]?' hl-'+highlights[i]:'');
+    cell.innerHTML=v+'<span class="ai">'+i+'</span>';
+    arrEl.appendChild(cell);
+  });
+}
+async function heapInsert(){
+  if(heapBusy)return; heapBusy=true;
+  const val=parseInt(document.getElementById('heap-val').value); if(isNaN(val)){heapBusy=false;return;}
+  clearLog('heap-log'); log('heap-log','Inserting '+val+'…');
+  heapData.push(val); renderHeap({[heapData.length-1]:'yellow'});
+  let i=heapData.length-1;
+  while(i>0){
+    const p=Math.floor((i-1)/2);
+    renderHeap({[i]:'yellow',[p]:'blue'});
+    log('heap-log','Compare '+heapData[i]+' with parent '+heapData[p]);
+    await waitStep();
+    if(heapCmp(heapData[i],heapData[p])){
+      [heapData[i],heapData[p]]=[heapData[p],heapData[i]];
+      renderHeap({[p]:'green',[i]:'blue'});
+      log('heap-log','Swap! '+heapData[p]+' ↑');
+      await sleep(animSpeed/2); i=p;
+    } else break;
+  }
+  renderHeap({[i]:'green'}); await sleep(animSpeed); renderHeap();
+  log('heap-log','✓ Inserted. Root is '+heapData[0]); heapBusy=false;
+}
+async function heapExtract(){
+  if(heapBusy||!heapData.length)return; heapBusy=true;
+  clearLog('heap-log'); log('heap-log','Extracting '+heapType+' ('+heapData[0]+')…');
+  renderHeap({0:'red'}); await sleep(animSpeed);
+  const extracted=heapData[0];
+  heapData[0]=heapData.pop();
+  if(heapData.length){heapSiftDown(heapData,0,heapData.length);}
+  renderHeap({0:'green'}); await sleep(animSpeed); renderHeap();
+  log('heap-log','✓ Extracted '+extracted+'. New root: '+(heapData[0]??'none'));
+  heapBusy=false;
+}
+async function heapify(){
+  if(heapBusy)return; heapBusy=true;
+  clearLog('heap-log');
+  // First highlight violations
+  const violations=[];
+  for(let i=0;i<heapData.length;i++){
+    const l=2*i+1,r=2*i+2;
+    if((l<heapData.length&&heapCmp(heapData[l],heapData[i]))||(r<heapData.length&&heapCmp(heapData[r],heapData[i]))){violations.push(i);}
+  }
+  if(violations.length){
+    const hl={};violations.forEach(i=>hl[i]='red');
+    renderHeap(hl); log('heap-log','Heap property violations at: '+violations.join(', '));
+    await sleep(animSpeed*1.5);
+  }
+  log('heap-log','Running heapify (build heap)…');
+  for(let i=Math.floor(heapData.length/2)-1;i>=0;i--){
+    renderHeap({[i]:'yellow'}); await waitStep();
+    heapSiftDown(heapData,i,heapData.length);
+    renderHeap({[i]:'green'}); await sleep(animSpeed/2);
+  }
+  renderHeap(); log('heap-log','✓ Heap property restored!'); heapBusy=false;
+}
+function toggleHeapType(){heapType=heapType==='min'?'max':'min';document.getElementById('heap-type-label').textContent=heapType==='min'?'Min-Heap':'Max-Heap';heapData.sort((a,b)=>heapType==='min'?a-b:b-a);renderHeap();}
+function heapReset(){heapData=[2,4,6,8,10,12];renderHeap();clearLog('heap-log');log('heap-log','Heap reset.');heapBusy=false;}
+renderHeap();
+
+// ─── HASH TABLE ──────────────────────────────────────────────────
+let htBuckets=new Array(8).fill(null).map(()=>[]);
+let htSize=0;
+let htBusy=false;
+
+function hashFn(key,size){let h=0;for(let i=0;i<key.length;i++)h=(h*31+key.charCodeAt(i))%size;return h;}
+function renderHT(highlights={}){
+  const el=document.getElementById('ht-viz');
+  const grid=document.createElement('div');
+  grid.className='ht-grid';
+  grid.style.gridTemplateColumns='repeat('+htBuckets.length+',1fr)';
+  htBuckets.forEach((bucket,i)=>{
+    const div=document.createElement('div');
+    div.className='ht-bucket';
+    div.id='htb-'+i;
+    div.innerHTML='<div class="ht-bucket-idx">'+i+'</div>';
+    const chain=document.createElement('div'); chain.className='ht-chain';
+    bucket.forEach(({k,v})=>{
+      const entry=document.createElement('div');
+      entry.className='ht-entry'+(highlights[k]?' hl-'+highlights[k]:'');
+      entry.textContent=k+':'+v;
+      chain.appendChild(entry);
+    });
+    div.appendChild(chain);
+    if(highlights['bucket-'+i])div.style.background='#4f8ef720';
+    grid.appendChild(div);
+  });
+  el.innerHTML=''; el.appendChild(grid);
+  const lf=htSize/htBuckets.length;
+  document.getElementById('ht-lf-text').textContent=lf.toFixed(2);
+  const bar=document.getElementById('ht-lf-bar');
+  bar.style.width=Math.min(lf*100,100)+'%';
+  bar.style.background=lf>0.75?'var(--red)':lf>0.5?'var(--yellow)':'var(--green)';
+}
+async function htInsert(){
+  if(htBusy)return; htBusy=true;
+  const key=document.getElementById('ht-key').value.trim();
+  const val=document.getElementById('ht-val').value.trim();
+  if(!key){htBusy=false;return;}
+  clearLog('ht-log'); log('ht-log','Inserting key="'+key+'" value="'+val+'"…');
+  const idx=hashFn(key,htBuckets.length);
+  log('ht-log','hash("'+key+'") = '+idx);
+  renderHT({['bucket-'+idx]:true}); await sleep(animSpeed);
+  const existing=htBuckets[idx].findIndex(e=>e.k===key);
+  if(existing>=0){htBuckets[idx][existing].v=val;log('ht-log','Updated existing key');}
+  else{htBuckets[idx].push({k:key,v:val});htSize++;
+    if(htBuckets[idx].length>1)log('ht-log','⚠ Collision! Chaining at bucket '+idx);
+  }
+  renderHT({[key]:'green'}); await sleep(animSpeed); renderHT();
+  if(htSize/htBuckets.length>0.75){log('ht-log','Load factor > 0.75 — resizing…');await htResize();}
+  log('ht-log','✓ Inserted. Load factor: '+(htSize/htBuckets.length).toFixed(2));
+  htBusy=false;
+}
+async function htGet(){
+  if(htBusy)return; htBusy=true;
+  const key=document.getElementById('ht-key').value.trim(); if(!key){htBusy=false;return;}
+  clearLog('ht-log'); log('ht-log','Getting key="'+key+'"…');
+  const idx=hashFn(key,htBuckets.length);
+  log('ht-log','Checking bucket '+idx);
+  renderHT({['bucket-'+idx]:true}); await sleep(animSpeed);
+  const entry=htBuckets[idx].find(e=>e.k===key);
+  if(entry){renderHT({[key]:'blue'});log('ht-log','✓ Found: "'+key+'" → "'+entry.v+'"');}
+  else log('ht-log','✗ Key "'+key+'" not found');
+  await sleep(animSpeed); renderHT(); htBusy=false;
+}
+async function htDelete(){
+  if(htBusy)return; htBusy=true;
+  const key=document.getElementById('ht-key').value.trim(); if(!key){htBusy=false;return;}
+  clearLog('ht-log'); log('ht-log','Deleting key="'+key+'"…');
+  const idx=hashFn(key,htBuckets.length);
+  renderHT({['bucket-'+idx]:true}); await sleep(animSpeed);
+  const i=htBuckets[idx].findIndex(e=>e.k===key);
+  if(i>=0){
+    renderHT({[key]:'red'}); await sleep(animSpeed);
+    htBuckets[idx].splice(i,1); htSize--; renderHT();
+    log('ht-log','✓ Deleted "'+key+'"');
+  } else log('ht-log','✗ Key not found');
+  htBusy=false;
+}
+async function htResize(){
+  const oldBuckets=htBuckets;
+  htBuckets=new Array(oldBuckets.length*2).fill(null).map(()=>[]);
+  htSize=0;
+  for(const bucket of oldBuckets) for(const {k,v} of bucket){
+    const idx=hashFn(k,htBuckets.length);
+    htBuckets[idx].push({k,v}); htSize++;
+  }
+  renderHT(); log('ht-log','Resized to '+htBuckets.length+' buckets');
+  await sleep(animSpeed);
+}
+function htReset(){htBuckets=new Array(8).fill(null).map(()=>[]);htSize=0;renderHT();clearLog('ht-log');log('ht-log','Hash table reset.');htBusy=false;}
+// Pre-populate
+[['apple','fruit'],['banana','fruit'],['car','vehicle'],['dog','animal']].forEach(([k,v])=>{const idx=hashFn(k,htBuckets.length);htBuckets[idx].push({k,v});htSize++;});
+renderHT();
+
+// ─── TRIE ─────────────────────────────────────────────────────────
+class TrieNode{constructor(ch=''){this.ch=ch;this.children={};this.isEnd=false;this.id=Math.random().toString(36).slice(2,6);}}
+let trieRoot=new TrieNode('root');
+let trieHighlights={};
+let trieBusy=false;
+
+function trieWords(node,prefix='',results=[]){
+  if(node.isEnd)results.push(prefix);
+  for(const[ch,child] of Object.entries(node.children))trieWords(child,prefix+ch,results);
+  return results;
+}
+function trieLayout(root){
+  const pos=new Map();
+  function layout(node,x,y,spread){
+    pos.set(node,{x,y});
+    const children=Object.values(node.children);
+    if(!children.length)return;
+    const childSpread=Math.max(spread/children.length,60);
+    const startX=x-(childSpread*(children.length-1))/2;
+    children.forEach((c,i)=>layout(c,startX+i*childSpread,y+65,childSpread));
+  }
+  layout(root,300,30,360);
+  return pos;
+}
+function renderTrie(){
+  const pos=trieLayout(trieRoot);
+  const maxX=Math.max(...[...pos.values()].map(p=>p.x))+40;
+  const maxY=Math.max(...[...pos.values()].map(p=>p.y))+40;
+  const svgNS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(svgNS,'svg');
+  svg.setAttribute('width',Math.max(maxX,300)); svg.setAttribute('height',Math.max(maxY,150));
+  svg.setAttribute('class','tree-svg');
+  // edges
+  pos.forEach((p,n)=>{
+    Object.values(n.children).forEach(child=>{
+      const cp=pos.get(child);
+      const edge=document.createElementNS(svgNS,'line');
+      edge.setAttribute('class','t-edge'+(trieHighlights[child.id]?' hl-'+trieHighlights[child.id]:''));
+      edge.setAttribute('x1',p.x);edge.setAttribute('y1',p.y+16);edge.setAttribute('x2',cp.x);edge.setAttribute('y2',cp.y-16);
+      svg.appendChild(edge);
+    });
+  });
+  // nodes
+  pos.forEach((p,n)=>{
+    if(n===trieRoot)return;
+    const g=document.createElementNS(svgNS,'g');
+    g.setAttribute('class','t-node'+(trieHighlights[n.id]?' hl-'+trieHighlights[n.id]:'')+(n.isEnd?' hl-green':''));
+    const c=document.createElementNS(svgNS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',16);g.appendChild(c);
+    const t=document.createElementNS(svgNS,'text');t.setAttribute('x',p.x);t.setAttribute('y',p.y);t.textContent=n.ch;g.appendChild(t);
+    svg.appendChild(g);
+  });
+  document.getElementById('trie-viz').innerHTML=''; document.getElementById('trie-viz').appendChild(svg);
+}
+function clrTrie(){trieHighlights={};renderTrie();}
+function hlTrie(id,color){trieHighlights[id]=color;renderTrie();}
+async function trieInsert(){
+  if(trieBusy)return; trieBusy=true;
+  const word=document.getElementById('trie-word').value.trim().toLowerCase(); if(!word){trieBusy=false;return;}
+  clearLog('trie-log'); log('trie-log','Inserting "'+word+'"…');
+  let cur=trieRoot;
+  for(const ch of word){
+    log('trie-log','Processing character "'+ch+'"');
+    if(!cur.children[ch]){cur.children[ch]=new TrieNode(ch);log('trie-log','Created new node "'+ch+'"');}
+    else log('trie-log','"'+ch+'" already exists');
+    cur=cur.children[ch]; hlTrie(cur.id,'yellow'); await waitStep();
+  }
+  cur.isEnd=true; hlTrie(cur.id,'green'); await sleep(animSpeed); clrTrie();
+  log('trie-log','✓ "'+word+'" inserted (end marker set)'); trieBusy=false;
+}
+async function trieSearch(){
+  if(trieBusy)return; trieBusy=true;
+  const word=document.getElementById('trie-word').value.trim().toLowerCase(); if(!word){trieBusy=false;return;}
+  clearLog('trie-log'); log('trie-log','Searching "'+word+'"…');
+  let cur=trieRoot;
+  for(const ch of word){
+    if(!cur.children[ch]){log('trie-log','✗ Character "'+ch+'" not found → "'+word+'" not in trie');clrTrie();trieBusy=false;return;}
+    cur=cur.children[ch]; hlTrie(cur.id,'yellow'); log('trie-log','Found "'+ch+'"'); await waitStep();
+  }
+  if(cur.isEnd){hlTrie(cur.id,'green');log('trie-log','✓ "'+word+'" found!');}
+  else{hlTrie(cur.id,'red');log('trie-log','✗ Prefix exists but "'+word+'" is not a complete word');}
+  await sleep(animSpeed); clrTrie(); trieBusy=false;
+}
+async function trieDelete(){
+  if(trieBusy)return; trieBusy=true;
+  const word=document.getElementById('trie-word').value.trim().toLowerCase(); if(!word){trieBusy=false;return;}
+  clearLog('trie-log'); log('trie-log','Deleting "'+word+'"…');
+  function del(node,word,depth){
+    if(!node)return false;
+    if(depth===word.length){if(node.isEnd){node.isEnd=false;return Object.keys(node.children).length===0;}return false;}
+    const ch=word[depth];
+    if(!node.children[ch])return false;
+    const shouldDelete=del(node.children[ch],word,depth+1);
+    if(shouldDelete){delete node.children[ch];return Object.keys(node.children).length===0&&!node.isEnd;}
+    return false;
+  }
+  const deleted=del(trieRoot,word,0);
+  renderTrie();
+  log('trie-log',deleted||true?'✓ "'+word+'" deleted':'✗ "'+word+'" not found');
+  trieBusy=false;
+}
+async function trieAutoComplete(){
+  if(trieBusy)return; trieBusy=true;
+  const prefix=document.getElementById('trie-word').value.trim().toLowerCase(); if(!prefix){trieBusy=false;return;}
+  clearLog('trie-log'); log('trie-log','Auto-completing "'+prefix+'"…');
+  let cur=trieRoot;
+  // Navigate to prefix end
+  for(const ch of prefix){
+    if(!cur.children[ch]){
+      log('trie-log','No words with prefix "'+prefix+'"');
+      document.getElementById('trie-ac-results').textContent='No matches for "'+prefix+'"';
+      trieBusy=false; return;
+    }
+    cur=cur.children[ch]; hlTrie(cur.id,'yellow'); await waitStep();
+  }
+  hlTrie(cur.id,'blue');
+  const completions=trieWords(cur,prefix);
+  log('trie-log','Found '+completions.length+' completions: '+completions.join(', '));
+  const resEl=document.getElementById('trie-ac-results');
+  resEl.innerHTML='Completions: '+completions.map(w=>'<span class="trie-word match">'+w+'</span>').join(' ');
+  await sleep(animSpeed); clrTrie(); trieBusy=false;
+}
+function trieReset(){trieRoot=new TrieNode('root');trieHighlights={};renderTrie();document.getElementById('trie-ac-results').textContent='';clearLog('trie-log');log('trie-log','Trie reset.');trieBusy=false;}
+// Pre-populate trie
+['apple','app','application','apply','apt','banana','band','ban'].forEach(w=>{
+  let cur=trieRoot;
+  for(const ch of w){if(!cur.children[ch])cur.children[ch]=new TrieNode(ch);cur=cur.children[ch];}
+  cur.isEnd=true;
+});
+renderTrie();
+</script>
+</body>
+</html>

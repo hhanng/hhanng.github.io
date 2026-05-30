@@ -220,4 +220,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-29 · 104 agents built · latest: #104 Mom's Everyday English Survival Kit: https://hhanng.github.io/agent-104.html</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-30 · 104 agents built · latest: #104 Mom's Everyday English Survival Kit: https://hhanng.github.io/agent-104.html</sub>
