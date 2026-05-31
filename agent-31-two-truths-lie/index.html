@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two Truths & a Lie Generator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f0fb;
+      --accent: #ccc0e8;
+      --accent2: #b8a8e0;
+      --primary: #5040a8;
+      --primary-light: #7060c8;
+      --text: #2a2040;
+      --text-muted: #7060a0;
+      --card-bg: #ffffff;
+      --border: #e0d8f4;
+      --green: #22c55e;
+      --red: #ef4444;
+      --green-light: #dcfce7;
+      --red-light: #fee2e2;
+      --shadow: 0 4px 20px rgba(80,64,168,0.12);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 28px 20px 24px;
+      text-align: center;
+    }
+    header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; }
+    header p { margin-top: 6px; opacity: 0.85; font-size: 1rem; }
+
+    /* API Key */
+    .api-bar {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .api-bar label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+    .api-bar input {
+      flex: 1; min-width: 220px; max-width: 380px;
+      padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 0.9rem; font-family: monospace;
+      background: var(--bg);
+    }
+    .api-bar input:focus { outline: none; border-color: var(--primary); }
+    .api-saved { font-size: 0.78rem; color: var(--green); font-weight: 600; }
+
+    /* Stats bar */
+    .stats-bar {
+      background: var(--accent);
+      padding: 8px 20px;
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .stat-item { font-size: 0.82rem; color: var(--primary); font-weight: 600; }
+    .stat-item span { font-weight: 800; }
+
+    /* Main */
+    main { max-width: 760px; margin: 0 auto; padding: 24px 16px 80px; }
+
+    /* Tabs */
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      padding: 14px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .tab-btn:hover { border-color: var(--accent2); color: var(--primary); }
+    .tab-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+    .tab-btn .tab-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+
+    /* Cards / Panels */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    /* Inputs */
+    input[type="text"], select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, select:focus { outline: none; border-color: var(--primary); }
+
+    /* Category chips */
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip {
+      padding: 6px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      background: white;
+      color: var(--text-muted);
+      font-weight: 600;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .chip:hover { border-color: var(--accent2); color: var(--primary); }
+    .chip.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+    /* Difficulty */
+    .diff-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+    .diff-btn {
+      padding: 10px 8px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .diff-btn:hover { border-color: var(--accent2); color: var(--primary); }
+    .diff-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .diff-btn .diff-emoji { display: block; font-size: 1.2rem; margin-bottom: 2px; }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 22px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(80,64,168,0.3); }
+    .btn-primary:disabled { background: var(--accent); color: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      border: 1.5px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--primary); background: var(--bg); }
+    .btn-sm { padding: 8px 14px; font-size: 0.82rem; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* Action row */
+    .action-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+    /* Statements / Game cards */
+    .statements-area { margin-top: 20px; }
+    .stmt-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .game-cards { display: flex; flex-direction: column; gap: 12px; }
+    .game-card {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      cursor: pointer;
+      background: white;
+      transition: all 0.2s;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .game-card:hover { border-color: var(--accent2); transform: translateY(-2px); box-shadow: var(--shadow); }
+    .game-card.selected-correct {
+      background: var(--green-light);
+      border-color: var(--green);
+    }
+    .game-card.selected-wrong {
+      background: var(--red-light);
+      border-color: var(--red);
+      animation: shake 0.5s ease;
+    }
+    .game-card.revealed-lie {
+      background: var(--red-light);
+      border-color: var(--red);
+    }
+    .game-card.revealed-truth {
+      background: var(--green-light);
+      border-color: var(--green);
+    }
+    .game-card.disabled { cursor: default; pointer-events: none; }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(4px); }
+    }
+
+    .card-letter {
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .game-card.selected-correct .card-letter { background: var(--green); color: white; }
+    .game-card.selected-wrong .card-letter { background: var(--red); color: white; }
+    .game-card.revealed-lie .card-letter { background: var(--red); color: white; }
+    .game-card.revealed-truth .card-letter { background: var(--green); color: white; }
+
+    .card-body { flex: 1; }
+    .card-text { font-size: 0.95rem; font-weight: 600; line-height: 1.5; }
+    .card-explanation {
+      margin-top: 8px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      display: none;
+    }
+    .card-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 6px;
+      display: inline-block;
+    }
+    .badge-truth { background: var(--green); color: white; }
+    .badge-lie { background: var(--red); color: white; }
+
+    /* Result banner */
+    .result-banner {
+      text-align: center;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: none;
+    }
+    .result-banner.correct { background: var(--green-light); color: #166534; }
+    .result-banner.wrong { background: var(--red-light); color: #991b1b; }
+
+    /* Confetti */
+    .confetti-container {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 9999; overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px; height: 10px;
+      animation: confetti-fall 1.5s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* About me mode */
+    .fact-input-group { display: flex; flex-direction: column; gap: 12px; }
+    .fact-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .fact-number {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .fact-row.lie-selected .fact-number { background: var(--red); color: white; }
+    .fact-input-wrapper { flex: 1; position: relative; }
+    .lie-mark-btn {
+      padding: 6px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .lie-mark-btn:hover { border-color: var(--red); color: var(--red); }
+    .lie-mark-btn.active { background: var(--red); border-color: var(--red); color: white; }
+
+    .polished-area {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--bg);
+      border-radius: 12px;
+      border: 1.5px dashed var(--border);
+    }
+    .polished-statement {
+      padding: 10px 12px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      border: 1.5px solid var(--border);
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    /* Party mode */
+    .party-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      border: 2px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .party-progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      justify-content: center;
+    }
+    .party-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .party-dot.done { background: var(--primary); }
+    .party-dot.current { background: var(--accent2); }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Error */
+    .error-box {
+      background: var(--red-light);
+      border: 1.5px solid var(--red);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #991b1b;
+      font-size: 0.88rem;
+      margin-top: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 520px) {
+      header h1 { font-size: 1.5rem; }
+      .diff-grid { grid-template-columns: 1fr 1fr 1fr; }
+      .action-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎭 Two Truths & a Lie</h1>
+  <p>Generate clever party game sets with AI — or craft your own</p>
+</header>
+
+<div class="api-bar">
+  <label>Gemini API Key:</label>
+  <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
+  <span class="api-saved" id="apiSaved" style="display:none">✓ Saved</span>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">Games played: <span id="statGames">0</span></div>
+  <div class="stat-item">Win rate: <span id="statWin">—</span></div>
+  <div class="stat-item">Best topic: <span id="statTopic">—</span></div>
+</div>
+
+<main>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="generate">
+      <span class="tab-icon">🎲</span>
+      Generate for me
+    </button>
+    <button class="tab-btn" data-tab="aboutme">
+      <span class="tab-icon">🙋</span>
+      About me
+    </button>
+  </div>
+
+  <!-- ===================== PANEL: GENERATE ===================== -->
+  <div class="panel active" id="panel-generate">
+    <div class="card-section">
+      <div class="section-label">Topic</div>
+      <input type="text" id="topicInput" placeholder='e.g. "space", "Taylor Swift", "ancient Rome"'>
+      <div class="section-label" style="margin-top:16px">Category</div>
+      <div class="chips" id="categoryChips">
+        <div class="chip active" data-val="Random facts">🎲 Random</div>
+        <div class="chip" data-val="Pop culture">🎤 Pop culture</div>
+        <div class="chip" data-val="Science">🔬 Science</div>
+        <div class="chip" data-val="History">📜 History</div>
+        <div class="chip" data-val="Animals">🦁 Animals</div>
+        <div class="chip" data-val="Sports">⚽ Sports</div>
+        <div class="chip" data-val="Food">🍕 Food</div>
+        <div class="chip" data-val="Movies">🎬 Movies</div>
+      </div>
+      <div class="section-label" style="margin-top:16px">Difficulty</div>
+      <div class="diff-grid">
+        <button class="diff-btn active" data-diff="Easy">
+          <span class="diff-emoji">😊</span>Easy<br><small style="font-weight:400;font-size:0.7rem">Obvious lie</small>
+        </button>
+        <button class="diff-btn" data-diff="Medium">
+          <span class="diff-emoji">🤔</span>Medium<br><small style="font-weight:400;font-size:0.7rem">Tricky</small>
+        </button>
+        <button class="diff-btn" data-diff="Hard">
+          <span class="diff-emoji">🧠</span>Hard<br><small style="font-weight:400;font-size:0.7rem">Very sneaky</small>
+        </button>
+      </div>
+      <div class="action-row">
+        <button class="btn btn-primary btn-full" id="generateBtn">✨ Generate</button>
+      </div>
+      <div id="genError" class="error-box" style="display:none"></div>
+    </div>
+
+    <!-- Game Area -->
+    <div id="gameArea" style="display:none">
+      <div class="card-section">
+        <div class="stmt-label">Click the one you think is the LIE 👇</div>
+        <div class="game-cards" id="gameCards"></div>
+        <div class="result-banner" id="resultBanner"></div>
+        <div class="action-row" id="postRevealActions" style="display:none">
+          <button class="btn btn-primary" id="playAgainBtn">🔄 Play again</button>
+          <button class="btn btn-secondary" id="shareBtn">📋 Share this set</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Party Mode -->
+    <div class="card-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-weight:700;font-size:1rem">🎉 Party Mode</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-top:2px">5 sets back to back for your group</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="partyBtn">Start party!</button>
+      </div>
+      <div id="partyArea" style="display:none;margin-top:16px">
+        <div class="party-progress" id="partyProgress"></div>
+        <div id="partyContent"></div>
+        <div class="action-row" style="margin-top:12px">
+          <button class="btn btn-primary btn-sm" id="partyNextBtn" style="display:none">Next set →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL: ABOUT ME ===================== -->
+  <div class="panel" id="panel-aboutme">
+    <div class="card-section">
+      <div class="section-label">Enter your 3 statements — mark which one is the lie</div>
+      <div class="fact-input-group" id="factInputs">
+        <div class="fact-row" id="factRow0">
+          <div class="fact-number">1</div>
+          <div class="fact-input-wrapper">
+            <input type="text" class="fact-input" placeholder="Statement 1 (truth or lie)">
+          </div>
+          <button class="lie-mark-btn" data-idx="0">Mark as Lie</button>
+        </div>
+        <div class="fact-row" id="factRow1">
+          <div class="fact-number">2</div>
+          <div class="fact-input-wrapper">
+            <input type="text" class="fact-input" placeholder="Statement 2 (truth or lie)">
+          </div>
+          <button class="lie-mark-btn" data-idx="1">Mark as Lie</button>
+        </div>
+        <div class="fact-row" id="factRow2">
+          <div class="fact-number">3</div>
+          <div class="fact-input-wrapper">
+            <input type="text" class="fact-input" placeholder="Statement 3 (truth or lie)">
+          </div>
+          <button class="lie-mark-btn" data-idx="2">Mark as Lie</button>
+        </div>
+      </div>
+      <div id="lieStatus" style="margin-top:10px;font-size:0.82rem;color:var(--text-muted)">No lie marked yet</div>
+
+      <div class="action-row" style="margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" id="polishBtn">✨ Polish my statements</button>
+        <button class="btn btn-secondary btn-sm" id="makeHarderBtn">🕵️ Make the lie more believable</button>
+        <button class="btn btn-secondary btn-sm" id="suggestLieBtn">💡 Suggest a better lie</button>
+      </div>
+      <div id="aboutError" class="error-box" style="display:none"></div>
+    </div>
+
+    <div class="card-section" id="polishedSection" style="display:none">
+      <div class="section-label">AI-polished version</div>
+      <div id="polishedArea"></div>
+      <div class="action-row" style="margin-top:12px">
+        <button class="btn btn-secondary btn-sm" id="copyPolishedBtn">📋 Copy final set</button>
+        <button class="btn btn-secondary btn-sm" id="applyPolishedBtn">Apply to fields</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Confetti container -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<script>
+// ==================== STATE ====================
+const state = {
+  apiKey: '',
+  category: 'Random facts',
+  difficulty: 'Easy',
+  currentStatements: [],
+  lieIndex: -1,       // index in currentStatements of the lie
+  revealed: false,
+  score: { correct: 0, total: 0 },
+  stats: { games: 0, correct: 0, topics: {} },
+  aboutLieIdx: -1,
+  polishedStatements: [],
+  partyMode: false,
+  partySets: [],
+  partyIdx: 0,
+};
+
+// ==================== INIT ====================
+function init() {
+  loadStats();
+  loadApiKey();
+  renderStats();
+  bindTabs();
+  bindCategoryChips();
+  bindDiffBtns();
+  bindGenerate();
+  bindAboutMe();
+  bindParty();
+  document.getElementById('apiKey').addEventListener('input', onApiKeyChange);
+}
+
+function loadApiKey() {
+  const saved = localStorage.getItem('ttl_apiKey');
+  if (saved) {
+    state.apiKey = saved;
+    document.getElementById('apiKey').value = saved;
+    document.getElementById('apiSaved').style.display = 'inline';
+  }
+}
+
+function onApiKeyChange(e) {
+  state.apiKey = e.target.value.trim();
+  localStorage.setItem('ttl_apiKey', state.apiKey);
+  document.getElementById('apiSaved').style.display = state.apiKey ? 'inline' : 'none';
+}
+
+function loadStats() {
+  const s = localStorage.getItem('ttl_stats');
+  if (s) state.stats = JSON.parse(s);
+}
+
+function saveStats() {
+  localStorage.setItem('ttl_stats', JSON.stringify(state.stats));
+}
+
+function renderStats() {
+  document.getElementById('statGames').textContent = state.stats.games;
+  const wr = state.stats.games > 0 ? Math.round((state.stats.correct / state.stats.games) * 100) + '%' : '—';
+  document.getElementById('statWin').textContent = wr;
+  const topics = state.stats.topics;
+  let bestTopic = '—';
+  let bestCount = 0;
+  for (const [t, c] of Object.entries(topics)) {
+    if (c > bestCount) { bestCount = c; bestTopic = t; }
+  }
+  document.getElementById('statTopic').textContent = bestTopic === '—' ? '—' : bestTopic;
+}
+
+// ==================== TABS ====================
+function bindTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+// ==================== CATEGORY CHIPS ====================
+function bindCategoryChips() {
+  document.querySelectorAll('#categoryChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#categoryChips .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      state.category = chip.dataset.val;
+    });
+  });
+}
+
+// ==================== DIFFICULTY ====================
+function bindDiffBtns() {
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.difficulty = btn.dataset.diff;
+    });
+  });
+}
+
+// ==================== GEMINI API ====================
+async function callGemini(prompt) {
+  const key = state.apiKey;
+  if (!key) throw new Error('Please enter your Gemini API key above.');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.9, maxOutputTokens: 1024 }
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API error ${res.status}`);
+  }
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return text;
+}
+
+function parseJSON(text) {
+  // Strip markdown fences if present
+  const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  return JSON.parse(cleaned);
+}
+
+// ==================== GENERATE MODE ====================
+function bindGenerate() {
+  document.getElementById('generateBtn').addEventListener('click', generateSet);
+  document.getElementById('playAgainBtn').addEventListener('click', resetGame);
+  document.getElementById('shareBtn').addEventListener('click', shareSet);
+}
+
+async function generateSet(topic) {
+  const topicVal = (typeof topic === 'string') ? topic : (document.getElementById('topicInput').value.trim() || state.category);
+  const errEl = document.getElementById('genError');
+  errEl.style.display = 'none';
+
+  const genBtn = document.getElementById('generateBtn');
+  genBtn.disabled = true;
+  genBtn.textContent = '⏳ Generating…';
+
+  const gameArea = document.getElementById('gameArea');
+  gameArea.style.display = 'block';
+  document.getElementById('gameCards').innerHTML = `<div class="loading"><div class="spinner"></div>Asking Gemini for something tricky…</div>`;
+  document.getElementById('resultBanner').style.display = 'none';
+  document.getElementById('postRevealActions').style.display = 'none';
+
+  const prompt = `Generate a 'Two Truths and a Lie' set about '${topicVal}'. Difficulty: ${state.difficulty}.
+
+Rules:
+- The two truths must be genuinely true, verifiable facts
+- The lie must be plausible and fit naturally with the truths
+- For Hard difficulty, make the lie almost indistinguishable from truth
+- All 3 statements should be similar in length and style so the lie doesn't stand out
+
+Return JSON:
+{
+  "statements": [
+    { "text": "Statement A", "isLie": false, "explanation": "This is true because..." },
+    { "text": "Statement B", "isLie": true, "explanation": "This is the lie because..." },
+    { "text": "Statement C", "isLie": false, "explanation": "This is true because..." }
+  ]
+}
+Shuffle the order randomly — don't always put the lie second.
+Return only JSON, no markdown.`;
+
+  try {
+    const raw = await callGemini(prompt);
+    const data = parseJSON(raw);
+    state.currentStatements = data.statements;
+    state.lieIndex = data.statements.findIndex(s => s.isLie);
+    state.revealed = false;
+    renderGameCards();
+    // Update stats topic counter
+    if (!state.stats.topics[topicVal]) state.stats.topics[topicVal] = 0;
+    state.stats.topics[topicVal]++;
+    saveStats();
+  } catch (e) {
+    errEl.textContent = '⚠️ ' + e.message;
+    errEl.style.display = 'block';
+    document.getElementById('gameCards').innerHTML = '';
+    gameArea.style.display = 'none';
+  } finally {
+    genBtn.disabled = false;
+    genBtn.textContent = '✨ Generate';
+  }
+}
+
+function renderGameCards(container, stmts, onGuess) {
+  const cards = stmts || state.currentStatements;
+  const el = container || document.getElementById('gameCards');
+  const labels = ['A', 'B', 'C'];
+  el.innerHTML = '';
+  cards.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    card.dataset.idx = i;
+    card.innerHTML = `
+      <div class="card-letter">${labels[i]}</div>
+      <div class="card-body">
+        <div class="card-text">${escHtml(s.text)}</div>
+        <div class="card-explanation">${escHtml(s.explanation || '')}</div>
+      </div>`;
+    card.addEventListener('click', () => {
+      if (onGuess) { onGuess(i); return; }
+      handleGuess(i);
+    });
+    el.appendChild(card);
+  });
+}
+
+function handleGuess(idx) {
+  if (state.revealed) return;
+  state.revealed = true;
+  const isCorrect = idx === state.lieIndex;
+
+  // Update score
+  state.score.total++;
+  state.stats.games++;
+  if (isCorrect) {
+    state.score.correct++;
+    state.stats.correct++;
+  }
+  saveStats();
+  renderStats();
+
+  revealCards(idx);
+
+  const banner = document.getElementById('resultBanner');
+  banner.style.display = 'block';
+  if (isCorrect) {
+    banner.className = 'result-banner correct';
+    banner.textContent = '🎉 Correct! You spotted the lie!';
+    launchConfetti();
+  } else {
+    banner.className = 'result-banner wrong';
+    banner.textContent = `❌ Wrong! The lie was statement ${['A','B','C'][state.lieIndex]}.`;
+  }
+
+  document.getElementById('postRevealActions').style.display = 'flex';
+}
+
+function revealCards(guessIdx) {
+  const cardEls = document.querySelectorAll('#gameCards .game-card');
+  cardEls.forEach((card, i) => {
+    card.classList.add('disabled');
+    const s = state.currentStatements[i];
+    card.querySelector('.card-explanation').style.display = 'block';
+    const badge = document.createElement('span');
+    badge.className = 'card-badge ' + (s.isLie ? 'badge-lie' : 'badge-truth');
+    badge.textContent = s.isLie ? '❌ LIE' : '✓ TRUTH';
+    card.querySelector('.card-body').appendChild(badge);
+    if (i === guessIdx && s.isLie) card.classList.add('selected-correct');
+    else if (i === guessIdx && !s.isLie) card.classList.add('selected-wrong');
+    else if (s.isLie) card.classList.add('revealed-lie');
+    else card.classList.add('revealed-truth');
+  });
+}
+
+function resetGame() {
+  state.revealed = false;
+  state.currentStatements = [];
+  document.getElementById('gameArea').style.display = 'none';
+  document.getElementById('topicInput').focus();
+}
+
+function shareSet() {
+  const lines = state.currentStatements.map((s, i) => `${['A','B','C'][i]}. ${s.text}`);
+  const text = `Two Truths & a Lie — Can you spot it?\n\n${lines.join('\n')}\n\n(The lie: ${['A','B','C'][state.lieIndex]})`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('shareBtn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = '📋 Share this set'; }, 2000);
+  });
+}
+
+// ==================== CONFETTI ====================
+function launchConfetti() {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#5040a8', '#ccc0e8', '#22c55e', '#f59e0b', '#ec4899', '#3b82f6'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const left = Math.random() * 100;
+    const delay = Math.random() * 0.8;
+    const size = 6 + Math.random() * 10;
+    const shape = Math.random() > 0.5 ? '50%' : '0%';
+    piece.style.cssText = `left:${left}%;background:${color};width:${size}px;height:${size}px;border-radius:${shape};animation-delay:${delay}s;animation-duration:${1.2 + Math.random() * 0.8}s;`;
+    container.appendChild(piece);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 3000);
+}
+
+// ==================== ABOUT ME ====================
+function bindAboutMe() {
+  document.querySelectorAll('.lie-mark-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      if (state.aboutLieIdx === idx) {
+        state.aboutLieIdx = -1;
+      } else {
+        state.aboutLieIdx = idx;
+      }
+      updateLieMarkers();
+    });
+  });
+  document.getElementById('polishBtn').addEventListener('click', polishStatements);
+  document.getElementById('makeHarderBtn').addEventListener('click', makeHarder);
+  document.getElementById('suggestLieBtn').addEventListener('click', suggestLie);
+  document.getElementById('copyPolishedBtn').addEventListener('click', copyPolished);
+  document.getElementById('applyPolishedBtn').addEventListener('click', applyPolished);
+}
+
+function updateLieMarkers() {
+  document.querySelectorAll('.lie-mark-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === state.aboutLieIdx);
+    document.getElementById('factRow' + i).classList.toggle('lie-selected', i === state.aboutLieIdx);
+  });
+  const status = document.getElementById('lieStatus');
+  if (state.aboutLieIdx === -1) {
+    status.textContent = 'No lie marked yet';
+  } else {
+    status.textContent = `Statement ${state.aboutLieIdx + 1} marked as the lie`;
+  }
+}
+
+function getAboutStatements() {
+  return [...document.querySelectorAll('.fact-input')].map(i => i.value.trim());
+}
+
+function validateAbout() {
+  const stmts = getAboutStatements();
+  if (stmts.some(s => !s)) throw new Error('Please fill in all 3 statements.');
+  if (state.aboutLieIdx === -1) throw new Error('Please mark which statement is the lie.');
+  return stmts;
+}
+
+async function polishStatements() {
+  const errEl = document.getElementById('aboutError');
+  errEl.style.display = 'none';
+  try {
+    const stmts = validateAbout();
+    const btn = document.getElementById('polishBtn');
+    btn.disabled = true; btn.textContent = '⏳ Polishing…';
+    const prompt = `Polish these two truths and a lie statements to sound more interesting and natural. Keep the same facts but make them more engaging.
+Statements:
+1. ${stmts[0]}
+2. ${stmts[1]}
+3. ${stmts[2]}
+Lie index (0-based): ${state.aboutLieIdx}
+Return JSON: { "statements": [{ "text": "polished text", "isLie": false }, ...] }
+Return only JSON.`;
+    const raw = await callGemini(prompt);
+    const data = parseJSON(raw);
+    state.polishedStatements = data.statements;
+    renderPolished();
+    btn.disabled = false; btn.textContent = '✨ Polish my statements';
+  } catch (e) {
+    errEl.textContent = '⚠️ ' + e.message; errEl.style.display = 'block';
+    document.getElementById('polishBtn').disabled = false;
+    document.getElementById('polishBtn').textContent = '✨ Polish my statements';
+  }
+}
+
+async function makeHarder() {
+  const errEl = document.getElementById('aboutError');
+  errEl.style.display = 'none';
+  try {
+    const stmts = validateAbout();
+    const btn = document.getElementById('makeHarderBtn');
+    btn.disabled = true; btn.textContent = '⏳ Tweaking…';
+    const lieText = stmts[state.aboutLieIdx];
+    const prompt = `This is the "lie" in a Two Truths and a Lie game: "${lieText}"
+The truths are: "${stmts.filter((_, i) => i !== state.aboutLieIdx).join('" and "')}"
+Rewrite the lie to be harder to spot — make it sound more plausible and fit naturally with the truths. Keep it similar in style and length.
+Return JSON: { "statements": [ same 3 statements but with the lie replaced by a sneakier version, in the same positions, each with "text" and "isLie" fields ] }
+Return only JSON.`;
+    const raw = await callGemini(prompt);
+    const data = parseJSON(raw);
+    state.polishedStatements = data.statements;
+    renderPolished('More believable lie:');
+    btn.disabled = false; btn.textContent = '🕵️ Make the lie more believable';
+  } catch (e) {
+    errEl.textContent = '⚠️ ' + e.message; errEl.style.display = 'block';
+    document.getElementById('makeHarderBtn').disabled = false;
+    document.getElementById('makeHarderBtn').textContent = '🕵️ Make the lie more believable';
+  }
+}
+
+async function suggestLie() {
+  const errEl = document.getElementById('aboutError');
+  errEl.style.display = 'none';
+  try {
+    const stmts = validateAbout();
+    const btn = document.getElementById('suggestLieBtn');
+    btn.disabled = true; btn.textContent = '⏳ Thinking…';
+    const truths = stmts.filter((_, i) => i !== state.aboutLieIdx);
+    const prompt = `Based on these two truths, generate a better, more believable lie for a Two Truths and a Lie game:
+Truth 1: "${truths[0]}"
+Truth 2: "${truths[1]}"
+The lie should: fit thematically with the truths, sound equally plausible, be roughly the same length/style.
+Return JSON: { "suggested_lie": "the lie text", "why": "why this makes a good lie" }
+Return only JSON.`;
+    const raw = await callGemini(prompt);
+    const data = parseJSON(raw);
+    const stmtsCopy = [...stmts];
+    stmtsCopy[state.aboutLieIdx] = data.suggested_lie;
+    state.polishedStatements = stmtsCopy.map((t, i) => ({ text: t, isLie: i === state.aboutLieIdx }));
+    renderPolished('Suggested alternative lie: ' + (data.why || ''));
+    btn.disabled = false; btn.textContent = '💡 Suggest a better lie';
+  } catch (e) {
+    errEl.textContent = '⚠️ ' + e.message; errEl.style.display = 'block';
+    document.getElementById('suggestLieBtn').disabled = false;
+    document.getElementById('suggestLieBtn').textContent = '💡 Suggest a better lie';
+  }
+}
+
+function renderPolished(note) {
+  const section = document.getElementById('polishedSection');
+  const area = document.getElementById('polishedArea');
+  section.style.display = 'block';
+  area.innerHTML = '';
+  if (note) {
+    const noteEl = document.createElement('div');
+    noteEl.style.cssText = 'font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;font-style:italic;';
+    noteEl.textContent = note;
+    area.appendChild(noteEl);
+  }
+  state.polishedStatements.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'polished-statement';
+    const badge = s.isLie ? '<span class="card-badge badge-lie" style="margin-left:8px">LIE</span>' : '';
+    div.innerHTML = `<strong style="min-width:16px">${i+1}.</strong> <span>${escHtml(s.text)}</span>${badge}`;
+    area.appendChild(div);
+  });
+}
+
+function copyPolished() {
+  if (!state.polishedStatements.length) return;
+  const lines = state.polishedStatements.map((s, i) => `${i+1}. ${s.text}`);
+  const text = `Two Truths & a Lie:\n\n${lines.join('\n')}`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyPolishedBtn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = '📋 Copy final set'; }, 2000);
+  });
+}
+
+function applyPolished() {
+  if (!state.polishedStatements.length) return;
+  const inputs = document.querySelectorAll('.fact-input');
+  state.polishedStatements.forEach((s, i) => { inputs[i].value = s.text; });
+}
+
+// ==================== PARTY MODE ====================
+function bindParty() {
+  document.getElementById('partyBtn').addEventListener('click', startParty);
+  document.getElementById('partyNextBtn').addEventListener('click', nextPartySet);
+}
+
+async function startParty() {
+  const topic = document.getElementById('topicInput').value.trim() || state.category;
+  const btn = document.getElementById('partyBtn');
+  btn.disabled = true; btn.textContent = '⏳ Generating 5 sets…';
+  const area = document.getElementById('partyArea');
+  const content = document.getElementById('partyContent');
+  area.style.display = 'block';
+  content.innerHTML = `<div class="loading"><div class="spinner"></div>Generating 5 sets for the party…</div>`;
+
+  const progress = document.getElementById('partyProgress');
+  progress.innerHTML = Array.from({length:5}, (_, i) => `<div class="party-dot" id="pdot${i}"></div>`).join('');
+
+  try {
+    state.partySets = [];
+    for (let i = 0; i < 5; i++) {
+      const prompt = `Generate a 'Two Truths and a Lie' set about '${topic}'. Difficulty: ${state.difficulty}. Make it different from other sets on this topic.
+Rules: truths must be verifiable facts, lie must be plausible.
+Return JSON: {"statements":[{"text":"...","isLie":false,"explanation":"..."},...]}, shuffle order, lie not always second. Return only JSON.`;
+      const raw = await callGemini(prompt);
+      const data = parseJSON(raw);
+      state.partySets.push(data.statements);
+      document.getElementById('pdot' + i).className = 'party-dot done';
+    }
+    state.partyIdx = 0;
+    renderPartySet();
+  } catch (e) {
+    content.innerHTML = `<div class="error-box">⚠️ ${escHtml(e.message)}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Start party!';
+  }
+}
+
+function renderPartySet() {
+  const set = state.partySets[state.partyIdx];
+  if (!set) return;
+  const content = document.getElementById('partyContent');
+  const labels = ['A', 'B', 'C'];
+
+  // update dots
+  for (let i = 0; i < 5; i++) {
+    const dot = document.getElementById('pdot' + i);
+    if (dot) dot.className = 'party-dot' + (i < state.partyIdx ? ' done' : i === state.partyIdx ? ' current' : '');
+  }
+
+  const cardHtml = set.map((s, i) => `
+    <div class="game-card" data-idx="${i}" data-party-card>
+      <div class="card-letter">${labels[i]}</div>
+      <div class="card-body">
+        <div class="card-text">${escHtml(s.text)}</div>
+        <div class="card-explanation">${escHtml(s.explanation || '')}</div>
+      </div>
+    </div>`).join('');
+
+  content.innerHTML = `
+    <div style="font-size:0.78rem;color:var(--text-muted);font-weight:600;text-align:center;margin-bottom:8px">SET ${state.partyIdx + 1} OF 5 — Click the lie!</div>
+    <div class="game-cards party-cards">${cardHtml}</div>
+    <div class="result-banner" id="partyResult"></div>`;
+
+  content.querySelectorAll('[data-party-card]').forEach(card => {
+    card.addEventListener('click', () => handlePartyGuess(parseInt(card.dataset.idx)));
+  });
+
+  const nextBtn = document.getElementById('partyNextBtn');
+  nextBtn.style.display = 'none';
+}
+
+function handlePartyGuess(idx) {
+  const set = state.partySets[state.partyIdx];
+  const lieIdx = set.findIndex(s => s.isLie);
+  const isCorrect = idx === lieIdx;
+  const labels = ['A', 'B', 'C'];
+
+  content.querySelectorAll('[data-party-card]').forEach((card, i) => {
+    card.classList.add('disabled');
+    card.querySelector('.card-explanation').style.display = 'block';
+    const s = set[i];
+    const badge = document.createElement('span');
+    badge.className = 'card-badge ' + (s.isLie ? 'badge-lie' : 'badge-truth');
+    badge.textContent = s.isLie ? '❌ LIE' : '✓ TRUTH';
+    card.querySelector('.card-body').appendChild(badge);
+    if (i === idx && s.isLie) card.classList.add('selected-correct');
+    else if (i === idx && !s.isLie) card.classList.add('selected-wrong');
+    else if (s.isLie) card.classList.add('revealed-lie');
+    else card.classList.add('revealed-truth');
+  });
+
+  const result = document.getElementById('partyResult');
+  result.style.display = 'block';
+  if (isCorrect) {
+    result.className = 'result-banner correct';
+    result.textContent = '🎉 Correct! The lie was ' + labels[lieIdx];
+    launchConfetti();
+  } else {
+    result.className = 'result-banner wrong';
+    result.textContent = `❌ The lie was actually ${labels[lieIdx]}!`;
+  }
+
+  const nextBtn = document.getElementById('partyNextBtn');
+  if (state.partyIdx < state.partySets.length - 1) {
+    nextBtn.style.display = 'inline-flex';
+    nextBtn.textContent = `Next set (${state.partyIdx + 2}/5) →`;
+  } else {
+    nextBtn.style.display = 'inline-flex';
+    nextBtn.textContent = '🎊 Party complete!';
+    nextBtn.onclick = () => {
+      document.getElementById('partyArea').style.display = 'none';
+    };
+  }
+}
+
+function nextPartySet() {
+  state.partyIdx++;
+  renderPartySet();
+}
+
+// ==================== UTILS ====================
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Fix reference to content in party handler
+const content = { querySelectorAll: (sel) => document.getElementById('partyContent').querySelectorAll(sel) };
+
+// Start
+init();
+</script>
+</body>
+</html>

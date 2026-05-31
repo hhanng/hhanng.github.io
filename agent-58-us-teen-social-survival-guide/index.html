@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>US Teen Social Survival Guide</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+  header {
+    background: #1a1d27;
+    border-bottom: 1px solid #2d3148;
+    padding: 20px 24px;
+    text-align: center;
+  }
+  header h1 { font-size: 1.8rem; font-weight: 700; color: #4f8ef7; letter-spacing: -0.5px; }
+  header p { color: #94a3b8; font-size: 0.9rem; margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    background: #4f8ef7;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 16px 24px 0;
+    background: #1a1d27;
+    border-bottom: 2px solid #2d3148;
+    overflow-x: auto;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px 18px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: #cbd5e1; background: #232636; }
+  .tab-btn.active { color: #4f8ef7; border-bottom-color: #4f8ef7; background: #0f1117; }
+
+  /* PANELS */
+  .panel { display: none; padding: 28px 24px; max-width: 1100px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title span { color: #4f8ef7; }
+
+  /* TOPICS GRID */
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .topic-card {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .topic-card:hover {
+    border-color: #4f8ef7;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(79,142,247,0.15);
+  }
+  .topic-icon { font-size: 2.2rem; margin-bottom: 12px; }
+  .topic-title { font-size: 1rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px; }
+  .topic-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; margin-bottom: 14px; }
+  .read-btn {
+    background: #4f8ef720;
+    border: 1px solid #4f8ef740;
+    color: #4f8ef7;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .read-btn:hover { background: #4f8ef730; }
+
+  /* GUIDE PANEL */
+  .guide-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .back-btn {
+    background: #232636;
+    border: 1px solid #2d3148;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { color: #e2e8f0; border-color: #4f8ef7; }
+  .guide-icon-title { font-size: 1.5rem; font-weight: 700; color: #e2e8f0; }
+
+  .guide-prompt {
+    text-align: center;
+    padding: 60px 20px;
+    color: #64748b;
+  }
+  .guide-prompt .big-icon { font-size: 4rem; margin-bottom: 16px; }
+  .guide-prompt p { font-size: 1rem; }
+
+  .guide-section {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 16px;
+  }
+  .guide-section h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #4f8ef7;
+    margin-bottom: 14px;
+  }
+  .tips-list { list-style: none; }
+  .tips-list li {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.88rem;
+    color: #cbd5e1;
+    border-bottom: 1px solid #2d314820;
+    line-height: 1.5;
+  }
+  .tips-list li:last-child { border-bottom: none; }
+  .tip-num {
+    min-width: 22px;
+    height: 22px;
+    background: #4f8ef720;
+    color: #4f8ef7;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+
+  .dos-donts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:600px) { .dos-donts { grid-template-columns: 1fr; } }
+  .dos, .donts { background: #0f1117; border-radius: 8px; padding: 16px; }
+  .dos h4 { color: #4ade80; font-size: 0.8rem; margin-bottom: 10px; }
+  .donts h4 { color: #f87171; font-size: 0.8rem; margin-bottom: 10px; }
+  .dos ul, .donts ul { list-style: none; }
+  .dos ul li, .donts ul li {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    padding: 4px 0;
+    display: flex;
+    gap: 6px;
+  }
+  .dos ul li::before { content: "✓"; color: #4ade80; font-weight: 700; }
+  .donts ul li::before { content: "✗"; color: #f87171; font-weight: 700; }
+
+  .scenario-box {
+    background: #0f1117;
+    border-left: 3px solid #a78bfa;
+    padding: 16px 18px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 12px;
+  }
+  .scenario-box .scenario-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #a78bfa;
+    margin-bottom: 8px;
+  }
+  .scenario-box .scenario-text {
+    font-size: 0.88rem;
+    color: #cbd5e1;
+    font-style: italic;
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+  .scenario-box .scenario-advice {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+
+  /* SCENARIOS PANEL */
+  .scenarios-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .scenario-counter {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+  .scenario-nav-btns { display: flex; gap: 8px; }
+  .nav-btn {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { border-color: #4f8ef7; color: #e2e8f0; }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .scenario-prog-bar {
+    background: #1a1d27;
+    border-radius: 99px;
+    height: 4px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .scenario-prog-fill {
+    height: 100%;
+    background: #4f8ef7;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .scenario-card {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    padding: 28px;
+  }
+  .scenario-situation {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 24px;
+    line-height: 1.6;
+    padding: 16px;
+    background: #0f1117;
+    border-radius: 8px;
+    border-left: 3px solid #4f8ef7;
+  }
+  .scenario-prompt {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .scenario-options { display: flex; flex-direction: column; gap: 10px; }
+  .scenario-option {
+    background: #0f1117;
+    border: 2px solid #2d3148;
+    border-radius: 10px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .scenario-option:hover:not(.revealed) { border-color: #4f8ef7; }
+  .option-letter {
+    min-width: 24px;
+    height: 24px;
+    background: #2d3148;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    transition: all 0.2s;
+  }
+  .option-text { font-size: 0.88rem; color: #94a3b8; line-height: 1.5; }
+  .scenario-option.selected .option-letter {
+    background: #4f8ef7;
+    color: #fff;
+  }
+  .scenario-option.selected .option-text { color: #e2e8f0; }
+  .scenario-option.selected { border-color: #4f8ef7; }
+  .scenario-option.revealed { cursor: default; }
+
+  .option-feedback {
+    margin-top: 8px;
+    padding: 10px 14px;
+    background: #1a1d2760;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    display: none;
+    border-left: 2px solid #4f8ef7;
+  }
+  .option-feedback.visible { display: block; }
+
+  .reveal-note {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: #475569;
+    font-style: italic;
+  }
+
+  /* CHECKLIST PANEL */
+  .checklist-header {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+  .checklist-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .checklist-header-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e2e8f0;
+  }
+  .checklist-prog-count {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #4ade80;
+  }
+  .overall-prog-bar-bg {
+    background: #0f1117;
+    border-radius: 99px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .overall-prog-bar-fill {
+    height: 100%;
+    background: #4ade80;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .checklist-category {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .checklist-cat-header {
+    padding: 14px 18px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #94a3b8;
+    border-bottom: 1px solid #2d3148;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .checklist-items { padding: 8px 0; }
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .checklist-item:hover { background: #232636; }
+  .check-box {
+    min-width: 18px;
+    height: 18px;
+    border: 2px solid #2d3148;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-top: 1px;
+  }
+  .check-box.checked { background: #4ade80; border-color: #4ade80; }
+  .check-box.checked::after { content: "✓"; color: #0f1117; font-size: 0.7rem; font-weight: 900; }
+  .check-text { font-size: 0.85rem; color: #94a3b8; line-height: 1.4; transition: color 0.2s; }
+  .checklist-item.done .check-text { color: #475569; text-decoration: line-through; }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid #2d3148;
+    color: #64748b;
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: #f87171; color: #f87171; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0f1117; }
+  ::-webkit-scrollbar-thumb { background: #2d3148; border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">#58 · Social Skills</div>
+  <h1>💬 US Teen Social Survival Guide</h1>
+  <p>Real advice for navigating friendships, dating, drama, and life in high school</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('topics')">📚 TOPICS</button>
+  <button class="tab-btn" onclick="switchTab('guide')">📖 GUIDE</button>
+  <button class="tab-btn" onclick="switchTab('scenarios')">🎭 SCENARIOS</button>
+  <button class="tab-btn" onclick="switchTab('checklist')">✅ CHECKLIST</button>
+</div>
+
+<!-- TOPICS -->
+<div id="panel-topics" class="panel active">
+  <div class="section-title">📚 Choose a <span>Topic</span></div>
+  <div class="topics-grid" id="topics-grid"></div>
+</div>
+
+<!-- GUIDE -->
+<div id="panel-guide" class="panel">
+  <div id="guide-prompt" class="guide-prompt">
+    <div class="big-icon">📖</div>
+    <p>Select a topic from the <strong>TOPICS</strong> tab to read the guide.</p>
+  </div>
+  <div id="guide-content" style="display:none;">
+    <div class="guide-header">
+      <button class="back-btn" onclick="backToTopics()">← Back to Topics</button>
+      <div class="guide-icon-title" id="guide-title-display"></div>
+    </div>
+    <div class="guide-section">
+      <h3>🔑 Top Tips</h3>
+      <ul class="tips-list" id="guide-tips"></ul>
+    </div>
+    <div class="guide-section">
+      <h3>✅ Do's & ✗ Don'ts</h3>
+      <div class="dos-donts">
+        <div class="dos"><h4>DO THIS</h4><ul id="guide-dos"></ul></div>
+        <div class="donts"><h4>DON'T DO THIS</h4><ul id="guide-donts"></ul></div>
+      </div>
+    </div>
+    <div class="guide-section">
+      <h3>🎬 Real-Life Scenario</h3>
+      <div id="guide-scenario"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENARIOS -->
+<div id="panel-scenarios" class="panel">
+  <div class="section-title">🎭 What Would <span>You Do?</span></div>
+  <div class="scenarios-nav">
+    <span class="scenario-counter" id="scenario-counter">Situation 1 of 20</span>
+    <div class="scenario-nav-btns">
+      <button class="nav-btn" id="btn-prev" onclick="prevScenario()" disabled>← Prev</button>
+      <button class="nav-btn" id="btn-next" onclick="nextScenario()">Next →</button>
+    </div>
+  </div>
+  <div class="scenario-prog-bar">
+    <div class="scenario-prog-fill" id="scenario-prog-fill" style="width:5%"></div>
+  </div>
+  <div id="scenario-card-wrap"></div>
+</div>
+
+<!-- CHECKLIST -->
+<div id="panel-checklist" class="panel">
+  <div class="section-title">✅ Social Confidence <span>Challenges</span></div>
+  <div class="checklist-header">
+    <div class="checklist-header-top">
+      <span class="checklist-header-title">Overall Progress</span>
+      <span class="checklist-prog-count" id="overall-prog-count">0 / 30</span>
+    </div>
+    <div class="overall-prog-bar-bg">
+      <div class="overall-prog-bar-fill" id="overall-prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div id="checklist-wrap"></div>
+  <button class="reset-btn" onclick="resetAll()">Reset all challenges</button>
+</div>
+
+<script>
+const SK = 'teen58_';
+
+// ======================== DATA ========================
+
+const TOPICS = [
+  {
+    id: 'friends',
+    icon: '🤝',
+    title: 'Making Friends',
+    desc: 'How to start conversations, find your people, and keep real friendships going.',
+    tips: [
+      'Start with shared activities — clubs, classes, sports. You don\'t have to approach random strangers.',
+      'Ask questions about the other person instead of talking only about yourself. People love feeling heard.',
+      'Use low-stakes openers: "Is this seat taken?" or "Did you understand the homework?" work perfectly.',
+      'Show up consistently — friendships build over time, not in one conversation.',
+      'Don\'t force friendship with everyone. Finding 1-2 genuine people beats having 20 fake friends.',
+      'Be the one who follows up — text them after school, remember what they told you.',
+      'Give specific compliments, not generic ones. "I liked how you answered that in class" beats "Cool shirt."',
+    ],
+    dos: [
+      'Be genuinely curious about people\'s interests',
+      'Show up when a friend needs you, not just when it\'s fun',
+      'Introduce yourself first — most people are relieved someone else did it',
+      'Be consistent — disappearing and reappearing confuses people',
+    ],
+    donts: [
+      'Pretend to like things just to fit in with someone',
+      'Text someone 10 times if they don\'t reply once',
+      'Be friends with someone out of pity',
+      'Drop friends the moment a "cooler" option appears',
+    ],
+    scenario: {
+      situation: 'It\'s the second week of school and you want to talk to someone in your class who seems cool, but you\'ve never spoken to them before.',
+      advice: 'Wait for a natural opening — before class, or after an interesting question the teacher asks. Say something like "That answer was actually interesting, do you actually know a lot about this?" Keep it short, don\'t overthink it. If they respond warmly, great. If not, don\'t take it personally — some people take time.',
+    }
+  },
+  {
+    id: 'dating',
+    icon: '💕',
+    title: 'Dating & Relationships',
+    desc: 'Navigating crushes, first relationships, and knowing what healthy actually looks like.',
+    tips: [
+      'Your first relationship probably won\'t be your last — and that\'s okay. They\'re learning experiences.',
+      'Don\'t rush into relationships because "everyone else has one." Unready relationships create more stress than happiness.',
+      'Healthy relationships make you feel secure, not anxious. If you\'re constantly worried, something is off.',
+      'Communicate directly — don\'t expect your partner to read your mind.',
+      'It\'s completely okay to say "I like you but I\'m not ready to date."',
+      'Never let a relationship replace your friendships — keep your other connections alive.',
+      'Breakups are painful but they end. Give yourself time to actually feel bad about it.',
+    ],
+    dos: [
+      'Talk openly about what you want from a relationship',
+      'Respect each other\'s boundaries — physical and emotional',
+      'Keep spending time with friends outside the relationship',
+      'End things kindly if it\'s not working out',
+    ],
+    donts: [
+      'Stay in a relationship just because you\'re scared to be alone',
+      'Post your entire relationship on social media',
+      'Let jealousy become controlling behavior',
+      'Date someone just to make an ex jealous',
+    ],
+    scenario: {
+      situation: 'Your crush finally asks you out but you\'re not sure if you\'re ready for a relationship.',
+      advice: 'Be honest. "I really like you but I want to take things slow — can we hang out and see how it feels?" Most people respect honesty far more than an awkward yes you don\'t mean. You can also agree to one low-key hangout with no pressure to define it right away.',
+    }
+  },
+  {
+    id: 'socialmedia',
+    icon: '📱',
+    title: 'Social Media',
+    desc: 'How to use social media without letting it use you back.',
+    tips: [
+      'What you post follows you — think about whether you\'d be okay with a future college or employer seeing it.',
+      'Comparing your real life to someone else\'s highlight reel is a guaranteed way to feel bad.',
+      'Unfollow accounts that consistently make you feel worse about yourself. Your feed should help, not hurt.',
+      'The "like" count on a post doesn\'t measure your worth. Not even close.',
+      'Subtweeting, vague-posting, and passive-aggressive stories always escalate drama.',
+      'Take real breaks from social media — even a day. Notice how it feels without it.',
+      'If something feels wrong about a DM from someone, trust that feeling immediately.',
+    ],
+    dos: [
+      'Think before you post anything you might regret',
+      'Use DMs to make real plans — then actually go offline and hang out',
+      'Report harassment — most platforms have simple reporting tools',
+      'Curate your feed to be positive and actually interesting',
+    ],
+    donts: [
+      'Screenshot and share private conversations',
+      'Post when you\'re angry or emotional',
+      'Engage with people who are clearly trying to get a reaction',
+      'Base your self-worth on follower counts or likes',
+    ],
+    scenario: {
+      situation: 'A classmate posts something mean about someone in your friend group. Everyone is screenshotting it and sharing it around.',
+      advice: 'Don\'t share or amplify it. If it crosses into bullying, report the post on the platform. Text the person who was targeted privately to check on them. Adding your own comment — even to defend — usually just makes it bigger. The post loses power when people stop engaging with it.',
+    }
+  },
+  {
+    id: 'drama',
+    icon: '🎭',
+    title: 'Handling Drama',
+    desc: 'Stay out of it, deal with it, and move on without burning every bridge.',
+    tips: [
+      'Drama needs audience and fuel. Remove yourself from both.',
+      'The fastest way to end drama involving you: don\'t respond publicly. Handle it privately, or not at all.',
+      'Venting to one person almost always gets back to the person you vented about. Choose wisely.',
+      'Don\'t take sides until you\'ve heard both people directly — secondhand stories are always distorted.',
+      'If someone is constantly at the center of drama, that pattern is the data.',
+      'Apologizing genuinely (even when you\'re not 100% wrong) diffuses situations faster than any argument.',
+      'Not everything needs a response. Some things genuinely just die if you let them.',
+    ],
+    dos: [
+      'Deal with conflicts directly and privately',
+      'Listen to understand, not to respond',
+      'Apologize when you\'re wrong — for real',
+      'Walk away from arguments happening online',
+    ],
+    donts: [
+      'Gossip about people even when they deserve it',
+      'Get involved in drama that has nothing to do with you',
+      'Send messages when you\'re angry — wait at least an hour',
+      'Make the drama into a group effort',
+    ],
+    scenario: {
+      situation: 'Two of your close friends are in a big fight and both of them are trying to get you to pick a side.',
+      advice: 'Be honest with both: "I care about you both and I\'m not going to get in the middle. You two need to talk directly." Don\'t carry messages between them. Don\'t share what one said to the other. Being neutral isn\'t the same as not caring — it\'s the most respectful thing you can do.',
+    }
+  },
+  {
+    id: 'pressure',
+    icon: '😤',
+    title: 'Peer Pressure',
+    desc: 'Saying no, staying true to yourself, and not caving just to fit in.',
+    tips: [
+      '"No thanks" is a complete sentence. You don\'t owe anyone an explanation for it.',
+      'Real friends don\'t make you do things you don\'t want to do — they accept the no.',
+      'Have your exit script ready: "I\'m good, maybe next time" or "I\'ve gotta get home" always works.',
+      'Peer pressure doesn\'t always come from bad people. Good people do it unconsciously too.',
+      'The short-term discomfort of saying no is much smaller than the long-term regret of a bad decision.',
+      'If you gave in and regret it, that\'s information for next time — not a reason to keep going.',
+      'Seek out people with similar values. They make saying no to others much easier.',
+    ],
+    dos: [
+      'Prepare your "no" answer in advance for high-pressure situations',
+      'Support friends when they say no to something',
+      'Leave situations that feel wrong before they escalate',
+      'Find the people at school who share your values',
+    ],
+    donts: [
+      'Do something just to avoid momentary awkwardness',
+      'Assume saying no makes you uncool',
+      'Pressure others — even jokingly',
+      'Tell yourself "just this once" if you don\'t actually want to',
+    ],
+    scenario: {
+      situation: 'At a party, people are passing something around and pressuring you to try it. You don\'t want to.',
+      advice: '"I\'m good" and look away. If it continues: "Seriously, I\'m not into it" — calm and firm. If it keeps going, leave that room. You don\'t have to explain your decision, debate it, or justify it. If a friend is pressuring you heavily, that\'s worth examining later.',
+    }
+  },
+  {
+    id: 'cliques',
+    icon: '👥',
+    title: 'School Cliques',
+    desc: 'Understanding social groups, navigating them without losing who you are.',
+    tips: [
+      'Cliques are real but rarely as rigid as they seem from the outside.',
+      'Being liked by one group doesn\'t require being rejected by another — that\'s a high school myth.',
+      'The popular group is not always the happiest group. Perception and reality diverge a lot.',
+      'You don\'t have to choose one table forever. Your social circle can evolve every semester.',
+      'Having friends across different groups is an actual social superpower.',
+      'Don\'t change who you are to get into a group — you\'ll have to maintain the act indefinitely.',
+      'Being genuine and kind travels between cliques better than anything else.',
+    ],
+    dos: [
+      'Be friendly to people across different social groups',
+      'Let your social circle evolve naturally over time',
+      'Be proud of your actual interests, not just what\'s currently cool',
+      'Bring people together who wouldn\'t normally hang out',
+    ],
+    donts: [
+      'Abandon old friends to chase a "cooler" group',
+      'Mock people who are less socially positioned than you',
+      'Base your self-worth on which table you sit at',
+      'Change your personality completely just to fit in somewhere',
+    ],
+    scenario: {
+      situation: 'You\'re in a lunch group but some people in it are starting to exclude someone you actually like.',
+      advice: 'Make your own small gestures first — invite the excluded person into your conversation, include them naturally. You don\'t have to make it a dramatic confrontation. If exclusion turns into bullying, say something privately to the group: "Can we just let them sit here? It\'s not a big deal." One person standing up usually breaks the exclusion cycle.',
+    }
+  },
+  {
+    id: 'adults',
+    icon: '🗣️',
+    title: 'Talking to Adults',
+    desc: 'Parents, teachers, counselors — how to actually get heard.',
+    tips: [
+      'Most adults respond better when you start with your feelings, not accusations. "I feel like..." beats "You always..."',
+      'If one adult isn\'t listening, you\'re allowed to go to a different adult. That\'s not betrayal.',
+      'Counselors are confidential for most things — know when they\'re required to involve parents.',
+      'Come with specifics, not generalizations. "On Tuesday in 4th period" beats "Sometimes in class."',
+      'Practice what you want to say before a hard conversation — it genuinely helps.',
+      'Pick your timing. Don\'t start a hard conversation when someone is rushed or already stressed.',
+      'It\'s okay to ask: "What would help in this situation?" — most adults respond well to that.',
+    ],
+    dos: [
+      'Use "I feel" statements in difficult conversations',
+      'Pick a calm moment, not a heated one',
+      'Be direct about what you need from the conversation',
+      'Write down your thoughts first if you get flustered easily',
+    ],
+    donts: [
+      'Assume adults automatically know what you need',
+      'Give up after one failed conversation',
+      'Escalate to anger if they don\'t respond right away',
+      'Stay silent about something serious because it feels awkward',
+    ],
+    scenario: {
+      situation: 'A teacher called you out in front of the class unfairly and you\'re angry about it.',
+      advice: 'Don\'t respond in the moment — that only escalates. After class, ask to speak privately: "I wanted to talk about what happened. I felt embarrassed and I don\'t think the situation was quite right." Most teachers listen better to a calm private conversation than a public challenge. If they still don\'t, bring it to your counselor.',
+    }
+  },
+  {
+    id: 'confidence',
+    icon: '✨',
+    title: 'Self-Confidence',
+    desc: 'Building real confidence that doesn\'t depend on other people\'s approval.',
+    tips: [
+      'Confidence is built through action, not waiting until you feel ready.',
+      'Confident people aren\'t fearless — they just act despite the fear.',
+      'Social confidence comes from genuine connection, not performance.',
+      'Compliment yourself the same way you\'d compliment a friend. You deserve the same grace.',
+      'Know what you\'re actually good at. Own it without apologizing.',
+      'Rejection doesn\'t define you — everyone faces it. The way you respond to it does.',
+      'Comparison is the fastest way to drain confidence. Run your own race.',
+    ],
+    dos: [
+      'Do one small scary thing per week: raise your hand, speak first, join something new',
+      'Remind yourself of what you\'ve done well when you\'re struggling',
+      'Spend time with people who genuinely build you up',
+      'Accept compliments with a simple "thank you" — don\'t deflect them',
+    ],
+    donts: [
+      'Wait until you\'re 100% ready before trying something new',
+      'Put yourself down in public to seem relatable or humble',
+      'Measure your confidence by how many people like you',
+      'Compare your behind-the-scenes to others\' highlight reel',
+    ],
+    scenario: {
+      situation: 'You want to join a club or team but you\'re afraid of being judged or not being good enough.',
+      advice: 'Go anyway — just once. Not twice, just once. Tell yourself: "I\'m just checking it out." Taking the pressure off makes the first step much smaller. Most people in activities remember being new. If it goes badly, you never have to go back. If it goes well, you\'ve started something.',
+    }
+  },
+];
+
+const SCENARIOS = [
+  {
+    situation: "You're at lunch on the first day and don't know where to sit. You see one empty table and one table with people you don't know.",
+    options: [
+      { label: "A — Sit alone at the empty table", feedback: "Fair, especially if you need a moment to breathe. But you might miss an easy chance to connect. First days are when everyone is most open to meeting new faces." },
+      { label: "B — Ask if you can sit at the table with strangers", feedback: "Strong move. Most people say yes and you might have someone to talk to tomorrow too. It's uncomfortable for about 30 seconds, then it's fine." },
+      { label: "C — Wait by the line and hope someone invites you", feedback: "This one usually doesn't end well. Waiting for an invitation is passive, and people are busy with their own anxiety on day one. Taking initiative feels better even when it's scary." },
+    ]
+  },
+  {
+    situation: "Your friend group is talking about someone behind their back. The things they're saying feel pretty mean.",
+    options: [
+      { label: "A — Jump in and agree so you fit in", feedback: "This makes you part of it. If it gets back to the person, you'll be lumped in. And it doesn't actually feel good — which is probably why you noticed something was off." },
+      { label: "B — Stay quiet and laugh along", feedback: "At least you're not adding fuel. But silence can feel like agreement. It's the middle path, but it's not fully neutral either." },
+      { label: "C — Change the subject or say 'I think that's harsh'", feedback: "The harder choice but usually the one you'll be glad you made. You don't have to make a speech — even just 'I think that's rough' shifts the energy in the room." },
+    ]
+  },
+  {
+    situation: "Someone you barely know starts sliding into your DMs romantically and it's making you uncomfortable.",
+    options: [
+      { label: "A — Ghost them and hope they stop", feedback: "Ghosting sometimes works, but they may escalate. It also leaves you in suspense about when it'll stop or get weird." },
+      { label: "B — Respond with something vague to avoid conflict", feedback: "Vague replies often get read as interest and drag it out longer. Clarity is kinder — even when it feels uncomfortable to be direct." },
+      { label: "C — Say clearly: 'I'm not really into this, thanks'", feedback: "The most efficient option. It can feel harsh, but you're not being mean — you're being clear. Most people stop immediately. If they don't, that's information about them." },
+    ]
+  },
+  {
+    situation: "Your friend tells you a secret and two days later another friend asks you about it directly.",
+    options: [
+      { label: "A — Share it because your other friend asked sincerely", feedback: "This breaks trust and damages the friendship with the person who confided in you. They told you for a reason." },
+      { label: "B — Say 'I don't know anything about that'", feedback: "White lie, but it protects your friend. The risk: if they find out, it looks like you were hiding it. Because you were." },
+      { label: "C — Say 'that's not my story to tell — ask them directly'", feedback: "The cleanest answer. It's honest, it deflects appropriately, and it signals you're someone who can actually be trusted with things." },
+    ]
+  },
+  {
+    situation: "You're dating someone and they start checking your phone without asking.",
+    options: [
+      { label: "A — Let it go since you have nothing to hide", feedback: "Having nothing to hide doesn't mean having no right to privacy. This sets a precedent that the behavior is acceptable — and it isn't." },
+      { label: "B — Say it bothers you and ask them to stop", feedback: "The right call. Privacy is expected in a healthy relationship. How they respond to this conversation tells you a lot about where things are headed." },
+      { label: "C — Check their phone too so it's 'fair'", feedback: "This escalates rather than solves. You'd be competing for control instead of fixing the actual trust issue underneath it." },
+    ]
+  },
+  {
+    situation: "A popular group starts being nicer to you, but they're kind of mean to your current friends.",
+    options: [
+      { label: "A — Spend all your time with the new group — this is your chance", feedback: "You might regret burning existing friendships for a group that may not last. Popularity is more fragile than it seems from outside it." },
+      { label: "B — Hang out with them sometimes but keep your current friendships", feedback: "Mature and realistic. You can expand your circle without torching the existing one — the key is making sure your original friends don't feel replaced." },
+      { label: "C — Reject the invite to protect your current friendships", feedback: "Loyal, but potentially limiting. New connections aren't inherently a threat. You can pursue them without abandoning where you came from." },
+    ]
+  },
+  {
+    situation: "Someone posts something about you online that's embarrassing but technically true.",
+    options: [
+      { label: "A — Post something embarrassing about them in return", feedback: "This starts a war. It feels satisfying for about five minutes then spirals. The original post becomes far more visible in the process." },
+      { label: "B — Message them privately to ask them to take it down", feedback: "Direct and usually effective. Most people, when confronted calmly and privately, take it down. Public retaliation is much worse for everyone." },
+      { label: "C — Ignore it and not give it any attention", feedback: "Valid if you can actually pull it off. Posts fade fast with no engagement. The hard part is genuinely not refreshing it every five minutes." },
+    ]
+  },
+  {
+    situation: "Your friend is going through something hard and keeps texting you at all hours. You're exhausted but don't want to abandon them.",
+    options: [
+      { label: "A — Keep responding whenever they text to be a good friend", feedback: "Admirable, but unsustainable. You can't be anyone's therapist around the clock. Burning yourself out doesn't actually help them long-term." },
+      { label: "B — Tell them you care but you need to set some limits on late-night texts", feedback: "The hard but real answer. 'I'm here for you — can we talk daily at a regular time? Late texts are hard for me.' Real friends understand limits." },
+      { label: "C — Pull back completely because it's too overwhelming", feedback: "This might feel like the path of least resistance, but it could really hurt them at a vulnerable time. A middle path works better than a full exit." },
+    ]
+  },
+  {
+    situation: "Someone calls you by a nickname you hate. They think it's funny. Everyone starts using it.",
+    options: [
+      { label: "A — Laugh it off even though it bothers you", feedback: "The nickname will stick and you'll be silently annoyed. The more people use it, the harder it becomes to stop." },
+      { label: "B — Tell the person privately that you don't like it", feedback: "Simple and effective. 'Hey, I actually don't love that — can you use my real name?' works in most cases. People don't realize it bothers you until you say so." },
+      { label: "C — Make a big deal out of it in front of everyone", feedback: "This can get awkward and might invite more teasing. Private conversations almost always work better than public confrontations for this kind of thing." },
+    ]
+  },
+  {
+    situation: "You realize a friend has been lying to you about where they are and what they're doing.",
+    options: [
+      { label: "A — Confront them publicly to put them on the spot", feedback: "This destroys the friendship and makes you look just as messy in the process. Nothing good comes from public callouts with friends." },
+      { label: "B — Bring it up directly and honestly in private", feedback: "The mature move. 'I noticed some things don't add up — can we talk?' gives them a chance to explain or come clean. Their response tells you everything." },
+      { label: "C — Start lying to them too as revenge", feedback: "Satisfying in theory, exhausting in practice. You'd be maintaining a fake friendship — what's actually the point of that?" },
+    ]
+  },
+  {
+    situation: "You said something that hurt someone's feelings. They told you — and you genuinely didn't think it was that big a deal.",
+    options: [
+      { label: "A — Tell them they're being oversensitive", feedback: "This dismisses their experience and almost always makes things worse. Even if you didn't intend to hurt them, they were hurt." },
+      { label: "B — Apologize even though you disagree it was that serious", feedback: "A genuine apology doesn't require you to agree the impact was objective. 'I'm sorry I hurt you' is always true if they were hurt." },
+      { label: "C — Try to explain what you actually meant", feedback: "Explaining can help, but lead with the apology first. If you lead with explanation it sounds defensive. Acknowledge the impact before you clarify intent." },
+    ]
+  },
+  {
+    situation: "A classmate is being bullied and you see it happening.",
+    options: [
+      { label: "A — Stay out of it because it's not your business", feedback: "Bystanders make bullying easier. Even doing nothing feels like tacit approval to the person being targeted." },
+      { label: "B — Step in and tell the bully to stop", feedback: "Brave and sometimes effective. Works especially well in group settings where social pressure shifts when one person speaks up." },
+      { label: "C — Go get an adult or text someone who can help", feedback: "Often underrated. Getting an adult doesn't make you a snitch — it makes you someone who actually solves the problem instead of just witnessing it." },
+    ]
+  },
+  {
+    situation: "You're asked to cover for a friend who's going somewhere their parents don't know about.",
+    options: [
+      { label: "A — Cover for them — that's what friends do", feedback: "You're now responsible if something goes wrong. And if it comes out, you're in trouble for lying. The coverage costs you." },
+      { label: "B — Tell them you're not comfortable lying for them", feedback: "Clean and honest. 'I'll keep your secret but I can't actively lie for you' is a real and fair response that most real friends accept." },
+      { label: "C — Make up a half-truth to avoid total lying", feedback: "The compromise option. Risk: half-truths get complicated fast and usually unravel at the worst moments." },
+    ]
+  },
+  {
+    situation: "You have a crush on someone who's dating one of your close friends.",
+    options: [
+      { label: "A — Act on it because feelings are feelings", feedback: "This breaks trust with your friend and puts everyone in an awkward situation. The friendship damage is usually not worth it." },
+      { label: "B — Keep it to yourself completely and let it fade", feedback: "The most realistic path. Crushes that you don't act on fade over time, especially if you stay busy and redirect your attention." },
+      { label: "C — Tell your friend — it feels dishonest not to", feedback: "High-risk and could go either way. Some friends appreciate honesty; others feel deeply uncomfortable. Ask yourself: does telling them actually help anyone?" },
+    ]
+  },
+  {
+    situation: "You feel like your friend group is leaving you out of things and you don't know why.",
+    options: [
+      { label: "A — Wait and hope things improve on their own", feedback: "This can work if it's just a temporary shift, but if something real is happening, silence lets it grow without any chance for resolution." },
+      { label: "B — Ask one friend directly if something is going on", feedback: "Direct, a little vulnerable, but effective. 'I've noticed we're not hanging out as much — is everything okay?' gives them a chance to be honest with you." },
+      { label: "C — Retaliate by making plans without them", feedback: "Creates more distance instead of solving the actual issue. It might also confirm any wrong impressions they already have about you." },
+    ]
+  },
+  {
+    situation: "Your parent embarrasses you in front of your friends. You're mortified.",
+    options: [
+      { label: "A — Snap at them in the moment", feedback: "Feels cathartic for about two seconds and then causes a much bigger conflict. Your friends also see it happen." },
+      { label: "B — Stay composed and talk to them privately later", feedback: "The difficult right answer. Tell them how it made you feel when you're both calm. 'When you did X in front of my friends, I felt Y' lands better than anything said in the moment." },
+      { label: "C — Pretend it didn't happen and suppress it", feedback: "Suppression usually leads to a bigger explosion later over something unrelated. And it doesn't help your parent understand what didn't work." },
+    ]
+  },
+  {
+    situation: "A friend sends you screenshots of a private conversation to show what someone said about you. You're hurt.",
+    options: [
+      { label: "A — Screenshot and share them further to defend yourself", feedback: "This escalates fast and you become part of the chain. You also lose control of where it goes from there." },
+      { label: "B — Process how you feel before responding to anything", feedback: "The underrated first step. Give yourself 24 hours before doing anything. Hot responses almost always make things worse in the short run." },
+      { label: "C — Immediately confront the person who said it", feedback: "Can be effective, but timing matters. Do it when you're calm, and ideally in person rather than via text where tone gets misread." },
+    ]
+  },
+  {
+    situation: "You're being pressured to take sides in a friend group's drama but you genuinely don't care about it.",
+    options: [
+      { label: "A — Pretend to care to stay connected to the group", feedback: "Exhausting and fake. You'll also accidentally become more involved than you want, and be expected to maintain the act." },
+      { label: "B — Say 'I'm kind of out of the loop on this one' and redirect", feedback: "Diplomatically honest. It's true, it's light, and it usually works without creating drama about the drama." },
+      { label: "C — Tell them straight you don't want to be involved", feedback: "Works if you deliver it without judgment. 'I'm just trying to stay out of stuff' lands fine with most reasonable people." },
+    ]
+  },
+  {
+    situation: "Someone you barely know asks you why you don't have a boyfriend or girlfriend yet.",
+    options: [
+      { label: "A — Make up a story about someone you're dating", feedback: "You now have to maintain a fiction. Stories expand and get complicated fast, especially in school environments." },
+      { label: "B — Say 'I'm just not focused on that right now'", feedback: "Clear, true, and completely unchallengeable. This sentence closes the conversation instantly without drama." },
+      { label: "C — Get defensive and tell them to mind their business", feedback: "Understandable, but it makes it a bigger moment than it needs to be. The calmer your response, the faster it's over." },
+    ]
+  },
+  {
+    situation: "You said you'd hang out with a friend, but a better opportunity came up and you want to cancel.",
+    options: [
+      { label: "A — Cancel last minute with a vague excuse", feedback: "If this becomes a pattern, your friend will notice. Vague excuses also tend to come out later, which is worse than the original cancel." },
+      { label: "B — Be honest: 'Something came up — can we reschedule to this week?'", feedback: "Respect goes both ways. Honesty plus a concrete reschedule keeps the friendship intact. It also models how you want to be treated." },
+      { label: "C — Go to the original plan even though you'd rather not", feedback: "This builds real friendship credit. And sometimes the thing you almost skipped turns out to be better than the alternative anyway." },
+    ]
+  },
+];
+
+const CHECKLIST_DATA = [
+  {
+    cat: '🤝 Making Connections',
+    items: [
+      'Say hi to someone new this week',
+      'Start a conversation with someone you normally wouldn\'t talk to',
+      'Sit at a different lunch table or spot — just once',
+      'Introduce yourself first to someone in a class',
+      'Attend one school event you wouldn\'t normally go to',
+    ]
+  },
+  {
+    cat: '🗣️ Speaking Up',
+    items: [
+      'Speak up in class at least once this week',
+      'Share your honest opinion in a group conversation',
+      'Compliment someone in a specific, sincere way',
+      'Tell a friend you appreciate them — out loud',
+      'Ask for help from a teacher or counselor without embarrassment',
+    ]
+  },
+  {
+    cat: '💪 Standing Your Ground',
+    items: [
+      'Say no to something you didn\'t want to do',
+      'Set one personal boundary and actually stick to it',
+      'Stand up for yourself in a low-stakes situation',
+      'Stand up for someone else when it felt safe to do so',
+      'Handle a conflict without involving extra people',
+    ]
+  },
+  {
+    cat: '📱 Digital Habits',
+    items: [
+      'Go offline for a full day — phone down, apps closed',
+      'Unfollow 3 accounts that consistently make you feel bad',
+      'Post something genuine, not performative',
+      'Resist the urge to screenshot and share a private conversation',
+      'Respond to a DM in real life (turn it into actual plans)',
+    ]
+  },
+  {
+    cat: '✨ Building Confidence',
+    items: [
+      'Do something you\'ve been avoiding because of fear of judgment',
+      'Give yourself a genuine compliment and write it down',
+      'Join one new club, activity, or team',
+      'Accept a compliment with just "thank you" — no deflecting',
+      'Try something new where you know no one',
+    ]
+  },
+  {
+    cat: '💬 Real Connections',
+    items: [
+      'Have a real conversation with a parent or guardian',
+      'Reach out to a friend you\'ve been out of touch with',
+      'Apologize to someone you\'ve wronged — sincerely',
+      'Start a conversation with someone who seems lonely',
+      'Share something personal with a trusted friend',
+    ]
+  },
+];
+
+// ======================== STATE ========================
+let currentScenarioIdx = 0;
+const scenarioRevealed = {};
+
+// ======================== TABS ========================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['topics','guide','scenarios','checklist'][i] === tab);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ======================== TOPICS ========================
+function renderTopics() {
+  document.getElementById('topics-grid').innerHTML = TOPICS.map(t => `
+    <div class="topic-card" onclick="openGuide('${t.id}')">
+      <div class="topic-icon">${t.icon}</div>
+      <div class="topic-title">${t.title}</div>
+      <div class="topic-desc">${t.desc}</div>
+      <button class="read-btn">→ Read Guide</button>
+    </div>
+  `).join('');
+}
+
+// ======================== GUIDE ========================
+function openGuide(id) {
+  const t = TOPICS.find(x => x.id === id);
+  if (!t) return;
+  switchTab('guide');
+  document.getElementById('guide-prompt').style.display = 'none';
+  document.getElementById('guide-content').style.display = 'block';
+  document.getElementById('guide-title-display').textContent = t.icon + ' ' + t.title;
+
+  document.getElementById('guide-tips').innerHTML = t.tips.map((tip, i) =>
+    `<li><span class="tip-num">${i+1}</span>${tip}</li>`
+  ).join('');
+
+  document.getElementById('guide-dos').innerHTML = t.dos.map(d => `<li>${d}</li>`).join('');
+  document.getElementById('guide-donts').innerHTML = t.donts.map(d => `<li>${d}</li>`).join('');
+
+  document.getElementById('guide-scenario').innerHTML = `
+    <div class="scenario-box">
+      <div class="scenario-label">📍 Situation</div>
+      <div class="scenario-text">"${t.scenario.situation}"</div>
+      <div class="scenario-label" style="margin-top:10px;">💡 What to do</div>
+      <div class="scenario-advice">${t.scenario.advice}</div>
+    </div>
+  `;
+}
+
+function backToTopics() { switchTab('topics'); }
+
+// ======================== SCENARIOS ========================
+function renderScenario(idx) {
+  const s = SCENARIOS[idx];
+  const total = SCENARIOS.length;
+  document.getElementById('scenario-counter').textContent = `Situation ${idx + 1} of ${total}`;
+  document.getElementById('scenario-prog-fill').style.width = Math.max(5, Math.round(((idx + 1) / total) * 100)) + '%';
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').disabled = idx === total - 1;
+  document.getElementById('btn-next').textContent = idx === total - 1 ? 'Done ✓' : 'Next →';
+
+  const isRevealed = !!scenarioRevealed[idx];
+
+  document.getElementById('scenario-card-wrap').innerHTML = `
+    <div class="scenario-card">
+      <div class="scenario-situation">${s.situation}</div>
+      <div class="scenario-prompt">What would you do?</div>
+      <div class="scenario-options">
+        ${s.options.map((opt, oi) => `
+          <div class="scenario-option${isRevealed ? ' revealed' : ''}" id="opt-${oi}" onclick="selectOption(${idx}, ${oi})">
+            <div class="option-letter">${['A','B','C'][oi]}</div>
+            <div style="flex:1;">
+              <div class="option-text">${opt.label.substring(4)}</div>
+              <div class="option-feedback${isRevealed ? ' visible' : ''}" id="fb-${oi}">
+                ${opt.feedback}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      ${isRevealed ? '' : '<div class="reveal-note">Pick an option to see the reflection.</div>'}
+    </div>
+  `;
+}
+
+function selectOption(scenIdx, optIdx) {
+  if (scenarioRevealed[scenIdx]) return;
+  scenarioRevealed[scenIdx] = optIdx;
+  localStorage.setItem(SK + 'scen_' + scenIdx, optIdx);
+
+  const opts = document.querySelectorAll('.scenario-option');
+  opts.forEach((el, i) => {
+    el.classList.add('revealed');
+    if (i === optIdx) el.classList.add('selected');
+    document.getElementById('fb-' + i).classList.add('visible');
+  });
+  document.querySelector('.reveal-note')?.remove();
+}
+
+function prevScenario() {
+  if (currentScenarioIdx > 0) { currentScenarioIdx--; renderScenario(currentScenarioIdx); }
+}
+
+function nextScenario() {
+  if (currentScenarioIdx < SCENARIOS.length - 1) { currentScenarioIdx++; renderScenario(currentScenarioIdx); }
+}
+
+// ======================== CHECKLIST ========================
+function getCheckKey(ci, ii) { return SK + 'chk_' + ci + '_' + ii; }
+function isChecked(ci, ii) { return localStorage.getItem(getCheckKey(ci, ii)) === '1'; }
+
+function toggleCheck(ci, ii) {
+  const key = getCheckKey(ci, ii);
+  localStorage.setItem(key, isChecked(ci, ii) ? '0' : '1');
+  renderChecklist();
+}
+
+function getOverallProgress() {
+  let total = 0, done = 0;
+  CHECKLIST_DATA.forEach((cat, ci) => {
+    cat.items.forEach((_, ii) => { total++; if (isChecked(ci, ii)) done++; });
+  });
+  return { total, done };
+}
+
+function renderChecklist() {
+  const { total, done } = getOverallProgress();
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('overall-prog-count').textContent = done + ' / ' + total;
+  document.getElementById('overall-prog-fill').style.width = pct + '%';
+
+  document.getElementById('checklist-wrap').innerHTML = CHECKLIST_DATA.map((cat, ci) => `
+    <div class="checklist-category">
+      <div class="checklist-cat-header">${cat.cat}</div>
+      <div class="checklist-items">
+        ${cat.items.map((item, ii) => {
+          const checked = isChecked(ci, ii);
+          return `
+            <div class="checklist-item${checked ? ' done' : ''}" onclick="toggleCheck(${ci}, ${ii})">
+              <div class="check-box${checked ? ' checked' : ''}"></div>
+              <span class="check-text">${item}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function resetAll() {
+  CHECKLIST_DATA.forEach((cat, ci) => {
+    cat.items.forEach((_, ii) => localStorage.removeItem(getCheckKey(ci, ii)));
+  });
+  renderChecklist();
+}
+
+// ======================== INIT ========================
+function initScenarios() {
+  SCENARIOS.forEach((_, i) => {
+    const saved = localStorage.getItem(SK + 'scen_' + i);
+    if (saved !== null) scenarioRevealed[i] = parseInt(saved);
+  });
+  renderScenario(0);
+}
+
+renderTopics();
+initScenarios();
+renderChecklist();
+</script>
+</body>
+</html>

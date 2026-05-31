@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pitch Deck Studio — Agent #73</title>
+<style>
+  :root {
+    --bg: #18181b;
+    --card: #27272a;
+    --card2: #3f3f46;
+    --gold: #eab308;
+    --gold-light: #fde047;
+    --text: #f4f4f5;
+    --muted: #a1a1aa;
+    --border: #3f3f46;
+    --dim: #52525b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  /* Header */
+  .header { padding: 20px 24px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+  .header-badge { background: var(--gold); color: #18181b; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 4px; letter-spacing: 1px; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 24px; }
+  .tab { padding: 12px 20px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; letter-spacing: 0.5px; }
+  .tab:hover { color: var(--gold); }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* Content */
+  .content { padding: 24px; max-width: 880px; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Section title */
+  .section-title { font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+
+  /* Progress bar */
+  .progress-bar { display: flex; gap: 4px; margin-bottom: 28px; flex-wrap: wrap; }
+  .progress-dot { width: 26px; height: 6px; border-radius: 3px; background: var(--card2); transition: background 0.3s; cursor: pointer; }
+  .progress-dot.done { background: var(--gold); }
+  .progress-dot.active { background: var(--gold-light); }
+  .progress-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+
+  /* Wizard */
+  .wizard-step { display: none; }
+  .wizard-step.active { display: block; }
+  .step-header { margin-bottom: 20px; }
+  .step-number { font-size: 11px; color: var(--gold); font-weight: 700; letter-spacing: 1.5px; margin-bottom: 6px; }
+  .step-title { font-size: 20px; font-weight: 800; color: var(--text); }
+  .step-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* Form */
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; }
+  input[type="text"], textarea {
+    width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 11px 14px; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, textarea:focus { border-color: var(--gold); }
+  textarea { resize: vertical; min-height: 80px; }
+  .bullet-inputs { display: flex; flex-direction: column; gap: 8px; }
+  .bullet-input-row { display: flex; align-items: center; gap: 8px; }
+  .bullet-input-row input { flex: 1; }
+  .bullet-num { font-size: 13px; font-weight: 700; color: var(--gold); min-width: 22px; }
+
+  /* Nav buttons */
+  .wizard-nav { display: flex; gap: 10px; margin-top: 24px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; font-family: inherit; }
+  .btn-gold { background: var(--gold); color: #18181b; }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-ghost { background: transparent; border: 1px solid var(--dim); color: var(--muted); }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Slides preview */
+  .slides-grid { display: flex; flex-direction: column; gap: 20px; }
+  .slide-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .slide-header { background: linear-gradient(135deg, #1c1c1f 0%, #27272a 100%); padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .slide-num { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 2px; }
+  .slide-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .slide-body { padding: 20px 22px; }
+  .slide-headline { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+  .slide-sub { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .slide-detail { font-size: 13px; color: var(--text); line-height: 1.7; white-space: pre-line; }
+  .slide-bullets { list-style: none; margin-top: 10px; }
+  .slide-bullets li { font-size: 13px; padding: 4px 0; display: flex; align-items: flex-start; gap: 8px; color: var(--text); }
+  .slide-bullets li::before { content: '◆'; color: var(--gold); font-size: 8px; margin-top: 5px; flex-shrink: 0; }
+  .slide-tag { display: inline-block; background: rgba(234,179,8,0.12); border: 1px solid rgba(234,179,8,0.3); color: var(--gold); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; }
+  .slide-copy-btn { font-size: 11px; padding: 5px 12px; border-radius: 6px; background: transparent; border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .slide-copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Tips */
+  .tips-list { display: flex; flex-direction: column; gap: 14px; }
+  .tip-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .tip-slide { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .tip-text { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+  .tip-mistake { font-size: 12px; color: #f87171; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); border-radius: 6px; padding: 8px 12px; }
+  .tip-mistake::before { content: '⚠ Common mistake: '; font-weight: 700; }
+
+  /* History */
+  .history-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color 0.2s; }
+  .history-item:hover { border-color: var(--gold); }
+  .history-name { font-size: 14px; font-weight: 700; }
+  .history-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .history-slides { font-size: 11px; color: var(--gold); font-weight: 700; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--gold); color: #18181b; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 13px; z-index: 9999; animation: fadeInOut 2.2s ease forwards; }
+  @keyframes fadeInOut { 0%{opacity:0;transform:translateY(10px)} 15%{opacity:1;transform:translateY(0)} 80%{opacity:1} 100%{opacity:0} }
+
+  /* Export */
+  .export-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; color: #fde68a; white-space: pre-wrap; word-break: break-word; max-height: 420px; overflow-y: auto; }
+
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .empty { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
+
+  @media print {
+    .tabs, .header, .wizard-nav, .slide-copy-btn, .btn { display: none !important; }
+    .slide-card { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="header-badge">#73</span>
+      <h1>Pitch Deck Studio</h1>
+    </div>
+    <p>From idea to investor-ready in 10 slides. No design skills needed.</p>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="build">BUILD</div>
+  <div class="tab" data-tab="slides">SLIDES</div>
+  <div class="tab" data-tab="tips">TIPS</div>
+  <div class="tab" data-tab="history">HISTORY</div>
+</div>
+
+<div class="content">
+
+<!-- BUILD TAB -->
+<div class="panel active" id="panel-build">
+  <div class="section-title">Pitch Deck Builder</div>
+  <div class="progress-label" id="progress-label">Slide 1 of 10</div>
+  <div class="progress-bar" id="progress-bar"></div>
+
+  <!-- Step 1: Company -->
+  <div class="wizard-step active" data-step="1">
+    <div class="step-header">
+      <div class="step-number">SLIDE 01 / 10</div>
+      <div class="step-title">Company</div>
+      <div class="step-hint">The first thing investors see. Make it memorable.</div>
+    </div>
+    <div class="form-group"><label>Company Name</label><input type="text" id="s1-name" placeholder="e.g. TaskFlow" oninput="save()"></div>
+    <div class="form-group"><label>Tagline</label><input type="text" id="s1-tagline" placeholder="e.g. Replace your daily standup with a 10-second update" oninput="save()"></div>
+  </div>
+
+  <!-- Step 2: Problem -->
+  <div class="wizard-step" data-step="2">
+    <div class="step-header">
+      <div class="step-number">SLIDE 02 / 10</div>
+      <div class="step-title">Problem</div>
+      <div class="step-hint">What pain exists in the world that you're solving?</div>
+    </div>
+    <div class="form-group"><label>The Problem</label><textarea id="s2-problem" placeholder="e.g. Remote teams lose 5+ hours/week to status meetings. There's no single source of truth for what's actually being worked on." oninput="save()"></textarea></div>
+    <div class="form-group"><label>Who Feels This Pain?</label><input type="text" id="s2-who" placeholder="e.g. Engineering managers at startups with 5–30 people" oninput="save()"></div>
+  </div>
+
+  <!-- Step 3: Solution -->
+  <div class="wizard-step" data-step="3">
+    <div class="step-header">
+      <div class="step-number">SLIDE 03 / 10</div>
+      <div class="step-title">Solution</div>
+      <div class="step-hint">What you do — make it crisp and specific.</div>
+    </div>
+    <div class="form-group"><label>Your Solution</label><textarea id="s3-solution" placeholder="e.g. TaskFlow gives every team a live task board that auto-syncs from commits, PRs, and Slack — no manual updates needed." oninput="save()"></textarea></div>
+  </div>
+
+  <!-- Step 4: Market -->
+  <div class="wizard-step" data-step="4">
+    <div class="step-header">
+      <div class="step-number">SLIDE 04 / 10</div>
+      <div class="step-title">Market Size</div>
+      <div class="step-hint">Show the opportunity. Investors want big markets.</div>
+    </div>
+    <div class="form-group"><label>TAM — Total Addressable Market</label><input type="text" id="s4-tam" placeholder="e.g. $60B global project management software market" oninput="save()"></div>
+    <div class="form-group"><label>SAM — Serviceable Addressable Market</label><input type="text" id="s4-sam" placeholder="e.g. $12B — remote-first tech startups globally" oninput="save()"></div>
+    <div class="form-group"><label>SOM — Serviceable Obtainable Market</label><input type="text" id="s4-som" placeholder="e.g. $240M — US-based startups 5–50 employees" oninput="save()"></div>
+  </div>
+
+  <!-- Step 5: Product -->
+  <div class="wizard-step" data-step="5">
+    <div class="step-header">
+      <div class="step-number">SLIDE 05 / 10</div>
+      <div class="step-title">Product</div>
+      <div class="step-hint">3 key features that make your product special.</div>
+    </div>
+    <div class="form-group"><label>Key Features (3 bullets)</label>
+      <div class="bullet-inputs">
+        <div class="bullet-input-row"><span class="bullet-num">01</span><input type="text" id="s5-f1" placeholder="e.g. Auto-syncs tasks from GitHub, Jira, and Slack" oninput="save()"></div>
+        <div class="bullet-input-row"><span class="bullet-num">02</span><input type="text" id="s5-f2" placeholder="e.g. AI-generated status summaries in 30 seconds" oninput="save()"></div>
+        <div class="bullet-input-row"><span class="bullet-num">03</span><input type="text" id="s5-f3" placeholder="e.g. Works inside Slack — zero new tools to learn" oninput="save()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 6: Traction -->
+  <div class="wizard-step" data-step="6">
+    <div class="step-header">
+      <div class="step-number">SLIDE 06 / 10</div>
+      <div class="step-title">Traction</div>
+      <div class="step-hint">Metrics and milestones that prove people want this.</div>
+    </div>
+    <div class="form-group"><label>Traction Metrics & Milestones</label><textarea id="s6-traction" placeholder="e.g. 120 beta users across 18 companies&#10;$8,400 MRR, growing 22% month-over-month&#10;Featured in Product Hunt top 5 (Jan 2026)&#10;3 LOIs from enterprise clients" oninput="save()"></textarea></div>
+  </div>
+
+  <!-- Step 7: Business Model -->
+  <div class="wizard-step" data-step="7">
+    <div class="step-header">
+      <div class="step-number">SLIDE 07 / 10</div>
+      <div class="step-title">Business Model</div>
+      <div class="step-hint">How do you make money? Keep it simple.</div>
+    </div>
+    <div class="form-group"><label>Revenue Model</label><textarea id="s7-model" placeholder="e.g. SaaS — $29/seat/month&#10;Free tier: up to 3 users&#10;Pro: $29/seat/month (unlimited)&#10;Enterprise: custom pricing + SSO + audit logs" oninput="save()"></textarea></div>
+  </div>
+
+  <!-- Step 8: Competition -->
+  <div class="wizard-step" data-step="8">
+    <div class="step-header">
+      <div class="step-number">SLIDE 08 / 10</div>
+      <div class="step-title">Competition</div>
+      <div class="step-hint">Who else is in the space, and why you win.</div>
+    </div>
+    <div class="form-group"><label>Competitive Landscape</label><textarea id="s8-competition" placeholder="e.g. Competitors: Jira, Linear, Asana, Monday.com&#10;&#10;Our edge: They require manual updates. We auto-sync. Competitors treat PM as input; we make it automatic output." oninput="save()"></textarea></div>
+  </div>
+
+  <!-- Step 9: Team -->
+  <div class="wizard-step" data-step="9">
+    <div class="step-header">
+      <div class="step-number">SLIDE 09 / 10</div>
+      <div class="step-title">Team</div>
+      <div class="step-hint">Investors bet on people. Make this compelling.</div>
+    </div>
+    <div class="form-group"><label>Founder Names & Roles</label><textarea id="s9-team" placeholder="e.g. Jane Kim — CEO, ex-Stripe PM, built 3 internal tools used by 500+ engineers&#10;Alex Nguyen — CTO, ex-Google, led infra for 1M+ user products&#10;Sam Lee — Head of Design, previously Figma, Design Evangelist" oninput="save()"></textarea></div>
+  </div>
+
+  <!-- Step 10: The Ask -->
+  <div class="wizard-step" data-step="10">
+    <div class="step-header">
+      <div class="step-number">SLIDE 10 / 10</div>
+      <div class="step-title">The Ask</div>
+      <div class="step-hint">How much are you raising and what will you do with it?</div>
+    </div>
+    <div class="form-group"><label>How Much You're Raising</label><input type="text" id="s10-amount" placeholder="e.g. $1.5M pre-seed round" oninput="save()"></div>
+    <div class="form-group"><label>Use of Funds</label><textarea id="s10-use" placeholder="e.g. 50% — Engineering (2 senior hires)&#10;30% — Sales & marketing&#10;20% — Infrastructure & ops&#10;&#10;18-month runway to Series A" oninput="save()"></textarea></div>
+  </div>
+
+  <div class="wizard-nav" id="wizard-nav">
+    <button class="btn btn-outline" id="btn-prev" onclick="prevStep()" style="display:none">← Previous</button>
+    <button class="btn btn-gold" id="btn-next" onclick="nextStep()">Next Slide →</button>
+    <button class="btn btn-ghost" id="btn-done" onclick="finishDeck()" style="display:none">Save Deck ✓</button>
+  </div>
+</div>
+
+<!-- SLIDES TAB -->
+<div class="panel" id="panel-slides">
+  <div class="section-title">Slide Preview</div>
+  <div id="slides-content"></div>
+  <div style="margin-top:20px">
+    <button class="btn btn-gold" onclick="copyFullDeck()">Copy Full Deck as Markdown</button>
+  </div>
+</div>
+
+<!-- TIPS TAB -->
+<div class="panel" id="panel-tips">
+  <div class="section-title">Investor Pitch Tips</div>
+  <div class="tips-list" id="tips-list"></div>
+</div>
+
+<!-- HISTORY TAB -->
+<div class="panel" id="panel-history">
+  <div class="section-title">Saved Decks</div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Last 5 saved pitch decks — click to reload into BUILD.</p>
+  <div id="history-list"></div>
+</div>
+
+</div>
+
+<script>
+// ── Storage ────────────────────────────────────────────────────────────────
+const LS = 'pitch73_';
+function ls(k, v) { if (v===undefined) return JSON.parse(localStorage.getItem(LS+k)||'null'); localStorage.setItem(LS+k, JSON.stringify(v)); }
+
+// ── Fields map ─────────────────────────────────────────────────────────────
+const FIELDS = [
+  null, // 0-indexed padding
+  ['s1-name','s1-tagline'],
+  ['s2-problem','s2-who'],
+  ['s3-solution'],
+  ['s4-tam','s4-sam','s4-som'],
+  ['s5-f1','s5-f2','s5-f3'],
+  ['s6-traction'],
+  ['s7-model'],
+  ['s8-competition'],
+  ['s9-team'],
+  ['s10-amount','s10-use'],
+];
+
+const STEP_NAMES = ['','Company','Problem','Solution','Market Size','Product','Traction','Business Model','Competition','Team','The Ask'];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let currentStep = 1;
+const TOTAL = 10;
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+  if (t.dataset.tab === 'slides') renderSlides();
+  if (t.dataset.tab === 'tips') renderTips();
+  if (t.dataset.tab === 'history') renderHistory();
+}));
+
+// ── Progress bar ───────────────────────────────────────────────────────────
+function renderProgressBar() {
+  const bar = document.getElementById('progress-bar');
+  bar.innerHTML = Array.from({length: TOTAL}, (_, i) => {
+    const n = i + 1;
+    let cls = 'progress-dot';
+    if (n < currentStep) cls += ' done';
+    else if (n === currentStep) cls += ' active';
+    return `<div class="${cls}" onclick="goStep(${n})" title="Slide ${n}: ${STEP_NAMES[n]}"></div>`;
+  }).join('');
+  document.getElementById('progress-label').textContent = `Slide ${currentStep} of ${TOTAL} — ${STEP_NAMES[currentStep]}`;
+}
+
+function goStep(n) {
+  save();
+  currentStep = n;
+  showStep();
+}
+
+function showStep() {
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.querySelector(`.wizard-step[data-step="${currentStep}"]`).classList.add('active');
+  document.getElementById('btn-prev').style.display = currentStep > 1 ? '' : 'none';
+  document.getElementById('btn-next').style.display = currentStep < TOTAL ? '' : 'none';
+  document.getElementById('btn-done').style.display = currentStep === TOTAL ? '' : 'none';
+  renderProgressBar();
+}
+
+function nextStep() { save(); if (currentStep < TOTAL) { currentStep++; showStep(); } }
+function prevStep() { save(); if (currentStep > 1) { currentStep--; showStep(); } }
+
+// ── Save / Load ────────────────────────────────────────────────────────────
+function save() {
+  const data = {};
+  for (let step = 1; step <= TOTAL; step++) {
+    (FIELDS[step]||[]).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) data[id] = el.value;
+    });
+  }
+  ls('current', data);
+}
+
+function load() {
+  const data = ls('current') || {};
+  Object.entries(data).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+}
+
+function getData() { return ls('current') || {}; }
+function g(id) { return (getData()[id] || '').trim(); }
+
+// ── Slides renderer ────────────────────────────────────────────────────────
+function slideHTML(n) {
+  const d = getData();
+  const v = id => (d[id]||'').trim();
+  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const slides = {
+    1: `<div class="slide-tag">01 · COMPANY</div>
+        <div class="slide-headline">${esc(v('s1-name')) || 'Your Company'}</div>
+        <div class="slide-sub">${esc(v('s1-tagline')) || 'Your tagline goes here'}</div>`,
+
+    2: `<div class="slide-tag">02 · PROBLEM</div>
+        <div class="slide-headline">The Problem</div>
+        <div class="slide-detail">${esc(v('s2-problem')) || '—'}</div>
+        ${v('s2-who') ? `<div style="margin-top:12px;font-size:12px;color:var(--gold);font-weight:700">WHO: <span style="color:var(--muted);font-weight:400">${esc(v('s2-who'))}</span></div>` : ''}`,
+
+    3: `<div class="slide-tag">03 · SOLUTION</div>
+        <div class="slide-headline">Our Solution</div>
+        <div class="slide-detail">${esc(v('s3-solution')) || '—'}</div>`,
+
+    4: `<div class="slide-tag">04 · MARKET</div>
+        <div class="slide-headline">Market Opportunity</div>
+        <ul class="slide-bullets">
+          <li><strong>TAM:</strong> ${esc(v('s4-tam')) || '—'}</li>
+          <li><strong>SAM:</strong> ${esc(v('s4-sam')) || '—'}</li>
+          <li><strong>SOM:</strong> ${esc(v('s4-som')) || '—'}</li>
+        </ul>`,
+
+    5: `<div class="slide-tag">05 · PRODUCT</div>
+        <div class="slide-headline">What We Built</div>
+        <ul class="slide-bullets">
+          ${[v('s5-f1'),v('s5-f2'),v('s5-f3')].filter(Boolean).map(f=>`<li>${esc(f)}</li>`).join('') || '<li>—</li>'}
+        </ul>`,
+
+    6: `<div class="slide-tag">06 · TRACTION</div>
+        <div class="slide-headline">Traction</div>
+        <div class="slide-detail">${esc(v('s6-traction')) || '—'}</div>`,
+
+    7: `<div class="slide-tag">07 · BUSINESS MODEL</div>
+        <div class="slide-headline">How We Make Money</div>
+        <div class="slide-detail">${esc(v('s7-model')) || '—'}</div>`,
+
+    8: `<div class="slide-tag">08 · COMPETITION</div>
+        <div class="slide-headline">Competitive Landscape</div>
+        <div class="slide-detail">${esc(v('s8-competition')) || '—'}</div>`,
+
+    9: `<div class="slide-tag">09 · TEAM</div>
+        <div class="slide-headline">The Team</div>
+        <div class="slide-detail">${esc(v('s9-team')) || '—'}</div>`,
+
+    10: `<div class="slide-tag">10 · THE ASK</div>
+        <div class="slide-headline">${esc(v('s10-amount')) || 'Our Ask'}</div>
+        <div class="slide-detail">${esc(v('s10-use')) || '—'}</div>`,
+  };
+
+  return `<div class="slide-card" id="slide-${n}">
+    <div class="slide-header">
+      <div>
+        <div class="slide-num">SLIDE ${String(n).padStart(2,'0')}</div>
+        <div class="slide-name">${STEP_NAMES[n]}</div>
+      </div>
+      <button class="slide-copy-btn" onclick="copySlide(${n})">Copy Slide</button>
+    </div>
+    <div class="slide-body">${slides[n]}</div>
+  </div>`;
+}
+
+function renderSlides() {
+  document.getElementById('slides-content').innerHTML = Array.from({length:TOTAL},(_,i)=>slideHTML(i+1)).join('');
+}
+
+function slideText(n) {
+  const v = id => (getData()[id]||'').trim();
+  const texts = {
+    1: `# ${v('s1-name') || 'Company'}\n${v('s1-tagline') || ''}`,
+    2: `## Problem\n${v('s2-problem') || ''}\n\nWho: ${v('s2-who') || ''}`,
+    3: `## Solution\n${v('s3-solution') || ''}`,
+    4: `## Market\n- TAM: ${v('s4-tam') || '—'}\n- SAM: ${v('s4-sam') || '—'}\n- SOM: ${v('s4-som') || '—'}`,
+    5: `## Product\n- ${v('s5-f1') || '—'}\n- ${v('s5-f2') || '—'}\n- ${v('s5-f3') || '—'}`,
+    6: `## Traction\n${v('s6-traction') || ''}`,
+    7: `## Business Model\n${v('s7-model') || ''}`,
+    8: `## Competition\n${v('s8-competition') || ''}`,
+    9: `## Team\n${v('s9-team') || ''}`,
+    10: `## The Ask\n${v('s10-amount') || ''}\n\n${v('s10-use') || ''}`,
+  };
+  return texts[n] || '';
+}
+
+function copySlide(n) {
+  navigator.clipboard.writeText(slideText(n)).then(()=>toast('Slide copied!'));
+}
+
+function copyFullDeck() {
+  const md = Array.from({length:TOTAL},(_,i)=>slideText(i+1)).join('\n\n---\n\n');
+  navigator.clipboard.writeText(md).then(()=>toast('Full deck copied!'));
+}
+
+// ── Tips ───────────────────────────────────────────────────────────────────
+const TIPS = [
+  { slide: 'Slide 1 — Company', tip: 'Your tagline is your first impression — it has 5 seconds to make them lean in. Lead with the outcome, not the feature.', mistake: 'Being too clever or vague. Avoid jargon. "AI-powered synergy platform" means nothing.' },
+  { slide: 'Slide 2 — Problem', tip: 'Make the investor feel the pain before you show the cure. Quantify the cost of the problem: hours lost, money wasted, deals missed.', mistake: 'Solving a problem nobody has. Validate with real quotes or data — "a survey of 50 users showed..."' },
+  { slide: 'Slide 3 — Solution', tip: 'One clear sentence of what you do. Lead with the outcome for the user, then explain how you get there.', mistake: 'Leading with features and technology. Lead with the user\'s transformation instead.' },
+  { slide: 'Slide 4 — Market', tip: 'Bottom-up SOM is more credible than top-down TAM math. Show how you calculated it, not just the number.', mistake: 'Claiming a 1% share of a trillion-dollar market. Investors see through this — it shows weak market understanding.' },
+  { slide: 'Slide 5 — Product', tip: 'Show, don\'t tell. A screenshot is worth 1,000 words. Focus on your "aha moment" — the feature that makes users say wow.', mistake: 'Listing every feature. Pick 3 that prove differentiation, not the full roadmap.' },
+  { slide: 'Slide 6 — Traction', tip: 'Revenue beats users, users beat waitlists. Show the best metric you have and month-over-month growth. Investors love slope.', mistake: 'Vanity metrics: app downloads, Twitter followers, or total signups without activation rate.' },
+  { slide: 'Slide 7 — Business Model', tip: 'State your price explicitly. "We charge $X per Y per month" is better than "SaaS subscription model." Show LTV/CAC if you have it.', mistake: 'Saying "we'll figure out monetization later." Even early-stage, you should have a hypothesis.' },
+  { slide: 'Slide 8 — Competition', tip: 'Acknowledge strong competitors — pretending they don\'t exist destroys credibility. Show why you win on dimensions that matter.', mistake: 'The "no competition" slide. Every problem has an incumbent solution, even if it\'s just spreadsheets.' },
+  { slide: 'Slide 9 — Team', tip: 'Lead with relevant wins, not just titles. "Built and sold 2 products" > "10 years of experience." Domain expertise + execution history = investor confidence.', mistake: 'Listing 6 advisors as a substitute for a strong founding team. Advisors don\'t build product.' },
+  { slide: 'Slide 10 — The Ask', tip: 'Know your number with confidence. State how much, at what terms, and your 18–24 month plan. Vague asks signal unpreparedness.', mistake: 'Saying "we\'re open to any amount." It signals you haven\'t modeled your business. Have a plan.' },
+];
+
+function renderTips() {
+  document.getElementById('tips-list').innerHTML = TIPS.map(t => `
+    <div class="tip-card">
+      <div class="tip-slide">${t.slide}</div>
+      <div class="tip-text">${t.tip}</div>
+      <div class="tip-mistake">${t.mistake}</div>
+    </div>`).join('');
+}
+
+// ── History ────────────────────────────────────────────────────────────────
+function finishDeck() {
+  save();
+  const data = getData();
+  const name = data['s1-name'] || 'Untitled';
+  let history = ls('history') || [];
+  history.unshift({ name, date: new Date().toLocaleDateString(), slides: TOTAL, data });
+  history = history.slice(0, 5);
+  ls('history', history);
+  toast('Deck saved! 🎉');
+}
+
+function renderHistory() {
+  const history = ls('history') || [];
+  const el = document.getElementById('history-list');
+  if (!history.length) { el.innerHTML = '<div class="empty">No saved decks yet. Complete a deck in BUILD to save it here.</div>'; return; }
+  el.innerHTML = history.map((h, i) => `
+    <div class="history-item" onclick="loadFromHistory(${i})">
+      <div>
+        <div class="history-name">${esc(h.name)}</div>
+        <div class="history-date">${h.date}</div>
+      </div>
+      <div class="history-slides">${h.slides} slides</div>
+    </div>`).join('');
+}
+
+function loadFromHistory(i) {
+  const history = ls('history') || [];
+  const h = history[i];
+  if (!h) return;
+  ls('current', h.data);
+  load();
+  currentStep = 1;
+  showStep();
+  toast('Loaded: ' + h.name);
+  document.querySelectorAll('.tab')[0].click();
+}
+
+// ── Utils ──────────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2300);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+load();
+showStep();
+renderTips();
+</script>
+</body>
+</html>

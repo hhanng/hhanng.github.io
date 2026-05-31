@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recursion Visualizer — FAANG Prep</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --border: #2d3148;
+    --blue: #4f8ef7; --green: #4ade80; --yellow: #fbbf24;
+    --red: #f87171; --orange: #fb923c;
+    --text: #f1f5f9; --muted: #94a3b8;
+    --active-bg: #1f1e0a; --wait-bg: #0a1020; --return-bg: #0a1f0a;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+  /* HEADER */
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+  header h1 { font-size: 1.3rem; font-weight: 700; color: var(--blue); letter-spacing: -0.5px; }
+  header span { color: var(--muted); font-size: 0.85rem; }
+  .badge { background: #1c2a45; color: var(--blue); font-size: 0.72rem; padding: 2px 8px; border-radius: 10px; border: 1px solid #2a3f70; }
+  /* TABS */
+  nav.tabs { background: var(--card); border-bottom: 1px solid var(--border); display: flex; }
+  nav.tabs button { flex: 1; max-width: 160px; padding: 12px 16px; background: none; border: none; color: var(--muted); font-size: 0.9rem; cursor: pointer; border-top: 2px solid transparent; transition: all 0.2s; }
+  nav.tabs button.active { color: var(--blue); border-top-color: var(--blue); background: rgba(79,142,247,0.07); }
+  nav.tabs button:hover:not(.active) { color: var(--text); }
+  /* CONTENT */
+  .tab-content { display: none; flex: 1; }
+  .tab-content.active { display: flex; flex-direction: column; }
+  /* ── TAB 1: VISUALIZE ── */
+  .viz-controls { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .ctrl-group { display: flex; align-items: center; gap: 8px; }
+  .ctrl-group label { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  select, input[type=number] { background: #12151f; border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; }
+  select:focus, input:focus { outline: none; border-color: var(--blue); }
+  .pill-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+  .pill { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 0.78rem; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .pill.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .pill:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
+  .warning-msg { background: #2a1f00; border: 1px solid #7a5500; color: var(--yellow); border-radius: 6px; padding: 6px 12px; font-size: 0.8rem; }
+  /* PLAYBACK */
+  .playback { background: var(--card); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+  .play-btns { display: flex; gap: 6px; }
+  .btn { padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border); background: #1e2235; color: var(--text); font-size: 0.85rem; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 5px; }
+  .btn:hover { border-color: var(--blue); color: var(--blue); }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .btn.primary:hover { background: #3a78e8; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .speed-ctrl { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--muted); }
+  .speed-ctrl input[type=range] { width: 100px; accent-color: var(--blue); }
+  .step-counter { font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  /* MAIN VIZ AREA */
+  .viz-main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto auto; gap: 1px; background: var(--border); overflow: hidden; min-height: 0; }
+  .viz-panel { background: var(--bg); padding: 14px; overflow: hidden; display: flex; flex-direction: column; }
+  .panel-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .panel-title span { font-size: 0.7rem; }
+  /* STACK PANEL */
+  .stack-container { display: flex; gap: 8px; flex: 1; overflow: hidden; }
+  .stack-depth-meter { width: 16px; background: #12151f; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); position: relative; }
+  .stack-depth-fill { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, var(--red), var(--yellow), var(--green)); transition: height 0.3s; border-radius: 8px; }
+  .stack-frames { flex: 1; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding-right: 4px; }
+  .stack-frames::-webkit-scrollbar { width: 4px; }
+  .stack-frames::-webkit-scrollbar-track { background: transparent; }
+  .stack-frames::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .frame { border-radius: 8px; padding: 10px 12px; font-family: 'Courier New', Courier, monospace; font-size: 0.78rem; line-height: 1.5; transition: all 0.3s; border: 1px solid var(--border); }
+  .frame.active { border: 2px solid var(--yellow); background: var(--active-bg); }
+  .frame.waiting { border: 1px solid var(--blue); background: var(--wait-bg); opacity: 0.85; }
+  .frame.returning { border: 2px solid var(--green); background: var(--return-bg); }
+  .frame.popped { animation: slideUp 0.3s ease forwards; }
+  @keyframes slideUp { to { transform: translateY(-20px); opacity: 0; } }
+  .frame-title { color: var(--yellow); font-weight: 700; font-size: 0.82rem; }
+  .frame.waiting .frame-title { color: var(--blue); }
+  .frame.returning .frame-title { color: var(--green); }
+  .frame-vars { color: var(--muted); margin-top: 2px; }
+  .frame-line { color: var(--text); margin-top: 2px; }
+  .frame-status { color: var(--blue); margin-top: 2px; font-style: italic; }
+  .frame.returning .frame-status { color: var(--green); }
+  .frame-depth { color: var(--muted); font-size: 0.68rem; margin-top: 2px; }
+  /* TREE CANVAS */
+  #treeCanvas { width: 100%; border-radius: 8px; background: #12151f; flex: 1; }
+  /* RETURN TRACE */
+  .return-trace { grid-column: 1 / -1; background: var(--card); border-top: 1px solid var(--border); padding: 10px 20px; min-height: 52px; }
+  .trace-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+  .trace-items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .trace-item { background: var(--return-bg); border: 1px solid var(--green); border-radius: 4px; padding: 3px 8px; font-family: monospace; font-size: 0.78rem; color: var(--green); animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+  /* STATS BAR */
+  .stats-bar { grid-column: 1 / -1; background: var(--card); border-top: 1px solid var(--border); padding: 8px 20px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .stat { font-size: 0.78rem; }
+  .stat-label { color: var(--muted); }
+  .stat-val { color: var(--text); font-weight: 600; margin-left: 4px; }
+  .stat-val.orange { color: var(--orange); }
+  /* HANOI */
+  .hanoi-display { display: flex; gap: 20px; justify-content: center; align-items: flex-end; height: 120px; padding: 10px; background: #12151f; border-radius: 8px; margin-bottom: 8px; }
+  .peg-group { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .peg-label { color: var(--muted); font-size: 0.72rem; margin-bottom: 4px; }
+  .peg-pole { width: 4px; height: 80px; background: var(--muted); border-radius: 2px; position: relative; display: flex; flex-direction: column-reverse; align-items: center; justify-content: flex-start; }
+  .peg-base { height: 6px; width: 80px; background: var(--muted); border-radius: 3px; }
+  .disk { border-radius: 4px; height: 16px; position: absolute; transition: all 0.4s; font-size: 0.6rem; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  /* ── TAB 2: PROBLEMS ── */
+  .problems-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; overflow-y: auto; flex: 1; }
+  .problem-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .prob-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .prob-name { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .diff-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+  .diff-easy { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+  .diff-medium { background: rgba(251,191,36,0.15); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  .prob-insight { color: var(--blue); font-size: 0.82rem; font-style: italic; }
+  .prob-cases { font-size: 0.8rem; }
+  .prob-case-label { color: var(--muted); display: block; margin-bottom: 2px; }
+  .prob-case-val { font-family: monospace; color: var(--green); }
+  .prob-mistake { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); border-radius: 6px; padding: 8px 12px; font-size: 0.78rem; color: var(--red); }
+  .prob-mistake::before { content: "⚠ Common mistake: "; font-weight: 600; }
+  pre.prob-code { border-radius: 8px; font-size: 0.75rem !important; max-height: 180px; overflow-y: auto; }
+  pre.prob-code::-webkit-scrollbar { height: 4px; width: 4px; }
+  pre.prob-code::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .viz-this-btn { margin-top: auto; padding: 8px 14px; background: rgba(79,142,247,0.12); border: 1px solid var(--blue); border-radius: 6px; color: var(--blue); font-size: 0.82rem; cursor: pointer; transition: all 0.15s; text-align: center; }
+  .viz-this-btn:hover { background: var(--blue); color: #fff; }
+  /* ── TAB 3: CONCEPTS ── */
+  .concepts-list { padding: 20px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; max-width: 860px; width: 100%; margin: 0 auto; }
+  .concept-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .concept-header { padding: 14px 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .concept-header:hover { background: rgba(255,255,255,0.03); }
+  .concept-title { font-weight: 700; font-size: 0.95rem; }
+  .concept-chevron { color: var(--muted); transition: transform 0.2s; font-size: 0.9rem; }
+  .concept-card.open .concept-chevron { transform: rotate(180deg); }
+  .concept-body { display: none; padding: 0 18px 18px; border-top: 1px solid var(--border); }
+  .concept-card.open .concept-body { display: block; }
+  .concept-body p { color: var(--muted); font-size: 0.85rem; line-height: 1.6; margin-top: 12px; }
+  .concept-body ul { list-style: none; padding: 0; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .concept-body ul li { font-size: 0.84rem; color: var(--muted); padding-left: 16px; position: relative; line-height: 1.5; }
+  .concept-body ul li::before { content: "→"; color: var(--blue); position: absolute; left: 0; }
+  .concept-body code { font-family: monospace; background: #12151f; padding: 1px 5px; border-radius: 3px; color: var(--green); font-size: 0.82rem; }
+  .checklist { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .check-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.84rem; }
+  .check-item .ck { color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .side-by-side { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .side-by-side h4 { font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .memo-table { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .memo-row { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-family: monospace; }
+  .memo-call { color: var(--text); }
+  .memo-hit { color: var(--orange); }
+  .memo-miss { color: var(--blue); }
+  /* SHARED */
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 10px; color: var(--muted); font-size: 0.9rem; }
+  .max-depth-warn { background: rgba(248,113,113,0.1); border: 1px solid var(--red); border-radius: 6px; padding: 8px 12px; color: var(--red); font-size: 0.8rem; text-align: center; }
+  /* SCROLLBARS */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⟳ Recursion Visualizer</h1>
+  <span>Animated Call Stack Explorer</span>
+  <span class="badge">FAANG Prep</span>
+</header>
+
+<nav class="tabs">
+  <button class="active" onclick="switchTab('visualize', this)">▶ Visualize</button>
+  <button onclick="switchTab('problems', this)">📋 Problems</button>
+  <button onclick="switchTab('concepts', this)">📚 Concepts</button>
+</nav>
+
+<!-- ═══════════════ TAB 1: VISUALIZE ═══════════════ -->
+<div id="tab-visualize" class="tab-content active" style="display:flex;flex-direction:column;">
+
+  <div class="viz-controls">
+    <div class="ctrl-group">
+      <label>Function</label>
+      <div class="pill-btns" id="fnPills">
+        <button class="pill active" onclick="selectFn('fibonacci', this)">Fibonacci</button>
+        <button class="pill" onclick="selectFn('factorial', this)">Factorial</button>
+        <button class="pill" onclick="selectFn('sumArray', this)">Sum Array</button>
+        <button class="pill" onclick="selectFn('power', this)">Power</button>
+        <button class="pill" onclick="selectFn('binarySearch', this)">Binary Search</button>
+        <button class="pill" onclick="selectFn('mergeSort', this)">Merge Sort</button>
+        <button class="pill" onclick="selectFn('treeTraversal', this)">Tree Traversal</button>
+        <button class="pill" onclick="selectFn('hanoi', this)">Tower of Hanoi</button>
+      </div>
+    </div>
+    <div class="ctrl-group" id="inputGroup">
+      <label id="inputLabel">n =</label>
+      <input type="number" id="nInput" min="1" max="10" value="4" style="width:64px" onchange="onInputChange()">
+    </div>
+    <div id="warningMsg" class="warning-msg" style="display:none">⚠ Large n! Showing n=8 to keep it readable.</div>
+  </div>
+
+  <div class="playback">
+    <div class="play-btns">
+      <button class="btn" id="btnPrev" onclick="stepPrev()">← Prev</button>
+      <button class="btn primary" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btnNext" onclick="stepNext()">→ Next</button>
+      <button class="btn" onclick="resetViz()">↺ Reset</button>
+    </div>
+    <div class="speed-ctrl">
+      <span>Speed</span>
+      <input type="range" id="speedSlider" min="1" max="5" value="3" oninput="updateSpeed()">
+      <span id="speedLabel">Normal</span>
+    </div>
+    <span class="step-counter" id="stepCounter">Step 0 of 0</span>
+  </div>
+
+  <div class="viz-main" id="vizMain">
+    <!-- LEFT: CALL STACK -->
+    <div class="viz-panel" style="overflow:hidden;">
+      <div class="panel-title">Call Stack <span id="stackDepthLabel">(depth: 0)</span></div>
+      <div id="hanoiDisplay" class="hanoi-display" style="display:none"></div>
+      <div class="stack-container" id="stackContainer">
+        <div class="stack-depth-meter">
+          <div class="stack-depth-fill" id="depthFill" style="height:0%"></div>
+        </div>
+        <div class="stack-frames" id="stackFrames">
+          <div class="empty-state" style="color:var(--muted);font-size:0.85rem;text-align:center;padding:20px">
+            Press ▶ Play or → Next to start the visualization
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: RECURSION TREE -->
+    <div class="viz-panel" id="treePanel">
+      <div class="panel-title">Recursion Tree</div>
+      <canvas id="treeCanvas"></canvas>
+    </div>
+
+    <!-- RETURN TRACE -->
+    <div class="return-trace">
+      <div class="trace-title">Return Value Chain</div>
+      <div class="trace-items" id="traceItems">
+        <span style="color:var(--muted);font-size:0.8rem">Return values will appear here as they resolve...</span>
+      </div>
+    </div>
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-label">Calls made:</span><span class="stat-val" id="statCalls">0</span></div>
+      <div class="stat"><span class="stat-label">Max depth:</span><span class="stat-val" id="statDepth">0</span></div>
+      <div class="stat"><span class="stat-label">Returns:</span><span class="stat-val" id="statReturns">0</span></div>
+      <div class="stat"><span class="stat-label">Duplicate calls:</span><span class="stat-val orange" id="statDups">0</span></div>
+      <div class="stat"><span class="stat-label">Time complexity:</span><span class="stat-val" id="statTime">—</span></div>
+      <div class="stat"><span class="stat-label">Space (stack):</span><span class="stat-val" id="statSpace">—</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TAB 2: PROBLEMS ═══════════════ -->
+<div id="tab-problems" class="tab-content" style="display:none;flex-direction:column;">
+  <div class="problems-grid" id="problemsGrid"></div>
+</div>
+
+<!-- ═══════════════ TAB 3: CONCEPTS ═══════════════ -->
+<div id="tab-concepts" class="tab-content" style="display:none;flex-direction:column;">
+  <div class="concepts-list" id="conceptsList"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA: PRE-COMPUTED ANIMATION STEPS
+// ═══════════════════════════════════════════════════════════
+
+const FN_META = {
+  fibonacci:     { label:'Fibonacci',      inputLabel:'n =',    defaultN:4, timeComplexity:'O(2ⁿ)', spaceComplexity:'O(n)' },
+  factorial:     { label:'Factorial',      inputLabel:'n =',    defaultN:5, timeComplexity:'O(n)',  spaceComplexity:'O(n)' },
+  sumArray:      { label:'Sum Array',      inputLabel:'len =',  defaultN:4, timeComplexity:'O(n)',  spaceComplexity:'O(n)' },
+  power:         { label:'Power',          inputLabel:'exp =',  defaultN:4, timeComplexity:'O(n)',  spaceComplexity:'O(n)' },
+  binarySearch:  { label:'Binary Search',  inputLabel:'—',      defaultN:0, timeComplexity:'O(log n)', spaceComplexity:'O(log n)' },
+  mergeSort:     { label:'Merge Sort',     inputLabel:'—',      defaultN:0, timeComplexity:'O(n log n)', spaceComplexity:'O(n)' },
+  treeTraversal: { label:'Tree Traversal', inputLabel:'—',      defaultN:0, timeComplexity:'O(n)',  spaceComplexity:'O(h)' },
+  hanoi:         { label:'Hanoi',          inputLabel:'disks =',defaultN:3, timeComplexity:'O(2ⁿ)', spaceComplexity:'O(n)' },
+};
+
+// ── FIBONACCI STEPS GENERATOR ──
+function genFibSteps(n) {
+  const steps = [];
+  const callCount = {};
+  let callsMade = 0, maxDepth = 0, returns = 0;
+  const treeNodes = {};
+  const nodeId = (nn) => `fib_${nn}_${Math.random().toString(36).slice(2,7)}`;
+
+  // We'll trace execution with a true recursive simulation
+  const stack = [];
+  const traceItems = [];
+
+  function trace(nn, parentId) {
+    const id = nodeId(nn);
+    const key = `fib(${nn})`;
+    callCount[key] = (callCount[key]||0)+1;
+    const isDup = callCount[key] > 1;
+    callsMade++;
+    if (stack.length+1 > maxDepth) maxDepth = stack.length+1;
+
+    treeNodes[id] = { label:`fib(${nn})`, n:nn, state:'active', parentId, children:[], returnVal:null };
+    if (parentId && treeNodes[parentId]) treeNodes[parentId].children.push(id);
+
+    stack.push({ label:`fib(${nn})`, vars:`n = ${nn}`, line:`return fib(${nn-1}) + fib(${nn-2})`, status:`computing fib(${nn-1}) + fib(${nn-2})`, state:'active', id, isDup });
+    steps.push({ type:'call', fn:'fib', args:[nn], stack: deepClone(stack), tree: deepClone(treeNodes), trace:[...traceItems], stats:{calls:callsMade, depth:maxDepth, returns, dups:Object.values(callCount).filter(v=>v>1).length} });
+
+    if (nn <= 1) {
+      const rv = nn;
+      const top = stack[stack.length-1];
+      top.state = 'returning';
+      top.status = `→ returning ${rv}`;
+      top.line = `return ${rv}`;
+      treeNodes[id].state = 'returned';
+      treeNodes[id].returnVal = rv;
+      returns++;
+      traceItems.push(`fib(${nn}) → ${rv}`);
+      steps.push({ type:'return', fn:'fib', args:[nn], returnVal:rv, stack: deepClone(stack), tree: deepClone(treeNodes), trace:[...traceItems], stats:{calls:callsMade, depth:maxDepth, returns, dups:Object.values(callCount).filter(v=>v>1).length} });
+      stack.pop();
+      return rv;
+    }
+
+    const left = trace(nn-1, id);
+    const top2 = stack[stack.length-1];
+    if (top2) { top2.status = `fib(${nn-1})=${left}, now computing fib(${nn-2})`; top2.state = 'waiting'; }
+
+    const right = trace(nn-2, id);
+    const rv = left + right;
+    const top3 = stack[stack.length-1];
+    if (top3) { top3.state = 'returning'; top3.status = `→ returning ${rv}`; top3.line = `return ${left} + ${right} = ${rv}`; }
+    treeNodes[id].state = 'returned';
+    treeNodes[id].returnVal = rv;
+    returns++;
+    traceItems.push(`fib(${nn}) → ${rv}`);
+    steps.push({ type:'return', fn:'fib', args:[nn], returnVal:rv, stack: deepClone(stack), tree: deepClone(treeNodes), trace:[...traceItems], stats:{calls:callsMade, depth:maxDepth, returns, dups:Object.values(callCount).filter(v=>v>1).length} });
+    stack.pop();
+    return rv;
+  }
+
+  const capped = Math.min(n, 6);
+  trace(capped, null);
+  return steps;
+}
+
+// ── FACTORIAL STEPS GENERATOR ──
+function genFactorialSteps(n) {
+  const steps = [];
+  const stack = [];
+  const traceItems = [];
+  let calls = 0, maxDepth = 0, returns = 0;
+  const treeNodes = {};
+
+  function trace(nn, parentId) {
+    calls++;
+    if (stack.length+1 > maxDepth) maxDepth = stack.length+1;
+    const id = `f${nn}_${calls}`;
+    treeNodes[id] = { label:`fact(${nn})`, n:nn, state:'active', parentId, children:[], returnVal:null };
+    if (parentId && treeNodes[parentId]) treeNodes[parentId].children.push(id);
+
+    stack.push({ label:`factorial(${nn})`, vars:`n = ${nn}`, line: nn <= 1 ? `return 1` : `return ${nn} × factorial(${nn-1})`, status: nn <= 1 ? 'base case!' : `computing factorial(${nn-1})`, state:'active', id });
+    steps.push({ type:'call', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+
+    if (nn <= 1) {
+      const top = stack[stack.length-1];
+      top.state = 'returning'; top.status = '→ returning 1'; top.line = 'return 1';
+      treeNodes[id].state = 'returned'; treeNodes[id].returnVal = 1;
+      returns++; traceItems.push(`fact(${nn}) → 1`);
+      steps.push({ type:'return', returnVal:1, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+      stack.pop();
+      return 1;
+    }
+
+    const sub = trace(nn-1, id);
+    const rv = nn * sub;
+    const top = stack[stack.length-1];
+    top.state = 'returning'; top.status = `→ returning ${rv}`; top.line = `return ${nn} × ${sub} = ${rv}`;
+    treeNodes[id].state = 'returned'; treeNodes[id].returnVal = rv;
+    returns++; traceItems.push(`fact(${nn}) → ${rv}`);
+    steps.push({ type:'return', returnVal:rv, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+    stack.pop();
+    return rv;
+  }
+
+  trace(Math.min(n, 8), null);
+  return steps;
+}
+
+// ── SUM ARRAY STEPS GENERATOR ──
+function genSumArraySteps(len) {
+  const arr = Array.from({length:Math.min(len,6)}, (_,i)=>i+1);
+  const steps = [];
+  const stack = [];
+  const traceItems = [];
+  let calls = 0, maxDepth = 0, returns = 0;
+  const treeNodes = {};
+
+  function trace(a, parentId) {
+    calls++;
+    if (stack.length+1 > maxDepth) maxDepth = stack.length+1;
+    const id = `s${calls}`;
+    const label = `sum([${a.join(',')}])`;
+    treeNodes[id] = { label, state:'active', parentId, children:[], returnVal:null };
+    if (parentId && treeNodes[parentId]) treeNodes[parentId].children.push(id);
+
+    const isBase = a.length === 0;
+    stack.push({ label, vars:`arr = [${a.join(',')}]`, line: isBase ? 'return 0' : `return ${a[0]} + sum([${a.slice(1).join(',')}])`, status: isBase ? 'base case (empty)' : `computing sum([${a.slice(1).join(',')}])`, state:'active', id });
+    steps.push({ type:'call', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+
+    if (isBase) {
+      const top = stack[stack.length-1];
+      top.state='returning'; top.status='→ returning 0';
+      treeNodes[id].state='returned'; treeNodes[id].returnVal=0;
+      returns++; traceItems.push(`sum([]) → 0`);
+      steps.push({ type:'return', returnVal:0, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+      stack.pop(); return 0;
+    }
+
+    const sub = trace(a.slice(1), id);
+    const rv = a[0] + sub;
+    const top = stack[stack.length-1];
+    top.state='returning'; top.status=`→ returning ${rv}`; top.line=`return ${a[0]} + ${sub} = ${rv}`;
+    treeNodes[id].state='returned'; treeNodes[id].returnVal=rv;
+    returns++; traceItems.push(`sum([${a.join(',')}]) → ${rv}`);
+    steps.push({ type:'return', returnVal:rv, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+    stack.pop(); return rv;
+  }
+
+  trace(arr, null);
+  return steps;
+}
+
+// ── POWER STEPS GENERATOR ──
+function genPowerSteps(exp) {
+  const x = 2, n = Math.min(exp, 8);
+  const steps = [];
+  const stack = [];
+  const traceItems = [];
+  let calls = 0, maxDepth = 0, returns = 0;
+  const treeNodes = {};
+
+  function trace(nn, parentId) {
+    calls++;
+    if (stack.length+1 > maxDepth) maxDepth = stack.length+1;
+    const id = `p${calls}`;
+    treeNodes[id] = { label:`pow(${x},${nn})`, state:'active', parentId, children:[], returnVal:null };
+    if (parentId && treeNodes[parentId]) treeNodes[parentId].children.push(id);
+
+    const isBase = nn === 0;
+    stack.push({ label:`pow(${x}, ${nn})`, vars:`x=${x}, n=${nn}`, line: isBase ? 'return 1' : `return ${x} × pow(${x},${nn-1})`, status: isBase ? 'base case!' : `computing pow(${x},${nn-1})`, state:'active', id });
+    steps.push({ type:'call', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+
+    if (isBase) {
+      const top = stack[stack.length-1];
+      top.state='returning'; top.status='→ returning 1';
+      treeNodes[id].state='returned'; treeNodes[id].returnVal=1;
+      returns++; traceItems.push(`pow(${x},0) → 1`);
+      steps.push({ type:'return', returnVal:1, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+      stack.pop(); return 1;
+    }
+
+    const sub = trace(nn-1, id);
+    const rv = x * sub;
+    const top = stack[stack.length-1];
+    top.state='returning'; top.status=`→ returning ${rv}`; top.line=`return ${x} × ${sub} = ${rv}`;
+    treeNodes[id].state='returned'; treeNodes[id].returnVal=rv;
+    returns++; traceItems.push(`pow(${x},${nn}) → ${rv}`);
+    steps.push({ type:'return', returnVal:rv, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+    stack.pop(); return rv;
+  }
+
+  trace(n, null);
+  return steps;
+}
+
+// ── BINARY SEARCH STEPS ──
+function genBinarySearchSteps() {
+  const arr = [1,3,5,7,9,11,13], target = 7;
+  const steps = [];
+  const stack = [];
+  const traceItems = [];
+  let calls = 0, maxDepth = 0, returns = 0;
+  const treeNodes = {};
+
+  function trace(lo, hi, parentId) {
+    calls++;
+    if (stack.length+1 > maxDepth) maxDepth = stack.length+1;
+    const id = `bs${calls}`;
+    const label = `bs(${lo},${hi})`;
+    treeNodes[id] = { label, state:'active', parentId, children:[], returnVal:null };
+    if (parentId && treeNodes[parentId]) treeNodes[parentId].children.push(id);
+
+    const mid = lo + Math.floor((hi-lo)/2);
+    const isNotFound = lo > hi;
+    const isFound = !isNotFound && arr[mid] === target;
+
+    stack.push({ label:`binarySearch(${lo},${hi})`, vars:`lo=${lo}, hi=${hi}, mid=${lo>hi?'—':mid}`, line: isNotFound ? 'return -1' : isFound ? `return ${mid}` : arr[mid] < target ? `return bs(${mid+1},${hi})` : `return bs(${lo},${mid-1})`, status: isNotFound ? 'not found!' : isFound ? `found at index ${mid}!` : arr[mid] < target ? 'target > mid, search right' : 'target < mid, search left', state:'active', id });
+    steps.push({ type:'call', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+
+    if (isNotFound) {
+      const top = stack[stack.length-1]; top.state='returning'; top.status='→ returning -1';
+      treeNodes[id].state='returned'; treeNodes[id].returnVal=-1;
+      returns++; traceItems.push(`bs(${lo},${hi}) → -1`);
+      steps.push({ type:'return', returnVal:-1, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+      stack.pop(); return -1;
+    }
+    if (isFound) {
+      const top = stack[stack.length-1]; top.state='returning'; top.status=`→ found at ${mid}!`;
+      treeNodes[id].state='returned'; treeNodes[id].returnVal=mid;
+      returns++; traceItems.push(`bs(${lo},${hi}) → ${mid} ✓`);
+      steps.push({ type:'return', returnVal:mid, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+      stack.pop(); return mid;
+    }
+
+    let sub;
+    if (arr[mid] < target) sub = trace(mid+1, hi, id);
+    else sub = trace(lo, mid-1, id);
+
+    const top = stack[stack.length-1];
+    if (top) { top.state='returning'; top.status=`→ returning ${sub}`; }
+    treeNodes[id].state='returned'; treeNodes[id].returnVal=sub;
+    returns++; traceItems.push(`bs(${lo},${hi}) → ${sub}`);
+    steps.push({ type:'return', returnVal:sub, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+    stack.pop(); return sub;
+  }
+
+  trace(0, arr.length-1, null);
+  return steps;
+}
+
+// ── MERGE SORT STEPS ──
+function genMergeSortSteps() {
+  const arr = [5,3,8,1,9,2];
+  const steps = [];
+  const stack = [];
+  const traceItems = [];
+  let calls = 0, maxDepth = 0, returns = 0;
+  const treeNodes = {};
+
+  function trace(a, parentId) {
+    if (a.length > 6) return a; // safety
+    calls++;
+    if (stack.length+1 > maxDepth) maxDepth = stack.length+1;
+    const id = `ms${calls}`;
+    const label = `ms([${a.join(',')}])`;
+    treeNodes[id] = { label, state:'active', parentId, children:[], returnVal:null };
+    if (parentId && treeNodes[parentId]) treeNodes[parentId].children.push(id);
+
+    const isBase = a.length <= 1;
+    const mid = Math.floor(a.length/2);
+    stack.push({ label:`mergeSort([${a.join(',')}])`, vars:`arr=[${a.join(',')}], len=${a.length}`, line: isBase ? `return [${a.join(',')}]` : `split → [${a.slice(0,mid).join(',')}] and [${a.slice(mid).join(',')}]`, status: isBase ? 'base case (len≤1)' : `splitting into two halves`, state:'active', id });
+    steps.push({ type:'call', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+
+    if (isBase) {
+      const top = stack[stack.length-1]; top.state='returning'; top.status=`→ returning [${a.join(',')}]`;
+      treeNodes[id].state='returned'; treeNodes[id].returnVal=a;
+      returns++; traceItems.push(`ms([${a.join(',')}]) → [${a.join(',')}]`);
+      steps.push({ type:'return', returnVal:a, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+      stack.pop(); return a;
+    }
+
+    const left = trace(a.slice(0, mid), id);
+    const right = trace(a.slice(mid), id);
+    const merged = merge(left, right);
+    const top = stack[stack.length-1];
+    if (top) { top.state='returning'; top.status=`→ merged: [${merged.join(',')}]`; top.line=`return merge([${left.join(',')}],[${right.join(',')}])`; }
+    treeNodes[id].state='returned'; treeNodes[id].returnVal=merged;
+    returns++; traceItems.push(`ms([${a.join(',')}]) → [${merged.join(',')}]`);
+    steps.push({ type:'return', returnVal:merged, stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+    stack.pop(); return merged;
+  }
+
+  function merge(a, b) {
+    const res = []; let i=0, j=0;
+    while (i<a.length && j<b.length) { if(a[i]<=b[j]) res.push(a[i++]); else res.push(b[j++]); }
+    return [...res, ...a.slice(i), ...b.slice(j)];
+  }
+
+  trace(arr, null);
+  return steps;
+}
+
+// ── TREE TRAVERSAL STEPS ──
+function genTreeTraversalSteps() {
+  // BST: [4,2,6,1,3,5,7]
+  const tree = {
+    val:4, id:'n4',
+    left:{ val:2, id:'n2', left:{val:1,id:'n1',left:null,right:null}, right:{val:3,id:'n3',left:null,right:null} },
+    right:{ val:6, id:'n6', left:{val:5,id:'n5',left:null,right:null}, right:{val:7,id:'n7',left:null,right:null} }
+  };
+
+  const steps = [];
+  const stack = [];
+  const traceItems = [];
+  let calls = 0, maxDepth = 0, returns = 0;
+  const treeNodes = {};
+
+  // Initialize all tree nodes as unvisited
+  function initTree(node, parentId) {
+    if (!node) return;
+    treeNodes[node.id] = { label:`node(${node.val})`, val:node.val, state:'unvisited', parentId, children:[], returnVal:null };
+    if (parentId && treeNodes[parentId]) treeNodes[parentId].children.push(node.id);
+    initTree(node.left, node.id);
+    initTree(node.right, node.id);
+  }
+  initTree(tree, null);
+
+  function trace(node, parentId) {
+    if (!node) return;
+    calls++;
+    if (stack.length+1 > maxDepth) maxDepth = stack.length+1;
+
+    treeNodes[node.id].state = 'active';
+    stack.push({ label:`inorder(${node.val})`, vars:`node.val = ${node.val}`, line:`inorder(left) → print(${node.val}) → inorder(right)`, status:`visiting node ${node.val}, going left`, state:'active', id:node.id });
+    steps.push({ type:'call', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+
+    if (node.left) {
+      const top = stack[stack.length-1]; top.state='waiting'; top.status='waiting for left subtree...';
+      trace(node.left, node.id);
+    }
+
+    const top2 = stack[stack.length-1];
+    if (top2) { top2.state='active'; top2.status=`visiting ${node.val} ← print!`; top2.line=`print(${node.val})`; }
+    treeNodes[node.id].state = 'visited';
+    returns++; traceItems.push(`visit ${node.val}`);
+    steps.push({ type:'return', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+
+    if (node.right) {
+      const top3 = stack[stack.length-1]; if(top3){ top3.state='waiting'; top3.status='waiting for right subtree...'; }
+      trace(node.right, node.id);
+    }
+
+    const top4 = stack[stack.length-1];
+    if (top4) { top4.state='returning'; top4.status='→ subtree done'; }
+    steps.push({ type:'return', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], stats:{calls, depth:maxDepth, returns, dups:0} });
+    stack.pop();
+  }
+
+  trace(tree, null);
+  return steps;
+}
+
+// ── HANOI STEPS ──
+function genHanoiSteps(numDisks) {
+  const nd = Math.min(numDisks, 4);
+  const steps = [];
+  const stack = [];
+  const traceItems = [];
+  let calls = 0, maxDepth = 0, returns = 0;
+  const treeNodes = {};
+  // pegs: A=0, B=1, C=2; disks: array of arrays
+  const pegs = [Array.from({length:nd},(_,i)=>nd-i), [], []]; // A has all disks
+
+  function pegName(i) { return ['A','B','C'][i]; }
+
+  function trace(n, from, to, via, parentId) {
+    calls++;
+    if (stack.length+1 > maxDepth) maxDepth = stack.length+1;
+    const id = `h${calls}`;
+    treeNodes[id] = { label:`hanoi(${n},${pegName(from)},${pegName(to)})`, state:'active', parentId, children:[], returnVal:null };
+    if (parentId && treeNodes[parentId]) treeNodes[parentId].children.push(id);
+
+    stack.push({ label:`hanoi(${n}, ${pegName(from)}→${pegName(to)})`, vars:`n=${n}, from=${pegName(from)}, to=${pegName(to)}, via=${pegName(via)}`, line: n===1 ? `move disk 1: ${pegName(from)}→${pegName(to)}` : `move ${n-1} disks, then disk ${n}, then ${n-1} again`, status: n===1 ? `base: move disk ${pegName(from)}→${pegName(to)}` : `recursing...`, state:'active', id });
+    steps.push({ type:'call', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], pegs:deepClone(pegs), stats:{calls, depth:maxDepth, returns, dups:0} });
+
+    if (n === 1) {
+      const disk = pegs[from].pop();
+      pegs[to].push(disk);
+      traceItems.push(`disk ${disk}: ${pegName(from)}→${pegName(to)}`);
+      const top = stack[stack.length-1]; top.state='returning'; top.status=`moved disk ${disk}!`;
+      treeNodes[id].state='returned';
+      returns++;
+      steps.push({ type:'return', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], pegs:deepClone(pegs), stats:{calls, depth:maxDepth, returns, dups:0} });
+      stack.pop();
+      return;
+    }
+
+    trace(n-1, from, via, to, id);
+    const top = stack[stack.length-1]; if(top){ top.status=`moving disk ${n} from ${pegName(from)} to ${pegName(to)}`; }
+    const disk = pegs[from].pop();
+    pegs[to].push(disk);
+    traceItems.push(`disk ${disk}: ${pegName(from)}→${pegName(to)}`);
+    steps.push({ type:'move', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], pegs:deepClone(pegs), stats:{calls, depth:maxDepth, returns, dups:0} });
+
+    trace(n-1, via, to, from, id);
+    const top2 = stack[stack.length-1]; if(top2){ top2.state='returning'; top2.status='done!'; }
+    treeNodes[id].state='returned';
+    returns++;
+    steps.push({ type:'return', stack:deepClone(stack), tree:deepClone(treeNodes), trace:[...traceItems], pegs:deepClone(pegs), stats:{calls, depth:maxDepth, returns, dups:0} });
+    stack.pop();
+  }
+
+  trace(nd, 0, 2, 1, null);
+  return steps;
+}
+
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let currentFn = 'fibonacci';
+let currentN = 4;
+let steps = [];
+let stepIdx = -1;
+let playing = false;
+let playTimer = null;
+let speedMs = 600; // ms per step
+
+const SPEEDS = { 1:1200, 2:800, 3:500, 4:250, 5:100 };
+const SPEED_LABELS = { 1:'Very Slow', 2:'Slow', 3:'Normal', 4:'Fast', 5:'Very Fast' };
+
+// ═══════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => { el.style.display='none'; el.classList.remove('active'); });
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById(`tab-${name}`);
+  el.style.display = 'flex';
+  el.classList.add('active');
+  btn.classList.add('active');
+  if (name === 'concepts') renderConcepts();
+  if (name === 'problems') renderProblems();
+}
+
+// ═══════════════════════════════════════════════════════════
+// FUNCTION SELECTION & INPUT
+// ═══════════════════════════════════════════════════════════
+function selectFn(fn, btn) {
+  currentFn = fn;
+  document.querySelectorAll('#fnPills .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const meta = FN_META[fn];
+  document.getElementById('inputLabel').textContent = meta.inputLabel;
+  const grp = document.getElementById('inputGroup');
+  const noInput = ['binarySearch','mergeSort','treeTraversal'].includes(fn);
+  grp.style.display = noInput ? 'none' : 'flex';
+  currentN = meta.defaultN;
+  document.getElementById('nInput').value = currentN;
+  // hanoi display
+  document.getElementById('hanoiDisplay').style.display = fn === 'hanoi' ? 'flex' : 'none';
+  resetViz();
+}
+
+function onInputChange() {
+  const val = parseInt(document.getElementById('nInput').value);
+  const warn = document.getElementById('warningMsg');
+  if (val > 8) {
+    warn.style.display = 'flex';
+    currentN = 8;
+    document.getElementById('nInput').value = 8;
+  } else {
+    warn.style.display = 'none';
+    currentN = val;
+  }
+  resetViz();
+}
+
+// ═══════════════════════════════════════════════════════════
+// GENERATE STEPS
+// ═══════════════════════════════════════════════════════════
+function generateSteps() {
+  switch (currentFn) {
+    case 'fibonacci':    return genFibSteps(currentN);
+    case 'factorial':    return genFactorialSteps(currentN);
+    case 'sumArray':     return genSumArraySteps(currentN);
+    case 'power':        return genPowerSteps(currentN);
+    case 'binarySearch': return genBinarySearchSteps();
+    case 'mergeSort':    return genMergeSortSteps();
+    case 'treeTraversal':return genTreeTraversalSteps();
+    case 'hanoi':        return genHanoiSteps(currentN);
+    default:             return genFibSteps(4);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PLAYBACK
+// ═══════════════════════════════════════════════════════════
+function resetViz() {
+  stopPlay();
+  steps = generateSteps();
+  stepIdx = -1;
+  updateUI();
+  renderStep(-1);
+}
+
+function togglePlay() {
+  if (playing) stopPlay();
+  else startPlay();
+}
+
+function startPlay() {
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  document.getElementById('btnPlay').className = 'btn';
+  advancePlay();
+}
+
+function stopPlay() {
+  playing = false;
+  clearTimeout(playTimer);
+  document.getElementById('btnPlay').textContent = '▶ Play';
+  document.getElementById('btnPlay').className = 'btn primary';
+}
+
+function advancePlay() {
+  if (!playing) return;
+  if (stepIdx < steps.length - 1) {
+    stepNext();
+    playTimer = setTimeout(advancePlay, speedMs);
+  } else {
+    stopPlay();
+  }
+}
+
+function stepNext() {
+  if (stepIdx < steps.length - 1) {
+    stepIdx++;
+    renderStep(stepIdx);
+    updateUI();
+  }
+}
+
+function stepPrev() {
+  if (stepIdx > 0) {
+    stepIdx--;
+    renderStep(stepIdx);
+    updateUI();
+  } else if (stepIdx === 0) {
+    stepIdx = -1;
+    renderStep(-1);
+    updateUI();
+  }
+}
+
+function updateSpeed() {
+  const val = parseInt(document.getElementById('speedSlider').value);
+  speedMs = SPEEDS[val];
+  document.getElementById('speedLabel').textContent = SPEED_LABELS[val];
+}
+
+function updateUI() {
+  const total = steps.length;
+  document.getElementById('stepCounter').textContent = `Step ${Math.max(0,stepIdx+1)} of ${total}`;
+  document.getElementById('btnPrev').disabled = stepIdx <= -1;
+  document.getElementById('btnNext').disabled = stepIdx >= total - 1;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER STEP
+// ═══════════════════════════════════════════════════════════
+function renderStep(idx) {
+  if (idx < 0) {
+    // Clear state
+    document.getElementById('stackFrames').innerHTML = '<div class="empty-state" style="color:var(--muted);font-size:0.85rem;text-align:center;padding:20px">Press ▶ Play or → Next to start</div>';
+    document.getElementById('depthFill').style.height = '0%';
+    document.getElementById('stackDepthLabel').textContent = '(depth: 0)';
+    document.getElementById('traceItems').innerHTML = '<span style="color:var(--muted);font-size:0.8rem">Return values will appear here...</span>';
+    document.getElementById('statCalls').textContent = '0';
+    document.getElementById('statDepth').textContent = '0';
+    document.getElementById('statReturns').textContent = '0';
+    document.getElementById('statDups').textContent = '0';
+    const meta = FN_META[currentFn];
+    document.getElementById('statTime').textContent = meta.timeComplexity;
+    document.getElementById('statSpace').textContent = meta.spaceComplexity;
+    drawTree({}, 'initial');
+    if (currentFn === 'hanoi') renderHanoi(null);
+    return;
+  }
+
+  const step = steps[idx];
+
+  // Stats
+  const s = step.stats;
+  document.getElementById('statCalls').textContent = s.calls;
+  document.getElementById('statDepth').textContent = s.depth;
+  document.getElementById('statReturns').textContent = s.returns;
+  document.getElementById('statDups').textContent = s.dups;
+  const meta = FN_META[currentFn];
+  document.getElementById('statTime').textContent = meta.timeComplexity;
+  document.getElementById('statSpace').textContent = meta.spaceComplexity;
+
+  // Stack frames
+  const stackEl = document.getElementById('stackFrames');
+  if (!step.stack || step.stack.length === 0) {
+    stackEl.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:20px">Stack is empty — all calls returned!</div>';
+  } else {
+    const maxPossibleDepth = steps.reduce((mx,st)=>Math.max(mx, st.stack ? st.stack.length:0), 0) || 1;
+    const curDepth = step.stack.length;
+    document.getElementById('stackDepthLabel').textContent = `(depth: ${curDepth})`;
+    document.getElementById('depthFill').style.height = `${Math.min(100, (curDepth/maxPossibleDepth)*100)}%`;
+
+    // Render frames newest-on-top
+    const reversed = [...step.stack].reverse();
+    stackEl.innerHTML = reversed.map((frame, i) => {
+      const isTop = i === 0;
+      const cls = isTop ? frame.state || 'active' : frame.state || 'waiting';
+      return `<div class="frame ${cls}">
+        <div class="frame-title">${esc(frame.label)}</div>
+        <div class="frame-vars">${esc(frame.vars||'')}</div>
+        <div class="frame-line">${esc(frame.line||'')}</div>
+        <div class="frame-status">${esc(frame.status||'')}</div>
+        <div class="frame-depth">depth ${step.stack.length - i}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Return trace
+  const traceEl = document.getElementById('traceItems');
+  if (step.trace && step.trace.length > 0) {
+    traceEl.innerHTML = step.trace.map(t => `<span class="trace-item">${esc(t)}</span>`).join('');
+  } else {
+    traceEl.innerHTML = '<span style="color:var(--muted);font-size:0.8rem">Return values will appear here...</span>';
+  }
+
+  // Tree
+  drawTree(step.tree || {});
+
+  // Hanoi
+  if (currentFn === 'hanoi' && step.pegs) {
+    renderHanoi(step.pegs);
+  }
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════════════════════════════
+// TREE DRAWING (Canvas)
+// ═══════════════════════════════════════════════════════════
+function drawTree(treeNodes, mode) {
+  const canvas = document.getElementById('treeCanvas');
+  const panel = document.getElementById('treePanel');
+  const W = panel.clientWidth - 28;
+  const H = Math.max(200, panel.clientHeight - 60);
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  if (!treeNodes || Object.keys(treeNodes).length === 0) {
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '13px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Recursion tree will appear here', W/2, H/2);
+    return;
+  }
+
+  // Find root(s)
+  const allIds = Object.keys(treeNodes);
+  const childIds = new Set(allIds.flatMap(id => treeNodes[id].children || []));
+  const roots = allIds.filter(id => !childIds.has(id));
+  if (roots.length === 0) return;
+
+  // Layout: BFS to assign positions
+  const pos = {};
+  const R = Math.min(22, Math.max(14, W / (allIds.length * 1.5)));
+
+  function subtreeWidth(id) {
+    const node = treeNodes[id];
+    if (!node || !node.children || node.children.length === 0) return 1;
+    return node.children.reduce((sum, cid) => sum + subtreeWidth(cid), 0);
+  }
+
+  function layout(id, x, y, totalWidth) {
+    pos[id] = { x, y };
+    const node = treeNodes[id];
+    if (!node || !node.children || node.children.length === 0) return;
+    const children = node.children;
+    const childWidths = children.map(subtreeWidth);
+    const total = childWidths.reduce((a,b)=>a+b, 0);
+    let cx = x - (totalWidth/2) + (totalWidth/(total*2));
+    children.forEach((cid, i) => {
+      const w = (childWidths[i]/total) * totalWidth;
+      layout(cid, cx + w/2 - totalWidth/(total*2) + (i===0?0:0), y + 60, w);
+      cx += w;
+    });
+  }
+
+  // Compute layout
+  const rootId = roots[0];
+  const tw = subtreeWidth(rootId);
+  layout(rootId, W/2, R+10, W - 2*R);
+
+  // Fix layout with cleaner spacing
+  const levelMap = {};
+  function assignLevels(id, level) {
+    levelMap[id] = level;
+    (treeNodes[id].children||[]).forEach(c => assignLevels(c, level+1));
+  }
+  assignLevels(rootId, 0);
+  const maxLevel = Math.max(...Object.values(levelMap));
+  const levelH = maxLevel > 0 ? Math.min(70, (H - 2*R - 20) / maxLevel) : 60;
+
+  // Recompute y based on levels
+  Object.keys(pos).forEach(id => {
+    pos[id].y = R + 10 + levelMap[id] * levelH;
+  });
+
+  // Draw edges
+  allIds.forEach(id => {
+    const node = treeNodes[id];
+    if (!pos[id]) return;
+    (node.children||[]).forEach(cid => {
+      if (!pos[cid]) return;
+      const state = treeNodes[cid].state;
+      ctx.beginPath();
+      ctx.moveTo(pos[id].x, pos[id].y);
+      ctx.lineTo(pos[cid].x, pos[cid].y);
+      ctx.strokeStyle = state === 'active' || state === 'returned' || state === 'visited' ? '#4f8ef7' : '#2d3148';
+      ctx.lineWidth = state === 'active' ? 2 : 1;
+      ctx.stroke();
+    });
+  });
+
+  // Draw nodes
+  allIds.forEach(id => {
+    if (!pos[id]) return;
+    const node = treeNodes[id];
+    const { x, y } = pos[id];
+    const state = node.state || 'unvisited';
+
+    let fillColor, borderColor, textColor;
+    if (state === 'active') { fillColor='#fbbf24'; borderColor='#fbbf24'; textColor='#000'; }
+    else if (state === 'waiting') { fillColor='rgba(79,142,247,0.3)'; borderColor='#4f8ef7'; textColor='#4f8ef7'; }
+    else if (state === 'returned' || state === 'visited') { fillColor='rgba(74,222,128,0.2)'; borderColor='#4ade80'; textColor='#4ade80'; }
+    else { fillColor='rgba(45,49,72,0.5)'; borderColor='#2d3148'; textColor='#94a3b8'; }
+
+    ctx.beginPath();
+    ctx.arc(x, y, R, 0, Math.PI*2);
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = state==='active' ? 2.5 : 1.5;
+    ctx.stroke();
+
+    // Label
+    const label = node.label || '';
+    const short = label.length > 8 ? label.replace('fib(','f(').replace('factorial(','f(').replace('pow(','p(').replace('mergeSort(','ms(').replace('inorder(','in(').replace('binarySearch(','bs(').replace('hanoi(','h(') : label;
+    ctx.fillStyle = textColor;
+    ctx.font = `bold ${Math.max(9, R*0.55)}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(short.length > 8 ? short.slice(0,7)+'…' : short, x, y);
+
+    // Return value below
+    if ((state === 'returned' || state === 'visited') && node.returnVal !== null && node.returnVal !== undefined) {
+      ctx.fillStyle = '#4ade80';
+      ctx.font = `${Math.max(8,R*0.45)}px monospace`;
+      ctx.fillText(Array.isArray(node.returnVal) ? `[${node.returnVal.join(',')}]`.slice(0,10) : String(node.returnVal), x, y + R + 8);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// HANOI DISPLAY
+// ═══════════════════════════════════════════════════════════
+const DISK_COLORS = ['#4f8ef7','#fbbf24','#4ade80','#f87171','#a78bfa'];
+
+function renderHanoi(pegs) {
+  const el = document.getElementById('hanoiDisplay');
+  if (!pegs) {
+    const nd = Math.min(currentN, 4);
+    const initPegs = [Array.from({length:nd},(_,i)=>nd-i), [], []];
+    renderHanoiPegs(el, initPegs, nd);
+    return;
+  }
+  const nd = Math.min(currentN, 4);
+  renderHanoiPegs(el, pegs, nd);
+}
+
+function renderHanoiPegs(el, pegs, numDisks) {
+  const maxW = 60;
+  const minW = 24;
+  el.innerHTML = ['A','B','C'].map((name,i) => {
+    const disks = pegs[i] || [];
+    const diskHTML = disks.map(d => {
+      const w = minW + ((d-1)/(numDisks||1)) * (maxW-minW);
+      return `<div class="disk" style="width:${w}px;background:${DISK_COLORS[(d-1)%DISK_COLORS.length]};bottom:${(disks.indexOf(d)*18)}px;left:50%;transform:translateX(-50%)">${d}</div>`;
+    }).join('');
+    return `<div class="peg-group">
+      <div class="peg-label">${name}</div>
+      <div class="peg-pole">${diskHTML}</div>
+      <div class="peg-base"></div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// TAB 2: PROBLEMS
+// ═══════════════════════════════════════════════════════════
+const PROBLEMS = [
+  {
+    name:'1. Fibonacci',
+    diff:'Easy',
+    fnKey:'fibonacci',
+    insight:'Each fib(n) = fib(n-1) + fib(n-2) — two recursive sub-problems',
+    baseCase:'fib(0) = 0, fib(1) = 1',
+    recursiveCase:'fib(n) = fib(n-1) + fib(n-2)',
+    mistake:'Forgetting both base cases → infinite recursion on fib(0)',
+    code:`def fib(n):
+    if n <= 1:       # base case
+        return n
+    return fib(n-1) + fib(n-2)
+
+# With memoization (O(n) time):
+from functools import lru_cache
+@lru_cache(maxsize=None)
+def fib_memo(n):
+    if n <= 1: return n
+    return fib_memo(n-1) + fib_memo(n-2)`
+  },
+  {
+    name:'2. Factorial',
+    diff:'Easy',
+    fnKey:'factorial',
+    insight:'n! = n × (n-1)! — multiply current n then recurse down',
+    baseCase:'factorial(0) = 1',
+    recursiveCase:'factorial(n) = n × factorial(n-1)',
+    mistake:'Using n==1 as base — factorial(0) still needs to return 1',
+    code:`def factorial(n):
+    if n == 0:       # base case
+        return 1
+    return n * factorial(n - 1)
+
+# Iterative equivalent:
+def factorial_iter(n):
+    result = 1
+    for i in range(2, n+1):
+        result *= i
+    return result`
+  },
+  {
+    name:'3. Sum of Array',
+    diff:'Easy',
+    fnKey:'sumArray',
+    insight:'sum(arr) = arr[0] + sum(arr[1:]) — peel one element, recurse on the rest',
+    baseCase:'sum([]) = 0',
+    recursiveCase:'sum(arr) = arr[0] + sum(arr[1:])',
+    mistake:'Not handling empty array — IndexError on arr[0] when arr is []',
+    code:`def sum_array(arr):
+    if len(arr) == 0:   # base case
+        return 0
+    return arr[0] + sum_array(arr[1:])
+
+# Note: O(n²) due to slicing!
+# Better: pass index
+def sum_idx(arr, i=0):
+    if i == len(arr): return 0
+    return arr[i] + sum_idx(arr, i+1)`
+  },
+  {
+    name:'4. Power Function',
+    diff:'Easy',
+    fnKey:'power',
+    insight:'pow(x, n) = x × pow(x, n-1), optimized to O(log n) with squaring',
+    baseCase:'pow(x, 0) = 1',
+    recursiveCase:'pow(x, n) = x × pow(x, n-1)  OR  pow(x, n//2)² for fast power',
+    mistake:'Naive recursion is O(n); use fast exponentiation for O(log n)',
+    code:`def power(x, n):
+    if n == 0: return 1          # base case
+    return x * power(x, n - 1)  # O(n)
+
+# Fast power: O(log n)
+def fast_power(x, n):
+    if n == 0: return 1
+    half = fast_power(x, n // 2)
+    if n % 2 == 0:
+        return half * half
+    return x * half * half`
+  },
+  {
+    name:'5. Binary Search',
+    diff:'Medium',
+    fnKey:'binarySearch',
+    insight:'Compare mid element → recurse on left or right half only',
+    baseCase:'lo > hi → not found | arr[mid] == target → found',
+    recursiveCase:'target < arr[mid]: search left | target > arr[mid]: search right',
+    mistake:'Integer overflow: use mid = lo + (hi-lo)//2, not (lo+hi)//2',
+    code:`def binary_search(arr, target, lo=0, hi=None):
+    if hi is None: hi = len(arr) - 1
+    if lo > hi: return -1          # not found
+    mid = lo + (hi - lo) // 2     # avoid overflow
+    if arr[mid] == target:
+        return mid
+    elif target < arr[mid]:
+        return binary_search(arr, target, lo, mid - 1)
+    else:
+        return binary_search(arr, target, mid + 1, hi)`
+  },
+  {
+    name:'6. Merge Sort',
+    diff:'Medium',
+    fnKey:'mergeSort',
+    insight:'Split array in half, sort each half recursively, then merge',
+    baseCase:'len(arr) ≤ 1 — already sorted',
+    recursiveCase:'merge_sort(left) + merge_sort(right) → merge both sorted halves',
+    mistake:'Forgetting to merge — splitting alone does not sort anything',
+    code:`def merge_sort(arr):
+    if len(arr) <= 1:      # base case
+        return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    return merge(left, right)
+
+def merge(left, right):
+    result = []
+    i = j = 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            result.append(left[i]); i += 1
+        else:
+            result.append(right[j]); j += 1
+    return result + left[i:] + right[j:]`
+  },
+  {
+    name:'7. Flatten Nested List',
+    diff:'Medium',
+    fnKey:null,
+    insight:'If element is a list → recurse into it, else → append to result',
+    baseCase:'Empty list → return []',
+    recursiveCase:'For each item: if list → flatten(item), else → [item]',
+    mistake:'Not checking isinstance before recursing — TypeError on non-iterable',
+    code:`def flatten(lst):
+    result = []
+    for item in lst:
+        if isinstance(item, list):   # recurse into sub-lists
+            result.extend(flatten(item))
+        else:
+            result.append(item)
+    return result
+
+# Example: flatten([1,[2,[3,4]],5])
+# → [1, 2, 3, 4, 5]`
+  },
+  {
+    name:'8. Generate Parentheses',
+    diff:'Medium',
+    fnKey:null,
+    insight:'Add "(" if opens left, add ")" if closes can balance — backtrack on each choice',
+    baseCase:'String length == 2*n → add to results',
+    recursiveCase:'Add "(" if open_count < n, add ")" if close_count < open_count',
+    mistake:'Not tracking open/close counts separately → invalid strings slip through',
+    code:`def generate_parens(n):
+    result = []
+    def backtrack(current, open, close):
+        if len(current) == 2 * n:   # base case
+            result.append(current)
+            return
+        if open < n:
+            backtrack(current + "(", open + 1, close)
+        if close < open:
+            backtrack(current + ")", open, close + 1)
+    backtrack("", 0, 0)
+    return result`
+  }
+];
+
+function renderProblems() {
+  const grid = document.getElementById('problemsGrid');
+  if (grid.children.length > 0) return; // already rendered
+  grid.innerHTML = PROBLEMS.map(p => `
+    <div class="problem-card">
+      <div class="prob-header">
+        <div class="prob-name">${esc(p.name)}</div>
+        <span class="diff-badge diff-${p.diff.toLowerCase()}">${esc(p.diff)}</span>
+      </div>
+      <div class="prob-insight">💡 ${esc(p.insight)}</div>
+      <div class="prob-cases">
+        <span class="prob-case-label">Base case:</span>
+        <span class="prob-case-val">${esc(p.baseCase)}</span>
+        <span class="prob-case-label" style="margin-top:4px">Recursive case:</span>
+        <span class="prob-case-val">${esc(p.recursiveCase)}</span>
+      </div>
+      <pre class="prob-code"><code class="language-python">${esc(p.code)}</code></pre>
+      <div class="prob-mistake">${esc(p.mistake)}</div>
+      ${p.fnKey ? `<button class="viz-this-btn" onclick="vizThis('${p.fnKey}')">▶ Visualize this →</button>` : '<div style="color:var(--muted);font-size:0.78rem;margin-top:auto">No direct visualization (backtracking)</div>'}
+    </div>
+  `).join('');
+  document.querySelectorAll('#problemsGrid code.language-python').forEach(el => hljs.highlightElement(el));
+}
+
+function vizThis(fnKey) {
+  // Switch to visualize tab
+  const vizBtn = document.querySelector('nav.tabs button');
+  switchTab('visualize', vizBtn);
+  // Select the function
+  const pills = document.querySelectorAll('#fnPills .pill');
+  const fnMap = ['fibonacci','factorial','sumArray','power','binarySearch','mergeSort','treeTraversal','hanoi'];
+  pills.forEach((pill, i) => {
+    if (fnMap[i] === fnKey) {
+      selectFn(fnKey, pill);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// TAB 3: CONCEPTS
+// ═══════════════════════════════════════════════════════════
+const CONCEPTS = [
+  {
+    title:'1. The 3 Laws of Recursion',
+    body:`
+      <p>Every correct recursive function must satisfy all three laws:</p>
+      <div class="checklist">
+        <div class="check-item"><span class="ck">✓</span><div><strong>Base case</strong> — must have at least one case where the answer is known without recursing (e.g., <code>fib(0)=0</code>, <code>fib(1)=1</code>)</div></div>
+        <div class="check-item"><span class="ck">✓</span><div><strong>Move toward base case</strong> — each recursive call must change state so you get closer to the base case (e.g., <code>n → n-1</code>)</div></div>
+        <div class="check-item"><span class="ck">✓</span><div><strong>Call itself</strong> — must call itself with a smaller/simpler version of the same problem</div></div>
+      </div>
+      <p style="margin-top:12px">Applied to <code>fib(n)</code>: base cases <code>n≤1</code>, each call uses smaller n, and it calls <code>fib(n-1)</code> + <code>fib(n-2)</code>. All three laws ✓</p>
+    `
+  },
+  {
+    title:'2. Call Stack Mechanics',
+    body:`
+      <p>Every function call creates a <strong>stack frame</strong> — a block of memory holding local variables, parameters, and the return address.</p>
+      <ul>
+        <li>Stack frames are pushed on call, popped on return (LIFO order)</li>
+        <li>The currently executing function is always on top</li>
+        <li>Suspended calls wait below — they resume when their child returns</li>
+        <li>Python's default recursion limit: <code>sys.getrecursionlimit()</code> = <strong>1000</strong></li>
+        <li>Increase it: <code>sys.setrecursionlimit(10000)</code> (use with caution)</li>
+        <li><strong>Stack overflow</strong> = exceeding the limit → <code>RecursionError</code></li>
+      </ul>
+      <p>Rule of thumb: recursion depth = maximum number of frames on the stack at once = O(depth) space complexity.</p>
+    `
+  },
+  {
+    title:'3. Memoization — Top-Down DP',
+    body:`
+      <p>Naive <code>fib(n)</code> recalculates the same subproblems repeatedly. <code>fib(4)</code> makes <strong>9 calls</strong> — 3 are duplicates.</p>
+      <div class="memo-table">
+        <div class="memo-row"><span class="memo-miss">fib(4)</span><span>→ calls fib(3) and fib(2) [miss]</span></div>
+        <div class="memo-row"><span class="memo-miss">fib(3)</span><span>→ calls fib(2) and fib(1) [miss]</span></div>
+        <div class="memo-row"><span class="memo-hit">fib(2)</span><span>→ called twice — DUPLICATE [hit]</span></div>
+        <div class="memo-row"><span class="memo-hit">fib(1)</span><span>→ called twice — DUPLICATE [hit]</span></div>
+        <div class="memo-row"><span class="memo-hit">fib(0)</span><span>→ called twice — DUPLICATE [hit]</span></div>
+      </div>
+      <p style="margin-top:10px">With memoization: cache results → <strong>7 calls</strong>, O(n) time instead of O(2ⁿ).</p>
+      <pre style="margin-top:10px;border-radius:8px;font-size:0.75rem"><code class="language-python">from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fib(n):
+    if n <= 1: return n
+    return fib(n-1) + fib(n-2)
+
+# Or manual dict cache:
+memo = {}
+def fib(n):
+    if n in memo: return memo[n]
+    if n <= 1: return n
+    memo[n] = fib(n-1) + fib(n-2)
+    return memo[n]</code></pre>
+    `
+  },
+  {
+    title:'4. Recursion vs Iteration',
+    body:`
+      <p>Any recursive algorithm can be converted to iterative using an explicit stack. Choose based on clarity vs. performance needs.</p>
+      <div class="side-by-side">
+        <div>
+          <h4>Recursive</h4>
+          <pre style="border-radius:6px;font-size:0.72rem"><code class="language-python">def fib(n):
+    if n <= 1: return n
+    return fib(n-1)+fib(n-2)
+# ✓ Clean, matches math
+# ✗ O(2ⁿ) without memo
+# ✗ Stack overhead</code></pre>
+        </div>
+        <div>
+          <h4>Iterative</h4>
+          <pre style="border-radius:6px;font-size:0.72rem"><code class="language-python">def fib(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a+b
+    return a
+# ✓ O(n) time, O(1) space
+# ✓ No stack overflow
+# ✗ Less intuitive</code></pre>
+        </div>
+      </div>
+      <ul style="margin-top:10px">
+        <li>Use recursion for: tree/graph traversal, divide & conquer, backtracking</li>
+        <li>Use iteration for: simple loops, when stack depth is a concern</li>
+      </ul>
+    `
+  },
+  {
+    title:'5. Tail Recursion',
+    body:`
+      <p>A function is <strong>tail recursive</strong> when the recursive call is the very last operation — no work happens after it returns.</p>
+      <div class="side-by-side">
+        <div>
+          <h4>Normal (not tail)</h4>
+          <pre style="border-radius:6px;font-size:0.72rem"><code class="language-python">def factorial(n):
+    if n == 0: return 1
+    # Work AFTER return: multiply
+    return n * factorial(n-1)</code></pre>
+        </div>
+        <div>
+          <h4>Tail recursive</h4>
+          <pre style="border-radius:6px;font-size:0.72rem"><code class="language-python">def factorial(n, acc=1):
+    if n == 0: return acc
+    # Call is LAST operation
+    return factorial(n-1, n*acc)</code></pre>
+        </div>
+      </div>
+      <ul style="margin-top:10px">
+        <li>In tail-call-optimized languages (Scheme, Haskell, Swift), tail calls reuse the same frame → O(1) space</li>
+        <li><strong>Python does NOT optimize tail calls</strong> — still O(n) stack frames</li>
+        <li>To get the benefit in Python, convert to a loop manually</li>
+        <li>The accumulator pattern (<code>acc=1</code>) is the key to making factorial tail-recursive</li>
+      </ul>
+    `
+  }
+];
+
+function renderConcepts() {
+  const list = document.getElementById('conceptsList');
+  if (list.children.length > 0) return;
+  list.innerHTML = CONCEPTS.map((c,i) => `
+    <div class="concept-card" id="concept-${i}">
+      <div class="concept-header" onclick="toggleConcept(${i})">
+        <span class="concept-title">${esc(c.title)}</span>
+        <span class="concept-chevron">▼</span>
+      </div>
+      <div class="concept-body">${c.body}</div>
+    </div>
+  `).join('');
+  document.querySelectorAll('#conceptsList code.language-python').forEach(el => hljs.highlightElement(el));
+}
+
+function toggleConcept(i) {
+  const card = document.getElementById(`concept-${i}`);
+  card.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('resize', () => {
+  if (stepIdx >= 0 && steps[stepIdx]) drawTree(steps[stepIdx].tree || {});
+  else drawTree({});
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  resetViz();
+  // Init stats display
+  const meta = FN_META[currentFn];
+  document.getElementById('statTime').textContent = meta.timeComplexity;
+  document.getElementById('statSpace').textContent = meta.spaceComplexity;
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') stepNext();
+  if (e.key === 'ArrowLeft') stepPrev();
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+  if (e.key === 'r' || e.key === 'R') resetViz();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Programming Coach</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;
+  --card:#1a1d27;
+  --border:#2d3148;
+  --blue:#4f8ef7;
+  --green:#4ade80;
+  --yellow:#fbbf24;
+  --red:#f87171;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --code:#0d1117;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:80px}
+a{color:var(--blue);text-decoration:none}
+/* NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100}
+.nav-tab{flex:1;padding:12px 4px 8px;text-align:center;cursor:pointer;font-size:11px;color:var(--muted);transition:color 0.2s;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:4px}
+.nav-tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-tab.active{color:var(--blue)}
+.nav-tab.active::after{content:'';display:block;width:24px;height:2px;background:var(--blue);border-radius:2px;margin:4px auto 0}
+/* TABS */
+.tab-content{display:none;padding:20px 16px;max-width:960px;margin:0 auto}
+.tab-content.active{display:block}
+/* HEADER */
+.app-header{text-align:center;padding:32px 16px 20px;max-width:960px;margin:0 auto}
+.app-header h1{font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.app-header p{color:var(--muted);margin-top:6px;font-size:14px}
+/* CARDS */
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:16px}
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-easy{background:#eaf3de22;color:#4ade80;border:1px solid #4ade8044}
+.badge-medium{background:#fbbf2422;color:#fbbf24;border:1px solid #fbbf2444}
+.badge-hard{background:#f8717122;color:#f87171;border:1px solid #f8717144}
+.badge-pattern{background:#4f8ef722;color:#4f8ef7;border:1px solid #4f8ef744;font-size:10px}
+/* PROBLEM CARDS */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:13px;transition:all 0.2s}
+.filter-btn.active,.filter-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.problems-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.problem-card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color 0.2s,transform 0.15s}
+.problem-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.problem-card.mastered{border-color:#4ade8066}
+.problem-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.problem-name{font-weight:600;font-size:15px;margin-bottom:4px}
+.problem-meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+.solve-btn{padding:6px 16px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:opacity 0.2s}
+.solve-btn:hover{opacity:0.85}
+/* LEARN TAB */
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);cursor:pointer;margin-bottom:20px;padding:6px 0;border:none;background:none;font-size:14px}
+.back-btn:hover{color:var(--text)}
+.section-title{font-size:13px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.problem-desc{font-size:14px;line-height:1.7;color:var(--muted)}
+.example-block{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:12px;margin:10px 0;font-family:monospace;font-size:13px}
+.intuition-box{background:#1a1d27;border-left:3px solid var(--blue);padding:12px 16px;border-radius:0 8px 8px 0;margin:8px 0}
+.intuition-box p{font-size:14px;line-height:1.7;margin-bottom:6px}
+.intuition-box p:last-child{margin-bottom:0}
+.intuition-label{font-weight:600;color:var(--blue)}
+/* DP TABLE */
+.dp-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:16px}
+.ctrl-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.2s;display:flex;align-items:center;gap:6px}
+.ctrl-btn:hover{border-color:var(--blue);color:var(--blue)}
+.ctrl-btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.ctrl-btn.primary:hover{opacity:0.85}
+.speed-ctrl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-left:auto}
+.speed-ctrl input{width:80px;accent-color:var(--blue)}
+.dp-table-wrap{overflow-x:auto;padding-bottom:8px}
+.dp-table{display:flex;gap:6px;padding:12px 0;min-width:max-content}
+.dp-cell{width:48px;height:48px;border:1.5px solid var(--border);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;font-size:13px;font-weight:600;transition:all 0.3s;background:var(--code);position:relative;cursor:default;flex-shrink:0}
+.dp-cell .cell-idx{font-size:9px;color:var(--muted);font-weight:400;position:absolute;top:3px;left:50%;transform:translateX(-50%)}
+.dp-cell .cell-val{font-size:16px;font-weight:700}
+.dp-cell.empty{color:var(--border)}
+.dp-cell.computed{background:#1a3a1a;border-color:#4ade8066;color:var(--green)}
+.dp-cell.current{background:#2a2400;border-color:var(--yellow);color:var(--yellow);box-shadow:0 0 12px #fbbf2440}
+.dp-cell.dependency{background:#1a2340;border-color:#4f8ef766;color:var(--blue)}
+.dp-cell.base{background:#1a2a3a;border-color:#4f8ef788;color:var(--blue)}
+/* 2D TABLE */
+.dp-grid-2d{display:inline-flex;flex-direction:column;gap:3px;padding:8px 0}
+.dp-row-2d{display:flex;gap:3px}
+.dp-cell-2d{width:40px;height:40px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:12px;font-weight:600;transition:all 0.3s;background:var(--code);flex-shrink:0}
+.dp-cell-2d.computed{background:#1a3a1a;border-color:#4ade8066;color:var(--green)}
+.dp-cell-2d.current{background:#2a2400;border-color:var(--yellow);color:var(--yellow);box-shadow:0 0 8px #fbbf2440}
+.dp-cell-2d.dependency{background:#1a2340;border-color:#4f8ef766;color:var(--blue)}
+.dp-cell-2d.base{background:#1a2a3a;border-color:#4f8ef788;color:var(--blue)}
+.dp-cell-2d.header{background:transparent;border:none;color:var(--muted);font-size:11px}
+.dp-cell-2d.match{background:#1a3a1a;border-color:#4ade8088}
+.dp-cell-2d.replace{background:#2a2000;border-color:#fbbf2466;color:var(--yellow)}
+.dp-cell-2d.insert{background:#1a1a3a;border-color:#4f8ef766;color:var(--blue)}
+.dp-cell-2d.delete{background:#3a1a1a;border-color:#f8717166;color:var(--red)}
+.dp-cell-2d.true-cell{background:#1a3a1a;border-color:#4ade8066;color:var(--green)}
+.dp-cell-2d.false-cell{background:#3a1a1a;border-color:#f8717122;color:var(--muted)}
+.step-info{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:13px;font-family:monospace;min-height:48px;margin-top:12px;color:var(--muted)}
+.step-info span.hl{color:var(--yellow);font-weight:600}
+.step-info span.hl-green{color:var(--green);font-weight:600}
+.step-info span.hl-blue{color:var(--blue);font-weight:600}
+/* CODE TABS */
+.code-tabs{display:flex;gap:2px;margin-bottom:0;border-bottom:1px solid var(--border)}
+.code-tab{padding:8px 16px;cursor:pointer;font-size:13px;color:var(--muted);border:none;background:none;border-bottom:2px solid transparent;transition:all 0.2s;margin-bottom:-1px}
+.code-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.code-block-wrap{position:relative}
+.copy-btn{position:absolute;top:10px;right:10px;padding:4px 10px;background:#2d3148;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;transition:all 0.2s;z-index:10}
+.copy-btn:hover,.copy-btn.copied{background:var(--blue);color:#fff;border-color:var(--blue)}
+.complexity-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.complexity-item{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:10px 14px;flex:1;min-width:140px}
+.complexity-label{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em}
+.complexity-val{font-family:monospace;font-size:15px;color:var(--yellow);font-weight:700}
+.complexity-why{font-size:12px;color:var(--muted);margin-top:4px}
+.opt-note{background:#1a2a1a;border:1px solid #4ade8033;border-radius:8px;padding:10px 14px;font-size:13px;color:var(--muted);margin-top:10px}
+.opt-note span{color:var(--green);font-weight:600}
+/* QUIZ */
+.quiz-q{margin-bottom:20px}
+.quiz-q .q-text{font-size:14px;font-weight:500;margin-bottom:10px}
+.quiz-options{display:flex;flex-direction:column;gap:6px}
+.quiz-opt{padding:9px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all 0.2s;background:var(--code)}
+.quiz-opt:hover{border-color:var(--blue)}
+.quiz-opt.correct{background:#1a3a1a;border-color:var(--green);color:var(--green)}
+.quiz-opt.wrong{background:#3a1a1a;border-color:var(--red);color:var(--red)}
+.quiz-opt.selected{border-color:var(--blue)}
+.quiz-fill{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.quiz-fill input{background:var(--code);border:1px solid var(--border);border-radius:6px;padding:7px 12px;color:var(--text);font-size:14px;font-family:monospace;width:120px;outline:none}
+.quiz-fill input:focus{border-color:var(--blue)}
+.quiz-fill input.correct{border-color:var(--green);color:var(--green)}
+.quiz-fill input.wrong{border-color:var(--red);color:var(--red)}
+.quiz-submit{padding:7px 16px;background:var(--blue);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px}
+.quiz-feedback{font-size:13px;margin-top:8px}
+.quiz-feedback.ok{color:var(--green)}
+.quiz-feedback.bad{color:var(--red)}
+.score-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:#1a3a1a;border:1px solid var(--green);border-radius:10px;font-size:15px;font-weight:600;color:var(--green);margin-top:16px}
+/* PATTERNS TAB */
+.pattern-card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.pattern-header{padding:16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.pattern-header:hover{background:#1e2233}
+.pattern-title{font-weight:600;font-size:16px}
+.pattern-chevron{transition:transform 0.2s;color:var(--muted)}
+.pattern-card.open .pattern-chevron{transform:rotate(180deg)}
+.pattern-body{display:none;padding:0 16px 16px}
+.pattern-card.open .pattern-body{display:block}
+.pattern-when{font-size:13px;color:var(--muted);margin-bottom:12px;padding:8px 12px;background:var(--code);border-radius:6px;border-left:3px solid var(--blue)}
+.code-template{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;line-height:1.6;overflow-x:auto;margin:10px 0;white-space:pre}
+.pattern-bullets{list-style:none;padding:0;margin:8px 0}
+.pattern-bullets li{font-size:13px;color:var(--muted);padding:4px 0;padding-left:16px;position:relative}
+.pattern-bullets li::before{content:'▸';position:absolute;left:0;color:var(--blue)}
+.pattern-bullets li.warn::before{color:var(--yellow)}
+.pattern-problems-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pattern-prob-chip{padding:3px 10px;background:#4f8ef722;border:1px solid #4f8ef744;border-radius:20px;font-size:12px;color:var(--blue);cursor:pointer}
+.pattern-prob-chip:hover{background:#4f8ef733}
+/* PROGRESS TAB */
+.progress-header{margin-bottom:20px}
+.progress-stat{font-size:24px;font-weight:700;color:var(--text)}
+.progress-sub{font-size:14px;color:var(--muted);margin-top:2px}
+.progress-bar-wrap{background:var(--border);border-radius:20px;height:10px;margin:10px 0;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width 0.6s ease}
+.progress-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:24px}
+.progress-item{background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.progress-item.mastered{border-color:#4ade8066;background:#1a3a1a22}
+.progress-item.inprogress{border-color:#fbbf2466;background:#2a200022}
+.progress-name{font-size:13px;font-weight:500;margin-bottom:6px}
+.progress-status{font-size:11px}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+.dot-mastered{background:var(--green)}
+.dot-inprogress{background:var(--yellow)}
+.dot-none{background:var(--border)}
+.streak-box{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.streak-num{font-size:36px;font-weight:700;color:var(--yellow)}
+.motivation-box{background:linear-gradient(135deg,#1a2a1a,#1a1d27);border:1px solid #4ade8044;border-radius:12px;padding:16px;text-align:center;margin-top:16px}
+.motivation-text{font-size:15px;color:var(--text);line-height:1.6}
+.next-prob{background:var(--card);border:1px solid var(--blue);border-radius:12px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
+/* UTILS */
+.flex{display:flex}
+.items-center{align-items:center}
+.gap-8{gap:8px}
+.gap-12{gap:12px}
+.mt-4{margin-top:4px}
+.mt-8{margin-top:8px}
+.mt-12{margin-top:12px}
+.mt-16{margin-top:16px}
+.mt-20{margin-top:20px}
+.mb-8{margin-bottom:8px}
+.mb-12{margin-bottom:12px}
+.mb-16{margin-bottom:16px}
+.text-sm{font-size:13px}
+.text-muted{color:var(--muted)}
+.font-mono{font-family:monospace}
+code{font-family:monospace;background:var(--code);padding:1px 5px;border-radius:3px;font-size:13px;color:#e06c75}
+.hidden{display:none}
+/* hljs override */
+.hljs{background:var(--code)!important;border-radius:0 0 8px 8px;font-size:13px;padding:16px!important}
+pre{margin:0}
+pre code.hljs{border-radius:8px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ TAB 1: PROBLEMS ═══════════════════════════════════════ -->
+<div id="tab-problems" class="tab-content active">
+  <div class="app-header">
+    <h1>Dynamic Programming Coach</h1>
+    <p>Master DP for FAANG — one problem at a time</p>
+  </div>
+
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-btn active" onclick="filterProblems('all',this)">All</button>
+    <button class="filter-btn" onclick="filterProblems('Easy',this)">Easy</button>
+    <button class="filter-btn" onclick="filterProblems('Medium',this)">Medium</button>
+    <button class="filter-btn" onclick="filterProblems('Hard',this)">Hard</button>
+    <button class="filter-btn" onclick="filterProblems('1D DP',this)">1D DP</button>
+    <button class="filter-btn" onclick="filterProblems('2D DP',this)">2D DP</button>
+    <button class="filter-btn" onclick="filterProblems('Knapsack',this)">Knapsack</button>
+  </div>
+
+  <div class="problems-grid" id="problemsGrid"></div>
+</div>
+
+<!-- ═══════════════════════════════════════ TAB 2: LEARN ═══════════════════════════════════════ -->
+<div id="tab-learn" class="tab-content">
+  <!-- Problem list view (when no problem selected) -->
+  <div id="learnHome">
+    <div class="app-header" style="padding-top:12px">
+      <h1 style="font-size:22px">Pick a Problem to Learn</h1>
+      <p>Click any problem below to open the interactive lesson</p>
+    </div>
+    <div class="problems-grid" id="learnProblemGrid"></div>
+  </div>
+
+  <!-- Lesson view -->
+  <div id="lessonView" class="hidden">
+    <button class="back-btn" onclick="closelesson()">
+      <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Problems
+    </button>
+    <div id="lessonContent"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ TAB 3: PATTERNS ═══════════════════════════════════════ -->
+<div id="tab-patterns" class="tab-content">
+  <div class="app-header" style="padding-top:12px">
+    <h1 style="font-size:22px">DP Pattern Reference</h1>
+    <p>Recognize the pattern → apply the template → win the interview</p>
+  </div>
+  <div id="patternsContainer"></div>
+</div>
+
+<!-- ═══════════════════════════════════════ TAB 4: PROGRESS ═══════════════════════════════════════ -->
+<div id="tab-progress" class="tab-content">
+  <div class="app-header" style="padding-top:12px">
+    <h1 style="font-size:22px">Your Progress</h1>
+  </div>
+  <div id="progressContent"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="nav">
+  <button class="nav-tab active" onclick="switchTab('problems',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Problems
+  </button>
+  <button class="nav-tab" onclick="switchTab('learn',this)">
+    <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    Learn
+  </button>
+  <button class="nav-tab" onclick="switchTab('patterns',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    Patterns
+  </button>
+  <button class="nav-tab" onclick="switchTab('progress',this)">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Progress
+  </button>
+</nav>
+
+<script>
+// ═══════════════════════════════ DATA ═══════════════════════════════
+
+const PROBLEMS = [
+  {
+    id:'fibonacci',
+    name:'Fibonacci Number',
+    pattern:'1D DP / Memoization',
+    patternKey:'1D DP',
+    difficulty:'Easy',
+    lc:'#509',
+    desc:'Given <code>n</code>, return the n-th Fibonacci number where F(0)=0, F(1)=1, and F(n)=F(n-1)+F(n-2).',
+    example:{input:'n = 7',output:'13',constraints:'0 ≤ n ≤ 30'},
+    intuition:[
+      '🔑 Key insight: fib(n) depends only on fib(n-1) and fib(n-2). We can store these answers instead of recomputing.',
+      '💭 Think of it this way: draw the recursion tree for fib(5). You\'ll notice fib(3) is computed TWICE, fib(2) THREE times. Memoization stores each result once.',
+      '📐 The subproblem is: "What is fib(i) for every i from 0 to n?"',
+      '✅ Why DP? Overlapping subproblems + optimal substructure = classic DP setup.'
+    ],
+    tableType:'1d',
+    tableLabels:['0','1','2','3','4','5','6','7'],
+    tableVals:[0,1,1,2,3,5,8,13],
+    steps: buildFibSteps(),
+    codes:{
+      memo:`def fib(n, memo={}):
+    # Base cases
+    if n <= 1:
+        return n
+    # Return cached result if available
+    if n in memo:
+        return memo[n]
+    # Compute and store
+    memo[n] = fib(n-1, memo) + fib(n-2, memo)
+    return memo[n]`,
+      tab:`def fib(n):
+    if n <= 1:
+        return n
+    # dp[i] holds fibonacci(i)
+    dp = [0] * (n + 1)
+    dp[0], dp[1] = 0, 1
+    for i in range(2, n + 1):
+        # Each value is sum of previous two
+        dp[i] = dp[i-1] + dp[i-2]
+    return dp[n]`
+    },
+    time:{memo:'O(n)',tab:'O(n)',why:'Each of the n subproblems is computed exactly once.'},
+    space:{memo:'O(n)',tab:'O(n)',why:'Memoization stores n results; tabulation uses an array of size n+1.'},
+    opt:'Space can be reduced to O(1) by only keeping dp[i-1] and dp[i-2] as two variables.',
+    quiz:[
+      {type:'mc',q:'What is the time complexity of the memoized solution?',opts:['O(2^n)','O(n)','O(n^2)','O(log n)'],answer:1},
+      {type:'mc',q:'How many total calls does fib(5) make WITHOUT memoization?',opts:['5','9','15','25'],answer:2},
+      {type:'fill',q:'Complete the recurrence: dp[i] = dp[___] + dp[___]',blanks:['i-1','i-2']}
+    ]
+  },
+  {
+    id:'climbing-stairs',
+    name:'Climbing Stairs',
+    pattern:'1D DP',
+    patternKey:'1D DP',
+    difficulty:'Easy',
+    lc:'#70',
+    desc:'You are climbing a staircase with <code>n</code> steps. Each time you can climb 1 or 2 steps. How many distinct ways can you climb to the top?',
+    example:{input:'n = 5',output:'8',constraints:'1 ≤ n ≤ 45'},
+    intuition:[
+      '🔑 Key insight: To reach step i, you either came from step i-1 (took 1 step) or step i-2 (took 2 steps). So ways(i) = ways(i-1) + ways(i-2).',
+      '💭 Think of it this way: It\'s exactly Fibonacci! ways(1)=1, ways(2)=2, ways(n)=ways(n-1)+ways(n-2).',
+      '📐 The subproblem is: "How many ways to reach step i?"',
+      '✅ Why DP? Each step\'s answer builds directly on the previous two — classic linear DP.'
+    ],
+    tableType:'1d',
+    tableLabels:['1','2','3','4','5'],
+    tableVals:[1,2,3,5,8],
+    steps: buildClimbSteps(),
+    codes:{
+      memo:`def climbStairs(n, memo={}):
+    # Base cases: 1 way to climb 1 step, 2 ways for 2 steps
+    if n <= 2:
+        return n
+    if n in memo:
+        return memo[n]
+    # Ways to reach n = ways to reach n-1 + ways to reach n-2
+    memo[n] = climbStairs(n-1, memo) + climbStairs(n-2, memo)
+    return memo[n]`,
+      tab:`def climbStairs(n):
+    if n <= 2:
+        return n
+    # dp[i] = distinct ways to reach step i
+    dp = [0] * (n + 1)
+    dp[1], dp[2] = 1, 2
+    for i in range(3, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+    return dp[n]`
+    },
+    time:{memo:'O(n)',tab:'O(n)',why:'We solve each of the n subproblems exactly once.'},
+    space:{memo:'O(n)',tab:'O(n)',why:'Memo dict or dp array of size n+1.'},
+    opt:'Keep only last two values: a, b = b, a+b. Reduces space to O(1).',
+    quiz:[
+      {type:'mc',q:'How many ways to climb 4 steps?',opts:['4','5','6','8'],answer:1},
+      {type:'mc',q:'Climbing Stairs is mathematically equivalent to:',opts:['Pascal\'s Triangle','Fibonacci Sequence','Binary Search','Merge Sort'],answer:1},
+      {type:'fill',q:'Complete: dp[i] = dp[___] + dp[___]',blanks:['i-1','i-2']}
+    ]
+  },
+  {
+    id:'house-robber',
+    name:'House Robber',
+    pattern:'1D DP',
+    patternKey:'1D DP',
+    difficulty:'Medium',
+    lc:'#198',
+    desc:'Given an array of non-negative integers representing the amount of money at each house, return the maximum amount you can rob without robbing two adjacent houses.',
+    example:{input:'nums = [2,7,9,3,1]',output:'12',constraints:'1 ≤ nums.length ≤ 100'},
+    intuition:[
+      '🔑 Key insight: At each house, you make a binary choice: rob it (skip previous) or skip it (take previous max).',
+      '💭 Think of it this way: dp[i] = max money robbing up to house i. Either you rob house i: dp[i-2]+nums[i], or you don\'t: dp[i-1].',
+      '📐 The subproblem is: "What\'s the max I can rob from the first i houses?"',
+      '✅ Why DP? Each decision depends only on the previous two results — optimal substructure.'
+    ],
+    tableType:'1d-nums',
+    nums:[2,7,9,3,1],
+    tableLabels:['0','1','2','3','4'],
+    tableVals:[2,7,11,11,12],
+    steps: buildRobberSteps(),
+    codes:{
+      memo:`def rob(nums, i=None, memo={}):
+    if i is None:
+        i = len(nums) - 1
+        memo.clear()
+    if i < 0:
+        return 0
+    if i in memo:
+        return memo[i]
+    # Either rob this house + skip prev, or skip this house
+    memo[i] = max(rob(nums, i-2, memo) + nums[i],
+                  rob(nums, i-1, memo))
+    return memo[i]`,
+      tab:`def rob(nums):
+    if not nums:
+        return 0
+    if len(nums) == 1:
+        return nums[0]
+    # dp[i] = max money from first i+1 houses
+    dp = [0] * len(nums)
+    dp[0] = nums[0]
+    dp[1] = max(nums[0], nums[1])
+    for i in range(2, len(nums)):
+        # Rob current: skip adjacent + current value
+        # Or skip current: take previous best
+        dp[i] = max(dp[i-2] + nums[i], dp[i-1])
+    return dp[-1]`
+    },
+    time:{memo:'O(n)',tab:'O(n)',why:'Each house is considered exactly once.'},
+    space:{memo:'O(n)',tab:'O(n)',why:'Memo dict or dp array of size n.'},
+    opt:'Only need dp[i-1] and dp[i-2], so use two variables: prev, curr. O(1) space.',
+    quiz:[
+      {type:'mc',q:'For nums=[2,7,9,3,1], what is dp[2]?',opts:['9','11','7','12'],answer:1},
+      {type:'mc',q:'The recurrence relation is dp[i] = max(dp[i-1], ___)?',opts:['nums[i]','dp[i-2]+nums[i]','dp[i-3]+nums[i]','nums[i]+nums[i-1]'],answer:1},
+      {type:'fill',q:'Complete: dp[i] = max(dp[i-1], dp[___] + nums[i])',blanks:['i-2']}
+    ]
+  },
+  {
+    id:'coin-change',
+    name:'Coin Change',
+    pattern:'Unbounded Knapsack',
+    patternKey:'Knapsack',
+    difficulty:'Medium',
+    lc:'#322',
+    desc:'Given coins of different denominations and a total amount, find the fewest number of coins needed to make up that amount. Return -1 if not possible.',
+    example:{input:'coins = [1,2,5], amount = 11',output:'3 (5+5+1)',constraints:'1 ≤ coins.length ≤ 12, 0 ≤ amount ≤ 10000'},
+    intuition:[
+      '🔑 Key insight: dp[amount] = min coins to make "amount". For each coin, dp[a] = min(dp[a], dp[a-coin]+1).',
+      '💭 Think of it this way: Imagine filling a bag of size 11. Try each coin denomination at every capacity. Since coins can repeat, iterate FORWARD.',
+      '📐 The subproblem is: "What\'s the minimum coins for every amount from 0 to target?"',
+      '✅ Why DP? Overlapping subproblems — making change for 11 reuses answers for 6, 9, 10...'
+    ],
+    tableType:'1d-coin',
+    tableLabels:['0','1','2','3','4','5','6','7','8','9','10','11'],
+    tableVals:[0,1,1,2,2,1,2,2,3,3,2,3],
+    steps: buildCoinSteps(),
+    codes:{
+      memo:`def coinChange(coins, amount):
+    memo = {}
+    def dp(rem):
+        if rem < 0: return float('inf')
+        if rem == 0: return 0
+        if rem in memo: return memo[rem]
+        # Try every coin, pick the one needing fewest coins
+        memo[rem] = 1 + min(dp(rem - c) for c in coins)
+        return memo[rem]
+    res = dp(amount)
+    return res if res != float('inf') else -1`,
+      tab:`def coinChange(coins, amount):
+    # dp[a] = min coins to make amount a
+    dp = [float('inf')] * (amount + 1)
+    dp[0] = 0  # 0 coins needed for amount 0
+    for coin in coins:
+        for a in range(coin, amount + 1):
+            # Use this coin + best solution for remainder
+            dp[a] = min(dp[a], dp[a - coin] + 1)
+    return dp[amount] if dp[amount] != float('inf') else -1`
+    },
+    time:{memo:'O(amount × coins)',tab:'O(amount × coins)',why:'For each of the (amount+1) amounts, we try each coin.'},
+    space:{memo:'O(amount)',tab:'O(amount)',why:'dp array of size amount+1.'},
+    opt:'The tabulation approach is already optimal. No further space reduction needed.',
+    quiz:[
+      {type:'mc',q:'Why do we iterate FORWARD (not reverse) for coin change?',opts:['It\'s faster','Coins can be reused (unbounded)','It\'s simpler','Array bounds'],answer:1},
+      {type:'mc',q:'dp[0] should be initialized to:',opts:['infinity','1','-1','0'],answer:3},
+      {type:'fill',q:'Complete: dp[a] = min(dp[a], dp[a - ___] + 1)',blanks:['coin']}
+    ]
+  },
+  {
+    id:'lcs',
+    name:'Longest Common Subsequence',
+    pattern:'2D DP',
+    patternKey:'2D DP',
+    difficulty:'Medium',
+    lc:'#1143',
+    desc:'Given two strings, return the length of their longest common subsequence (characters don\'t need to be contiguous).',
+    example:{input:'text1 = "ABCBDAB", text2 = "BDCAB"',output:'4 ("BCAB")',constraints:'1 ≤ text1.length, text2.length ≤ 1000'},
+    intuition:[
+      '🔑 Key insight: If chars match, extend LCS from diagonal. If not, take max from left or above.',
+      '💭 Think of it this way: Build a 2D table where dp[i][j] = LCS of text1[:i] and text2[:j].',
+      '📐 The subproblem is: "What\'s the LCS of the first i chars of text1 and first j chars of text2?"',
+      '✅ Why DP? Each cell depends on only 3 neighbors — perfect 2D DP structure.'
+    ],
+    tableType:'2d-lcs',
+    rows:['','A','B','C','B','D','A','B'],
+    cols:['','B','D','C','A','B'],
+    steps: buildLCSSteps(),
+    codes:{
+      memo:`def longestCommonSubsequence(text1, text2):
+    memo = {}
+    def dp(i, j):
+        if i == 0 or j == 0: return 0
+        if (i,j) in memo: return memo[(i,j)]
+        if text1[i-1] == text2[j-1]:
+            # Characters match: extend from diagonal
+            memo[(i,j)] = 1 + dp(i-1, j-1)
+        else:
+            # Take max of excluding one char from either string
+            memo[(i,j)] = max(dp(i-1,j), dp(i,j-1))
+        return memo[(i,j)]
+    return dp(len(text1), len(text2))`,
+      tab:`def longestCommonSubsequence(text1, text2):
+    m, n = len(text1), len(text2)
+    # dp[i][j] = LCS of text1[:i] and text2[:j]
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if text1[i-1] == text2[j-1]:
+                # Match: diagonal + 1
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                # No match: best of skipping one char
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    return dp[m][n]`
+    },
+    time:{memo:'O(m×n)',tab:'O(m×n)',why:'Fill every cell of the m×n table exactly once.'},
+    space:{memo:'O(m×n)',tab:'O(m×n)',why:'2D table of size (m+1)×(n+1).'},
+    opt:'Reduce to O(min(m,n)) space using two 1D arrays (current and previous row).',
+    quiz:[
+      {type:'mc',q:'When text1[i-1] == text2[j-1], dp[i][j] equals:',opts:['dp[i-1][j-1]','dp[i-1][j-1]+1','max(dp[i-1][j],dp[i][j-1])','0'],answer:1},
+      {type:'mc',q:'LCS of "ABCBDAB" and "BDCAB" is:',opts:['3','4','5','6'],answer:1},
+      {type:'fill',q:'When chars don\'t match: dp[i][j] = max(dp[i-1][j], dp[i][___])',blanks:['j-1']}
+    ]
+  },
+  {
+    id:'knapsack',
+    name:'0/1 Knapsack',
+    pattern:'0/1 Knapsack',
+    patternKey:'Knapsack',
+    difficulty:'Medium',
+    lc:'Classic',
+    desc:'Given n items each with a weight and value, and a knapsack of capacity W, find the maximum value you can carry. Each item can be used at most once.',
+    example:{input:'weights=[1,3,4,5], values=[1,4,5,7], W=7',output:'9',constraints:'0 ≤ n ≤ 500, 0 ≤ W ≤ 1000'},
+    intuition:[
+      '🔑 Key insight: For each item, either include it (if weight allows) or exclude it. Take the max.',
+      '💭 Think of it this way: dp[i][w] = max value using first i items with capacity w. For each item, compare "include" vs "exclude".',
+      '📐 The subproblem is: "Max value from first i items with exactly w capacity remaining?"',
+      '✅ Why DP? Each item-capacity pair has a unique optimal answer that depends on smaller subproblems.'
+    ],
+    tableType:'2d-knapsack',
+    itemNames:['w=1,v=1','w=3,v=4','w=4,v=5','w=5,v=7'],
+    capacity:7,
+    steps: buildKnapsackSteps(),
+    codes:{
+      memo:`def knapsack(weights, values, W):
+    n = len(weights)
+    memo = {}
+    def dp(i, w):
+        if i == 0 or w == 0: return 0
+        if (i,w) in memo: return memo[(i,w)]
+        if weights[i-1] > w:
+            # Item too heavy: must exclude
+            memo[(i,w)] = dp(i-1, w)
+        else:
+            # Max of including or excluding item i
+            include = values[i-1] + dp(i-1, w-weights[i-1])
+            exclude = dp(i-1, w)
+            memo[(i,w)] = max(include, exclude)
+        return memo[(i,w)]
+    return dp(n, W)`,
+      tab:`def knapsack(weights, values, W):
+    n = len(weights)
+    # dp[i][w] = max value, first i items, capacity w
+    dp = [[0]*(W+1) for _ in range(n+1)]
+    for i in range(1, n+1):
+        for w in range(W+1):
+            # Option 1: exclude item i
+            dp[i][w] = dp[i-1][w]
+            if weights[i-1] <= w:
+                # Option 2: include item i
+                include = values[i-1] + dp[i-1][w-weights[i-1]]
+                dp[i][w] = max(dp[i][w], include)
+    return dp[n][W]`
+    },
+    time:{memo:'O(n×W)',tab:'O(n×W)',why:'Fill every cell of the n×W table exactly once.'},
+    space:{memo:'O(n×W)',tab:'O(n×W)',why:'2D table of size (n+1)×(W+1).'},
+    opt:'Use 1D dp array of size W+1 and iterate weights REVERSE to avoid using item twice.',
+    quiz:[
+      {type:'mc',q:'Why iterate weights in REVERSE for 1D 0/1 knapsack?',opts:['It\'s faster','To avoid using an item more than once','To handle negative weights','Base case setup'],answer:1},
+      {type:'mc',q:'If item i has weight > current capacity w, then dp[i][w] = ?',opts:['0','values[i]','dp[i-1][w]','dp[i][w-1]'],answer:2},
+      {type:'fill',q:'Include item i: dp[i][w] = values[i-1] + dp[i-1][w - ___]',blanks:['weights[i-1]']}
+    ]
+  },
+  {
+    id:'lis',
+    name:'Longest Increasing Subsequence',
+    pattern:'Subsequence DP',
+    patternKey:'1D DP',
+    difficulty:'Medium',
+    lc:'#300',
+    desc:'Given an integer array, return the length of the longest strictly increasing subsequence (elements don\'t need to be contiguous).',
+    example:{input:'nums = [10,9,2,5,3,7,101,18]',output:'4 ([2,3,7,101])',constraints:'1 ≤ nums.length ≤ 2500'},
+    intuition:[
+      '🔑 Key insight: dp[i] = length of LIS ending exactly at index i. For each j < i, if nums[j] < nums[i], we can extend.',
+      '💭 Think of it this way: For each element, look back at all smaller elements and extend their LIS by 1.',
+      '📐 The subproblem is: "What\'s the longest increasing subsequence ending at index i?"',
+      '✅ Why DP? Each element\'s LIS depends on all previous elements — O(n²) DP or O(n log n) with patience sorting.'
+    ],
+    tableType:'1d-lis',
+    tableLabels:['10','9','2','5','3','7','101','18'],
+    tableVals:[1,1,1,2,2,3,4,4],
+    steps: buildLISSteps(),
+    codes:{
+      memo:`def lengthOfLIS(nums):
+    # O(n^2) memoized approach
+    n = len(nums)
+    memo = [-1] * n
+    def dp(i):
+        if memo[i] != -1: return memo[i]
+        best = 1  # LIS of just nums[i] alone
+        for j in range(i):
+            if nums[j] < nums[i]:
+                # Extend LIS ending at j
+                best = max(best, dp(j) + 1)
+        memo[i] = best
+        return best
+    return max(dp(i) for i in range(n))`,
+      tab:`def lengthOfLIS(nums):
+    n = len(nums)
+    # dp[i] = length of LIS ending at index i
+    dp = [1] * n  # Each element is an LIS of length 1
+    for i in range(1, n):
+        for j in range(i):
+            if nums[j] < nums[i]:
+                # nums[i] extends LIS ending at j
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)`
+    },
+    time:{memo:'O(n²)',tab:'O(n²)',why:'For each of n elements, we scan all previous elements.'},
+    space:{memo:'O(n)',tab:'O(n)',why:'dp array of size n.'},
+    opt:'O(n log n) with patience sorting: maintain a tails array and binary search for insertion point.',
+    quiz:[
+      {type:'mc',q:'For nums=[10,9,2,5,3,7,101,18], what is dp[5] (index of 7)?',opts:['2','3','4','1'],answer:1},
+      {type:'mc',q:'Initial value of dp[i] should be:',opts:['0','n','-1','1'],answer:3},
+      {type:'fill',q:'dp[i] = max(dp[i], dp[j] + 1) when nums[j] < ___',blanks:['nums[i]']}
+    ]
+  },
+  {
+    id:'edit-distance',
+    name:'Edit Distance',
+    pattern:'2D DP / String',
+    patternKey:'2D DP',
+    difficulty:'Hard',
+    lc:'#72',
+    desc:'Given two strings word1 and word2, return the minimum number of operations (insert, delete, replace) to convert word1 to word2.',
+    example:{input:'word1 = "horse", word2 = "ros"',output:'3',constraints:'0 ≤ word1.length, word2.length ≤ 500'},
+    intuition:[
+      '🔑 Key insight: dp[i][j] = min edits to convert word1[:i] to word2[:j]. Three choices at each cell: insert, delete, or replace.',
+      '💭 Think of it this way: Matching characters cost 0. Mismatches cost 1 + min of 3 neighbors (left=insert, top=delete, diagonal=replace).',
+      '📐 The subproblem is: "Min edits to align first i chars of word1 with first j chars of word2?"',
+      '✅ Why DP? Each cell depends on 3 neighbors — can\'t solve without previously solved subproblems.'
+    ],
+    tableType:'2d-edit',
+    rows:['','h','o','r','s','e'],
+    cols:['','r','o','s'],
+    steps: buildEditSteps(),
+    codes:{
+      memo:`def minDistance(word1, word2):
+    memo = {}
+    def dp(i, j):
+        if i == 0: return j  # Insert all of word2
+        if j == 0: return i  # Delete all of word1
+        if (i,j) in memo: return memo[(i,j)]
+        if word1[i-1] == word2[j-1]:
+            memo[(i,j)] = dp(i-1, j-1)  # Match: free!
+        else:
+            insert  = dp(i, j-1)   # Insert word2[j]
+            delete  = dp(i-1, j)   # Delete word1[i]
+            replace = dp(i-1, j-1) # Replace word1[i]
+            memo[(i,j)] = 1 + min(insert, delete, replace)
+        return memo[(i,j)]
+    return dp(len(word1), len(word2))`,
+      tab:`def minDistance(word1, word2):
+    m, n = len(word1), len(word2)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    # Base cases: convert empty string
+    for i in range(m+1): dp[i][0] = i
+    for j in range(n+1): dp[0][j] = j
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if word1[i-1] == word2[j-1]:
+                dp[i][j] = dp[i-1][j-1]  # Match
+            else:
+                # 1 + min(insert, delete, replace)
+                dp[i][j] = 1 + min(
+                    dp[i][j-1],    # insert
+                    dp[i-1][j],    # delete
+                    dp[i-1][j-1]   # replace
+                )
+    return dp[m][n]`
+    },
+    time:{memo:'O(m×n)',tab:'O(m×n)',why:'Fill every cell of the m×n table exactly once.'},
+    space:{memo:'O(m×n)',tab:'O(m×n)',why:'2D table of size (m+1)×(n+1).'},
+    opt:'Reduce to O(min(m,n)) space using only two rows at a time.',
+    quiz:[
+      {type:'mc',q:'The base case dp[i][0] = i means:',opts:['Cost 0 always','Delete i chars from word1','Insert i chars','Match found'],answer:1},
+      {type:'mc',q:'When word1[i-1] == word2[j-1], the cost is:',opts:['0','1','dp[i-1][j-1]','dp[i-1][j-1]+0'],answer:2},
+      {type:'fill',q:'dp[i][j] = 1 + min(dp[i][j-1], dp[i-1][j], dp[i-1][___])',blanks:['j-1']}
+    ]
+  },
+  {
+    id:'unique-paths',
+    name:'Unique Paths',
+    pattern:'2D Grid DP',
+    patternKey:'2D DP',
+    difficulty:'Medium',
+    lc:'#62',
+    desc:'A robot is on a m×n grid at top-left. It can only move right or down. Count the number of unique paths to the bottom-right corner.',
+    example:{input:'m = 3, n = 7',output:'28',constraints:'1 ≤ m, n ≤ 100'},
+    intuition:[
+      '🔑 Key insight: dp[i][j] = ways to reach cell (i,j) = dp[i-1][j] + dp[i][j-1] (came from above or from left).',
+      '💭 Think of it this way: Every cell in the first row/column can only be reached one way. All other cells sum their two sources.',
+      '📐 The subproblem is: "How many unique paths reach cell (i,j)?"',
+      '✅ Why DP? Each path count builds from neighbors — no need to enumerate all paths explicitly.'
+    ],
+    tableType:'2d-grid',
+    gridM:3,gridN:7,
+    steps: buildUniquePathsSteps(),
+    codes:{
+      memo:`def uniquePaths(m, n):
+    memo = {}
+    def dp(i, j):
+        if i == 0 or j == 0: return 1  # Edge cells
+        if (i,j) in memo: return memo[(i,j)]
+        # From above + from left
+        memo[(i,j)] = dp(i-1,j) + dp(i,j-1)
+        return memo[(i,j)]
+    return dp(m-1, n-1)`,
+      tab:`def uniquePaths(m, n):
+    # dp[i][j] = unique paths to reach (i,j)
+    dp = [[1]*n for _ in range(m)]
+    # First row and column = 1 (only one way to reach)
+    for i in range(1, m):
+        for j in range(1, n):
+            # From above + from left
+            dp[i][j] = dp[i-1][j] + dp[i][j-1]
+    return dp[m-1][n-1]`
+    },
+    time:{memo:'O(m×n)',tab:'O(m×n)',why:'Each of the m×n cells computed once.'},
+    space:{memo:'O(m×n)',tab:'O(m×n)',why:'2D grid of size m×n.'},
+    opt:'Use a single row array, updating in place left-to-right. Reduces to O(n) space.',
+    quiz:[
+      {type:'mc',q:'Why are all cells in row 0 and column 0 equal to 1?',opts:['Random choice','Only one path: go all right or all down','Matrix property','Base case assumption'],answer:1},
+      {type:'mc',q:'For a 3×7 grid, unique paths =',opts:['21','28','36','42'],answer:1},
+      {type:'fill',q:'dp[i][j] = dp[i-1][j] + dp[___][j-1]',blanks:['i']}
+    ]
+  },
+  {
+    id:'word-break',
+    name:'Word Break',
+    pattern:'String DP',
+    patternKey:'1D DP',
+    difficulty:'Medium',
+    lc:'#139',
+    desc:'Given a string s and a dictionary of strings wordDict, return true if s can be segmented into a space-separated sequence of one or more dictionary words.',
+    example:{input:'s = "leetcode", wordDict = ["leet","code"]',output:'true',constraints:'1 ≤ s.length ≤ 300'},
+    intuition:[
+      '🔑 Key insight: dp[i] = True if s[:i] can be word-broken. Check all j < i: if dp[j] is True AND s[j:i] is in dict, then dp[i] = True.',
+      '💭 Think of it this way: Try every possible "last word". If we can break s[:j] and s[j:i] is a valid word, then s[:i] is breakable.',
+      '📐 The subproblem is: "Can the first i characters of s be word-broken?"',
+      '✅ Why DP? Checking s[:i] reuses answers from s[:j] for all j<i — classic string DP.'
+    ],
+    tableType:'1d-wb',
+    s:'leetcode',
+    wordDict:['leet','code'],
+    tableLabels:['0','1','2','3','4','5','6','7','8'],
+    tableVals:[true,false,false,false,true,false,false,false,true],
+    steps: buildWordBreakSteps(),
+    codes:{
+      memo:`def wordBreak(s, wordDict):
+    word_set = set(wordDict)
+    memo = {}
+    def dp(start):
+        if start == len(s): return True
+        if start in memo: return memo[start]
+        for end in range(start+1, len(s)+1):
+            if s[start:end] in word_set and dp(end):
+                memo[start] = True
+                return True
+        memo[start] = False
+        return False
+    return dp(0)`,
+      tab:`def wordBreak(s, wordDict):
+    word_set = set(wordDict)
+    n = len(s)
+    # dp[i] = can we break s[:i] into dict words?
+    dp = [False] * (n + 1)
+    dp[0] = True  # Empty string is always breakable
+    for i in range(1, n + 1):
+        for j in range(i):
+            # If s[:j] breakable AND s[j:i] is a word
+            if dp[j] and s[j:i] in word_set:
+                dp[i] = True
+                break
+    return dp[n]`
+    },
+    time:{memo:'O(n²)',tab:'O(n²)',why:'O(n²) pairs (i,j) each checking a substring (O(n) for hash).'},
+    space:{memo:'O(n)',tab:'O(n)',why:'dp boolean array of size n+1.'},
+    opt:'Precompute max word length in dict to limit inner loop range and prune early.',
+    quiz:[
+      {type:'mc',q:'Why is dp[0] = True?',opts:['First char always valid','Empty prefix requires 0 words (vacuously true)','Initialization only','s[0] is always in dict'],answer:1},
+      {type:'mc',q:'"leetcode" → dp[4] = True because:',opts:['"leet" is in dict AND dp[0]=T','dp[3]=T','All chars checked','No reason'],answer:0},
+      {type:'fill',q:'dp[i] = True if dp[j] and s[j:___] in word_set',blanks:['i']}
+    ]
+  }
+];
+
+// ═══════════════════════════════ STEP BUILDERS ═══════════════════════════════
+
+function buildFibSteps(){
+  const vals=[0,1,1,2,3,5,8,13];
+  const steps=[];
+  steps.push({type:'base',indices:[0,1],desc:'Set base cases: <span class="hl-blue">dp[0]=0</span>, <span class="hl-blue">dp[1]=1</span>',computed:[0,1]});
+  for(let i=2;i<=7;i++){
+    steps.push({type:'compute',current:i,deps:[i-1,i-2],
+      desc:`Compute dp[${i}]: dp[<span class="hl-blue">${i-1}</span>](=${vals[i-1]}) + dp[<span class="hl-blue">${i-2}</span>](=${vals[i-2]}) = <span class="hl">${vals[i]}</span>`,
+      computed:vals.slice(0,i+1).map((_,j)=>j)});
+  }
+  return steps;
+}
+
+function buildClimbSteps(){
+  const vals=[1,2,3,5,8];
+  const steps=[];
+  steps.push({type:'base',indices:[0,1],desc:'Base cases: <span class="hl-blue">dp[1]=1</span> (one way), <span class="hl-blue">dp[2]=2</span> (two ways)',computed:[0,1]});
+  for(let i=2;i<5;i++){
+    steps.push({type:'compute',current:i,deps:[i-1,i-2],
+      desc:`dp[${i+1}]: dp[<span class="hl-blue">${i}</span>](=${vals[i-1]}) + dp[<span class="hl-blue">${i-1}</span>](=${vals[i-2]}) = <span class="hl">${vals[i]}</span>`,
+      computed:Array.from({length:i+1},(_,j)=>j)});
+  }
+  return steps;
+}
+
+function buildRobberSteps(){
+  const nums=[2,7,9,3,1];
+  const vals=[2,7,11,11,12];
+  const steps=[];
+  steps.push({type:'base',indices:[0],desc:`Base case: dp[0] = <span class="hl-blue">nums[0]</span> = <span class="hl">${nums[0]}</span>`,computed:[0]});
+  steps.push({type:'base',indices:[1],desc:`dp[1] = max(<span class="hl-blue">nums[0]</span>, <span class="hl-blue">nums[1]</span>) = max(${nums[0]},${nums[1]}) = <span class="hl">${vals[1]}</span>`,computed:[0,1]});
+  for(let i=2;i<5;i++){
+    steps.push({type:'compute',current:i,deps:[i-1,i-2],
+      desc:`dp[${i}] = max(dp[<span class="hl-blue">${i-1}</span>]=${vals[i-1]}, dp[<span class="hl-blue">${i-2}</span>]+nums[${i}]=${vals[i-2]}+${nums[i]}) = <span class="hl">${vals[i]}</span>`,
+      computed:Array.from({length:i+1},(_,j)=>j)});
+  }
+  return steps;
+}
+
+function buildCoinSteps(){
+  const coins=[1,2,5]; const amount=11;
+  const dp=Array(12).fill(Infinity);dp[0]=0;
+  const vals=[0,1,1,2,2,1,2,2,3,3,2,3];
+  const steps=[];
+  steps.push({type:'base',indices:[0],desc:'Initialize: <span class="hl-blue">dp[0]=0</span> (0 coins for amount 0), all others = ∞',computed:[0]});
+  for(const coin of coins){
+    for(let a=coin;a<=amount;a++){
+      const newVal=Math.min(vals[a],vals[a-coin]+1);
+      if(newVal<vals[a]||steps.length<4){
+        steps.push({type:'coin',current:a,coin,prev:a-coin,
+          desc:`Coin <span class="hl-blue">${coin}</span>: dp[<span class="hl">${a}</span>] = min(${vals[a]===Infinity?'∞':vals[a]}, dp[${a-coin}]+1=${vals[a-coin]+1}) = <span class="hl-green">${vals[a]}</span>`,
+          computed:vals.map((v,i)=>i<=a&&v<Infinity?i:-1).filter(x=>x>=0)});
+      }
+    }
+  }
+  return steps.slice(0,15);
+}
+
+function buildLCSSteps(){
+  const r='ABCBDAB',c='BDCAB';
+  const m=r.length,n=c.length;
+  const dp=Array.from({length:m+1},()=>Array(n+1).fill(0));
+  const steps=[];
+  steps.push({type:'base',desc:'Initialize: <span class="hl-blue">row 0 and col 0 = 0</span> (empty string LCS is 0)',grid:dp.map(row=>[...row]),i:-1,j:-1});
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      if(r[i-1]===c[j-1]){dp[i][j]=dp[i-1][j-1]+1;}
+      else{dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);}
+      if(steps.length<20){
+        const match=r[i-1]===c[j-1];
+        steps.push({type:match?'match':'nomatch',i,j,
+          desc:match?`'<span class="hl-green">${r[i-1]}</span>' matches! dp[${i}][${j}] = dp[${i-1}][${j-1}]+1 = <span class="hl">${dp[i][j]}</span>`
+            :`No match ('${r[i-1]}' vs '${c[j-1]}'): dp[${i}][${j}] = max(dp[${i-1}][${j}],dp[${i}][${j-1}]) = <span class="hl">${dp[i][j]}</span>`,
+          grid:dp.map(row=>[...row]),match});
+      }
+    }
+  }
+  return steps;
+}
+
+function buildKnapsackSteps(){
+  const weights=[1,3,4,5],values=[1,4,5,7],W=7,n=4;
+  const dp=Array.from({length:n+1},()=>Array(W+1).fill(0));
+  const steps=[];
+  steps.push({type:'base',desc:'Initialize: <span class="hl-blue">dp[0][*]=0</span> (no items = 0 value)',grid:dp.map(row=>[...row]),i:0,j:0});
+  for(let i=1;i<=n;i++){
+    for(let w=0;w<=W;w++){
+      dp[i][w]=dp[i-1][w];
+      if(weights[i-1]<=w){dp[i][w]=Math.max(dp[i][w],values[i-1]+dp[i-1][w-weights[i-1]]);}
+      if(steps.length<18){
+        const canInclude=weights[i-1]<=w;
+        const excl=dp[i-1][w];
+        const incl=canInclude?values[i-1]+dp[i-1][w-weights[i-1]]:null;
+        steps.push({type:'cell',i,w,
+          desc:canInclude?`Item ${i}(w=${weights[i-1]},v=${values[i-1]}), cap=${w}: max(excl=${excl}, incl=${incl}) = <span class="hl">${dp[i][w]}</span>`
+            :`Item ${i}(w=${weights[i-1]}), cap=${w}: <span class="hl-blue">too heavy</span>, inherit ${excl}`,
+          grid:dp.map(row=>[...row])});
+      }
+    }
+  }
+  return steps;
+}
+
+function buildLISSteps(){
+  const nums=[10,9,2,5,3,7,101,18];
+  const dp=[1,1,1,2,2,3,4,4];
+  const steps=[];
+  steps.push({type:'base',desc:'Initialize all <span class="hl-blue">dp[i]=1</span> (each element alone is LIS of length 1)',computed:[]});
+  for(let i=0;i<nums.length&&steps.length<12;i++){
+    const deps=[];
+    for(let j=0;j<i;j++){if(nums[j]<nums[i])deps.push(j);}
+    steps.push({type:'compute',current:i,deps,
+      desc:`dp[${i}](val=${nums[i]}): check all prev smaller → dp[${i}]=<span class="hl">${dp[i]}</span>`,
+      computed:Array.from({length:i+1},(_,k)=>k)});
+  }
+  return steps;
+}
+
+function buildEditSteps(){
+  const w1='horse',w2='ros';
+  const m=w1.length,n=w2.length;
+  const dp=Array.from({length:m+1},()=>Array(n+1).fill(0));
+  for(let i=0;i<=m;i++)dp[i][0]=i;
+  for(let j=0;j<=n;j++)dp[0][j]=j;
+  const steps=[];
+  steps.push({type:'base',desc:'Base cases: <span class="hl-blue">dp[i][0]=i</span> (delete i chars), <span class="hl-blue">dp[0][j]=j</span> (insert j chars)',grid:dp.map(r=>[...r]),i:0,j:0});
+  for(let i=1;i<=m&&steps.length<16;i++){
+    for(let j=1;j<=n&&steps.length<16;j++){
+      const match=w1[i-1]===w2[j-1];
+      if(match)dp[i][j]=dp[i-1][j-1];
+      else dp[i][j]=1+Math.min(dp[i][j-1],dp[i-1][j],dp[i-1][j-1]);
+      steps.push({type:match?'match':'edit',i,j,match,
+        desc:match?`'<span class="hl-green">${w1[i-1]}</span>' matches! dp[${i}][${j}] = dp[${i-1}][${j-1}] = <span class="hl">${dp[i][j]}</span>`
+          :`dp[${i}][${j}]: 1+min(ins=${dp[i][j-1]},del=${dp[i-1][j]},rep=${dp[i-1][j-1]}) = <span class="hl">${dp[i][j]}</span>`,
+        grid:dp.map(r=>[...r])});
+    }
+  }
+  return steps;
+}
+
+function buildUniquePathsSteps(){
+  const M=3,N=7;
+  const dp=Array.from({length:M},()=>Array(N).fill(1));
+  const steps=[];
+  steps.push({type:'base',desc:'Base cases: <span class="hl-blue">all edge cells = 1</span> (only one way to reach)',grid:dp.map(r=>[...r]),i:0,j:0});
+  for(let i=1;i<M&&steps.length<14;i++){
+    for(let j=1;j<N&&steps.length<14;j++){
+      dp[i][j]=dp[i-1][j]+dp[i][j-1];
+      steps.push({type:'compute',i,j,
+        desc:`dp[${i}][${j}] = dp[${i-1}][${j}](=${dp[i-1][j]}) + dp[${i}][${j-1}](=${dp[i][j-1]}) = <span class="hl">${dp[i][j]}</span>`,
+        grid:dp.map(r=>[...r])});
+    }
+  }
+  return steps;
+}
+
+function buildWordBreakSteps(){
+  const s='leetcode',words=['leet','code'];
+  const n=s.length;
+  const dp=Array(n+1).fill(false);dp[0]=true;
+  const steps=[];
+  steps.push({type:'base',desc:'dp[0]=<span class="hl-green">True</span> (empty string is always breakable)',computed:[0]});
+  for(let i=1;i<=n&&steps.length<12;i++){
+    for(let j=0;j<i;j++){
+      const sub=s.slice(j,i);
+      if(dp[j]&&words.includes(sub)){
+        dp[i]=true;
+        steps.push({type:'match',i,j,word:sub,
+          desc:`dp[${i}]: dp[${j}]=T and "<span class="hl-green">${sub}</span>" in dict → dp[${i}]=<span class="hl-green">True</span>`,
+          computed:dp.map((v,k)=>v?k:-1).filter(x=>x>=0)});
+        break;
+      }
+    }
+    if(!dp[i]&&steps.length<12){
+      steps.push({type:'false',i,
+        desc:`dp[${i}]: no valid split found → dp[${i}]=<span class="hl" style="color:var(--red)">False</span>`,
+        computed:dp.map((v,k)=>v?k:-1).filter(x=>x>=0)});
+    }
+  }
+  return steps;
+}
+
+// ═══════════════════════════════ STATE ═══════════════════════════════
+
+let state = {
+  currentTab: 'problems',
+  currentProblem: null,
+  animStep: 0,
+  animInterval: null,
+  animSpeed: 800,
+  quizAnswers: {},
+  mastered: JSON.parse(localStorage.getItem('dp_mastered')||'[]'),
+  lastStudied: localStorage.getItem('dp_last')||'',
+  streak: parseInt(localStorage.getItem('dp_streak')||'0'),
+  codeTab: {},
+};
+
+function saveProgress(){
+  localStorage.setItem('dp_mastered', JSON.stringify(state.mastered));
+  const today = new Date().toISOString().split('T')[0];
+  const last = state.lastStudied;
+  if(last !== today){
+    const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
+    state.streak = (last === yesterday) ? state.streak+1 : 1;
+    state.lastStudied = today;
+    localStorage.setItem('dp_streak', state.streak);
+    localStorage.setItem('dp_last', today);
+  }
+}
+
+// ═══════════════════════════════ NAV ═══════════════════════════════
+
+function switchTab(tab, btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  btn.classList.add('active');
+  state.currentTab = tab;
+  if(tab==='progress') renderProgress();
+  if(tab==='patterns') renderPatterns();
+  if(tab==='learn' && !state.currentProblem) renderLearnHome();
+}
+
+// ═══════════════════════════════ PROBLEMS ═══════════════════════════════
+
+function filterProblems(f, btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProblems(f);
+}
+
+function renderProblems(filter='all'){
+  const grid = document.getElementById('problemsGrid');
+  const filtered = filter==='all' ? PROBLEMS : PROBLEMS.filter(p=>{
+    if(filter==='Easy'||filter==='Medium'||filter==='Hard') return p.difficulty===filter;
+    if(filter==='1D DP') return p.patternKey==='1D DP';
+    if(filter==='2D DP') return p.patternKey==='2D DP';
+    if(filter==='Knapsack') return p.patternKey==='Knapsack';
+    return true;
+  });
+  grid.innerHTML = filtered.map(p=>`
+    <div class="problem-card ${state.mastered.includes(p.id)?'mastered':''}" onclick="openProblem('${p.id}')">
+      <div class="problem-card-top">
+        <div>
+          <div class="problem-name">${p.name} ${state.mastered.includes(p.id)?'<span style="color:var(--green)">✓</span>':''}</div>
+          <div class="problem-meta">LeetCode ${p.lc}</div>
+        </div>
+        <span class="badge badge-${p.difficulty.toLowerCase()}">${p.difficulty}</span>
+      </div>
+      <span class="badge badge-pattern">${p.pattern}</span>
+      <div style="margin-top:12px">
+        <button class="solve-btn" onclick="event.stopPropagation();openProblem('${p.id}')">Solve →</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderLearnHome(){
+  const grid = document.getElementById('learnProblemGrid');
+  grid.innerHTML = PROBLEMS.map(p=>`
+    <div class="problem-card ${state.mastered.includes(p.id)?'mastered':''}" onclick="openProblem('${p.id}')">
+      <div class="problem-card-top">
+        <div>
+          <div class="problem-name">${p.name} ${state.mastered.includes(p.id)?'<span style="color:var(--green)">✓</span>':''}</div>
+          <div class="problem-meta">LeetCode ${p.lc}</div>
+        </div>
+        <span class="badge badge-${p.difficulty.toLowerCase()}">${p.difficulty}</span>
+      </div>
+      <span class="badge badge-pattern">${p.pattern}</span>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════ LESSON ═══════════════════════════════
+
+function openProblem(id){
+  const p = PROBLEMS.find(x=>x.id===id);
+  if(!p) return;
+  state.currentProblem = p;
+  state.animStep = 0;
+  stopAnim();
+  saveProgress();
+
+  // Switch to learn tab
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-learn').classList.add('active');
+  document.querySelectorAll('.nav-tab')[1].classList.add('active');
+
+  document.getElementById('learnHome').classList.add('hidden');
+  document.getElementById('lessonView').classList.remove('hidden');
+  document.getElementById('lessonContent').innerHTML = buildLesson(p);
+  renderTableStep(p, 0);
+  document.querySelector('.lesson-wrap')?.scrollTo(0,0);
+  window.scrollTo(0,0);
+  hljs.highlightAll();
+}
+
+function closelesson(){
+  stopAnim();
+  state.currentProblem = null;
+  document.getElementById('learnHome').classList.remove('hidden');
+  document.getElementById('lessonView').classList.add('hidden');
+  renderLearnHome();
+}
+
+function buildLesson(p){
+  return `
+  <div class="lesson-wrap">
+    <!-- A: Problem -->
+    <div class="card mb-16">
+      <div class="section-title">A · Problem Statement</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h2 style="font-size:20px;font-weight:700">${p.name}</h2>
+        <div style="display:flex;gap:8px"><span class="badge badge-${p.difficulty.toLowerCase()}">${p.difficulty}</span><span class="badge badge-pattern">LC ${p.lc}</span></div>
+      </div>
+      <p class="problem-desc">${p.desc}</p>
+      <div class="example-block">
+        <div style="color:var(--muted);font-size:11px;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Example</div>
+        <div style="color:var(--blue)">Input: </div><div style="margin-left:8px">${p.example.input}</div>
+        <div style="color:var(--green);margin-top:4px">Output: </div><div style="margin-left:8px">${p.example.output}</div>
+        <div style="color:var(--muted);margin-top:4px;font-size:12px">Constraints: ${p.example.constraints}</div>
+      </div>
+    </div>
+
+    <!-- B: Intuition -->
+    <div class="card mb-16">
+      <div class="section-title">B · Intuition</div>
+      ${p.intuition.map(line=>`<div class="intuition-box"><p>${line}</p></div>`).join('')}
+    </div>
+
+    <!-- C: Animated Table -->
+    <div class="card mb-16">
+      <div class="section-title">C · Animated DP Table</div>
+      <div class="dp-controls">
+        <button class="ctrl-btn" onclick="prevStep()">← Prev</button>
+        <button class="ctrl-btn primary" id="playBtn" onclick="togglePlay()">▶ Play</button>
+        <button class="ctrl-btn" onclick="nextStep()">Next →</button>
+        <button class="ctrl-btn" onclick="resetAnim()">↺ Reset</button>
+        <div class="speed-ctrl">
+          <span>Speed</span>
+          <input type="range" min="1" max="3" value="2" oninput="setSpeed(this.value)">
+          <span id="speedLabel">Normal</span>
+        </div>
+      </div>
+      <div id="dpTableContainer" class="dp-table-wrap"></div>
+      <div class="step-info" id="stepInfo">Press Play or Next to begin animation.</div>
+    </div>
+
+    <!-- D: Code -->
+    <div class="card mb-16">
+      <div class="section-title">D · Solution Code</div>
+      <div class="code-tabs">
+        <button class="code-tab active" onclick="switchCode('${p.id}','memo',this)">Memoization (Top-Down)</button>
+        <button class="code-tab" onclick="switchCode('${p.id}','tab',this)">Tabulation (Bottom-Up)</button>
+      </div>
+      <div id="code-memo-${p.id}">
+        <div class="code-block-wrap">
+          <button class="copy-btn" onclick="copyCode(this,'${p.id}','memo')">Copy</button>
+          <pre><code class="language-python">${escapeHtml(p.codes.memo)}</code></pre>
+        </div>
+      </div>
+      <div id="code-tab-${p.id}" class="hidden">
+        <div class="code-block-wrap">
+          <button class="copy-btn" onclick="copyCode(this,'${p.id}','tab')">Copy</button>
+          <pre><code class="language-python">${escapeHtml(p.codes.tab)}</code></pre>
+        </div>
+      </div>
+      <div class="complexity-row">
+        <div class="complexity-item">
+          <div class="complexity-label">Time (Memo)</div>
+          <div class="complexity-val">${p.time.memo}</div>
+          <div class="complexity-why">${p.time.why}</div>
+        </div>
+        <div class="complexity-item">
+          <div class="complexity-label">Time (Tab)</div>
+          <div class="complexity-val">${p.time.tab}</div>
+        </div>
+        <div class="complexity-item">
+          <div class="complexity-label">Space</div>
+          <div class="complexity-val">${p.space.memo}</div>
+          <div class="complexity-why">${p.space.why}</div>
+        </div>
+      </div>
+      <div class="opt-note"><span>💡 Optimization:</span> ${p.opt}</div>
+    </div>
+
+    <!-- E: Quiz -->
+    <div class="card mb-16">
+      <div class="section-title">E · Quick Quiz</div>
+      <div id="quizContainer">${buildQuiz(p)}</div>
+    </div>
+  </div>`;
+}
+
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ═══════════════════════════════ TABLE RENDERING ═══════════════════════════════
+
+function renderTableStep(p, step){
+  const container = document.getElementById('dpTableContainer');
+  const info = document.getElementById('stepInfo');
+  if(!container||!info) return;
+
+  const s = p.steps[step];
+  if(!s){info.innerHTML='Animation complete!';return;}
+
+  if(p.tableType==='1d'||p.tableType==='1d-nums'||p.tableType==='1d-lis'||p.tableType==='1d-coin'||p.tableType==='1d-wb'){
+    render1DTable(p, s, container);
+  } else if(p.tableType==='2d-lcs'||p.tableType==='2d-edit'||p.tableType==='2d-grid'||p.tableType==='2d-knapsack'){
+    render2DTable(p, s, container);
+  }
+  info.innerHTML = s.desc||'';
+}
+
+function render1DTable(p, s, container){
+  const labels = p.tableLabels;
+  const vals = p.tableVals;
+  const computed = s.computed||[];
+  const current = s.current;
+  const deps = s.deps||[];
+  const base = s.indices||[];
+
+  let html='<div class="dp-table" style="flex-wrap:wrap">';
+
+  if(p.tableType==='1d-nums'){
+    html+='<div style="display:flex;flex-direction:column;gap:6px">';
+    html+='<div style="display:flex;gap:6px">';
+    for(let i=0;i<p.nums.length;i++){
+      html+=`<div class="dp-cell" style="background:#1a1a2a;border-color:#4f8ef744;color:var(--blue)"><span class="cell-idx">nums[${i}]</span><span class="cell-val">${p.nums[i]}</span></div>`;
+    }
+    html+='</div><div style="font-size:11px;color:var(--muted);padding:4px 0">dp[]:</div><div style="display:flex;gap:6px">';
+    for(let i=0;i<labels.length;i++){
+      let cls='dp-cell empty';
+      let val='?';
+      if(i===current){cls='dp-cell current';val=vals[i];}
+      else if(deps.includes(i)){cls='dp-cell dependency';val=vals[i];}
+      else if(computed.includes(i)){cls='dp-cell computed';val=vals[i];}
+      else if(base.includes(i)){cls='dp-cell base';val=vals[i];}
+      html+=`<div class="${cls}"><span class="cell-idx">${i}</span><span class="cell-val">${val}</span></div>`;
+    }
+    html+='</div></div>';
+  } else if(p.tableType==='1d-wb'){
+    html+='<div style="display:flex;flex-direction:column;gap:6px">';
+    html+='<div style="display:flex;gap:6px;align-items:center"><span style="font-size:11px;color:var(--muted);width:36px">s[]:</span>';
+    for(let i=0;i<p.s.length;i++){
+      html+=`<div class="dp-cell" style="background:#1a1a2a;border-color:#4f8ef744;color:var(--blue);width:36px;height:36px"><span class="cell-val" style="font-size:14px">${p.s[i]}</span></div>`;
+    }
+    html+='</div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:11px;color:var(--muted);width:36px">dp[]:</span>';
+    const tbVals=p.tableVals;
+    const computed2=s.computed||[];
+    const curr=s.i||s.current;
+    for(let i=0;i<=p.s.length;i++){
+      let cls,val;
+      if(i===curr){
+        val=tbVals[i]?'T':'F';
+        cls=`dp-cell ${tbVals[i]?'computed':'current'}`;
+      } else if(computed2.includes(i)){
+        val=tbVals[i]?'T':'F';
+        cls=`dp-cell ${tbVals[i]?'computed':''}`;
+        if(!tbVals[i])cls='dp-cell';
+      } else {
+        cls='dp-cell empty';val='?';
+      }
+      html+=`<div class="${cls}" style="width:36px;height:36px"><span class="cell-idx">${i}</span><span class="cell-val" style="font-size:12px">${val}</span></div>`;
+    }
+    html+='</div></div>';
+  } else {
+    for(let i=0;i<labels.length;i++){
+      let cls='dp-cell empty';
+      let val='?';
+      if(i===current){cls='dp-cell current';val=vals[i];}
+      else if(deps&&deps.includes(i)){cls='dp-cell dependency';val=vals[i];}
+      else if(computed.includes(i)){cls='dp-cell computed';val=vals[i];}
+      else if(base&&base.includes(i)){cls='dp-cell base';val=vals[i];}
+      html+=`<div class="${cls}"><span class="cell-idx">${labels[i]}</span><span class="cell-val">${val}</span></div>`;
+    }
+  }
+  html+='</div>';
+  container.innerHTML=html;
+}
+
+function render2DTable(p, s, container){
+  if(!s.grid) return;
+  const grid=s.grid;
+  const ci=s.i,cj=s.j;
+
+  let rows,cols;
+  if(p.tableType==='2d-lcs'){rows=p.rows;cols=p.cols;}
+  else if(p.tableType==='2d-edit'){rows=p.rows;cols=p.cols;}
+  else if(p.tableType==='2d-grid'){rows=grid.length;cols=grid[0].length;}
+  else if(p.tableType==='2d-knapsack'){rows=p.itemNames.length+1;cols=p.capacity+1;}
+
+  let html='<div class="dp-grid-2d">';
+
+  if(p.tableType==='2d-lcs'||p.tableType==='2d-edit'){
+    // Header row
+    html+='<div class="dp-row-2d">';
+    html+=`<div class="dp-cell-2d header" style="font-weight:700"></div>`;
+    for(const c of cols) html+=`<div class="dp-cell-2d header">${c||''}</div>`;
+    html+='</div>';
+    for(let i=0;i<grid.length;i++){
+      html+='<div class="dp-row-2d">';
+      const rowLabel=(p.tableType==='2d-lcs'?p.rows:p.rows)[i]||'';
+      html+=`<div class="dp-cell-2d header">${rowLabel}</div>`;
+      for(let j=0;j<grid[i].length;j++){
+        let cls='dp-cell-2d';
+        if(i===0||j===0)cls='dp-cell-2d base';
+        if(i===ci&&j===cj)cls='dp-cell-2d current';
+        else if(i<(ci||0)&&j<=(cj||0)||i<=(ci||0)&&j<(cj||0)){
+          if(i===0||j===0)cls='dp-cell-2d base';
+          else{
+            if(p.tableType==='2d-edit'&&s.match&&i===ci&&j===cj)cls='dp-cell-2d match';
+            else cls='dp-cell-2d computed';
+          }
+        }
+        html+=`<div class="${cls}">${grid[i][j]}</div>`;
+      }
+      html+='</div>';
+    }
+  } else if(p.tableType==='2d-grid'){
+    const M=grid.length,N=grid[0].length;
+    for(let i=0;i<M;i++){
+      html+='<div class="dp-row-2d">';
+      for(let j=0;j<N;j++){
+        let cls='dp-cell-2d';
+        if(i===ci&&j===cj)cls='dp-cell-2d current';
+        else if(i===0||j===0)cls='dp-cell-2d base';
+        else if(i<ci||(i===ci&&j<cj))cls='dp-cell-2d computed';
+        html+=`<div class="${cls}">${grid[i][j]}</div>`;
+      }
+      html+='</div>';
+    }
+  } else if(p.tableType==='2d-knapsack'){
+    // Header
+    html+='<div class="dp-row-2d">';
+    html+=`<div class="dp-cell-2d header" style="width:56px;font-size:10px">item\\cap</div>`;
+    for(let w=0;w<=p.capacity;w++)html+=`<div class="dp-cell-2d header">${w}</div>`;
+    html+='</div>';
+    for(let i=0;i<grid.length;i++){
+      html+='<div class="dp-row-2d">';
+      const lbl=i===0?'∅':(p.itemNames[i-1]||`i${i}`);
+      html+=`<div class="dp-cell-2d header" style="width:56px;font-size:9px">${lbl}</div>`;
+      for(let w=0;w<grid[i].length;w++){
+        let cls='dp-cell-2d';
+        if(i===ci&&w===s.w)cls='dp-cell-2d current';
+        else if(i===0)cls='dp-cell-2d base';
+        else if(i<ci||(i===ci&&w<s.w))cls='dp-cell-2d computed';
+        html+=`<div class="${cls}">${grid[i][w]}</div>`;
+      }
+      html+='</div>';
+    }
+  }
+
+  html+='</div>';
+  container.innerHTML=html;
+}
+
+// ═══════════════════════════════ ANIMATION CONTROLS ═══════════════════════════════
+
+function nextStep(){
+  const p=state.currentProblem;
+  if(!p) return;
+  if(state.animStep < p.steps.length-1){
+    state.animStep++;
+    renderTableStep(p, state.animStep);
+  } else {
+    stopAnim();
+  }
+}
+
+function prevStep(){
+  const p=state.currentProblem;
+  if(!p) return;
+  if(state.animStep > 0){
+    state.animStep--;
+    renderTableStep(p, state.animStep);
+  }
+}
+
+function resetAnim(){
+  stopAnim();
+  state.animStep=0;
+  const p=state.currentProblem;
+  if(p) renderTableStep(p, 0);
+  const info=document.getElementById('stepInfo');
+  if(info) info.innerHTML='Press Play or Next to begin animation.';
+}
+
+function togglePlay(){
+  if(state.animInterval){stopAnim();}
+  else{startAnim();}
+}
+
+function startAnim(){
+  const btn=document.getElementById('playBtn');
+  if(btn){btn.textContent='⏸ Pause';btn.classList.add('primary');}
+  state.animInterval=setInterval(()=>{
+    const p=state.currentProblem;
+    if(!p||state.animStep>=p.steps.length-1){stopAnim();return;}
+    state.animStep++;
+    renderTableStep(p, state.animStep);
+  }, state.animSpeed);
+}
+
+function stopAnim(){
+  if(state.animInterval){clearInterval(state.animInterval);state.animInterval=null;}
+  const btn=document.getElementById('playBtn');
+  if(btn){btn.textContent='▶ Play';btn.classList.remove('primary');}
+}
+
+function setSpeed(v){
+  const speeds={1:1200,2:800,3:400};
+  const labels={1:'Slow',2:'Normal',3:'Fast'};
+  state.animSpeed=speeds[v];
+  const lbl=document.getElementById('speedLabel');
+  if(lbl)lbl.textContent=labels[v];
+  if(state.animInterval){stopAnim();startAnim();}
+}
+
+// ═══════════════════════════════ CODE TABS ═══════════════════════════════
+
+function switchCode(id, which, btn){
+  const memo=document.getElementById('code-memo-'+id);
+  const tab=document.getElementById('code-tab-'+id);
+  if(!memo||!tab) return;
+  if(which==='memo'){memo.classList.remove('hidden');tab.classList.add('hidden');}
+  else{tab.classList.remove('hidden');memo.classList.add('hidden');}
+  btn.closest('.card').querySelectorAll('.code-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function copyCode(btn, id, which){
+  const p=PROBLEMS.find(x=>x.id===id);
+  if(!p) return;
+  navigator.clipboard.writeText(p.codes[which]).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);
+  });
+}
+
+// ═══════════════════════════════ QUIZ ═══════════════════════════════
+
+function buildQuiz(p){
+  let html='<div id="quizForm">';
+  p.quiz.forEach((q,i)=>{
+    html+=`<div class="quiz-q" id="quizQ${i}"><div class="q-text">${i+1}. ${q.q}</div>`;
+    if(q.type==='mc'){
+      html+=`<div class="quiz-options">`;
+      q.opts.forEach((opt,oi)=>{
+        html+=`<div class="quiz-opt" onclick="answerMC(${i},${oi},'${p.id}')">${opt}</div>`;
+      });
+      html+=`</div>`;
+    } else if(q.type==='fill'){
+      html+=`<div class="quiz-fill">`;
+      q.blanks.forEach((b,bi)=>{
+        html+=`<input id="fill${i}_${bi}" type="text" placeholder="?" autocomplete="off">`;
+      });
+      html+=`<button class="quiz-submit" onclick="checkFill(${i},'${p.id}')">Check</button>`;
+      html+=`</div>`;
+    }
+    html+=`<div class="quiz-feedback" id="feedback${i}"></div></div>`;
+  });
+  html+=`<div id="quizScore" class="hidden"></div></div>`;
+  return html;
+}
+
+let quizState={};
+
+function answerMC(qi, oi, pid){
+  const p=PROBLEMS.find(x=>x.id===pid);
+  if(!p) return;
+  const q=p.quiz[qi];
+  if(quizState[pid+qi]) return;
+  quizState[pid+qi]=true;
+  const opts=document.querySelectorAll(`#quizQ${qi} .quiz-opt`);
+  opts[oi].classList.add(oi===q.answer?'correct':'wrong');
+  if(oi!==q.answer) opts[q.answer].classList.add('correct');
+  const fb=document.getElementById('feedback'+qi);
+  if(fb) fb.innerHTML=oi===q.answer?'<span class="ok">✓ Correct!</span>':'<span class="bad">✗ Incorrect. See highlighted answer.</span>';
+  checkQuizComplete(pid);
+}
+
+function checkFill(qi, pid){
+  const p=PROBLEMS.find(x=>x.id===pid);
+  if(!p) return;
+  const q=p.quiz[qi];
+  if(quizState[pid+qi]) return;
+  let allCorrect=true;
+  q.blanks.forEach((b,bi)=>{
+    const inp=document.getElementById(`fill${qi}_${bi}`);
+    if(!inp) return;
+    const correct=inp.value.trim().toLowerCase()===b.toLowerCase();
+    inp.classList.add(correct?'correct':'wrong');
+    if(!correct)allCorrect=false;
+  });
+  quizState[pid+qi]=allCorrect;
+  const fb=document.getElementById('feedback'+qi);
+  if(fb) fb.innerHTML=allCorrect?'<span class="ok">✓ Correct!</span>':`<span class="bad">✗ Expected: ${q.blanks.join(', ')}</span>`;
+  if(allCorrect) checkQuizComplete(pid);
+}
+
+function checkQuizComplete(pid){
+  const p=PROBLEMS.find(x=>x.id===pid);
+  if(!p) return;
+  const allDone=p.quiz.every((_,i)=>quizState[pid+i]);
+  const allCorrect=p.quiz.every((_,i)=>quizState[pid+i]===true);
+  const score=p.quiz.filter((_,i)=>quizState[pid+i]===true).length;
+  const el=document.getElementById('quizScore');
+  if(allDone&&el){
+    el.classList.remove('hidden');
+    if(allCorrect&&!state.mastered.includes(pid)){
+      state.mastered.push(pid);
+      saveProgress();
+      el.innerHTML=`<div class="score-badge">🏆 ${score}/${p.quiz.length} — Mastered! Badge unlocked.</div>`;
+    } else {
+      el.innerHTML=`<div class="score-badge" style="border-color:var(--yellow);color:var(--yellow)">${score}/${p.quiz.length} correct. ${allCorrect?'Mastered!':'Keep practicing!'}</div>`;
+    }
+  }
+}
+
+// ═══════════════════════════════ PATTERNS ═══════════════════════════════
+
+const PATTERNS = [
+  {
+    name:'1D DP (Linear)',
+    icon:'📈',
+    when:'Ask: "Can I solve this by looking at just the previous 1–2 values?"',
+    template:`dp = [0] * (n + 1)
+dp[0] = base_case
+for i in range(1, n + 1):
+    dp[i] = f(dp[i-1], dp[i-2], ...)`,
+    problems:['Fibonacci','Climbing Stairs','House Robber','LIS'],
+    recognize:['The answer for position i depends on a fixed number of previous positions','You can define a clear "subproblem for index i"','No 2D state needed — one dimension is enough'],
+    mistakes:['Forgetting to initialize base cases (dp[0], dp[1])','Using a list when two variables would suffice (space optimization)']
+  },
+  {
+    name:'2D DP (Grid/String)',
+    icon:'🗂',
+    when:'Ask: "Do I have two sequences to compare, or a 2D grid to traverse?"',
+    template:`dp = [[0]*(m+1) for _ in range(n+1)]
+for i in range(1, n+1):
+    for j in range(1, m+1):
+        if match:
+            dp[i][j] = dp[i-1][j-1] + 1
+        else:
+            dp[i][j] = max(dp[i-1][j], dp[i][j-1])`,
+    problems:['LCS','Edit Distance','Unique Paths'],
+    recognize:['Two strings or sequences as input','2D grid with directional movement (right/down)','Comparing characters from two strings at each step'],
+    mistakes:['Off-by-one errors — use 1-indexed DP with n+1 size','Forgetting base cases (row 0 and column 0)']
+  },
+  {
+    name:'0/1 Knapsack',
+    icon:'🎒',
+    when:'Ask: "Can I take each item at most once? Do I have a capacity constraint?"',
+    template:`for i in range(n):
+    # Iterate REVERSE to avoid reusing items
+    for w in range(capacity, weight[i]-1, -1):
+        dp[w] = max(dp[w],
+                    dp[w - weight[i]] + value[i])`,
+    problems:['0/1 Knapsack','Subset Sum','Partition Equal Subset Sum'],
+    recognize:['Each item can be used at most once (binary choice)', 'Total capacity or budget constraint','Maximize value or check if target sum is achievable'],
+    mistakes:['Iterating FORWARD — causes items to be used multiple times','Not initializing dp[0]=0 correctly']
+  },
+  {
+    name:'Unbounded Knapsack',
+    icon:'♾️',
+    when:'Ask: "Can I use the same item multiple times?"',
+    template:`for coin in coins:
+    # Iterate FORWARD — allows reuse of same item
+    for amount in range(coin, target + 1):
+        dp[amount] = min(dp[amount],
+                         dp[amount - coin] + 1)`,
+    problems:['Coin Change','Integer Break','Climbing Stairs (general)'],
+    recognize:['Items can be reused unlimited times','Counting minimum cost or ways to reach a target','Each item is available in infinite quantity'],
+    mistakes:['Iterating REVERSE like 0/1 Knapsack — prevents reuse','Initializing dp[0] incorrectly (should be 0 for min problems)']
+  },
+  {
+    name:'Subsequence DP',
+    icon:'🔗',
+    when:'Ask: "Am I finding a non-contiguous subsequence of an array?"',
+    template:`dp = [1] * n  # Each element alone
+for i in range(n):
+    for j in range(i):
+        if nums[j] < nums[i]:  # Condition varies
+            dp[i] = max(dp[i], dp[j] + 1)
+return max(dp)`,
+    problems:['LIS (#300)','Maximum Sum Increasing Subsequence'],
+    recognize:['Looking for longest/best subsequence (skip allowed)','Comparing each element to ALL previous elements','O(n²) inner loop is expected'],
+    mistakes:['Confusing with subarray (contiguous) problems','Not initializing dp[i]=1 (each element is length-1 subsequence)']
+  },
+  {
+    name:'String DP (Segmentation)',
+    icon:'✂️',
+    when:'Ask: "Can I break a string into valid parts?"',
+    template:`dp = [False] * (n + 1)
+dp[0] = True  # Empty string is always valid
+for i in range(1, n + 1):
+    for j in range(i):
+        if dp[j] and s[j:i] in word_set:
+            dp[i] = True
+            break`,
+    problems:['Word Break (#139)','Palindrome Partitioning'],
+    recognize:['Checking if string can be segmented into valid words/parts','dp[i] is boolean (can/cannot) rather than a count','Dictionary lookup at each step'],
+    mistakes:['Forgetting dp[0]=True (empty prefix is always valid)','Using list instead of set for word dictionary — O(n) vs O(1) lookup']
+  }
+];
+
+function renderPatterns(){
+  const container=document.getElementById('patternsContainer');
+  if(container.innerHTML) return; // Already rendered
+  container.innerHTML=PATTERNS.map((pat,pi)=>`
+    <div class="pattern-card" id="pat${pi}">
+      <div class="pattern-header" onclick="togglePattern(${pi})">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">${pat.icon}</span>
+          <span class="pattern-title">${pat.name}</span>
+        </div>
+        <svg class="pattern-chevron" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="pattern-body">
+        <div class="pattern-when">${pat.when}</div>
+        <div class="section-title" style="font-size:11px;margin-bottom:6px">Template</div>
+        <div class="code-template">${escapeHtml(pat.template)}</div>
+        <div class="section-title" style="font-size:11px;margin-bottom:6px;margin-top:12px">How to recognize in an interview</div>
+        <ul class="pattern-bullets">
+          ${pat.recognize.map(r=>`<li>${r}</li>`).join('')}
+        </ul>
+        <div class="section-title" style="font-size:11px;margin-bottom:6px;margin-top:12px">Common mistakes</div>
+        <ul class="pattern-bullets">
+          ${pat.mistakes.map(m=>`<li class="warn">${m}</li>`).join('')}
+        </ul>
+        <div class="section-title" style="font-size:11px;margin-bottom:6px;margin-top:12px">Problems using this pattern</div>
+        <div class="pattern-problems-list">
+          ${pat.problems.map(pr=>`<span class="pattern-prob-chip">${pr}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function togglePattern(pi){
+  const card=document.getElementById('pat'+pi);
+  card.classList.toggle('open');
+}
+
+// ═══════════════════════════════ PROGRESS ═══════════════════════════════
+
+function renderProgress(){
+  const m=state.mastered;
+  const total=PROBLEMS.length;
+  const count=m.length;
+  const pct=Math.round(count/total*100);
+
+  const msgs=[
+    [0,2,'Every expert was once a beginner. Start with Fibonacci! 🌱'],
+    [3,5,'Great progress! You\'re building real FAANG skills. 💪'],
+    [6,8,'Almost there! DP is becoming your superpower. 🚀'],
+    [9,10,'DP master unlocked! You\'re ready for FAANG interviews. 🏆']
+  ];
+  const msg=msgs.find(([a,b])=>count>=a&&count<=b)||msgs[0];
+
+  const nextProb=PROBLEMS.find(p=>!m.includes(p.id));
+
+  const el=document.getElementById('progressContent');
+  el.innerHTML=`
+    <div class="streak-box">
+      <div>
+        <div class="streak-num">${state.streak}</div>
+      </div>
+      <div>
+        <div style="font-weight:600;font-size:16px">Day Streak 🔥</div>
+        <div class="text-sm text-muted">Last studied: ${state.lastStudied||'Not yet'}</div>
+      </div>
+    </div>
+
+    ${nextProb?`<div class="next-prob">
+      <div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">NEXT RECOMMENDED</div>
+        <div style="font-weight:600">${nextProb.name}</div>
+        <div style="font-size:12px;color:var(--muted)">${nextProb.pattern}</div>
+      </div>
+      <button class="solve-btn" onclick="openProblem('${nextProb.id}')">Start →</button>
+    </div>`:'<div class="next-prob" style="border-color:var(--green)"><div style="color:var(--green);font-weight:600">🏆 All problems mastered!</div></div>'}
+
+    <div class="card mb-16">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+        <div class="progress-stat">Problems Mastered: ${count}/${total}</div>
+        <div style="font-size:13px;color:var(--blue)">${pct}%</div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="progress-grid" style="margin-top:16px">
+        ${PROBLEMS.map(p=>{
+          const mastered=m.includes(p.id);
+          return `<div class="progress-item ${mastered?'mastered':''}" onclick="openProblem('${p.id}')" style="cursor:pointer">
+            <div class="progress-name">${p.name}</div>
+            <div class="progress-status">
+              <span class="status-dot ${mastered?'dot-mastered':'dot-none'}"></span>
+              <span style="font-size:11px;color:${mastered?'var(--green)':'var(--muted)'}">${mastered?'Mastered':'Not started'}</span>
+            </div>
+            <div style="margin-top:6px"><span class="badge badge-${p.difficulty.toLowerCase()}">${p.difficulty}</span></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div style="margin-bottom:8px">
+        <div class="progress-stat" style="font-size:18px">Patterns Studied: ${Math.min(count,6)}/6</div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${Math.round(Math.min(count,6)/6*100)}%"></div></div>
+      <div style="margin-top:12px">
+        ${['1D DP (Linear)','2D DP (Grid/String)','0/1 Knapsack','Unbounded Knapsack','Subsequence DP','String DP'].map((pat,pi)=>{
+          const done=count>pi;
+          return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+            <span style="color:${done?'var(--green)':'var(--border)'}">●</span>
+            <span style="font-size:14px;color:${done?'var(--text)':'var(--muted)'}">${pat}</span>
+            ${done?'<span style="margin-left:auto;font-size:11px;color:var(--green)">✓ Studied</span>':''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="motivation-box">
+      <div class="motivation-text">${msg[2]}</div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════ INIT ═══════════════════════════════
+
+renderProblems();
+renderLearnHome();
+hljs.highlightAll();
+</script>
+</body>
+</html>

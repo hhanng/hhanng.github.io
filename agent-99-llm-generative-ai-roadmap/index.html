@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>LLM & Generative AI Roadmap — Agent #99</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0520;--card:#1a0d35;--card2:#22124a;
+  --purple:#a855f7;--cyan:#22d3ee;--green:#4ade80;
+  --amber:#fbbf24;--red:#f87171;--gray:#94a3b8;
+  --text:#e2e8f0;--border:#2d1f5e;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+h1{font-size:1.6rem;font-weight:700;color:var(--purple)}
+h2{font-size:1.1rem;font-weight:600;color:var(--cyan);margin-bottom:12px}
+h3{font-size:.95rem;font-weight:600}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:16px}
+.badge{background:var(--purple);color:#fff;font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:20px}
+.tabs{display:flex;gap:0;background:var(--card);border-bottom:1px solid var(--border)}
+.tab{padding:12px 22px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--gray);border-bottom:3px solid transparent;transition:.2s;letter-spacing:.5px}
+.tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+.tab:hover:not(.active){color:var(--text)}
+.panel{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.panel.active{display:block}
+/* Progress */
+.overall-progress{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:16px}
+.overall-bar-track{flex:1;height:10px;background:var(--border);border-radius:5px;overflow:hidden}
+.overall-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--cyan));border-radius:5px;transition:.5s}
+.overall-label{font-size:.85rem;font-weight:700;color:var(--cyan);white-space:nowrap}
+/* Stage */
+.stage{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:16px;overflow:hidden}
+.stage-header{padding:16px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.stage-header:hover{background:rgba(168,85,247,.05)}
+.stage-num{width:32px;height:32px;border-radius:50%;background:var(--purple);color:#fff;font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stage-title{font-weight:600;font-size:1rem}
+.stage-sub{font-size:.75rem;color:var(--gray);margin-left:auto}
+.stage-bar-track{width:100px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.stage-bar-fill{height:100%;background:var(--purple);border-radius:3px;transition:.4s}
+.stage-chevron{font-size:.8rem;color:var(--gray);margin-left:8px;transition:.3s}
+.stage-content{display:none;padding:0 20px 16px;border-top:1px solid var(--border)}
+.stage.open .stage-content{display:block}
+.stage.open .stage-chevron{transform:rotate(180deg)}
+.stage-locked{opacity:.5;cursor:not-allowed}
+.locked-msg{font-size:.75rem;color:var(--amber);margin:0 20px 12px;display:none}
+.stage-locked .locked-msg{display:block}
+.item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(45,31,94,.5)}
+.item:last-child{border-bottom:none}
+.item-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:1px;transition:.2s;display:flex;align-items:center;justify-content:center}
+.item-check.checked{background:var(--purple);border-color:var(--purple)}
+.item-check.checked::after{content:'✓';font-size:.7rem;color:#fff}
+.item-body{flex:1}
+.item-title{font-size:.85rem;font-weight:500;line-height:1.4}
+.item-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.diff-badge{padding:2px 7px;border-radius:10px;font-size:.68rem;font-weight:600}
+.diff-beginner{background:#1a2e1a;color:var(--green)}
+.diff-intermediate{background:#1e3a5f;color:var(--cyan)}
+.diff-advanced{background:#2d1f4a;color:var(--purple)}
+.time-badge{font-size:.68rem;color:var(--gray)}
+.faang-badge{font-size:.68rem;color:var(--amber)}
+/* Concepts */
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.concept-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.concept-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.concept-header h3{color:var(--purple)}
+.concept-body{padding:16px}
+.concept-desc{font-size:.78rem;color:var(--gray);line-height:1.5;margin-bottom:12px}
+/* Canvas visuals */
+canvas{border-radius:8px;background:#0a0520;display:block;margin:0 auto}
+/* Attention viz */
+.attn-sentence{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.attn-word{padding:6px 12px;border-radius:20px;background:var(--card2);border:2px solid var(--border);cursor:pointer;font-size:.85rem;transition:.3s}
+.attn-word.selected{border-color:var(--purple);color:var(--purple)}
+.attn-bars{display:flex;flex-direction:column;gap:4px}
+.attn-row{display:flex;align-items:center;gap:8px;font-size:.75rem}
+.attn-bar-wrap{flex:1;height:14px;background:var(--border);border-radius:7px;overflow:hidden}
+.attn-bar-fill{height:100%;border-radius:7px;transition:.4s}
+/* Token demo */
+.token-input{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:.85rem;outline:none}
+.token-display{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;min-height:32px}
+.token{padding:3px 8px;border-radius:6px;font-size:.78rem;font-family:monospace}
+/* Embeddings scatter */
+/* RAG Pipeline */
+.rag-steps{display:flex;flex-direction:column;gap:0}
+.rag-step{display:flex;align-items:center;gap:10px;padding:8px 0}
+.rag-box{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:.8rem;font-weight:600;min-width:110px;text-align:center;transition:.4s}
+.rag-box.active{border-color:var(--purple);color:var(--purple);background:rgba(168,85,247,.1)}
+.rag-arrow{color:var(--border);font-size:1.2rem}
+/* Decision tree */
+.dtree-node{background:var(--card2);border:2px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.8rem;cursor:pointer;transition:.2s;margin-bottom:6px}
+.dtree-node:hover{border-color:var(--purple)}
+.dtree-node.yes{border-color:var(--green);color:var(--green)}
+.dtree-node.no{border-color:var(--red);color:var(--red)}
+.dtree-result{background:rgba(168,85,247,.1);border:2px solid var(--purple);border-radius:10px;padding:14px;font-size:.85rem;display:none}
+.dtree-result.visible{display:block}
+/* Playground */
+.playground-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.playground-grid{grid-template-columns:1fr}}
+.pg-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+textarea{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:.82rem;font-family:monospace;outline:none;resize:vertical}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:.82rem;font-weight:600;transition:.2s}
+.btn-primary{background:var(--purple);color:#fff}
+.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.output-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:.75rem;color:var(--green);min-height:80px;white-space:pre-wrap;word-break:break-all;margin-top:10px}
+select,input[type=range]{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px;font-size:.82rem;outline:none}
+/* Resources */
+.res-section{margin-bottom:24px}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.res-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:.2s}
+.res-card:hover{border-color:var(--purple)}
+.res-card.done{border-color:var(--green);opacity:.8}
+.res-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.res-tag{padding:2px 7px;border-radius:10px;font-size:.65rem;font-weight:600}
+.tag-paper{background:#1e3a5f;color:var(--cyan)}
+.tag-course{background:#1a2e1a;color:var(--green)}
+.tag-book{background:#2d1f4a;color:var(--purple)}
+.tag-tool{background:#3d2700;color:var(--amber)}
+.tag-repo{background:#2e1a1a;color:var(--red)}
+.tag-free{background:#1a2e1a;color:var(--green)}
+.tag-paid{background:#2e1a1a;color:var(--red)}
+.tag-beginner{background:#1a2e1a;color:var(--green)}
+/* scrollbars */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.temp-bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.temp-row{display:flex;align-items:center;gap:8px;font-size:.75rem}
+.temp-bar-wrap{flex:1;height:18px;background:var(--border);border-radius:4px;overflow:hidden;display:flex}
+.temp-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-family:monospace;transition:.5s}
+.chunk-vis{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.chunk-block{padding:4px 8px;border-radius:4px;font-size:.72rem;font-family:monospace;border:1px solid}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="badge">#99</span>
+  <h1>LLM & Generative AI Roadmap</h1>
+  <span style="color:var(--gray);font-size:.82rem;margin-left:auto">From zero to building production AI systems</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('roadmap')">ROADMAP</div>
+  <div class="tab" onclick="switchTab('concepts')">CONCEPTS</div>
+  <div class="tab" onclick="switchTab('playground')">PLAYGROUND</div>
+  <div class="tab" onclick="switchTab('resources')">RESOURCES</div>
+</div>
+
+<!-- ═══════════════════════ ROADMAP ═══════════════════════ -->
+<div id="panel-roadmap" class="panel active">
+  <div class="overall-progress">
+    <div style="font-size:.85rem;font-weight:600;color:var(--gray);white-space:nowrap">Overall Progress</div>
+    <div class="overall-bar-track"><div class="overall-bar-fill" id="overallFill" style="width:0%"></div></div>
+    <div class="overall-label" id="overallLabel">0%</div>
+  </div>
+  <div id="stagesContainer"></div>
+</div>
+
+<!-- ═══════════════════════ CONCEPTS ═══════════════════════ -->
+<div id="panel-concepts" class="panel">
+  <div class="concept-grid" id="conceptGrid"></div>
+</div>
+
+<!-- ═══════════════════════ PLAYGROUND ═══════════════════════ -->
+<div id="panel-playground" class="panel">
+  <div class="playground-grid">
+
+    <div class="pg-card">
+      <h3 style="margin-bottom:6px;color:var(--purple)">Prompt Template Builder</h3>
+      <p style="font-size:.75rem;color:var(--gray);margin-bottom:12px">Build a structured API request</p>
+      <label style="font-size:.75rem;color:var(--gray)">System prompt</label>
+      <textarea id="pg-system" rows="3" placeholder="You are a helpful assistant..."></textarea>
+      <label style="font-size:.75rem;color:var(--gray);margin-top:8px;display:block">Few-shot example (optional)</label>
+      <textarea id="pg-fewshot" rows="2" placeholder="User: Hi\nAssistant: Hello!"></textarea>
+      <label style="font-size:.75rem;color:var(--gray);margin-top:8px;display:block">User message</label>
+      <textarea id="pg-user" rows="2" placeholder="What is the capital of France?"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-primary" onclick="buildPrompt()">Build Request</button>
+        <button class="btn btn-secondary" onclick="copyPrompt()">Copy JSON</button>
+      </div>
+      <div class="output-box" id="pg-prompt-out">// JSON will appear here</div>
+    </div>
+
+    <div class="pg-card">
+      <h3 style="margin-bottom:6px;color:var(--cyan)">Token Counter & Cost Estimator</h3>
+      <p style="font-size:.75rem;color:var(--gray);margin-bottom:12px">~4 chars/token · GPT-4o pricing</p>
+      <textarea id="pg-token-text" rows="6" placeholder="Paste any text here to estimate token count and API cost..." oninput="countTokens()"></textarea>
+      <div id="token-output" style="margin-top:12px;font-size:.82rem;line-height:1.8"></div>
+    </div>
+
+    <div class="pg-card">
+      <h3 style="margin-bottom:6px;color:var(--amber)">Embedding Similarity Calculator</h3>
+      <p style="font-size:.75rem;color:var(--gray);margin-bottom:12px">Choose 2 words from hardcoded vocab</p>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <select id="emb-word1" style="flex:1" onchange="calcSimilarity()"></select>
+        <select id="emb-word2" style="flex:1" onchange="calcSimilarity()"></select>
+      </div>
+      <div id="emb-result" style="font-size:.85rem;text-align:center;padding:12px;background:var(--bg);border-radius:8px"></div>
+      <canvas id="embCanvas" width="300" height="120" style="margin-top:10px;width:100%;height:auto"></canvas>
+    </div>
+
+    <div class="pg-card">
+      <h3 style="margin-bottom:6px;color:var(--green)">RAG Chunking Demo</h3>
+      <p style="font-size:.75rem;color:var(--gray);margin-bottom:12px">See how text is split for RAG retrieval</p>
+      <textarea id="pg-chunk-text" rows="4" placeholder="Paste a paragraph here to see how RAG would chunk it..."></textarea>
+      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+        <label style="font-size:.75rem;color:var(--gray)">Chunk size:
+          <select id="chunk-size" onchange="showChunks()">
+            <option value="256">256 tokens</option>
+            <option value="512" selected>512 tokens</option>
+            <option value="1024">1024 tokens</option>
+          </select>
+        </label>
+        <label style="font-size:.75rem;color:var(--gray)">Overlap:
+          <select id="chunk-overlap" onchange="showChunks()">
+            <option value="0">0 tokens</option>
+            <option value="10">10 tokens</option>
+            <option value="20" selected>20 tokens</option>
+          </select>
+        </label>
+      </div>
+      <div id="chunk-output" class="chunk-vis"></div>
+    </div>
+
+    <div class="pg-card" style="grid-column:1/-1">
+      <h3 style="margin-bottom:6px;color:var(--red)">Chain-of-Thought Formatter</h3>
+      <p style="font-size:.75rem;color:var(--gray);margin-bottom:12px">Paste a problem → get a structured CoT prompt</p>
+      <textarea id="pg-cot-input" rows="3" placeholder="If a train travels at 60 mph for 2.5 hours, how far does it go?"></textarea>
+      <button class="btn btn-primary" onclick="formatCoT()" style="margin-top:8px">Format as CoT</button>
+      <div class="output-box" id="pg-cot-out" style="color:var(--cyan)">// CoT prompt will appear here</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════ RESOURCES ═══════════════════════ -->
+<div id="panel-resources" class="panel">
+  <div id="resourcesContainer"></div>
+</div>
+
+<script>
+const STORAGE='llm99_';
+
+// ─────────────────────── TABS ───────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const names=['roadmap','concepts','playground','resources'];
+    t.classList.toggle('active',names[i]===name);
+  });
+  document.querySelectorAll('.panel').forEach(p=>{
+    p.classList.toggle('active',p.id==='panel-'+name);
+  });
+}
+
+// ─────────────────────── ROADMAP DATA ───────────────────────
+const STAGES=[
+  {
+    num:1, title:'Foundations', sub:'Before LLMs make sense',
+    items:[
+      {title:'Linear algebra basics — vectors, matrices, dot product',diff:'Beginner',time:'3 hrs'},
+      {title:'Calculus intuition — gradient, chain rule, partial derivatives',diff:'Beginner',time:'4 hrs'},
+      {title:'Probability & statistics — distributions, Bayes theorem, entropy',diff:'Beginner',time:'4 hrs'},
+      {title:'Python for ML — numpy, pandas, matplotlib basics',diff:'Beginner',time:'6 hrs'},
+      {title:'Basic neural networks — perceptron, backprop, activation functions',diff:'Intermediate',time:'8 hrs',faang:true},
+    ]
+  },
+  {
+    num:2, title:'Classical Deep Learning', sub:'The building blocks',
+    items:[
+      {title:'CNNs — convolution, pooling, image recognition intuition',diff:'Intermediate',time:'6 hrs'},
+      {title:'RNNs & LSTMs — sequential data, vanishing gradient problem',diff:'Intermediate',time:'5 hrs',faang:true},
+      {title:'Word embeddings — Word2Vec, GloVe, what embeddings actually are',diff:'Intermediate',time:'4 hrs',faang:true},
+      {title:'Seq2seq models — encoder-decoder for translation tasks',diff:'Intermediate',time:'4 hrs'},
+      {title:'Attention mechanism basics — why it replaced RNNs',diff:'Advanced',time:'5 hrs',faang:true},
+    ]
+  },
+  {
+    num:3, title:'The Transformer Revolution', sub:'"Attention Is All You Need"',
+    items:[
+      {title:'Self-attention, multi-head attention, positional encoding deep dive',diff:'Advanced',time:'8 hrs',faang:true},
+      {title:'BERT — bidirectional pre-training, MLM + NSP, fine-tuning',diff:'Advanced',time:'6 hrs',faang:true},
+      {title:'GPT family — autoregressive, causal attention, scaling laws',diff:'Advanced',time:'6 hrs',faang:true},
+      {title:'T5 & encoder-decoder models — text-to-text framing',diff:'Advanced',time:'4 hrs'},
+      {title:'Tokenization — BPE, WordPiece, SentencePiece internals',diff:'Intermediate',time:'3 hrs',faang:true},
+    ]
+  },
+  {
+    num:4, title:'Modern LLMs', sub:'GPT-4, Claude, Gemini, and open-source',
+    items:[
+      {title:'GPT-3/4 / Claude / Gemini — architecture similarities and differences',diff:'Advanced',time:'5 hrs',faang:true},
+      {title:'Instruction tuning — FLAN, InstructGPT, how alignment training works',diff:'Advanced',time:'5 hrs',faang:true},
+      {title:'RLHF — reward model, PPO, Constitutional AI (Anthropic)',diff:'Advanced',time:'6 hrs',faang:true},
+      {title:'Emergent abilities and scaling laws — Chinchilla, GPT-4 report',diff:'Advanced',time:'4 hrs'},
+      {title:'Context windows and KV cache — why longer context costs more',diff:'Advanced',time:'3 hrs',faang:true},
+      {title:'Quantization — INT8, INT4, GGUF, why it enables local LLMs',diff:'Advanced',time:'3 hrs'},
+      {title:'LLaMA / Mistral / open-source models — why they matter',diff:'Intermediate',time:'4 hrs'},
+    ]
+  },
+  {
+    num:5, title:'Building with LLMs', sub:'The practical FAANG-relevant layer',
+    items:[
+      {title:'Prompt engineering — zero-shot, few-shot, CoT, tree-of-thought',diff:'Intermediate',time:'5 hrs',faang:true},
+      {title:'RAG — chunking, embeddings, vector DBs, similarity search',diff:'Advanced',time:'8 hrs',faang:true},
+      {title:'Fine-tuning — full fine-tune vs LoRA vs QLoRA tradeoffs',diff:'Advanced',time:'6 hrs',faang:true},
+      {title:'LLM APIs — OpenAI, Anthropic, Gemini — streaming, function calling',diff:'Intermediate',time:'4 hrs',faang:true},
+      {title:'LangChain / LlamaIndex — chains, agents, retrieval pipelines',diff:'Intermediate',time:'5 hrs'},
+      {title:'AI agents and tool use — agent loop, planning, memory',diff:'Advanced',time:'6 hrs',faang:true},
+      {title:'Function calling — how models interact with external APIs',diff:'Intermediate',time:'3 hrs',faang:true},
+    ]
+  },
+  {
+    num:6, title:'Production & Research Frontier', sub:'Ship and scale real systems',
+    items:[
+      {title:'Evaluation — BLEU, ROUGE, human eval, LLM-as-judge',diff:'Advanced',time:'4 hrs',faang:true},
+      {title:'Hallucination and mitigation — grounding, RAG, sampling strategies',diff:'Advanced',time:'4 hrs',faang:true},
+      {title:'Multimodal models — vision-language, CLIP, GPT-4V internals',diff:'Advanced',time:'5 hrs'},
+      {title:'AI safety basics — alignment, red-teaming, Constitutional AI',diff:'Advanced',time:'4 hrs',faang:true},
+      {title:'Vector databases — Pinecone, Weaviate, Chroma, pgvector',diff:'Intermediate',time:'3 hrs',faang:true},
+      {title:'Deploying LLMs — vLLM, Ollama, Hugging Face Inference Endpoints',diff:'Advanced',time:'5 hrs'},
+    ]
+  }
+];
+
+let checks={};
+function loadChecks(){ checks=JSON.parse(localStorage.getItem(STORAGE+'checks')||'{}'); }
+function saveChecks(){ localStorage.setItem(STORAGE+'checks',JSON.stringify(checks)); }
+function stageProgress(si){
+  const items=STAGES[si].items;
+  const done=items.filter((_,ii)=>checks[`${si}-${ii}`]).length;
+  return {done, total:items.length, pct:Math.round(done/items.length*100)};
+}
+function overallProgress(){
+  let done=0, total=0;
+  STAGES.forEach((s,si)=>{ s.items.forEach((_,ii)=>{ total++; if(checks[`${si}-${ii}`]) done++; }); });
+  return {done, total, pct:Math.round(done/total*100)};
+}
+function isUnlocked(si){
+  if(si<=1) return true;
+  const p0=stageProgress(0), p1=stageProgress(1);
+  if(si>=2 && (p0.pct<70||p1.pct<70)) return false;
+  return true;
+}
+
+function buildRoadmap(){
+  loadChecks();
+  const container=document.getElementById('stagesContainer');
+  container.innerHTML='';
+  const overall=overallProgress();
+  document.getElementById('overallFill').style.width=overall.pct+'%';
+  document.getElementById('overallLabel').textContent=`${overall.done}/${overall.total} (${overall.pct}%)`;
+
+  STAGES.forEach((stage,si)=>{
+    const unlocked=isUnlocked(si);
+    const prog=stageProgress(si);
+    const div=document.createElement('div');
+    div.className='stage'+(unlocked?'':' stage-locked');
+    div.id=`stage-${si}`;
+    div.innerHTML=`
+      <div class="stage-header" onclick="${unlocked?`toggleStage(${si})`:''}">
+        <div class="stage-num">${stage.num}</div>
+        <div>
+          <div class="stage-title">${stage.title}</div>
+          <div style="font-size:.73rem;color:var(--gray)">${stage.sub}</div>
+        </div>
+        <div class="stage-sub">${prog.done}/${prog.total}</div>
+        <div class="stage-bar-track"><div class="stage-bar-fill" style="width:${prog.pct}%"></div></div>
+        ${unlocked?`<div class="stage-chevron">▼</div>`:`<div style="font-size:.72rem;color:var(--amber);margin-left:8px">🔒</div>`}
+      </div>
+      ${!unlocked?`<div class="locked-msg">Complete Stages 1 & 2 to 70% to unlock this stage.</div>`:''}
+      <div class="stage-content">
+        ${stage.items.map((item,ii)=>`
+          <div class="item" id="item-${si}-${ii}">
+            <div class="item-check ${checks[`${si}-${ii}`]?'checked':''}" onclick="toggleCheck(${si},${ii})"></div>
+            <div class="item-body">
+              <div class="item-title">${item.title}</div>
+              <div class="item-meta">
+                <span class="diff-badge diff-${item.diff.toLowerCase()}">${item.diff}</span>
+                <span class="time-badge">⏱ ${item.time}</span>
+                ${item.faang?`<span class="faang-badge">⭐ FAANG relevant</span>`:''}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function toggleStage(si){
+  const el=document.getElementById(`stage-${si}`);
+  el.classList.toggle('open');
+}
+
+function toggleCheck(si,ii){
+  const key=`${si}-${ii}`;
+  checks[key]=!checks[key];
+  saveChecks();
+  buildRoadmap();
+  // Re-open the stage
+  setTimeout(()=>{ const el=document.getElementById(`stage-${si}`); if(el) el.classList.add('open'); }, 10);
+}
+
+// ─────────────────────── CONCEPTS ───────────────────────
+const CONCEPTS=[
+  {
+    title:'Self-Attention',
+    desc:'Click a word to see how attention scores are distributed across the sentence.',
+    build: buildAttention
+  },
+  {
+    title:'Tokenization',
+    desc:'Type text to see simulated BPE tokenization with token IDs.',
+    build: buildTokenizer
+  },
+  {
+    title:'Word Embeddings',
+    desc:'2D scatter of semantic word clusters. Click any two words to see cosine similarity.',
+    build: buildEmbeddingScatter
+  },
+  {
+    title:'Temperature & Sampling',
+    desc:'See how temperature affects token probability distributions.',
+    build: buildTemperature
+  },
+  {
+    title:'RAG Pipeline',
+    desc:'Animated step-by-step flow: Document → Chunk → Embed → Retrieve → Generate.',
+    build: buildRAGPipeline
+  },
+  {
+    title:'RLHF Process',
+    desc:'3-phase diagram: SFT → Reward Model → PPO Optimization.',
+    build: buildRLHF
+  },
+  {
+    title:'Transformer Architecture',
+    desc:'Click any component to learn what it does.',
+    build: buildTransformerDiagram
+  },
+  {
+    title:'Context Window & KV Cache',
+    desc:'Why longer context = more memory, and how KV cache speeds inference.',
+    build: buildContextWindow
+  },
+  {
+    title:'Fine-tuning vs RAG vs Prompting',
+    desc:'Answer 4 questions to get a personalized recommendation.',
+    build: buildDecisionTree
+  },
+  {
+    title:'Scaling Laws',
+    desc:'Adjust parameters/data/compute to see the predicted performance curve.',
+    build: buildScalingLaw
+  },
+  {
+    title:'Vector Databases',
+    desc:'How nearest-neighbor search works in high-dimensional embedding space.',
+    build: buildVectorDB
+  },
+  {
+    title:'LoRA — Low-Rank Adaptation',
+    desc:'How LoRA adds trainable rank-decomposition matrices to freeze base weights.',
+    build: buildLoRA
+  },
+  {
+    title:'Quantization',
+    desc:'How INT8/INT4 reduce model memory — the math behind it.',
+    build: buildQuantization
+  },
+  {
+    title:'Chain of Thought',
+    desc:'Why "think step by step" unlocks reasoning — with examples.',
+    build: buildCoT
+  },
+  {
+    title:'BERT vs GPT Architecture',
+    desc:'Side-by-side: bidirectional encoder vs autoregressive decoder.',
+    build: buildBERTvsGPT
+  },
+  {
+    title:'Hallucination & Mitigation',
+    desc:'Why LLMs hallucinate and 5 strategies to reduce it.',
+    build: buildHallucination
+  },
+  {
+    title:'Agent Loop',
+    desc:'How AI agents use tools, plan, and iterate to complete tasks.',
+    build: buildAgentLoop
+  },
+  {
+    title:'Function Calling',
+    desc:'How models decide to call tools and parse structured outputs.',
+    build: buildFunctionCalling
+  },
+  {
+    title:'Multimodal Models',
+    desc:'How vision and language are fused in GPT-4V, CLIP, Gemini.',
+    build: buildMultimodal
+  },
+  {
+    title:'Constitutional AI',
+    desc:'Anthropic\'s approach: a set of principles guides self-critique.',
+    build: buildConstitutionalAI
+  }
+];
+
+function buildConceptCards(){
+  const grid=document.getElementById('conceptGrid');
+  CONCEPTS.forEach((c,i)=>{
+    const card=document.createElement('div');
+    card.className='concept-card';
+    card.innerHTML=`<div class="concept-header"><h3>${c.title}</h3></div><div class="concept-body"><p class="concept-desc">${c.desc}</p><div id="concept-body-${i}"></div></div>`;
+    grid.appendChild(card);
+    try{ c.build(document.getElementById(`concept-body-${i}`)); } catch(e){}
+  });
+}
+
+// Attention
+const ATTN_SENTENCE=['The','model','reads','the','sentence','carefully'];
+const ATTN_WEIGHTS={
+  'The':   [0.3,0.05,0.05,0.5,0.05,0.05],
+  'model': [0.1,0.4,0.2,0.1,0.1,0.1],
+  'reads': [0.05,0.3,0.4,0.05,0.1,0.1],
+  'the':   [0.5,0.05,0.05,0.3,0.05,0.05],
+  'sentence':[0.05,0.1,0.1,0.05,0.5,0.2],
+  'carefully':[0.05,0.1,0.2,0.05,0.2,0.4]
+};
+function buildAttention(el){
+  el.innerHTML=`<div class="attn-sentence" id="attn-sent"></div><div id="attn-bar-area"></div><p style="font-size:.7rem;color:var(--gray);margin-top:8px">Click a word to see attention weights — Q·Kᵀ / √d</p>`;
+  const sent=el.querySelector('#attn-sent');
+  ATTN_SENTENCE.forEach(w=>{
+    const span=document.createElement('span');
+    span.className='attn-word'; span.textContent=w;
+    span.onclick=()=>{
+      el.querySelectorAll('.attn-word').forEach(s=>s.classList.remove('selected'));
+      span.classList.add('selected');
+      const bars=el.querySelector('#attn-bar-area');
+      const weights=ATTN_WEIGHTS[w]||[];
+      bars.innerHTML='<div class="attn-bars">'+ATTN_SENTENCE.map((sw,i)=>{
+        const pct=Math.round((weights[i]||0)*100);
+        const col=`hsl(${270+i*20},70%,${50+pct/3}%)`;
+        return `<div class="attn-row"><span style="width:70px;text-align:right">${sw}</span><div class="attn-bar-wrap"><div class="attn-bar-fill" style="width:${pct}%;background:${col}"></div></div><span style="width:30px">${pct}%</span></div>`;
+      }).join('')+'</div>';
+    };
+    sent.appendChild(span);
+  });
+}
+
+// Tokenizer (simulated BPE)
+const COMMON_TOKENS={'the':'the','and':'and','is':'is','of':'of','to':'to','in':'in','a':'a','that':'that','for':'for','it':'it','with':'with','as':'as','are':'are','be':'be','have':'have','was':'was','not':'not','on':'on','at':'at','or':'or','transformer':'transform','##er':null,'language':'lang','##uage':null,'model':'model','attention':'attention','neural':'neural','network':'network','##s':null,'embedding':'embed','##ding':null,'llm':'llm','token':'token','##ize':'##ize','context':'context','fine':null,'##tune':null};
+const COLORS=['#7c3aed','#2563eb','#065f46','#92400e','#7f1d1d','#1e3a5f','#1a2e1a'];
+function buildTokenizer(el){
+  el.innerHTML=`<input class="token-input" id="tok-input" placeholder="Type anything: 'The transformer model'" oninput="updateTokenizer(this,document.getElementById('tok-disp'),document.getElementById('tok-info'))"/><div class="token-display" id="tok-disp"></div><div id="tok-info" style="font-size:.72rem;color:var(--gray);margin-top:6px"></div>`;
+}
+function updateTokenizer(inp,disp,info){
+  const text=inp.value.trim();
+  if(!text){ disp.innerHTML=''; info.textContent=''; return; }
+  const words=text.toLowerCase().replace(/[^a-z0-9 ]/g,'').split(' ').filter(Boolean);
+  let tokens=[]; let id=1000;
+  words.forEach(w=>{
+    if(w.length<=3){ tokens.push({text:w,id:id++}); }
+    else{
+      tokens.push({text:w.slice(0,Math.ceil(w.length/2)),id:id++});
+      tokens.push({text:'##'+w.slice(Math.ceil(w.length/2)),id:id++});
+    }
+  });
+  disp.innerHTML=tokens.map((t,i)=>`<span class="token" style="background:${COLORS[i%COLORS.length]}22;border:1px solid ${COLORS[i%COLORS.length]};color:${COLORS[i%COLORS.length]}">${t.text}<span style="font-size:.6rem;opacity:.6;margin-left:3px">${t.id}</span></span>`).join('');
+  info.textContent=`${tokens.length} tokens · ~${Math.round(text.length/4)} tokens by char count`;
+}
+
+// Embedding scatter
+const EMBED_WORDS=[
+  {w:'king',x:0.8,y:0.85,g:'royalty'},  {w:'queen',x:0.6,y:0.8,g:'royalty'},
+  {w:'man',x:0.3,y:0.6,g:'person'},     {w:'woman',x:0.2,y:0.7,g:'person'},
+  {w:'cat',x:0.1,y:0.2,g:'animal'},     {w:'dog',x:0.2,y:0.1,g:'animal'},
+  {w:'lion',x:0.15,y:0.35,g:'animal'},{w:'tiger',x:0.25,y:0.3,g:'animal'},
+  {w:'Paris',x:0.75,y:0.3,g:'city'},   {w:'London',x:0.8,y:0.2,g:'city'},
+  {w:'Tokyo',x:0.9,y:0.4,g:'city'},
+  {w:'happy',x:0.5,y:0.9,g:'emotion'}, {w:'sad',x:0.4,y:0.85,g:'emotion'},
+  {w:'fast',x:0.7,y:0.55,g:'adj'},      {w:'slow',x:0.6,y:0.5,g:'adj'},
+];
+const GROUP_COLORS={'royalty':'#a855f7','person':'#22d3ee','animal':'#4ade80','city':'#fbbf24','emotion':'#f87171','adj':'#60a5fa'};
+function buildEmbeddingScatter(el){
+  el.innerHTML=`<canvas id="emb-scatter" width="280" height="180" style="width:100%;border-radius:8px;background:#0a0520;cursor:crosshair"></canvas><div id="emb-info" style="font-size:.75rem;color:var(--gray);margin-top:6px;text-align:center">Click any two words to see cosine similarity</div>`;
+  const canvas=el.querySelector('#emb-scatter');
+  const ctx=canvas.getContext('2d');
+  let sel=[];
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    EMBED_WORDS.forEach(p=>{
+      const x=p.x*canvas.width*0.85+canvas.width*0.075;
+      const y=(1-p.y)*canvas.height*0.85+canvas.height*0.075;
+      const isSel=sel.includes(p.w);
+      ctx.beginPath(); ctx.arc(x,y,isSel?7:5,0,Math.PI*2);
+      ctx.fillStyle=GROUP_COLORS[p.g]+'99'; ctx.fill();
+      ctx.strokeStyle=GROUP_COLORS[p.g]; ctx.lineWidth=isSel?2:1; ctx.stroke();
+      ctx.fillStyle=GROUP_COLORS[p.g]; ctx.font=`${isSel?'bold ':''}10px sans-serif`;
+      ctx.textAlign='center'; ctx.fillText(p.w,x,y-10);
+    });
+    if(sel.length===2){
+      const a=EMBED_WORDS.find(p=>p.w===sel[0]), b=EMBED_WORDS.find(p=>p.w===sel[1]);
+      if(a&&b){
+        const ax=a.x*canvas.width*0.85+canvas.width*0.075, ay=(1-a.y)*canvas.height*0.85+canvas.height*0.075;
+        const bx=b.x*canvas.width*0.85+canvas.width*0.075, by=(1-b.y)*canvas.height*0.85+canvas.height*0.075;
+        ctx.strokeStyle='#ffffff66'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+        ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); ctx.setLineDash([]);
+        const sim=cosineSim(a,b);
+        el.querySelector('#emb-info').textContent=`${sel[0]} · ${sel[1]} → cosine similarity: ${sim.toFixed(3)}`;
+      }
+    }
+  }
+  canvas.addEventListener('click',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(canvas.width/rect.width);
+    const my=(e.clientY-rect.top)*(canvas.height/rect.height);
+    let closest=null, minD=Infinity;
+    EMBED_WORDS.forEach(p=>{
+      const x=p.x*canvas.width*0.85+canvas.width*0.075, y=(1-p.y)*canvas.height*0.85+canvas.height*0.075;
+      const d=Math.hypot(mx-x,my-y);
+      if(d<minD){minD=d;closest=p;}
+    });
+    if(closest&&minD<30){
+      if(sel.includes(closest.w)) sel=sel.filter(s=>s!==closest.w);
+      else{ if(sel.length>=2) sel.shift(); sel.push(closest.w); }
+      draw();
+    }
+  });
+  draw();
+}
+function cosineSim(a,b){
+  const dot=a.x*b.x+a.y*b.y;
+  const magA=Math.hypot(a.x,a.y), magB=Math.hypot(b.x,b.y);
+  return dot/(magA*magB);
+}
+
+// Temperature
+const TEMP_TOKENS=['Paris','France','London','Berlin','Rome'];
+const TEMP_PROBS=[0.6,0.2,0.1,0.06,0.04];
+function buildTemperature(el){
+  el.innerHTML=`<p style="font-size:.75rem;color:var(--gray);margin-bottom:8px">Prompt: "The capital of France is ___"</p>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <label style="font-size:.75rem;color:var(--gray);white-space:nowrap">Temp:</label>
+      <input type="range" min="1" max="30" value="7" style="flex:1" oninput="updateTemp(this,document.getElementById('temp-val'),document.getElementById('temp-bars'))"/>
+      <span id="temp-val" style="font-size:.82rem;font-family:monospace;width:30px;text-align:right;color:var(--purple)">0.7</span>
+    </div>
+    <div id="temp-bars" class="temp-bars"></div>
+    <p style="font-size:.68rem;color:var(--gray);margin-top:8px">Temperature divides logits before softmax. Low T → greedy, high T → creative/random.</p>`;
+  updateTemp(el.querySelector('input'), el.querySelector('#temp-val'), el.querySelector('#temp-bars'));
+}
+function updateTemp(slider,valEl,barsEl){
+  const t=parseInt(slider.value)/10;
+  valEl.textContent=t.toFixed(1);
+  const logits=TEMP_PROBS.map(p=>Math.log(p)/t);
+  const exps=logits.map(l=>Math.exp(l));
+  const sum=exps.reduce((a,b)=>a+b,0);
+  const probs=exps.map(e=>e/sum);
+  const cols=['#a855f7','#22d3ee','#4ade80','#fbbf24','#f87171'];
+  barsEl.innerHTML=TEMP_TOKENS.map((tok,i)=>`
+    <div class="temp-row">
+      <span style="width:55px;text-align:right;font-family:monospace">${tok}</span>
+      <div class="temp-bar-wrap">
+        <div style="width:${Math.round(probs[i]*100)}%;background:${cols[i]};height:100%;transition:.4s;display:flex;align-items:center;padding-left:4px">
+          <span style="font-size:.65rem;color:#000;font-weight:600;white-space:nowrap">${(probs[i]*100).toFixed(1)}%</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// RAG Pipeline
+function buildRAGPipeline(el){
+  const steps=[
+    {label:'Document',desc:'Raw source material (PDFs, web pages, text)'},
+    {label:'Chunk',desc:'Split into ~512-token overlapping windows'},
+    {label:'Embed',desc:'Each chunk → dense vector via embedding model'},
+    {label:'Store',desc:'Vectors saved in a vector database (Pinecone, Chroma)'},
+    {label:'Query',desc:'User question → embed with same model'},
+    {label:'Retrieve',desc:'Find top-k chunks by cosine similarity'},
+    {label:'Augment',desc:'Inject retrieved context into LLM prompt'},
+    {label:'Generate',desc:'LLM synthesizes grounded answer'},
+    {label:'Answer',desc:'Final response with citations'}
+  ];
+  let cur=0;
+  el.innerHTML=`<div id="rag-steps"></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-secondary" onclick="ragStep(this,'prev')" style="font-size:.72rem">‹ Prev</button><button class="btn btn-primary" onclick="ragStep(this,'next')" style="font-size:.72rem">Next ›</button></div><p id="rag-desc" style="font-size:.75rem;color:var(--gray);margin-top:8px"></p>`;
+  function render(){
+    const stepsEl=el.querySelector('#rag-steps');
+    stepsEl.innerHTML=steps.map((s,i)=>`<div class="rag-step"><div class="rag-box ${i===cur?'active':''}">${s.label}</div>${i<steps.length-1?'<span class="rag-arrow">↓</span>':''}</div>`).join('');
+    el.querySelector('#rag-desc').textContent=steps[cur].desc;
+  }
+  el.querySelector('#rag-steps').ragStep=function(btn,dir){};
+  window.ragStep=function(btn,dir){
+    if(dir==='next'&&cur<steps.length-1) cur++;
+    else if(dir==='prev'&&cur>0) cur--;
+    render();
+  };
+  render();
+}
+
+// RLHF
+function buildRLHF(el){
+  const phases=[
+    {label:'Phase 1: SFT',color:'#a855f7',desc:'Supervised Fine-Tuning: curate high-quality human demonstrations → fine-tune base LLM to follow instructions. Input: prompts + ideal responses. Output: SFT model.'},
+    {label:'Phase 2: Reward Model',color:'#22d3ee',desc:'Show humans pairs of SFT outputs → collect preference data → train a reward model that scores responses 0–1. Input: (prompt, response) pairs. Output: scalar reward.'},
+    {label:'Phase 3: PPO',color:'#4ade80',desc:'Use reinforcement learning (PPO) with the reward model as the environment. The LLM generates responses, the reward model scores them, and gradients flow back. Output: RLHF-tuned model.'}
+  ];
+  let active=0;
+  el.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px" id="rlhf-phases"></div><div class="output-box" id="rlhf-desc" style="color:var(--cyan);min-height:60px"></div>`;
+  function render(){
+    const ph=el.querySelector('#rlhf-phases');
+    ph.innerHTML=phases.map((p,i)=>`<div style="padding:10px 14px;border-radius:8px;border:2px solid ${i===active?p.color:'var(--border)'};cursor:pointer;font-weight:600;font-size:.82rem;color:${i===active?p.color:'var(--gray)'};transition:.3s" onclick="rlhfPhase(${i})">${p.label}</div>`).join('');
+    el.querySelector('#rlhf-desc').textContent=phases[active].desc;
+  }
+  window.rlhfPhase=function(i){ active=i; render(); };
+  render();
+}
+
+// Transformer diagram
+function buildTransformerDiagram(el){
+  const components={
+    'Input Embedding':'Converts token IDs to dense vectors. Each token becomes a point in ~512–4096 dimensional space.',
+    'Positional Encoding':'Adds position information since attention has no inherent order. Sin/cos functions encode position.',
+    'Multi-Head Attention':'Runs h parallel attention heads, each learning different relationships. Outputs are concatenated + projected.',
+    'Feed-Forward Network':'Two linear layers with ReLU in between. Each token is processed independently. Often 4× model width.',
+    'Layer Norm':'Normalizes activations to mean=0, std=1 per token. Stabilizes training of deep networks.',
+    'Output Projection':'Final linear layer maps hidden states to vocabulary size (50k tokens). Softmax gives probabilities.'
+  };
+  el.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">`+
+    Object.keys(components).map(k=>`<div onclick="showComponent('${k}')" style="padding:6px 10px;border-radius:6px;background:var(--card2);border:1px solid var(--border);cursor:pointer;font-size:.75rem;transition:.2s" onmouseover="this.style.borderColor='var(--purple)'" onmouseout="this.style.borderColor='var(--border)'">${k}</div>`).join('')+
+    `</div><div id="comp-desc" style="font-size:.78rem;color:var(--text);padding:10px;background:var(--bg);border-radius:8px;min-height:50px;line-height:1.5">Click any component above ↑</div>`;
+  window._compData=components;
+  window.showComponent=function(k){ document.getElementById('comp-desc').textContent=window._compData[k]; };
+}
+
+// Context Window
+function buildContextWindow(el){
+  const models=[
+    {name:'GPT-3.5',ctx:'16K',mem:'~32MB',note:'Most common API calls'},
+    {name:'GPT-4',ctx:'128K',mem:'~256MB',note:'Long doc analysis'},
+    {name:'Claude 3.5',ctx:'200K',mem:'~400MB',note:'Anthropic\'s model'},
+    {name:'Gemini 1.5',ctx:'1M',mem:'~2GB',note:'Longest context'},
+    {name:'LLaMA 3',ctx:'128K',mem:'~256MB',note:'Open source'}
+  ];
+  el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:.75rem">
+    <tr style="color:var(--gray)">${['Model','Context','KV Memory','Note'].map(h=>`<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">${h}</th>`).join('')}</tr>
+    ${models.map(m=>`<tr><td style="padding:6px 8px;font-weight:600">${m.name}</td><td style="color:var(--cyan)">${m.ctx}</td><td style="color:var(--amber)">${m.mem}</td><td style="color:var(--gray)">${m.note}</td></tr>`).join('')}
+  </table>
+  <p style="font-size:.7rem;color:var(--gray);margin-top:10px">KV cache stores key-value pairs for all tokens in context. Memory scales with O(n²) for attention. Longer context = quadratically more compute.</p>`;
+}
+
+// Decision tree
+function buildDecisionTree(el){
+  const questions=[
+    'Do you have labeled training data (input→output pairs)?',
+    'Do you need the model to use real-time or private data?',
+    'Is consistent, repeatable output format critical?',
+    'Do you have GPU budget for fine-tuning?'
+  ];
+  const results=[
+    {title:'Fine-tuning',color:'#a855f7',why:'You have labeled data + GPU budget. Fine-tune for consistent format and deep domain knowledge.'},
+    {title:'RAG',color:'#22d3ee',why:'You need real-time/private data. RAG retrieves relevant context dynamically without retraining.'},
+    {title:'Prompt Engineering',color:'#4ade80',why:'Start here. Few-shot examples and careful prompting often match fine-tuning at zero cost.'},
+  ];
+  let answers=[], cur=0;
+  el.innerHTML=`<div id="dtree-q" style="font-size:.82rem;font-weight:600;margin-bottom:10px"></div><div style="display:flex;gap:8px" id="dtree-btns"></div><div id="dtree-res" class="dtree-result"></div><button onclick="resetDtree()" style="font-size:.7rem;color:var(--gray);background:none;border:none;cursor:pointer;margin-top:8px">↺ Reset</button>`;
+  function render(){
+    if(cur>=questions.length){
+      const hasData=answers[0]==='yes', needsRT=answers[1]==='yes', needsFmt=answers[2]==='yes', hasGPU=answers[3]==='yes';
+      let rec = !hasData||!hasGPU ? results[2] : needsRT ? results[1] : results[0];
+      el.querySelector('#dtree-q').textContent='Recommendation:';
+      el.querySelector('#dtree-btns').innerHTML='';
+      const res=el.querySelector('#dtree-res');
+      res.className='dtree-result visible';
+      res.style.borderColor=rec.color;
+      res.innerHTML=`<div style="font-weight:700;color:${rec.color};font-size:1rem;margin-bottom:6px">${rec.title}</div><div style="font-size:.78rem;color:var(--text);line-height:1.5">${rec.why}</div>`;
+      return;
+    }
+    el.querySelector('#dtree-q').textContent=`Q${cur+1}: ${questions[cur]}`;
+    el.querySelector('#dtree-btns').innerHTML='<button class="btn btn-secondary" onclick="dtreeAnswer(\'yes\')" style="font-size:.78rem">Yes</button><button class="btn btn-secondary" onclick="dtreeAnswer(\'no\')" style="font-size:.78rem">No</button>';
+    el.querySelector('#dtree-res').className='dtree-result';
+  }
+  window.dtreeAnswer=function(a){ answers.push(a); cur++; render(); };
+  window.resetDtree=function(){ answers=[]; cur=0; render(); };
+  render();
+}
+
+// Scaling laws
+function buildScalingLaw(el){
+  el.innerHTML=`<div style="font-size:.75rem;color:var(--gray);margin-bottom:8px">Chinchilla scaling law approximation: Loss ≈ A·N<sup>−α</sup> + B·D<sup>−β</sup></div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+      <label style="font-size:.73rem;color:var(--gray)">Parameters (B): <input type="range" id="sl-params" min="1" max="100" value="7" oninput="updateScaling()"/><span id="sl-params-val" style="color:var(--purple)">7B</span></label>
+      <label style="font-size:.73rem;color:var(--gray)">Training tokens (B): <input type="range" id="sl-data" min="1" max="200" value="140" oninput="updateScaling()"/><span id="sl-data-val" style="color:var(--cyan)">140B</span></label>
+    </div>
+    <canvas id="sl-canvas" width="280" height="120" style="width:100%;border-radius:8px;background:#0a0520"></canvas>
+    <div id="sl-result" style="font-size:.78rem;color:var(--amber);margin-top:8px"></div>`;
+  function updateScaling(){
+    const N=parseInt(document.getElementById('sl-params').value);
+    const D=parseInt(document.getElementById('sl-data').value);
+    document.getElementById('sl-params-val').textContent=N+'B';
+    document.getElementById('sl-data-val').textContent=D+'B';
+    const chinchillaOptD=20*N;
+    const loss=1.5*(N**-0.07)+2.0*(D**-0.07);
+    const canvas=document.getElementById('sl-canvas');
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // Draw curve
+    ctx.strokeStyle='#a855f7'; ctx.lineWidth=2;
+    ctx.beginPath();
+    for(let i=1;i<=100;i++){
+      const n=i; const d=20*n;
+      const l=1.5*(n**-0.07)+2.0*(d**-0.07);
+      const x=(i/100)*canvas.width;
+      const y=canvas.height-(l-0.5)/2*canvas.height;
+      if(i===1) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    // Current point
+    const cx=(N/100)*canvas.width;
+    const cy=canvas.height-(loss-0.5)/2*canvas.height;
+    ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2);
+    ctx.fillStyle='#fbbf24'; ctx.fill();
+    document.getElementById('sl-result').textContent=`Current: ${N}B params, ${D}B tokens. Chinchilla-optimal: ${chinchillaOptD}B tokens. Estimated loss: ${loss.toFixed(3)}`;
+  }
+  window.updateScaling=updateScaling;
+  updateScaling();
+}
+
+// Vector DB
+function buildVectorDB(el){
+  el.innerHTML=`<p style="font-size:.78rem;color:var(--text);line-height:1.5;margin-bottom:10px">Vector databases store embeddings and find the nearest neighbors using approximate algorithms like HNSW or IVF-PQ.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+      <tr style="color:var(--gray)"><th style="text-align:left;padding:5px;border-bottom:1px solid var(--border)">Database</th><th style="padding:5px;border-bottom:1px solid var(--border)">Algorithm</th><th style="padding:5px;border-bottom:1px solid var(--border)">Best for</th></tr>
+      ${[['Pinecone','HNSW','Managed / production'],['Chroma','HNSW','Local dev'],['Weaviate','HNSW + BM25','Hybrid search'],['pgvector','IVF','Postgres users'],['FAISS','IVF-PQ','Self-hosted scale']].map(r=>`<tr>${r.map((c,i)=>`<td style="padding:5px;color:${i===0?'var(--cyan)':i===1?'var(--purple)':'var(--gray)'}">${c}</td>`).join('')}</tr>`).join('')}
+    </table>`;
+}
+
+// LoRA
+function buildLoRA(el){
+  el.innerHTML=`<p style="font-size:.78rem;line-height:1.5;margin-bottom:10px">Instead of updating all W (d×d), LoRA adds two small matrices: <b style="color:var(--purple)">A</b> (d×r) and <b style="color:var(--cyan)">B</b> (r×d), where r ≪ d.</p>
+    <div style="background:var(--bg);border-radius:8px;padding:12px;font-family:monospace;font-size:.75rem;color:var(--green)">W' = W + α·(B·A)
+rank r = 8, α = 16
+params: d=4096, r=8
+original: 4096² = 16.7M params
+LoRA: 2×4096×8 = 65K params ← 256× smaller!</div>
+    <p style="font-size:.72rem;color:var(--gray);margin-top:8px">QLoRA adds 4-bit quantization of base weights, enabling fine-tuning on consumer GPUs.</p>`;
+}
+
+// Quantization
+function buildQuantization(el){
+  el.innerHTML=`<p style="font-size:.78rem;line-height:1.5;margin-bottom:8px">Quantization maps FP32 weights to lower precision, dramatically reducing model size.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+      <tr style="color:var(--gray)"><th style="text-align:left;padding:5px;border-bottom:1px solid var(--border)">Format</th><th style="padding:5px;border-bottom:1px solid var(--border)">Bits</th><th style="padding:5px;border-bottom:1px solid var(--border)">7B model size</th><th style="padding:5px;border-bottom:1px solid var(--border)">Quality loss</th></tr>
+      ${[['FP32','32','28 GB','None (baseline)'],['FP16','16','14 GB','Minimal'],['INT8','8','7 GB','~1% drop'],['INT4 / GGUF','4','3.5 GB','~3-5% drop'],['INT2','2','1.75 GB','Significant']].map((r,i)=>`<tr style="${i===3?'border:1px solid var(--purple)':''}"><td style="padding:5px;color:${i===3?'var(--purple)':'var(--cyan)'}">${r[0]}</td><td style="padding:5px;text-align:center">${r[1]}</td><td style="padding:5px;color:var(--amber)">${r[2]}</td><td style="padding:5px;color:${i===0?'var(--green)':i>=3?'var(--red)':'var(--gray)'}">${r[3]}</td></tr>`).join('')}
+    </table>`;
+}
+
+// Chain of Thought
+function buildCoT(el){
+  el.innerHTML=`<div style="margin-bottom:10px">
+    <div style="font-size:.75rem;color:var(--gray);margin-bottom:4px">Standard prompt:</div>
+    <div style="background:var(--bg);border-radius:6px;padding:8px;font-size:.75rem;color:var(--red)">Q: 23×17=? A: 361 ← often wrong</div>
+  </div>
+  <div>
+    <div style="font-size:.75rem;color:var(--gray);margin-bottom:4px">Chain-of-Thought prompt:</div>
+    <div style="background:var(--bg);border-radius:6px;padding:8px;font-size:.75rem;color:var(--green);line-height:1.6">Q: 23×17=? Let's think step by step.<br>A: 23×10=230, 23×7=161, 230+161=391 ✓</div>
+  </div>
+  <p style="font-size:.72rem;color:var(--gray);margin-top:8px">Why it works: CoT externalizes reasoning, forcing the model to generate intermediate steps that it can condition future tokens on.</p>`;
+}
+
+// BERT vs GPT
+function buildBERTvsGPT(el){
+  el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.75rem">
+    <div style="background:var(--bg);border-radius:8px;padding:10px;border:1px solid var(--cyan)">
+      <div style="font-weight:700;color:var(--cyan);margin-bottom:6px">BERT</div>
+      <div style="color:var(--gray);line-height:1.6">Architecture: Encoder only<br>Attention: Bidirectional<br>Training: MLM + NSP<br>Use case: Classification, NER, QA<br>Example: "The [MASK] is blue"</div>
+    </div>
+    <div style="background:var(--bg);border-radius:8px;padding:10px;border:1px solid var(--purple)">
+      <div style="font-weight:700;color:var(--purple);margin-bottom:6px">GPT</div>
+      <div style="color:var(--gray);line-height:1.6">Architecture: Decoder only<br>Attention: Causal (left-only)<br>Training: Next token prediction<br>Use case: Generation, chat<br>Example: "The sky is ___"</div>
+    </div>
+  </div>`;
+}
+
+// Hallucination
+function buildHallucination(el){
+  el.innerHTML=`<p style="font-size:.78rem;color:var(--gray);line-height:1.5;margin-bottom:8px">LLMs hallucinate because they predict plausible tokens, not factual ones. They optimize for coherence, not truth.</p>
+    <div style="display:flex;flex-direction:column;gap:6px">`+
+    [['RAG','Ground responses in retrieved real documents'],['Temperature=0','Greedy decoding → more deterministic'],['Self-consistency','Sample many answers, majority vote'],['Tool use','Let model query databases instead of guessing'],['Confidence prompting','Ask "how confident are you?" — uncalibrated but helps']].map((m,i)=>`<div style="display:flex;gap:8px;align-items:center;font-size:.75rem"><span style="background:rgba(168,85,247,.2);color:var(--purple);border-radius:4px;padding:2px 8px;font-weight:600;white-space:nowrap">${i+1}</span><div><b>${m[0]}:</b> <span style="color:var(--gray)">${m[1]}</span></div></div>`).join('')+`</div>`;
+}
+
+// Agent Loop
+function buildAgentLoop(el){
+  const steps=['Perceive','Plan','Act','Observe','Reflect','Repeat'];
+  let cur=0;
+  el.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">`+steps.map((s,i)=>`<div id="al-${i}" onclick="alStep(${i})" style="padding:6px 12px;border-radius:20px;background:var(--card2);border:2px solid var(--border);cursor:pointer;font-size:.78rem;transition:.3s">${s}</div>`).join('')+`</div><div id="al-desc" style="font-size:.78rem;color:var(--text);line-height:1.5;padding:8px;background:var(--bg);border-radius:8px"></div>`;
+  const descs=['Receive user query and available tools. Parse intent.','Use LLM to choose which tool to call and with what arguments.','Execute the tool call (web search, code execution, API call, etc.).','Parse tool output and inject results back into context.','Did we complete the task? If not, re-plan with new information.','Continue the loop until task is complete or max iterations reached.'];
+  window.alStep=function(i){
+    cur=i;
+    el.querySelectorAll('[id^=al-]').forEach((el2,j)=>{ el2.style.borderColor=j===i?'var(--purple)':'var(--border)'; el2.style.color=j===i?'var(--purple)':'var(--text)'; });
+    el.querySelector('#al-desc').textContent=descs[i];
+  };
+  window.alStep(0);
+}
+
+// Function Calling
+function buildFunctionCalling(el){
+  el.innerHTML=`<p style="font-size:.75rem;color:var(--gray);margin-bottom:8px">Model outputs structured JSON instead of text when a tool fits the user's need.</p>
+    <div style="background:var(--bg);border-radius:8px;padding:10px;font-family:monospace;font-size:.71rem;color:var(--green);line-height:1.6">User: "What's the weather in Tokyo?"
+
+Model output:
+{
+  "name": "get_weather",
+  "arguments": {
+    "location": "Tokyo",
+    "units": "celsius"
+  }
+}
+
+App calls API → returns 22°C
+Model: "It's currently 22°C in Tokyo."</div>`;
+}
+
+// Multimodal
+function buildMultimodal(el){
+  el.innerHTML=`<p style="font-size:.75rem;color:var(--gray);line-height:1.5;margin-bottom:10px">Vision-language models align image patches and text tokens in a shared embedding space.</p>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:.75rem">`+
+    [['CLIP (OpenAI)','Contrastive learning: match images to captions. Powers image search.','var(--green)'],['GPT-4V','Patch embeddings from ViT fed into GPT-4 as tokens. 1024 patches per image.','var(--purple)'],['Gemini 1.5','Native multimodal: trained end-to-end on text, images, audio, video.','var(--cyan)'],['LLaVA / Idefics','Open-source: MLP adapter connects CLIP vision encoder to Llama decoder.','var(--amber)']].map(m=>`<div style="background:var(--bg);border-radius:6px;padding:8px;border-left:3px solid ${m[2]}"><b style="color:${m[2]}">${m[0]}:</b> <span style="color:var(--gray)">${m[1]}</span></div>`).join('')+`</div>`;
+}
+
+// Constitutional AI
+function buildConstitutionalAI(el){
+  el.innerHTML=`<p style="font-size:.78rem;color:var(--gray);line-height:1.5;margin-bottom:8px">Anthropic's CAI uses a written constitution (principles) to guide RLHF without human labelers for every response.</p>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:.75rem">`+
+    [['1. Critique','Ask the model: "Does this response violate our principles?"'],['2. Revise','Ask the model to rewrite the response to fix violations'],['3. Repeat','Run multiple rounds of critique-revise'],['4. RLAIF','Use revised responses as preference data instead of human labels'],['5. Scale','Human values are encoded in the constitution, not per-item judgments']].map(s=>`<div style="display:flex;gap:8px"><span style="color:var(--purple);font-weight:600;white-space:nowrap">${s[0]}</span><span style="color:var(--gray)">${s[1]}</span></div>`).join('')+`</div>`;
+}
+
+// ─────────────────────── PLAYGROUND FUNCTIONS ───────────────────────
+function buildPrompt(){
+  const sys=document.getElementById('pg-system').value.trim();
+  const fs=document.getElementById('pg-fewshot').value.trim();
+  const user=document.getElementById('pg-user').value.trim();
+  const messages=[];
+  if(sys) messages.push({role:'system',content:sys});
+  if(fs){
+    const lines=fs.split('\n');
+    lines.forEach(l=>{ if(l.startsWith('User:')) messages.push({role:'user',content:l.slice(5).trim()}); else if(l.startsWith('Assistant:')) messages.push({role:'assistant',content:l.slice(10).trim()}); });
+  }
+  if(user) messages.push({role:'user',content:user});
+  const req={model:'gpt-4o',messages,temperature:0.7,max_tokens:1000};
+  document.getElementById('pg-prompt-out').textContent=JSON.stringify(req,null,2);
+}
+
+let lastPromptJson='';
+function copyPrompt(){
+  const txt=document.getElementById('pg-prompt-out').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{ const btn=event.target; btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy JSON',1500); });
+}
+
+function countTokens(){
+  const text=document.getElementById('pg-token-text').value;
+  const chars=text.length;
+  const tokens=Math.round(chars/4);
+  const inputCost=(tokens/1000000*2.5).toFixed(4);
+  const outputEst=Math.round(tokens*0.4);
+  const outputCost=(outputEst/1000000*10).toFixed(4);
+  document.getElementById('token-output').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="background:var(--bg);border-radius:8px;padding:10px">
+        <div style="color:var(--gray);font-size:.72rem">Characters</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--cyan)">${chars.toLocaleString()}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:10px">
+        <div style="color:var(--gray);font-size:.72rem">Est. Tokens</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--purple)">${tokens.toLocaleString()}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:10px">
+        <div style="color:var(--gray);font-size:.72rem">Input cost (GPT-4o)</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--amber)">$${inputCost}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:10px">
+        <div style="color:var(--gray);font-size:.72rem">Output cost (est.)</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--green)">$${outputCost}</div>
+      </div>
+    </div>
+    <div style="font-size:.7rem;color:var(--gray);margin-top:8px">GPT-4o pricing: $2.50/1M input tokens, $10/1M output. Estimate assumes ~40% output ratio.</div>
+  `;
+}
+
+function calcSimilarity(){
+  const w1=document.getElementById('emb-word1').value;
+  const w2=document.getElementById('emb-word2').value;
+  const a=EMBED_WORDS.find(p=>p.w===w1), b=EMBED_WORDS.find(p=>p.w===w2);
+  if(!a||!b) return;
+  const sim=cosineSim(a,b);
+  const pct=Math.round((sim+1)/2*100);
+  document.getElementById('emb-result').innerHTML=`<span style="color:var(--purple)">${w1}</span> · <span style="color:var(--cyan)">${w2}</span><br><span style="font-size:1.4rem;font-weight:700;color:${sim>0.7?'var(--green)':sim>0.3?'var(--amber)':'var(--red)'}">${sim.toFixed(4)}</span><br><span style="font-size:.72rem;color:var(--gray)">${sim>0.8?'Very similar':sim>0.5?'Somewhat similar':sim>0.2?'Weakly related':'Dissimilar'}</span>`;
+  const canvas=document.getElementById('embCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const ax=a.x*canvas.width*0.7+canvas.width*0.15, ay=(1-a.y)*canvas.height*0.7+canvas.height*0.15;
+  const bx=b.x*canvas.width*0.7+canvas.width*0.15, by=(1-b.y)*canvas.height*0.7+canvas.height*0.15;
+  ctx.strokeStyle='rgba(168,85,247,.3)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
+  [[ax,ay,w1,GROUP_COLORS[a.g]],[bx,by,w2,GROUP_COLORS[b.g]]].forEach(([x,y,w,c])=>{
+    ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2); ctx.fillStyle=c+'44'; ctx.fill(); ctx.strokeStyle=c; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle=c; ctx.font='bold 10px sans-serif'; ctx.textAlign='center'; ctx.fillText(w,x,y-14);
+  });
+  const mx=(ax+bx)/2, my=(ay+by)/2;
+  ctx.fillStyle='white'; ctx.font='11px sans-serif'; ctx.textAlign='center'; ctx.fillText(sim.toFixed(3),mx,my-6);
+}
+
+function populateEmbSelects(){
+  const words=EMBED_WORDS.map(p=>p.w);
+  ['emb-word1','emb-word2'].forEach((id,i)=>{
+    const sel=document.getElementById(id);
+    words.forEach((w,j)=>{ const o=document.createElement('option'); o.value=w; o.textContent=w; if(j===i) o.selected=true; sel.appendChild(o); });
+  });
+  calcSimilarity();
+}
+
+function showChunks(){
+  const text=document.getElementById('pg-chunk-text').value.trim();
+  if(!text){ document.getElementById('chunk-output').innerHTML=''; return; }
+  const chunkTokens=parseInt(document.getElementById('chunk-size').value);
+  const overlap=parseInt(document.getElementById('chunk-overlap').value);
+  const chunkChars=chunkTokens*4, overlapChars=overlap*4;
+  const chunks=[]; let pos=0;
+  while(pos<text.length){
+    chunks.push(text.slice(pos,pos+chunkChars));
+    pos+=chunkChars-overlapChars;
+  }
+  const cols=['#7c3aed','#065f46','#1e3a5f','#92400e','#7f1d1d'];
+  document.getElementById('chunk-output').innerHTML=chunks.map((c,i)=>`<div class="chunk-block" style="background:${cols[i%cols.length]}22;border-color:${cols[i%cols.length]};color:${cols[i%cols.length]}">Chunk ${i+1}: ~${Math.round(c.length/4)} tokens<br><span style="font-size:.68rem;opacity:.8">${c.slice(0,60)}${c.length>60?'…':''}</span></div>`).join('');
+}
+
+function formatCoT(){
+  const prob=document.getElementById('pg-cot-input').value.trim();
+  if(!prob){ document.getElementById('pg-cot-out').textContent='Paste a problem first.'; return; }
+  const out=`System: You are a careful, step-by-step reasoner.
+
+User: ${prob}
+
+Let's think through this step by step:
+
+Step 1: Identify what we're asked to find
+Step 2: List the relevant information given
+Step 3: Choose the right approach or formula
+Step 4: Execute the calculation or reasoning
+Step 5: Verify the answer makes sense`;
+  document.getElementById('pg-cot-out').textContent=out;
+}
+
+// ─────────────────────── RESOURCES ───────────────────────
+const RESOURCES=[
+  {
+    section:'Papers (with Plain-English Summaries)',
+    items:[
+      {title:'Attention Is All You Need (2017)',type:'paper',free:true,time:'4 hrs',beginner:false,desc:'The OG Transformer paper. Self-attention replaces RNNs. Foundation of every modern LLM.'},
+      {title:'BERT: Pre-training of Deep Bidirectional Transformers (2019)',type:'paper',free:true,time:'3 hrs',beginner:false,desc:'Google\'s breakthrough: pre-train bidirectionally, fine-tune for any NLP task.'},
+      {title:'Language Models are Few-Shot Learners (GPT-3, 2020)',type:'paper',free:true,time:'3 hrs',beginner:false,desc:'175B parameters. In-context learning. The moment LLMs became commercially viable.'},
+      {title:'Training Language Models to Follow Instructions (InstructGPT, 2022)',type:'paper',free:true,time:'2 hrs',beginner:false,desc:'RLHF applied to GPT. The recipe that made ChatGPT possible.'},
+      {title:'LoRA: Low-Rank Adaptation of Large Language Models (2021)',type:'paper',free:true,time:'2 hrs',beginner:false,desc:'Fine-tune 10,000× fewer parameters by adding low-rank matrices. Enables fine-tuning on consumer GPUs.'},
+      {title:'Training Compute-Optimal LLMs (Chinchilla, 2022)',type:'paper',free:true,time:'2 hrs',beginner:false,desc:'The optimal LLM should be trained on 20× as many tokens as parameters.'},
+      {title:'Llama 2: Open Foundation and Fine-Tuned Chat Models (2023)',type:'paper',free:true,time:'2 hrs',beginner:false,desc:'Meta\'s open-source LLM. Democratized local LLM experimentation.'},
+      {title:'Mixtral of Experts (2024)',type:'paper',free:true,time:'1 hr',beginner:false,desc:'Sparse mixture of experts: 8 FFN experts, 2 active per token. Smarter compute allocation.'},
+      {title:'RAG: Retrieval-Augmented Generation (2020)',type:'paper',free:true,time:'2 hrs',beginner:false,desc:'Combine parametric LLM knowledge with non-parametric retrieval from a document store.'}
+    ]
+  },
+  {
+    section:'Free Courses',
+    items:[
+      {title:'fast.ai — Practical Deep Learning for Coders',type:'course',free:true,time:'20 hrs',beginner:true,desc:'Top-down approach. Build real models before theory. Best starting point for practitioners.'},
+      {title:'Andrej Karpathy — Neural Networks: Zero to Hero',type:'course',free:true,time:'15 hrs',beginner:false,desc:'Build GPT from scratch in Python. The best technical explanation of transformers on YouTube.'},
+      {title:'DeepLearning.AI — LangChain for LLM Apps',type:'course',free:true,time:'4 hrs',beginner:true,desc:'Practical course on building RAG, agents, and chains with LangChain.'},
+      {title:'DeepLearning.AI — Building Systems with ChatGPT API',type:'course',free:true,time:'3 hrs',beginner:true,desc:'Multi-step LLM pipelines, evaluations, and production patterns.'},
+      {title:'Stanford CS224N — Natural Language Processing with Deep Learning',type:'course',free:true,time:'40 hrs',beginner:false,desc:'University-level NLP. Covers transformers, BERT, GPT, and research frontiers.'},
+      {title:'Hugging Face NLP Course',type:'course',free:true,time:'10 hrs',beginner:true,desc:'Hands-on with the transformers library. Fine-tuning, datasets, and Spaces deployment.'},
+    ]
+  },
+  {
+    section:'Books',
+    items:[
+      {title:'Deep Learning — Goodfellow, Bengio, Courville',type:'book',free:true,time:'80 hrs',beginner:false,desc:'The bible of deep learning. Dense but comprehensive. Free online at deeplearningbook.org.'},
+      {title:'Speech and Language Processing — Jurafsky & Martin',type:'book',free:true,time:'60 hrs',beginner:false,desc:'The standard NLP textbook. Chapter 9-10 cover neural networks and transformers excellently.'},
+      {title:'Build a Large Language Model From Scratch — Sebastian Raschka',type:'book',free:false,time:'30 hrs',beginner:false,desc:'2024 book. Implement GPT from scratch, then fine-tune and RLHF it. Very hands-on.'},
+    ]
+  },
+  {
+    section:'Tools to Try (Free)',
+    items:[
+      {title:'Ollama — Run LLMs Locally',type:'tool',free:true,time:'1 hr',beginner:true,desc:'One command to run Llama 3, Mistral, Qwen, Phi on your MacBook. No GPU required for small models.'},
+      {title:'LM Studio — Local LLM GUI',type:'tool',free:true,time:'30 min',beginner:true,desc:'Beautiful desktop app for downloading and chatting with local GGUF models.'},
+      {title:'OpenAI Playground',type:'tool',free:false,time:'1 hr',beginner:true,desc:'Test prompts with temperature, system prompt, few-shot examples side by side. Best for prompt engineering.'},
+      {title:'Hugging Face Spaces',type:'tool',free:true,time:'2 hrs',beginner:true,desc:'Try thousands of hosted models instantly. Also deploy your own Gradio/Streamlit apps for free.'},
+      {title:'LangChain / LlamaIndex',type:'tool',free:true,time:'5 hrs',beginner:false,desc:'Python frameworks for building RAG pipelines, agents, and multi-step LLM chains.'},
+    ]
+  },
+  {
+    section:'GitHub Repos to Star',
+    items:[
+      {title:'huggingface/transformers',type:'repo',free:true,time:'—',beginner:false,desc:'The library. 130K+ stars. Every major model architecture implemented in PyTorch/TF/JAX.'},
+      {title:'ggerganov/llama.cpp',type:'repo',free:true,time:'—',beginner:false,desc:'Run quantized LLMs in C++. Powers Ollama and LM Studio under the hood.'},
+      {title:'langchain-ai/langchain',type:'repo',free:true,time:'—',beginner:false,desc:'90K+ stars. Chains, agents, tools, RAG, memory — the full LLM app stack.'},
+      {title:'run-llama/llama_index',type:'repo',free:true,time:'—',beginner:false,desc:'Data framework for RAG. Better data connectors and indexing strategies than LangChain.'},
+      {title:'chroma-core/chroma',type:'repo',free:true,time:'—',beginner:true,desc:'The easiest vector database to set up locally. `pip install chromadb` and done.'},
+    ]
+  }
+];
+
+let resDone={};
+function buildResources(){
+  resDone=JSON.parse(localStorage.getItem(STORAGE+'res')||'{}');
+  const typeColors={paper:'tag-paper',course:'tag-course',book:'tag-book',tool:'tag-tool',repo:'tag-repo'};
+  const container=document.getElementById('resourcesContainer');
+  let totalDone=0, total=0;
+  RESOURCES.forEach(sec=>{ sec.items.forEach(()=>total++); });
+  Object.values(resDone).filter(Boolean).forEach(()=>totalDone++);
+
+  container.innerHTML=`<div style="margin-bottom:16px;font-size:.85rem;color:var(--gray)">${totalDone}/${total} resources completed</div>`+
+    RESOURCES.map((sec,si)=>`
+      <div class="res-section">
+        <h2>${sec.section}</h2>
+        <div class="res-grid">
+          ${sec.items.map((r,ii)=>`
+            <div class="res-card ${resDone[`${si}-${ii}`]?'done':''}" onclick="toggleRes(${si},${ii})">
+              <div style="font-size:.82rem;font-weight:600;line-height:1.4;margin-bottom:6px">${r.title}</div>
+              <div style="font-size:.73rem;color:var(--gray);line-height:1.4">${r.desc}</div>
+              <div class="res-meta">
+                <span class="res-tag ${typeColors[r.type]}">${r.type}</span>
+                <span class="res-tag ${r.free?'tag-free':'tag-paid'}">${r.free?'FREE':'Paid'}</span>
+                ${r.beginner?'<span class="res-tag tag-beginner">Beginner</span>':''}
+                <span style="font-size:.65rem;color:var(--gray);margin-left:auto">${r.time}</span>
+              </div>
+              ${resDone[`${si}-${ii}`]?'<div style="font-size:.7rem;color:var(--green);margin-top:6px">✓ Completed</div>':''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+}
+
+function toggleRes(si,ii){
+  resDone[`${si}-${ii}`]=!resDone[`${si}-${ii}`];
+  localStorage.setItem(STORAGE+'res',JSON.stringify(resDone));
+  buildResources();
+}
+
+// ─────────────────────── INIT ───────────────────────
+buildRoadmap();
+buildConceptCards();
+buildResources();
+populateEmbSelects();
+// Open Stage 1 by default
+setTimeout(()=>{ toggleStage(0); },100);
+</script>
+</body>
+</html>

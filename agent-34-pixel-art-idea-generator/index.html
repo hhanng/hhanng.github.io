@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Art Idea Generator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8f0fb; color: #703898; min-height: 100vh; }
+
+  /* Header */
+  header { background: #fff; border-bottom: 2px solid #d4b8d8; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  header h1 { font-size: 1.3rem; font-weight: 700; color: #703898; }
+  .api-row { display: flex; align-items: center; gap: 8px; }
+  .api-row input { border: 1.5px solid #d4b8d8; border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; width: 220px; color: #703898; background: #fdf8ff; }
+  .api-row input:focus { outline: none; border-color: #703898; }
+  .api-label { font-size: 0.78rem; color: #a07ab0; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; padding: 20px 20px 0; }
+  .tab { padding: 10px 22px; border-radius: 12px 12px 0 0; cursor: pointer; font-weight: 600; font-size: 0.9rem; border: 2px solid transparent; transition: all 0.2s; color: #a07ab0; background: #ede4f0; }
+  .tab.active { background: #fff; border-color: #d4b8d8; border-bottom-color: #fff; color: #703898; }
+  .tab:hover:not(.active) { background: #e8d8ee; }
+
+  /* Main panels */
+  .panel { display: none; background: #fff; border: 2px solid #d4b8d8; border-radius: 0 12px 12px 12px; padding: 24px; margin: 0 20px; }
+  .panel.active { display: block; }
+
+  /* Section labels */
+  .section-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #a07ab0; margin-bottom: 8px; }
+
+  /* Pills */
+  .pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .pill { padding: 7px 16px; border-radius: 20px; border: 2px solid #d4b8d8; cursor: pointer; font-size: 0.85rem; font-weight: 500; background: #fdf8ff; color: #703898; transition: all 0.15s; user-select: none; }
+  .pill:hover { border-color: #703898; background: #f0e4f6; }
+  .pill.selected { background: #703898; color: #fff; border-color: #703898; }
+
+  /* Textarea */
+  textarea { width: 100%; border: 1.5px solid #d4b8d8; border-radius: 10px; padding: 12px; font-size: 0.9rem; color: #703898; background: #fdf8ff; resize: vertical; min-height: 80px; font-family: inherit; }
+  textarea:focus { outline: none; border-color: #703898; }
+  textarea::placeholder { color: #c9a8d8; }
+
+  /* Buttons */
+  .btn { padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.15s; }
+  .btn-primary { background: #703898; color: #fff; }
+  .btn-primary:hover { background: #5a2c7a; }
+  .btn-primary:disabled { background: #c9a8d8; cursor: not-allowed; }
+  .btn-outline { background: transparent; border: 2px solid #703898; color: #703898; }
+  .btn-outline:hover { background: #f0e4f6; }
+  .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+
+  /* Generate row */
+  .gen-row { display: flex; justify-content: center; padding: 8px 0 4px; }
+
+  /* Ideas grid */
+  .ideas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; margin-top: 24px; }
+
+  /* Idea card */
+  .idea-card { background: #fdf8ff; border: 2px solid #d4b8d8; border-radius: 14px; padding: 16px; position: relative; }
+  .idea-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+  .idea-title { font-size: 1rem; font-weight: 700; color: #703898; flex: 1; }
+  .star-btn { background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0 0 0 8px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; background: #d4b8d8; color: #703898; margin-bottom: 8px; }
+  .idea-desc { font-size: 0.82rem; color: #8a5aa0; margin-bottom: 10px; line-height: 1.5; }
+
+  /* Pixel preview canvas */
+  .pixel-preview { display: block; image-rendering: pixelated; border-radius: 8px; margin: 0 auto 12px; border: 2px solid #d4b8d8; background: #e8d8f0; }
+
+  /* Palette row */
+  .palette-row { display: flex; gap: 5px; margin-bottom: 12px; flex-wrap: wrap; }
+  .swatch { width: 22px; height: 22px; border-radius: 5px; border: 1.5px solid #d4b8d8; cursor: default; }
+  .swatch[title] { cursor: help; }
+
+  /* Steps */
+  .steps-list { list-style: none; padding: 0; }
+  .steps-list li { font-size: 0.8rem; color: #703898; padding: 4px 0 4px 20px; position: relative; line-height: 1.45; }
+  .steps-list li::before { content: attr(data-n); position: absolute; left: 0; font-weight: 700; color: #a07ab0; }
+
+  /* Loading spinner */
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid #d4b8d8; border-top-color: #703898; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-box { background: #fff0f5; border: 1.5px solid #e8a0c0; border-radius: 10px; padding: 12px 16px; color: #c0306a; font-size: 0.85rem; margin-top: 16px; }
+
+  /* Saved banner */
+  .saved-bar { background: #f0e4f6; border: 1.5px solid #d4b8d8; border-radius: 10px; padding: 10px 16px; margin-top: 16px; }
+  .saved-bar h3 { font-size: 0.9rem; margin-bottom: 8px; }
+  .saved-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .saved-chip { background: #fff; border: 1.5px solid #d4b8d8; border-radius: 8px; padding: 5px 10px; font-size: 0.78rem; cursor: pointer; color: #703898; }
+  .saved-chip:hover { background: #e8d8f0; }
+
+  /* ===== EDITOR ===== */
+  #editor-screen { display: none; padding: 0 20px 30px; }
+  .editor-header { display: flex; align-items: center; gap: 12px; padding: 16px 0 14px; flex-wrap: wrap; }
+  .editor-header h2 { font-size: 1.1rem; font-weight: 700; flex: 1; }
+  .editor-body { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+
+  .editor-canvas-wrap { position: relative; display: inline-block; cursor: crosshair; }
+  #editor-canvas { display: block; image-rendering: pixelated; border: 2px solid #703898; border-radius: 6px; }
+
+  .editor-sidebar { flex: 1; min-width: 180px; }
+  .tool-group { margin-bottom: 16px; }
+  .tool-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #a07ab0; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .tool-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tool-btn { padding: 7px 12px; border-radius: 8px; border: 2px solid #d4b8d8; background: #fdf8ff; color: #703898; font-size: 0.82rem; cursor: pointer; font-weight: 600; transition: all 0.15s; }
+  .tool-btn:hover { border-color: #703898; }
+  .tool-btn.active { background: #703898; color: #fff; border-color: #703898; }
+
+  .color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 10px; }
+  .color-cell { width: 28px; height: 28px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: border-color 0.1s; }
+  .color-cell:hover { border-color: #703898; }
+  .color-cell.selected { border-color: #703898; box-shadow: 0 0 0 2px #f0e4f6; }
+
+  .current-color-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .current-color-swatch { width: 32px; height: 32px; border-radius: 8px; border: 2px solid #d4b8d8; }
+  .current-color-row input[type=color] { width: 32px; height: 32px; padding: 0; border: none; background: none; cursor: pointer; border-radius: 6px; }
+
+  .action-btns { display: flex; flex-direction: column; gap: 8px; }
+
+  /* Divider */
+  .divider { height: 1px; background: #e8d8f0; margin: 16px 0; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .tabs { padding: 12px 12px 0; }
+    .panel { margin: 0 12px; padding: 16px; }
+    #editor-screen { padding: 0 12px 20px; }
+    .ideas-grid { grid-template-columns: 1fr; }
+    .api-row input { width: 150px; }
+    header h1 { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎨 Pixel Art Idea Generator</h1>
+  <div class="api-row">
+    <span class="api-label">Gemini API Key:</span>
+    <input type="password" id="api-key-input" placeholder="AIza..." autocomplete="off">
+  </div>
+</header>
+
+<!-- Main App -->
+<div id="main-screen">
+  <div class="tabs">
+    <div class="tab active" data-tab="mode1">✨ Give me an idea</div>
+    <div class="tab" data-tab="mode2">💡 I have an idea</div>
+    <div class="tab" data-tab="saved">⭐ Saved</div>
+  </div>
+
+  <!-- Mode 1 -->
+  <div class="panel active" id="mode1">
+    <div class="section-label">Skill Level</div>
+    <div class="pill-group" id="skill-pills">
+      <div class="pill selected" data-value="Beginner" data-grid="16">🌱 Beginner (16×16)</div>
+      <div class="pill" data-value="Intermediate" data-grid="32">⚡ Intermediate (32×32)</div>
+      <div class="pill" data-value="Advanced" data-grid="64">🔥 Advanced (64×64)</div>
+    </div>
+
+    <div class="section-label">Style (pick up to 2)</div>
+    <div class="pill-group" id="style-pills">
+      <div class="pill" data-value="Retro game">🕹️ Retro game</div>
+      <div class="pill" data-value="Cute/Kawaii">🌸 Cute/Kawaii</div>
+      <div class="pill" data-value="Nature">🌿 Nature</div>
+      <div class="pill" data-value="Space">🚀 Space</div>
+      <div class="pill" data-value="Food">🍕 Food</div>
+      <div class="pill" data-value="Animals">🐾 Animals</div>
+      <div class="pill" data-value="Characters">👾 Characters</div>
+      <div class="pill" data-value="Abstract">🔷 Abstract</div>
+      <div class="pill" data-value="Isometric">🏗️ Isometric</div>
+      <div class="pill" data-value="Horror">💀 Horror</div>
+    </div>
+
+    <div class="section-label">Time Available</div>
+    <div class="pill-group" id="time-pills">
+      <div class="pill" data-value="15 minutes">⏱️ 15 min</div>
+      <div class="pill selected" data-value="1 hour">☕ 1 hour</div>
+      <div class="pill" data-value="an afternoon">🌤️ Afternoon</div>
+      <div class="pill" data-value="a full weekend">🗓️ Weekend project</div>
+    </div>
+
+    <div class="gen-row">
+      <button class="btn btn-primary" id="gen-btn">✨ Generate Ideas</button>
+    </div>
+    <div id="mode1-output"></div>
+  </div>
+
+  <!-- Mode 2 -->
+  <div class="panel" id="mode2">
+    <div class="section-label">Describe Your Idea</div>
+    <textarea id="user-idea" placeholder="e.g. A cozy cabin in the woods at night with snow falling…"></textarea>
+    <div class="divider"></div>
+
+    <div class="section-label">Skill Level</div>
+    <div class="pill-group" id="skill-pills2">
+      <div class="pill selected" data-value="Beginner" data-grid="16">🌱 Beginner (16×16)</div>
+      <div class="pill" data-value="Intermediate" data-grid="32">⚡ Intermediate (32×32)</div>
+      <div class="pill" data-value="Advanced" data-grid="64">🔥 Advanced (64×64)</div>
+    </div>
+
+    <div class="section-label">Style (pick up to 2)</div>
+    <div class="pill-group" id="style-pills2">
+      <div class="pill" data-value="Retro game">🕹️ Retro game</div>
+      <div class="pill" data-value="Cute/Kawaii">🌸 Cute/Kawaii</div>
+      <div class="pill" data-value="Nature">🌿 Nature</div>
+      <div class="pill" data-value="Space">🚀 Space</div>
+      <div class="pill" data-value="Food">🍕 Food</div>
+      <div class="pill" data-value="Animals">🐾 Animals</div>
+      <div class="pill" data-value="Characters">👾 Characters</div>
+      <div class="pill" data-value="Abstract">🔷 Abstract</div>
+      <div class="pill" data-value="Isometric">🏗️ Isometric</div>
+      <div class="pill" data-value="Horror">💀 Horror</div>
+    </div>
+
+    <div class="gen-row">
+      <button class="btn btn-primary" id="plan-btn">🗺️ Help me plan it</button>
+    </div>
+    <div id="mode2-output"></div>
+  </div>
+
+  <!-- Saved -->
+  <div class="panel" id="saved">
+    <div id="saved-content"></div>
+  </div>
+</div>
+
+<!-- Editor Screen -->
+<div id="editor-screen">
+  <div class="editor-header">
+    <button class="btn btn-outline btn-sm" id="back-btn">← Back to ideas</button>
+    <h2 id="editor-title">Pixel Art Editor</h2>
+    <button class="btn btn-outline btn-sm" id="download-btn">⬇ Download PNG</button>
+    <button class="btn btn-outline btn-sm" id="clear-btn">🗑 Clear</button>
+  </div>
+  <div class="editor-body">
+    <div class="editor-canvas-wrap">
+      <canvas id="editor-canvas"></canvas>
+    </div>
+    <div class="editor-sidebar">
+      <div class="tool-group">
+        <label>Tool</label>
+        <div class="tool-btns">
+          <button class="tool-btn active" data-tool="paint">✏️ Paint</button>
+          <button class="tool-btn" data-tool="erase">🧹 Eraser</button>
+          <button class="tool-btn" data-tool="fill">🪣 Fill</button>
+        </div>
+      </div>
+      <div class="tool-group">
+        <label>Color</label>
+        <div class="current-color-row">
+          <div class="current-color-swatch" id="cur-swatch"></div>
+          <input type="color" id="custom-color" title="Custom color">
+        </div>
+        <div class="color-grid" id="color-grid"></div>
+      </div>
+      <div class="tool-group">
+        <label>Actions</label>
+        <div class="action-btns">
+          <button class="btn btn-outline btn-sm" id="undo-btn">↩ Undo (Ctrl+Z)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+let currentIdeas = [];
+let savedIdeas = JSON.parse(localStorage.getItem('pixelart-saved') || '[]');
+let editorState = {
+  grid: null, gridSize: 32, cellSize: 12,
+  palette: [], currentColor: '#703898',
+  tool: 'paint', drawing: false,
+  history: []
+};
+
+// ===== API KEY =====
+const apiKeyInput = document.getElementById('api-key-input');
+apiKeyInput.value = localStorage.getItem('gemini-api-key') || '';
+apiKeyInput.addEventListener('input', () => localStorage.setItem('gemini-api-key', apiKeyInput.value.trim()));
+
+// ===== TABS =====
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'saved') renderSavedPanel();
+  });
+});
+
+// ===== PILL GROUPS =====
+function initPillGroup(groupId, maxSelect, onChangeFn) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const isSingleSelect = maxSelect === 1;
+      if (isSingleSelect) {
+        group.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+        pill.classList.add('selected');
+      } else {
+        const selected = group.querySelectorAll('.pill.selected');
+        if (pill.classList.contains('selected')) {
+          pill.classList.remove('selected');
+        } else if (selected.length < maxSelect) {
+          pill.classList.add('selected');
+        }
+      }
+      if (onChangeFn) onChangeFn();
+    });
+  });
+}
+
+initPillGroup('skill-pills', 1);
+initPillGroup('style-pills', 2);
+initPillGroup('time-pills', 1);
+initPillGroup('skill-pills2', 1);
+initPillGroup('style-pills2', 2);
+
+function getSelected(groupId) {
+  return [...document.getElementById(groupId).querySelectorAll('.pill.selected')].map(p => p.dataset.value);
+}
+
+function getSkillGrid(groupId) {
+  const el = document.getElementById(groupId).querySelector('.pill.selected');
+  return el ? parseInt(el.dataset.grid) : 16;
+}
+
+// ===== GEMINI API =====
+async function callGemini(prompt) {
+  const key = apiKeyInput.value.trim();
+  if (!key) throw new Error('Please enter your Gemini API key at the top of the page.');
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.9, maxOutputTokens: 4096 }
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function parseJSON(text) {
+  // Strip markdown fences
+  text = text.replace(/^```[a-z]*\n?/gm, '').replace(/```$/gm, '').trim();
+  return JSON.parse(text);
+}
+
+// ===== PIXEL PREVIEW =====
+function renderPixelPreview(canvas, colorMap, paletteMap, displaySize) {
+  if (!colorMap || !colorMap.length) return;
+  const rows = colorMap.length;
+  const cols = colorMap[0].length;
+  const cellW = Math.floor(displaySize / cols);
+  const cellH = Math.floor(displaySize / rows);
+  canvas.width = cols * cellW;
+  canvas.height = rows * cellH;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const key = String(colorMap[r][c]);
+      const color = paletteMap[key];
+      if (!color || color === 'transparent') continue;
+      ctx.fillStyle = color;
+      ctx.fillRect(c * cellW, r * cellH, cellW, cellH);
+    }
+  }
+}
+
+// ===== IDEA CARDS =====
+function renderIdeaCards(ideas, container) {
+  container.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'ideas-grid';
+
+  ideas.forEach((idea, idx) => {
+    const card = document.createElement('div');
+    card.className = 'idea-card';
+
+    // Star
+    const isSaved = savedIdeas.some(s => s.title === idea.title);
+    const starBtn = document.createElement('button');
+    starBtn.className = 'star-btn';
+    starBtn.title = isSaved ? 'Remove from saved' : 'Save idea';
+    starBtn.textContent = isSaved ? '⭐' : '☆';
+
+    starBtn.addEventListener('click', () => {
+      const savedIdx = savedIdeas.findIndex(s => s.title === idea.title);
+      if (savedIdx >= 0) {
+        savedIdeas.splice(savedIdx, 1);
+        starBtn.textContent = '☆';
+      } else {
+        if (savedIdeas.length >= 5) {
+          alert('You can only save up to 5 ideas. Remove one first!');
+          return;
+        }
+        savedIdeas.push(idea);
+        starBtn.textContent = '⭐';
+      }
+      localStorage.setItem('pixelart-saved', JSON.stringify(savedIdeas));
+    });
+
+    const header = document.createElement('div');
+    header.className = 'idea-card-header';
+    const title = document.createElement('div');
+    title.className = 'idea-title';
+    title.textContent = idea.title;
+    header.appendChild(title);
+    header.appendChild(starBtn);
+
+    const badge = document.createElement('div');
+    badge.className = 'badge';
+    badge.textContent = `${idea.difficulty} · ${idea.estimatedTime}`;
+
+    const desc = document.createElement('div');
+    desc.className = 'idea-desc';
+    desc.textContent = idea.description;
+
+    // Canvas preview
+    const canvas = document.createElement('canvas');
+    canvas.className = 'pixel-preview';
+    canvas.style.width = '128px';
+    canvas.style.height = '128px';
+    card.appendChild(header);
+    card.appendChild(badge);
+    card.appendChild(desc);
+    card.appendChild(canvas);
+
+    if (idea.colorMap && idea.paletteMap) {
+      renderPixelPreview(canvas, idea.colorMap, idea.paletteMap, 128);
+    }
+
+    // Palette
+    const palRow = document.createElement('div');
+    palRow.className = 'palette-row';
+    (idea.palette || []).forEach(hex => {
+      const sw = document.createElement('div');
+      sw.className = 'swatch';
+      sw.style.background = hex;
+      sw.title = hex;
+      palRow.appendChild(sw);
+    });
+
+    // Steps
+    const stepsList = document.createElement('ul');
+    stepsList.className = 'steps-list';
+    (idea.steps || []).forEach((step, i) => {
+      const li = document.createElement('li');
+      li.dataset.n = i + 1 + '.';
+      li.textContent = step;
+      stepsList.appendChild(li);
+    });
+
+    // Start btn
+    const startBtn = document.createElement('button');
+    startBtn.className = 'btn btn-primary btn-sm';
+    startBtn.style.marginTop = '12px';
+    startBtn.style.width = '100%';
+    startBtn.textContent = '🖌 Start this one';
+    startBtn.addEventListener('click', () => openEditor(idea));
+
+    card.appendChild(palRow);
+    card.appendChild(stepsList);
+    card.appendChild(startBtn);
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}
+
+// ===== MODE 1 — GENERATE =====
+document.getElementById('gen-btn').addEventListener('click', async () => {
+  const skill = getSelected('skill-pills')[0] || 'Beginner';
+  const styles = getSelected('style-pills');
+  const time = getSelected('time-pills')[0] || '1 hour';
+  const gridSize = getSkillGrid('skill-pills');
+  const stylesStr = styles.length ? styles.join(' and ') : 'any';
+
+  const prompt = `Generate 4 pixel art project ideas for a ${skill} artist who likes ${stylesStr} style, with ${time} to work on it.
+
+For each idea, also generate a simple ${gridSize}x${gridSize} pixel art color map as a 2D array.
+
+Return JSON:
+{
+  "ideas": [
+    {
+      "title": "Tiny Mushroom Village",
+      "description": "A cozy pixel scene with small mushroom houses",
+      "difficulty": "Beginner",
+      "estimatedTime": "1 hour",
+      "palette": ["#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#ffffff"],
+      "colorMap": [[0,0,1,1,0],[1,2,2,2,1],[1,2,3,2,1],[0,1,1,1,0],[0,0,1,0,0]],
+      "paletteMap": { "0": "transparent", "1": "#ff6b6b", "2": "#ffd93d", "3": "#6bcb77" },
+      "steps": ["Start with the mushroom cap outline", "Fill in the stem", "Add details and highlights"]
+    }
+  ]
+}
+Return only JSON, no markdown.`;
+
+  const btn = document.getElementById('gen-btn');
+  const output = document.getElementById('mode1-output');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generating…';
+  output.innerHTML = '';
+
+  try {
+    const raw = await callGemini(prompt);
+    const data = parseJSON(raw);
+    currentIdeas = data.ideas || [];
+    renderIdeaCards(currentIdeas, output);
+  } catch (e) {
+    output.innerHTML = `<div class="error-box">❌ ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Generate Ideas';
+  }
+});
+
+// ===== MODE 2 — PLAN =====
+document.getElementById('plan-btn').addEventListener('click', async () => {
+  const userIdea = document.getElementById('user-idea').value.trim();
+  if (!userIdea) { alert('Please describe your pixel art idea first!'); return; }
+
+  const skill = getSelected('skill-pills2')[0] || 'Beginner';
+  const styles = getSelected('style-pills2');
+  const gridSize = getSkillGrid('skill-pills2');
+  const stylesStr = styles.length ? styles.join(', ') : 'any';
+
+  const prompt = `Help me plan a pixel art of: '${userIdea}'. Skill level: ${skill}. Style: ${stylesStr}.
+
+Generate a simple ${gridSize}x${gridSize} pixel art color map as a 2D array.
+
+Return JSON:
+{
+  "ideas": [
+    {
+      "title": "string",
+      "description": "string",
+      "difficulty": "${skill}",
+      "estimatedTime": "string",
+      "palette": ["#hex1", "#hex2", "#hex3", "#hex4", "#hex5"],
+      "colorMap": [[0,1,2],[1,2,0],[2,0,1]],
+      "paletteMap": { "0": "transparent", "1": "#hex1", "2": "#hex2" },
+      "steps": ["step 1", "step 2", "step 3"]
+    }
+  ]
+}
+Return only JSON, no markdown.`;
+
+  const btn = document.getElementById('plan-btn');
+  const output = document.getElementById('mode2-output');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Planning…';
+  output.innerHTML = '';
+
+  try {
+    const raw = await callGemini(prompt);
+    const data = parseJSON(raw);
+    const ideas = data.ideas || (data.idea ? [data.idea] : []);
+    renderIdeaCards(ideas, output);
+  } catch (e) {
+    output.innerHTML = `<div class="error-box">❌ ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🗺️ Help me plan it';
+  }
+});
+
+// ===== SAVED PANEL =====
+function renderSavedPanel() {
+  const el = document.getElementById('saved-content');
+  if (savedIdeas.length === 0) {
+    el.innerHTML = '<p style="color:#a07ab0;font-size:0.9rem">No saved ideas yet. Star an idea card to save it here!</p>';
+    return;
+  }
+  el.innerHTML = `<div class="saved-bar"><h3>⭐ Saved Ideas (${savedIdeas.length}/5)</h3></div>`;
+  const container = document.createElement('div');
+  renderIdeaCards(savedIdeas, container);
+  el.appendChild(container);
+}
+
+// ===== EDITOR =====
+const editorCanvas = document.getElementById('editor-canvas');
+const editorCtx = editorCanvas.getContext('2d');
+
+function openEditor(idea) {
+  const skillEl = document.querySelector('#skill-pills .pill.selected') ||
+                  document.querySelector('#skill-pills2 .pill.selected');
+  const gridSize = skillEl ? parseInt(skillEl.dataset.grid) : 16;
+  const maxPx = Math.min(window.innerWidth - 260, 520);
+  const cellSize = Math.max(4, Math.floor(maxPx / gridSize));
+
+  editorState.gridSize = gridSize;
+  editorState.cellSize = cellSize;
+  editorState.palette = [...(idea.palette || ['#703898', '#d4b8d8', '#fff', '#000'])];
+  editorState.currentColor = editorState.palette[0] || '#703898';
+  editorState.tool = 'paint';
+  editorState.drawing = false;
+  editorState.history = [];
+
+  // Init grid
+  editorState.grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
+
+  // Pre-fill from colorMap if available
+  if (idea.colorMap && idea.paletteMap) {
+    const cm = idea.colorMap;
+    const pm = idea.paletteMap;
+    for (let r = 0; r < Math.min(cm.length, gridSize); r++) {
+      for (let c = 0; c < Math.min((cm[r]||[]).length, gridSize); c++) {
+        const key = String(cm[r][c]);
+        const color = pm[key];
+        if (color && color !== 'transparent') {
+          editorState.grid[r][c] = color;
+        }
+      }
+    }
+  }
+
+  document.getElementById('editor-title').textContent = idea.title;
+  editorCanvas.width = gridSize * cellSize;
+  editorCanvas.height = gridSize * cellSize;
+
+  renderColorGrid();
+  updateCurSwatch();
+  drawEditor();
+
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('editor-screen').style.display = 'block';
+}
+
+function drawEditor() {
+  const { gridSize, cellSize, grid } = editorState;
+  editorCtx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
+
+  // Background checkerboard
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      const x = c * cellSize, y = r * cellSize;
+      const isLight = (r + c) % 2 === 0;
+      editorCtx.fillStyle = isLight ? '#e8d8f0' : '#f0e8f8';
+      editorCtx.fillRect(x, y, cellSize, cellSize);
+      if (grid[r][c]) {
+        editorCtx.fillStyle = grid[r][c];
+        editorCtx.fillRect(x, y, cellSize, cellSize);
+      }
+    }
+  }
+
+  // Grid lines (subtle)
+  if (cellSize >= 6) {
+    editorCtx.strokeStyle = 'rgba(112,56,152,0.1)';
+    editorCtx.lineWidth = 0.5;
+    for (let r = 0; r <= gridSize; r++) {
+      editorCtx.beginPath();
+      editorCtx.moveTo(0, r * cellSize);
+      editorCtx.lineTo(gridSize * cellSize, r * cellSize);
+      editorCtx.stroke();
+    }
+    for (let c = 0; c <= gridSize; c++) {
+      editorCtx.beginPath();
+      editorCtx.moveTo(c * cellSize, 0);
+      editorCtx.lineTo(c * cellSize, gridSize * cellSize);
+      editorCtx.stroke();
+    }
+  }
+}
+
+function getCell(e) {
+  const rect = editorCanvas.getBoundingClientRect();
+  const scaleX = editorCanvas.width / rect.width;
+  const scaleY = editorCanvas.height / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+  return {
+    r: Math.floor(y / editorState.cellSize),
+    c: Math.floor(x / editorState.cellSize)
+  };
+}
+
+function paintCell(r, c) {
+  const { gridSize, tool, currentColor, grid } = editorState;
+  if (r < 0 || r >= gridSize || c < 0 || c >= gridSize) return;
+  if (tool === 'paint') {
+    grid[r][c] = currentColor;
+  } else if (tool === 'erase') {
+    grid[r][c] = null;
+  } else if (tool === 'fill') {
+    floodFill(r, c, grid[r][c], currentColor, grid, gridSize);
+  }
+  drawEditor();
+}
+
+function floodFill(r, c, targetColor, fillColor, grid, size) {
+  if (targetColor === fillColor) return;
+  const stack = [[r, c]];
+  const visited = new Set();
+  while (stack.length) {
+    const [cr, cc] = stack.pop();
+    if (cr < 0 || cr >= size || cc < 0 || cc >= size) continue;
+    const key = `${cr},${cc}`;
+    if (visited.has(key)) continue;
+    if (grid[cr][cc] !== targetColor) continue;
+    visited.add(key);
+    grid[cr][cc] = fillColor;
+    stack.push([cr+1,cc],[cr-1,cc],[cr,cc+1],[cr,cc-1]);
+  }
+}
+
+function pushHistory() {
+  const copy = editorState.grid.map(row => [...row]);
+  editorState.history.push(copy);
+  if (editorState.history.length > 50) editorState.history.shift();
+}
+
+// Mouse events
+editorCanvas.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  pushHistory();
+  editorState.drawing = true;
+  const { r, c } = getCell(e);
+  paintCell(r, c);
+});
+editorCanvas.addEventListener('mousemove', e => {
+  if (!editorState.drawing) return;
+  const { r, c } = getCell(e);
+  paintCell(r, c);
+});
+editorCanvas.addEventListener('mouseup', () => { editorState.drawing = false; });
+editorCanvas.addEventListener('mouseleave', () => { editorState.drawing = false; });
+
+// Touch events
+editorCanvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  pushHistory();
+  editorState.drawing = true;
+  const { r, c } = getCell(e.touches[0]);
+  paintCell(r, c);
+}, { passive: false });
+editorCanvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!editorState.drawing) return;
+  const { r, c } = getCell(e.touches[0]);
+  paintCell(r, c);
+}, { passive: false });
+editorCanvas.addEventListener('touchend', () => { editorState.drawing = false; });
+
+// Tool buttons
+document.querySelectorAll('.tool-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    editorState.tool = btn.dataset.tool;
+  });
+});
+
+// Undo
+function undo() {
+  if (!editorState.history.length) return;
+  editorState.grid = editorState.history.pop();
+  drawEditor();
+}
+document.getElementById('undo-btn').addEventListener('click', undo);
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
+});
+
+// Clear
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if (!confirm('Clear the canvas?')) return;
+  pushHistory();
+  const { gridSize } = editorState;
+  editorState.grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
+  drawEditor();
+});
+
+// Download
+document.getElementById('download-btn').addEventListener('click', () => {
+  const scale = 8;
+  const { gridSize, grid } = editorState;
+  const out = document.createElement('canvas');
+  out.width = gridSize * scale;
+  out.height = gridSize * scale;
+  const ctx = out.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      if (grid[r][c]) {
+        ctx.fillStyle = grid[r][c];
+        ctx.fillRect(c * scale, r * scale, scale, scale);
+      }
+    }
+  }
+
+  const link = document.createElement('a');
+  link.download = `${document.getElementById('editor-title').textContent.replace(/\s+/g,'-')}.png`;
+  link.href = out.toDataURL('image/png');
+  link.click();
+});
+
+// Back
+document.getElementById('back-btn').addEventListener('click', () => {
+  document.getElementById('editor-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'block';
+});
+
+// Color grid
+function renderColorGrid() {
+  const grid = document.getElementById('color-grid');
+  grid.innerHTML = '';
+  const colors = [...new Set([...editorState.palette, '#000000', '#ffffff', '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9f43', '#a29bfe'])];
+  colors.forEach(hex => {
+    const cell = document.createElement('div');
+    cell.className = 'color-cell';
+    if (hex === editorState.currentColor) cell.classList.add('selected');
+    cell.style.background = hex;
+    cell.title = hex;
+    cell.addEventListener('click', () => {
+      editorState.currentColor = hex;
+      document.querySelectorAll('.color-cell').forEach(c => c.classList.remove('selected'));
+      cell.classList.add('selected');
+      updateCurSwatch();
+      document.getElementById('custom-color').value = hex;
+    });
+    grid.appendChild(cell);
+  });
+}
+
+function updateCurSwatch() {
+  document.getElementById('cur-swatch').style.background = editorState.currentColor;
+  document.getElementById('custom-color').value = editorState.currentColor;
+}
+
+document.getElementById('custom-color').addEventListener('input', e => {
+  editorState.currentColor = e.target.value;
+  document.getElementById('cur-swatch').style.background = e.target.value;
+  document.querySelectorAll('.color-cell').forEach(c => c.classList.remove('selected'));
+});
+</script>
+</body>
+</html>

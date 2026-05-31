@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pomodoro Focus Timer - Agent #61</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --card2: #20243a;
+    --blue: #4f8ef7; --green: #4ade80; --red: #f87171;
+    --yellow: #fbbf24; --text: #e2e8f0; --muted: #64748b;
+    --border: #2d3150;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+  header { text-align: center; padding: 20px 16px 0; }
+  header h1 { font-size: 1.1rem; font-weight: 600; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  header p { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+  .tabs { display: flex; justify-content: center; gap: 4px; padding: 16px 16px 0; border-bottom: 1px solid var(--border); }
+  .tab-btn { background: none; border: none; color: var(--muted); font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; text-transform: uppercase; }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .tab-content { display: none; padding: 24px 16px; max-width: 640px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+
+  /* TIMER TAB */
+  .mode-btns { display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; }
+  .mode-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all .2s; }
+  .mode-btn.active { color: var(--bg); }
+  .mode-btn.active.pomodoro { background: var(--blue); border-color: var(--blue); }
+  .mode-btn.active.short { background: var(--green); border-color: var(--green); }
+  .mode-btn.active.long { background: var(--yellow); border-color: var(--yellow); }
+
+  .timer-ring-wrap { display: flex; justify-content: center; margin-bottom: 28px; position: relative; }
+  .timer-ring-wrap svg { width: 240px; height: 240px; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 8; }
+  .ring-fg { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke .5s; }
+  .timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+  .timer-display { font-size: 3.2rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
+  .timer-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  .task-input-wrap { margin-bottom: 14px; }
+  .task-input-wrap label { font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .task-input-wrap input { width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; outline: none; transition: border .2s; }
+  .task-input-wrap input:focus { border-color: var(--blue); }
+
+  .ctrl-btns { display: flex; gap: 12px; justify-content: center; }
+  .ctrl-btn { padding: 12px 32px; border-radius: 10px; border: none; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all .2s; letter-spacing: 0.5px; }
+  .ctrl-btn.start { background: var(--blue); color: #fff; }
+  .ctrl-btn.start:hover { opacity: .85; }
+  .ctrl-btn.pause { background: var(--yellow); color: #000; }
+  .ctrl-btn.pause:hover { opacity: .85; }
+  .ctrl-btn.reset { background: var(--card); border: 1px solid var(--border); color: var(--muted); }
+  .ctrl-btn.reset:hover { border-color: var(--text); color: var(--text); }
+
+  .session-count { text-align: center; margin-top: 20px; font-size: 0.8rem; color: var(--muted); }
+  .session-dots { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
+  .session-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: background .3s; }
+  .session-dot.done { background: var(--green); }
+
+  /* TASKS TAB */
+  .add-task-form { display: flex; gap: 8px; margin-bottom: 20px; }
+  .add-task-form input { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; outline: none; transition: border .2s; }
+  .add-task-form input:focus { border-color: var(--blue); }
+  .add-task-form input[type="number"] { flex: 0 0 70px; text-align: center; }
+  .add-task-form button { background: var(--blue); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .add-task-form button:hover { opacity: .85; }
+
+  .task-list { display: flex; flex-direction: column; gap: 10px; }
+  .task-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; transition: opacity .3s; }
+  .task-item.done { opacity: 0.45; }
+  .task-item.active-task { border-color: var(--blue); }
+  .task-check { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s; }
+  .task-check.done { background: var(--green); border-color: var(--green); }
+  .task-check.done::after { content: '✓'; color: #000; font-size: 11px; font-weight: 900; }
+  .task-info { flex: 1; }
+  .task-name { font-size: 0.9rem; font-weight: 600; }
+  .task-progress { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+  .task-actions { display: flex; gap: 6px; }
+  .task-act-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 4px; transition: all .2s; }
+  .task-act-btn:hover { color: var(--text); background: var(--card2); }
+  .task-act-btn.del:hover { color: var(--red); }
+  .task-act-btn.select:hover { color: var(--blue); }
+  .empty-state { text-align: center; color: var(--muted); padding: 40px; font-size: 0.9rem; }
+
+  /* SETTINGS TAB */
+  .settings-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .settings-section h3 { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+  .setting-row:last-child { margin-bottom: 0; }
+  .setting-label { font-size: 0.9rem; }
+  .setting-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .slider-wrap { display: flex; align-items: center; gap: 10px; }
+  .slider-wrap input[type="range"] { width: 140px; accent-color: var(--blue); cursor: pointer; }
+  .slider-val { font-size: 0.85rem; font-weight: 700; color: var(--blue); min-width: 32px; text-align: right; }
+  .toggle-wrap { position: relative; width: 44px; height: 24px; }
+  .toggle-wrap input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 24px; cursor: pointer; transition: background .2s; }
+  .toggle-slider::before { content: ''; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform .2s; }
+  .toggle-wrap input:checked + .toggle-slider { background: var(--blue); }
+  .toggle-wrap input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  /* STATS TAB */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+  .stat-val { font-size: 2rem; font-weight: 800; }
+  .stat-val.blue { color: var(--blue); }
+  .stat-val.green { color: var(--green); }
+  .stat-val.yellow { color: var(--yellow); }
+  .stat-val.red { color: var(--red); }
+  .stat-lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+  .week-chart { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .week-chart h3 { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+  .bars { display: flex; align-items: flex-end; gap: 8px; height: 80px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; }
+  .bar { width: 100%; background: var(--blue); border-radius: 4px 4px 0 0; min-height: 2px; transition: height .5s ease; opacity: 0.85; }
+  .bar-day { font-size: 0.7rem; color: var(--muted); }
+  .bar-num { font-size: 0.65rem; color: var(--muted); margin-bottom: auto; }
+  .stats-reset { margin-top: 16px; text-align: center; }
+  .stats-reset button { background: none; border: 1px solid var(--border); color: var(--muted); padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
+  .stats-reset button:hover { border-color: var(--red); color: var(--red); }
+
+  /* Notification toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--card); border: 1px solid var(--blue); color: var(--text); padding: 12px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; transition: transform .4s ease; z-index: 999; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── SESSION MODES ── */
+  .session-mode-row { display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
+  .session-mode-label { font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-weight:600; }
+  .session-mode-btn { background:var(--card); border:1px solid var(--border); color:var(--muted); padding:6px 13px; border-radius:20px; cursor:pointer; font-size:.75rem; font-weight:600; transition:all .2s; }
+  .session-mode-btn.active { background:var(--card2); border-color:var(--yellow); color:var(--yellow); }
+
+  /* LC specific */
+  .lc-fields { margin-bottom:16px; display:flex; flex-direction:column; gap:10px; }
+  .lc-field label { font-size:.72rem; color:var(--muted); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:1px; }
+  .lc-field input { width:100%; background:var(--card); border:1px solid var(--border); color:var(--text); padding:10px 14px; border-radius:8px; font-size:.88rem; outline:none; transition:border .2s; }
+  .lc-field input:focus { border-color:var(--blue); }
+  .lc-field select { width:100%; background:var(--card); border:1px solid var(--border); color:var(--text); padding:10px 14px; border-radius:8px; font-size:.88rem; outline:none; cursor:pointer; transition:border .2s; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; }
+  .lc-field select:focus { border-color:var(--blue); }
+  .lc-tip-card { margin-top:16px; background:var(--card); border:1px solid var(--blue); border-radius:12px; padding:16px 18px; }
+  .lc-tip-card-hdr { font-size:.7rem; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .lc-tip-card-body { font-size:.87rem; line-height:1.65; color:var(--text); }
+  .lc-log-section { margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .lc-log-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .lc-log-title { font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+  .lc-log-clear { background:none; border:none; color:var(--muted); font-size:.72rem; cursor:pointer; padding:2px 6px; border-radius:4px; }
+  .lc-log-clear:hover { color:var(--red); }
+  .lc-log-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+  .lc-log-table th { color:var(--muted); font-weight:600; text-align:left; padding:4px 6px; border-bottom:1px solid var(--border); font-size:.72rem; text-transform:uppercase; letter-spacing:.5px; }
+  .lc-log-table td { padding:6px 6px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+  .lc-log-table tr:last-child td { border-bottom:none; }
+  .lc-pattern-tag { background:var(--card2); border:1px solid var(--blue); border-radius:20px; padding:2px 8px; font-size:.72rem; color:var(--blue); white-space:nowrap; }
+
+  /* ESL specific */
+  .esl-reading-wrap { margin-bottom:14px; }
+  .esl-reading-wrap label { font-size:.72rem; color:var(--muted); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:1px; }
+  .esl-reading-wrap input { width:100%; background:var(--card); border:1px solid var(--border); color:var(--text); padding:10px 14px; border-radius:8px; font-size:.88rem; outline:none; transition:border .2s; }
+  .esl-reading-wrap input:focus { border-color:var(--green); }
+  .esl-vocab-panel { margin-top:16px; background:var(--card); border:1px solid var(--green); border-radius:12px; padding:16px 18px; }
+  .esl-vocab-panel-hdr { font-size:.7rem; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .esl-log-row { display:flex; gap:8px; margin-bottom:8px; }
+  .esl-log-row input { flex:1; background:var(--card2); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; font-size:.85rem; outline:none; transition:border .2s; }
+  .esl-log-row input:focus { border-color:var(--green); }
+  .esl-log-btn { background:var(--green); color:#000; border:none; padding:8px 14px; border-radius:8px; font-weight:700; font-size:.82rem; cursor:pointer; white-space:nowrap; }
+  .esl-log-btn:hover { opacity:.85; }
+  .esl-saved-section { margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .esl-saved-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:6px; }
+  .esl-saved-title { font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+  .esl-saved-actions { display:flex; gap:8px; }
+  .vocab-clear-btn { background:none; border:none; color:var(--muted); font-size:.72rem; cursor:pointer; padding:2px 6px; border-radius:4px; }
+  .vocab-clear-btn:hover { color:var(--red); }
+  .vocab-export-btn { background:none; border:1px solid var(--border); color:var(--muted); font-size:.72rem; cursor:pointer; padding:3px 8px; border-radius:4px; }
+  .vocab-export-btn:hover { border-color:var(--green); color:var(--green); }
+  .vocab-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+  .vocab-table th { color:var(--muted); font-weight:600; text-align:left; padding:4px 6px; border-bottom:1px solid var(--border); font-size:.72rem; text-transform:uppercase; letter-spacing:.5px; }
+  .vocab-table td { padding:6px 6px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+  .vocab-table tr:last-child td { border-bottom:none; }
+  .vocab-source-tag { font-size:.72rem; color:var(--muted); font-style:italic; }
+  .vocab-empty { font-size:.82rem; color:var(--muted); }
+  .esl-checkin-panel { margin-top:16px; background:var(--card2); border:2px solid var(--yellow); border-radius:12px; padding:18px; }
+  .esl-checkin-hdr { font-size:.7rem; font-weight:700; color:var(--yellow); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .esl-checkin-q { font-size:.9rem; font-weight:600; margin-bottom:10px; }
+  .esl-checkin-ta { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:8px; font-size:.86rem; resize:vertical; min-height:70px; outline:none; transition:border .2s; font-family:inherit; }
+  .esl-checkin-ta:focus { border-color:var(--yellow); }
+  .esl-checkin-save { margin-top:8px; background:var(--yellow); color:#000; border:none; padding:8px 18px; border-radius:8px; font-weight:700; font-size:.82rem; cursor:pointer; }
+  .esl-checkin-save:hover { opacity:.85; }
+  .esl-checkin-skip { margin-left:8px; background:none; border:none; color:var(--muted); font-size:.8rem; cursor:pointer; }
+  .esl-checkin-skip:hover { color:var(--text); }
+
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .timer-display { font-size: 2.5rem; }
+    .timer-ring-wrap svg { width: 200px; height: 200px; }
+    .add-task-form { flex-wrap: wrap; }
+    .add-task-form input[type="number"] { flex: 0 0 60px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Pomodoro Focus Timer</h1>
+  <p>Agent #61 &bull; 100 AI Agents Challenge</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('timer')">Timer</button>
+  <button class="tab-btn" onclick="switchTab('tasks')">Tasks</button>
+  <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
+  <button class="tab-btn" onclick="switchTab('stats')">Stats</button>
+</div>
+
+<!-- TIMER TAB -->
+<div class="tab-content active" id="tab-timer">
+  <div class="mode-btns">
+    <button class="mode-btn active pomodoro" onclick="setMode('pomodoro')">Pomodoro</button>
+    <button class="mode-btn short" onclick="setMode('short')">Short Break</button>
+    <button class="mode-btn long" onclick="setMode('long')">Long Break</button>
+  </div>
+  <div class="session-mode-row">
+    <span class="session-mode-label">Session:</span>
+    <button class="session-mode-btn active" data-sm="standard" onclick="setSessionMode('standard')">Standard</button>
+    <button class="session-mode-btn" data-sm="leetcode" onclick="setSessionMode('leetcode')">💻 LeetCode</button>
+    <button class="session-mode-btn" data-sm="esl" onclick="setSessionMode('esl')">📖 ESL Reading</button>
+  </div>
+
+  <div class="timer-ring-wrap">
+    <svg viewBox="0 0 240 240">
+      <circle class="ring-bg" cx="120" cy="120" r="108"/>
+      <circle class="ring-fg" id="ring" cx="120" cy="120" r="108"/>
+    </svg>
+    <div class="timer-text">
+      <div class="timer-display" id="timer-display">25:00</div>
+      <div class="timer-label" id="timer-mode-label">Focus</div>
+    </div>
+  </div>
+
+  <!-- ESL: "What are you reading?" -->
+  <div class="esl-reading-wrap" id="esl-reading-wrap" style="display:none">
+    <label>📖 What are you reading?</label>
+    <input type="text" id="esl-reading-input" placeholder="Article title, textbook, news…" oninput="saveEslReading()">
+  </div>
+
+  <div class="task-input-wrap">
+    <label id="current-task-label">Current Task</label>
+    <input type="text" id="current-task" placeholder="What are you working on?" oninput="saveCurrentTask()">
+  </div>
+
+  <!-- LC: problem + pattern dropdown -->
+  <div class="lc-fields" id="lc-fields" style="display:none">
+    <div class="lc-field">
+      <label>Problem Name / Number</label>
+      <input type="text" id="lc-problem-input" placeholder="e.g. Two Sum, #1, Longest Substring…">
+    </div>
+    <div class="lc-field">
+      <label>Algorithm Pattern</label>
+      <select id="lc-pattern-select">
+        <option value="">— Select a pattern —</option>
+        <option>Arrays</option>
+        <option>Strings</option>
+        <option>Trees</option>
+        <option>Graphs</option>
+        <option>DP</option>
+        <option>Binary Search</option>
+        <option>Two Pointers</option>
+        <option>Sliding Window</option>
+        <option>Stack</option>
+        <option>Heap</option>
+        <option>Backtracking</option>
+        <option>Math</option>
+        <option>Greedy</option>
+        <option>Linked List</option>
+        <option>Other</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="ctrl-btns">
+    <button class="ctrl-btn start" id="start-btn" onclick="toggleTimer()">Start</button>
+    <button class="ctrl-btn reset" onclick="resetTimer()">Reset</button>
+  </div>
+
+  <div class="session-count">
+    <div id="session-label">Session 1 of 4 until long break</div>
+    <div class="session-dots" id="session-dots"></div>
+  </div>
+
+  <!-- LeetCode: pattern tip shown during break -->
+  <div class="lc-tip-card" id="lc-tip-card" style="display:none">
+    <div class="lc-tip-card-hdr">💡 Pattern Tip — Review While You Rest</div>
+    <div class="lc-tip-card-body" id="lc-tip-text"></div>
+  </div>
+
+  <!-- LeetCode: session log -->
+  <div class="lc-log-section" id="lc-log-section" style="display:none">
+    <div class="lc-log-hdr">
+      <span class="lc-log-title">📋 Session Log (<span id="lc-log-count">0</span>)</span>
+      <button class="lc-log-clear" onclick="clearLcLog()">Clear</button>
+    </div>
+    <div id="lc-log-body"><span class="vocab-empty">No sessions yet — complete a pomodoro to log.</span></div>
+  </div>
+
+  <!-- ESL: vocab log prompt shown during break -->
+  <div class="esl-vocab-panel" id="esl-vocab-panel" style="display:none">
+    <div class="esl-vocab-panel-hdr">📖 Log New Vocabulary</div>
+    <div class="esl-log-row">
+      <input type="text" id="esl-vocab-input" placeholder="Word or phrase you encountered…" onkeydown="if(event.key==='Enter')logVocab()">
+      <button class="esl-log-btn" onclick="logVocab()">Log</button>
+    </div>
+    <div id="esl-break-recent" style="font-size:.78rem;color:var(--muted)"></div>
+  </div>
+
+  <!-- ESL: saved vocab list always visible in ESL mode -->
+  <div class="esl-saved-section" id="esl-saved-section" style="display:none">
+    <div class="esl-saved-hdr">
+      <span class="esl-saved-title">📚 My Vocabulary (<span id="esl-vocab-count">0</span>)</span>
+      <div class="esl-saved-actions">
+        <button class="vocab-export-btn" onclick="exportVocabCSV()">⬇ CSV</button>
+        <button class="vocab-clear-btn" onclick="clearVocab()">Clear All</button>
+      </div>
+    </div>
+    <div id="esl-vocab-saved-list"><span class="vocab-empty">No words logged yet — log during breaks!</span></div>
+  </div>
+
+  <!-- ESL: check-in after full cycle -->
+  <div class="esl-checkin-panel" id="esl-checkin-panel" style="display:none">
+    <div class="esl-checkin-hdr">🎯 Full Cycle Check-In</div>
+    <div class="esl-checkin-q" id="esl-checkin-q">What was this reading about?</div>
+    <textarea class="esl-checkin-ta" id="esl-checkin-ta" placeholder="Summarise in your own words…"></textarea>
+    <div>
+      <button class="esl-checkin-save" onclick="saveCheckin()">Save Note</button>
+      <button class="esl-checkin-skip" onclick="skipCheckin()">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- TASKS TAB -->
+<div class="tab-content" id="tab-tasks">
+  <div class="add-task-form">
+    <input type="text" id="new-task-name" placeholder="Task name..." onkeydown="if(event.key==='Enter')addTask()">
+    <input type="number" id="new-task-est" placeholder="Est" min="1" max="20" value="1">
+    <button onclick="addTask()">+ Add</button>
+  </div>
+  <div class="task-list" id="task-list"></div>
+</div>
+
+<!-- SETTINGS TAB -->
+<div class="tab-content" id="tab-settings">
+  <div class="settings-section">
+    <h3>Timer Durations</h3>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Pomodoro</div>
+        <div class="setting-sub">Focus session length</div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="set-pomo" min="5" max="60" step="5" oninput="updateSetting('pomo',this.value)">
+        <span class="slider-val" id="val-pomo">25</span><span style="color:var(--muted);font-size:.8rem">min</span>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Short Break</div>
+        <div class="setting-sub">Break between pomodoros</div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="set-short" min="1" max="15" step="1" oninput="updateSetting('short',this.value)">
+        <span class="slider-val" id="val-short">5</span><span style="color:var(--muted);font-size:.8rem">min</span>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Long Break</div>
+        <div class="setting-sub">Break after a full set</div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="set-long" min="5" max="40" step="5" oninput="updateSetting('long',this.value)">
+        <span class="slider-val" id="val-long">15</span><span style="color:var(--muted);font-size:.8rem">min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h3>Behavior</h3>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Long Break After</div>
+        <div class="setting-sub">Pomodoros before long break</div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="set-cycle" min="2" max="8" step="1" oninput="updateSetting('cycle',this.value)">
+        <span class="slider-val" id="val-cycle">4</span><span style="color:var(--muted);font-size:.8rem">pomos</span>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Auto-start Next</div>
+        <div class="setting-sub">Automatically start next timer</div>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="set-autostart" onchange="updateSetting('autostart', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Sound Alerts</div>
+        <div class="setting-sub">Play a sound when timer ends</div>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="set-sound" checked onchange="updateSetting('sound', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- STATS TAB -->
+<div class="tab-content" id="tab-stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-val blue" id="stat-today">0</div>
+      <div class="stat-lbl">Pomodoros Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val green" id="stat-week">0</div>
+      <div class="stat-lbl">This Week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val yellow" id="stat-time">0h</div>
+      <div class="stat-lbl">Focus Time Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val red" id="stat-streak">0</div>
+      <div class="stat-lbl">Day Streak</div>
+    </div>
+  </div>
+  <div class="week-chart">
+    <h3>This Week</h3>
+    <div class="bars" id="week-bars"></div>
+  </div>
+  <div class="stats-grid" style="margin-top:12px">
+    <div class="stat-card">
+      <div class="stat-val blue" id="stat-total">0</div>
+      <div class="stat-lbl">Total Pomodoros</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val green" id="stat-best">0</div>
+      <div class="stat-lbl">Best Day</div>
+    </div>
+  </div>
+  <div class="stats-reset"><button onclick="confirmResetStats()">Reset All Stats</button></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const S = key => localStorage.getItem('pomo61_' + key);
+const W = (key, val) => localStorage.setItem('pomo61_' + key, typeof val === 'object' ? JSON.stringify(val) : val);
+const J = key => { try { return JSON.parse(S(key)); } catch { return null; } };
+
+// Settings
+let settings = J('settings') || { pomo: 25, short: 5, long: 15, cycle: 4, autostart: false, sound: true };
+let tasks = J('tasks') || [];
+let stats = J('stats') || {};
+
+// Timer state
+let mode = 'pomodoro';
+let timeLeft = 0;
+let totalTime = 0;
+let running = false;
+let interval = null;
+let sessionCount = 0;
+let activeTaskId = null;
+
+const CIRCUMFERENCE = 2 * Math.PI * 108;
+
+function init() {
+  document.getElementById('set-pomo').value = settings.pomo;
+  document.getElementById('val-pomo').textContent = settings.pomo;
+  document.getElementById('set-short').value = settings.short;
+  document.getElementById('val-short').textContent = settings.short;
+  document.getElementById('set-long').value = settings.long;
+  document.getElementById('val-long').textContent = settings.long;
+  document.getElementById('set-cycle').value = settings.cycle;
+  document.getElementById('val-cycle').textContent = settings.cycle;
+  document.getElementById('set-autostart').checked = settings.autostart;
+  document.getElementById('set-sound').checked = settings.sound;
+
+  document.getElementById('current-task').value = S('currentTask') || '';
+
+  const ring = document.getElementById('ring');
+  ring.style.strokeDasharray = CIRCUMFERENCE;
+  setMode('pomodoro', false);
+  sessionCount = parseInt(S('sessionCount') || '0');
+  renderSessionDots();
+  renderTasks();
+  renderStats();
+  requestNotifPermission();
+
+  // Restore session mode
+  const sm = S('sessionMode') || 'standard';
+  setSessionMode(sm, true);
+}
+
+function requestNotifPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  if (tab === 'stats') renderStats();
+}
+
+function setMode(m, userInit = true) {
+  if (running && userInit) { resetTimer(); }
+  mode = m;
+  const mins = m === 'pomodoro' ? settings.pomo : m === 'short' ? settings.short : settings.long;
+  totalTime = mins * 60;
+  timeLeft = totalTime;
+
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  const idx = ['pomodoro', 'short', 'long'].indexOf(m);
+  document.querySelectorAll('.mode-btn')[idx].classList.add('active');
+
+  const labels = { pomodoro: 'Focus', short: 'Short Break', long: 'Long Break' };
+  document.getElementById('timer-mode-label').textContent = labels[m];
+
+  const colors = { pomodoro: '#4f8ef7', short: '#4ade80', long: '#fbbf24' };
+  document.getElementById('ring').style.stroke = colors[m];
+
+  updateDisplay();
+  running = false;
+  clearInterval(interval);
+  document.getElementById('start-btn').textContent = 'Start';
+  document.getElementById('start-btn').className = 'ctrl-btn start';
+}
+
+function updateDisplay() {
+  const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+  const s = (timeLeft % 60).toString().padStart(2, '0');
+  document.getElementById('timer-display').textContent = `${m}:${s}`;
+  document.title = `${m}:${s} - Pomodoro #61`;
+
+  const progress = totalTime > 0 ? timeLeft / totalTime : 1;
+  document.getElementById('ring').style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
+}
+
+function toggleTimer() {
+  if (running) {
+    running = false;
+    clearInterval(interval);
+    document.getElementById('start-btn').textContent = 'Resume';
+    document.getElementById('start-btn').className = 'ctrl-btn pause';
+  } else {
+    running = true;
+    document.getElementById('start-btn').textContent = 'Pause';
+    document.getElementById('start-btn').className = 'ctrl-btn pause';
+    interval = setInterval(tick, 1000);
+  }
+}
+
+function tick() {
+  if (timeLeft <= 0) {
+    clearInterval(interval);
+    running = false;
+    onTimerEnd();
+    return;
+  }
+  timeLeft--;
+  updateDisplay();
+}
+
+function resetTimer() {
+  clearInterval(interval);
+  running = false;
+  const mins = mode === 'pomodoro' ? settings.pomo : mode === 'short' ? settings.short : settings.long;
+  totalTime = mins * 60;
+  timeLeft = totalTime;
+  document.getElementById('start-btn').textContent = 'Start';
+  document.getElementById('start-btn').className = 'ctrl-btn start';
+  updateDisplay();
+}
+
+// ── SESSION MODES ──────────────────────────────────────────────
+let sessionMode = 'standard';
+let eslVocab = J('eslVocab') || [];
+let lcLogs = J('lcLogs') || [];
+
+const PATTERN_TIPS = {
+  'Arrays': 'Master in-place transformations: prefix sums, difference arrays, sorting + greedy. Two-pointer on sorted arrays beats nested loops — O(n) vs O(n²). Watch for off-by-one on indices.',
+  'Strings': 'Treat as char arrays. Use Map/object for frequency counting. Sliding window for substrings. String slicing is O(k) — avoid repeated slices inside a loop; build with array.join() instead.',
+  'Trees': 'Always think preorder / inorder / postorder. Recursion is natural — trust the recursive definition. For BST: inorder traversal gives sorted order. For balanced check: return height from leaves.',
+  'Graphs': 'BFS for shortest path (unweighted), DFS for components/cycles. Represent as adjacency list for O(V+E). Always track visited[] to avoid infinite loops. Topological sort needs cycle detection.',
+  'DP': 'Start with brute-force recursion → add memoization (top-down) → optimize to table (bottom-up). Define state clearly: dp[i] means…? Reduce space by rolling array when only previous row is needed.',
+  'Binary Search': 'Works on ANY monotonic predicate, not just sorted arrays. Template: lo=0, hi=n-1, while lo<hi: mid=(lo+hi)//2, decide which half to drop. For floats, iterate a fixed number of times.',
+  'Two Pointers': 'Use when searching a pair in a sorted array or detecting cycles. Move pointers based on conditions — O(n) time, O(1) space. For 3-sum: fix one element, two-pointer the rest.',
+  'Sliding Window': 'For contiguous subarray/substring problems. Expand right pointer, shrink left when constraint violated. Fixed window: advance both simultaneously. Variable window: shrink until valid again.',
+  'Stack': 'LIFO for bracket matching, undo history, iterative DFS. Monotonic stack: pop when invariant breaks — next greater element, largest histogram rectangle, trapping rain water.',
+  'Heap': 'Min-heap for k-th largest (keep k elements — pop when size > k). Median: max-heap left + min-heap right, balance sizes on each insert. Python: heapq uses min-heap; negate values for max-heap.',
+  'Backtracking': 'Template: choose → explore → unchoose. Prune early with constraints before recursing deeper. Classic uses: permutations, combinations, subsets, N-Queens, Sudoku. State space can be O(2^n).',
+  'Math': 'GCD via Euclidean algorithm (O(log min)). Modular arithmetic: (a*b)%m = ((a%m)*(b%m))%m. Bit tricks: x&(x-1) removes lowest set bit; x&(-x) isolates it. Sieve of Eratosthenes for primes to N.',
+  'Greedy': 'Greedy works when local optimal = global optimal. Prove correctness by exchange argument. Strategy: sort first, then make the locally best choice at each step. Pitfall: greedy fails for 0/1 knapsack.',
+  'Linked List': 'Dummy head node simplifies edge cases (empty list, single node). Cycle detection: fast/slow pointers — they meet inside cycle. Reversal: prev=null, curr=head, reassign next step by step.',
+  'Other': 'Break the problem into smaller sub-problems. Draw examples on paper. Check edge cases: empty input, single element, all duplicates. Think about time/space trade-offs before coding.',
+};
+
+function setSessionMode(m, silent = false) {
+  sessionMode = m;
+  W('sessionMode', m);
+  document.querySelectorAll('.session-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.sm === m));
+
+  document.getElementById('lc-fields').style.display        = m === 'leetcode' ? 'flex' : 'none';
+  document.getElementById('lc-log-section').style.display   = m === 'leetcode' ? 'block' : 'none';
+  document.getElementById('esl-reading-wrap').style.display = m === 'esl'      ? 'block' : 'none';
+  document.getElementById('esl-saved-section').style.display= m === 'esl'      ? 'block' : 'none';
+  document.getElementById('lc-tip-card').style.display      = 'none';
+  document.getElementById('esl-vocab-panel').style.display  = 'none';
+  document.getElementById('esl-checkin-panel').style.display= 'none';
+
+  if (m === 'esl') {
+    document.getElementById('current-task-label').textContent = 'Current Focus';
+    document.getElementById('esl-reading-input').value = S('eslReading') || '';
+    renderVocabList();
+  } else {
+    document.getElementById('current-task-label').textContent = 'Current Task';
+  }
+
+  if (m === 'leetcode') renderLcLog();
+
+  if (!silent) showToast(m === 'leetcode' ? '💻 LeetCode Session active' : m === 'esl' ? '📖 ESL Reading Session active' : 'Standard mode active');
+}
+
+function saveEslReading() {
+  W('eslReading', document.getElementById('esl-reading-input').value);
+}
+
+// LeetCode ────────────────────────────────────────────────────
+function showPatternTip() {
+  const sel = document.getElementById('lc-pattern-select').value;
+  const key = sel && PATTERN_TIPS[sel] ? sel : Object.keys(PATTERN_TIPS)[Math.floor(Math.random() * Object.keys(PATTERN_TIPS).length)];
+  const tip = PATTERN_TIPS[key];
+  document.getElementById('lc-tip-text').innerHTML =
+    `<strong style="color:var(--blue)">${key}:</strong> ${tip}`;
+  document.getElementById('lc-tip-card').style.display = 'block';
+}
+
+function recordLcSession() {
+  const problem = document.getElementById('lc-problem-input').value.trim();
+  const pattern = document.getElementById('lc-pattern-select').value;
+  if (!problem && !pattern) return;
+  lcLogs.unshift({ problem: problem || '—', pattern: pattern || 'Other', date: todayStr(), time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+  if (lcLogs.length > 50) lcLogs.pop();
+  W('lcLogs', lcLogs);
+  renderLcLog();
+}
+
+function renderLcLog() {
+  const el = document.getElementById('lc-log-body');
+  document.getElementById('lc-log-count').textContent = lcLogs.length;
+  if (!lcLogs.length) {
+    el.innerHTML = '<span class="vocab-empty">No sessions yet — complete a pomodoro to log.</span>';
+    return;
+  }
+  el.innerHTML = `<table class="lc-log-table">
+    <thead><tr><th>Problem</th><th>Pattern</th><th>Date</th></tr></thead>
+    <tbody>${lcLogs.map(l => `<tr>
+      <td>${escHtml(l.problem)}</td>
+      <td><span class="lc-pattern-tag">${escHtml(l.pattern)}</span></td>
+      <td style="color:var(--muted);font-size:.75rem">${l.date}<br>${l.time}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function clearLcLog() {
+  if (!lcLogs.length || !confirm('Clear session log?')) return;
+  lcLogs = []; W('lcLogs', lcLogs); renderLcLog();
+}
+
+// ESL ─────────────────────────────────────────────────────────
+function showEslVocabPrompt() {
+  document.getElementById('esl-vocab-panel').style.display = 'block';
+  document.getElementById('esl-vocab-input').value = '';
+  document.getElementById('esl-break-recent').textContent = '';
+  setTimeout(() => document.getElementById('esl-vocab-input').focus(), 200);
+}
+
+function logVocab() {
+  const word = document.getElementById('esl-vocab-input').value.trim();
+  if (!word) return;
+  const source = document.getElementById('esl-reading-input') ? document.getElementById('esl-reading-input').value.trim() : '';
+  eslVocab.unshift({ word, date: todayStr(), source });
+  W('eslVocab', eslVocab);
+  document.getElementById('esl-vocab-input').value = '';
+  document.getElementById('esl-break-recent').textContent =
+    `✓ Logged "${word}" · ${eslVocab.length} word${eslVocab.length !== 1 ? 's' : ''} total`;
+  renderVocabList();
+}
+
+function renderVocabList() {
+  const el = document.getElementById('esl-vocab-saved-list');
+  document.getElementById('esl-vocab-count').textContent = eslVocab.length;
+  if (!eslVocab.length) {
+    el.innerHTML = '<span class="vocab-empty">No words logged yet — log during breaks!</span>';
+    return;
+  }
+  el.innerHTML = `<table class="vocab-table">
+    <thead><tr><th>Word / Phrase</th><th>Source</th><th>Date</th></tr></thead>
+    <tbody>${eslVocab.map(v => `<tr>
+      <td><strong>${escHtml(v.word)}</strong></td>
+      <td><span class="vocab-source-tag">${v.source ? escHtml(v.source) : '—'}</span></td>
+      <td style="color:var(--muted);font-size:.75rem">${v.date}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function clearVocab() {
+  if (!eslVocab.length || !confirm('Clear all saved vocabulary?')) return;
+  eslVocab = []; W('eslVocab', eslVocab); renderVocabList();
+}
+
+function exportVocabCSV() {
+  if (!eslVocab.length) { showToast('No vocabulary to export.'); return; }
+  const rows = [['Word/Phrase', 'Source', 'Date'], ...eslVocab.map(v => [v.word, v.source || '', v.date])];
+  const csv = rows.map(r => r.map(c => '"' + c.replace(/"/g, '""') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'esl_vocab_' + todayStr() + '.csv';
+  a.click();
+  showToast('Vocabulary exported!');
+}
+
+// ESL Check-in ─────────────────────────────────────────────────
+function showEslCheckin() {
+  const reading = (S('eslReading') || '').trim();
+  const q = reading ? `What was "${reading}" about?` : 'What was this reading about?';
+  document.getElementById('esl-checkin-q').textContent = q;
+  document.getElementById('esl-checkin-ta').value = '';
+  document.getElementById('esl-checkin-panel').style.display = 'block';
+}
+
+function saveCheckin() {
+  const note = document.getElementById('esl-checkin-ta').value.trim();
+  const reading = (S('eslReading') || '—').trim();
+  if (note) {
+    const notes = J('eslNotes') || [];
+    notes.unshift({ reading, note, date: todayStr() });
+    if (notes.length > 20) notes.pop();
+    W('eslNotes', notes);
+    showToast('Reading note saved!');
+  }
+  document.getElementById('esl-checkin-panel').style.display = 'none';
+}
+
+function skipCheckin() {
+  document.getElementById('esl-checkin-panel').style.display = 'none';
+}
+
+// Timer end ────────────────────────────────────────────────────
+function onTimerEnd() {
+  playSound();
+  document.getElementById('start-btn').textContent = 'Start';
+  document.getElementById('start-btn').className = 'ctrl-btn start';
+
+  if (mode === 'pomodoro') {
+    sessionCount++;
+    W('sessionCount', sessionCount);
+    recordPomodoro();
+    renderSessionDots();
+    showToast('Pomodoro complete! Take a break.');
+    sendNotification('Pomodoro Complete!', 'Great work! Time for a break.');
+
+    // Session mode actions
+    if (sessionMode === 'leetcode') {
+      recordLcSession();
+      showPatternTip();
+    } else if (sessionMode === 'esl') {
+      showEslVocabPrompt();
+    }
+
+    if (sessionCount >= settings.cycle) {
+      sessionCount = 0; W('sessionCount', 0);
+      // ESL full-cycle check-in
+      if (sessionMode === 'esl') setTimeout(showEslCheckin, 500);
+      if (settings.autostart) { setMode('long'); setTimeout(toggleTimer, 800); }
+      else setMode('long');
+    } else {
+      if (settings.autostart) { setMode('short'); setTimeout(toggleTimer, 800); }
+      else setMode('short');
+    }
+  } else {
+    // Break ended
+    document.getElementById('lc-tip-card').style.display     = 'none';
+    document.getElementById('esl-vocab-panel').style.display = 'none';
+    showToast('Break over! Time to focus.');
+    sendNotification('Break Over!', 'Ready to focus again?');
+    if (settings.autostart) { setMode('pomodoro'); setTimeout(toggleTimer, 800); }
+    else setMode('pomodoro');
+  }
+}
+
+function recordPomodoro() {
+  const today = todayStr();
+  if (!stats[today]) stats[today] = 0;
+  stats[today]++;
+  W('stats', stats);
+
+  if (activeTaskId !== null) {
+    const task = tasks.find(t => t.id === activeTaskId);
+    if (task && !task.done) {
+      task.actual = (task.actual || 0) + 1;
+      W('tasks', tasks);
+      renderTasks();
+    }
+  }
+}
+
+function playSound() {
+  if (!settings.sound) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.15, 0.3].forEach((delay, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = [880, 660, 440][i];
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.4);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.4);
+    });
+  } catch(e) {}
+}
+
+function sendNotification(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body, icon: '' });
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function saveCurrentTask() {
+  W('currentTask', document.getElementById('current-task').value);
+}
+
+function renderSessionDots() {
+  const cycle = settings.cycle;
+  const dots = document.getElementById('session-dots');
+  dots.innerHTML = '';
+  for (let i = 0; i < cycle; i++) {
+    const d = document.createElement('div');
+    d.className = 'session-dot' + (i < sessionCount ? ' done' : '');
+    dots.appendChild(d);
+  }
+  document.getElementById('session-label').textContent =
+    `Session ${Math.min(sessionCount + 1, cycle)} of ${cycle} until long break`;
+}
+
+// TASKS ────────────────────────────────────────────────────────
+function addTask() {
+  const name = document.getElementById('new-task-name').value.trim();
+  const est = parseInt(document.getElementById('new-task-est').value) || 1;
+  if (!name) return;
+  tasks.push({ id: Date.now(), name, est, actual: 0, done: false });
+  W('tasks', tasks);
+  document.getElementById('new-task-name').value = '';
+  document.getElementById('new-task-est').value = 1;
+  renderTasks();
+}
+
+function renderTasks() {
+  const list = document.getElementById('task-list');
+  if (tasks.length === 0) {
+    list.innerHTML = '<div class="empty-state">No tasks yet. Add one above!</div>';
+    return;
+  }
+  list.innerHTML = tasks.map(t => `
+    <div class="task-item ${t.done ? 'done' : ''} ${t.id === activeTaskId ? 'active-task' : ''}">
+      <div class="task-check ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})"></div>
+      <div class="task-info">
+        <div class="task-name">${escHtml(t.name)}</div>
+        <div class="task-progress">${t.actual || 0} / ${t.est} pomodoro${t.est !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="task-actions">
+        <button class="task-act-btn select" onclick="selectTask(${t.id})" title="Focus on this task">▶</button>
+        <button class="task-act-btn del" onclick="deleteTask(${t.id})" title="Delete">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (t) { t.done = !t.done; W('tasks', tasks); renderTasks(); }
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(x => x.id !== id);
+  if (activeTaskId === id) activeTaskId = null;
+  W('tasks', tasks);
+  renderTasks();
+}
+
+function selectTask(id) {
+  activeTaskId = id;
+  const t = tasks.find(x => x.id === id);
+  if (t) {
+    document.getElementById('current-task').value = t.name;
+    W('currentTask', t.name);
+    switchTabDirect('timer');
+    showToast(`Focusing on: ${t.name}`);
+  }
+}
+
+function switchTabDirect(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.tab-btn')[0].classList.add('active');
+}
+
+// SETTINGS ─────────────────────────────────────────────────────
+function updateSetting(key, val) {
+  if (key === 'autostart') settings.autostart = val;
+  else if (key === 'sound') settings.sound = val;
+  else {
+    settings[key] = parseInt(val);
+    document.getElementById('val-' + key).textContent = val;
+  }
+  W('settings', settings);
+  if ((key === 'pomo' && mode === 'pomodoro') || (key === 'short' && mode === 'short') || (key === 'long' && mode === 'long')) {
+    if (!running) resetTimer();
+  }
+  if (key === 'cycle') renderSessionDots();
+}
+
+// STATS ────────────────────────────────────────────────────────
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+function getWeekDays() {
+  const days = [];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  return days;
+}
+
+function renderStats() {
+  const today = todayStr();
+  const todayCount = stats[today] || 0;
+  const weekDays = getWeekDays();
+  const weekCount = weekDays.reduce((s, d) => s + (stats[d] || 0), 0);
+  const focusMins = todayCount * settings.pomo;
+  const hours = Math.floor(focusMins / 60);
+  const mins = focusMins % 60;
+
+  document.getElementById('stat-today').textContent = todayCount;
+  document.getElementById('stat-week').textContent = weekCount;
+  document.getElementById('stat-time').textContent = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+
+  let streak = 0, d = new Date();
+  while (true) {
+    const ds = d.toISOString().slice(0, 10);
+    if (stats[ds] && stats[ds] > 0) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+  document.getElementById('stat-streak').textContent = streak;
+
+  const allVals = Object.values(stats);
+  const total = allVals.reduce((a, b) => a + b, 0);
+  const best = allVals.length > 0 ? Math.max(...allVals) : 0;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-best').textContent = best;
+
+  const maxVal = Math.max(...weekDays.map(d => stats[d] || 0), 1);
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const barsEl = document.getElementById('week-bars');
+  barsEl.innerHTML = weekDays.map(d => {
+    const cnt = stats[d] || 0;
+    const heightPct = Math.round((cnt / maxVal) * 100);
+    const dayName = dayNames[new Date(d + 'T12:00:00').getDay()];
+    const isToday = d === today;
+    return `<div class="bar-col">
+      <span class="bar-num">${cnt > 0 ? cnt : ''}</span>
+      <div class="bar" style="height:${heightPct}%;opacity:${isToday?'1':'0.5'};background:${isToday?'var(--blue)':'var(--muted)'}"></div>
+      <span class="bar-day" style="color:${isToday?'var(--blue)':'var(--muted)'}">${dayName}</span>
+    </div>`;
+  }).join('');
+}
+
+function confirmResetStats() {
+  if (confirm('Reset all stats? This cannot be undone.')) {
+    stats = {};
+    W('stats', stats);
+    renderStats();
+    showToast('Stats reset.');
+  }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init();
+</script>
+</body>
+</html>

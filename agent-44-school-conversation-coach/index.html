@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>School Conversation Coach</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOP BAR */
+.topbar{background:#161b27;border-bottom:1px solid #00ff8833;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:1.5rem}
+.logo-text{font-size:1rem;font-weight:700;color:#00ff88;letter-spacing:.4px}
+.logo-sub{font-size:.7rem;color:#888;margin-top:1px}
+.api-wrap{display:flex;align-items:center;gap:8px}
+.api-wrap label{font-size:.72rem;color:#888;white-space:nowrap}
+.api-wrap input{background:#1e2535;border:1px solid #ffffff22;color:#fff;font-size:.75rem;padding:6px 10px;border-radius:4px;outline:none;width:210px;transition:.2s}
+.api-wrap input:focus{border-color:#00ff88}
+.api-wrap .save-btn{background:transparent;border:1px solid #00ff88;color:#00ff88;font-size:.72rem;padding:6px 12px;border-radius:4px;cursor:pointer;transition:.2s}
+.api-wrap .save-btn:hover{background:#00ff88;color:#0f1117}
+.api-status{font-size:.7rem;padding:3px 8px;border-radius:10px}
+.api-status.ok{color:#00ff88;background:#00ff8820;border:1px solid #00ff8844}
+.api-status.no{color:#888;background:#ffffff10;border:1px solid #ffffff22}
+
+/* LAYOUT */
+.layout{flex:1;display:grid;grid-template-columns:270px 1fr;min-height:0}
+@media(max-width:720px){.layout{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
+
+/* SIDEBAR */
+.sidebar{background:#161b27;border-right:1px solid #ffffff0a;display:flex;flex-direction:column;overflow-y:auto}
+.sb-section{padding:12px 14px;border-bottom:1px solid #ffffff08}
+.sb-title{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:8px}
+
+/* SCENARIO CARDS */
+.scenario-btn{width:100%;text-align:left;background:transparent;border:1px solid #ffffff0f;border-radius:6px;padding:9px 11px;margin-bottom:6px;cursor:pointer;transition:.2s;font-family:inherit}
+.scenario-btn:hover{border-color:#00ff8844;background:#00ff8808}
+.scenario-btn.active{border-color:#00ff88;background:#00ff8815}
+.sc-icon{font-size:1rem;margin-right:6px}
+.sc-name{font-size:.8rem;color:#ccc;font-weight:600}
+.sc-desc{font-size:.68rem;color:#666;margin-top:2px}
+.scenario-btn.active .sc-name{color:#00ff88}
+
+/* SAVED */
+.saved-item{background:#1e2535;border-radius:5px;padding:6px 10px;margin-bottom:5px;cursor:pointer;transition:.2s;font-size:.75rem;color:#888;display:flex;align-items:center;justify-content:space-between}
+.saved-item:hover{background:#00ff8815;color:#00ff88}
+.del-btn{background:transparent;border:none;color:#555;cursor:pointer;font-size:.75rem;padding:0 2px}
+.del-btn:hover{color:#ff4466}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+
+/* MODE TABS */
+.mode-tabs{display:flex;background:#161b27;border-bottom:1px solid #ffffff0a}
+.mode-tab{flex:1;background:transparent;border:none;color:#888;font-size:.78rem;padding:11px 8px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;font-family:inherit}
+.mode-tab:hover{color:#00ff88}
+.mode-tab.active{color:#00ff88;border-bottom-color:#00ff88}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+
+/* BUILDER */
+.builder-card{background:#161b27;border:1px solid #ffffff0f;border-radius:8px;padding:14px}
+.field-label{font-size:.72rem;color:#888;margin-bottom:5px;display:block}
+.field-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+select,input[type=text],textarea{background:#1e2535;border:1px solid #ffffff22;color:#e0e0e0;font-size:.82rem;padding:7px 10px;border-radius:5px;outline:none;font-family:inherit;transition:.2s}
+select:focus,input[type=text]:focus,textarea:focus{border-color:#00ff88}
+select{cursor:pointer}
+textarea{resize:vertical;width:100%;min-height:70px;line-height:1.6}
+.tone-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tone-chip{background:transparent;border:1px solid #ffffff15;color:#888;font-size:.72rem;padding:4px 11px;border-radius:12px;cursor:pointer;transition:.2s}
+.tone-chip:hover{border-color:#00ff88;color:#00ff88}
+.tone-chip.active{background:#00ff8822;border-color:#00ff88;color:#00ff88}
+
+/* BTN */
+.btn{background:transparent;border:1px solid #00ff88;color:#00ff88;font-size:.78rem;padding:8px 18px;border-radius:5px;cursor:pointer;transition:.2s;font-family:inherit;white-space:nowrap}
+.btn:hover:not(:disabled){background:#00ff88;color:#0f1117}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.cyan{border-color:#00d4ff;color:#00d4ff}
+.btn.cyan:hover:not(:disabled){background:#00d4ff;color:#0f1117}
+.btn.amber{border-color:#ffaa00;color:#ffaa00}
+.btn.amber:hover{background:#ffaa00;color:#0f1117}
+.btn.red{border-color:#ff4466;color:#ff4466}
+.btn.red:hover{background:#ff4466;color:#0f1117}
+
+/* SCRIPT OUTPUT */
+.script-card{background:#161b27;border:1px solid #ffffff0f;border-radius:8px;overflow:hidden}
+.script-header{background:#1e2535;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff0a}
+.script-title{font-size:.82rem;font-weight:600;color:#00ff88}
+.script-actions{display:flex;gap:6px}
+.script-body{padding:14px}
+
+/* DIALOGUE */
+.dialogue{display:flex;flex-direction:column;gap:10px}
+.msg-row{display:flex;gap:10px;align-items:flex-start}
+.msg-row.you{flex-direction:row-reverse}
+.msg-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;background:#1e2535;border:1px solid #ffffff15}
+.msg-bubble{background:#1e2535;border-radius:8px;padding:9px 12px;max-width:78%;font-size:.82rem;line-height:1.6;border:1px solid #ffffff0a}
+.msg-row.you .msg-bubble{background:#00ff8815;border-color:#00ff8833}
+.msg-speaker{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;color:#555}
+.msg-row.you .msg-speaker{text-align:right;color:#00ff8888}
+.msg-note{font-size:.72rem;color:#00d4ff;font-style:italic;margin-top:4px}
+
+/* TIPS BOX */
+.tips-box{background:#00d4ff0f;border:1px solid #00d4ff22;border-radius:7px;padding:12px 14px}
+.tips-title{font-size:.72rem;color:#00d4ff;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.tip-item{font-size:.78rem;color:#ccc;padding:3px 0;border-bottom:1px solid #ffffff07;line-height:1.5}
+.tip-item:last-child{border:none}
+.tip-item::before{content:'→ ';color:#00d4ff}
+
+/* VOCAB BOX */
+.vocab-box{background:#ffaa000f;border:1px solid #ffaa0022;border-radius:7px;padding:12px 14px}
+.vocab-title{font-size:.72rem;color:#ffaa00;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.vocab-item{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #ffffff07;font-size:.78rem}
+.vocab-item:last-child{border:none}
+.vocab-word{color:#ffaa00;font-weight:600;min-width:110px}
+.vocab-def{color:#ccc}
+
+/* PRACTICE MODE */
+.practice-turn{background:#1e2535;border-radius:7px;padding:12px;margin-bottom:8px}
+.pt-label{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:6px}
+.pt-prompt{font-size:.85rem;color:#e0e0e0;margin-bottom:10px;line-height:1.55}
+.pt-input{width:100%;background:#0f1117;border:1px solid #ffffff22;color:#e0e0e0;font-size:.82rem;padding:8px 10px;border-radius:5px;outline:none;font-family:inherit;transition:.2s;margin-bottom:7px}
+.pt-input:focus{border-color:#00ff88}
+.pt-feedback{font-size:.78rem;padding:8px 10px;border-radius:5px;display:none;line-height:1.5}
+.pt-feedback.show{display:block}
+.pt-feedback.good{background:#00ff8818;border:1px solid #00ff8844;color:#00ff88}
+.pt-feedback.ok{background:#ffaa0018;border:1px solid #ffaa0044;color:#ffaa00}
+.pt-feedback.try{background:#00d4ff18;border:1px solid #00d4ff44;color:#00d4ff}
+.progress-dots{display:flex;gap:5px;margin-bottom:10px}
+.dot{width:8px;height:8px;border-radius:50%;background:#1e2535;border:1px solid #ffffff22;transition:.3s}
+.dot.done{background:#00ff88;border-color:#00ff88}
+.dot.current{border-color:#00ff88;background:#00ff8833}
+
+/* PHRASEBOOK */
+.phrase-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.phrase-card{background:#1e2535;border:1px solid #ffffff0f;border-radius:6px;padding:10px 12px;cursor:pointer;transition:.2s;border-left:3px solid transparent}
+.phrase-card:hover{border-left-color:#00ff88;background:#00ff8808}
+.phrase-situation{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:4px}
+.phrase-text{font-size:.82rem;color:#ccc;line-height:1.5;margin-bottom:5px}
+.phrase-note{font-size:.7rem;color:#888;font-style:italic}
+
+/* LOADING */
+.loading{text-align:center;padding:30px;color:#555}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid #ffffff15;border-top-color:#00ff88;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ALERT */
+.alert{padding:9px 12px;border-radius:5px;font-size:.78rem}
+.alert.error{background:#ff446620;border:1px solid #ff446655;color:#ff4466}
+.alert.info{background:#00d4ff15;border:1px solid #00d4ff33;color:#00d4ff}
+
+/* WELCOME */
+.welcome{text-align:center;padding:40px 20px;max-width:520px;margin:0 auto}
+.welcome-emoji{font-size:3rem;margin-bottom:12px}
+.welcome h2{font-size:1rem;color:#00ff88;margin-bottom:8px}
+.welcome p{font-size:.82rem;color:#888;line-height:1.7}
+.quick-starts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.qs-btn{background:#1e2535;border:1px solid #ffffff15;color:#aaa;font-size:.75rem;padding:7px 14px;border-radius:14px;cursor:pointer;transition:.2s}
+.qs-btn:hover{border-color:#00ff88;color:#00ff88;background:#00ff8808}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:#0f1117}
+::-webkit-scrollbar-thumb{background:#ffffff18;border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-icon">🏫</span>
+    <div>
+      <div class="logo-text">School Conversation Coach</div>
+      <div class="logo-sub">Scripts &amp; practice for talking to friends, teachers &amp; teammates</div>
+    </div>
+  </div>
+  <div class="api-wrap">
+    <label>Gemini API Key</label>
+    <input type="password" id="api-key" placeholder="AIza…" autocomplete="off"/>
+    <button class="save-btn" onclick="saveKey()">Save</button>
+    <span class="api-status no" id="api-status">No key</span>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-title">Situations</div>
+
+      <button class="scenario-btn active" data-id="make-friends" onclick="pickScenario(this)">
+        <span class="sc-icon">👋</span><span class="sc-name">Making Friends</span>
+        <div class="sc-desc">Starting conversations, joining a group</div>
+      </button>
+      <button class="scenario-btn" data-id="ask-teacher" onclick="pickScenario(this)">
+        <span class="sc-icon">🙋</span><span class="sc-name">Talking to a Teacher</span>
+        <div class="sc-desc">Asking for help, extensions, office hours</div>
+      </button>
+      <button class="scenario-btn" data-id="group-project" onclick="pickScenario(this)">
+        <span class="sc-icon">🤝</span><span class="sc-name">Group Project</span>
+        <div class="sc-desc">Assigning roles, giving opinions, disagreeing</div>
+      </button>
+      <button class="scenario-btn" data-id="lunch-table" onclick="pickScenario(this)">
+        <span class="sc-icon">🍱</span><span class="sc-name">Lunch & Hangouts</span>
+        <div class="sc-desc">Small talk, inviting someone, joining in</div>
+      </button>
+      <button class="scenario-btn" data-id="sports-team" onclick="pickScenario(this)">
+        <span class="sc-icon">⚽</span><span class="sc-name">Sports & Clubs</span>
+        <div class="sc-desc">Teammates, coaches, sportsmanship</div>
+      </button>
+      <button class="scenario-btn" data-id="class-discuss" onclick="pickScenario(this)">
+        <span class="sc-icon">🗣️</span><span class="sc-name">Class Discussion</span>
+        <div class="sc-desc">Sharing opinions, agreeing/disagreeing politely</div>
+      </button>
+      <button class="scenario-btn" data-id="conflict" onclick="pickScenario(this)">
+        <span class="sc-icon">😤</span><span class="sc-name">Handling Conflict</span>
+        <div class="sc-desc">Misunderstandings, apologies, standing up politely</div>
+      </button>
+      <button class="scenario-btn" data-id="custom" onclick="pickScenario(this)">
+        <span class="sc-icon">✏️</span><span class="sc-name">Custom Situation</span>
+        <div class="sc-desc">Describe your own situation</div>
+      </button>
+    </div>
+
+    <div class="sb-section" style="flex:1">
+      <div class="sb-title">💾 Saved Scripts</div>
+      <div id="saved-list"><div style="font-size:.72rem;color:#555">No saved scripts yet.</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="showMode('script',this)">📜 Get Script</button>
+      <button class="mode-tab" onclick="showMode('practice',this)">🎯 Practice</button>
+      <button class="mode-tab" onclick="showMode('phrasebook',this)">📖 Phrasebook</button>
+    </div>
+
+    <!-- SCRIPT MODE -->
+    <div class="content" id="mode-script">
+
+      <div class="builder-card">
+        <div class="field-row" style="align-items:flex-end">
+          <div style="flex:1">
+            <label class="field-label">Who are you talking to?</label>
+            <select id="talking-to" style="width:100%">
+              <option value="classmate">A classmate I just met</option>
+              <option value="close-friend">A close friend</option>
+              <option value="teacher">A teacher</option>
+              <option value="coach">A coach or club leader</option>
+              <option value="group">A group of students</option>
+              <option value="teammate">A teammate</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <label class="field-label">Your English level</label>
+            <select id="eng-level" style="width:100%">
+              <option value="beginner">Beginner — very simple words</option>
+              <option value="intermediate" selected>Intermediate — clear &amp; natural</option>
+              <option value="advanced">Advanced — more fluent</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="custom-field" style="display:none;margin-bottom:10px">
+          <label class="field-label">Describe your situation</label>
+          <textarea id="custom-desc" placeholder="e.g. I need to tell my lab partner I can't meet this weekend but I want to reschedule…"></textarea>
+        </div>
+
+        <label class="field-label">Tone</label>
+        <div class="tone-chips" id="tone-chips">
+          <button class="tone-chip active" data-tone="friendly" onclick="setTone(this)">😊 Friendly</button>
+          <button class="tone-chip" data-tone="polite" onclick="setTone(this)">🤝 Polite</button>
+          <button class="tone-chip" data-tone="confident" onclick="setTone(this)">💪 Confident</button>
+          <button class="tone-chip" data-tone="casual" onclick="setTone(this)">😎 Casual</button>
+          <button class="tone-chip" data-tone="formal" onclick="setTone(this)">👔 Formal</button>
+        </div>
+
+        <div class="field-row">
+          <button class="btn" id="gen-btn" onclick="generateScript()" disabled>✨ Generate Script</button>
+          <button class="btn amber" onclick="generateAlternative()" id="alt-btn" style="display:none" disabled>🔄 Try Different Version</button>
+        </div>
+        <div id="builder-alert"></div>
+      </div>
+
+      <div id="script-output"></div>
+
+    </div>
+
+    <!-- PRACTICE MODE -->
+    <div class="content" id="mode-practice" style="display:none">
+      <div class="builder-card">
+        <p style="font-size:.82rem;color:#aaa;line-height:1.6">Choose a situation from the sidebar, then practice the conversation turn by turn. Type your response and get instant feedback.</p>
+        <div style="margin-top:10px">
+          <button class="btn" id="practice-btn" onclick="startPractice()" disabled>▶ Start Practice Session</button>
+        </div>
+        <div id="practice-alert"></div>
+      </div>
+      <div id="practice-output"></div>
+    </div>
+
+    <!-- PHRASEBOOK MODE -->
+    <div class="content" id="mode-phrasebook" style="display:none">
+      <div class="builder-card" style="padding:10px 14px">
+        <input type="text" id="phrase-search" placeholder="Search phrases…" style="width:100%" oninput="filterPhrases(this.value)">
+      </div>
+      <div class="phrase-grid" id="phrase-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+const GEMINI_URL = k=>`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
+let apiKey='', currentScenario='make-friends', currentTone='friendly', savedScripts=[], practiceData=null, practiceStep=0;
+
+const SCENARIO_META = {
+  'make-friends':{name:'Making Friends',icon:'👋',context:'meeting new classmates and starting friendships at school'},
+  'ask-teacher':{name:'Talking to a Teacher',icon:'🙋',context:'asking a teacher for help, an extension, or clarification on an assignment'},
+  'group-project':{name:'Group Project',icon:'🤝',context:'working on a group project — assigning tasks, sharing ideas, and resolving disagreements'},
+  'lunch-table':{name:'Lunch & Hangouts',icon:'🍱',context:'casual small talk at lunch, inviting someone to hang out, or joining a conversation'},
+  'sports-team':{name:'Sports & Clubs',icon:'⚽',context:'talking to teammates or a coach during sports practice or a club meeting'},
+  'class-discuss':{name:'Class Discussion',icon:'🗣️',context:'participating in a class discussion — sharing opinions and agreeing or disagreeing respectfully'},
+  'conflict':{name:'Handling Conflict',icon:'😤',context:'handling a misunderstanding, apologizing, or politely standing up for yourself at school'},
+  'custom':{name:'Custom Situation',icon:'✏️',context:''}
+};
+
+const PHRASEBOOK = [
+  {situation:'Making Friends',text:'Hey, I\'m [name]. Are you in this class too?',note:'Simple opener — works anywhere'},
+  {situation:'Making Friends',text:'That\'s so cool! How long have you been doing that?',note:'Shows genuine interest'},
+  {situation:'Making Friends',text:'Do you want to sit together at lunch?',note:'Friendly and direct'},
+  {situation:'Making Friends',text:'I\'ve seen you around — I\'m [name], by the way!',note:'Natural way to introduce yourself'},
+  {situation:'Making Friends',text:'Do you know if there\'s homework due tomorrow?',note:'Easy conversation starter'},
+  {situation:'Talking to Teachers',text:'Excuse me, could I ask you a quick question?',note:'Polite attention-getter'},
+  {situation:'Talking to Teachers',text:'I didn\'t quite understand [topic]. Could you explain it a different way?',note:'Honest and respectful'},
+  {situation:'Talking to Teachers',text:'I\'m having trouble with this. Would it be okay if I came to office hours?',note:'Shows initiative'},
+  {situation:'Talking to Teachers',text:'Is there any way I could get a short extension? I\'ve been dealing with [brief reason].',note:'Keep it brief and honest'},
+  {situation:'Talking to Teachers',text:'Thank you for explaining that — it makes more sense now.',note:'Always appreciated'},
+  {situation:'Group Project',text:'What does everyone think we should focus on first?',note:'Opens discussion naturally'},
+  {situation:'Group Project',text:'I can take care of [task] if someone else handles [task].',note:'Proactive role-taking'},
+  {situation:'Group Project',text:'That\'s a good idea! What if we also added…',note:'"Yes, and" keeps energy positive'},
+  {situation:'Group Project',text:'I see what you mean, but I\'m a little worried about [concern].',note:'Disagree without shutting down'},
+  {situation:'Group Project',text:'When do we want to have a draft ready?',note:'Keeps the team on schedule'},
+  {situation:'Lunch & Hangouts',text:'Do you mind if I sit here?',note:'Always polite to ask'},
+  {situation:'Lunch & Hangouts',text:'Have you seen [show/movie]? It\'s so good!',note:'Easy shared-interest opener'},
+  {situation:'Lunch & Hangouts',text:'Hey, we\'re going to [place] after school — want to come?',note:'Casual invite'},
+  {situation:'Lunch & Hangouts',text:'What are you doing this weekend?',note:'Classic small talk'},
+  {situation:'Sports & Clubs',text:'Great pass! / Nice work out there!',note:'Encouragement costs nothing'},
+  {situation:'Sports & Clubs',text:'Coach, could I ask a quick question about the play?',note:'Shows attentiveness'},
+  {situation:'Sports & Clubs',text:'My bad — I\'ll do better next time.',note:'Own your mistakes gracefully'},
+  {situation:'Sports & Clubs',text:'Let\'s go! We\'ve got this!',note:'Team energy booster'},
+  {situation:'Class Discussion',text:'I agree with what [name] said, and I also think…',note:'Builds on others\' ideas'},
+  {situation:'Class Discussion',text:'That\'s interesting — I actually see it a bit differently.',note:'Polite way to disagree'},
+  {situation:'Class Discussion',text:'Could you say more about what you mean by that?',note:'Shows active listening'},
+  {situation:'Class Discussion',text:'I\'m not totally sure, but I think…',note:'Honest about uncertainty'},
+  {situation:'Handling Conflict',text:'I think there might be a misunderstanding — can we talk about it?',note:'De-escalates immediately'},
+  {situation:'Handling Conflict',text:'I\'m sorry if I made you feel that way — I didn\'t mean to.',note:'Genuine apology'},
+  {situation:'Handling Conflict',text:'I felt [feeling] when [situation]. Can we figure this out together?',note:'I-statements avoid blame'},
+  {situation:'Handling Conflict',text:'I don\'t think that\'s okay. Please stop.',note:'Firm but calm boundary'},
+];
+
+// ==================== INIT ====================
+(function(){
+  const s = localStorage.getItem('conv-coach-v1');
+  if(s){ try{ const d=JSON.parse(s); if(d.key){apiKey=d.key;document.getElementById('api-key').value=d.key;updateStatus(true);} if(d.saved) savedScripts=d.saved; }catch(e){} }
+  renderSaved();
+  renderPhrasebook(PHRASEBOOK);
+})();
+
+function saveKey(){ apiKey=document.getElementById('api-key').value.trim(); updateStatus(!!apiKey); persist(); }
+function updateStatus(ok){
+  const el=document.getElementById('api-status');
+  el.textContent=ok?'✓ Key saved':'No key';
+  el.className='api-status '+(ok?'ok':'no');
+  document.getElementById('gen-btn').disabled=!ok;
+  document.getElementById('practice-btn').disabled=!ok;
+}
+function setTone(btn){ document.querySelectorAll('.tone-chip').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); currentTone=btn.dataset.tone; }
+function pickScenario(btn){
+  document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentScenario=btn.dataset.id;
+  const cf=document.getElementById('custom-field');
+  cf.style.display=currentScenario==='custom'?'block':'none';
+}
+function showMode(name,btn){
+  document.querySelectorAll('.mode-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['script','practice','phrasebook'].forEach(m=>{ document.getElementById('mode-'+m).style.display=m===name?'flex':'none'; });
+}
+
+// ==================== GEMINI ====================
+async function callGemini(prompt){
+  const res=await fetch(GEMINI_URL(apiKey),{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.75,maxOutputTokens:1600}})});
+  if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error '+res.status);}
+  const d=await res.json();
+  return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+function parseJSON(raw){ return JSON.parse(raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim()); }
+
+// ==================== GENERATE SCRIPT ====================
+async function generateScript(variant){
+  if(!apiKey) return;
+  const talkingTo=document.getElementById('talking-to').value;
+  const level=document.getElementById('eng-level').value;
+  const custom=document.getElementById('custom-desc').value.trim();
+  const meta=SCENARIO_META[currentScenario];
+  const context=currentScenario==='custom'?(custom||'a school situation'):meta.context;
+
+  document.getElementById('script-output').innerHTML='<div class="loading"><div class="spinner"></div><div>Writing your script…</div></div>';
+  document.getElementById('builder-alert').innerHTML='';
+
+  const levelGuide={beginner:'Use very short sentences and simple vocabulary. Avoid idioms.',
+    intermediate:'Use clear natural English. Can include some common phrases.',
+    advanced:'Use natural fluid English with varied vocabulary.'}[level];
+
+  const prompt=`You are a friendly school conversation coach helping an ESL student (${level} English level) navigate school life in the US.
+
+Scenario: ${meta.name}
+Context: The student needs a script for ${context}.
+They are talking to: ${talkingTo.replace(/-/g,' ')}.
+Tone: ${currentTone}
+Language level: ${levelGuide}
+${variant?' Generate a DIFFERENT version from what was shown before — vary the opening line and overall approach.':''}
+
+Return ONLY valid JSON (no markdown, no code fences):
+{
+  "title": "Short title for this script",
+  "dialogue": [
+    {"speaker": "You", "text": "What the student says", "note": "optional tip — when/why to use this line (max 10 words, or null)"},
+    {"speaker": "Other person's role (e.g. Classmate)", "text": "Realistic response they might give", "note": null},
+    {"speaker": "You", "text": "Student's follow-up", "note": null}
+  ],
+  "tips": ["Tip 1 about this situation", "Tip 2", "Tip 3"],
+  "vocab": [
+    {"word": "phrase or word used in script", "meaning": "simple definition"},
+    {"word": "another phrase", "meaning": "simple definition"}
+  ],
+  "alternate_openers": ["Another way to start this conversation", "Yet another option"]
+}
+
+Include 6–10 dialogue turns. Tips should be practical cultural advice for school in the US. Vocab: 3–5 entries.`;
+
+  try{
+    const raw=await callGemini(prompt);
+    const data=parseJSON(raw);
+    renderScript(data);
+    document.getElementById('alt-btn').style.display='';
+    document.getElementById('alt-btn').disabled=false;
+  }catch(e){
+    document.getElementById('builder-alert').innerHTML=`<div class="alert error">Error: ${e.message}</div>`;
+    document.getElementById('script-output').innerHTML='';
+  }
+}
+
+function generateAlternative(){ generateScript(true); }
+
+function renderScript(data){
+  const id='sc-'+Date.now();
+  const dialogue=data.dialogue||[];
+  const dlHTML=dialogue.map(msg=>{
+    const isYou=msg.speaker==='You'||msg.speaker==='you';
+    return `<div class="msg-row ${isYou?'you':''}">
+      <div class="msg-avatar">${isYou?'🙋':'😊'}</div>
+      <div>
+        <div class="msg-speaker">${escH(msg.speaker)}</div>
+        <div class="msg-bubble">${escH(msg.text||'')}${msg.note?`<div class="msg-note">💡 ${escH(msg.note)}</div>`:''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const tipsHTML=(data.tips||[]).map(t=>`<div class="tip-item">${escH(t)}</div>`).join('');
+  const vocabHTML=(data.vocab||[]).map(v=>`<div class="vocab-item"><span class="vocab-word">${escH(v.word)}</span><span class="vocab-def">${escH(v.meaning)}</span></div>`).join('');
+  const altsHTML=(data.alternate_openers||[]).map(a=>`<div class="tip-item" style="color:#aa88ff">${escH(a)}</div>`).join('');
+
+  document.getElementById('script-output').innerHTML=`
+    <div class="script-card" id="${id}">
+      <div class="script-header">
+        <span class="script-title">📜 ${escH(data.title||'Script')}</span>
+        <div class="script-actions">
+          <button class="btn" style="font-size:.68rem;padding:4px 10px" onclick="saveScript('${escJ(data.title||'Script')}','${id}')">💾 Save</button>
+          <button class="btn cyan" style="font-size:.68rem;padding:4px 10px" onclick="loadPractice(${encodeData(data)})">🎯 Practice This</button>
+        </div>
+      </div>
+      <div class="script-body">
+        <div class="dialogue">${dlHTML}</div>
+        ${tipsHTML?`<div class="tips-box" style="margin-top:14px"><div class="tips-title">💡 Cultural Tips</div>${tipsHTML}</div>`:''}
+        ${vocabHTML?`<div class="vocab-box" style="margin-top:10px"><div class="vocab-title">📚 Key Phrases</div>${vocabHTML}</div>`:''}
+        ${altsHTML?`<div class="tips-box" style="margin-top:10px;background:#aa88ff0a;border-color:#aa88ff22"><div class="tips-title" style="color:#aa88ff">🔄 Other Ways to Start</div>${altsHTML}</div>`:''}
+      </div>
+    </div>`;
+  window._lastScriptData=data;
+}
+
+function encodeData(data){ return `'${escJ(JSON.stringify(data))}'`; }
+
+// ==================== PRACTICE ====================
+function loadPractice(dataStr){
+  try{
+    const data=typeof dataStr==='string'?JSON.parse(dataStr):dataStr;
+    practiceData=data; practiceStep=0;
+    showMode('practice',document.querySelectorAll('.mode-tab')[1]);
+    renderPractice();
+  }catch(e){}
+}
+
+function startPractice(){
+  if(!apiKey) return;
+  if(window._lastScriptData){ loadPractice(window._lastScriptData); return; }
+  generateScript();
+  setTimeout(()=>{ if(window._lastScriptData) loadPractice(window._lastScriptData); },3000);
+}
+
+function renderPractice(){
+  if(!practiceData){ document.getElementById('practice-output').innerHTML='<div class="alert info">Generate a script first, then click "Practice This".</div>'; return; }
+  const turns=practiceData.dialogue||[];
+  const youTurns=turns.filter(t=>t.speaker==='You'||t.speaker==='you');
+  const total=youTurns.length;
+  const dots=Array.from({length:total},(_,i)=>`<div class="dot ${i<practiceStep?'done':i===practiceStep?'current':''}" id="dot-${i}"></div>`).join('');
+
+  let html=`<div class="practice-turn">
+    <div class="pt-label">Progress</div>
+    <div class="progress-dots">${dots}</div>
+    <div class="pt-label">Turn ${practiceStep+1} of ${total}</div>`;
+
+  // Show context from non-you turns before this you-turn
+  const youIndices=turns.map((t,i)=>(t.speaker==='You'||t.speaker==='you')?i:-1).filter(i=>i>=0);
+  const currentYouIdx=youIndices[practiceStep];
+  if(currentYouIdx>0){
+    const prev=turns[currentYouIdx-1];
+    html+=`<div style="margin-bottom:10px"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:4px">${escH(prev.speaker)} said:</div>
+      <div style="background:#1e2535;border-radius:6px;padding:8px 11px;font-size:.82rem;color:#ccc">${escH(prev.text)}</div></div>`;
+  }
+
+  html+=`<div class="pt-label">Your turn — what would you say?</div>
+    <input class="pt-input" id="practice-input-${practiceStep}" placeholder="Type your response…" onkeydown="if(event.key==='Enter')checkResponse(${practiceStep})"/>
+    <button class="btn" onclick="checkResponse(${practiceStep})">Submit →</button>
+    <div class="pt-feedback" id="pf-${practiceStep}"></div>
+    <button class="btn amber" style="margin-top:8px;font-size:.72rem;padding:5px 12px" onclick="showAnswer(${practiceStep},${currentYouIdx})">Show example answer</button>
+  </div>`;
+
+  document.getElementById('practice-output').innerHTML=html;
+}
+
+async function checkResponse(step){
+  if(!apiKey) return;
+  const input=document.getElementById(`practice-input-${step}`);
+  const val=input.value.trim();
+  if(!val) return;
+  const turns=practiceData.dialogue||[];
+  const youIndices=turns.map((t,i)=>(t.speaker==='You'||t.speaker==='you')?i:-1).filter(i=>i>=0);
+  const expected=turns[youIndices[step]]?.text||'';
+  const context=turns[youIndices[step]-1]?.text||'(start of conversation)';
+
+  input.disabled=true;
+  const fb=document.getElementById(`pf-${step}`);
+  fb.className='pt-feedback show ok'; fb.textContent='Checking…';
+
+  try{
+    const prompt=`You are a kind school conversation coach. A student is practicing an English school conversation.
+
+Situation: ${SCENARIO_META[currentScenario]?.name||'school'}
+The other person said: "${context}"
+The student typed: "${val}"
+A good example answer would be: "${expected}"
+
+Evaluate the student's response in 1-2 sentences. Be encouraging and specific.
+Reply in JSON: {"rating":"good"|"ok"|"try", "feedback":"your feedback here"}
+- "good": natural, appropriate, correct English
+- "ok": understandable but could be improved, minor errors
+- "try": hard to understand or inappropriate for the situation`;
+    const raw=await callGemini(prompt);
+    const d=parseJSON(raw);
+    fb.className=`pt-feedback show ${d.rating||'ok'}`;
+    const emojis={good:'🎉',ok:'👍',try:'💡'};
+    fb.textContent=(emojis[d.rating]||'💡')+' '+d.feedback;
+    if(d.rating==='good'||d.rating==='ok'){
+      setTimeout(()=>{
+        practiceStep++;
+        const youTurns=(practiceData.dialogue||[]).filter(t=>t.speaker==='You'||t.speaker==='you');
+        if(practiceStep>=youTurns.length){
+          document.getElementById('practice-output').innerHTML=`<div class="practice-turn" style="text-align:center;padding:30px">
+            <div style="font-size:2rem;margin-bottom:10px">🎉</div>
+            <div style="color:#00ff88;font-size:.9rem;font-weight:600;margin-bottom:6px">Practice Complete!</div>
+            <div style="font-size:.78rem;color:#888;margin-bottom:14px">Great work practicing this conversation.</div>
+            <button class="btn" onclick="practiceStep=0;renderPractice()">Practice Again</button>
+          </div>`;
+        } else { renderPractice(); }
+      },1800);
+    }
+  }catch(e){
+    fb.textContent='Could not check — try again.';
+  }
+}
+
+function showAnswer(step, idx){
+  const turns=practiceData.dialogue||[];
+  const fb=document.getElementById(`pf-${step}`);
+  fb.className='pt-feedback show try';
+  fb.textContent='💡 Example: "'+escH(turns[idx]?.text||'')+'"';
+}
+
+// ==================== PHRASEBOOK ====================
+function renderPhrasebook(phrases){
+  document.getElementById('phrase-grid').innerHTML=phrases.map(p=>`
+    <div class="phrase-card" onclick="quickSearch('${escJ(p.text)}')">
+      <div class="phrase-situation">${escH(p.situation)}</div>
+      <div class="phrase-text">"${escH(p.text)}"</div>
+      <div class="phrase-note">${escH(p.note)}</div>
+    </div>`).join('');
+}
+function filterPhrases(q){
+  const t=q.toLowerCase();
+  renderPhrasebook(t?PHRASEBOOK.filter(p=>p.text.toLowerCase().includes(t)||p.situation.toLowerCase().includes(t)||p.note.toLowerCase().includes(t)):PHRASEBOOK);
+}
+function quickSearch(text){ document.getElementById('mode-script').querySelector('[data-id="custom"]') && (document.getElementById('custom-desc').value=text); }
+
+// ==================== SAVE ====================
+function saveScript(title,cardId){
+  savedScripts.unshift({id:Date.now(),title,ts:new Date().toLocaleDateString()});
+  if(savedScripts.length>10) savedScripts.pop();
+  persist(); renderSaved();
+}
+function renderSaved(){
+  const el=document.getElementById('saved-list');
+  if(!savedScripts.length){el.innerHTML='<div style="font-size:.72rem;color:#555">No saved scripts yet.</div>';return;}
+  el.innerHTML=savedScripts.map((s,i)=>`<div class="saved-item">
+    <span>📜 ${escH(s.title)}</span>
+    <button class="del-btn" onclick="deleteSaved(${i})">✕</button>
+  </div>`).join('');
+}
+function deleteSaved(i){ savedScripts.splice(i,1); persist(); renderSaved(); }
+function persist(){ try{localStorage.setItem('conv-coach-v1',JSON.stringify({key:apiKey,saved:savedScripts}));}catch(e){} }
+
+// ==================== UTILS ====================
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escJ(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\n/g,'\\n');}
+</script>
+</body>
+</html>

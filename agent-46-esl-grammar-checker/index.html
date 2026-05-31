@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ESL Grammar Checker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOP BAR */
+.topbar{background:#161b27;border-bottom:1px solid #00d4ff33;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:1.5rem}
+.logo-text{font-size:1.05rem;font-weight:700;color:#00d4ff;letter-spacing:.5px}
+.logo-sub{font-size:.72rem;color:#888;margin-top:1px}
+.api-row{display:flex;align-items:center;gap:8px}
+.api-row label{font-size:.72rem;color:#888;white-space:nowrap}
+.api-row input{background:#1e2535;border:1px solid #ffffff22;color:#fff;font-size:.75rem;padding:6px 10px;border-radius:4px;outline:none;width:220px;transition:.2s}
+.api-row input:focus{border-color:#00d4ff}
+.api-row .save-btn{background:transparent;border:1px solid #00d4ff;color:#00d4ff;font-size:.72rem;padding:6px 12px;border-radius:4px;cursor:pointer;transition:.2s;white-space:nowrap}
+.api-row .save-btn:hover{background:#00d4ff;color:#0f1117}
+.api-status{font-size:.7rem;padding:3px 8px;border-radius:10px}
+.api-status.ok{color:#00ff88;background:#00ff8820;border:1px solid #00ff8844}
+.api-status.no{color:#888;background:#ffffff10;border:1px solid #ffffff22}
+
+/* MAIN LAYOUT */
+.main{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;max-width:1200px;margin:0 auto;width:100%}
+@media(max-width:700px){.main{grid-template-columns:1fr}}
+
+/* PANELS */
+.panel{background:#161b27;border:1px solid #ffffff11;border-radius:8px;display:flex;flex-direction:column;overflow:hidden}
+.panel-header{background:#1e2535;padding:10px 14px;font-size:.78rem;font-weight:600;color:#00d4ff;letter-spacing:.5px;border-bottom:1px solid #ffffff11;display:flex;align-items:center;justify-content:space-between}
+.panel-body{padding:14px;flex:1;display:flex;flex-direction:column;gap:10px}
+
+/* TEXTAREA */
+textarea{background:#1e2535;border:1px solid #ffffff22;color:#e0e0e0;font-size:.88rem;line-height:1.7;padding:12px;border-radius:6px;resize:vertical;outline:none;min-height:180px;font-family:inherit;transition:.2s;width:100%}
+textarea:focus{border-color:#00d4ff}
+
+/* CONTROLS */
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{background:transparent;border:1px solid #00d4ff;color:#00d4ff;font-size:.78rem;padding:7px 16px;border-radius:4px;cursor:pointer;transition:.2s;white-space:nowrap;font-family:inherit}
+.btn:hover:not(:disabled){background:#00d4ff;color:#0f1117}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.green{border-color:#00ff88;color:#00ff88}
+.btn.green:hover:not(:disabled){background:#00ff88;color:#0f1117}
+.btn.amber{border-color:#ffaa00;color:#ffaa00}
+.btn.amber:hover{background:#ffaa00;color:#0f1117}
+.btn.red{border-color:#ff4466;color:#ff4466}
+.btn.red:hover{background:#ff4466;color:#0f1117}
+.char-count{font-size:.7rem;color:#555;margin-left:auto}
+
+/* LEVEL SELECTOR */
+.level-row{display:flex;gap:6px;flex-wrap:wrap}
+.level-chip{background:transparent;border:1px solid #ffffff22;color:#888;font-size:.72rem;padding:4px 12px;border-radius:12px;cursor:pointer;transition:.2s}
+.level-chip:hover{border-color:#00d4ff;color:#00d4ff}
+.level-chip.active{background:#00d4ff22;border-color:#00d4ff;color:#00d4ff}
+
+/* FOCUS CHIPS */
+.focus-chip{background:transparent;border:1px solid #ffffff22;color:#888;font-size:.72rem;padding:4px 10px;border-radius:12px;cursor:pointer;transition:.2s}
+.focus-chip:hover{border-color:#ffaa00;color:#ffaa00}
+.focus-chip.active{background:#ffaa0022;border-color:#ffaa00;color:#ffaa00}
+
+/* RESULTS */
+.result-box{background:#1e2535;border-radius:6px;padding:12px;min-height:60px;font-size:.85rem;line-height:1.75;position:relative}
+.result-placeholder{color:#555;font-size:.82rem;font-style:italic}
+
+/* CORRECTIONS LIST */
+.corrections{display:flex;flex-direction:column;gap:10px}
+.correction-item{background:#0f1117;border:1px solid #ffffff11;border-radius:6px;padding:10px 12px;border-left:3px solid #00d4ff}
+.correction-item.grammar{border-left-color:#ff4466}
+.correction-item.spelling{border-left-color:#ffaa00}
+.correction-item.style{border-left-color:#aa88ff}
+.correction-item.vocab{border-left-color:#00ff88}
+.c-type{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600}
+.c-type.grammar{color:#ff4466}
+.c-type.spelling{color:#ffaa00}
+.c-type.style{color:#aa88ff}
+.c-type.vocab{color:#00ff88}
+.c-before{font-size:.82rem;color:#ff446699;text-decoration:line-through;margin-bottom:2px}
+.c-after{font-size:.85rem;color:#00ff88;margin-bottom:4px}
+.c-tip{font-size:.77rem;color:#aaa;line-height:1.5}
+
+/* HIGHLIGHTED TEXT */
+.hl-grammar{background:#ff446633;border-bottom:2px solid #ff4466;border-radius:2px;padding:0 1px;cursor:pointer;transition:.2s}
+.hl-spelling{background:#ffaa0033;border-bottom:2px solid #ffaa00;border-radius:2px;padding:0 1px;cursor:pointer}
+.hl-style{background:#aa88ff33;border-bottom:2px solid #aa88ff;border-radius:2px;padding:0 1px;cursor:pointer}
+.hl-vocab{background:#00ff8833;border-bottom:2px solid #00ff88;border-radius:2px;padding:0 1px;cursor:pointer}
+
+/* SCORE */
+.score-row{display:flex;gap:10px;flex-wrap:wrap}
+.score-box{background:#0f1117;border:1px solid #ffffff11;border-radius:6px;padding:8px 14px;text-align:center;flex:1;min-width:80px}
+.score-val{font-size:1.4rem;font-weight:700}
+.score-lbl{font-size:.62rem;color:#888;margin-top:2px}
+.score-bar-track{background:#1e2535;border-radius:3px;height:6px;margin-top:6px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;transition:width .6s}
+
+/* REWRITE BOX */
+.rewrite-box{background:#0f1117;border:1px solid #00ff8844;border-radius:6px;padding:12px;font-size:.85rem;line-height:1.75;color:#e0e0e0;position:relative}
+.rewrite-label{font-size:.68rem;color:#00ff88;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.copy-btn{position:absolute;top:8px;right:8px;background:transparent;border:1px solid #ffffff22;color:#888;font-size:.68rem;padding:3px 8px;border-radius:4px;cursor:pointer;transition:.2s}
+.copy-btn:hover{border-color:#00ff88;color:#00ff88}
+
+/* TIPS SECTION */
+.tips-list{display:flex;flex-direction:column;gap:6px}
+.tip-item{background:#0f1117;border-radius:5px;padding:8px 10px;font-size:.78rem;line-height:1.5;border-left:3px solid #00d4ff44}
+.tip-item strong{color:#00d4ff}
+
+/* HISTORY */
+.history-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.history-item{background:#0f1117;border-radius:5px;padding:8px 10px;cursor:pointer;transition:.2s;border:1px solid #ffffff08}
+.history-item:hover{border-color:#00d4ff33;background:#1e2535}
+.history-meta{font-size:.65rem;color:#555;margin-top:3px}
+.history-preview{font-size:.75rem;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+/* SPINNER */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #ffffff22;border-top-color:#00d4ff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* LEGEND */
+.legend{display:flex;gap:10px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:.7rem;color:#888}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+
+/* TABS */
+.tab-row{display:flex;border-bottom:1px solid #ffffff11;background:#1e2535}
+.tab-btn{background:transparent;border:none;color:#888;font-size:.75rem;padding:8px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;font-family:inherit}
+.tab-btn.active{color:#00d4ff;border-bottom-color:#00d4ff}
+.tab-pane{display:none;padding:14px;flex:1;overflow-y:auto}
+.tab-pane.active{display:flex;flex-direction:column;gap:10px}
+
+/* ALERT */
+.alert{padding:8px 12px;border-radius:4px;font-size:.78rem;margin:4px 0}
+.alert.error{background:#ff446622;border:1px solid #ff446666;color:#ff4466}
+.alert.info{background:#00d4ff22;border:1px solid #00d4ff44;color:#00d4ff}
+.alert.warn{background:#ffaa0022;border:1px solid #ffaa0044;color:#ffaa00}
+
+/* SAMPLE TEXTS */
+.sample-row{display:flex;gap:6px;flex-wrap:wrap}
+.sample-btn{background:#1e2535;border:1px solid #ffffff15;color:#888;font-size:.7rem;padding:4px 10px;border-radius:10px;cursor:pointer;transition:.2s;white-space:nowrap}
+.sample-btn:hover{border-color:#00d4ff44;color:#00d4ff}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#0f1117}
+::-webkit-scrollbar-thumb{background:#ffffff22;border-radius:3px}
+
+/* TOOLTIP */
+.tooltip{position:fixed;background:#1e2535;border:1px solid #00d4ff;padding:6px 10px;border-radius:5px;font-size:.72rem;max-width:220px;z-index:999;pointer-events:none;display:none;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-icon">✍️</span>
+    <div>
+      <div class="logo-text">ESL Grammar Checker</div>
+      <div class="logo-sub">Gentle corrections &amp; tips for English learners</div>
+    </div>
+  </div>
+  <div class="api-row">
+    <label>Gemini API Key</label>
+    <input type="password" id="api-key-input" placeholder="AIza..." autocomplete="off"/>
+    <button class="save-btn" onclick="saveKey()">Save</button>
+    <span class="api-status no" id="api-status">No key</span>
+  </div>
+</div>
+
+<div class="main">
+  <!-- LEFT: INPUT -->
+  <div class="panel">
+    <div class="panel-header">
+      <span>📝 Your Writing</span>
+      <span id="char-count" style="font-size:.68rem;color:#555">0 chars</span>
+    </div>
+    <div class="panel-body">
+
+      <div>
+        <div style="font-size:.72rem;color:#888;margin-bottom:6px">Proficiency Level</div>
+        <div class="level-row">
+          <button class="level-chip active" data-lvl="beginner" onclick="setLevel(this)">🌱 Beginner</button>
+          <button class="level-chip" data-lvl="intermediate" onclick="setLevel(this)">📘 Intermediate</button>
+          <button class="level-chip" data-lvl="advanced" onclick="setLevel(this)">🎓 Advanced</button>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:.72rem;color:#888;margin-bottom:6px">Focus Areas (optional)</div>
+        <div class="level-row">
+          <button class="focus-chip active" data-focus="grammar" onclick="toggleFocus(this)">Grammar</button>
+          <button class="focus-chip active" data-focus="spelling" onclick="toggleFocus(this)">Spelling</button>
+          <button class="focus-chip active" data-focus="style" onclick="toggleFocus(this)">Style</button>
+          <button class="focus-chip active" data-focus="vocabulary" onclick="toggleFocus(this)">Vocabulary</button>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:.72rem;color:#888;margin-bottom:5px">Sample Texts</div>
+        <div class="sample-row">
+          <button class="sample-btn" onclick="loadSample(0)">Email</button>
+          <button class="sample-btn" onclick="loadSample(1)">Essay intro</button>
+          <button class="sample-btn" onclick="loadSample(2)">Daily chat</button>
+          <button class="sample-btn" onclick="loadSample(3)">Job application</button>
+        </div>
+      </div>
+
+      <textarea id="user-text" placeholder="Paste or type your English writing here…
+
+For example:
+Yesterday I go to the market and buyed many vegetable. The weather is very cold and I wearing my jacket. My friend she tell me that the market have a good price for fresh fruit."
+oninput="onTextInput()"></textarea>
+
+      <div class="controls">
+        <button class="btn green" id="check-btn" onclick="checkGrammar()" disabled>✓ Check Grammar</button>
+        <button class="btn" onclick="clearAll()">✕ Clear</button>
+        <button class="btn amber" id="rewrite-btn" onclick="rewriteText()" disabled style="display:none">✨ Rewrite</button>
+      </div>
+
+      <div id="input-alert"></div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div class="panel">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="showTab('corrections')">Corrections</button>
+      <button class="tab-btn" onclick="showTab('highlighted')">Highlighted</button>
+      <button class="tab-btn" onclick="showTab('rewrite')">Rewrite</button>
+      <button class="tab-btn" onclick="showTab('tips')">Tips</button>
+      <button class="tab-btn" onclick="showTab('history')">History</button>
+    </div>
+
+    <!-- CORRECTIONS TAB -->
+    <div class="tab-pane active" id="tab-corrections">
+      <div class="score-row" id="score-row" style="display:none">
+        <div class="score-box">
+          <div class="score-val" id="score-overall" style="color:#00d4ff">—</div>
+          <div class="score-lbl">Overall Score</div>
+          <div class="score-bar-track"><div class="score-bar-fill" id="bar-overall" style="width:0%;background:#00d4ff"></div></div>
+        </div>
+        <div class="score-box">
+          <div class="score-val" id="score-grammar" style="color:#ff4466">—</div>
+          <div class="score-lbl">Grammar</div>
+          <div class="score-bar-track"><div class="score-bar-fill" id="bar-grammar" style="width:0%;background:#ff4466"></div></div>
+        </div>
+        <div class="score-box">
+          <div class="score-val" id="score-vocab" style="color:#00ff88">—</div>
+          <div class="score-lbl">Vocabulary</div>
+          <div class="score-bar-track"><div class="score-bar-fill" id="bar-vocab" style="width:0%;background:#00ff88"></div></div>
+        </div>
+        <div class="score-box">
+          <div class="score-val" id="score-clarity" style="color:#aa88ff">—</div>
+          <div class="score-lbl">Clarity</div>
+          <div class="score-bar-track"><div class="score-bar-fill" id="bar-clarity" style="width:0%;background:#aa88ff"></div></div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#ff4466"></span>Grammar</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#ffaa00"></span>Spelling</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#aa88ff"></span>Style</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#00ff88"></span>Vocabulary</span>
+      </div>
+
+      <div id="corrections-area">
+        <div class="result-placeholder">Your grammar corrections will appear here after checking.</div>
+      </div>
+    </div>
+
+    <!-- HIGHLIGHTED TAB -->
+    <div class="tab-pane" id="tab-highlighted">
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#ff4466"></span>Grammar</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#ffaa00"></span>Spelling</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#aa88ff"></span>Style</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#00ff88"></span>Vocabulary</span>
+      </div>
+      <div class="result-box" id="highlighted-text">
+        <span class="result-placeholder">Your text with highlighted errors will appear here.</span>
+      </div>
+      <div style="font-size:.72rem;color:#555">Click on any highlighted word to see the correction.</div>
+    </div>
+
+    <!-- REWRITE TAB -->
+    <div class="tab-pane" id="tab-rewrite">
+      <div id="rewrite-area">
+        <div class="result-placeholder">Click "✨ Rewrite" to get a corrected version of your text.</div>
+      </div>
+    </div>
+
+    <!-- TIPS TAB -->
+    <div class="tab-pane" id="tab-tips">
+      <div id="tips-area">
+        <div class="result-placeholder">Grammar tips for your writing will appear here.</div>
+      </div>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div class="tab-pane" id="tab-history">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:.72rem;color:#888">Recent checks (saved locally)</div>
+        <button class="btn red" style="font-size:.68rem;padding:3px 8px" onclick="clearHistory()">Clear All</button>
+      </div>
+      <div class="history-list" id="history-list">
+        <div class="result-placeholder">No history yet.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ==================== CONFIG ====================
+const GEMINI_URL = key => `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+const SAMPLES = [
+  `Dear Manager,\n\nI am writing to you because I want apply for the job position what you post last week. I have many experience in this field and I working hard always. I think I am a good fit because I learn quick and I am very responsible person.\n\nThank you for you consideration.`,
+  `In today's society, technology play a very important role in our lifes. Many peoples use smartphone for communicate with their friends and family. Although technology have many benefit, it also bring some problem. For example, some student spend too much time on phone and they cannot focus their study.`,
+  `Yesterday my friend and I go to the new restaurant downtown. The food was very delicious and the service was good too. We order pizza and pasta. The pasta was more better than pizza in my opinion. We stay there for two hour and talk about many things.`,
+  `I am interesting to apply for the software engineer position in your company. I graduate from university last year with a bachelor degree in computer science. During my study, I working on several project which involve programming in Python and JavaScript. I am confident that my skill match your requirements.`
+];
+
+let apiKey = '';
+let currentLevel = 'beginner';
+let activeFocus = new Set(['grammar','spelling','style','vocabulary']);
+let lastResult = null;
+let history = [];
+
+// ==================== INIT ====================
+(function init() {
+  const saved = localStorage.getItem('esl-checker-v1');
+  if(saved) {
+    try {
+      const d = JSON.parse(saved);
+      if(d.key) { apiKey = d.key; document.getElementById('api-key-input').value = d.key; updateApiStatus(true); }
+      if(d.history) history = d.history;
+    } catch(e) {}
+  }
+  renderHistory();
+  document.getElementById('user-text').addEventListener('input', onTextInput);
+})();
+
+function saveKey() {
+  apiKey = document.getElementById('api-key-input').value.trim();
+  updateApiStatus(!!apiKey);
+  persist();
+}
+
+function updateApiStatus(ok) {
+  const el = document.getElementById('api-status');
+  el.textContent = ok ? '✓ Key saved' : 'No key';
+  el.className = 'api-status ' + (ok ? 'ok' : 'no');
+  updateCheckBtn();
+}
+
+function updateCheckBtn() {
+  const hasText = document.getElementById('user-text').value.trim().length > 0;
+  document.getElementById('check-btn').disabled = !apiKey || !hasText;
+  document.getElementById('rewrite-btn').disabled = !apiKey || !hasText;
+}
+
+function onTextInput() {
+  const len = document.getElementById('user-text').value.length;
+  document.getElementById('char-count').textContent = len + ' chars';
+  updateCheckBtn();
+}
+
+function setLevel(btn) {
+  document.querySelectorAll('.level-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentLevel = btn.dataset.lvl;
+}
+
+function toggleFocus(btn) {
+  btn.classList.toggle('active');
+  const f = btn.dataset.focus;
+  if(activeFocus.has(f)) activeFocus.delete(f); else activeFocus.add(f);
+}
+
+function loadSample(i) {
+  document.getElementById('user-text').value = SAMPLES[i];
+  onTextInput();
+}
+
+function clearAll() {
+  document.getElementById('user-text').value = '';
+  document.getElementById('char-count').textContent = '0 chars';
+  document.getElementById('corrections-area').innerHTML = '<div class="result-placeholder">Your grammar corrections will appear here after checking.</div>';
+  document.getElementById('highlighted-text').innerHTML = '<span class="result-placeholder">Your text with highlighted errors will appear here.</span>';
+  document.getElementById('rewrite-area').innerHTML = '<div class="result-placeholder">Click "✨ Rewrite" to get a corrected version of your text.</div>';
+  document.getElementById('tips-area').innerHTML = '<div class="result-placeholder">Grammar tips for your writing will appear here.</div>';
+  document.getElementById('score-row').style.display = 'none';
+  document.getElementById('rewrite-btn').style.display = 'none';
+  document.getElementById('input-alert').innerHTML = '';
+  lastResult = null;
+  updateCheckBtn();
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    const tabs = ['corrections','highlighted','rewrite','tips','history'];
+    b.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ==================== API CALL ====================
+async function callGemini(prompt) {
+  const res = await fetch(GEMINI_URL(apiKey), {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      contents: [{parts: [{text: prompt}]}],
+      generationConfig: {temperature: 0.3, maxOutputTokens: 2048}
+    })
+  });
+  if(!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || 'API error ' + res.status);
+  }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+// ==================== CHECK GRAMMAR ====================
+async function checkGrammar() {
+  const text = document.getElementById('user-text').value.trim();
+  if(!text) return;
+  if(!apiKey) { document.getElementById('input-alert').innerHTML = '<div class="alert error">Please enter your Gemini API key above.</div>'; return; }
+
+  const btn = document.getElementById('check-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Checking…';
+  document.getElementById('input-alert').innerHTML = '';
+
+  const focusList = [...activeFocus].join(', ');
+  const levelGuide = {
+    beginner: 'Use simple, encouraging language. Explain grammar rules as if teaching a child. Avoid jargon.',
+    intermediate: 'Explain rules clearly. Reference grammar terms but define them briefly.',
+    advanced: 'Be concise. Use technical grammar terms. Focus on nuance and style.'
+  }[currentLevel];
+
+  const prompt = `You are a gentle, encouraging ESL grammar teacher. Analyze the following text written by a ${currentLevel}-level English learner.
+
+Focus on: ${focusList}.
+Tone guidance: ${levelGuide}
+
+Return ONLY valid JSON (no markdown, no code fences) in this exact format:
+{
+  "scores": {
+    "overall": 72,
+    "grammar": 65,
+    "vocabulary": 80,
+    "clarity": 75
+  },
+  "corrections": [
+    {
+      "type": "grammar",
+      "original": "exact phrase from text",
+      "corrected": "fixed version",
+      "tip": "short friendly explanation why (1-2 sentences, encouraging tone)"
+    }
+  ],
+  "tips": [
+    {
+      "title": "tip title",
+      "body": "2-3 sentence explanation of a grammar rule relevant to the mistakes found"
+    }
+  ],
+  "summary": "1-2 sentence encouraging overall feedback"
+}
+
+Types must be one of: grammar, spelling, style, vocabulary.
+Scores are 0-100 integers.
+Include at most 8 corrections. Be encouraging, not harsh.
+
+Text to check:
+"""
+${text}
+"""`;
+
+  try {
+    const raw = await callGemini(prompt);
+    const json = parseJSON(raw);
+    lastResult = {text, json, level: currentLevel, ts: Date.now()};
+    renderResults(json, text);
+    saveToHistory(text, json);
+    document.getElementById('rewrite-btn').style.display = '';
+    showTab('corrections');
+  } catch(e) {
+    document.getElementById('input-alert').innerHTML = `<div class="alert error">Error: ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✓ Check Grammar';
+    updateCheckBtn();
+  }
+}
+
+// ==================== REWRITE ====================
+async function rewriteText() {
+  const text = document.getElementById('user-text').value.trim();
+  if(!text || !apiKey) return;
+  const btn = document.getElementById('rewrite-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Rewriting…';
+  showTab('rewrite');
+
+  const prompt = `You are a helpful ESL writing coach. Rewrite the following text to fix all grammar, spelling, and style issues.
+Keep the original meaning and the learner's voice — don't make it too formal or change the content.
+Return ONLY the rewritten text with no explanations, no preamble.
+
+Level: ${currentLevel}
+
+Original text:
+"""
+${text}
+"""`;
+
+  try {
+    const rewritten = await callGemini(prompt);
+    const box = document.getElementById('rewrite-area');
+    box.innerHTML = `
+      <div class="rewrite-box">
+        <div class="rewrite-label">✨ Corrected Version</div>
+        <button class="copy-btn" onclick="copyText('${escHtml(rewritten.replace(/'/g,"\\'").replace(/\n/g,'\\n'))}')">Copy</button>
+        <div>${rewritten.replace(/\n/g,'<br>')}</div>
+      </div>
+      <div style="font-size:.72rem;color:#555;margin-top:4px">The rewrite preserves your meaning while fixing errors. Compare with your original to learn!</div>`;
+  } catch(e) {
+    document.getElementById('rewrite-area').innerHTML = `<div class="alert error">Error: ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Rewrite';
+    updateCheckBtn();
+  }
+}
+
+// ==================== RENDER RESULTS ====================
+function renderResults(json, text) {
+  // Scores
+  const sr = document.getElementById('score-row');
+  sr.style.display = 'flex';
+  setScore('overall', json.scores?.overall);
+  setScore('grammar', json.scores?.grammar);
+  setScore('vocab',   json.scores?.vocabulary);
+  setScore('clarity', json.scores?.clarity);
+
+  // Corrections
+  const area = document.getElementById('corrections-area');
+  const corr = json.corrections || [];
+  if(!corr.length) {
+    area.innerHTML = `<div class="alert info">✓ Great writing! No significant errors found.</div>`;
+    if(json.summary) area.innerHTML += `<div class="tip-item">${json.summary}</div>`;
+  } else {
+    let html = '';
+    if(json.summary) html += `<div class="alert info">${json.summary}</div>`;
+    html += '<div class="corrections">';
+    corr.forEach(c => {
+      html += `<div class="correction-item ${c.type}">
+        <div class="c-type ${c.type}">${c.type}</div>
+        <div class="c-before">${escHtml(c.original || '')}</div>
+        <div class="c-after">→ ${escHtml(c.corrected || '')}</div>
+        <div class="c-tip">💡 ${escHtml(c.tip || '')}</div>
+      </div>`;
+    });
+    html += '</div>';
+    area.innerHTML = html;
+  }
+
+  // Highlighted text
+  renderHighlighted(text, corr);
+
+  // Tips
+  const tips = json.tips || [];
+  const ta = document.getElementById('tips-area');
+  if(!tips.length) { ta.innerHTML = '<div class="result-placeholder">No specific tips this time.</div>'; }
+  else {
+    ta.innerHTML = '<div class="tips-list">' + tips.map(t => `
+      <div class="tip-item">
+        <strong>${escHtml(t.title || '')}</strong><br>
+        ${escHtml(t.body || '')}
+      </div>`).join('') + '</div>';
+  }
+}
+
+function setScore(name, val) {
+  const v = Math.min(100, Math.max(0, val || 0));
+  const colors = {overall:'#00d4ff', grammar:'#ff4466', vocab:'#00ff88', clarity:'#aa88ff'};
+  document.getElementById('score-' + name).textContent = v + '/100';
+  const bar = document.getElementById('bar-' + name);
+  bar.style.width = v + '%';
+  bar.style.background = colors[name] || '#00d4ff';
+}
+
+function renderHighlighted(text, corr) {
+  let html = escHtml(text);
+  // Replace each correction's original phrase with highlighted span
+  // Process in reverse order to preserve positions
+  const sorted = [...corr].sort((a,b) => (b.original?.length||0) - (a.original?.length||0));
+  sorted.forEach((c, i) => {
+    if(!c.original) return;
+    const esc = escHtmlReg(c.original);
+    const tipText = escHtml(c.tip || '').replace(/'/g,'&#39;');
+    const corrText = escHtml(c.corrected || '').replace(/'/g,'&#39;');
+    html = html.replace(esc, `<span class="hl-${c.type}" data-tip="${tipText}" data-corr="${corrText}" data-type="${c.type}" onmouseenter="showTip(event,this)" onmouseleave="hideTip()">${esc}</span>`);
+  });
+  document.getElementById('highlighted-text').innerHTML = html.replace(/\n/g,'<br>');
+}
+
+function showTip(e, el) {
+  const tt = document.getElementById('tooltip');
+  tt.innerHTML = `<strong style="color:${typeColor(el.dataset.type)}">${el.dataset.type.toUpperCase()}</strong><br>→ ${el.dataset.corr}<br><span style="color:#aaa">${el.dataset.tip}</span>`;
+  tt.style.display = 'block';
+  tt.style.left = (e.clientX + 12) + 'px';
+  tt.style.top = (e.clientY - 10) + 'px';
+}
+function hideTip() { document.getElementById('tooltip').style.display = 'none'; }
+function typeColor(t) { return {grammar:'#ff4466',spelling:'#ffaa00',style:'#aa88ff',vocabulary:'#00ff88'}[t]||'#00d4ff'; }
+
+// ==================== HISTORY ====================
+function saveToHistory(text, json) {
+  const item = {
+    ts: Date.now(),
+    preview: text.slice(0, 80),
+    score: json.scores?.overall || 0,
+    count: (json.corrections || []).length,
+    level: currentLevel
+  };
+  history.unshift(item);
+  if(history.length > 20) history.pop();
+  persist();
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if(!history.length) { el.innerHTML = '<div class="result-placeholder">No history yet.</div>'; return; }
+  el.innerHTML = history.map((h,i) => `
+    <div class="history-item" onclick="loadHistory(${i})">
+      <div class="history-preview">${escHtml(h.preview)}…</div>
+      <div class="history-meta">${new Date(h.ts).toLocaleString()} · Score: ${h.score}/100 · ${h.count} corrections · ${h.level}</div>
+    </div>`).join('');
+}
+
+function loadHistory(i) {
+  const h = history[i];
+  if(h) {
+    document.getElementById('user-text').value = h.preview;
+    onTextInput();
+    showTab('corrections');
+  }
+}
+
+function clearHistory() {
+  history = [];
+  persist();
+  renderHistory();
+}
+
+// ==================== UTILS ====================
+function parseJSON(raw) {
+  // strip markdown code fences if present
+  const cleaned = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+  return JSON.parse(cleaned);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escHtmlReg(s) {
+  return escHtml(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function copyText(txt) {
+  navigator.clipboard.writeText(txt.replace(/\\n/g,'\n')).catch(() => {});
+}
+
+function persist() {
+  try { localStorage.setItem('esl-checker-v1', JSON.stringify({key: apiKey, history})); } catch(e) {}
+}
+</script>
+</body>
+</html>

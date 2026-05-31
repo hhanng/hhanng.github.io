@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent #74 — App Store Optimization Suite</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#1a0a1e;--card:#2d1a35;--accent:#e879f9;--secondary:#818cf8;
+    --text:#fff;--muted:#a78bba;--border:#4a2d5a;--red:#f87171;--amber:#fbbf24;--green:#34d399;
+  }
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+  header{background:linear-gradient(135deg,#2d1a35,#1a0a1e);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;gap:12px}
+  header .logo{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--secondary));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+  header h1{font-size:18px;font-weight:700}
+  header span{font-size:12px;color:var(--muted);display:block;margin-top:2px}
+  .tabs{display:flex;background:#12061a;border-bottom:1px solid var(--border);overflow-x:auto}
+  .tab{padding:14px 20px;font-size:13px;font-weight:600;letter-spacing:.05em;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;transition:.2s}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab:hover:not(.active){color:var(--text)}
+  .panel{display:none;padding:20px;max-width:900px;margin:0 auto}
+  .panel.active{display:block}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+  input,select,textarea{width:100%;background:#12061a;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;outline:none;transition:.2s;font-family:inherit}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,121,249,.15)}
+  select option{background:#1a0a1e}
+  textarea{resize:vertical;min-height:80px}
+  .counter{text-align:right;font-size:11px;color:var(--muted);margin-top:4px}
+  .counter.warn{color:var(--amber)}
+  .counter.over{color:var(--red)}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:.2s}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#c026d3);color:#fff}
+  .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+  .btn-secondary{background:var(--card);border:1px solid var(--border);color:var(--text)}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-sm{padding:6px 12px;font-size:12px}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:600px){.grid-2{grid-template-columns:1fr}}
+  /* Score */
+  .score-badge{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;font-size:22px;font-weight:800;border:3px solid}
+  .score-red{color:var(--red);border-color:var(--red)}
+  .score-amber{color:var(--amber);border-color:var(--amber)}
+  .score-green{color:var(--green);border-color:var(--green)}
+  .score-row{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+  .score-info h3{font-size:16px;font-weight:700}
+  .score-info p{font-size:12px;color:var(--muted);margin-top:2px}
+  .field-score{display:flex;align-items:center;justify-content:space-between;padding:12px;background:#12061a;border-radius:8px;margin-bottom:8px}
+  .field-score-bar{flex:1;height:6px;background:#2d1a35;border-radius:3px;margin:0 12px;overflow:hidden}
+  .field-score-fill{height:100%;border-radius:3px;transition:.5s}
+  .tips-list{margin-top:8px;padding-left:16px}
+  .tips-list li{font-size:12px;color:var(--muted);margin-bottom:4px}
+  /* Keywords */
+  .kw-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .kw-row input{flex:1}
+  .kw-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
+  .kw-low{background:#14532d;color:#4ade80}
+  .kw-med{background:#713f12;color:#fbbf24}
+  .kw-high{background:#7f1d1d;color:#f87171}
+  .kw-item{background:#12061a;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+  .kw-item-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .kw-item-name{font-weight:600;flex:1}
+  .kw-meta{display:flex;gap:8px;flex-wrap:wrap}
+  .kw-meta span{font-size:11px;color:var(--muted)}
+  .kw-meta strong{color:var(--text)}
+  .kw-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .kw-tag{font-size:11px;background:rgba(129,140,248,.15);border:1px solid rgba(129,140,248,.3);color:var(--secondary);padding:2px 8px;border-radius:12px;cursor:pointer;transition:.2s}
+  .kw-tag:hover{background:rgba(129,140,248,.3)}
+  .kw-string-box{background:#12061a;border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:12px}
+  .kw-string-display{font-size:13px;color:var(--accent);word-break:break-all;min-height:24px;margin-bottom:8px}
+  .kw-slots{display:flex;flex-wrap:wrap;gap:6px;min-height:32px}
+  .kw-slot{background:rgba(232,121,249,.15);border:1px solid rgba(232,121,249,.3);color:var(--accent);padding:4px 10px;border-radius:16px;font-size:12px;cursor:grab;user-select:none;display:flex;align-items:center;gap:4px}
+  .kw-slot .remove{cursor:pointer;opacity:.6;font-size:14px;line-height:1}
+  .kw-slot .remove:hover{opacity:1}
+  /* Preview */
+  .preview-toggle{display:flex;gap:8px;margin-bottom:16px}
+  .toggle-btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);transition:.2s}
+  .toggle-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .ios-card{background:#fff;border-radius:16px;padding:16px;max-width:380px;margin:0 auto;color:#000}
+  .ios-card .app-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .ios-card .app-icon{width:64px;height:64px;background:linear-gradient(135deg,#e879f9,#818cf8);border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px}
+  .ios-card .app-info h2{font-size:16px;font-weight:700;color:#000}
+  .ios-card .app-info p{font-size:12px;color:#666;margin-top:2px}
+  .ios-card .rating-row{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .ios-card .stars{color:#ff9f0a;font-size:12px}
+  .ios-card .rating-count{font-size:11px;color:#999}
+  .ios-card .get-btn{background:#0a84ff;color:#fff;border:none;padding:6px 18px;border-radius:16px;font-size:13px;font-weight:700;cursor:pointer}
+  .ios-screenshots{display:flex;gap:8px;margin:12px 0;overflow:hidden}
+  .ios-screenshots .ss{width:110px;height:180px;background:#e5e5ea;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#999}
+  .ios-card .desc{font-size:13px;color:#333;line-height:1.5;margin-top:12px}
+  .gplay-card{background:#202124;border-radius:16px;padding:16px;max-width:380px;margin:0 auto}
+  .gplay-card .gplay-header{display:flex;gap:12px;margin-bottom:12px}
+  .gplay-card .app-icon{width:64px;height:64px;background:linear-gradient(135deg,#e879f9,#818cf8);border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px}
+  .gplay-card .gplay-info h2{font-size:15px;font-weight:600;color:#fff}
+  .gplay-card .gplay-info .dev{font-size:12px;color:#01875f;margin-top:2px}
+  .gplay-card .gplay-info .cat{font-size:11px;color:#9aa0a6;margin-top:4px}
+  .gplay-install{background:#01875f;color:#fff;border:none;padding:10px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin:8px 0}
+  .gplay-screenshots{display:flex;gap:8px;overflow:hidden;margin:8px 0}
+  .gplay-screenshots .ss{width:120px;height:190px;background:#3c4043;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9aa0a6}
+  .gplay-desc{font-size:13px;color:#e8eaed;line-height:1.5;margin-top:8px}
+  .gplay-stars{color:#fdd663;font-size:12px;margin-top:4px}
+  /* Checklist */
+  .checklist-group{margin-bottom:16px}
+  .checklist-group-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .checklist-group-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .progress-bar{height:6px;background:#12061a;border-radius:3px;overflow:hidden;margin-bottom:12px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--secondary));border-radius:3px;transition:.3s}
+  .checklist-item{display:flex;gap:12px;align-items:flex-start;padding:10px;background:#12061a;border-radius:8px;margin-bottom:6px;cursor:pointer;transition:.2s}
+  .checklist-item:hover{background:#1a0a2e}
+  .checklist-item.done .item-title{text-decoration:line-through;color:var(--muted)}
+  .check-box{width:20px;height:20px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s;margin-top:1px}
+  .checklist-item.done .check-box{background:var(--accent);border-color:var(--accent)}
+  .item-title{font-size:13px;font-weight:600}
+  .item-why{font-size:11px;color:var(--muted);margin-top:3px}
+  .overall-progress{text-align:center;margin-bottom:20px}
+  .big-pct{font-size:48px;font-weight:800;color:var(--accent)}
+  .big-pct-label{font-size:13px;color:var(--muted);margin-top:4px}
+  /* Misc */
+  .row{display:flex;align-items:center;gap:12px}
+  .row-between{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .mt-8{margin-top:8px}
+  .mt-12{margin-top:12px}
+  .mt-16{margin-top:16px}
+  .text-muted{color:var(--muted);font-size:12px}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+  .results-section{margin-top:20px}
+  .section-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .copy-btn{font-size:11px;padding:4px 10px;background:rgba(129,140,248,.15);border:1px solid rgba(129,140,248,.3);color:var(--secondary);border-radius:6px;cursor:pointer;transition:.2s}
+  .copy-btn:hover{background:rgba(129,140,248,.3)}
+  hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+  .footer{text-align:center;padding:24px;font-size:12px;color:var(--muted)}
+  .footer a{color:var(--secondary);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📱</div>
+  <div>
+    <h1>App Store Optimization Suite</h1>
+    <span>Agent #74 · 100 AI Agents Challenge</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('optimize')">OPTIMIZE</div>
+  <div class="tab" onclick="switchTab('keywords')">KEYWORDS</div>
+  <div class="tab" onclick="switchTab('preview')">PREVIEW</div>
+  <div class="tab" onclick="switchTab('checklist')">CHECKLIST</div>
+</div>
+
+<!-- ═══════════════════════════════ OPTIMIZE ═══════════════════════════════ -->
+<div id="panel-optimize" class="panel active">
+  <div class="card">
+    <div class="section-title">App Info</div>
+    <div class="grid-2">
+      <div>
+        <label>App Name / Title</label>
+        <input type="text" id="app-name" placeholder="e.g. FocusFlow — Daily Planner" oninput="updateCounter('app-name','name-count',30,50)" maxlength="60">
+        <div class="counter" id="name-count">0 / 30</div>
+      </div>
+      <div>
+        <label>Category</label>
+        <select id="app-category">
+          <option value="">Select category…</option>
+          <option>Productivity</option><option>Health & Fitness</option><option>Finance</option>
+          <option>Education</option><option>Entertainment</option><option>Social Networking</option>
+          <option>Photo & Video</option><option>Music</option><option>Games</option>
+          <option>Travel</option><option>Food & Drink</option><option>Shopping</option>
+          <option>Lifestyle</option><option>News</option><option>Sports</option>
+          <option>Utilities</option><option>Medical</option><option>Business</option>
+          <option>Navigation</option><option>Developer Tools</option>
+        </select>
+      </div>
+    </div>
+    <div class="mt-12">
+      <label>Primary Keyword</label>
+      <input type="text" id="primary-kw" placeholder="e.g. daily planner" oninput="syncKwPreview()">
+    </div>
+    <div class="mt-12">
+      <label>Short Description / Subtitle <span class="text-muted">(80 chars max)</span></label>
+      <input type="text" id="short-desc" placeholder="e.g. Plan your day, boost focus & hit goals" oninput="updateCounter('short-desc','short-count',60,80)" maxlength="80">
+      <div class="counter" id="short-count">0 / 80</div>
+    </div>
+    <div class="mt-12">
+      <label>Long Description <span class="text-muted">(4000 chars max)</span></label>
+      <textarea id="long-desc" rows="5" placeholder="Describe your app's features, benefits, and value proposition…" oninput="updateCounter('long-desc','long-count',2500,4000)" maxlength="4000"></textarea>
+      <div class="counter" id="long-count">0 / 4000</div>
+    </div>
+    <div class="mt-16">
+      <button class="btn btn-primary" onclick="runAnalysis()">⚡ Analyze ASO Score</button>
+    </div>
+  </div>
+
+  <div id="results-area" style="display:none">
+    <div class="card">
+      <div class="row-between">
+        <div>
+          <div class="section-title">Overall ASO Score</div>
+          <div class="row mt-8">
+            <div class="score-badge" id="overall-badge">—</div>
+            <div class="score-info">
+              <h3 id="overall-label">—</h3>
+              <p id="overall-sub">Run analysis to get your score</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Field Scores</div>
+      <div id="field-scores"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Improvement Tips</div>
+      <div id="tips-area"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ KEYWORDS ═══════════════════════════════ -->
+<div id="panel-keywords" class="panel">
+  <div class="card">
+    <div class="section-title">Enter Keyword Ideas <span class="text-muted">(up to 10)</span></div>
+    <div id="kw-inputs"></div>
+    <div class="mt-8 row">
+      <button class="btn btn-secondary btn-sm" onclick="addKwInput()">+ Add keyword</button>
+      <button class="btn btn-primary btn-sm" onclick="analyzeKeywords()" style="margin-left:8px">Analyze Keywords</button>
+    </div>
+  </div>
+
+  <div id="kw-results" style="display:none">
+    <div class="card">
+      <div class="section-title">Keyword Analysis</div>
+      <div id="kw-analysis-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Apple App Store Keyword String Builder <span class="text-muted">(100 chars)</span></div>
+      <p class="text-muted mt-8" style="margin-bottom:10px">Click keywords below to add them. Drag to reorder. Target: under 100 characters.</p>
+      <div class="kw-slots" id="kw-slots"></div>
+      <div class="kw-string-box mt-12">
+        <div class="section-title" style="margin-bottom:6px">Keyword String Preview</div>
+        <div class="kw-string-display" id="kw-string-display">—</div>
+        <div class="row-between">
+          <span class="counter" id="kw-string-count">0 / 100 characters</span>
+          <button class="copy-btn" onclick="copyKwString()">Copy</button>
+        </div>
+      </div>
+      <div class="mt-12">
+        <div class="section-title" style="margin-bottom:6px">Available Keywords (click to add)</div>
+        <div id="kw-available-tags" class="kw-tags"></div>
+      </div>
+      <div class="mt-12 row">
+        <button class="btn btn-secondary btn-sm" onclick="saveKwSet()">💾 Save Set</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadKwSet()" style="margin-left:8px">📂 Load Set</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ PREVIEW ═══════════════════════════════ -->
+<div id="panel-preview" class="panel">
+  <div class="preview-toggle">
+    <button class="toggle-btn active" id="toggle-ios" onclick="switchPreview('ios')">📱 iOS App Store</button>
+    <button class="toggle-btn" id="toggle-gplay" onclick="switchPreview('gplay')">🤖 Google Play</button>
+  </div>
+  <p class="text-muted" style="margin-bottom:16px">Fill in app info on the Optimize tab to see a live preview.</p>
+
+  <div id="preview-ios">
+    <div class="ios-card">
+      <div class="app-row">
+        <div class="app-icon">📱</div>
+        <div class="app-info">
+          <h2 id="prev-ios-name">Your App Name</h2>
+          <p id="prev-ios-sub">Your subtitle goes here</p>
+          <div class="rating-row">
+            <span class="stars">★★★★★</span>
+            <span class="rating-count">4.8 • 2.3K Ratings</span>
+            <button class="get-btn" style="margin-left:auto">GET</button>
+          </div>
+        </div>
+      </div>
+      <div class="ios-screenshots">
+        <div class="ss">Screenshot 1</div>
+        <div class="ss">Screenshot 2</div>
+        <div class="ss">Screenshot 3</div>
+      </div>
+      <div class="desc" id="prev-ios-desc">Your long description preview will appear here once you fill in the Optimize tab.</div>
+    </div>
+  </div>
+
+  <div id="preview-gplay" style="display:none">
+    <div class="gplay-card">
+      <div class="gplay-header">
+        <div class="app-icon">📱</div>
+        <div class="gplay-info">
+          <h2 id="prev-gplay-name">Your App Name</h2>
+          <div class="dev">Your Developer Name</div>
+          <div class="cat" id="prev-gplay-cat">Category • 100K+ downloads</div>
+          <div class="gplay-stars">★★★★★ 4.8</div>
+        </div>
+      </div>
+      <button class="gplay-install">Install</button>
+      <div class="gplay-screenshots">
+        <div class="ss">Screenshot 1</div>
+        <div class="ss">Screenshot 2</div>
+        <div class="ss">Screenshot 3</div>
+      </div>
+      <div class="gplay-desc" id="prev-gplay-desc">Your long description preview will appear here once you fill in the Optimize tab.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ CHECKLIST ═══════════════════════════════ -->
+<div id="panel-checklist" class="panel">
+  <div class="overall-progress">
+    <div class="big-pct" id="check-pct">0%</div>
+    <div class="big-pct-label">Launch Readiness</div>
+  </div>
+  <div id="checklist-groups"></div>
+</div>
+
+<div class="footer">
+  Agent #74 · <a href="https://hhanng.github.io" target="_blank">100 AI Agents Challenge</a> · All data stays in your browser
+</div>
+
+<script>
+// ══════════════ TABS ══════════════
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['optimize','keywords','preview','checklist'][i]===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='preview') refreshPreview();
+}
+
+// ══════════════ COUNTERS ══════════════
+function updateCounter(inputId,counterId,warn,max){
+  const el=document.getElementById(inputId);
+  const c=document.getElementById(counterId);
+  const len=el.value.length;
+  c.textContent=len+' / '+max;
+  c.className='counter'+(len>max?' over':len>warn?' warn':'');
+}
+
+function syncKwPreview(){
+  // live update preview
+  refreshPreview();
+}
+
+// ══════════════ OPTIMIZE / ANALYSIS ══════════════
+function scoreTitle(name,kw){
+  let score=50,tips=[];
+  const len=name.length;
+  if(len>=25&&len<=35){score+=20}else if(len>=20&&len<=45){score+=10;tips.push('Ideal title length is 25–35 characters — you have '+len+'.')}
+  else{tips.push('Title is '+len+' chars. Aim for 25–35 characters for best visibility.')}
+  const words=name.toLowerCase().split(/\s+/).filter(Boolean);
+  const unique=new Set(words).size;
+  if(unique>=4)score+=15;else tips.push('Use more unique words in your title to broaden discoverability.');
+  if(kw&&name.toLowerCase().includes(kw.toLowerCase())){score+=15}else if(kw){tips.push('Include your primary keyword "'+kw+'" in the app title.')}
+  if(/[|•\-]/.test(name)){score+=5}else{tips.push('Consider adding a separator (e.g. " — " or " | ") to split your brand name and value prop.')}
+  return{score:Math.min(100,score),tips};
+}
+function scoreShortDesc(desc,kw){
+  let score=40,tips=[];
+  if(!desc){return{score:0,tips:['Short description / subtitle is empty — fill it in.']}}
+  const words=desc.toLowerCase().split(/\s+/).filter(Boolean);
+  const first10=words.slice(0,10).join(' ');
+  if(kw&&first10.includes(kw.toLowerCase())){score+=25}else if(kw){tips.push('Put your keyword "'+kw+'" in the first 10 words of the subtitle.')}
+  const actionVerbs=['track','boost','manage','build','plan','discover','create','share','connect','learn','organize','automate','simplify','improve','achieve'];
+  if(actionVerbs.some(v=>desc.toLowerCase().startsWith(v))||actionVerbs.some(v=>words[0]===v)){score+=15}else{tips.push('Start your subtitle with a strong action verb (Track, Boost, Manage, etc.).')}
+  if(desc.length>=40)score+=10;else tips.push('Subtitle is short. Aim for 40–80 characters to fill the space.');
+  if(desc.length<=80)score+=10;else tips.push('Subtitle exceeds 80 chars — Apple will truncate it.');
+  const benefitWords=['fast','easy','simple','powerful','smart','free','instant','daily','best'];
+  if(benefitWords.some(b=>desc.toLowerCase().includes(b)))score+=5;
+  return{score:Math.min(100,score),tips};
+}
+function scoreLongDesc(desc,kw){
+  let score=40,tips=[];
+  if(!desc){return{score:0,tips:['Long description is empty — add one.']}}
+  const wordCount=desc.split(/\s+/).filter(Boolean).length;
+  if(wordCount>=200)score+=15;else tips.push('Add more content — aim for 200+ words for better indexing.');
+  if(kw){
+    const kwCount=(desc.toLowerCase().match(new RegExp(kw.toLowerCase(),'g'))||[]).length;
+    const density=kwCount/wordCount;
+    if(density>=0.01&&density<=0.04)score+=20;
+    else if(kwCount===0)tips.push('Include your keyword "'+kw+'" naturally in the description.');
+    else if(density>0.05)tips.push('Keyword density is high — reduce "'+kw+'" mentions to avoid keyword stuffing.');
+    else score+=10;
+  }
+  if(/^[\s\S]*[-•*]\s/m.test(desc))score+=15;else tips.push('Add bullet points or lists (using -, •, or *) to improve readability.');
+  if(/\n\n|\r\n\r\n/.test(desc))score+=10;else tips.push('Break your description into paragraphs with blank lines for readability.');
+  const ctaWords=['download','try','get','install','start','join','sign up'];
+  if(ctaWords.some(c=>desc.toLowerCase().includes(c)))score+=5;else tips.push('Add a call to action at the end (e.g., "Download now and start today!").');
+  return{score:Math.min(100,score),tips};
+}
+function getScoreColor(s){return s>=80?'green':s>=60?'amber':'red'}
+function renderBar(score){
+  const c=getScoreColor(score);
+  const color=c==='green'?'var(--green)':c==='amber'?'var(--amber)':'var(--red)';
+  return`<div class="field-score-bar"><div class="field-score-fill" style="width:${score}%;background:${color}"></div></div>`;
+}
+function runAnalysis(){
+  const name=document.getElementById('app-name').value.trim();
+  const kw=document.getElementById('primary-kw').value.trim();
+  const shortDesc=document.getElementById('short-desc').value.trim();
+  const longDesc=document.getElementById('long-desc').value.trim();
+  if(!name){alert('Please enter an app name.');return;}
+  const t=scoreTitle(name,kw);
+  const s=scoreShortDesc(shortDesc,kw);
+  const l=scoreLongDesc(longDesc,kw);
+  const overall=Math.round((t.score+s.score+l.score)/3);
+  // Badge
+  const badge=document.getElementById('overall-badge');
+  const c=getScoreColor(overall);
+  badge.textContent=overall;
+  badge.className='score-badge score-'+c;
+  const labels={green:'Excellent',amber:'Needs Work',red:'Poor'};
+  const subs={green:'Your listing is well-optimized for the app stores.',amber:'A few improvements could significantly boost your visibility.',red:'Several critical improvements needed before launch.'};
+  document.getElementById('overall-label').textContent=labels[c]+' — '+overall+'/100';
+  document.getElementById('overall-sub').textContent=subs[c];
+  // Field scores
+  const fields=[
+    {name:'App Title / Name',score:t.score},
+    {name:'Short Description / Subtitle',score:s.score},
+    {name:'Long Description',score:l.score}
+  ];
+  document.getElementById('field-scores').innerHTML=fields.map(f=>`
+    <div class="field-score">
+      <span style="font-size:13px;width:180px;flex-shrink:0">${f.name}</span>
+      ${renderBar(f.score)}
+      <span style="font-size:13px;font-weight:700;width:40px;text-align:right;color:${f.score>=80?'var(--green)':f.score>=60?'var(--amber)':'var(--red)'}">${f.score}</span>
+    </div>
+  `).join('');
+  // Tips
+  const allTips=[
+    {field:'Title',tips:t.tips},
+    {field:'Short Description',tips:s.tips},
+    {field:'Long Description',tips:l.tips}
+  ].filter(g=>g.tips.length);
+  document.getElementById('tips-area').innerHTML=allTips.length
+    ?allTips.map(g=>`<div style="margin-bottom:12px"><div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--accent)">${g.field}</div><ul class="tips-list">${g.tips.map(t=>`<li>${t}</li>`).join('')}</ul></div>`).join('')
+    :`<p style="color:var(--green);font-size:13px">✓ Great work! No major issues found.</p>`;
+  document.getElementById('results-area').style.display='block';
+  refreshPreview();
+}
+
+// ══════════════ KEYWORDS ══════════════
+let kwInputs=[];
+let kwSlotItems=[];
+const suffixes=['app','free','best','for iPhone','2024','tool','tracker','online','pro','download'];
+function init_kw(){
+  const c=document.getElementById('kw-inputs');
+  if(c.children.length===0) for(let i=0;i<3;i++) addKwInput();
+}
+function addKwInput(){
+  const div=document.getElementById('kw-inputs');
+  if(div.children.length>=10)return;
+  const row=document.createElement('div');
+  row.className='kw-row';
+  row.innerHTML=`<input type="text" placeholder="Keyword ${div.children.length+1}…">`;
+  div.appendChild(row);
+}
+function competitionEst(word){
+  const l=word.split(' ').length;
+  if(l>=3)return{label:'Low',cls:'kw-low'};
+  if(l===2)return{label:'Med',cls:'kw-med'};
+  return{label:'High',cls:'kw-high'};
+}
+function analyzeKeywords(){
+  const inputs=document.querySelectorAll('#kw-inputs input');
+  const kws=[...inputs].map(i=>i.value.trim()).filter(Boolean);
+  if(!kws.length){alert('Enter at least one keyword.');return;}
+  const list=document.getElementById('kw-analysis-list');
+  list.innerHTML=kws.map(kw=>{
+    const comp=competitionEst(kw);
+    const len=kw.length;
+    const lenScore=len<=10?'Short — ideal':len<=20?'Medium':' Long — may not index well';
+    const isSpecific=kw.split(' ').length>=2;
+    const vars=suffixes.filter(s=>!kw.toLowerCase().includes(s)).slice(0,5).map(s=>kw+' '+s);
+    return`<div class="kw-item">
+      <div class="kw-item-top">
+        <span class="kw-item-name">${kw}</span>
+        <span class="kw-badge ${comp.cls}">${comp.label} Competition</span>
+      </div>
+      <div class="kw-meta">
+        <span>Length: <strong>${len} chars</strong> · ${lenScore}</span>
+        <span>Specificity: <strong>${isSpecific?'Specific (long-tail)':'Generic (broad)'}</strong></span>
+      </div>
+      <div class="kw-tags">${vars.map(v=>`<span class="kw-tag" onclick="addKwSlot('${v}')">${v}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+  // available tags
+  kwSlotItems=[];
+  document.getElementById('kw-slots').innerHTML='';
+  updateKwString();
+  document.getElementById('kw-available-tags').innerHTML=kws.map(k=>`<span class="kw-tag" onclick="addKwSlot('${k}')">${k}</span>`).join('');
+  document.getElementById('kw-results').style.display='block';
+}
+function addKwSlot(kw){
+  if(kwSlotItems.includes(kw))return;
+  kwSlotItems.push(kw);
+  renderKwSlots();
+}
+function removeKwSlot(kw){
+  kwSlotItems=kwSlotItems.filter(k=>k!==kw);
+  renderKwSlots();
+}
+function renderKwSlots(){
+  const c=document.getElementById('kw-slots');
+  c.innerHTML=kwSlotItems.map(k=>`<div class="kw-slot" draggable="true" data-kw="${k}">${k}<span class="remove" onclick="removeKwSlot('${k}')">×</span></div>`).join('');
+  updateKwString();
+}
+function updateKwString(){
+  const str=kwSlotItems.join(',');
+  document.getElementById('kw-string-display').textContent=str||'—';
+  const cnt=document.getElementById('kw-string-count');
+  cnt.textContent=str.length+' / 100 characters';
+  cnt.className='counter'+(str.length>100?' over':str.length>85?' warn':'');
+}
+function copyKwString(){
+  const s=kwSlotItems.join(',');
+  navigator.clipboard.writeText(s).then(()=>{
+    const btn=document.querySelector('.copy-btn');
+    btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500);
+  });
+}
+function saveKwSet(){
+  const key='aso74_kwset_'+Date.now();
+  localStorage.setItem(key,JSON.stringify(kwSlotItems));
+  alert('Keyword set saved! Key: '+key.replace('aso74_kwset_',''));
+}
+function loadKwSet(){
+  const keys=Object.keys(localStorage).filter(k=>k.startsWith('aso74_kwset_'));
+  if(!keys.length){alert('No saved keyword sets found.');return;}
+  const latest=keys.sort().pop();
+  kwSlotItems=JSON.parse(localStorage.getItem(latest));
+  renderKwSlots();
+}
+
+// ══════════════ PREVIEW ══════════════
+function switchPreview(mode){
+  document.getElementById('preview-ios').style.display=mode==='ios'?'block':'none';
+  document.getElementById('preview-gplay').style.display=mode==='gplay'?'block':'none';
+  document.getElementById('toggle-ios').classList.toggle('active',mode==='ios');
+  document.getElementById('toggle-gplay').classList.toggle('active',mode==='gplay');
+}
+function refreshPreview(){
+  const name=document.getElementById('app-name').value||'Your App Name';
+  const sub=document.getElementById('short-desc').value||'Your subtitle goes here';
+  const desc=(document.getElementById('long-desc').value||'Your long description preview will appear here once you fill in the Optimize tab.').substring(0,300);
+  const cat=document.getElementById('app-category').value||'Category';
+  document.getElementById('prev-ios-name').textContent=name;
+  document.getElementById('prev-ios-sub').textContent=sub;
+  document.getElementById('prev-ios-desc').textContent=desc;
+  document.getElementById('prev-gplay-name').textContent=name;
+  document.getElementById('prev-gplay-cat').textContent=cat+' • 100K+ downloads';
+  document.getElementById('prev-gplay-desc').textContent=desc;
+}
+
+// ══════════════ CHECKLIST ══════════════
+const CHECKLIST=[
+  {group:'📝 Metadata',items:[
+    {id:'c1',title:'App title includes primary keyword',why:'The title is the #1 ranking factor — keyword here drives indexed traffic.'},
+    {id:'c2',title:'Subtitle / short description uses secondary keyword',why:'Apple indexes this field; Google indexes the full short description.'},
+    {id:'c3',title:'Long description uses keyword naturally (1–3%)',why:'Keyword stuffing hurts ranking. Natural density signals relevance.'},
+    {id:'c4',title:'Keyword field filled to 100 chars (iOS)',why:'Every unused character is a missed ranking opportunity.'},
+    {id:'c5',title:'App name is unique and brand-safe',why:'Copycat-sounding names hurt trust and may violate store policies.'},
+  ]},
+  {group:'🎨 Visuals',items:[
+    {id:'c6',title:'App icon follows platform guidelines',why:'iOS icons: no transparency; Android: no required shape.'},
+    {id:'c7',title:'At least 5 screenshots uploaded',why:'More screenshots increase conversion. Feature USPs in each.'},
+    {id:'c8',title:'First screenshot shows core value proposition',why:'Many users only see the first 2 screenshots before the fold.'},
+    {id:'c9',title:'Screenshots include captions or UI callouts',why:'Text overlays increase conversion by up to 20%.'},
+    {id:'c10',title:'Preview video uploaded (iOS) or promo video (Play)',why:'Videos increase listing page time and conversion rates.'},
+  ]},
+  {group:'⭐ Ratings & Reviews',items:[
+    {id:'c11',title:'In-app review prompt configured',why:'Apps that ask for reviews at the right moment get 5–10× more.'},
+    {id:'c12',title:'Review prompt triggers after a positive action',why:'Asking after success (task complete, level up) boosts star ratings.'},
+    {id:'c13',title:'All existing reviews have been responded to',why:'Responding to reviews signals engagement; raises ranking signals.'},
+    {id:'c14',title:'Bug reports in reviews have been resolved',why:'Unresolved complaints show in Review Summary and hurt installs.'},
+    {id:'c15',title:'Rating over 4.0 stars',why:'Below 4.0 is shown prominently; users filter out low-rated apps.'},
+  ]},
+  {group:'🌍 Localization',items:[
+    {id:'c16',title:'App listing localized for top 3 target markets',why:'Localized listings rank higher in non-English App Store regions.'},
+    {id:'c17',title:'Screenshots localized (UI language matches market)',why:'Users convert 2–3× better when screenshots show their language.'},
+    {id:'c18',title:'App supports right-to-left layout (if needed)',why:'Arabic and Hebrew markets are large and under-served.'},
+    {id:'c19',title:'App name not trademarked in target countries',why:'IP disputes can trigger de-listing with little notice.'},
+    {id:'c20',title:'In-app purchases localized for pricing and currency',why:'Non-native prices reduce purchase intent.'},
+  ]},
+  {group:'📊 Analytics',items:[
+    {id:'c21',title:'App analytics SDK integrated (e.g. Firebase)',why:'Without data, you can\'t know which ASO change moved the needle.'},
+    {id:'c22',title:'App Store Connect / Play Console analytics reviewed',why:'Conversion rate, impressions, and source data guide next iteration.'},
+    {id:'c23',title:'A/B test for icon or screenshots planned',why:'Even a 5% conversion lift compounds into thousands of extra installs.'},
+    {id:'c24',title:'Competitor listings reviewed for keyword gaps',why:'Stealing competitor keywords is the fastest short-term ASO win.'},
+    {id:'c25',title:'Release notes are informative and keyword-rich',why:'Release notes are indexed and shown prominently after updates.'},
+  ]}
+];
+let checkState={};
+function saveChecks(){localStorage.setItem('aso74_checks',JSON.stringify(checkState));}
+function loadChecks(){
+  try{checkState=JSON.parse(localStorage.getItem('aso74_checks'))||{};}catch(e){checkState={};}
+}
+function renderChecklist(){
+  loadChecks();
+  const c=document.getElementById('checklist-groups');
+  c.innerHTML=CHECKLIST.map(g=>{
+    const done=g.items.filter(i=>checkState[i.id]).length;
+    const pct=Math.round(done/g.items.length*100);
+    return`<div class="checklist-group card">
+      <div class="checklist-group-header">
+        <div class="checklist-group-title">${g.group}</div>
+        <span class="text-muted">${done}/${g.items.length}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      ${g.items.map(item=>`
+        <div class="checklist-item${checkState[item.id]?' done':''}" onclick="toggleCheck('${item.id}')">
+          <div class="check-box">${checkState[item.id]?'✓':''}</div>
+          <div><div class="item-title">${item.title}</div><div class="item-why">${item.why}</div></div>
+        </div>
+      `).join('')}
+    </div>`;
+  }).join('');
+  updateOverallPct();
+}
+function toggleCheck(id){
+  checkState[id]=!checkState[id];
+  saveChecks();
+  renderChecklist();
+}
+function updateOverallPct(){
+  const all=CHECKLIST.flatMap(g=>g.items);
+  const done=all.filter(i=>checkState[i.id]).length;
+  document.getElementById('check-pct').textContent=Math.round(done/all.length*100)+'%';
+}
+
+// ══════════════ INIT ══════════════
+init_kw();
+renderChecklist();
+// Live preview sync
+['app-name','short-desc','long-desc','primary-kw','app-category'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)el.addEventListener('input',refreshPreview);
+  if(el&&el.tagName==='SELECT')el.addEventListener('change',refreshPreview);
+});
+refreshPreview();
+</script>
+</body>
+</html>

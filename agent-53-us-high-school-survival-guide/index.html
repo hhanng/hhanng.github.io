@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>US High School Survival Guide</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+  header {
+    background: #1a1d27;
+    border-bottom: 1px solid #2d3148;
+    padding: 20px 24px;
+    text-align: center;
+  }
+  header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #4f8ef7;
+    letter-spacing: -0.5px;
+  }
+  header p { color: #94a3b8; font-size: 0.9rem; margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    background: #4f8ef7;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 16px 24px 0;
+    background: #1a1d27;
+    border-bottom: 2px solid #2d3148;
+    overflow-x: auto;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px 18px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: #cbd5e1; background: #232636; }
+  .tab-btn.active { color: #4f8ef7; border-bottom-color: #4f8ef7; background: #0f1117; }
+
+  /* PANELS */
+  .panel { display: none; padding: 28px 24px; max-width: 1100px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title span { color: #4f8ef7; }
+
+  /* TOPICS GRID */
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .topic-card {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .topic-card:hover {
+    border-color: #4f8ef7;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(79,142,247,0.15);
+  }
+  .topic-icon { font-size: 2.2rem; margin-bottom: 12px; }
+  .topic-title { font-size: 1rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px; }
+  .topic-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; margin-bottom: 14px; }
+  .read-btn {
+    background: #4f8ef720;
+    border: 1px solid #4f8ef740;
+    color: #4f8ef7;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .read-btn:hover { background: #4f8ef730; }
+
+  /* GUIDE PANEL */
+  .guide-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .back-btn {
+    background: #232636;
+    border: 1px solid #2d3148;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { color: #e2e8f0; border-color: #4f8ef7; }
+  .guide-icon-title { font-size: 1.5rem; font-weight: 700; color: #e2e8f0; }
+
+  .guide-prompt {
+    text-align: center;
+    padding: 60px 20px;
+    color: #64748b;
+  }
+  .guide-prompt .big-icon { font-size: 4rem; margin-bottom: 16px; }
+  .guide-prompt p { font-size: 1rem; }
+
+  .guide-section {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 16px;
+  }
+  .guide-section h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #4f8ef7;
+    margin-bottom: 14px;
+  }
+  .tips-list { list-style: none; }
+  .tips-list li {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.88rem;
+    color: #cbd5e1;
+    border-bottom: 1px solid #2d314820;
+    line-height: 1.5;
+  }
+  .tips-list li:last-child { border-bottom: none; }
+  .tip-num {
+    min-width: 22px;
+    height: 22px;
+    background: #4f8ef720;
+    color: #4f8ef7;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+
+  .dos-donts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media(max-width:600px) { .dos-donts { grid-template-columns: 1fr; } }
+  .dos, .donts {
+    background: #0f1117;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .dos h4 { color: #4ade80; font-size: 0.8rem; margin-bottom: 10px; }
+  .donts h4 { color: #f87171; font-size: 0.8rem; margin-bottom: 10px; }
+  .dos ul, .donts ul { list-style: none; }
+  .dos ul li, .donts ul li {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    padding: 4px 0;
+    display: flex;
+    gap: 6px;
+  }
+  .dos ul li::before { content: "✓"; color: #4ade80; font-weight: 700; }
+  .donts ul li::before { content: "✗"; color: #f87171; font-weight: 700; }
+
+  .quick-facts { display: flex; flex-direction: column; gap: 8px; }
+  .fact-item {
+    background: #0f1117;
+    border-left: 3px solid #4f8ef7;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.83rem;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+  .fact-item strong { color: #e2e8f0; }
+
+  /* QUIZ */
+  .quiz-start {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .quiz-start h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; }
+  .quiz-start p { color: #64748b; margin-bottom: 28px; }
+  .btn-primary {
+    background: #4f8ef7;
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary:hover { background: #3b7de8; transform: translateY(-1px); }
+
+  .quiz-progress-bar {
+    background: #1a1d27;
+    border-radius: 99px;
+    height: 6px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .quiz-progress-fill {
+    height: 100%;
+    background: #4f8ef7;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .quiz-progress-text {
+    font-size: 0.8rem;
+    color: #64748b;
+    text-align: right;
+    margin-bottom: 8px;
+  }
+  .quiz-card {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    padding: 28px;
+  }
+  .quiz-q {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-option {
+    background: #0f1117;
+    border: 2px solid #2d3148;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .quiz-option:hover { border-color: #4f8ef7; color: #e2e8f0; }
+  .quiz-option.correct { border-color: #4ade80; background: #4ade8015; color: #4ade80; }
+  .quiz-option.wrong { border-color: #f87171; background: #f8717115; color: #f87171; }
+  .quiz-option.disabled { pointer-events: none; }
+
+  .quiz-result {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .result-badge {
+    font-size: 5rem;
+    margin-bottom: 16px;
+  }
+  .result-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #4f8ef7;
+    margin-bottom: 8px;
+  }
+  .result-score {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    margin-bottom: 16px;
+  }
+  .result-desc {
+    font-size: 0.9rem;
+    color: #64748b;
+    max-width: 400px;
+    margin: 0 auto 28px;
+    line-height: 1.6;
+  }
+  .result-bar-wrap { margin: 20px 0; }
+  .result-bar-bg {
+    background: #1a1d27;
+    border-radius: 99px;
+    height: 12px;
+    overflow: hidden;
+  }
+  .result-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s ease;
+  }
+
+  /* CHECKLIST */
+  .grade-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .grade-tab {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .grade-tab.active {
+    background: #4f8ef720;
+    border-color: #4f8ef7;
+    color: #4f8ef7;
+  }
+  .grade-panel { display: none; }
+  .grade-panel.active { display: block; }
+
+  .grade-progress-wrap {
+    background: #1a1d27;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .grade-prog-bar-bg {
+    flex: 1;
+    background: #0f1117;
+    border-radius: 99px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .grade-prog-bar-fill {
+    height: 100%;
+    background: #4ade80;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .grade-prog-text {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #4ade80;
+    min-width: 48px;
+    text-align: right;
+  }
+
+  .checklist-category {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .checklist-cat-header {
+    padding: 14px 18px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #94a3b8;
+    border-bottom: 1px solid #2d3148;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .checklist-items { padding: 8px 0; }
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 0;
+  }
+  .checklist-item:hover { background: #232636; }
+  .check-box {
+    min-width: 18px;
+    height: 18px;
+    border: 2px solid #2d3148;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-top: 1px;
+  }
+  .check-box.checked {
+    background: #4ade80;
+    border-color: #4ade80;
+  }
+  .check-box.checked::after {
+    content: "✓";
+    color: #0f1117;
+    font-size: 0.7rem;
+    font-weight: 900;
+  }
+  .check-text {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.4;
+    transition: color 0.2s;
+  }
+  .checklist-item.done .check-text {
+    color: #475569;
+    text-decoration: line-through;
+  }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid #2d3148;
+    color: #64748b;
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: #f87171; color: #f87171; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0f1117; }
+  ::-webkit-scrollbar-thumb { background: #2d3148; border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">TT #53</div>
+  <h1>🏫 US High School Survival Guide</h1>
+  <p>Everything you need to survive (and thrive) in American high school</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('topics')">📚 TOPICS</button>
+  <button class="tab-btn" onclick="switchTab('guide')">📖 GUIDE</button>
+  <button class="tab-btn" onclick="switchTab('quiz')">🧠 QUIZ</button>
+  <button class="tab-btn" onclick="switchTab('checklist')">✅ CHECKLIST</button>
+</div>
+
+<!-- ==================== TOPICS ==================== -->
+<div id="panel-topics" class="panel active">
+  <div class="section-title">📚 Choose a <span>Topic</span></div>
+  <div class="topics-grid" id="topics-grid"></div>
+</div>
+
+<!-- ==================== GUIDE ==================== -->
+<div id="panel-guide" class="panel">
+  <div id="guide-prompt" class="guide-prompt">
+    <div class="big-icon">📖</div>
+    <p>Select a topic from the <strong>TOPICS</strong> tab to read the guide.</p>
+  </div>
+  <div id="guide-content" style="display:none;">
+    <div class="guide-header">
+      <button class="back-btn" onclick="backToTopics()">← Back to Topics</button>
+      <div class="guide-icon-title" id="guide-title-display"></div>
+    </div>
+    <div class="guide-section">
+      <h3>🔑 Top Tips</h3>
+      <ul class="tips-list" id="guide-tips"></ul>
+    </div>
+    <div class="guide-section">
+      <h3>✅ Do's & ✗ Don'ts</h3>
+      <div class="dos-donts">
+        <div class="dos"><h4>DO THIS</h4><ul id="guide-dos"></ul></div>
+        <div class="donts"><h4>DON'T DO THIS</h4><ul id="guide-donts"></ul></div>
+      </div>
+    </div>
+    <div class="guide-section">
+      <h3>💡 Quick Facts</h3>
+      <div class="quick-facts" id="guide-facts"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== QUIZ ==================== -->
+<div id="panel-quiz" class="panel">
+  <div id="quiz-start">
+    <div class="quiz-start">
+      <div style="font-size:4rem;margin-bottom:16px;">🧠</div>
+      <h2>How Ready Are You?</h2>
+      <p>20 questions about US high school life.<br>Find out if you're a Freshman Newbie or a Total Pro!</p>
+      <button class="btn-primary" onclick="startQuiz()">Start Quiz →</button>
+    </div>
+  </div>
+  <div id="quiz-game" style="display:none;">
+    <div class="quiz-progress-text" id="quiz-prog-text">Question 1 / 20</div>
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-prog-fill" style="width:5%"></div></div>
+    <div class="quiz-card">
+      <div class="quiz-q" id="quiz-question"></div>
+      <div class="quiz-options" id="quiz-options"></div>
+    </div>
+  </div>
+  <div id="quiz-result" style="display:none;"></div>
+</div>
+
+<!-- ==================== CHECKLIST ==================== -->
+<div id="panel-checklist" class="panel">
+  <div class="section-title">✅ Grade-by-Grade <span>Checklist</span></div>
+  <div class="grade-tabs">
+    <button class="grade-tab active" onclick="switchGrade('9')">9th Grade</button>
+    <button class="grade-tab" onclick="switchGrade('10')">10th Grade</button>
+    <button class="grade-tab" onclick="switchGrade('11')">11th Grade</button>
+    <button class="grade-tab" onclick="switchGrade('12')">12th Grade</button>
+  </div>
+  <div id="checklist-panels"></div>
+</div>
+
+<script>
+// ======================== DATA ========================
+
+const TOPICS = [
+  {
+    id: 'academics',
+    icon: '📚',
+    title: 'Academics',
+    desc: 'GPA, classes, homework, and staying on top of it all.',
+    tips: [
+      'Your GPA is calculated on a 4.0 scale — know how A, B, C map to grade points.',
+      'Take advantage of office hours. Teachers love when students show up; it builds a relationship.',
+      'Use a planner or digital calendar for every assignment and test date — no exceptions.',
+      'AP and Honors classes boost your GPA with weighted points (A = 5.0 instead of 4.0).',
+      'Study groups work, but make sure everyone actually studies — don\'t turn it into a hangout.',
+      'Start big projects at least a week early. Two-night cramming rarely ends well.',
+      'Most schools have free tutoring — use it before you fall behind, not after.',
+    ],
+    dos: [
+      'Attend every class, even when you feel lazy',
+      'Ask for help before exams, not the night before',
+      'Keep all graded papers until grades are finalized',
+      'Use your school library for free textbooks',
+    ],
+    donts: [
+      'Skip class thinking it won\'t count',
+      'Cheat — consequences can go on your permanent record',
+      'Wait until senior year to care about GPA',
+      'Rely on cramming as your main study strategy',
+    ],
+    facts: [
+      '<strong>Weighted GPA:</strong> AP and Honors classes use a 5.0 scale, so a B in AP equals a 4.0 in a regular class.',
+      '<strong>Class rank:</strong> Many schools rank students by GPA — top 10% can open scholarship doors.',
+      '<strong>Extra credit:</strong> Always take it when offered — even 5 points can save your grade.',
+      '<strong>Incompletes:</strong> Missing work becomes a 0, which tanks averages fast.',
+    ]
+  },
+  {
+    id: 'social',
+    icon: '👥',
+    title: 'Social Life',
+    desc: 'Navigating friendships, cliques, and high school drama.',
+    tips: [
+      'High school friend groups shift constantly — don\'t be afraid to expand your circle each year.',
+      'Sit at different lunch tables occasionally; you\'ll be surprised who you connect with.',
+      'Drama fades faster than you think. What feels huge today is forgotten in two weeks.',
+      'It\'s normal to feel like an outsider — most people secretly feel the same way.',
+      'Treat everyone with respect, including "unpopular" classmates — reputation spreads fast.',
+      'Social media drama at school follows you in real life. Think before you post.',
+      'Quality over quantity: two genuine friends beat 20 acquaintances any day.',
+    ],
+    dos: [
+      'Say hi to new students — they\'re grateful',
+      'Stand up against bullying when it\'s safe to do so',
+      'Be genuinely interested in other people\'s lives',
+      'Attend school events to meet people outside class',
+    ],
+    donts: [
+      'Spread rumors or gossip — it always comes back',
+      'Ditch old friends just to chase popularity',
+      'Post mean things about classmates online',
+      'Let peer pressure push you into bad decisions',
+    ],
+    facts: [
+      '<strong>Homecoming:</strong> A fall tradition — dance, game, and court election. Most students attend regardless of date status.',
+      '<strong>Prom:</strong> Junior and Senior formal dance, usually in spring. Tickets sell out fast.',
+      '<strong>Cliques exist</strong> but are less rigid than movies suggest. Most people move between groups.',
+      '<strong>Spirit Week:</strong> Schools hold themed dress-up days before homecoming. Participate — it\'s more fun than it sounds.',
+    ]
+  },
+  {
+    id: 'extracurriculars',
+    icon: '⚽',
+    title: 'Extracurriculars',
+    desc: 'Clubs, sports, and activities that define your HS experience.',
+    tips: [
+      'Join at least one club or sport freshman year — it\'s the easiest time to meet people.',
+      'Colleges care about depth over breadth: being president of two clubs beats being in ten.',
+      'Try something outside your comfort zone — you might discover a hidden passion.',
+      'Student government and NHS (National Honor Society) look great on college apps.',
+      'Sports require tryouts but clubs usually don\'t — clubs are lower-risk and still count.',
+      'Start or found a club if one for your interest doesn\'t exist — this shows initiative.',
+      'Keep track of your hours and roles for your resume and college applications.',
+    ],
+    dos: [
+      'Join activities you actually enjoy, not just what looks good',
+      'Take on leadership roles when you\'re ready',
+      'Balance activities with academics — don\'t overcommit',
+      'Show up consistently — attendance is noticed',
+    ],
+    donts: [
+      'Join 12 clubs just to list them on applications',
+      'Quit a team or club mid-season without talking to a teacher',
+      'Ignore the social side — it\'s half the value',
+      'Let activities slip into your sleep or study time every night',
+    ],
+    facts: [
+      '<strong>Varsity vs JV:</strong> Varsity is the competitive school team; JV (Junior Varsity) is for developing athletes.',
+      '<strong>NHS:</strong> National Honor Society — requires 3.5+ GPA, community service, and teacher recommendation.',
+      '<strong>Model UN, Debate, DECA:</strong> These competitions look excellent on college applications.',
+      '<strong>Community service hours</strong> are often required for graduation in many US states.',
+    ]
+  },
+  {
+    id: 'college-prep',
+    icon: '🎓',
+    title: 'College Prep',
+    desc: 'SAT, ACT, applications, and planning your future.',
+    tips: [
+      'Start thinking about college in 10th grade, not senior year — it sneaks up fast.',
+      'Take the PSAT in 10th grade for practice; in 11th grade it qualifies you for National Merit.',
+      'The SAT and ACT are different — take a practice test of each to see which suits you.',
+      'Most colleges use the Common App — create an account junior year and explore.',
+      'Reach schools, match schools, and safety schools — apply to all three tiers.',
+      'Ask for recommendation letters in September of senior year, not November.',
+      'Visit college campuses if possible — virtual tours are a good alternative.',
+    ],
+    dos: [
+      'Study for the SAT/ACT months in advance with Khan Academy',
+      'Keep track of all deadlines in a spreadsheet',
+      'Write your Common App essay over the summer before senior year',
+      'Apply for FAFSA as soon as it opens in October',
+    ],
+    donts: [
+      'Wait until senior year to think about test scores',
+      'Apply to schools only based on rankings — fit matters',
+      'Submit applications without having others proofread essays',
+      'Ignore financial aid — many schools have huge grants',
+    ],
+    facts: [
+      '<strong>Common App:</strong> One application sent to 1,000+ colleges. Most schools use it.',
+      '<strong>FAFSA:</strong> Federal Student Aid form — required for grants, loans, and work-study. File ASAP each year.',
+      '<strong>SAT vs ACT:</strong> SAT is evidence-based; ACT includes science section. Both accepted everywhere.',
+      '<strong>Early Decision vs Regular:</strong> ED is binding; applying ED can improve acceptance odds at some schools.',
+    ]
+  },
+  {
+    id: 'mental-health',
+    icon: '🧘',
+    title: 'Mental Health',
+    desc: 'Stress, burnout, anxiety — and how to handle it all.',
+    tips: [
+      'High school stress is real — acknowledge it instead of pushing it down.',
+      'Sleep is not optional. 8 hours of sleep outperforms any last-minute cramming session.',
+      'If you\'re feeling overwhelmed, tell a trusted adult — counselors are there to help.',
+      'Build daily "reset" habits: a 10-minute walk, journaling, or music between studying.',
+      'Social comparison is a trap — everyone\'s highlight reel looks better than your real life.',
+      'Know the signs of burnout: constant exhaustion, no motivation, irritability.',
+      'It\'s okay to ask for a mental health day — check your school\'s excused absence policy.',
+    ],
+    dos: [
+      'Build a consistent sleep schedule (same time every night)',
+      'Talk to the school counselor — it\'s confidential',
+      'Exercise regularly, even just walking 20 minutes',
+      'Set realistic goals — perfection is not the target',
+    ],
+    donts: [
+      'Sacrifice sleep to study — it backfires on test day',
+      'Compare your GPA or life to classmates\' Instagram',
+      'Suffer in silence if you\'re really struggling',
+      'Use caffeine as a sleep replacement',
+    ],
+    facts: [
+      '<strong>School counselors:</strong> Every US high school is required to have them. Their job is your wellbeing.',
+      '<strong>Burnout rate:</strong> Studies show 75%+ of high schoolers feel stressed about grades regularly.',
+      '<strong>SAT pressure:</strong> Your score does not define your worth — hundreds of test-optional schools exist.',
+      '<strong>Crisis Text Line:</strong> Text HOME to 741741 for free, 24/7 mental health support.',
+    ]
+  },
+  {
+    id: 'lunch',
+    icon: '🍔',
+    title: 'Lunch & Food',
+    desc: 'Cafeteria culture, free lunch, and the social dynamics of food.',
+    tips: [
+      'The cafeteria is a social battlefield — know that any table is fair game your first week.',
+      'Free and Reduced Lunch programs exist — apply if your family qualifies (it\'s confidential).',
+      'Packing lunch is almost always better quality and cheaper than buying every day.',
+      'Most schools have a 25-30 minute lunch period — use it to decompress, not just eat.',
+      'Freshman year: sit anywhere. By junior year, you\'ll have a usual spot without even thinking.',
+      'Vending machines are expensive — bring a snack from home for afternoon hunger.',
+      'Some cafeterias allow you to eat outside or in classrooms — know your school\'s rules.',
+    ],
+    dos: [
+      'Eat breakfast before school — it directly affects focus',
+      'Bring water every single day',
+      'Try sitting with new people occasionally',
+      'Apply for free lunch if eligible — no shame at all',
+    ],
+    donts: [
+      'Skip lunch to study — your brain needs fuel',
+      'Eat energy drinks as a meal replacement',
+      'Leave a mess — custodians work hard',
+      'Stress about where to sit on day one — it works itself out',
+    ],
+    facts: [
+      '<strong>Lunch debt:</strong> Many districts allow students to charge lunch — but the bill follows families.',
+      '<strong>Free Lunch:</strong> ~30% of US students qualify for free or reduced price lunch.',
+      '<strong>Open campus:</strong> Some high schools allow seniors to leave for lunch — check your school\'s policy.',
+      '<strong>Lunch period</strong> length varies — some schools have 20 minutes, others 45.',
+    ]
+  },
+  {
+    id: 'teachers',
+    icon: '👩‍🏫',
+    title: 'Teachers & Classes',
+    desc: 'How to work with teachers and navigate class selection.',
+    tips: [
+      'Introduce yourself to teachers early — they\'re more likely to help students they know.',
+      'Sit in the front third of the class if you want to stay engaged and impress the teacher.',
+      'Email is the standard way to contact teachers — use proper grammar, sign your name.',
+      'Class selection matters: balance challenging courses with ones you can actually manage.',
+      'AP classes require the most work but carry the biggest GPA reward if you get A\'s.',
+      'If a teacher is unfair, talk to a counselor — document everything first.',
+      'Grade disputes are real — always keep your graded work until the semester ends.',
+    ],
+    dos: [
+      'Participate in class discussion at least once per week',
+      'Thank teachers occasionally — they notice kindness',
+      'Read the syllabus on day one and keep it all semester',
+      'Be upfront about absences and make up work immediately',
+    ],
+    donts: [
+      'Argue with a teacher in front of the class',
+      'Be on your phone during instruction',
+      'Assume a bad grade is permanent — ask about extra credit',
+      'Skip reading the syllabus — that\'s where the rules live',
+    ],
+    facts: [
+      '<strong>Electives:</strong> Most schools require credits in PE, health, and arts — plus free elective choices.',
+      '<strong>Counselor scheduling:</strong> You meet with your counselor once a year to plan classes — come prepared.',
+      '<strong>Dual enrollment:</strong> Some high schools let you take actual college classes for credit.',
+      '<strong>Teacher recs:</strong> For college apps, you need 2+ letters — build those relationships by junior year.',
+    ]
+  },
+  {
+    id: 'senior-year',
+    icon: '🎉',
+    title: 'Senior Year',
+    desc: 'Senioritis, college decisions, graduation, and the grand finale.',
+    tips: [
+      'Senioritis is real but dangerous — colleges can rescind acceptances if your grades drop.',
+      'Apply to college early — November deadlines sneak up fast in senior year.',
+      'Senior traditions are worth participating in: prom, senior trip, cap & gown photos.',
+      'Write your senior quote thoughtfully — it\'s in the yearbook forever.',
+      'Start FAFSA as soon as it opens (October) — financial aid is first-come, first-served.',
+      'Say genuine goodbyes to teachers who mattered — you\'ll appreciate it later.',
+      'Enjoy the lasts: last first day, last homecoming, last regular lunch period.',
+    ],
+    dos: [
+      'Keep your GPA up through graduation — schools check',
+      'Attend senior events (prom, grad night) even if just to experience them',
+      'Get your diploma requirements confirmed with your counselor',
+      'Make a list of "things to do before graduation" and actually do them',
+    ],
+    donts: [
+      'Coast through second semester assuming nothing matters',
+      'Skip the graduation ceremony — your family wants to see it',
+      'Burn bridges with teachers who might write recs for scholarships',
+      'Forget to apply for local scholarships — less competitive than national ones',
+    ],
+    facts: [
+      '<strong>College rescission:</strong> Colleges can pull your acceptance if your senior grades drop significantly.',
+      '<strong>Cap & gown:</strong> Usually ordered by January. Late orders often cost extra.',
+      '<strong>Senior skip day:</strong> Informal tradition — but absences still count against you if your school counts them.',
+      '<strong>Graduation requirements</strong> vary by state: most require 4 years of English, 3-4 of math, 3 of science.',
+    ]
+  },
+];
+
+const QUIZ_QUESTIONS = [
+  { q: "What GPA scale do most US high schools use?", opts: ["10.0", "4.0", "5.0", "100"], ans: 1 },
+  { q: "What does 'AP' stand for in AP classes?", opts: ["Advanced Placement", "Academic Program", "Advanced Practice", "Annual Prep"], ans: 0 },
+  { q: "What is the Common App used for?", opts: ["School lunch payments", "College applications", "Signing up for clubs", "Requesting transcripts"], ans: 1 },
+  { q: "What is the typical length of a US high school lunch period?", opts: ["45-60 minutes", "15 minutes", "25-30 minutes", "1 hour"], ans: 2 },
+  { q: "What does FAFSA stand for?", opts: ["Federal Aid For Student Advancement", "Free Application for Federal Student Aid", "Financial Assistance for School Applications", "Federal Academic Funding Support Application"], ans: 1 },
+  { q: "What is JV in the context of school sports?", opts: ["Just Varsity", "Junior Varsity", "Junior Volunteer", "Joint Venture"], ans: 1 },
+  { q: "What is 'senioritis'?", opts: ["A disease seniors get in winter", "A drop in motivation senior year", "A scholarship program for seniors", "Senior orientation week"], ans: 1 },
+  { q: "Which exam do US 11th graders take that can qualify them for National Merit scholarships?", opts: ["SAT", "ACT", "PSAT", "GRE"], ans: 2 },
+  { q: "What is homecoming in American high school?", opts: ["A spring formal dance", "A fall tradition with a dance and football game", "The last day of school", "A college visit day"], ans: 1 },
+  { q: "What does NHS stand for in a high school context?", opts: ["National Honor Society", "National High School", "New Honor Students", "National Health Service"], ans: 0 },
+  { q: "How many years is US high school?", opts: ["3 years", "4 years", "5 years", "2 years"], ans: 1 },
+  { q: "What are high school grade years called? (Freshman = 9th, what is 10th?)", opts: ["Sophomore", "Junior", "Senior", "Second-year"], ans: 0 },
+  { q: "What is 'Early Decision' in college applications?", opts: ["Applying before your senior year", "A binding early application commitment", "Getting your decision early in December", "Applying to only one school"], ans: 1 },
+  { q: "What is a weighted GPA?", opts: ["GPA with extra weight from attendance", "GPA that counts harder classes as worth more points", "GPA rounded up by teachers", "GPA from standardized tests"], ans: 1 },
+  { q: "Which of these is generally accepted by all US universities?", opts: ["SAT only", "ACT only", "Both SAT and ACT", "Neither — they use GPA only"], ans: 2 },
+  { q: "What is 'Spirit Week' in US high school?", opts: ["A week of standardized tests", "Themed dress-up days before homecoming", "A week of community service", "A religious observance week"], ans: 1 },
+  { q: "What is the Crisis Text Line number you can text for mental health support?", opts: ["911", "988", "741741", "1-800-273-8255"], ans: 2 },
+  { q: "What does 'open campus' policy typically mean for seniors?", opts: ["Seniors can skip any class", "Seniors can leave school grounds during lunch", "The school has an open-door policy for visitors", "Seniors choose their own schedule freely"], ans: 1 },
+  { q: "About what percentage of US high school students qualify for free or reduced lunch?", opts: ["5%", "15%", "30%", "50%"], ans: 2 },
+  { q: "What is 'dual enrollment'?", opts: ["Being in two clubs at once", "Taking high school and college courses simultaneously", "Enrolling in two sports seasons", "Applying to two colleges with one application"], ans: 1 },
+];
+
+const CHECKLIST_DATA = {
+  '9': [
+    {
+      cat: '🎒 Getting Started',
+      items: [
+        'Learn your school\'s layout before the first day',
+        'Get your class schedule and memorize your locker combo',
+        'Introduce yourself to all your teachers in the first week',
+        'Join at least one club or activity',
+        'Find a friend group (or two) to eat lunch with',
+        'Set up a planner or digital calendar for assignments',
+      ]
+    },
+    {
+      cat: '📚 Academics',
+      items: [
+        'Understand how your GPA is calculated',
+        'Get organized: a binder or folder for each class',
+        'Talk to your counselor about your 4-year course plan',
+        'Figure out your school\'s tutoring and homework help resources',
+        'Aim for a strong GPA from the start — it\'s easier to maintain than recover',
+      ]
+    },
+    {
+      cat: '⚽ Activities & Life',
+      items: [
+        'Attend your first homecoming',
+        'Complete required community service hours if your school has them',
+        'Learn how to use the school library resources (databases, etc.)',
+        'Get a part-time job or volunteer role if possible',
+      ]
+    },
+  ],
+  '10': [
+    {
+      cat: '📊 Academic Progress',
+      items: [
+        'Review your GPA and identify weak spots to improve',
+        'Sign up for at least one AP or Honors class if capable',
+        'Take the PSAT for practice (not high stakes yet)',
+        'Start building relationships with teachers who could write recommendations',
+        'Research summer programs, internships, or enrichment opportunities',
+      ]
+    },
+    {
+      cat: '🏫 School Life',
+      items: [
+        'Run for a leadership role in a club or team',
+        'Attend a school play, concert, or art show',
+        'Participate in Spirit Week',
+        'Start a study group for your hardest class',
+        'Connect with an upperclassman mentor',
+      ]
+    },
+    {
+      cat: '🎓 College Awareness',
+      items: [
+        'Create a list of potential college interests (no need to finalize)',
+        'Research what AP tests colleges give credit for',
+        'Look up what GPA range gets into your target colleges',
+        'Start a resume listing activities, awards, and volunteering',
+      ]
+    },
+  ],
+  '11': [
+    {
+      cat: '🎯 Test Prep',
+      items: [
+        'Take the PSAT in October — qualifies for National Merit',
+        'Decide: SAT or ACT (take a practice test of each)',
+        'Sign up for your first official SAT or ACT test date',
+        'Use Khan Academy for free SAT prep',
+        'Aim to take the test at least twice for a higher score',
+      ]
+    },
+    {
+      cat: '📝 College Prep',
+      items: [
+        'Create your Common App account and explore it',
+        'Build your college list: reach, match, safety (5-10 schools)',
+        'Request letters of recommendation from teachers in spring',
+        'Draft personal statement ideas over summer break',
+        'Visit at least 2-3 college campuses (or virtual tours)',
+        'Research scholarship opportunities — especially local ones',
+      ]
+    },
+    {
+      cat: '📚 Academic Excellence',
+      items: [
+        'Take AP exams in May — a score of 3+ may earn college credit',
+        'Maintain or improve GPA — junior year is heavily weighted by colleges',
+        'Take on a leadership role in your activities',
+        'Complete community service if required for graduation',
+      ]
+    },
+  ],
+  '12': [
+    {
+      cat: '📬 College Applications',
+      items: [
+        'Finalize college list by September',
+        'Complete Common App essays before Early Decision deadline',
+        'Submit Early Decision/Action applications (November 1-15)',
+        'Submit all regular decision applications by January 1',
+        'Submit FAFSA as soon as it opens in October',
+        'Complete CSS Profile if required by your target schools',
+        'Apply for at least 5 local scholarships',
+      ]
+    },
+    {
+      cat: '🎓 Graduation Requirements',
+      items: [
+        'Confirm all credit requirements with your counselor',
+        'Order your cap & gown by January',
+        'Take required senior exams or exit assessments',
+        'Complete any remaining community service hours',
+        'Submit senior yearbook quote and photos on time',
+      ]
+    },
+    {
+      cat: '🎉 Senior Milestones',
+      items: [
+        'Attend homecoming for the last time',
+        'Go to prom',
+        'Participate in senior portraits',
+        'Attend graduation rehearsal',
+        'Walk at graduation ceremony',
+        'Celebrate — you made it!',
+      ]
+    },
+  ],
+};
+
+// ======================== STATE ========================
+const STORAGE_KEY = 'hs53_';
+let currentQuizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+let currentGrade = '9';
+
+// ======================== TABS ========================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['topics','guide','quiz','checklist'][i] === tab);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ======================== TOPICS ========================
+function renderTopics() {
+  const grid = document.getElementById('topics-grid');
+  grid.innerHTML = TOPICS.map(t => `
+    <div class="topic-card" onclick="openGuide('${t.id}')">
+      <div class="topic-icon">${t.icon}</div>
+      <div class="topic-title">${t.title}</div>
+      <div class="topic-desc">${t.desc}</div>
+      <button class="read-btn">→ Read</button>
+    </div>
+  `).join('');
+}
+
+// ======================== GUIDE ========================
+function openGuide(id) {
+  const topic = TOPICS.find(t => t.id === id);
+  if (!topic) return;
+
+  switchTab('guide');
+  document.getElementById('guide-prompt').style.display = 'none';
+  document.getElementById('guide-content').style.display = 'block';
+  document.getElementById('guide-title-display').textContent = topic.icon + ' ' + topic.title;
+
+  const tipsList = document.getElementById('guide-tips');
+  tipsList.innerHTML = topic.tips.map((tip, i) => `
+    <li><span class="tip-num">${i+1}</span>${tip}</li>
+  `).join('');
+
+  const dosList = document.getElementById('guide-dos');
+  dosList.innerHTML = topic.dos.map(d => `<li>${d}</li>`).join('');
+
+  const dontsList = document.getElementById('guide-donts');
+  dontsList.innerHTML = topic.donts.map(d => `<li>${d}</li>`).join('');
+
+  const factsList = document.getElementById('guide-facts');
+  factsList.innerHTML = topic.facts.map(f => `<div class="fact-item">${f}</div>`).join('');
+}
+
+function backToTopics() {
+  switchTab('topics');
+}
+
+// ======================== QUIZ ========================
+function startQuiz() {
+  currentQuizIndex = 0;
+  quizScore = 0;
+  document.getElementById('quiz-start').style.display = 'none';
+  document.getElementById('quiz-result').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUIZ_QUESTIONS[currentQuizIndex];
+  const pct = Math.round(((currentQuizIndex) / QUIZ_QUESTIONS.length) * 100);
+  document.getElementById('quiz-prog-text').textContent = `Question ${currentQuizIndex + 1} / ${QUIZ_QUESTIONS.length}`;
+  document.getElementById('quiz-prog-fill').style.width = Math.max(5, pct) + '%';
+  document.getElementById('quiz-question').textContent = q.q;
+  quizAnswered = false;
+
+  const optionsEl = document.getElementById('quiz-options');
+  optionsEl.innerHTML = q.opts.map((opt, i) => `
+    <button class="quiz-option" onclick="selectAnswer(${i})">${opt}</button>
+  `).join('');
+}
+
+function selectAnswer(idx) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const q = QUIZ_QUESTIONS[currentQuizIndex];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === q.ans) btn.classList.add('correct');
+    else if (i === idx && idx !== q.ans) btn.classList.add('wrong');
+  });
+
+  if (idx === q.ans) quizScore++;
+
+  setTimeout(() => {
+    currentQuizIndex++;
+    if (currentQuizIndex < QUIZ_QUESTIONS.length) {
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }, 1000);
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('quiz-result').style.display = 'block';
+
+  const pct = Math.round((quizScore / QUIZ_QUESTIONS.length) * 100);
+  let emoji, title, desc, color;
+  if (pct < 50) {
+    emoji = '🐣'; title = 'Freshman Newbie'; color = '#f87171';
+    desc = 'You\'re just getting started! American high school has a lot to learn — that\'s totally okay. Explore the Topics tab to get up to speed.';
+  } else if (pct < 80) {
+    emoji = '📈'; title = 'Getting There'; color = '#fbbf24';
+    desc = 'You know the basics but there\'s still some territory to explore. A few more months of high school and you\'ll be a pro.';
+  } else {
+    emoji = '🏆'; title = 'Total Pro'; color = '#4ade80';
+    desc = 'You\'ve got high school figured out! Whether you lived it or studied hard, you know your stuff inside and out.';
+  }
+
+  document.getElementById('quiz-result').innerHTML = `
+    <div class="quiz-result">
+      <div class="result-badge">${emoji}</div>
+      <div class="result-title">${title}</div>
+      <div class="result-score">${quizScore} / ${QUIZ_QUESTIONS.length} correct (${pct}%)</div>
+      <div class="result-bar-wrap">
+        <div class="result-bar-bg">
+          <div class="result-bar-fill" id="res-fill" style="width:0%;background:${color}"></div>
+        </div>
+      </div>
+      <div class="result-desc">${desc}</div>
+      <button class="btn-primary" onclick="startQuiz()">Try Again</button>
+      &nbsp;
+      <button class="btn-primary" style="background:#232636;color:#94a3b8;" onclick="
+        document.getElementById('quiz-start').style.display='block';
+        document.getElementById('quiz-result').style.display='none';
+      ">Back to Start</button>
+    </div>
+  `;
+  setTimeout(() => {
+    const fill = document.getElementById('res-fill');
+    if (fill) fill.style.width = pct + '%';
+  }, 100);
+}
+
+// ======================== CHECKLIST ========================
+function getCheckKey(grade, catIdx, itemIdx) {
+  return STORAGE_KEY + 'check_' + grade + '_' + catIdx + '_' + itemIdx;
+}
+
+function isChecked(grade, catIdx, itemIdx) {
+  return localStorage.getItem(getCheckKey(grade, catIdx, itemIdx)) === '1';
+}
+
+function toggleCheck(grade, catIdx, itemIdx) {
+  const key = getCheckKey(grade, catIdx, itemIdx);
+  const current = localStorage.getItem(key) === '1';
+  localStorage.setItem(key, current ? '0' : '1');
+  renderGradePanel(grade);
+  updateGradeProgress(grade);
+}
+
+function getProgress(grade) {
+  const cats = CHECKLIST_DATA[grade];
+  let total = 0, done = 0;
+  cats.forEach((cat, ci) => {
+    cat.items.forEach((_, ii) => {
+      total++;
+      if (isChecked(grade, ci, ii)) done++;
+    });
+  });
+  return { total, done };
+}
+
+function updateGradeProgress(grade) {
+  const { total, done } = getProgress(grade);
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const fill = document.getElementById('prog-fill-' + grade);
+  const text = document.getElementById('prog-text-' + grade);
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = done + ' / ' + total;
+}
+
+function renderGradePanel(grade) {
+  const cats = CHECKLIST_DATA[grade];
+  const panel = document.getElementById('grade-panel-' + grade);
+  if (!panel) return;
+  const { total, done } = getProgress(grade);
+  const pct = total ? Math.round((done / total) * 100) : 0;
+
+  panel.innerHTML = `
+    <div class="grade-progress-wrap">
+      <span style="font-size:0.85rem;color:#64748b;min-width:80px;">${getGradeLabel(grade)} Progress</span>
+      <div class="grade-prog-bar-bg"><div class="grade-prog-bar-fill" id="prog-fill-${grade}" style="width:${pct}%"></div></div>
+      <span class="grade-prog-text" id="prog-text-${grade}">${done} / ${total}</span>
+    </div>
+    ${cats.map((cat, ci) => `
+      <div class="checklist-category">
+        <div class="checklist-cat-header">${cat.cat}</div>
+        <div class="checklist-items">
+          ${cat.items.map((item, ii) => {
+            const checked = isChecked(grade, ci, ii);
+            return `
+              <div class="checklist-item${checked ? ' done' : ''}" onclick="toggleCheck('${grade}', ${ci}, ${ii})">
+                <div class="check-box${checked ? ' checked' : ''}"></div>
+                <span class="check-text">${item}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `).join('')}
+    <button class="reset-btn" onclick="resetGrade('${grade}')">Reset ${getGradeLabel(grade)} checklist</button>
+  `;
+}
+
+function getGradeLabel(g) {
+  return { '9': '9th Grade', '10': '10th Grade', '11': '11th Grade', '12': '12th Grade' }[g];
+}
+
+function switchGrade(grade) {
+  currentGrade = grade;
+  document.querySelectorAll('.grade-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.grade-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  const panel = document.getElementById('grade-panel-' + grade);
+  if (panel) {
+    panel.classList.add('active');
+    renderGradePanel(grade);
+  }
+}
+
+function resetGrade(grade) {
+  const cats = CHECKLIST_DATA[grade];
+  cats.forEach((cat, ci) => {
+    cat.items.forEach((_, ii) => {
+      localStorage.removeItem(getCheckKey(grade, ci, ii));
+    });
+  });
+  renderGradePanel(grade);
+}
+
+function renderChecklist() {
+  const container = document.getElementById('checklist-panels');
+  container.innerHTML = ['9', '10', '11', '12'].map(g => `
+    <div class="grade-panel${g === '9' ? ' active' : ''}" id="grade-panel-${g}"></div>
+  `).join('');
+  ['9', '10', '11', '12'].forEach(g => renderGradePanel(g));
+}
+
+// ======================== INIT ========================
+renderTopics();
+renderChecklist();
+</script>
+</body>
+</html>

@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent #70 — Tech Career Roadmap Planner</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #111827;
+    --card: #1f2937;
+    --card2: #374151;
+    --amber: #f59e0b;
+    --amber-dim: #d97706;
+    --indigo: #6366f1;
+    --indigo-dim: #4f46e5;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #f9fafb;
+    --muted: #9ca3af;
+    --border: #374151;
+    --border2: #4b5563;
+    --shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .header-badge {
+    background: var(--amber);
+    color: #111827;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .header h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+  .header p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .header-right { font-size: 12px; color: var(--muted); }
+  .header-right a { color: var(--amber); text-decoration: none; font-weight: 600; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: #0f172a;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    flex: 1;
+    min-width: 110px;
+    padding: 14px 16px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+  /* MAIN */
+  .main { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* SECTION HEADING */
+  .section-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .section-heading h2 { font-size: 22px; font-weight: 800; }
+  .accent-amber { color: var(--amber); }
+  .accent-indigo { color: var(--indigo); }
+
+  /* ============================================================ */
+  /* ROADMAP PANEL */
+  /* ============================================================ */
+
+  .track-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .track-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .track-btn:hover { border-color: var(--amber); transform: translateY(-2px); }
+  .track-btn.active { border-color: var(--amber); background: rgba(245,158,11,0.08); }
+  .track-icon { font-size: 22px; margin-bottom: 6px; }
+  .track-name { font-size: 14px; font-weight: 700; }
+  .track-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .roadmap-container { display: none; }
+  .roadmap-container.visible { display: block; }
+
+  .roadmap-header {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .roadmap-title { font-size: 18px; font-weight: 800; }
+  .roadmap-progress-wrap { display: flex; align-items: center; gap: 12px; }
+  .roadmap-progress-bar-bg {
+    width: 160px; height: 8px;
+    background: var(--border2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .roadmap-progress-bar-fill {
+    height: 100%; background: var(--amber);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .roadmap-progress-text { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  .phase-section { margin-bottom: 28px; }
+  .phase-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .phase-label.beginner { color: var(--green); }
+  .phase-label.mid { color: var(--indigo); }
+  .phase-label.senior { color: var(--amber); }
+  .phase-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .step-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .step-card:hover { border-color: var(--border2); }
+  .step-card.done { border-color: var(--green); background: rgba(16,185,129,0.06); }
+
+  .step-checkbox {
+    width: 22px; height: 22px; flex-shrink: 0;
+    border: 2px solid var(--border2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s;
+    cursor: pointer;
+    margin-top: 1px;
+  }
+  .step-card.done .step-checkbox { background: var(--green); border-color: var(--green); color: #fff; }
+
+  .step-body { flex: 1; }
+  .step-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .step-card.done .step-title { color: var(--muted); text-decoration: line-through; }
+  .step-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .step-time { font-size: 12px; color: var(--amber); font-weight: 600; }
+  .step-resource {
+    font-size: 12px; color: var(--indigo);
+    text-decoration: none;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .step-resource:hover { color: #818cf8; }
+
+  /* ============================================================ */
+  /* SKILLS PANEL */
+  /* ============================================================ */
+
+  .skills-intro {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .skills-overall { font-size: 14px; }
+  .skills-overall strong { color: var(--amber); font-size: 20px; }
+  .skills-reset-btn {
+    padding: 6px 14px;
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .skills-reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .skill-category { margin-bottom: 28px; }
+  .skill-cat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .skill-cat-name {
+    font-size: 14px; font-weight: 800;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .skill-cat-pct { font-size: 12px; color: var(--muted); }
+  .skill-cat-bar-bg { height: 4px; background: var(--border2); border-radius: 2px; margin-bottom: 12px; overflow: hidden; }
+  .skill-cat-bar-fill { height: 100%; background: var(--indigo); border-radius: 2px; transition: width 0.4s ease; }
+
+  .skill-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  .skill-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .skill-item:hover { border-color: var(--border2); }
+  .skill-item.checked { border-color: var(--indigo); background: rgba(99,102,241,0.08); }
+  .skill-left { display: flex; align-items: center; gap: 10px; }
+  .skill-check {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border2);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .skill-item.checked .skill-check { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+  .skill-name { font-size: 13px; font-weight: 600; }
+  .skill-item.checked .skill-name { color: var(--muted); }
+  .level-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 20px; letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+  .level-beginner { background: rgba(16,185,129,0.15); color: var(--green); }
+  .level-intermediate { background: rgba(99,102,241,0.15); color: var(--indigo); }
+  .level-advanced { background: rgba(245,158,11,0.15); color: var(--amber); }
+
+  /* ============================================================ */
+  /* GOALS PANEL */
+  /* ============================================================ */
+
+  .goal-form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+  .goal-form-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--amber); }
+  .goal-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  @media (max-width: 540px) { .goal-form-row { grid-template-columns: 1fr; } }
+
+  .gf-group { display: flex; flex-direction: column; gap: 6px; }
+  .gf-group.full { grid-column: 1 / -1; }
+  .gf-group label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .gf-group input,
+  .gf-group select {
+    background: #0f172a;
+    border: 1.5px solid var(--border2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .gf-group input:focus,
+  .gf-group select:focus { outline: none; border-color: var(--amber); }
+
+  .add-goal-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--amber);
+    color: #111827;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .add-goal-btn:hover { background: var(--amber-dim); }
+
+  .goals-list { display: flex; flex-direction: column; gap: 10px; }
+  .goal-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    transition: border-color 0.2s;
+  }
+  .goal-card.done { border-color: var(--green); }
+  .goal-card.inprogress { border-color: var(--indigo); }
+  .goal-left { flex: 1; min-width: 200px; }
+  .goal-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .goal-card.done .goal-title { text-decoration: line-through; color: var(--muted); }
+  .goal-date { font-size: 12px; color: var(--muted); }
+  .goal-right { display: flex; align-items: center; gap: 10px; }
+  .status-select {
+    background: #0f172a;
+    border: 1.5px solid var(--border2);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .delete-goal-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 4px;
+  }
+  .delete-goal-btn:hover { color: var(--red); }
+  .goals-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+  }
+  .goals-empty .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+  /* STATUS BADGES */
+  .status-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 8px;
+    border-radius: 20px; letter-spacing: 0.3px;
+  }
+  .status-not-started { background: rgba(156,163,175,0.15); color: var(--muted); }
+  .status-in-progress { background: rgba(99,102,241,0.15); color: var(--indigo); }
+  .status-done { background: rgba(16,185,129,0.15); color: var(--green); }
+
+  /* ============================================================ */
+  /* PROGRESS PANEL */
+  /* ============================================================ */
+
+  .progress-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); }
+  .stat-icon { font-size: 28px; margin-bottom: 8px; }
+  .stat-value { font-size: 32px; font-weight: 900; margin-bottom: 4px; }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.indigo { color: var(--indigo); }
+  .stat-value.green { color: var(--green); }
+  .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+  .progress-section { margin-bottom: 28px; }
+  .progress-section-title {
+    font-size: 16px; font-weight: 800;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .big-bar-wrap { margin-bottom: 16px; }
+  .big-bar-label { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .big-bar-name { font-size: 13px; font-weight: 600; }
+  .big-bar-pct { font-size: 13px; color: var(--muted); }
+  .big-bar-bg { height: 10px; background: var(--border2); border-radius: 5px; overflow: hidden; }
+  .big-bar-fill { height: 100%; border-radius: 5px; transition: width 0.4s ease; }
+  .bar-amber { background: var(--amber); }
+  .bar-indigo { background: var(--indigo); }
+  .bar-green { background: var(--green); }
+
+  .streak-card {
+    background: linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(99,102,241,0.15) 100%);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 12px;
+    padding: 28px;
+    text-align: center;
+  }
+  .streak-fire { font-size: 40px; margin-bottom: 8px; }
+  .streak-number { font-size: 48px; font-weight: 900; color: var(--amber); }
+  .streak-label { font-size: 14px; color: var(--muted); margin-top: 4px; }
+  .streak-message { font-size: 13px; color: var(--text); margin-top: 12px; font-style: italic; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--card2);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--shadow);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1000;
+    border: 1px solid var(--border2);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <span class="header-badge">#70</span>
+    <div>
+      <h1>Tech Career Roadmap Planner</h1>
+      <p>Your path from zero to hired — one skill at a time</p>
+    </div>
+  </div>
+  <div class="header-right">
+    Part of <a href="https://hhanng.github.io" target="_blank">100 AI Agents Challenge</a>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs">
+  <button class="tab-btn active" onclick="switchTab('roadmap', this)">🗺️ ROADMAP</button>
+  <button class="tab-btn" onclick="switchTab('skills', this)">🛠️ SKILLS</button>
+  <button class="tab-btn" onclick="switchTab('goals', this)">🎯 GOALS</button>
+  <button class="tab-btn" onclick="switchTab('progress', this)">📊 PROGRESS</button>
+</nav>
+
+<main class="main">
+
+  <!-- ===================== ROADMAP ===================== -->
+  <section class="panel active" id="panel-roadmap">
+    <div class="section-heading">
+      <h2>Choose Your <span class="accent-amber">Track</span></h2>
+    </div>
+
+    <div class="track-grid" id="trackGrid"></div>
+
+    <div class="roadmap-container" id="roadmapContainer">
+      <div class="roadmap-header">
+        <div>
+          <div class="roadmap-title" id="roadmapTitle"></div>
+        </div>
+        <div class="roadmap-progress-wrap">
+          <div class="roadmap-progress-bar-bg">
+            <div class="roadmap-progress-bar-fill" id="roadmapBarFill" style="width:0%"></div>
+          </div>
+          <span class="roadmap-progress-text" id="roadmapProgressText">0 / 0 steps</span>
+        </div>
+      </div>
+      <div id="roadmapSteps"></div>
+    </div>
+  </section>
+
+  <!-- ===================== SKILLS ===================== -->
+  <section class="panel" id="panel-skills">
+    <div class="skills-intro">
+      <div class="skills-overall">
+        Overall Skills: <strong id="skillsOverallPct">0%</strong>
+        <span style="color:var(--muted); font-size:13px;"> — <span id="skillsOverallCount">0</span> skills learned</span>
+      </div>
+      <button class="skills-reset-btn" onclick="resetSkills()">Reset All</button>
+    </div>
+    <div id="skillsContent"></div>
+  </section>
+
+  <!-- ===================== GOALS ===================== -->
+  <section class="panel" id="panel-goals">
+    <div class="section-heading">
+      <h2>Career <span class="accent-amber">Goals</span></h2>
+    </div>
+
+    <div class="goal-form-card">
+      <div class="goal-form-title">+ Add a New Goal</div>
+      <div class="goal-form-row">
+        <div class="gf-group full">
+          <label>Goal Description</label>
+          <input type="text" id="goalTitle" placeholder="e.g. Get AWS Solutions Architect cert, Land first dev job..." maxlength="120" />
+        </div>
+        <div class="gf-group">
+          <label>Target Date</label>
+          <input type="date" id="goalDate" />
+        </div>
+        <div class="gf-group">
+          <label>Status</label>
+          <select id="goalStatus">
+            <option value="not-started">Not Started</option>
+            <option value="in-progress">In Progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+      </div>
+      <button class="add-goal-btn" onclick="addGoal()">Add Goal</button>
+    </div>
+
+    <div class="goals-list" id="goalsList"></div>
+  </section>
+
+  <!-- ===================== PROGRESS ===================== -->
+  <section class="panel" id="panel-progress">
+    <div class="section-heading">
+      <h2>Your <span class="accent-amber">Progress</span></h2>
+    </div>
+
+    <div class="progress-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🗺️</div>
+        <div class="stat-value amber" id="statRoadmapDone">0</div>
+        <div class="stat-label">Roadmap Steps Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🛠️</div>
+        <div class="stat-value indigo" id="statSkillsDone">0</div>
+        <div class="stat-label">Skills Learned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value green" id="statGoalsDone">0</div>
+        <div class="stat-label">Goals Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value amber" id="statDays">0</div>
+        <div class="stat-label">Days on Journey</div>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-section-title">📈 Completion Overview</div>
+      <div class="big-bar-wrap">
+        <div class="big-bar-label"><span class="big-bar-name">🗺️ Roadmap Steps</span><span class="big-bar-pct" id="progRoadmapPct">0%</span></div>
+        <div class="big-bar-bg"><div class="big-bar-fill bar-amber" id="progRoadmapBar" style="width:0%"></div></div>
+      </div>
+      <div class="big-bar-wrap">
+        <div class="big-bar-label"><span class="big-bar-name">🛠️ Skills Checklist</span><span class="big-bar-pct" id="progSkillsPct">0%</span></div>
+        <div class="big-bar-bg"><div class="big-bar-fill bar-indigo" id="progSkillsBar" style="width:0%"></div></div>
+      </div>
+      <div class="big-bar-wrap">
+        <div class="big-bar-label"><span class="big-bar-name">🎯 Career Goals</span><span class="big-bar-pct" id="progGoalsPct">0%</span></div>
+        <div class="big-bar-bg"><div class="big-bar-fill bar-green" id="progGoalsBar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="streak-card" id="streakCard">
+      <div class="streak-fire">🔥</div>
+      <div class="streak-number" id="streakNumber">0</div>
+      <div class="streak-label">Day Streak</div>
+      <div class="streak-message" id="streakMessage">Complete your first step to start your streak!</div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const TRACKS = [
+  { id: 'frontend', icon: '🎨', name: 'Frontend Dev', desc: 'UI, CSS, React, performance' },
+  { id: 'backend',  icon: '⚙️',  name: 'Backend Dev',  desc: 'APIs, databases, servers' },
+  { id: 'fullstack',icon: '🔗', name: 'Full Stack',    desc: 'Frontend + backend end-to-end' },
+  { id: 'devops',   icon: '☁️', name: 'DevOps / Cloud', desc: 'CI/CD, Docker, Kubernetes' },
+  { id: 'data',     icon: '📊', name: 'Data Engineer',  desc: 'Pipelines, warehouses, Spark' },
+  { id: 'ml',       icon: '🤖', name: 'ML Engineer',    desc: 'Models, training, deployment' },
+  { id: 'security', icon: '🔐', name: 'Cybersecurity',  desc: 'Pentesting, defense, certs' },
+  { id: 'mobile',   icon: '📱', name: 'Mobile Dev',     desc: 'iOS, Android, React Native' },
+];
+
+const ROADMAPS = {
+  frontend: {
+    label: '🎨 Frontend Developer',
+    phases: {
+      beginner: [
+        { title: 'HTML & CSS Fundamentals', time: '3–4 weeks', url: 'https://developer.mozilla.org/en-US/docs/Learn' },
+        { title: 'JavaScript Basics (ES6+)', time: '4–6 weeks', url: 'https://javascript.info' },
+        { title: 'Responsive Design & Flexbox / Grid', time: '2 weeks', url: 'https://css-tricks.com/snippets/css/a-guide-to-flexbox/' },
+        { title: 'Version Control with Git & GitHub', time: '1 week', url: 'https://learngitbranching.js.org' },
+      ],
+      mid: [
+        { title: 'React (Components, Hooks, State)', time: '6–8 weeks', url: 'https://react.dev/learn' },
+        { title: 'TypeScript Fundamentals', time: '3 weeks', url: 'https://www.typescriptlang.org/docs/' },
+        { title: 'REST APIs & Fetch / Axios', time: '2 weeks', url: 'https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API' },
+        { title: 'Testing with Jest & React Testing Library', time: '2 weeks', url: 'https://testing-library.com/docs/' },
+        { title: 'Build Tools: Vite, Webpack Basics', time: '1 week', url: 'https://vitejs.dev/guide/' },
+      ],
+      senior: [
+        { title: 'State Management (Zustand / Redux Toolkit)', time: '2 weeks', url: 'https://zustand-demo.pmnd.rs/' },
+        { title: 'Performance Optimization & Web Vitals', time: '2 weeks', url: 'https://web.dev/performance/' },
+        { title: 'Next.js & SSR / SSG Patterns', time: '4 weeks', url: 'https://nextjs.org/learn' },
+        { title: 'Accessibility (WCAG) & SEO', time: '2 weeks', url: 'https://www.w3.org/WAI/fundamentals/' },
+        { title: 'System Design for Frontend', time: '3 weeks', url: 'https://frontendmastery.com/posts/frontend-system-design-guide/' },
+      ]
+    }
+  },
+  backend: {
+    label: '⚙️ Backend Developer',
+    phases: {
+      beginner: [
+        { title: 'Pick a language: Python or Node.js', time: '4 weeks', url: 'https://www.python.org/about/gettingstarted/' },
+        { title: 'HTTP, REST, and APIs basics', time: '1 week', url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP' },
+        { title: 'SQL & Relational Databases (PostgreSQL)', time: '3 weeks', url: 'https://www.postgresqltutorial.com/' },
+        { title: 'Git & GitHub Workflow', time: '1 week', url: 'https://learngitbranching.js.org' },
+      ],
+      mid: [
+        { title: 'Build REST APIs (FastAPI / Express)', time: '4 weeks', url: 'https://fastapi.tiangolo.com/tutorial/' },
+        { title: 'Authentication: JWT, OAuth 2.0, Sessions', time: '2 weeks', url: 'https://jwt.io/introduction/' },
+        { title: 'NoSQL: Redis & MongoDB basics', time: '2 weeks', url: 'https://university.mongodb.com/' },
+        { title: 'Testing: Unit, Integration, Mocking', time: '2 weeks', url: 'https://docs.pytest.org/en/stable/' },
+        { title: 'Docker Containerization', time: '2 weeks', url: 'https://docs.docker.com/get-started/' },
+      ],
+      senior: [
+        { title: 'Microservices Architecture', time: '4 weeks', url: 'https://microservices.io/patterns/' },
+        { title: 'Message Queues: Kafka / RabbitMQ', time: '3 weeks', url: 'https://kafka.apache.org/documentation/' },
+        { title: 'System Design (Scalability & CAP)', time: '4 weeks', url: 'https://github.com/donnemartin/system-design-primer' },
+        { title: 'Observability: Logging, Metrics, Tracing', time: '2 weeks', url: 'https://opentelemetry.io/docs/' },
+        { title: 'Cloud Deployment: AWS / GCP basics', time: '3 weeks', url: 'https://aws.amazon.com/getting-started/' },
+      ]
+    }
+  },
+  fullstack: {
+    label: '🔗 Full Stack Developer',
+    phases: {
+      beginner: [
+        { title: 'HTML, CSS & JavaScript Fundamentals', time: '6 weeks', url: 'https://javascript.info' },
+        { title: 'Node.js & npm Ecosystem', time: '2 weeks', url: 'https://nodejs.org/en/learn' },
+        { title: 'SQL Databases & Basic CRUD', time: '3 weeks', url: 'https://www.postgresqltutorial.com/' },
+        { title: 'Git & GitHub', time: '1 week', url: 'https://learngitbranching.js.org' },
+      ],
+      mid: [
+        { title: 'React Frontend + Express Backend', time: '6 weeks', url: 'https://react.dev/learn' },
+        { title: 'REST API Design & Integration', time: '2 weeks', url: 'https://restfulapi.net/' },
+        { title: 'Authentication & Authorization', time: '2 weeks', url: 'https://jwt.io/introduction/' },
+        { title: 'PostgreSQL with an ORM (Prisma / Sequelize)', time: '2 weeks', url: 'https://www.prisma.io/docs' },
+        { title: 'Docker & Basic DevOps', time: '2 weeks', url: 'https://docs.docker.com/get-started/' },
+      ],
+      senior: [
+        { title: 'Next.js Full Stack (App Router)', time: '4 weeks', url: 'https://nextjs.org/learn' },
+        { title: 'TypeScript across the stack', time: '3 weeks', url: 'https://www.typescriptlang.org/docs/' },
+        { title: 'System Design Fundamentals', time: '4 weeks', url: 'https://github.com/donnemartin/system-design-primer' },
+        { title: 'CI/CD Pipelines (GitHub Actions)', time: '2 weeks', url: 'https://docs.github.com/en/actions' },
+        { title: 'Cloud Deployment (Vercel / AWS)', time: '2 weeks', url: 'https://vercel.com/docs' },
+      ]
+    }
+  },
+  devops: {
+    label: '☁️ DevOps / Cloud Engineer',
+    phases: {
+      beginner: [
+        { title: 'Linux Command Line & Shell Scripting', time: '4 weeks', url: 'https://linuxjourney.com/' },
+        { title: 'Git & Version Control', time: '1 week', url: 'https://learngitbranching.js.org' },
+        { title: 'Networking Basics (DNS, HTTP, TCP/IP)', time: '2 weeks', url: 'https://www.cloudflare.com/learning/network-layer/what-is-the-network-layer/' },
+        { title: 'Python / Bash Scripting', time: '3 weeks', url: 'https://tldp.org/LDP/Bash-Beginners-Guide/html/' },
+      ],
+      mid: [
+        { title: 'Docker & Container Concepts', time: '3 weeks', url: 'https://docs.docker.com/get-started/' },
+        { title: 'Kubernetes (k8s) Core Concepts', time: '6 weeks', url: 'https://kubernetes.io/docs/tutorials/' },
+        { title: 'CI/CD with GitHub Actions / Jenkins', time: '3 weeks', url: 'https://docs.github.com/en/actions' },
+        { title: 'Infrastructure as Code: Terraform', time: '4 weeks', url: 'https://developer.hashicorp.com/terraform/tutorials' },
+        { title: 'AWS Core Services (EC2, S3, RDS, VPC)', time: '4 weeks', url: 'https://aws.amazon.com/getting-started/' },
+      ],
+      senior: [
+        { title: 'AWS Solutions Architect Associate Cert', time: '8 weeks', url: 'https://aws.amazon.com/certification/certified-solutions-architect-associate/' },
+        { title: 'Monitoring: Prometheus, Grafana, ELK', time: '3 weeks', url: 'https://prometheus.io/docs/introduction/overview/' },
+        { title: 'GitOps & ArgoCD', time: '3 weeks', url: 'https://argo-cd.readthedocs.io/en/stable/' },
+        { title: 'Service Mesh (Istio / Linkerd)', time: '4 weeks', url: 'https://istio.io/latest/docs/setup/getting-started/' },
+        { title: 'FinOps & Cost Optimization', time: '2 weeks', url: 'https://www.finops.org/introduction/what-is-finops/' },
+      ]
+    }
+  },
+  data: {
+    label: '📊 Data Engineer',
+    phases: {
+      beginner: [
+        { title: 'Python for Data (Pandas, NumPy)', time: '4 weeks', url: 'https://pandas.pydata.org/docs/getting_started/' },
+        { title: 'SQL: Joins, Aggregations, Window Functions', time: '3 weeks', url: 'https://mode.com/sql-tutorial/' },
+        { title: 'Data Modeling Fundamentals', time: '2 weeks', url: 'https://www.guru99.com/data-modelling-conceptual-logical.html' },
+        { title: 'Git & Project Setup', time: '1 week', url: 'https://learngitbranching.js.org' },
+      ],
+      mid: [
+        { title: 'Apache Spark & PySpark', time: '5 weeks', url: 'https://spark.apache.org/docs/latest/api/python/' },
+        { title: 'Data Warehousing: Snowflake / BigQuery', time: '3 weeks', url: 'https://docs.snowflake.com/en/user-guide-intro.html' },
+        { title: 'Orchestration: Airflow / Prefect', time: '3 weeks', url: 'https://airflow.apache.org/docs/apache-airflow/stable/tutorial/' },
+        { title: 'dbt for Data Transformation', time: '2 weeks', url: 'https://docs.getdbt.com/docs/introduction' },
+        { title: 'Kafka & Streaming Data', time: '3 weeks', url: 'https://kafka.apache.org/documentation/' },
+      ],
+      senior: [
+        { title: 'Data Lake Architecture (Delta Lake / Iceberg)', time: '4 weeks', url: 'https://delta.io/' },
+        { title: 'Cloud Data Platforms (AWS Glue, Databricks)', time: '4 weeks', url: 'https://docs.databricks.com/' },
+        { title: 'Data Quality & Observability (Great Expectations)', time: '3 weeks', url: 'https://docs.greatexpectations.io/' },
+        { title: 'DataOps & CI/CD for Pipelines', time: '2 weeks', url: 'https://dataopsmanifesto.org/' },
+        { title: 'System Design for Data Systems', time: '4 weeks', url: 'https://github.com/donnemartin/system-design-primer' },
+      ]
+    }
+  },
+  ml: {
+    label: '🤖 ML Engineer',
+    phases: {
+      beginner: [
+        { title: 'Python: Pandas, NumPy, Matplotlib', time: '4 weeks', url: 'https://pandas.pydata.org/docs/getting_started/' },
+        { title: 'Math for ML: Linear Algebra, Stats, Calculus', time: '6 weeks', url: 'https://www.khanacademy.org/math/linear-algebra' },
+        { title: 'ML Fundamentals with scikit-learn', time: '5 weeks', url: 'https://scikit-learn.org/stable/tutorial/' },
+        { title: 'Supervised & Unsupervised Learning', time: '3 weeks', url: 'https://www.coursera.org/learn/machine-learning' },
+      ],
+      mid: [
+        { title: 'Deep Learning with PyTorch', time: '8 weeks', url: 'https://pytorch.org/tutorials/' },
+        { title: 'NLP & Transformers (HuggingFace)', time: '6 weeks', url: 'https://huggingface.co/learn/nlp-course' },
+        { title: 'MLOps: Experiment Tracking with MLflow', time: '3 weeks', url: 'https://mlflow.org/docs/latest/tutorials-and-examples/' },
+        { title: 'Model Deployment with FastAPI + Docker', time: '3 weeks', url: 'https://fastapi.tiangolo.com/tutorial/' },
+        { title: 'Feature Engineering & Data Pipelines', time: '3 weeks', url: 'https://www.featurestore.org/' },
+      ],
+      senior: [
+        { title: 'Large Language Models & Fine-tuning', time: '6 weeks', url: 'https://huggingface.co/docs/transformers/training' },
+        { title: 'Distributed Training (Horovod / DeepSpeed)', time: '4 weeks', url: 'https://www.deepspeed.ai/getting-started/' },
+        { title: 'ML System Design & A/B Testing', time: '4 weeks', url: 'https://ml-ops.org/' },
+        { title: 'Model Monitoring & Drift Detection', time: '3 weeks', url: 'https://evidentlyai.com/blog/ml-monitoring-do-you-even-need-it' },
+        { title: 'RAG Systems & Vector Databases', time: '4 weeks', url: 'https://www.pinecone.io/learn/retrieval-augmented-generation/' },
+      ]
+    }
+  },
+  security: {
+    label: '🔐 Cybersecurity Engineer',
+    phases: {
+      beginner: [
+        { title: 'Networking Fundamentals (OSI, TCP/IP, DNS)', time: '3 weeks', url: 'https://www.professormesser.com/network-plus/n10-008/n10-008-video/n10-008-training-course/' },
+        { title: 'Linux Administration & CLI', time: '4 weeks', url: 'https://linuxjourney.com/' },
+        { title: 'Python Scripting for Security', time: '3 weeks', url: 'https://automatetheboringstuff.com/' },
+        { title: 'CompTIA Security+ Fundamentals', time: '6 weeks', url: 'https://www.comptia.org/certifications/security' },
+      ],
+      mid: [
+        { title: 'Ethical Hacking & Penetration Testing (TryHackMe)', time: '8 weeks', url: 'https://tryhackme.com/' },
+        { title: 'Web Application Security (OWASP Top 10)', time: '3 weeks', url: 'https://owasp.org/www-project-top-ten/' },
+        { title: 'Network Security & Firewalls', time: '3 weeks', url: 'https://www.cloudflare.com/learning/network-layer/what-is-a-firewall/' },
+        { title: 'SIEM & Log Analysis (Splunk basics)', time: '2 weeks', url: 'https://www.splunk.com/en_us/training/free-courses.html' },
+        { title: 'Cryptography Fundamentals', time: '3 weeks', url: 'https://cryptohack.org/' },
+      ],
+      senior: [
+        { title: 'Certified Ethical Hacker (CEH) or OSCP', time: '12 weeks', url: 'https://www.offensive-security.com/pwk-oscp/' },
+        { title: 'Cloud Security (AWS Security Specialty)', time: '8 weeks', url: 'https://aws.amazon.com/certification/certified-security-specialty/' },
+        { title: 'Threat Modeling & Red Team Operations', time: '4 weeks', url: 'https://owasp.org/www-community/Threat_Modeling' },
+        { title: 'Incident Response & Digital Forensics', time: '4 weeks', url: 'https://www.sans.org/cyber-security-courses/incident-response-forensics/' },
+        { title: 'Zero Trust Architecture', time: '3 weeks', url: 'https://www.nist.gov/publications/zero-trust-architecture' },
+      ]
+    }
+  },
+  mobile: {
+    label: '📱 Mobile Developer',
+    phases: {
+      beginner: [
+        { title: 'JavaScript / TypeScript Fundamentals', time: '4 weeks', url: 'https://javascript.info' },
+        { title: 'React Native Core Concepts', time: '5 weeks', url: 'https://reactnative.dev/docs/getting-started' },
+        { title: 'Mobile UI: Flex, StyleSheet, Navigation', time: '3 weeks', url: 'https://reactnavigation.org/docs/getting-started/' },
+        { title: 'Git & App Deployment Basics', time: '1 week', url: 'https://learngitbranching.js.org' },
+      ],
+      mid: [
+        { title: 'State Management (Zustand / Redux)', time: '2 weeks', url: 'https://zustand-demo.pmnd.rs/' },
+        { title: 'REST API Integration & Offline Storage', time: '3 weeks', url: 'https://reactnative.dev/docs/network' },
+        { title: 'Push Notifications & Background Tasks', time: '2 weeks', url: 'https://docs.expo.dev/push-notifications/overview/' },
+        { title: 'Native Modules & Expo SDK', time: '3 weeks', url: 'https://docs.expo.dev/' },
+        { title: 'App Store Deployment (iOS & Android)', time: '2 weeks', url: 'https://reactnative.dev/docs/publishing-to-app-store' },
+      ],
+      senior: [
+        { title: 'Performance Optimization & JS Thread', time: '3 weeks', url: 'https://reactnative.dev/docs/performance' },
+        { title: 'Native iOS (Swift) or Android (Kotlin) Basics', time: '6 weeks', url: 'https://developer.apple.com/tutorials/swiftui' },
+        { title: 'CI/CD for Mobile (Fastlane / EAS)', time: '2 weeks', url: 'https://fastlane.tools/' },
+        { title: 'Mobile Security Best Practices', time: '2 weeks', url: 'https://owasp.org/www-project-mobile-app-security/' },
+        { title: 'Analytics, Crash Reporting & A/B Testing', time: '2 weeks', url: 'https://firebase.google.com/docs/analytics' },
+      ]
+    }
+  }
+};
+
+const SKILLS_DATA = [
+  {
+    category: 'Languages',
+    icon: '💻',
+    skills: [
+      { name: 'Python', level: 'Beginner' },
+      { name: 'JavaScript', level: 'Beginner' },
+      { name: 'TypeScript', level: 'Intermediate' },
+      { name: 'Go', level: 'Advanced' },
+      { name: 'Rust', level: 'Advanced' },
+      { name: 'Java', level: 'Intermediate' },
+      { name: 'SQL', level: 'Beginner' },
+    ]
+  },
+  {
+    category: 'Frameworks',
+    icon: '🔧',
+    skills: [
+      { name: 'React', level: 'Beginner' },
+      { name: 'Next.js', level: 'Intermediate' },
+      { name: 'Node.js / Express', level: 'Beginner' },
+      { name: 'FastAPI', level: 'Intermediate' },
+      { name: 'Django', level: 'Intermediate' },
+      { name: 'React Native', level: 'Intermediate' },
+    ]
+  },
+  {
+    category: 'Databases',
+    icon: '🗄️',
+    skills: [
+      { name: 'PostgreSQL', level: 'Beginner' },
+      { name: 'MySQL', level: 'Beginner' },
+      { name: 'MongoDB', level: 'Intermediate' },
+      { name: 'Redis', level: 'Intermediate' },
+      { name: 'Elasticsearch', level: 'Advanced' },
+      { name: 'Snowflake / BigQuery', level: 'Advanced' },
+    ]
+  },
+  {
+    category: 'DevOps',
+    icon: '🚀',
+    skills: [
+      { name: 'Docker', level: 'Beginner' },
+      { name: 'Kubernetes', level: 'Intermediate' },
+      { name: 'GitHub Actions / CI-CD', level: 'Beginner' },
+      { name: 'Terraform', level: 'Intermediate' },
+      { name: 'Helm', level: 'Advanced' },
+      { name: 'Ansible', level: 'Advanced' },
+    ]
+  },
+  {
+    category: 'System Design',
+    icon: '🏗️',
+    skills: [
+      { name: 'REST & API Design', level: 'Beginner' },
+      { name: 'Microservices', level: 'Intermediate' },
+      { name: 'Event-Driven Architecture', level: 'Intermediate' },
+      { name: 'Load Balancing & Caching', level: 'Intermediate' },
+      { name: 'Distributed Systems', level: 'Advanced' },
+    ]
+  },
+  {
+    category: 'CS Fundamentals',
+    icon: '📚',
+    skills: [
+      { name: 'Data Structures & Algorithms', level: 'Beginner' },
+      { name: 'Big O Notation', level: 'Beginner' },
+      { name: 'Operating Systems', level: 'Intermediate' },
+      { name: 'Computer Networks', level: 'Intermediate' },
+      { name: 'Compilers / Interpreters', level: 'Advanced' },
+    ]
+  },
+  {
+    category: 'Soft Skills',
+    icon: '🤝',
+    skills: [
+      { name: 'Technical Communication', level: 'Beginner' },
+      { name: 'Code Review', level: 'Beginner' },
+      { name: 'Agile / Scrum', level: 'Beginner' },
+      { name: 'Mentoring & Teaching', level: 'Intermediate' },
+      { name: 'Cross-team Collaboration', level: 'Intermediate' },
+    ]
+  },
+  {
+    category: 'Tools',
+    icon: '🛠️',
+    skills: [
+      { name: 'Git & GitHub', level: 'Beginner' },
+      { name: 'VS Code / IDE Mastery', level: 'Beginner' },
+      { name: 'Postman / API Testing', level: 'Beginner' },
+      { name: 'Linux / Terminal', level: 'Intermediate' },
+      { name: 'Figma Basics', level: 'Beginner' },
+      { name: 'Jira / Linear', level: 'Beginner' },
+    ]
+  },
+  {
+    category: 'Cloud',
+    icon: '☁️',
+    skills: [
+      { name: 'AWS Core Services', level: 'Intermediate' },
+      { name: 'GCP Fundamentals', level: 'Intermediate' },
+      { name: 'Azure Basics', level: 'Intermediate' },
+      { name: 'Serverless (Lambda / Cloud Functions)', level: 'Intermediate' },
+      { name: 'CDN & Edge Computing', level: 'Advanced' },
+    ]
+  },
+  {
+    category: 'Security',
+    icon: '🔐',
+    skills: [
+      { name: 'OWASP Top 10', level: 'Beginner' },
+      { name: 'Authentication (JWT, OAuth)', level: 'Beginner' },
+      { name: 'HTTPS & TLS', level: 'Beginner' },
+      { name: 'Secrets Management', level: 'Intermediate' },
+      { name: 'Penetration Testing Basics', level: 'Advanced' },
+    ]
+  }
+];
+
+// ============================================================
+// STORAGE KEYS
+// ============================================================
+
+const STEP_KEY     = 'roadmap70_steps';
+const SKILL_KEY    = 'roadmap70_skills';
+const GOAL_KEY     = 'roadmap70_goals';
+const STREAK_KEY   = 'roadmap70_streak';
+const TRACK_KEY    = 'roadmap70_track';
+const START_KEY    = 'roadmap70_startdate';
+
+// ============================================================
+// INIT
+// ============================================================
+
+let activeTrack = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderTrackGrid();
+  renderSkills();
+  renderGoals();
+
+  const savedTrack = localStorage.getItem(TRACK_KEY);
+  if (savedTrack) {
+    const btn = document.querySelector(`[data-track="${savedTrack}"]`);
+    if (btn) selectTrack(savedTrack, btn);
+  }
+});
+
+// ============================================================
+// TABS
+// ============================================================
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab === 'progress') refreshProgress();
+}
+
+// ============================================================
+// ROADMAP
+// ============================================================
+
+function renderTrackGrid() {
+  const grid = document.getElementById('trackGrid');
+  grid.innerHTML = TRACKS.map(t => `
+    <button class="track-btn" data-track="${t.id}" onclick="selectTrack('${t.id}', this)">
+      <div class="track-icon">${t.icon}</div>
+      <div class="track-name">${t.name}</div>
+      <div class="track-desc">${t.desc}</div>
+    </button>
+  `).join('');
+}
+
+function selectTrack(id, btn) {
+  document.querySelectorAll('.track-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeTrack = id;
+  localStorage.setItem(TRACK_KEY, id);
+  renderRoadmap(id);
+}
+
+function renderRoadmap(id) {
+  const data = ROADMAPS[id];
+  if (!data) return;
+
+  const container = document.getElementById('roadmapContainer');
+  container.classList.add('visible');
+  document.getElementById('roadmapTitle').textContent = data.label;
+
+  const doneSteps = getDoneSteps(id);
+  let totalSteps = 0;
+  let doneCount = 0;
+  let html = '';
+
+  const phases = [
+    { key: 'beginner', label: 'Beginner', cls: 'beginner', icon: '🌱' },
+    { key: 'mid',      label: 'Mid-Level', cls: 'mid',      icon: '🚀' },
+    { key: 'senior',   label: 'Senior',    cls: 'senior',   icon: '⭐' },
+  ];
+
+  phases.forEach(phase => {
+    const steps = data.phases[phase.key];
+    if (!steps) return;
+    html += `<div class="phase-section">
+      <div class="phase-label ${phase.cls}">${phase.icon} ${phase.label} Phase</div>`;
+
+    steps.forEach((step, idx) => {
+      const stepKey = `${id}_${phase.key}_${idx}`;
+      const isDone = doneSteps.includes(stepKey);
+      totalSteps++;
+      if (isDone) doneCount++;
+      html += `
+        <div class="step-card ${isDone ? 'done' : ''}" onclick="toggleStep('${stepKey}', '${id}', this)">
+          <div class="step-checkbox">${isDone ? '✓' : ''}</div>
+          <div class="step-body">
+            <div class="step-title">${step.title}</div>
+            <div class="step-meta">
+              <span class="step-time">⏱ ${step.time}</span>
+              <a class="step-resource" href="${step.url}" target="_blank" onclick="event.stopPropagation()">📖 Free Resource →</a>
+            </div>
+          </div>
+        </div>`;
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('roadmapSteps').innerHTML = html;
+  updateRoadmapBar(doneCount, totalSteps);
+}
+
+function toggleStep(stepKey, trackId, card) {
+  if (!localStorage.getItem(START_KEY)) {
+    localStorage.setItem(START_KEY, new Date().toISOString());
+  }
+  const doneSteps = getDoneSteps(trackId);
+  const idx = doneSteps.indexOf(stepKey);
+  if (idx === -1) doneSteps.push(stepKey);
+  else doneSteps.splice(idx, 1);
+  setDoneSteps(trackId, doneSteps);
+
+  const isDone = idx === -1;
+  card.classList.toggle('done', isDone);
+  const cb = card.querySelector('.step-checkbox');
+  cb.textContent = isDone ? '✓' : '';
+  card.querySelector('.step-title').style.textDecoration = isDone ? 'line-through' : '';
+
+  const allCards = document.querySelectorAll('.step-card');
+  let total = allCards.length, done = 0;
+  allCards.forEach(c => { if (c.classList.contains('done')) done++; });
+  updateRoadmapBar(done, total);
+
+  updateStreak();
+  showToast(isDone ? '✅ Step completed!' : '↩️ Step unchecked');
+}
+
+function updateRoadmapBar(done, total) {
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('roadmapBarFill').style.width = pct + '%';
+  document.getElementById('roadmapProgressText').textContent = `${done} / ${total} steps`;
+}
+
+function getDoneSteps(trackId) {
+  try { return JSON.parse(localStorage.getItem(STEP_KEY + '_' + trackId)) || []; }
+  catch { return []; }
+}
+function setDoneSteps(trackId, arr) {
+  localStorage.setItem(STEP_KEY + '_' + trackId, JSON.stringify(arr));
+}
+
+// ============================================================
+// SKILLS
+// ============================================================
+
+const SKILLS_STORE_KEY = SKILL_KEY;
+
+function getCheckedSkills() {
+  try { return JSON.parse(localStorage.getItem(SKILLS_STORE_KEY)) || []; }
+  catch { return []; }
+}
+function setCheckedSkills(arr) {
+  localStorage.setItem(SKILLS_STORE_KEY, JSON.stringify(arr));
+}
+
+function renderSkills() {
+  const checked = getCheckedSkills();
+  const container = document.getElementById('skillsContent');
+  let totalSkills = 0, totalChecked = 0;
+
+  container.innerHTML = SKILLS_DATA.map(cat => {
+    const catTotal = cat.skills.length;
+    const catChecked = cat.skills.filter(s => checked.includes(cat.category + ':' + s.name)).length;
+    const catPct = catTotal ? Math.round((catChecked / catTotal) * 100) : 0;
+    totalSkills += catTotal;
+    totalChecked += catChecked;
+
+    return `
+      <div class="skill-category">
+        <div class="skill-cat-header">
+          <div class="skill-cat-name">${cat.icon} ${cat.category}</div>
+          <div class="skill-cat-pct">${catChecked} / ${catTotal} · ${catPct}%</div>
+        </div>
+        <div class="skill-cat-bar-bg">
+          <div class="skill-cat-bar-fill" style="width:${catPct}%"></div>
+        </div>
+        <div class="skill-list">
+          ${cat.skills.map(s => {
+            const key = cat.category + ':' + s.name;
+            const isChecked = checked.includes(key);
+            return `
+              <div class="skill-item ${isChecked ? 'checked' : ''}" onclick="toggleSkill('${key}', this)">
+                <div class="skill-left">
+                  <div class="skill-check">${isChecked ? '✓' : ''}</div>
+                  <div class="skill-name">${s.name}</div>
+                </div>
+                <span class="level-badge level-${s.level.toLowerCase()}">${s.level}</span>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  const overallPct = totalSkills ? Math.round((totalChecked / totalSkills) * 100) : 0;
+  document.getElementById('skillsOverallPct').textContent = overallPct + '%';
+  document.getElementById('skillsOverallCount').textContent = totalChecked;
+}
+
+function toggleSkill(key, item) {
+  if (!localStorage.getItem(START_KEY)) {
+    localStorage.setItem(START_KEY, new Date().toISOString());
+  }
+  const checked = getCheckedSkills();
+  const idx = checked.indexOf(key);
+  if (idx === -1) checked.push(key);
+  else checked.splice(idx, 1);
+  setCheckedSkills(checked);
+  renderSkills();
+  updateStreak();
+  showToast(idx === -1 ? '✅ Skill learned!' : '↩️ Skill unchecked');
+}
+
+function resetSkills() {
+  if (!confirm('Reset all skill checkboxes?')) return;
+  localStorage.removeItem(SKILLS_STORE_KEY);
+  renderSkills();
+  showToast('Skills reset');
+}
+
+// ============================================================
+// GOALS
+// ============================================================
+
+function getGoals() {
+  try { return JSON.parse(localStorage.getItem(GOAL_KEY)) || []; }
+  catch { return []; }
+}
+function setGoals(arr) {
+  localStorage.setItem(GOAL_KEY, JSON.stringify(arr)); }
+
+function addGoal() {
+  const title = document.getElementById('goalTitle').value.trim();
+  if (!title) { showToast('Please enter a goal!'); return; }
+  const goals = getGoals();
+  if (goals.length >= 10) { showToast('Maximum 10 goals reached'); return; }
+
+  if (!localStorage.getItem(START_KEY)) {
+    localStorage.setItem(START_KEY, new Date().toISOString());
+  }
+
+  goals.push({
+    id: Date.now(),
+    title,
+    date: document.getElementById('goalDate').value,
+    status: document.getElementById('goalStatus').value
+  });
+  setGoals(goals);
+  document.getElementById('goalTitle').value = '';
+  document.getElementById('goalDate').value = '';
+  document.getElementById('goalStatus').value = 'not-started';
+  renderGoals();
+  showToast('🎯 Goal added!');
+}
+
+function updateGoalStatus(id, status) {
+  const goals = getGoals();
+  const goal = goals.find(g => g.id === id);
+  if (goal) { goal.status = status; setGoals(goals); renderGoals(); }
+}
+
+function deleteGoal(id) {
+  const goals = getGoals().filter(g => g.id !== id);
+  setGoals(goals);
+  renderGoals();
+  showToast('Goal removed');
+}
+
+function renderGoals() {
+  const goals = getGoals();
+  const container = document.getElementById('goalsList');
+
+  if (goals.length === 0) {
+    container.innerHTML = `<div class="goals-empty"><div class="empty-icon">🎯</div><p>No goals yet. Add your first career goal above!</p></div>`;
+    return;
+  }
+
+  const statusLabel = { 'not-started': 'Not Started', 'in-progress': 'In Progress', 'done': 'Done' };
+  container.innerHTML = goals.map(g => `
+    <div class="goal-card ${g.status === 'done' ? 'done' : ''} ${g.status === 'in-progress' ? 'inprogress' : ''}">
+      <div class="goal-left">
+        <div class="goal-title">${escHtml(g.title)}</div>
+        <div class="goal-date">${g.date ? '📅 Target: ' + formatDate(g.date) : '📅 No deadline set'} &nbsp;·&nbsp;
+          <span class="status-badge status-${g.status}">${statusLabel[g.status]}</span>
+        </div>
+      </div>
+      <div class="goal-right">
+        <select class="status-select" onchange="updateGoalStatus(${g.id}, this.value)">
+          <option value="not-started" ${g.status === 'not-started' ? 'selected' : ''}>Not Started</option>
+          <option value="in-progress" ${g.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+          <option value="done" ${g.status === 'done' ? 'selected' : ''}>Done</option>
+        </select>
+        <button class="delete-goal-btn" onclick="deleteGoal(${g.id})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// PROGRESS
+// ============================================================
+
+function refreshProgress() {
+  // Roadmap steps
+  let totalRoadmap = 0, doneRoadmap = 0;
+  TRACKS.forEach(t => {
+    const data = ROADMAPS[t.id];
+    if (!data) return;
+    const doneSteps = getDoneSteps(t.id);
+    Object.values(data.phases).forEach(steps => {
+      totalRoadmap += steps.length;
+    });
+    doneRoadmap += doneSteps.length;
+  });
+
+  // Skills
+  const checkedSkills = getCheckedSkills().length;
+  const totalSkills = SKILLS_DATA.reduce((sum, c) => sum + c.skills.length, 0);
+
+  // Goals
+  const goals = getGoals();
+  const doneGoals = goals.filter(g => g.status === 'done').length;
+  const totalGoals = goals.length;
+
+  // Days
+  const startStr = localStorage.getItem(START_KEY);
+  const days = startStr ? Math.max(1, Math.floor((Date.now() - new Date(startStr).getTime()) / 86400000)) : 0;
+
+  document.getElementById('statRoadmapDone').textContent = doneRoadmap;
+  document.getElementById('statSkillsDone').textContent = checkedSkills;
+  document.getElementById('statGoalsDone').textContent = doneGoals;
+  document.getElementById('statDays').textContent = days;
+
+  const roadmapPct = totalRoadmap ? Math.round((doneRoadmap / totalRoadmap) * 100) : 0;
+  const skillsPct  = totalSkills  ? Math.round((checkedSkills  / totalSkills)  * 100) : 0;
+  const goalsPct   = totalGoals   ? Math.round((doneGoals  / totalGoals)   * 100) : 0;
+
+  ['roadmap', 'skills', 'goals'].forEach((k, i) => {
+    const pct = [roadmapPct, skillsPct, goalsPct][i];
+    document.getElementById(`progRoadmapPct`.replace('roadmap', k)).textContent = pct + '%';
+    document.getElementById(`progRoadmapBar`.replace('roadmap', k)).style.width = pct + '%';
+  });
+
+  // Streak
+  const streak = getStreak();
+  document.getElementById('streakNumber').textContent = streak;
+  document.getElementById('streakMessage').textContent = streakMessage(streak);
+}
+
+// ============================================================
+// STREAK
+// ============================================================
+
+function getStreak() {
+  try { return JSON.parse(localStorage.getItem(STREAK_KEY)) || 0; }
+  catch { return 0; }
+}
+
+function updateStreak() {
+  const lastDate = localStorage.getItem('roadmap70_lastaction');
+  const today = new Date().toDateString();
+  if (lastDate === today) return;
+
+  localStorage.setItem('roadmap70_lastaction', today);
+  const streak = getStreak() + 1;
+  localStorage.setItem(STREAK_KEY, JSON.stringify(streak));
+}
+
+function streakMessage(n) {
+  if (n === 0) return 'Complete your first step to start your streak! 💪';
+  if (n < 3)   return "You're just getting started — keep going! 🌱";
+  if (n < 7)   return 'Building momentum! A week streak is within reach 🔥';
+  if (n < 14)  return "One week done! You're on a serious roll 🚀";
+  if (n < 30)  return "Half a month in — you're unstoppable ⚡";
+  return "30+ days? You're built different. Don't stop now 🏆";
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+
+function formatDate(str) {
+  const d = new Date(str + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pronunciation & Accent Trainer — Agent #57</title>
+<style>
+:root{--bg:#0f1117;--card:#1a1d27;--card2:#20243a;--blue:#4f8ef7;--blue-dim:#1a2a5a;--green:#4ade80;--green-dim:#0d2a1a;--yellow:#facc15;--red:#f87171;--purple:#a78bfa;--text:#e8eaf0;--muted:#8b90a8;--border:#2a2d3e;--r:12px;--rs:8px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:60px;}
+header{background:linear-gradient(135deg,#1a1d27,#0f1117);border-bottom:1px solid var(--border);padding:18px 20px 0;position:sticky;top:0;z-index:100;}
+.hdr{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.hdr h1{font-size:1.25rem;font-weight:700;}
+.hdr p{font-size:.75rem;color:var(--muted);margin-top:1px;}
+.hdr-badge{margin-left:auto;background:var(--blue-dim);color:var(--blue);padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:600;white-space:nowrap;}
+.tabs{display:flex;gap:2px;overflow-x:auto;}
+.tab-btn{background:none;border:none;color:var(--muted);padding:10px 18px;cursor:pointer;font-size:.79rem;font-weight:600;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab-btn:hover{color:var(--text);}.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.main{max-width:940px;margin:0 auto;padding:24px 16px;}
+.tab-panel{display:none;}.tab-panel.active{display:block;}
+.notice{background:#2a1a0a;border:1px solid #f97316;border-radius:var(--rs);padding:12px 16px;font-size:.8rem;color:#fb923c;margin-bottom:18px;display:flex;align-items:flex-start;gap:8px;}
+
+/* FILTER TABS */
+.ftabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.ftab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;cursor:pointer;font-size:.75rem;font-weight:600;transition:all .15s;}
+.ftab.active,.ftab:hover{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+
+/* WORD GRID */
+.word-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
+.wc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;transition:border-color .2s;}
+.wc:hover{border-color:var(--blue);}
+.wc-word{font-size:1.3rem;font-weight:800;color:var(--text);margin-bottom:3px;}
+.wc-ipa{font-size:.9rem;color:var(--blue);font-family:'Courier New',monospace;margin-bottom:6px;}
+.wc-mistake{font-size:.72rem;color:var(--red);margin-bottom:4px;}
+.wc-tip{font-size:.72rem;color:var(--yellow);margin-bottom:10px;line-height:1.4;}
+.wc-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
+.wtag{font-size:.62rem;padding:2px 7px;border-radius:10px;font-weight:600;}
+.wtag-m{background:#1a2a5a;color:var(--blue);}
+.wtag-v{background:#2a1a40;color:var(--purple);}
+.wtag-a{background:#1a3020;color:var(--green);}
+.wc-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.wc-btn{padding:6px 12px;border-radius:var(--rs);border:1px solid var(--border);background:var(--card2);color:var(--muted);cursor:pointer;font-size:.72rem;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:4px;}
+.wc-btn:hover:not(:disabled){background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+.wc-btn:disabled{opacity:.4;cursor:not-allowed;}
+.wc-btn.speaking{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+.wc-btn.recording{background:#3a1a1a;border-color:var(--red);color:var(--red);animation:pulse .8s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+.wc-result{margin-top:8px;font-size:.72rem;padding:6px 10px;border-radius:var(--rs);background:var(--card2);border:1px solid var(--border);display:none;}
+.wc-result.show{display:block;}
+.match-yes{color:var(--green);}
+.match-no{color:var(--red);}
+
+/* TONGUE TWISTERS */
+.twist-grid{display:flex;flex-direction:column;gap:10px;}
+.tc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;}
+.tc-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.tc-sound{font-size:.68rem;font-weight:700;text-transform:uppercase;padding:3px 9px;border-radius:20px;background:var(--blue-dim);color:var(--blue);}
+.tc-diff{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;}
+.diff-easy{background:#0d2a1a;color:var(--green);}
+.diff-medium{background:#2a2000;color:var(--yellow);}
+.diff-hard{background:#2a0f0f;color:var(--red);}
+.tc-text{font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:12px;color:var(--text);}
+.tc-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.tc-pb{font-size:.7rem;color:var(--purple);margin-left:auto;}
+.tc-result{margin-top:10px;display:none;}
+.tc-result.show{display:block;}
+.word-token{display:inline-block;padding:2px 5px;border-radius:4px;font-size:.85rem;font-weight:600;margin:2px;}
+.tok-correct{background:var(--green-dim);color:var(--green);}
+.tok-wrong{background:#2a0f0f;color:var(--red);}
+.tok-na{background:var(--card2);color:var(--muted);}
+.accuracy-bar{height:8px;border-radius:4px;background:var(--border);margin-top:8px;overflow:hidden;}
+.accuracy-fill{height:100%;border-radius:4px;transition:width .5s;background:var(--green);}
+
+/* QUIZ */
+.quiz-setup{text-align:center;padding:48px 20px;}
+.quiz-setup h2{font-size:1.4rem;font-weight:700;margin-bottom:8px;}
+.quiz-setup p{font-size:.86rem;color:var(--muted);max-width:440px;margin:0 auto 28px;}
+.start-btn{background:linear-gradient(135deg,var(--blue),#6fa8ff);color:#fff;border:none;padding:13px 36px;border-radius:var(--r);font-size:.96rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.start-btn:hover{opacity:.88;}
+.quiz-history{margin-top:24px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;}
+.quiz-history h3{font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.qh-row{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;font-size:.78rem;}
+.quiz-area{display:none;}
+.quiz-area.active{display:block;}
+.quiz-progress{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.qp-bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.qp-fill{height:100%;background:var(--blue);transition:width .3s;}
+.qp-label{font-size:.8rem;color:var(--muted);white-space:nowrap;}
+.qtimer{font-size:1.2rem;font-weight:800;color:var(--green);min-width:28px;text-align:center;}
+.qtimer.warn{color:var(--yellow);}
+.qtimer.danger{color:var(--red);}
+.qcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px;}
+.qtype-label{font-size:.68rem;font-weight:700;text-transform:uppercase;color:var(--purple);margin-bottom:12px;letter-spacing:.4px;}
+.qprompt{font-size:1.1rem;font-weight:700;line-height:1.5;margin-bottom:6px;}
+.qipa{font-size:1.6rem;font-family:'Courier New',monospace;color:var(--blue);margin-bottom:4px;}
+.qsub{font-size:.8rem;color:var(--muted);margin-bottom:18px;}
+.speak-word-btn{background:var(--blue-dim);border:1px solid var(--blue);color:var(--blue);padding:8px 18px;border-radius:var(--rs);cursor:pointer;font-size:.82rem;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:6px;transition:all .15s;}
+.speak-word-btn:hover{background:var(--blue);color:#fff;}
+.q-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.q-opt{background:var(--card2);border:1px solid var(--border);border-radius:var(--rs);padding:14px 18px;cursor:pointer;font-size:.9rem;font-weight:600;text-align:left;transition:all .15s;}
+.q-opt:hover:not(:disabled){border-color:var(--blue);color:var(--blue);}
+.q-opt:disabled{cursor:not-allowed;}
+.q-opt.correct{background:var(--green-dim)!important;border-color:var(--green)!important;color:var(--green)!important;}
+.q-opt.wrong{background:#2a0f0f!important;border-color:var(--red)!important;color:var(--red)!important;}
+.q-record-area{text-align:center;padding:10px 0;}
+.q-feedback{background:var(--card2);border-radius:var(--rs);padding:14px 18px;margin-top:14px;display:none;}
+.q-feedback.show{display:block;}
+.q-feedback-correct{color:var(--green);font-weight:700;font-size:.9rem;margin-bottom:4px;}
+.q-feedback-wrong{color:var(--red);font-weight:700;font-size:.9rem;margin-bottom:4px;}
+.q-feedback-explain{font-size:.78rem;color:var(--muted);line-height:1.5;}
+.next-btn{background:var(--blue);color:#fff;border:none;padding:10px 24px;border-radius:var(--rs);cursor:pointer;font-size:.85rem;font-weight:700;margin-top:14px;transition:opacity .2s;}
+.next-btn:hover{opacity:.85;}
+.quiz-results{display:none;text-align:center;padding:32px 20px;}
+.quiz-results.show{display:block;}
+.result-score{font-size:3.5rem;font-weight:900;background:linear-gradient(135deg,var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.result-label{font-size:1rem;color:var(--muted);margin-bottom:24px;}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;max-width:500px;margin:0 auto 24px;}
+.rg-box{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:14px;text-align:center;}
+.rg-val{font-size:1.5rem;font-weight:800;color:var(--blue);}
+.rg-lbl{font-size:.7rem;color:var(--muted);margin-top:2px;}
+@media(max-width:600px){.word-grid{grid-template-columns:1fr;}.q-options{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr">
+    <div>
+      <h1>🎤 Pronunciation & Accent Trainer</h1>
+      <p>Hear it · Practice it · Record yourself · Master it</p>
+    </div>
+    <span class="hdr-badge">Agent #57</span>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('words',this)">📚 Word Trainer</button>
+    <button class="tab-btn" onclick="showTab('twisters',this)">🔁 Tongue Twisters</button>
+    <button class="tab-btn" onclick="showTab('quiz',this)">🧠 Pronunciation Quiz</button>
+  </div>
+</header>
+
+<div class="main">
+
+<!-- ===== TAB 1: WORD TRAINER ===== -->
+<div class="tab-panel active" id="tab-words">
+  <div id="notice-sr" class="notice" style="display:none">
+    ⚠️ <span><strong>SpeechRecognition not supported</strong> in this browser. 🔊 Hear It and 🐢 Hear Slow will still work. For recording features, please use Chrome or Edge.</span>
+  </div>
+  <div class="ftabs" id="word-filter-tabs">
+    <button class="ftab active" onclick="setWordFilter('all',this)">All (100+)</button>
+    <button class="ftab" onclick="setWordFilter('mispronounced',this)">⚠️ Commonly Mispronounced</button>
+    <button class="ftab" onclick="setWordFilter('vietnamese',this)">🇻🇳 Hard for Vietnamese Speakers</button>
+    <button class="ftab" onclick="setWordFilter('academic',this)">🎓 Academic</button>
+  </div>
+  <div class="word-grid" id="word-grid"></div>
+</div>
+
+<!-- ===== TAB 2: TONGUE TWISTERS ===== -->
+<div class="tab-panel" id="tab-twisters">
+  <div id="notice-sr2" class="notice" style="display:none">
+    ⚠️ <span><strong>SpeechRecognition not supported</strong> — 🔊 Hear It still works. For Try It accuracy scoring, use Chrome or Edge.</span>
+  </div>
+  <div class="ftabs" id="twist-filter-tabs">
+    <button class="ftab active" onclick="setTwistFilter('all',this)">All (40)</button>
+    <button class="ftab" onclick="setTwistFilter('s_sh',this)">/s/ vs /ʃ/</button>
+    <button class="ftab" onclick="setTwistFilter('th',this)">/θ/ /ð/ TH</button>
+    <button class="ftab" onclick="setTwistFilter('r_l',this)">/r/ vs /l/</button>
+    <button class="ftab" onclick="setTwistFilter('v_b',this)">/v/ vs /b/</button>
+    <button class="ftab" onclick="setTwistFilter('p_b',this)">/p/ and /b/</button>
+    <button class="ftab" onclick="setTwistFilter('w',this)">/w/</button>
+    <button class="ftab" onclick="setTwistFilter('vowels',this)">Mixed Vowels</button>
+    <button class="ftab" onclick="setTwistFilter('speed',this)">⚡ Speed</button>
+  </div>
+  <div class="twist-grid" id="twist-grid"></div>
+</div>
+
+<!-- ===== TAB 3: QUIZ ===== -->
+<div class="tab-panel" id="tab-quiz">
+  <div id="quiz-setup" class="quiz-setup">
+    <h2>🧠 Pronunciation Quiz</h2>
+    <p>20 questions mixing 4 types: Listen & Choose, Read & Record, Minimal Pairs, and IPA Reading. 30 seconds per question.</p>
+    <button class="start-btn" onclick="startQuiz()">Start Quiz →</button>
+    <div class="quiz-history" id="quiz-history"></div>
+  </div>
+  <div class="quiz-area" id="quiz-area">
+    <div class="quiz-progress">
+      <div class="qp-bar"><div class="qp-fill" id="qp-fill" style="width:0%"></div></div>
+      <span class="qp-label" id="qp-label">Q 1/20</span>
+      <span class="qtimer" id="qtimer">30</span>
+    </div>
+    <div class="qcard">
+      <div class="qtype-label" id="qtype-label"></div>
+      <div id="qcontent"></div>
+      <div class="q-feedback" id="q-feedback">
+        <div id="q-fb-text"></div>
+        <div class="q-feedback-explain" id="q-fb-explain"></div>
+        <button class="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+  </div>
+  <div class="quiz-results" id="quiz-results">
+    <div class="result-score" id="result-score">0/20</div>
+    <div class="result-label" id="result-label"></div>
+    <div class="result-grid" id="result-grid"></div>
+    <button class="start-btn" onclick="startQuiz()">Play Again</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ============================================================
+// SPEECH API SETUP
+// ============================================================
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+const SS = window.speechSynthesis;
+const hasSR = !!SR;
+const hasSS = !!SS;
+
+if (!hasSR) {
+  document.getElementById('notice-sr').style.display = 'flex';
+  document.getElementById('notice-sr2').style.display = 'flex';
+}
+
+let currentUtterance = null;
+function speak(text, rate, onEnd) {
+  if (!hasSS) return;
+  SS.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = rate || 1.0; u.pitch = 1.0;
+  if (onEnd) u.onend = onEnd;
+  currentUtterance = u;
+  SS.speak(u);
+}
+
+let activeRecognition = null;
+function listenOnce(onResult, onError) {
+  if (!hasSR) { if(onError) onError('not supported'); return; }
+  if (activeRecognition) { try { activeRecognition.stop(); } catch(e){} }
+  const rec = new SR();
+  rec.lang = 'en-US'; rec.continuous = false; rec.interimResults = false; rec.maxAlternatives = 3;
+  rec.onresult = e => {
+    const transcripts = [];
+    for (let i=0;i<e.results[0].length;i++) transcripts.push(e.results[0][i].transcript.toLowerCase().trim());
+    onResult(transcripts);
+  };
+  rec.onerror = e => { if(onError) onError(e.error); };
+  rec.onend = () => { activeRecognition = null; };
+  activeRecognition = rec;
+  rec.start();
+}
+
+// ============================================================
+// WORD DATA (100 words)
+// ============================================================
+const WORDS = [
+  // ── COMMONLY MISPRONOUNCED ─────────────────────────────
+  {w:'Quinoa',ipa:'/ˈkiːn.wɑː/',mistake:'Often said "KWIN-oh-ah"',vi:'Say KEEN-wah — QU=K, ends like "wah"',tags:['mispronounced']},
+  {w:'Gnocchi',ipa:'/ˈnjɒk.i/',mistake:'"G-no-chee" — G and first C are silent',vi:'Say NYOK-ee (NY then OK-ee)',tags:['mispronounced']},
+  {w:'Worcestershire',ipa:'/ˈwʊs.tər.ʃɪr/',mistake:'Trying to say every letter',vi:'Say WOOS-ter-sher — only 3 syllables!',tags:['mispronounced','academic']},
+  {w:'Colonel',ipa:'/ˈkɜːr.nəl/',mistake:'Saying "kol-OH-nel" — L sounds like R',vi:'Say KER-nel — spelled with L but sounds like R',tags:['mispronounced']},
+  {w:'Epitome',ipa:'/ɪˈpɪt.ə.mi/',mistake:'"EP-ih-tome" — treating -ome like "home"',vi:'Say eh-PIT-oh-mee (4 syllables)',tags:['mispronounced','academic']},
+  {w:'Mischievous',ipa:'/ˈmɪs.tʃɪ.vəs/',mistake:'"mis-CHEEV-ee-us" (4 syllables) — only 3!',vi:'Say MIS-chuh-vus (3 syllables, no extra "ee")',tags:['mispronounced']},
+  {w:'February',ipa:'/ˈfeb.ru.er.i/',mistake:'Dropping first R: "FEB-yoo-ary"',vi:'Say FEB-roo-air-ee (keep both R sounds)',tags:['mispronounced','vietnamese']},
+  {w:'Library',ipa:'/ˈlaɪ.brer.i/',mistake:'"LI-berry" — dropping middle R',vi:'Say LY-breh-ree (R-R combo in middle)',tags:['mispronounced','vietnamese']},
+  {w:'Nuclear',ipa:'/ˈnjuː.kliː.ər/',mistake:'"noo-KYOO-lar" — wrong vowel+consonant',vi:'Say NOO-klee-er (kl cluster, not kyo)',tags:['mispronounced']},
+  {w:'Sherbet',ipa:'/ˈʃɜːr.bɪt/',mistake:'"SHER-bert" — adding extra T',vi:'Say SHER-bit (no T after B)',tags:['mispronounced']},
+  {w:'Espresso',ipa:'/eˈspres.oʊ/',mistake:'"EX-presso" — adding X',vi:'Say eh-SPRES-oh (starts with ES not EX)',tags:['mispronounced']},
+  {w:'Especially',ipa:'/ɪˈspeʃ.əl.i/',mistake:'"EX-pecially" or "EX-specially"',vi:'Say ih-SPESH-uh-lee (no X!)',tags:['mispronounced','vietnamese']},
+  {w:'Supposedly',ipa:'/səˈpoʊz.ɪd.li/',mistake:'"Supposably" — wrong suffix',vi:'Say suh-POH-zed-lee (not "ably")',tags:['mispronounced']},
+  {w:'Pronunciation',ipa:'/prəˌnʌn.siˈeɪ.ʃən/',mistake:'"pro-NOUNCE-iation" — changing vowel',vi:'Say pruh-nun-see-AY-shun (UN not OUN)',tags:['mispronounced','vietnamese']},
+  {w:'Nausea',ipa:'/ˈnɔː.zi.ə/',mistake:'"NAW-sha" — skipping syllable',vi:'Say NAW-zee-uh (3 syllables)',tags:['mispronounced']},
+  {w:'Aesthetic',ipa:'/esˈθet.ɪk/',mistake:'"a-STHET-ic" — silent initial A',vi:'Say es-THET-ik — TH here = T sound!',tags:['mispronounced','academic']},
+  {w:'Hyperbole',ipa:'/haɪˈpɜːr.bə.li/',mistake:'"HY-per-bowl" — treating as 3 syllables',vi:'Say hy-PER-buh-lee (4 syllables, ends -lee)',tags:['mispronounced','academic']},
+  {w:'Cache',ipa:'/kæʃ/',mistake:'"Ca-SHAY" — confusing with "cachet"',vi:'Say KASH (rhymes with cash)',tags:['mispronounced']},
+  {w:'Chaos',ipa:'/ˈkeɪ.ɒs/',mistake:'"CHA-os" — CH sounds like K',vi:'Say KAY-os (not chow!)',tags:['mispronounced','academic']},
+  {w:'Choir',ipa:'/ˈkwaɪər/',mistake:'"CHO-ir" — CH sounds like KW',vi:'Say KWYR (rhymes with "fire")',tags:['mispronounced']},
+  {w:'Debt',ipa:'/det/',mistake:'Saying the B: "DEBT"',vi:'Say DET — the B is completely silent',tags:['mispronounced','vietnamese']},
+  {w:'Doubt',ipa:'/daʊt/',mistake:'Saying the B: "DOWBT"',vi:'Say DOWT — the B is completely silent',tags:['mispronounced','vietnamese']},
+  {w:'Island',ipa:'/ˈaɪ.lənd/',mistake:'Saying the S: "IS-land"',vi:'Say EYE-lund — S is silent',tags:['mispronounced']},
+  {w:'Knight',ipa:'/naɪt/',mistake:'"kuh-NIGHT" — KN = just N, GH is silent',vi:'Say NYTE (exactly like "night")',tags:['mispronounced']},
+  {w:'Naive',ipa:'/naɪˈiːv/',mistake:'One syllable "NIVE"',vi:'Say ny-EEV (2 syllables)',tags:['mispronounced','academic']},
+  {w:'Receipt',ipa:'/rɪˈsiːt/',mistake:'Saying the P: "re-SIPPT"',vi:'Say reh-SEET — P is completely silent',tags:['mispronounced']},
+  {w:'Salmon',ipa:'/ˈsæm.ən/',mistake:'Saying the L: "SAL-mon"',vi:'Say SAM-un — L is completely silent',tags:['mispronounced']},
+  {w:'Sword',ipa:'/sɔːrd/',mistake:'Saying the W: "SWOORD"',vi:'Say SORD — W is silent',tags:['mispronounced']},
+  {w:'Wednesday',ipa:'/ˈwenz.deɪ/',mistake:'Saying hidden D: "WED-nes-day"',vi:'Say WENZ-day (middle D is silent)',tags:['mispronounced']},
+  {w:'Yacht',ipa:'/jɒt/',mistake:'"YATCH-et" or "YATCH"',vi:'Say YOT (rhymes with hot)',tags:['mispronounced']},
+  {w:'Albeit',ipa:'/ɔːlˈbiː.ɪt/',mistake:'"ALL-bite" or "all-BIT"',vi:'Say awl-BEE-it (3 syllables)',tags:['mispronounced','academic']},
+  {w:'Antarctic',ipa:'/æntˈɑːrk.tɪk/',mistake:'Dropping first C: "ant-AR-tic"',vi:'Say ant-ARK-tik (say both C sounds)',tags:['mispronounced']},
+  {w:'Arctic',ipa:'/ˈɑːrk.tɪk/',mistake:'"ART-ic" — dropping the C',vi:'Say ARK-tik (not ART-ik)',tags:['mispronounced']},
+  {w:'Athlete',ipa:'/ˈæθ.liːt/',mistake:'"ATH-uh-leet" — adding extra syllable',vi:'Say ATH-leet (only 2 syllables)',tags:['mispronounced']},
+  {w:'Deteriorate',ipa:'/dɪˈtɪər.i.ə.reɪt/',mistake:'Dropping syllables or stressing wrong',vi:'Say deh-TEER-ee-uh-rayt (5 syllables)',tags:['mispronounced','academic']},
+  {w:'Dilate',ipa:'/daɪˈleɪt/',mistake:'"DI-a-late" — adding extra syllable',vi:'Say dy-LAYT (only 2 syllables)',tags:['mispronounced','academic']},
+  {w:'Escape',ipa:'/ɪˈskeɪp/',mistake:'"EX-cape" — adding X',vi:'Say ih-SKAYP (no X)',tags:['mispronounced']},
+  {w:'Etcetera',ipa:'/etˈset.ər.ə/',mistake:'"EX-cetera" or "ek-SETRA"',vi:'Say et-SET-er-uh (et not ex!)',tags:['mispronounced']},
+  {w:'Exquisite',ipa:'/ɪkˈskwɪz.ɪt/',mistake:'Stressing first syllable: "EX-kwiz-it"',vi:'Say ik-SKWIZ-it (stress on 2nd)',tags:['mispronounced','academic']},
+  {w:'Hierarchy',ipa:'/ˈhaɪ.ə.rɑːr.ki/',mistake:'Dropping syllable: "HI-ar-key"',vi:'Say HY-er-ar-kee (4 syllables)',tags:['mispronounced','academic']},
+  {w:'Homage',ipa:'/ˈɒm.ɪdʒ/',mistake:'"HO-mij" — H may be silent',vi:'Say OM-ij (H is optional/silent)',tags:['mispronounced','academic']},
+  {w:'Jewelry',ipa:'/ˈdʒuː.əl.ri/',mistake:'"JEW-el-ary" — adding extra syllable',vi:'Say JOO-ul-ree (3 syllables)',tags:['mispronounced']},
+  {w:'Mauve',ipa:'/moʊv/',mistake:'"MAWVE" or "MAVE"',vi:'Say MOHV (rhymes with stove)',tags:['mispronounced']},
+  {w:'Moot',ipa:'/muːt/',mistake:'Confusing with "mute" (/mjuːt/)',vi:'Say MOOT (rhymes with root)',tags:['mispronounced','academic']},
+  {w:'Particularly',ipa:'/pərˈtɪk.jʊ.lər.li/',mistake:'Dropping syllables: "par-TIC-ularly"',vi:'Say par-TIK-yoo-ler-lee (6 syllables!)',tags:['mispronounced','vietnamese']},
+  {w:'Prescription',ipa:'/prɪˈskrɪp.ʃən/',mistake:'"per-SCRIPTION" — PER not PRE',vi:'Say preh-SKRIP-shun',tags:['mispronounced']},
+  {w:'Realtor',ipa:'/ˈriːl.tər/',mistake:'"REAL-uh-tor" — adding syllable',vi:'Say REEL-ter (2 syllables only)',tags:['mispronounced']},
+  {w:'Regardless',ipa:'/rɪˈɡɑːrd.ləs/',mistake:'"Irregardless" — not a standard word',vi:'Say reh-GARD-les',tags:['mispronounced']},
+  {w:'Remunerate',ipa:'/rɪˈmjuː.nə.reɪt/',mistake:'"RE-numerate" — mixing words',vi:'Say reh-MYOO-nuh-rayt',tags:['mispronounced','academic']},
+  {w:'Subtle',ipa:'/ˈsʌt.əl/',mistake:'Saying the B: "SUB-tle"',vi:'Say SUT-ul — B is completely silent',tags:['mispronounced']},
+  {w:'Temperature',ipa:'/ˈtem.prɪ.tʃər/',mistake:'Saying all syllables: "TEM-per-a-ture"',vi:'Say TEM-pruh-cher (3 syllables in casual speech)',tags:['mispronounced']},
+  {w:'Vulnerable',ipa:'/ˈvʌl.nər.ə.bəl/',mistake:'"VUN-erable" — dropping L',vi:'Say VUL-nuh-ruh-bul (V not B!)',tags:['mispronounced','vietnamese']},
+  // ── EVERYDAY WORDS HARD FOR VIETNAMESE SPEAKERS ──────────
+  {w:'comfortable',ipa:'/ˈkʌm.ftər.bəl/',mistake:'Saying all 4 syllables: "com-FOR-ta-ble"',vi:'Say KUM-fer-tul (3 syllables in natural speech)',tags:['vietnamese']},
+  {w:'vegetable',ipa:'/ˈvedʒ.tə.bəl/',mistake:'"veg-ETA-ble" — 4 syllables',vi:'Say VEJ-tuh-bul (3 syllables)',tags:['vietnamese']},
+  {w:'interesting',ipa:'/ˈɪn.trɪ.stɪŋ/',mistake:'"IN-ter-ES-ting" — 4 syllables',vi:'Say IN-tres-ting (3 syllables)',tags:['vietnamese']},
+  {w:'different',ipa:'/ˈdɪf.ər.ənt/',mistake:'"dif-FAIR-ent" — 3 syllables',vi:'Say DIF-rint (2 syllables in natural speech)',tags:['vietnamese']},
+  {w:'every',ipa:'/ˈev.ri/',mistake:'"EV-er-ee" — 3 syllables',vi:'Say EV-ree (2 syllables only)',tags:['vietnamese']},
+  {w:'evening',ipa:'/ˈiːv.nɪŋ/',mistake:'"EV-en-ing" — 3 syllables',vi:'Say EEV-ning (2 syllables)',tags:['vietnamese']},
+  {w:'family',ipa:'/ˈfæm.li/',mistake:'"FAM-i-lee" — exaggerating vowel',vi:'Say FAM-lee (often 2 syllables in speech)',tags:['vietnamese']},
+  {w:'probably',ipa:'/ˈprɒb.ə.bli/',mistake:'"PROB-a-blee" — full 4 syllables',vi:'Say PROB-uh-blee (3 syllables)',tags:['vietnamese']},
+  {w:'police',ipa:'/pəˈliːs/',mistake:'"POH-lice" — wrong stress on 1st syllable',vi:'Say puh-LEES (stress on 2nd syllable!)',tags:['vietnamese']},
+  {w:'prefer',ipa:'/prɪˈfɜːr/',mistake:'Dropping final R: "pre-FEE"',vi:'Say preh-FER (American R at end is key)',tags:['vietnamese']},
+  {w:'prepare',ipa:'/prɪˈpeər/',mistake:'Dropping R: "pre-PAY"',vi:'Say preh-PAIR (rhymes with hair)',tags:['vietnamese']},
+  {w:'present',ipa:'/ˈprez.ənt/',mistake:'Stress changes meaning: noun vs verb',vi:'Noun: PREZ-ent / Verb: preh-ZENT',tags:['vietnamese']},
+  {w:'previous',ipa:'/ˈpriː.vi.əs/',mistake:'"PREV-ee-us" — 3 syllables',vi:'Say PREE-vee-us (3 syllables)',tags:['vietnamese']},
+  {w:'produce',ipa:'/prəˈduːs/',mistake:'Always saying PRO-doos (noun stress)',vi:'Noun: PRO-dyoos / Verb: pruh-DYOOS',tags:['vietnamese']},
+  {w:'progress',ipa:'/ˈprɒɡ.res/',mistake:'Always stressing same syllable',vi:'Noun: PROG-res / Verb: pruh-GRES',tags:['vietnamese']},
+  {w:'pronounce',ipa:'/prəˈnaʊns/',mistake:'"PRO-nounce" — wrong stress',vi:'Say pruh-NOWNS (stress on 2nd syllable)',tags:['vietnamese']},
+  {w:'protect',ipa:'/prəˈtekt/',mistake:'"PRO-tect" — wrong stress',vi:'Say pruh-TEKT (stress 2nd syllable)',tags:['vietnamese']},
+  {w:'provide',ipa:'/prəˈvaɪd/',mistake:'"pruh-BIDE" — V sounds like B',vi:'Say pruh-VYD — V is not B!',tags:['vietnamese']},
+  {w:'purple',ipa:'/ˈpɜːr.pəl/',mistake:'Avoiding the R vowel: "PEE-pul"',vi:'Say PER-pul (American R vowel ɜːr)',tags:['vietnamese']},
+  {w:'purpose',ipa:'/ˈpɜːr.pəs/',mistake:'"PER-pos" — missing the ɜːr vowel',vi:'Say PER-pus (ɜːr = the "er" in "her")',tags:['vietnamese']},
+  {w:'actually',ipa:'/ˈæk.tʃu.ə.li/',mistake:'"ACK-shully" — skipping syllable',vi:'Say AK-choo-uh-lee (4 syllables)',tags:['vietnamese']},
+  {w:'animal',ipa:'/ˈæn.ɪ.məl/',mistake:'"AN-ih-mull" — correct! But watch vowels',vi:'Say AN-ih-mul (short vowels)',tags:['vietnamese']},
+  {w:'beautiful',ipa:'/ˈbjuː.tɪ.fəl/',mistake:'"BOO-tiful" — missing the Y glide',vi:'Say BYOO-tih-ful (BY not BOO)',tags:['vietnamese']},
+  {w:'camera',ipa:'/ˈkæm.ər.ə/',mistake:'"KAM-eh-rah" — stressing all syllables',vi:'Say KAM-er-uh (3 syllables)',tags:['vietnamese']},
+  {w:'cannot',ipa:'/ˈkæn.ɒt/',mistake:'"can-NOT" — wrong stress',vi:'Say KAN-ot (stress on first)',tags:['vietnamese']},
+  {w:'capital',ipa:'/ˈkæp.ɪ.təl/',mistake:'"CAP-ee-tull" — elongating I',vi:'Say KAP-ih-tul (short I sound)',tags:['vietnamese']},
+  {w:'central',ipa:'/ˈsen.trəl/',mistake:'"SEN-ter-al" — adding syllable',vi:'Say SEN-trul (only 2 syllables)',tags:['vietnamese']},
+  {w:'children',ipa:'/ˈtʃɪl.drən/',mistake:'"SHIL-dren" — CH not SH',vi:'Say CHIL-dren (tʃ sound at start)',tags:['vietnamese']},
+  {w:'company',ipa:'/ˈkʌm.pə.ni/',mistake:'"COM-pa-nee" — elongating all vowels',vi:'Say KUM-puh-nee (3 syllables)',tags:['vietnamese']},
+  {w:'complete',ipa:'/kəmˈpliːt/',mistake:'"COM-pleet" — wrong stress',vi:'Say kum-PLEET (stress on 2nd)',tags:['vietnamese']},
+  {w:'country',ipa:'/ˈkʌn.tri/',mistake:'"CON-tree" — wrong vowel',vi:'Say KUN-tree (short U sound)',tags:['vietnamese']},
+  {w:'culture',ipa:'/ˈkʌl.tʃər/',mistake:'"COOL-tour" — French influence',vi:'Say KUL-cher (-cher not -toor)',tags:['vietnamese']},
+  {w:'customer',ipa:'/ˈkʌs.tə.mər/',mistake:'"cus-TOM-er" — wrong stress',vi:'Say KUS-tuh-mer (stress on 1st)',tags:['vietnamese']},
+  {w:'develop',ipa:'/dɪˈvel.əp/',mistake:'"DEV-elop" — wrong stress',vi:'Say deh-VEL-up (stress on 2nd)',tags:['vietnamese']},
+  {w:'example',ipa:'/ɪɡˈzɑːm.pəl/',mistake:'"ex-AMP-ul" — wrong Z/S sound',vi:'Say ig-ZAM-pul (Z sound, not S!)',tags:['vietnamese']},
+  {w:'government',ipa:'/ˈɡʌv.ər.nmənt/',mistake:'"GOV-ern-MENT" — 4 syllables',vi:'Say GUV-ern-ment (3 syllables in fast speech)',tags:['vietnamese']},
+  {w:'history',ipa:'/ˈhɪs.tər.i/',mistake:'"his-TOR-ee" — wrong stress',vi:'Say HIS-ter-ee (stress on 1st)',tags:['vietnamese']},
+  {w:'important',ipa:'/ɪmˈpɔːr.tənt/',mistake:'"im-POR-tant" — missing R vowel',vi:'Say im-POR-tant (ɔːr = like "or")',tags:['vietnamese']},
+  {w:'language',ipa:'/ˈlæŋ.ɡwɪdʒ/',mistake:'"LANG-u-age" — 3 syllables',vi:'Say LANG-gwij (2 syllables, ends -wij)',tags:['vietnamese']},
+  {w:'vehicle',ipa:'/ˈviː.ɪ.kəl/',mistake:'"VEE-hi-kul" — H is silent',vi:'Say VEE-uh-kul (no H sound)',tags:['vietnamese']},
+  {w:'natural',ipa:'/ˈnætʃ.ər.əl/',mistake:'"NAT-choo-ral" — 4 syllables',vi:'Say NATCH-er-ul (3 syllables)',tags:['vietnamese']},
+  {w:'original',ipa:'/əˈrɪdʒ.ɪ.nəl/',mistake:'"OR-ig-in-al" — 4 syllables, wrong stress',vi:'Say uh-RIJ-ih-nul (stress on 2nd)',tags:['vietnamese','academic']},
+  {w:'particular',ipa:'/pərˈtɪk.jʊ.lər/',mistake:'"par-TIC-ular" — dropping syllable',vi:'Say per-TIK-yoo-ler (4 syllables)',tags:['vietnamese']},
+  {w:'regular',ipa:'/ˈreɡ.jʊ.lər/',mistake:'"REG-u-lar" — elongating U',vi:'Say REG-yoo-ler (3 syllables)',tags:['vietnamese']},
+  {w:'several',ipa:'/ˈsev.ər.əl/',mistake:'"SEV-er-al" — 3 syllables? Yes!',vi:'Say SEV-er-ul (weak final vowel)',tags:['vietnamese']},
+  {w:'similar',ipa:'/ˈsɪm.ɪ.lər/',mistake:'"SIM-i-lar" — elongating I',vi:'Say SIM-ih-ler (3 syllables)',tags:['vietnamese']},
+  {w:'usually',ipa:'/ˈjuː.ʒu.ə.li/',mistake:'"YOO-zhoo-lee" — 3 syllables',vi:'Say YOO-zhoo-uh-lee (4 syllables)',tags:['vietnamese']},
+  {w:'whether',ipa:'/ˈweð.ər/',mistake:'"WEE-ther" or "WET-her" — wrong TH',vi:'Say WETH-er (ð = voiced TH)',tags:['vietnamese']},
+  {w:'without',ipa:'/wɪˈðaʊt/',mistake:'"wee-TOWT" or "wit-OWT" — missing ð',vi:'Say with-OWT (voiced TH in middle)',tags:['vietnamese']},
+];
+
+// ============================================================
+// TONGUE TWISTERS (40)
+// ============================================================
+const TWISTERS = [
+  // /s/ vs /sh/
+  {text:'She sells seashells by the seashore',sound:'/s/ vs /ʃ/',diff:'medium',group:'s_sh'},
+  {text:'Sally sold six slippery seashells by the seashore',sound:'/s/ vs /ʃ/',diff:'hard',group:'s_sh'},
+  {text:'Susan shines shoes and socks',sound:'/s/ vs /ʃ/',diff:'easy',group:'s_sh'},
+  {text:"Sam's shop stocks short spotted socks",sound:'/s/ vs /ʃ/',diff:'medium',group:'s_sh'},
+  {text:'Surely Sylvia swims in the shimmering sea',sound:'/s/ vs /ʃ/',diff:'medium',group:'s_sh'},
+  // /th/
+  {text:'The thirty-three thieves thought that they thrilled the throne',sound:'/θ/ and /ð/ TH',diff:'hard',group:'th'},
+  {text:'There were three free throws',sound:'/θ/ and /ð/ TH',diff:'easy',group:'th'},
+  {text:'Theo thrust a thistle through the thick cloth',sound:'/θ/ TH',diff:'medium',group:'th'},
+  {text:'Thin sticks thick bricks thin sticks thick bricks',sound:'/θ/ TH',diff:'medium',group:'th'},
+  {text:'Three thin thinkers thinking thick thoughtful thoughts',sound:'/θ/ TH',diff:'hard',group:'th'},
+  // /r/ vs /l/
+  {text:'Red lorry yellow lorry red lorry yellow lorry',sound:'/r/ vs /l/',diff:'medium',group:'r_l'},
+  {text:'Eleven benevolent elephants',sound:'/l/',diff:'easy',group:'r_l'},
+  {text:'Really leery rarely Larry',sound:'/r/ vs /l/',diff:'hard',group:'r_l'},
+  {text:'Larry sent the latter a little litter',sound:'/r/ vs /l/',diff:'medium',group:'r_l'},
+  {text:'Rolling red wagons along rural roads',sound:'/r/ vs /l/',diff:'medium',group:'r_l'},
+  // /v/ vs /b/
+  {text:"Victor's very vivid vests vex vendors",sound:'/v/',diff:'medium',group:'v_b'},
+  {text:"Beverly's very best bet",sound:'/v/ vs /b/',diff:'easy',group:'v_b'},
+  {text:'Very well very well very well',sound:'/v/',diff:'easy',group:'v_b'},
+  {text:'Babbling bumbling band of baboons',sound:'/b/',diff:'easy',group:'v_b'},
+  {text:'Big black bears bite big black bugs',sound:'/b/',diff:'medium',group:'v_b'},
+  // /p/ and /b/
+  {text:'Peter Piper picked a peck of pickled peppers',sound:'/p/',diff:'medium',group:'p_b'},
+  {text:'Betty Botter bought some butter but she said the butter was bitter',sound:'/b/ and /t/',diff:'hard',group:'p_b'},
+  {text:'Pad kid poured curd pulled cod',sound:'/p/ and /d/',diff:'hard',group:'p_b'},
+  {text:'Purple paper people purple paper people',sound:'/p/',diff:'medium',group:'p_b'},
+  {text:'Picky people pick Peter Pan peanut butter',sound:'/p/ and /b/',diff:'medium',group:'p_b'},
+  // /w/
+  {text:'Whether the weather is warm or whether the weather is not',sound:'/w/ and /ð/',diff:'medium',group:'w'},
+  {text:'How much wood would a woodchuck chuck if a woodchuck could chuck wood',sound:'/w/',diff:'medium',group:'w'},
+  {text:"Willie's really weary working weekdays in winter weather",sound:'/w/',diff:'medium',group:'w'},
+  {text:'Which witch wished which wicked wish',sound:'/w/ and /tʃ/',diff:'medium',group:'w'},
+  {text:"Willy's wooden whistle won't work without wind",sound:'/w/',diff:'hard',group:'w'},
+  // Mixed vowels
+  {text:'Unique New York unique New York you know you need unique New York',sound:'Vowels /juː/ /uː/',diff:'hard',group:'vowels'},
+  {text:'I saw Susie sitting in a shoeshine shop',sound:'Vowels + /s/ /ʃ/',diff:'medium',group:'vowels'},
+  {text:'How can a clam cram in a clean cream can',sound:'/æ/ and /iː/',diff:'medium',group:'vowels'},
+  {text:'I scream you scream we all scream for ice cream',sound:'Vowels',diff:'easy',group:'vowels'},
+  {text:'Toy boat toy boat toy boat',sound:'/ɔɪ/ diphthong',diff:'medium',group:'vowels'},
+  // Speed challenges
+  {text:"The sixth sick sheikh's sixth sheep's sick",sound:'Speed + /s/ /ʃ/',diff:'hard',group:'speed'},
+  {text:'Pad kid poured curd pulled cod',sound:'Speed challenge',diff:'hard',group:'speed'},
+  {text:'Brisk brave brigadiers brandished broad bright blades blunderingly',sound:'Speed + /br/ /bl/',diff:'hard',group:'speed'},
+  {text:'Freshly fried flying fish freshly fried flying fish',sound:'Speed + /fl/ /fr/',diff:'medium',group:'speed'},
+  {text:'Lesser leather never weathered wetter weather better',sound:'Speed + /ɛ/ vowels',diff:'hard',group:'speed'},
+];
+
+// ============================================================
+// MINIMAL PAIRS (for quiz Type C)
+// ============================================================
+const PAIRS = [
+  {a:'ship',b:'sheep',sound:'/ɪ/ vs /iː/'},
+  {a:'bit',b:'beat',sound:'/ɪ/ vs /iː/'},
+  {a:'pull',b:'pool',sound:'/ʊ/ vs /uː/'},
+  {a:'pill',b:'bill',sound:'/p/ vs /b/'},
+  {a:'vine',b:'wine',sound:'/v/ vs /w/'},
+  {a:'think',b:'sink',sound:'/θ/ vs /s/'},
+  {a:'right',b:'light',sound:'/r/ vs /l/'},
+  {a:'very',b:'berry',sound:'/v/ vs /b/'},
+  {a:'rice',b:'lice',sound:'/r/ vs /l/'},
+  {a:'seat',b:'sit',sound:'/iː/ vs /ɪ/'},
+  {a:'bad',b:'bed',sound:'/æ/ vs /e/'},
+  {a:'cup',b:'cap',sound:'/ʌ/ vs /æ/'},
+  {a:'leave',b:'live',sound:'/iː/ vs /ɪ/'},
+  {a:'late',b:'rate',sound:'/l/ vs /r/'},
+  {a:'fail',b:'vale',sound:'/f/ vs /v/'},
+  {a:'fan',b:'van',sound:'/f/ vs /v/'},
+  {a:'base',b:'vase',sound:'/b/ vs /v/'},
+  {a:'thank',b:'tank',sound:'/θ/ vs /t/'},
+  {a:'free',b:'three',sound:'/f/ vs /θ/'},
+  {a:'cat',b:'cut',sound:'/æ/ vs /ʌ/'},
+];
+
+// ============================================================
+// WORD TRAINER
+// ============================================================
+let wordFilter = 'all';
+function setWordFilter(f, btn) {
+  wordFilter = f;
+  document.querySelectorAll('#word-filter-tabs .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWordGrid();
+}
+
+function renderWordGrid() {
+  const grid = document.getElementById('word-grid');
+  const filtered = wordFilter === 'all' ? WORDS : WORDS.filter(w => w.tags.includes(wordFilter));
+  grid.innerHTML = filtered.map((w,i) => {
+    const idx = WORDS.indexOf(w);
+    const tagHtml = w.tags.map(t =>
+      `<span class="wtag wtag-${t==='mispronounced'?'m':t==='vietnamese'?'v':'a'}">${t==='mispronounced'?'⚠️ Mispronounced':t==='vietnamese'?'🇻🇳 Vietnamese':'🎓 Academic'}</span>`
+    ).join('');
+    return `
+    <div class="wc">
+      <div class="wc-word">${w.w}</div>
+      <div class="wc-ipa">${w.ipa}</div>
+      <div class="wc-mistake">❌ Common: ${w.mistake}</div>
+      <div class="wc-tip">💡 ${w.vi}</div>
+      <div class="wc-tags">${tagHtml}</div>
+      <div class="wc-btns">
+        <button class="wc-btn" id="hear-${idx}" onclick="hearWord(${idx},1.0)">🔊 Hear It</button>
+        <button class="wc-btn" id="slow-${idx}" onclick="hearWord(${idx},0.5)">🐢 Slow</button>
+        <button class="wc-btn" id="rec-${idx}" onclick="recordWord(${idx})" ${!hasSR?'disabled title="Need Chrome/Edge"':''}>🎤 Record</button>
+      </div>
+      <div class="wc-result" id="result-${idx}"></div>
+    </div>`;
+  }).join('');
+}
+
+function hearWord(idx, rate) {
+  const word = WORDS[idx].w;
+  const btnId = rate === 1.0 ? `hear-${idx}` : `slow-${idx}`;
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.classList.add('speaking'); setTimeout(()=>btn.classList.remove('speaking'), 1400); }
+  speak(word, rate);
+}
+
+function recordWord(idx) {
+  const word = WORDS[idx].w;
+  const btn = document.getElementById(`rec-${idx}`);
+  const resultEl = document.getElementById(`result-${idx}`);
+  if (!hasSR) return;
+  btn.classList.add('recording');
+  btn.textContent = '⏹ Listening...';
+  resultEl.classList.remove('show');
+  listenOnce(
+    transcripts => {
+      btn.classList.remove('recording');
+      btn.textContent = '🎤 Record';
+      const heard = transcripts[0] || '';
+      const target = word.toLowerCase();
+      const match = transcripts.some(t => t.includes(target) || target.includes(t.split(' ')[0]));
+      resultEl.innerHTML = `
+        <div>You said: <strong style="color:var(--yellow)">"${heard || '(nothing heard)'}"</strong></div>
+        <div>Target: <strong>"${word}"</strong></div>
+        <div class="${match?'match-yes':'match-no'}">${match ? '✅ Great match!' : '❌ Try again — focus on the sounds'}</div>
+      `;
+      resultEl.classList.add('show');
+    },
+    err => {
+      btn.classList.remove('recording');
+      btn.textContent = '🎤 Record';
+      resultEl.innerHTML = `<div class="match-no">⚠️ Mic error: ${err}. Check permissions.</div>`;
+      resultEl.classList.add('show');
+    }
+  );
+}
+
+// ============================================================
+// TONGUE TWISTERS
+// ============================================================
+let twistFilter = 'all';
+const twistBests = {};
+
+function setTwistFilter(f, btn) {
+  twistFilter = f;
+  document.querySelectorAll('#twist-filter-tabs .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTwistGrid();
+}
+
+function renderTwistGrid() {
+  const saved = JSON.parse(localStorage.getItem('twist_bests')||'{}');
+  const filtered = twistFilter === 'all' ? TWISTERS : TWISTERS.filter(t => t.group === twistFilter);
+  const grid = document.getElementById('twist-grid');
+  grid.innerHTML = filtered.map((t, i) => {
+    const idx = TWISTERS.indexOf(t);
+    const pb = saved[idx];
+    const diffClass = {easy:'diff-easy',medium:'diff-medium',hard:'diff-hard'}[t.diff]||'diff-medium';
+    return `
+    <div class="tc">
+      <div class="tc-header">
+        <span class="tc-sound">${t.sound}</span>
+        <span class="tc-diff ${diffClass}">${t.diff}</span>
+      </div>
+      <div class="tc-text">"${t.text}"</div>
+      <div class="tc-btns">
+        <button class="wc-btn" onclick="hearTwister(${idx})">🔊 Hear It</button>
+        <button class="wc-btn" id="trybtn-${idx}" onclick="tryTwister(${idx})" ${!hasSR?'disabled title="Need Chrome/Edge"':''}>🎤 Try It</button>
+        ${pb ? `<span class="tc-pb">🏆 Best: ${pb}%</span>` : ''}
+      </div>
+      <div class="tc-result" id="tr-${idx}"></div>
+    </div>`;
+  }).join('');
+}
+
+function hearTwister(idx) {
+  speak(TWISTERS[idx].text, 0.9);
+}
+
+function tryTwister(idx) {
+  if (!hasSR) return;
+  const btn = document.getElementById(`trybtn-${idx}`);
+  const resEl = document.getElementById(`tr-${idx}`);
+  btn.classList.add('recording');
+  btn.textContent = '⏹ Listening...';
+  resEl.classList.remove('show');
+  listenOnce(
+    transcripts => {
+      btn.classList.remove('recording');
+      btn.textContent = '🎤 Try It';
+      const heard = (transcripts[0] || '').toLowerCase().replace(/[^a-z\s']/g,'');
+      const target = TWISTERS[idx].text.toLowerCase().replace(/[^a-z\s']/g,'');
+      const tWords = target.split(/\s+/);
+      const hWords = heard.split(/\s+/);
+      let correct = 0;
+      const tokens = tWords.map((tw,i) => {
+        const hw = hWords[i]||'';
+        const ok = hw === tw || hw.includes(tw) || tw.includes(hw);
+        if (ok) correct++;
+        return `<span class="word-token ${ok?'tok-correct':'tok-wrong'}">${tw}</span>`;
+      });
+      const pct = Math.round((correct/tWords.length)*100);
+      // Save best
+      const saved = JSON.parse(localStorage.getItem('twist_bests')||'{}');
+      if (!saved[idx] || pct > saved[idx]) { saved[idx] = pct; localStorage.setItem('twist_bests', JSON.stringify(saved)); }
+      const scoreColor = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
+      resEl.innerHTML = `
+        <div style="margin-bottom:6px;font-size:.8rem;color:var(--muted)">You said: "<em>${heard||'(nothing heard)'}</em>"</div>
+        <div style="margin-bottom:8px;flex-wrap:wrap;display:flex;gap:2px">${tokens.join('')}</div>
+        <div style="font-size:.85rem;font-weight:700;color:${scoreColor};margin-bottom:6px">Accuracy: ${pct}% (${correct}/${tWords.length} words)</div>
+        <div class="accuracy-bar"><div class="accuracy-fill" style="width:${pct}%;background:${scoreColor}"></div></div>
+      `;
+      resEl.classList.add('show');
+      // Re-render to update best score
+      renderTwistGrid();
+    },
+    err => {
+      btn.classList.remove('recording');
+      btn.textContent = '🎤 Try It';
+      resEl.innerHTML = `<div class="match-no">⚠️ Mic error: ${err}</div>`;
+      resEl.classList.add('show');
+    }
+  );
+}
+
+// ============================================================
+// QUIZ ENGINE
+// ============================================================
+let quiz = { questions:[], idx:0, score:0, timer:null, typeCounts:{A:0,B:0,C:0,D:0}, typeCorrect:{A:0,B:0,C:0,D:0} };
+
+function generateQuizQuestions() {
+  const qs = [];
+  // Mix: 6A + 4B + 5C + 5D = 20
+  const wordPool = [...WORDS].sort(()=>Math.random()-.5);
+  // Type A: Listen & Choose
+  for (let i=0;i<6;i++) {
+    const target = wordPool[i];
+    const others = WORDS.filter(w=>w.w!==target.w).sort(()=>Math.random()-.5).slice(0,3);
+    const opts = [target, ...others].sort(()=>Math.random()-.5);
+    qs.push({type:'A', target, opts, answered:false});
+  }
+  // Type B: Read & Record
+  for (let i=6;i<(hasSR?10:6);i++) {
+    qs.push({type:'B', target:wordPool[i], answered:false});
+  }
+  // Type C: Minimal Pairs
+  const pairPool = [...PAIRS].sort(()=>Math.random()-.5).slice(0,5);
+  for (const p of pairPool) {
+    const sayA = Math.random() > .5;
+    qs.push({type:'C', pair:p, sayWord: sayA?p.a:p.b, answered:false});
+  }
+  // Type D: IPA Reading
+  const ipaPool = WORDS.filter(w=>w.ipa).sort(()=>Math.random()-.5).slice(0,5);
+  for (const target of ipaPool) {
+    const others = WORDS.filter(w=>w.w!==target.w).sort(()=>Math.random()-.5).slice(0,3);
+    const opts = [target, ...others].sort(()=>Math.random()-.5);
+    qs.push({type:'D', target, opts, answered:false});
+  }
+  return qs.sort(()=>Math.random()-.5).slice(0,20);
+}
+
+function startQuiz() {
+  quiz.questions = generateQuizQuestions();
+  quiz.idx = 0; quiz.score = 0;
+  quiz.typeCounts = {A:0,B:0,C:0,D:0};
+  quiz.typeCorrect = {A:0,B:0,C:0,D:0};
+  document.getElementById('quiz-setup').style.display = 'none';
+  document.getElementById('quiz-area').classList.add('active');
+  document.getElementById('quiz-results').classList.remove('show');
+  showQuestion();
+}
+
+function showQuestion() {
+  if (quiz.idx >= quiz.questions.length) { endQuiz(); return; }
+  const q = quiz.questions[quiz.idx];
+  const pct = (quiz.idx/20)*100;
+  document.getElementById('qp-fill').style.width = pct+'%';
+  document.getElementById('qp-label').textContent = `Q ${quiz.idx+1}/20`;
+  const typeLabels = {A:'Type A — Listen & Choose',B:'Type B — Read & Record',C:'Type C — Minimal Pairs',D:'Type D — IPA Reading'};
+  document.getElementById('qtype-label').textContent = typeLabels[q.type];
+  document.getElementById('q-feedback').classList.remove('show');
+  let html = '';
+  if (q.type === 'A') {
+    html = `
+      <div class="qprompt">Listen to the word, then choose which word you heard:</div>
+      <button class="speak-word-btn" onclick="speak('${q.target.w}',1.0)">🔊 Speak it again</button>
+      <div class="q-options">${q.opts.map(o=>`<button class="q-opt" onclick="answerA('${o.w}','${q.target.w}',this)">${o.w}</button>`).join('')}</div>
+    `;
+    setTimeout(()=>speak(q.target.w, 1.0), 400);
+  } else if (q.type === 'B') {
+    html = `
+      <div class="qprompt">Pronounce this word correctly:</div>
+      <div class="qipa" style="font-size:2rem;margin-bottom:4px">${q.target.w}</div>
+      <div class="qsub">${q.target.ipa}</div>
+      <div class="q-record-area">
+        <button class="wc-btn" id="q-rec-btn" onclick="recordQuizB(${quiz.idx})" style="margin:0 auto" ${!hasSR?'disabled':''}>
+          ${hasSR?'🎤 Record Yourself':'🎤 Not available — click Next'}
+        </button>
+      </div>
+    `;
+  } else if (q.type === 'C') {
+    html = `
+      <div class="qprompt">Listen — which word do you hear?</div>
+      <div class="qsub">Target sound: <strong>${q.pair.sound}</strong></div>
+      <button class="speak-word-btn" onclick="speak('${q.sayWord}',1.0)">🔊 Hear it again</button>
+      <div class="q-options">
+        <button class="q-opt" onclick="answerC('${q.pair.a}','${q.sayWord}',this)">${q.pair.a}</button>
+        <button class="q-opt" onclick="answerC('${q.pair.b}','${q.sayWord}',this)">${q.pair.b}</button>
+      </div>
+    `;
+    setTimeout(()=>speak(q.sayWord, 0.85), 400);
+  } else if (q.type === 'D') {
+    html = `
+      <div class="qprompt">Which word matches this IPA pronunciation?</div>
+      <div class="qipa">${q.target.ipa}</div>
+      <div class="qsub">Click 🔊 to hear the pronunciation, then choose:</div>
+      <button class="speak-word-btn" onclick="speak('${q.target.w}',0.85)">🔊 Hear it</button>
+      <div class="q-options">${q.opts.map(o=>`<button class="q-opt" onclick="answerD('${o.w}','${q.target.w}',this)">${o.w}</button>`).join('')}</div>
+    `;
+  }
+  document.getElementById('qcontent').innerHTML = html;
+  startTimer();
+}
+
+let timerInterval = null;
+function startTimer() {
+  clearInterval(timerInterval);
+  let t = 30;
+  const el = document.getElementById('qtimer');
+  el.textContent = t; el.className = 'qtimer';
+  timerInterval = setInterval(() => {
+    t--;
+    el.textContent = t;
+    el.className = 'qtimer' + (t<=10?' danger':t<=20?' warn':'');
+    if (t <= 0) { clearInterval(timerInterval); timeOut(); }
+  }, 1000);
+}
+
+function timeOut() {
+  const q = quiz.questions[quiz.idx];
+  if (q.answered) return;
+  q.answered = true;
+  showFeedback(false, 'Time\'s up!', `Correct: ${q.target?q.target.w:q.sayWord} ${q.target?q.target.ipa:''}`);
+}
+
+function answerA(chosen, correct, btn) {
+  clearInterval(timerInterval);
+  const q = quiz.questions[quiz.idx];
+  if (q.answered) return;
+  q.answered = true;
+  const right = chosen === correct;
+  if (right) { quiz.score++; quiz.typeCorrect.A++; }
+  quiz.typeCounts.A++;
+  document.querySelectorAll('.q-opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim()===correct) b.classList.add('correct');
+    else if(b.textContent.trim()===chosen&&!right) b.classList.add('wrong');
+  });
+  const word = WORDS.find(w=>w.w===correct);
+  showFeedback(right, right?'✅ Correct!':'❌ Wrong', word ? `${correct} ${word.ipa}\n💡 ${word.vi}` : '');
+}
+
+function answerC(chosen, correct, btn) {
+  clearInterval(timerInterval);
+  const q = quiz.questions[quiz.idx];
+  if (q.answered) return;
+  q.answered = true;
+  const right = chosen === correct;
+  if (right) { quiz.score++; quiz.typeCorrect.C++; }
+  quiz.typeCounts.C++;
+  document.querySelectorAll('.q-opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim()===correct) b.classList.add('correct');
+    else if(b.textContent.trim()===chosen&&!right) b.classList.add('wrong');
+  });
+  showFeedback(right, right?'✅ Correct!':'❌ Wrong', `The word was "${correct}". Sound: ${q.pair.sound}`);
+}
+
+function answerD(chosen, correct, btn) {
+  clearInterval(timerInterval);
+  const q = quiz.questions[quiz.idx];
+  if (q.answered) return;
+  q.answered = true;
+  const right = chosen === correct;
+  if (right) { quiz.score++; quiz.typeCorrect.D++; }
+  quiz.typeCounts.D++;
+  document.querySelectorAll('.q-opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim()===correct) b.classList.add('correct');
+    else if(b.textContent.trim()===chosen&&!right) b.classList.add('wrong');
+  });
+  const word = WORDS.find(w=>w.w===correct);
+  showFeedback(right, right?'✅ Correct!':'❌ Wrong', word ? `${correct}: ${word.ipa}\n💡 ${word.vi}` : '');
+}
+
+function recordQuizB(qIdx) {
+  const q = quiz.questions[qIdx];
+  if (q.answered || !hasSR) return;
+  const btn = document.getElementById('q-rec-btn');
+  btn.classList.add('recording');
+  btn.textContent = '⏹ Listening...';
+  listenOnce(
+    transcripts => {
+      clearInterval(timerInterval);
+      btn.classList.remove('recording');
+      q.answered = true;
+      const target = q.target.w.toLowerCase();
+      const right = transcripts.some(t => t.includes(target) || target.includes(t.split(' ')[0]));
+      if (right) { quiz.score++; quiz.typeCorrect.B++; }
+      quiz.typeCounts.B++;
+      showFeedback(right, right?'✅ Recognized! Great pronunciation!':'❌ Not quite — try focusing on the sounds',
+        `You said: "${transcripts[0]||'(nothing)'}"\nTarget: "${q.target.w}" ${q.target.ipa}\n💡 ${q.target.vi}`);
+    },
+    err => {
+      btn.classList.remove('recording');
+      btn.textContent = '🎤 Record Yourself';
+      console.log('Rec error',err);
+    }
+  );
+}
+
+function showFeedback(correct, headline, explain) {
+  const fb = document.getElementById('q-feedback');
+  document.getElementById('q-fb-text').innerHTML = `<div class="${correct?'q-feedback-correct':'q-feedback-wrong'}">${headline}</div>`;
+  document.getElementById('q-fb-explain').textContent = explain;
+  fb.classList.add('show');
+}
+
+function nextQuestion() {
+  quiz.idx++;
+  if (quiz.idx >= 20) endQuiz();
+  else showQuestion();
+}
+
+function endQuiz() {
+  clearInterval(timerInterval);
+  document.getElementById('quiz-area').classList.remove('active');
+  const res = document.getElementById('quiz-results');
+  res.classList.add('show');
+  const pct = Math.round((quiz.score/20)*100);
+  const rank = pct>=90?'🏆 Master Pronouncer!':pct>=75?'🎤 Strong Speaker':pct>=55?'📈 Keep Practicing':'🌱 Keep Going!';
+  document.getElementById('result-score').textContent = `${quiz.score}/20`;
+  document.getElementById('result-label').textContent = `${pct}% — ${rank}`;
+  const types = [
+    {t:'A',lbl:'Listen & Choose'},
+    {t:'B',lbl:'Read & Record'},
+    {t:'C',lbl:'Minimal Pairs'},
+    {t:'D',lbl:'IPA Reading'},
+  ];
+  const weakest = types.filter(t=>quiz.typeCounts[t.t]>0).sort((a,b)=>{
+    const ra = quiz.typeCounts[a.t]?quiz.typeCorrect[a.t]/quiz.typeCounts[a.t]:1;
+    const rb = quiz.typeCounts[b.t]?quiz.typeCorrect[b.t]/quiz.typeCounts[b.t]:1;
+    return ra-rb;
+  });
+  document.getElementById('result-grid').innerHTML = types.filter(t=>quiz.typeCounts[t.t]>0).map(t=>`
+    <div class="rg-box">
+      <div class="rg-val">${quiz.typeCorrect[t.t]}/${quiz.typeCounts[t.t]}</div>
+      <div class="rg-lbl">${t.lbl}</div>
+    </div>
+  `).join('') + (weakest.length ? `<div class="rg-box"><div class="rg-val" style="font-size:.9rem">⚠️ ${weakest[0].lbl}</div><div class="rg-lbl">Weakest area</div></div>` : '');
+  // Save to history
+  const hist = JSON.parse(localStorage.getItem('quiz_hist')||'[]');
+  hist.unshift({score:quiz.score, pct, date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+  if (hist.length>5) hist.pop();
+  localStorage.setItem('quiz_hist', JSON.stringify(hist));
+  renderQuizHistory();
+  document.getElementById('quiz-setup').style.display = 'block';
+}
+
+function renderQuizHistory() {
+  const hist = JSON.parse(localStorage.getItem('quiz_hist')||'[]');
+  const el = document.getElementById('quiz-history');
+  if (!hist.length) { el.innerHTML=''; return; }
+  el.innerHTML = `<h3>Recent Scores</h3>` + hist.map(h=>`
+    <div class="qh-row">
+      <span>${h.date}</span>
+      <span style="color:var(--blue);font-weight:700">${h.score}/20 (${h.pct}%)</span>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderWordGrid();
+renderTwistGrid();
+renderQuizHistory();
+</script>
+</body>
+</html>

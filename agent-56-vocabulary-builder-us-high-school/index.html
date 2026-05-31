@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent #56 — Vocabulary Builder US High School</title>
+<style>
+  :root{--bg:#0f1117;--card:#1a1d27;--card2:#20243a;--blue:#4f8ef7;--blue-dim:#2a4a8a;--green:#4ade80;--green-dim:#1a4a30;--yellow:#facc15;--red:#f87171;--text:#e8eaf0;--muted:#8b90a8;--border:#2a2d3e;--radius:12px;--radius-sm:8px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:40px;}
+  header{background:linear-gradient(135deg,#1a1d27,#0f1117);border-bottom:1px solid var(--border);padding:20px 24px 0;position:sticky;top:0;z-index:100;}
+  .header-top{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+  .header-icon{font-size:2rem;background:linear-gradient(135deg,var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .header-title h1{font-size:1.35rem;font-weight:700;}
+  .header-title p{font-size:0.78rem;color:var(--muted);margin-top:1px;}
+  .header-badge{margin-left:auto;background:var(--blue-dim);color:var(--blue);padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;white-space:nowrap;}
+  .tabs{display:flex;gap:2px;}
+  .tab-btn{background:none;border:none;color:var(--muted);padding:10px 18px;cursor:pointer;font-size:0.8rem;font-weight:600;letter-spacing:.5px;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+  .main{max-width:900px;margin:0 auto;padding:28px 20px;}
+  .tab-panel{display:none;}.tab-panel.active{display:block;}
+  .section-title{font-size:1.1rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+  .pill{background:var(--card2);color:var(--muted);font-size:0.72rem;padding:3px 9px;border-radius:20px;font-weight:500;}
+
+  /* CATEGORIES */
+  .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:14px;}
+  .cat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:transform .15s,border-color .2s,box-shadow .2s;position:relative;overflow:hidden;}
+  .cat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--cc,var(--blue));}
+  .cat-card:hover{transform:translateY(-2px);border-color:var(--cc,var(--blue));box-shadow:0 8px 24px rgba(0,0,0,.4);}
+  .cat-icon{font-size:1.8rem;margin-bottom:10px;}
+  .cat-name{font-size:.92rem;font-weight:700;margin-bottom:5px;}
+  .cat-count{font-size:.72rem;color:var(--muted);}
+  .cat-preview{font-size:.72rem;color:var(--muted);font-style:italic;border-top:1px solid var(--border);padding-top:7px;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mini-bar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .mini-fill{height:100%;border-radius:2px;background:var(--cc,var(--blue));transition:width .4s;}
+
+  /* FLASHCARDS */
+  .fc-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+  .back-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:.82rem;font-weight:600;transition:background .2s;}
+  .back-btn:hover{background:var(--card2);}
+  .fc-cat-title{font-size:1rem;font-weight:700;}
+  .fc-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .fc-ctrl-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 13px;border-radius:20px;cursor:pointer;font-size:.75rem;font-weight:600;transition:all .15s;}
+  .fc-ctrl-btn.active,.fc-ctrl-btn:hover{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+  .flashcard-wrap{perspective:1000px;margin:0 auto 16px;max-width:520px;}
+  .flashcard{width:100%;height:210px;position:relative;transform-style:preserve-3d;transition:transform .5s;cursor:pointer;}
+  .flashcard.flipped{transform:rotateY(180deg);}
+  .card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--radius);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;}
+  .card-front{background:var(--card);}
+  .card-back{background:var(--card2);transform:rotateY(180deg);}
+  .card-word{font-size:1.7rem;font-weight:800;color:var(--blue);margin-bottom:5px;}
+  .card-pos{font-size:.72rem;color:var(--muted);font-style:italic;margin-bottom:4px;}
+  .card-syn{font-size:.72rem;color:var(--purple,#a78bfa);}
+  .card-def{font-size:.9rem;margin-bottom:7px;line-height:1.5;}
+  .card-ex{font-size:.78rem;color:var(--yellow);font-style:italic;line-height:1.4;}
+  .card-hint{font-size:.68rem;color:var(--muted);position:absolute;bottom:10px;}
+  .fc-nav{display:flex;gap:12px;justify-content:center;align-items:center;margin-bottom:20px;}
+  .nav-btn{background:var(--card);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1rem;transition:all .15s;}
+  .nav-btn:hover{border-color:var(--blue);color:var(--blue);}
+  .nav-count{font-size:.82rem;color:var(--muted);min-width:70px;text-align:center;}
+  .fc-placeholder{text-align:center;padding:60px 20px;color:var(--muted);}
+  .fc-placeholder .big-icon{font-size:3rem;margin-bottom:12px;}
+
+  /* QUIZ */
+  .quiz-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+  .mode-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .15s;text-align:center;}
+  .mode-card:hover,.mode-card.selected{border-color:var(--blue);background:var(--blue-dim);}
+  .mode-icon{font-size:1.5rem;margin-bottom:8px;}
+  .mode-name{font-size:.88rem;font-weight:700;}
+  .mode-desc{font-size:.72rem;color:var(--muted);margin-top:3px;}
+  .quiz-cat-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;}
+  .qcat-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 13px;border-radius:20px;cursor:pointer;font-size:.75rem;font-weight:600;transition:all .15s;}
+  .qcat-btn.selected,.qcat-btn:hover{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+  .start-btn{background:linear-gradient(135deg,var(--blue),#6fa8ff);color:#fff;border:none;padding:13px 32px;border-radius:var(--radius);font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .2s;display:block;margin:0 auto;}
+  .start-btn:hover{opacity:.88;}
+  .quiz-active{display:none;}
+  .quiz-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .quiz-prog-text{font-size:.82rem;color:var(--muted);font-weight:600;}
+  .quiz-score{background:var(--card2);padding:5px 14px;border-radius:20px;font-size:.82rem;font-weight:700;}
+  .quiz-bar{height:6px;background:var(--border);border-radius:3px;margin-bottom:24px;overflow:hidden;}
+  .quiz-bar-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .4s;}
+  .q-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:26px;text-align:center;margin-bottom:18px;}
+  .q-label{font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+  .q-word{font-size:1.5rem;font-weight:800;color:var(--blue);margin-bottom:6px;}
+  .q-sub{font-size:.82rem;color:var(--muted);}
+  .fill-input{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:11px 16px;font-size:.95rem;margin:10px 0;outline:none;}
+  .fill-input:focus{border-color:var(--blue);}
+  .choices{display:flex;flex-direction:column;gap:9px;}
+  .choice-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:13px 18px;border-radius:var(--radius-sm);cursor:pointer;text-align:left;font-size:.85rem;transition:all .15s;line-height:1.4;}
+  .choice-btn:hover:not(:disabled){border-color:var(--blue);background:var(--card2);}
+  .choice-btn.correct{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+  .choice-btn.wrong{background:rgba(248,113,113,.12);border-color:var(--red);color:var(--red);}
+  .q-feedback{text-align:center;padding:12px;border-radius:var(--radius-sm);font-weight:600;font-size:.88rem;margin-bottom:14px;display:none;}
+  .q-feedback.correct{background:var(--green-dim);color:var(--green);}
+  .q-feedback.wrong{background:rgba(248,113,113,.12);color:var(--red);}
+  .next-btn{background:var(--blue);color:#fff;border:none;padding:11px 26px;border-radius:var(--radius-sm);font-size:.88rem;font-weight:700;cursor:pointer;display:none;margin:0 auto;transition:opacity .2s;}
+  .next-btn:hover{opacity:.88;}
+  .quiz-results{display:none;text-align:center;padding:24px 0;}
+  .score-ring{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;position:relative;}
+  .score-inner{width:88px;height:88px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .score-num{font-size:1.6rem;font-weight:800;color:var(--blue);}
+  .score-den{font-size:.72rem;color:var(--muted);}
+  .score-msg{font-size:1.1rem;font-weight:700;margin-bottom:5px;}
+  .score-sub{font-size:.82rem;color:var(--muted);margin-bottom:22px;}
+  .miss-section{text-align:left;margin-top:10px;}
+  .miss-title{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+  .miss-item{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:var(--radius-sm);padding:11px 15px;margin-bottom:7px;}
+  .miss-word{font-weight:700;color:var(--blue);margin-bottom:3px;}
+  .miss-def{font-size:.78rem;color:var(--green);}
+  .retry-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 24px;border-radius:var(--radius-sm);cursor:pointer;font-size:.86rem;font-weight:600;margin-top:16px;transition:all .2s;}
+  .retry-btn:hover{border-color:var(--blue);color:var(--blue);}
+
+  /* PROGRESS */
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;}
+  .stat-num{font-size:2rem;font-weight:800;color:var(--blue);}
+  .stat-lbl{font-size:.72rem;color:var(--muted);font-weight:600;margin-top:4px;}
+  .prog-section{margin-bottom:24px;}
+  .prog-title{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+  .prog-item{margin-bottom:11px;}
+  .prog-info{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:5px;}
+  .prog-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+  .prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .6s;}
+  .empty-state{text-align:center;padding:36px;color:var(--muted);font-size:.88rem;}
+  @media(max-width:600px){.cat-grid{grid-template-columns:1fr 1fr;}.quiz-mode-grid{grid-template-columns:1fr 1fr;}.tab-btn{padding:10px 10px;font-size:.72rem;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-top">
+    <div class="header-icon">🎓</div>
+    <div class="header-title">
+      <h1>Vocabulary Builder — US High School</h1>
+      <p>200 words · 8 categories · 4 quiz modes</p>
+    </div>
+    <div class="header-badge">#56 / 100</div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('categories')">🗂 CATEGORIES</button>
+    <button class="tab-btn" onclick="switchTab('flashcards')">🃏 FLASHCARDS</button>
+    <button class="tab-btn" onclick="switchTab('quiz')">🎯 QUIZ</button>
+    <button class="tab-btn" onclick="switchTab('progress')">📊 PROGRESS</button>
+  </div>
+</header>
+
+<div class="main">
+
+<!-- CATEGORIES -->
+<div class="tab-panel active" id="tab-categories">
+  <div class="section-title">Word Categories <span class="pill" id="cat-pill">0 mastered</span></div>
+  <div class="cat-grid" id="cat-grid"></div>
+</div>
+
+<!-- FLASHCARDS -->
+<div class="tab-panel" id="tab-flashcards">
+  <div id="fc-placeholder" class="fc-placeholder">
+    <div class="big-icon">👆</div>
+    <p>Click a category to start flashcards</p>
+    <small>Go to CATEGORIES and tap any card</small>
+  </div>
+  <div id="fc-content" style="display:none">
+    <div class="fc-header">
+      <button class="back-btn" onclick="goBackToCats()">← Back</button>
+      <span class="fc-cat-title" id="fc-cat-title"></span>
+    </div>
+    <div class="fc-controls" id="fc-controls"></div>
+    <div class="flashcard-wrap">
+      <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="card-face card-front">
+          <div class="card-word" id="cw"></div>
+          <div class="card-pos" id="cp"></div>
+          <div class="card-syn" id="cs"></div>
+          <div class="card-hint">Tap to reveal →</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-def" id="cd"></div>
+          <div class="card-ex" id="ce"></div>
+          <div class="card-hint">← Tap to flip back</div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-nav">
+      <button class="nav-btn" onclick="prevCard()">◀</button>
+      <span class="nav-count" id="nav-count">1 / 25</span>
+      <button class="nav-btn" onclick="nextCard()">▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="tab-panel" id="tab-quiz">
+  <div id="quiz-setup">
+    <div class="section-title">Quiz Mode</div>
+    <div class="quiz-mode-grid">
+      <div class="mode-card selected" onclick="selectMode('definition',this)" id="mode-definition">
+        <div class="mode-icon">📖</div>
+        <div class="mode-name">Definition Match</div>
+        <div class="mode-desc">See word → pick meaning</div>
+      </div>
+      <div class="mode-card" onclick="selectMode('fill',this)" id="mode-fill">
+        <div class="mode-icon">✍️</div>
+        <div class="mode-name">Fill in the Blank</div>
+        <div class="mode-desc">Complete the sentence</div>
+      </div>
+      <div class="mode-card" onclick="selectMode('synonym',this)" id="mode-synonym">
+        <div class="mode-icon">🔄</div>
+        <div class="mode-name">Synonym Match</div>
+        <div class="mode-desc">Find the closest synonym</div>
+      </div>
+      <div class="mode-card" onclick="selectMode('context',this)" id="mode-context">
+        <div class="mode-icon">💬</div>
+        <div class="mode-name">Sentence Context</div>
+        <div class="mode-desc">Pick the word that fits</div>
+      </div>
+    </div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:10px;">Filter by category (optional):</div>
+    <div class="quiz-cat-row" id="quiz-cat-row"></div>
+    <button class="start-btn" onclick="startQuiz()">Start Quiz (20 questions)</button>
+  </div>
+  <div class="quiz-active" id="quiz-active">
+    <div class="quiz-hdr">
+      <span class="quiz-prog-text" id="q-prog-text">Q 1 of 20</span>
+      <span class="quiz-score" id="q-score-badge">Score: 0</span>
+    </div>
+    <div class="quiz-bar"><div class="quiz-bar-fill" id="q-bar" style="width:0%"></div></div>
+    <div class="q-card">
+      <div class="q-label" id="q-label"></div>
+      <div class="q-word" id="q-word"></div>
+      <div class="q-sub" id="q-sub"></div>
+    </div>
+    <div id="q-input-area"></div>
+    <div class="q-feedback" id="q-feedback"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next →</button>
+  </div>
+  <div class="quiz-results" id="quiz-results">
+    <div class="score-ring" id="score-ring">
+      <div class="score-inner">
+        <div class="score-num" id="fin-num">0</div>
+        <div class="score-den" id="fin-den">/ 20</div>
+      </div>
+    </div>
+    <div class="score-msg" id="fin-msg"></div>
+    <div class="score-sub" id="fin-sub"></div>
+    <div class="miss-section" id="miss-section"></div>
+    <button class="retry-btn" onclick="resetQuiz()">Try Again</button>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="tab-panel" id="tab-progress">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="s-mastered">0</div><div class="stat-lbl">Words Mastered</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-quizzes">0</div><div class="stat-lbl">Quizzes Taken</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-best">—</div><div class="stat-lbl">Best Score</div></div>
+  </div>
+  <div class="prog-section">
+    <div class="prog-title">Words Mastered per Category</div>
+    <div id="prog-bars"></div>
+  </div>
+  <div class="prog-section">
+    <div class="prog-title">Quiz History (Last 5)</div>
+    <div id="quiz-history"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────
+const CATS = [
+  {id:'sat',name:'SAT Words',icon:'📝',color:'#4f8ef7',
+   words:[
+    {w:'ameliorate',pos:'verb',def:'To make a bad situation better',ex:'The new policy aimed to ameliorate the housing crisis.',syn:['improve','alleviate']},
+    {w:'ambiguous',pos:'adj',def:'Having more than one possible meaning; unclear',ex:'His ambiguous answer left us confused.',syn:['vague','unclear']},
+    {w:'benevolent',pos:'adj',def:'Friendly and generous; kind-hearted',ex:'The benevolent donor funded the entire library.',syn:['kind','generous']},
+    {w:'brevity',pos:'noun',def:'The quality of being brief; conciseness',ex:'The speech was praised for its brevity and clarity.',syn:['conciseness','shortness']},
+    {w:'capricious',pos:'adj',def:'Changing suddenly and unexpectedly; unpredictable',ex:'The capricious weather ruined our picnic plans.',syn:['unpredictable','fickle']},
+    {w:'cogent',pos:'adj',def:'Clear, logical, and convincing',ex:'She made a cogent argument for the new policy.',syn:['convincing','persuasive']},
+    {w:'condone',pos:'verb',def:'To accept behavior that is considered wrong',ex:'The school refused to condone cheating.',syn:['overlook','excuse']},
+    {w:'dearth',pos:'noun',def:'A scarcity or lack of something',ex:'There is a dearth of qualified nurses in rural areas.',syn:['scarcity','shortage']},
+    {w:'derogatory',pos:'adj',def:'Showing a disrespectful attitude; insulting',ex:'Making derogatory comments about colleagues is unacceptable.',syn:['insulting','disrespectful']},
+    {w:'diligent',pos:'adj',def:'Careful and hard-working; showing great effort',ex:'She was a diligent student who always finished her homework.',syn:['hardworking','conscientious']},
+    {w:'eloquent',pos:'adj',def:'Expressing ideas clearly and well; fluent',ex:'The valedictorian gave an eloquent speech.',syn:['articulate','fluent']},
+    {w:'enigmatic',pos:'adj',def:'Mysterious and difficult to understand',ex:'The Mona Lisa\'s enigmatic smile has fascinated viewers for centuries.',syn:['mysterious','puzzling']},
+    {w:'ephemeral',pos:'adj',def:'Lasting for only a short time',ex:'Fame is often ephemeral — here today, gone tomorrow.',syn:['fleeting','brief']},
+    {w:'exacerbate',pos:'verb',def:'To make a problem or bad situation worse',ex:'Stress can exacerbate many physical health problems.',syn:['worsen','aggravate']},
+    {w:'fastidious',pos:'adj',def:'Very attentive to detail; difficult to please',ex:'The fastidious chef insisted on the freshest ingredients.',syn:['meticulous','fussy']},
+    {w:'fervent',pos:'adj',def:'Having or showing intense and passionate feelings',ex:'She was a fervent supporter of environmental justice.',syn:['passionate','ardent']},
+    {w:'frugal',pos:'adj',def:'Careful with money; using resources sparingly',ex:'He was frugal all his life and saved enough to travel.',syn:['thrifty','economical']},
+    {w:'gregarious',pos:'adj',def:'Fond of company; sociable and outgoing',ex:'The gregarious host made everyone feel welcome.',syn:['sociable','outgoing']},
+    {w:'hamper',pos:'verb',def:'To prevent someone from moving or making progress',ex:'The heavy rain hampered rescue efforts.',syn:['hinder','impede']},
+    {w:'idiosyncratic',pos:'adj',def:'Peculiar or individual; unique to a person',ex:'His idiosyncratic teaching style was memorable.',syn:['quirky','distinctive']},
+    {w:'immutable',pos:'adj',def:'Unchanging over time; unable to be changed',ex:'The laws of physics are immutable.',syn:['unchangeable','fixed']},
+    {w:'loquacious',pos:'adj',def:'Tending to talk a great deal; talkative',ex:'The loquacious guide gave far too much information.',syn:['talkative','verbose']},
+    {w:'ostracize',pos:'verb',def:'To exclude someone from a group or society',ex:'He was ostracized by his classmates after the incident.',syn:['exclude','shun']},
+    {w:'pragmatic',pos:'adj',def:'Dealing with problems sensibly and practically',ex:'A pragmatic approach worked better than idealism.',syn:['practical','realistic']},
+    {w:'verbose',pos:'adj',def:'Using more words than needed; wordy',ex:'His verbose essay could have been summarized in a paragraph.',syn:['wordy','long-winded']},
+   ]},
+  {id:'academic',name:'Academic Words',icon:'🏫',color:'#a78bfa',
+   words:[
+    {w:'analyze',pos:'verb',def:'To examine something in detail to understand it',ex:'Students were asked to analyze the poem\'s structure.',syn:['examine','study']},
+    {w:'assess',pos:'verb',def:'To evaluate or estimate the nature of something',ex:'Teachers assess students through essays and exams.',syn:['evaluate','measure']},
+    {w:'concept',pos:'noun',def:'An abstract idea or general notion',ex:'Democracy is a complex political concept.',syn:['idea','notion']},
+    {w:'context',pos:'noun',def:'The circumstances surrounding an event or statement',ex:'You need to understand the historical context of the text.',syn:['setting','background']},
+    {w:'criteria',pos:'noun',def:'Standards by which something is judged',ex:'What are the criteria for this scholarship?',syn:['standards','requirements']},
+    {w:'derive',pos:'verb',def:'To obtain something from a source',ex:'Many English words are derived from Latin.',syn:['obtain','extract']},
+    {w:'evaluate',pos:'verb',def:'To form an opinion about the value of something',ex:'We need to evaluate the effectiveness of the program.',syn:['assess','appraise']},
+    {w:'hypothesis',pos:'noun',def:'A proposed explanation to be tested',ex:'The scientist formed a hypothesis and tested it.',syn:['theory','proposition']},
+    {w:'implicit',pos:'adj',def:'Suggested but not directly stated',ex:'Her implicit message was that we should work harder.',syn:['implied','indirect']},
+    {w:'integrate',pos:'verb',def:'To combine parts into a whole; to include fully',ex:'The school works to integrate students of all backgrounds.',syn:['combine','incorporate']},
+    {w:'interpret',pos:'verb',def:'To explain or understand the meaning of something',ex:'How you interpret the data depends on your perspective.',syn:['explain','construe']},
+    {w:'methodology',pos:'noun',def:'A system of methods used in a study or activity',ex:'The research methodology was clearly explained.',syn:['approach','procedure']},
+    {w:'phenomenon',pos:'noun',def:'A fact or event that can be observed',ex:'The aurora borealis is a stunning natural phenomenon.',syn:['occurrence','event']},
+    {w:'premise',pos:'noun',def:'A statement assumed to be true as a basis for reasoning',ex:'The argument was built on a faulty premise.',syn:['assumption','basis']},
+    {w:'principle',pos:'noun',def:'A fundamental rule or belief guiding behavior',ex:'The principle of fairness is central to the law.',syn:['rule','belief']},
+    {w:'rationale',pos:'noun',def:'The reasons or logic behind a decision',ex:'Please explain the rationale for your choice.',syn:['reasoning','justification']},
+    {w:'refute',pos:'verb',def:'To prove something to be wrong',ex:'She was unable to refute the evidence against her.',syn:['disprove','counter']},
+    {w:'synthesize',pos:'verb',def:'To combine information to form a new whole',ex:'The essay synthesized ideas from three sources.',syn:['combine','integrate']},
+    {w:'thesis',pos:'noun',def:'A statement expressing the main argument of an essay',ex:'Your thesis should appear in the introduction.',syn:['argument','claim']},
+    {w:'utilize',pos:'verb',def:'To make practical use of something',ex:'Students should utilize all available resources.',syn:['use','employ']},
+    {w:'validate',pos:'verb',def:'To confirm or prove something is correct',ex:'The experiment validated the original hypothesis.',syn:['confirm','verify']},
+    {w:'variable',pos:'noun',def:'A factor that can change in an experiment',ex:'Temperature is the independent variable in this study.',syn:['factor','element']},
+    {w:'coherent',pos:'adj',def:'Logical and consistent; easy to understand',ex:'A good essay requires a coherent argument.',syn:['logical','clear']},
+    {w:'implications',pos:'noun',def:'Possible future effects or results of something',ex:'The implications of climate change are vast.',syn:['consequences','effects']},
+    {w:'rhetoric',pos:'noun',def:'Language used to persuade; effective or showy speech',ex:'His political rhetoric inspired millions.',syn:['persuasion','oratory']},
+   ]},
+  {id:'literary',name:'Literary Terms',icon:'📜',color:'#34d399',
+   words:[
+    {w:'allegory',pos:'noun',def:'A story with a hidden moral or political meaning',ex:'Animal Farm is an allegory for Soviet Russia.',syn:['parable','fable']},
+    {w:'alliteration',pos:'noun',def:'Repetition of the same sound at the start of nearby words',ex:'"Peter Piper picked a peck" uses alliteration.',syn:['consonance','repetition']},
+    {w:'allusion',pos:'noun',def:'A brief reference to a person, place, or event',ex:'The title is an allusion to Shakespeare.',syn:['reference','mention']},
+    {w:'antagonist',pos:'noun',def:'The character who opposes the main character',ex:'The antagonist created conflict in every chapter.',syn:['villain','opponent']},
+    {w:'archetype',pos:'noun',def:'A very typical example of a character or theme',ex:'The wise mentor is a classic archetype.',syn:['prototype','model']},
+    {w:'assonance',pos:'noun',def:'Repetition of vowel sounds in nearby words',ex:'"The rain in Spain" has assonance with the "ain" sound.',syn:['vowel rhyme','resonance']},
+    {w:'catharsis',pos:'noun',def:'Emotional release or purification, especially through art',ex:'Watching the tragedy brought the audience catharsis.',syn:['release','purging']},
+    {w:'climax',pos:'noun',def:'The most exciting or important point of a story',ex:'The climax occurs when the hero defeats the villain.',syn:['peak','turning point']},
+    {w:'connotation',pos:'noun',def:'An idea associated with a word beyond its literal meaning',ex:'"Home" has warm connotations of safety and love.',syn:['implication','association']},
+    {w:'diction',pos:'noun',def:'The choice and use of words in speech or writing',ex:'The author\'s formal diction suits the serious tone.',syn:['wording','word choice']},
+    {w:'foil',pos:'noun',def:'A character whose traits contrast with the protagonist\'s',ex:'Watson is Holmes\'s foil — emotional versus logical.',syn:['contrast','counterpart']},
+    {w:'foreshadowing',pos:'noun',def:'A hint of what is to come later in the story',ex:'The dark clouds were foreshadowing of the disaster.',syn:['hint','preview']},
+    {w:'hubris',pos:'noun',def:'Excessive pride leading to downfall',ex:'The king\'s hubris caused him to ignore warnings.',syn:['arrogance','pride']},
+    {w:'imagery',pos:'noun',def:'Descriptive language that creates mental pictures',ex:'The poet used vivid imagery to describe the storm.',syn:['description','visualization']},
+    {w:'irony',pos:'noun',def:'A contrast between what is expected and what happens',ex:'It\'s ironic that the fire station burned down.',syn:['paradox','contradiction']},
+    {w:'juxtaposition',pos:'noun',def:'Placing two contrasting things side by side',ex:'The author used juxtaposition to highlight inequality.',syn:['contrast','comparison']},
+    {w:'metaphor',pos:'noun',def:'A direct comparison without using "like" or "as"',ex:'"Life is a journey" is a metaphor.',syn:['comparison','figure of speech']},
+    {w:'motif',pos:'noun',def:'A repeated element that has symbolic significance',ex:'Water is a motif for change throughout the novel.',syn:['theme','pattern']},
+    {w:'narrator',pos:'noun',def:'The person who tells a story',ex:'The unreliable narrator misled readers throughout.',syn:['storyteller','voice']},
+    {w:'onomatopoeia',pos:'noun',def:'A word that imitates the sound it describes',ex:'"Buzz," "crash," and "hiss" are onomatopoeia.',syn:['sound word','echo word']},
+    {w:'paradox',pos:'noun',def:'A statement that seems contradictory but may be true',ex:'"Less is more" is a famous paradox.',syn:['contradiction','irony']},
+    {w:'protagonist',pos:'noun',def:'The main character in a story',ex:'Harry Potter is the protagonist of the series.',syn:['hero','main character']},
+    {w:'simile',pos:'noun',def:'A comparison using "like" or "as"',ex:'"Her eyes were like stars" is a simile.',syn:['comparison','analogy']},
+    {w:'theme',pos:'noun',def:'The central idea or message of a literary work',ex:'The theme of justice runs through the entire novel.',syn:['message','idea']},
+    {w:'tone',pos:'noun',def:'The author\'s attitude toward the subject',ex:'The tone of the poem is melancholic and reflective.',syn:['mood','attitude']},
+   ]},
+  {id:'science',name:'Science',icon:'🔬',color:'#fb923c',
+   words:[
+    {w:'adaptation',pos:'noun',def:'A change that helps an organism survive in its environment',ex:'The polar bear\'s thick fur is an adaptation to cold.',syn:['adjustment','modification']},
+    {w:'catalyst',pos:'noun',def:'A substance that speeds up a chemical reaction',ex:'Enzymes act as catalysts in biological processes.',syn:['accelerant','agent']},
+    {w:'chromosome',pos:'noun',def:'A structure carrying genetic information in a cell',ex:'Humans have 46 chromosomes in each cell.',syn:['gene carrier','DNA strand']},
+    {w:'compound',pos:'noun',def:'A substance made of two or more elements chemically combined',ex:'Water (H₂O) is a compound of hydrogen and oxygen.',syn:['mixture','substance']},
+    {w:'decomposition',pos:'noun',def:'The process of breaking down into smaller parts',ex:'Decomposition of leaves returns nutrients to the soil.',syn:['decay','breakdown']},
+    {w:'diffusion',pos:'noun',def:'The spreading of particles from high to low concentration',ex:'Diffusion explains how smell travels through air.',syn:['spreading','dispersion']},
+    {w:'ecosystem',pos:'noun',def:'A community of living things and their environment',ex:'Deforestation destroys the rainforest ecosystem.',syn:['habitat','biome']},
+    {w:'equilibrium',pos:'noun',def:'A state of balance between opposing forces',ex:'The chemical reaction reached equilibrium.',syn:['balance','stability']},
+    {w:'evolution',pos:'noun',def:'Gradual development of species over many generations',ex:'Darwin\'s theory of evolution changed biology.',syn:['development','progression']},
+    {w:'friction',pos:'noun',def:'Resistance when two surfaces move against each other',ex:'Friction slows a sliding book to a stop.',syn:['resistance','drag']},
+    {w:'gravity',pos:'noun',def:'A force pulling objects toward each other',ex:'Gravity keeps the planets in orbit around the Sun.',syn:['gravitational pull','attraction']},
+    {w:'metamorphosis',pos:'noun',def:'A dramatic change in form during development',ex:'A caterpillar undergoes metamorphosis to become a butterfly.',syn:['transformation','change']},
+    {w:'mitosis',pos:'noun',def:'Cell division producing two identical daughter cells',ex:'Growth occurs through mitosis in living organisms.',syn:['cell division','replication']},
+    {w:'molecule',pos:'noun',def:'The smallest unit of a substance with all its properties',ex:'A water molecule contains two hydrogen atoms.',syn:['particle','unit']},
+    {w:'osmosis',pos:'noun',def:'Movement of water through a membrane to equalize concentration',ex:'Osmosis helps plants absorb water from soil.',syn:['diffusion','permeation']},
+    {w:'photosynthesis',pos:'noun',def:'Plants converting sunlight, water, and CO₂ into food',ex:'Photosynthesis produces oxygen as a byproduct.',syn:['food production','solar conversion']},
+    {w:'precipitation',pos:'noun',def:'Water falling from clouds as rain, snow, or hail',ex:'The forecast shows heavy precipitation this weekend.',syn:['rainfall','condensation']},
+    {w:'spectrum',pos:'noun',def:'A range of values; or light separated into colors',ex:'The rainbow shows the full visible spectrum.',syn:['range','band']},
+    {w:'symbiosis',pos:'noun',def:'A relationship between two organisms that benefits both',ex:'Bees and flowers have a symbiotic relationship.',syn:['mutualism','partnership']},
+    {w:'velocity',pos:'noun',def:'Speed in a specific direction',ex:'The rocket reached escape velocity at launch.',syn:['speed','rate']},
+    {w:'volatile',pos:'adj',def:'Evaporating quickly; or likely to change suddenly',ex:'Alcohol is a volatile substance.',syn:['unstable','evaporative']},
+    {w:'wavelength',pos:'noun',def:'Distance between the peaks of a wave',ex:'Different colors of light have different wavelengths.',syn:['frequency','wave size']},
+    {w:'biodiversity',pos:'noun',def:'Variety of species living in an area',ex:'Rainforests have incredible biodiversity.',syn:['variety','diversity']},
+    {w:'combustion',pos:'noun',def:'The process of burning; a rapid chemical reaction with oxygen',ex:'Combustion of fuel powers car engines.',syn:['burning','oxidation']},
+    {w:'nucleus',pos:'noun',def:'The central part of an atom or cell',ex:'DNA is found inside the cell nucleus.',syn:['core','center']},
+   ]},
+  {id:'history',name:'History',icon:'🏛️',color:'#facc15',
+   words:[
+    {w:'abolition',pos:'noun',def:'The action of officially ending a system or practice',ex:'The abolition of slavery was a turning point in US history.',syn:['elimination','end']},
+    {w:'alliance',pos:'noun',def:'A union or agreement between nations or groups',ex:'NATO is a military alliance of democratic nations.',syn:['partnership','coalition']},
+    {w:'amendment',pos:'noun',def:'A change or addition to a law or document',ex:'The First Amendment protects freedom of speech.',syn:['revision','modification']},
+    {w:'aristocracy',pos:'noun',def:'The upper class; government by a privileged class',ex:'The French aristocracy lost power in the Revolution.',syn:['nobility','upper class']},
+    {w:'colonization',pos:'noun',def:'The act of establishing control over another territory',ex:'European colonization changed the Americas dramatically.',syn:['settlement','occupation']},
+    {w:'democracy',pos:'noun',def:'Government by the people, through elected representatives',ex:'Athens is considered the birthplace of democracy.',syn:['self-governance','republic']},
+    {w:'diplomacy',pos:'noun',def:'Managing international relations through negotiation',ex:'Skilled diplomacy averted a war between the nations.',syn:['negotiation','statesmanship']},
+    {w:'emancipation',pos:'noun',def:'The fact of being freed from legal, social, or political restraint',ex:'The Emancipation Proclamation freed enslaved people.',syn:['liberation','freedom']},
+    {w:'empire',pos:'noun',def:'A group of nations under one ruler or government',ex:'The Roman Empire lasted for centuries.',syn:['dominion','realm']},
+    {w:'feudalism',pos:'noun',def:'A medieval system where land was exchanged for military service',ex:'Feudalism dominated Europe in the Middle Ages.',syn:['serfdom','hierarchy']},
+    {w:'genocide',pos:'noun',def:'The deliberate killing of a large group of people',ex:'The Holocaust was a devastating act of genocide.',syn:['massacre','extermination']},
+    {w:'imperialism',pos:'noun',def:'A policy of extending a country\'s power over others',ex:'British imperialism spread English culture globally.',syn:['expansionism','domination']},
+    {w:'manifest destiny',pos:'noun',def:'19th-century belief that US expansion across America was inevitable',ex:'Manifest Destiny justified westward expansion.',syn:['expansionism','destiny']},
+    {w:'mercantilism',pos:'noun',def:'Economic policy focused on building national wealth through trade',ex:'Mercantilism drove European exploration in the 1500s.',syn:['trade policy','commerce']},
+    {w:'monarchy',pos:'noun',def:'A form of government with a king or queen as head of state',ex:'Britain operates as a constitutional monarchy.',syn:['kingdom','reign']},
+    {w:'nationalism',pos:'noun',def:'Strong pride and loyalty to one\'s nation',ex:'Nationalism fueled many independence movements.',syn:['patriotism','loyalism']},
+    {w:'oppression',pos:'noun',def:'Prolonged cruel treatment or control of a group',ex:'Civil rights movements fought against oppression.',syn:['tyranny','persecution']},
+    {w:'propaganda',pos:'noun',def:'Information used to promote a political cause or point of view',ex:'Wartime propaganda encouraged people to enlist.',syn:['indoctrination','spin']},
+    {w:'reformation',pos:'noun',def:'A 16th-century movement to reform the Catholic Church',ex:'Martin Luther sparked the Protestant Reformation.',syn:['reform','revolution']},
+    {w:'republic',pos:'noun',def:'A state in which power is held by elected representatives',ex:'The United States is a constitutional republic.',syn:['democracy','commonwealth']},
+    {w:'revolution',pos:'noun',def:'A forcible overthrow of a government or social order',ex:'The French Revolution ended the monarchy.',syn:['uprising','revolt']},
+    {w:'sovereignty',pos:'noun',def:'Full power and authority over a territory',ex:'Nations guard their sovereignty fiercely.',syn:['independence','authority']},
+    {w:'tyranny',pos:'noun',def:'Cruel and oppressive government or rule',ex:'The people rebelled against the tyrant\'s rule.',syn:['despotism','dictatorship']},
+    {w:'renaissance',pos:'noun',def:'A cultural rebirth; 14th–17th century European movement',ex:'The Renaissance produced art, science, and literature.',syn:['rebirth','revival']},
+    {w:'suffrage',pos:'noun',def:'The right to vote in political elections',ex:'Women\'s suffrage was achieved in 1920 in the US.',syn:['voting right','franchise']},
+   ]},
+  {id:'math',name:'Math Terms',icon:'📐',color:'#38bdf8',
+   words:[
+    {w:'asymptote',pos:'noun',def:'A line a curve approaches but never touches',ex:'The graph has a horizontal asymptote at y = 0.',syn:['limit line','boundary']},
+    {w:'coefficient',pos:'noun',def:'A number multiplied by a variable in an expression',ex:'In 3x, the coefficient is 3.',syn:['multiplier','factor']},
+    {w:'congruent',pos:'adj',def:'Identical in shape and size',ex:'The two triangles are congruent.',syn:['identical','equal']},
+    {w:'denominator',pos:'noun',def:'The bottom number in a fraction',ex:'In ¾, the denominator is 4.',syn:['divisor','bottom number']},
+    {w:'derivative',pos:'noun',def:'The rate at which a function changes at any point',ex:'Calculus uses derivatives to find slopes.',syn:['rate of change','slope']},
+    {w:'diameter',pos:'noun',def:'A straight line through the center of a circle',ex:'The diameter of the circle is twice the radius.',syn:['width','span']},
+    {w:'exponent',pos:'noun',def:'A number showing how many times to multiply a base',ex:'In 2³, the exponent is 3.',syn:['power','index']},
+    {w:'factorial',pos:'noun',def:'The product of all positive integers up to a number',ex:'5! (5 factorial) = 5×4×3×2×1 = 120.',syn:['product sequence','n!']},
+    {w:'hypotenuse',pos:'noun',def:'The longest side of a right triangle',ex:'The hypotenuse is opposite the right angle.',syn:['longest side','opposite side']},
+    {w:'integer',pos:'noun',def:'A whole number, positive, negative, or zero',ex:'−3, 0, and 7 are all integers.',syn:['whole number','round number']},
+    {w:'intercept',pos:'noun',def:'Where a line crosses an axis on a graph',ex:'The y-intercept is where the line crosses the y-axis.',syn:['crossing point','intersection']},
+    {w:'logarithm',pos:'noun',def:'The power to which a base must be raised to get a number',ex:'log₁₀(100) = 2 because 10² = 100.',syn:['log','inverse exponent']},
+    {w:'mean',pos:'noun',def:'The average of a set of numbers',ex:'The mean of 2, 4, 6 is 4.',syn:['average','arithmetic mean']},
+    {w:'median',pos:'noun',def:'The middle value in an ordered list',ex:'The median of 1, 3, 5 is 3.',syn:['middle value','midpoint']},
+    {w:'mode',pos:'noun',def:'The most frequently occurring value in a data set',ex:'In {1,2,2,3}, the mode is 2.',syn:['most frequent','common value']},
+    {w:'numerator',pos:'noun',def:'The top number in a fraction',ex:'In ¾, the numerator is 3.',syn:['top number','dividend']},
+    {w:'perpendicular',pos:'adj',def:'At a right angle (90°) to another line',ex:'The two roads are perpendicular to each other.',syn:['at right angles','orthogonal']},
+    {w:'polynomial',pos:'noun',def:'An expression with multiple terms involving variables',ex:'x² + 3x + 2 is a polynomial.',syn:['algebraic expression','multi-term equation']},
+    {w:'prime',pos:'adj',def:'A whole number greater than 1 divisible only by 1 and itself',ex:'7 is a prime number.',syn:['indivisible','prime number']},
+    {w:'quadratic',pos:'adj',def:'Involving a variable raised to the second power',ex:'x² + 5x + 6 = 0 is a quadratic equation.',syn:['second-degree','parabolic']},
+    {w:'radius',pos:'noun',def:'The distance from the center of a circle to its edge',ex:'The radius is half the diameter.',syn:['half-diameter','spoke']},
+    {w:'tangent',pos:'noun',def:'A line touching a curve at exactly one point',ex:'The tangent touches the circle at point A.',syn:['touching line','slope line']},
+    {w:'variable',pos:'noun',def:'A symbol representing an unknown or changing value',ex:'In the equation x + 5 = 10, x is the variable.',syn:['unknown','symbol']},
+    {w:'probability',pos:'noun',def:'The likelihood of an event happening, from 0 to 1',ex:'The probability of flipping heads is 0.5.',syn:['likelihood','chance']},
+    {w:'proportion',pos:'noun',def:'A statement that two ratios are equal',ex:'The proportion 1/2 = 2/4 is true.',syn:['ratio','relationship']},
+   ]},
+  {id:'slang',name:'Modern Slang',icon:'💬',color:'#e879f9',
+   words:[
+    {w:'GOAT',pos:'noun',def:'Greatest Of All Time — used to describe the best ever',ex:'LeBron James is considered the GOAT by many fans.',syn:['legend','champion']},
+    {w:'lowkey',pos:'adv',def:'Secretly; to a moderate degree; without making it obvious',ex:'I lowkey love that new song but won\'t admit it.',syn:['secretly','somewhat']},
+    {w:'extra',pos:'adj',def:'Over-the-top; doing or saying too much',ex:'He wore a tuxedo to a casual dinner — so extra.',syn:['dramatic','over-the-top']},
+    {w:'slay',pos:'verb',def:'To do something impressively well',ex:'She absolutely slayed that presentation.',syn:['crush it','nail it']},
+    {w:'vibe',pos:'noun',def:'An atmosphere or feeling; also to be in a relaxed mood',ex:'This coffee shop has such a cozy vibe.',syn:['mood','atmosphere']},
+    {w:'lit',pos:'adj',def:'Exciting, amazing, or fun',ex:'That party was absolutely lit!',syn:['amazing','exciting']},
+    {w:'snatched',pos:'adj',def:'Looking incredibly good; perfectly styled',ex:'Your outfit is snatched today.',syn:['flawless','perfect']},
+    {w:'ghosting',pos:'verb',def:'To suddenly stop responding to someone without explanation',ex:'He was ghosting her texts for a week.',syn:['ignoring','disappearing']},
+    {w:'flex',pos:'verb',def:'To show off or boast about something',ex:'She\'s always flexing her new car on social media.',syn:['show off','boast']},
+    {w:'savage',pos:'adj',def:'Ruthlessly impressive; brutally honest or cool',ex:'That comeback was absolutely savage.',syn:['brutal','fierce']},
+    {w:'tea',pos:'noun',def:'Gossip; interesting or dramatic news',ex:'Spill the tea — what happened at the party?',syn:['gossip','drama']},
+    {w:'woke',pos:'adj',def:'Alert to social and political injustice',ex:'She became more woke after taking the sociology class.',syn:['aware','enlightened']},
+    {w:'clout',pos:'noun',def:'Social influence or power, especially online',ex:'He only posted that for the clout.',syn:['influence','status']},
+    {w:'bussin',pos:'adj',def:'Extremely delicious; really good',ex:'This pizza is bussin!',syn:['delicious','amazing']},
+    {w:'no cap',pos:'phrase',def:'For real; without lying or exaggerating',ex:'That movie was incredible, no cap.',syn:['for real','honestly']},
+    {w:'sus',pos:'adj',def:'Suspicious; questionable in behavior',ex:'His excuse sounded pretty sus.',syn:['suspicious','shady']},
+    {w:'hits different',pos:'phrase',def:'Feels especially meaningful or emotional in context',ex:'This song hits different at midnight.',syn:['feels special','resonates']},
+    {w:'understood the assignment',pos:'phrase',def:'Perfectly did what was expected; got it exactly right',ex:'She understood the assignment with that costume.',syn:['nailed it','got it right']},
+    {w:'rent free',pos:'phrase',def:'Constantly in someone\'s mind without effort',ex:'That song lives rent free in my head.',syn:['obsessively thinking','constantly present']},
+    {w:'simp',pos:'noun',def:'Someone who is excessively devoted to a crush',ex:'He bought her flowers every day — total simp.',syn:['pushover','overly devoted']},
+    {w:'bet',pos:'interj',def:'Okay; agreed; expressing confirmation or acceptance',ex:'"Meet me at 8?" "Bet."',syn:['agreed','okay']},
+    {w:'main character',pos:'noun',def:'Acting as if you are the protagonist of your own story',ex:'She had a total main character moment walking in.',syn:['center of attention','protagonist energy']},
+    {w:'bop',pos:'noun',def:'A song that is very good and enjoyable',ex:'That new track is a total bop.',syn:['hit','banger']},
+    {w:'basic',pos:'adj',def:'Unoriginal; following mainstream trends without individuality',ex:'Pumpkin spice lattes are considered basic.',syn:['mainstream','generic']},
+    {w:'glow-up',pos:'noun',def:'A dramatic positive transformation in appearance or life',ex:'Her glow-up from freshman to senior year was incredible.',syn:['transformation','improvement']},
+   ]},
+  {id:'power',name:'Power Words',icon:'⚡',color:'#f97316',
+   words:[
+    {w:'achieve',pos:'verb',def:'To successfully reach a goal through effort',ex:'She worked hard to achieve her dreams.',syn:['accomplish','attain']},
+    {w:'amplify',pos:'verb',def:'To increase the strength or effect of something',ex:'Social media can amplify both good and bad messages.',syn:['increase','magnify']},
+    {w:'bold',pos:'adj',def:'Showing courage and confidence; not afraid to take risks',ex:'It was a bold decision to leave her stable job.',syn:['courageous','daring']},
+    {w:'compelling',pos:'adj',def:'Evoking interest or admiration; convincing',ex:'She gave a compelling argument for the change.',syn:['convincing','powerful']},
+    {w:'decisive',pos:'adj',def:'Settling something quickly and clearly',ex:'A decisive leader makes choices quickly and confidently.',syn:['firm','conclusive']},
+    {w:'dynamic',pos:'adj',def:'Full of energy, positive change, and progress',ex:'The dynamic speaker kept the audience engaged.',syn:['energetic','vibrant']},
+    {w:'empower',pos:'verb',def:'To give authority or confidence to someone',ex:'Education empowers individuals to change their lives.',syn:['enable','strengthen']},
+    {w:'exceptional',pos:'adj',def:'Unusually good; outstanding',ex:'Her exceptional talent won her a scholarship.',syn:['outstanding','extraordinary']},
+    {w:'influential',pos:'adj',def:'Having a great effect on someone or something',ex:'She became one of the most influential scientists.',syn:['powerful','impactful']},
+    {w:'innovative',pos:'adj',def:'Introducing new ideas; original and creative',ex:'Their innovative approach transformed the industry.',syn:['creative','pioneering']},
+    {w:'inspire',pos:'verb',def:'To fill someone with enthusiasm or the urge to create',ex:'Her story inspired thousands of young people.',syn:['motivate','encourage']},
+    {w:'lead',pos:'verb',def:'To guide others toward a goal',ex:'She led the team to a historic victory.',syn:['guide','direct']},
+    {w:'motivate',pos:'verb',def:'To cause someone to act or work harder',ex:'The coach motivated the team before the final game.',syn:['inspire','drive']},
+    {w:'optimize',pos:'verb',def:'To make as effective or efficient as possible',ex:'We need to optimize our workflow.',syn:['improve','maximize']},
+    {w:'passionate',pos:'adj',def:'Having or showing strong emotion or enthusiasm',ex:'She is passionate about environmental justice.',syn:['enthusiastic','dedicated']},
+    {w:'pioneering',pos:'adj',def:'Being the first to develop something new',ex:'Her pioneering research changed medicine forever.',syn:['groundbreaking','innovative']},
+    {w:'resilient',pos:'adj',def:'Able to recover quickly from difficulties',ex:'A resilient person bounces back from failure.',syn:['tough','adaptable']},
+    {w:'strategic',pos:'adj',def:'Done as part of a plan to achieve a goal',ex:'Their strategic marketing campaign was very successful.',syn:['planned','tactical']},
+    {w:'transformative',pos:'adj',def:'Causing a marked change in someone or something',ex:'The new technology had a transformative impact.',syn:['life-changing','revolutionary']},
+    {w:'visionary',pos:'noun/adj',def:'A person with original ideas about the future',ex:'Elon Musk is considered a visionary entrepreneur.',syn:['forward-thinker','innovator']},
+    {w:'robust',pos:'adj',def:'Strong and healthy; effective in different conditions',ex:'The economy needs a robust recovery plan.',syn:['strong','durable']},
+    {w:'impactful',pos:'adj',def:'Having a major effect or influence',ex:'Her speech was one of the most impactful of the year.',syn:['significant','powerful']},
+    {w:'paramount',pos:'adj',def:'More important than anything else',ex:'Safety is of paramount importance in this industry.',syn:['supreme','foremost']},
+    {w:'cultivate',pos:'verb',def:'To develop or foster something over time',ex:'She cultivated strong relationships with her mentors.',syn:['develop','nurture']},
+    {w:'persevere',pos:'verb',def:'To continue despite difficulties or delay',ex:'He persevered through years of rejection before succeeding.',syn:['persist','endure']},
+   ]},
+];
+
+const ALL_WORDS = [];
+CATS.forEach(c=>c.words.forEach((w,i)=>ALL_WORDS.push({...w,catId:c.id,catName:c.name,idx:i})));
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+const LS = k=>'vocab56_'+k;
+let activeCatId = null;
+let fcPool = []; let fcIdx = 0; let fcFlipped = false; let fcFilter = 'all';
+let quizMode = 'definition';
+let quizSelectedCats = new Set();
+let quizQs = []; let qIdx = 0; let qScore = 0; let qMissed = []; let qAnswered = false;
+
+function getMastered(catId){ try{return new Set(JSON.parse(localStorage.getItem(LS('m_'+catId))||'[]'));}catch{return new Set();} }
+function toggleMastered(catId,idx){ const s=getMastered(catId); s.has(idx)?s.delete(idx):s.add(idx); localStorage.setItem(LS('m_'+catId),JSON.stringify([...s])); }
+function getTotalMastered(){ return CATS.reduce((t,c)=>t+getMastered(c.id).size,0); }
+function getHistory(){ try{return JSON.parse(localStorage.getItem(LS('history'))||'[]');}catch{return[];} }
+function saveHistory(score,total){ const h=getHistory(); h.unshift({score,total,date:new Date().toLocaleDateString()}); localStorage.setItem(LS('history'),JSON.stringify(h.slice(0,20))); }
+
+// ── TABS ─────────────────────────────────────────────
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['categories','flashcards','quiz','progress'][i]===t));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='categories') renderCategories();
+  if(t==='progress') renderProgress();
+}
+
+// ── CATEGORIES ─────────────────────────────────────────
+function renderCategories(){
+  document.getElementById('cat-pill').textContent=getTotalMastered()+' mastered';
+  document.getElementById('cat-grid').innerHTML=CATS.map(c=>{
+    const m=getMastered(c.id).size, pct=Math.round(m/c.words.length*100);
+    return `<div class="cat-card" style="--cc:${c.color}" onclick="openFlashcards('${c.id}')">
+      <div class="cat-icon">${c.icon}</div>
+      <div class="cat-name">${c.name}</div>
+      <div class="cat-count">${m}/${c.words.length} mastered</div>
+      <div class="cat-preview">"${c.words[0].w}"</div>
+      <div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── FLASHCARDS ─────────────────────────────────────────
+function openFlashcards(catId){
+  activeCatId = catId; fcIdx=0; fcFlipped=false; fcFilter='all';
+  document.getElementById('fc-placeholder').style.display='none';
+  document.getElementById('fc-content').style.display='block';
+  const cat = CATS.find(c=>c.id===catId);
+  document.getElementById('fc-cat-title').textContent = cat.icon+' '+cat.name;
+  buildFcControls(cat);
+  buildFcPool(cat);
+  switchTab('flashcards');
+}
+function buildFcControls(cat){
+  document.getElementById('fc-controls').innerHTML=
+    ['all','mastered','unmastered'].map(f=>`
+    <button class="fc-ctrl-btn ${fcFilter===f?'active':''}" onclick="setFcFilter('${f}',this)">
+      ${f==='all'?'All ('+cat.words.length+')':f==='mastered'?'✓ Mastered':'Not yet'}
+    </button>`).join('');
+}
+function setFcFilter(f,btn){
+  fcFilter=f; fcIdx=0; fcFlipped=false;
+  document.querySelectorAll('.fc-ctrl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildFcPool(CATS.find(c=>c.id===activeCatId));
+}
+function buildFcPool(cat){
+  const m=getMastered(cat.id);
+  fcPool=cat.words.map((w,i)=>({...w,idx:i})).filter(w=>
+    fcFilter==='all'?true:fcFilter==='mastered'?m.has(w.idx):!m.has(w.idx)
+  );
+  showFcCard();
+}
+function showFcCard(){
+  if(!fcPool.length){ document.getElementById('cw').textContent='No words'; document.getElementById('cp').textContent=''; document.getElementById('cs').textContent=''; document.getElementById('cd').textContent='Change filter above'; document.getElementById('ce').textContent=''; document.getElementById('nav-count').textContent='0/0'; return; }
+  fcFlipped=false; document.getElementById('flashcard').classList.remove('flipped');
+  const w=fcPool[fcIdx];
+  document.getElementById('cw').textContent=w.w;
+  document.getElementById('cp').textContent='('+w.pos+')';
+  document.getElementById('cs').textContent='syn: '+w.syn.join(', ');
+  document.getElementById('cd').textContent=w.def;
+  document.getElementById('ce').textContent='"'+w.ex+'"';
+  document.getElementById('nav-count').textContent=(fcIdx+1)+' / '+fcPool.length;
+}
+function flipCard(){ fcFlipped=!fcFlipped; document.getElementById('flashcard').classList.toggle('flipped',fcFlipped); }
+function prevCard(){ if(fcIdx>0){fcIdx--;showFcCard();} }
+function nextCard(){ if(fcIdx<fcPool.length-1){fcIdx++;showFcCard();} }
+function goBackToCats(){ document.getElementById('fc-placeholder').style.display='block'; document.getElementById('fc-content').style.display='none'; switchTab('categories'); }
+
+// ── QUIZ ───────────────────────────────────────────────
+function selectMode(m,el){
+  quizMode=m;
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function initQuizCats(){
+  document.getElementById('quiz-cat-row').innerHTML=CATS.map((c,i)=>`
+    <button class="qcat-btn" onclick="toggleQCat(${i},this)">${c.icon} ${c.name}</button>`).join('');
+}
+function toggleQCat(i,btn){ quizSelectedCats.has(i)?quizSelectedCats.delete(i):quizSelectedCats.add(i); btn.classList.toggle('selected',quizSelectedCats.has(i)); }
+
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function buildQuizPool(){
+  const useCats = quizSelectedCats.size>0?CATS.filter((_,i)=>quizSelectedCats.has(i)):CATS;
+  return useCats.flatMap(c=>c.words.map(w=>({...w,catId:c.id})));
+}
+function startQuiz(){
+  const pool=buildQuizPool();
+  if(pool.length<4){ alert('Select at least one category!'); return; }
+  quizQs=shuffle(pool).slice(0,20); qIdx=0; qScore=0; qMissed=[];
+  document.getElementById('quiz-setup').style.display='none';
+  document.getElementById('quiz-active').style.display='block';
+  document.getElementById('quiz-results').style.display='none';
+  showQuestion();
+}
+function showQuestion(){
+  qAnswered=false;
+  const q=quizQs[qIdx], total=quizQs.length;
+  document.getElementById('q-prog-text').textContent=`Q ${qIdx+1} of ${total}`;
+  document.getElementById('q-score-badge').textContent=`Score: ${qScore}`;
+  document.getElementById('q-bar').style.width=(qIdx/total*100)+'%';
+  document.getElementById('q-feedback').style.display='none';
+  document.getElementById('next-btn').style.display='none';
+  const pool=buildQuizPool();
+
+  if(quizMode==='definition'){
+    document.getElementById('q-label').textContent='What does this word mean?';
+    document.getElementById('q-word').textContent=q.w;
+    document.getElementById('q-sub').textContent='('+q.pos+')';
+    const wrongs=shuffle(pool.filter(x=>x.def!==q.def)).slice(0,3);
+    const choices=shuffle([q,...wrongs]);
+    document.getElementById('q-input-area').innerHTML=`<div class="choices">${choices.map(c=>`<button class="choice-btn" onclick="checkAnswer(this,${c.def===q.def},'${q.def.replace(/'/g,"\\'")}','${q.w}')">${c.def}</button>`).join('')}</div>`;
+  }else if(quizMode==='synonym'){
+    document.getElementById('q-label').textContent='Which word is a synonym?';
+    document.getElementById('q-word').textContent=q.w;
+    document.getElementById('q-sub').textContent='('+q.def+')';
+    const correctSyn=q.syn[0];
+    const wrongs=shuffle(pool.filter(x=>x.w!==q.w&&!q.syn.includes(x.w))).slice(0,3).map(x=>x.w);
+    const choices=shuffle([correctSyn,...wrongs]);
+    document.getElementById('q-input-area').innerHTML=`<div class="choices">${choices.map(c=>`<button class="choice-btn" onclick="checkAnswer(this,${c===correctSyn},'${correctSyn}','${q.w}')">${c}</button>`).join('')}</div>`;
+  }else if(quizMode==='fill'){
+    document.getElementById('q-label').textContent='Fill in the blank:';
+    const blank=q.ex.replace(new RegExp(q.w,'i'),'_______');
+    document.getElementById('q-word').textContent=blank;
+    document.getElementById('q-sub').textContent='Type the missing word';
+    document.getElementById('q-input-area').innerHTML=`<input class="fill-input" id="fill-inp" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')checkFill('${q.w}')"><br><button class="check-btn" style="margin-top:8px;" onclick="checkFill('${q.w}')">Check</button>`;
+    setTimeout(()=>document.getElementById('fill-inp')?.focus(),100);
+  }else{
+    document.getElementById('q-label').textContent='Which word fits best?';
+    const blank=q.ex.replace(new RegExp(q.w,'i'),'_______');
+    document.getElementById('q-word').textContent=blank;
+    document.getElementById('q-sub').textContent='Pick the correct word';
+    const wrongs=shuffle(pool.filter(x=>x.w!==q.w)).slice(0,3);
+    const choices=shuffle([q,...wrongs]);
+    document.getElementById('q-input-area').innerHTML=`<div class="choices">${choices.map(c=>`<button class="choice-btn" onclick="checkAnswer(this,${c.w===q.w},'${q.w}','${q.w}')">${c.w}</button>`).join('')}</div>`;
+  }
+}
+function checkAnswer(btn,correct,correctAnswer,word){
+  if(qAnswered)return; qAnswered=true;
+  document.querySelectorAll('.choice-btn').forEach(b=>{ b.disabled=true; if(b.textContent.trim()===correctAnswer.trim())b.classList.add('correct'); });
+  if(!correct){ btn.classList.add('wrong'); qMissed.push(quizQs[qIdx]); }
+  else qScore++;
+  showFeedback(correct,correctAnswer);
+}
+function checkFill(word){
+  if(qAnswered)return;
+  const inp=document.getElementById('fill-inp'); if(!inp)return;
+  const val=inp.value.trim().toLowerCase();
+  const correct=val===word.toLowerCase()||val===word.toLowerCase().replace(/[^a-z]/g,'');
+  qAnswered=true; inp.disabled=true;
+  if(correct)qScore++; else qMissed.push(quizQs[qIdx]);
+  showFeedback(correct,word);
+}
+function showFeedback(correct,correctAnswer){
+  document.getElementById('q-score-badge').textContent='Score: '+qScore;
+  const fb=document.getElementById('q-feedback');
+  fb.textContent=correct?'✓ Correct!':'✗ The answer was: '+correctAnswer;
+  fb.className='q-feedback '+(correct?'correct':'wrong');
+  fb.style.display='block';
+  document.getElementById('next-btn').style.display='block';
+}
+const checkAnswer_style_fix=`<style>.check-btn{background:var(--blue);color:#fff;border:none;padding:9px 22px;border-radius:var(--radius-sm);cursor:pointer;font-size:.85rem;font-weight:700;}</style>`;
+function nextQuestion(){ qIdx++; if(qIdx>=quizQs.length)finishQuiz(); else showQuestion(); }
+function finishQuiz(){
+  document.getElementById('quiz-active').style.display='none';
+  document.getElementById('quiz-results').style.display='block';
+  const total=quizQs.length, pct=Math.round(qScore/total*100);
+  document.getElementById('fin-num').textContent=qScore;
+  document.getElementById('fin-den').textContent='/ '+total;
+  document.getElementById('score-ring').style.background=`conic-gradient(var(--blue) ${pct*3.6}deg,var(--border) 0deg)`;
+  const msgs=[['🏆 Vocabulary Master!','You know your words!'],['🎯 Great Work!','Almost perfect!'],['📚 Solid Progress!','Keep practicing!'],['💪 Keep Going!','Review the missed words.']];
+  const [msg,sub]=pct>=90?msgs[0]:pct>=70?msgs[1]:pct>=50?msgs[2]:msgs[3];
+  document.getElementById('fin-msg').textContent=msg;
+  document.getElementById('fin-sub').textContent=sub;
+  document.getElementById('miss-section').innerHTML=qMissed.length?
+    `<div class="miss-title">Missed Words (${qMissed.length})</div>`+qMissed.map(w=>`<div class="miss-item"><div class="miss-word">${w.w}</div><div class="miss-def">✓ ${w.def}</div></div>`).join('')
+    :'<div style="color:var(--green);font-weight:600;margin-top:8px;">🎉 Perfect — no mistakes!</div>';
+  saveHistory(qScore,total);
+}
+function resetQuiz(){ document.getElementById('quiz-setup').style.display='block'; document.getElementById('quiz-active').style.display='none'; document.getElementById('quiz-results').style.display='none'; }
+
+// ── PROGRESS ──────────────────────────────────────────
+function renderProgress(){
+  const total=getTotalMastered(), history=getHistory();
+  const best=history.length?Math.max(...history.map(h=>Math.round(h.score/h.total*100))):null;
+  document.getElementById('s-mastered').textContent=total;
+  document.getElementById('s-quizzes').textContent=history.length;
+  document.getElementById('s-best').textContent=best!==null?best+'%':'—';
+  document.getElementById('prog-bars').innerHTML=CATS.map(c=>{
+    const m=getMastered(c.id).size,pct=Math.round(m/c.words.length*100);
+    return `<div class="prog-item"><div class="prog-info"><span>${c.icon} ${c.name}</span><span>${m}/${c.words.length}</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+  const histEl=document.getElementById('quiz-history');
+  if(!history.length){histEl.innerHTML='<div class="empty-state">No quizzes yet. Go to QUIZ to start!</div>';return;}
+  histEl.innerHTML=history.slice(0,5).map((h,i)=>{
+    const pct=Math.round(h.score/h.total*100),cls=pct>=80?'color:var(--green)':pct>=50?'color:var(--yellow)':'color:var(--red)';
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-size:.82rem;color:var(--muted);">Quiz #${history.length-i} — ${h.date}</div>
+      <div style="font-weight:700;${cls}">${h.score}/${h.total} (${pct}%)</div>
+    </div>`;
+  }).join('');
+}
+
+// ── INIT ──────────────────────────────────────────────
+renderCategories();
+initQuizCats();
+</script>
+</body>
+</html>

@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Style Generator — Agent #30</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --card: #1a1a1a;
+    --card2: #222;
+    --accent: #b8c8e8;
+    --accent2: #8aafd4;
+    --text: #e8e8e8;
+    --muted: #888;
+    --border: #2a2a2a;
+    --success: #4ade80;
+    --danger: #f87171;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    flex: 1;
+    min-width: 200px;
+  }
+  .logo span { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
+  .api-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .api-row label { color: var(--muted); font-size: 12px; }
+  .api-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    width: 280px;
+    font-family: monospace;
+  }
+  .api-input:focus { outline: none; border-color: var(--accent); }
+  .api-save-btn {
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s;
+  }
+  .api-save-btn:hover { opacity: .85; }
+
+  /* MAIN LAYOUT */
+  .main { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  /* SECTION HEADERS */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* COMPONENT GRID */
+  .component-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .comp-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all .18s;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .comp-btn .icon { font-size: 24px; }
+  .comp-btn:hover { border-color: var(--accent); background: #1e1e2a; transform: translateY(-1px); }
+  .comp-btn.selected { border-color: var(--accent); background: #1b2033; box-shadow: 0 0 0 2px #b8c8e840; }
+
+  /* CONFIG PANEL */
+  #config-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 28px;
+    display: none;
+    animation: fadeIn .3s ease;
+  }
+  #config-panel.visible { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 700px) { .config-grid { grid-template-columns: 1fr; } }
+
+  .field-group { display: flex; flex-direction: column; gap: 8px; }
+  .field-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+  /* VIBE PILLS */
+  .vibe-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .vibe-pill {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--muted);
+    user-select: none;
+  }
+  .vibe-pill:hover { border-color: var(--accent); color: var(--text); }
+  .vibe-pill.selected { background: #1b2033; border-color: var(--accent); color: var(--accent); }
+  .vibe-pill.disabled { opacity: .4; cursor: not-allowed; }
+
+  /* COLOR PICKERS */
+  .color-row { display: flex; align-items: center; gap: 10px; }
+  .color-row input[type="color"] {
+    width: 40px; height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+    padding: 2px;
+  }
+  .color-hex {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 6px 10px;
+    font-family: monospace;
+    font-size: 13px;
+    width: 90px;
+  }
+  .color-hex:focus { outline: none; border-color: var(--accent); }
+
+  /* SLIDER */
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+    height: 4px;
+    cursor: pointer;
+  }
+  .slider-val {
+    color: var(--accent);
+    font-family: monospace;
+    font-size: 13px;
+    min-width: 38px;
+    text-align: right;
+  }
+
+  /* SIZE BUTTONS */
+  .size-btns { display: flex; gap: 8px; }
+  .size-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .size-btn:hover { border-color: var(--accent); color: var(--text); }
+  .size-btn.selected { background: #1b2033; border-color: var(--accent); color: var(--accent); }
+
+  /* FRAMEWORK SELECT */
+  select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    width: 100%;
+  }
+  select:focus { outline: none; border-color: var(--accent); }
+
+  /* GENERATE BUTTON */
+  .generate-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0f0f0f;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+    width: 100%;
+    transition: opacity .2s, transform .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .generate-btn:hover { opacity: .9; transform: translateY(-1px); }
+  .generate-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* LOADING SPINNER */
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid #0f0f0f4a;
+    border-top-color: #0f0f0f;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+  }
+  .spinner.visible { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* RESULTS PANELS */
+  #results {
+    display: none;
+    grid-template-columns: 1fr 1fr 240px;
+    gap: 16px;
+    margin-bottom: 28px;
+    animation: fadeIn .4s ease;
+  }
+  #results.visible { display: grid; }
+  @media (max-width: 1100px) { #results { grid-template-columns: 1fr 1fr; } #panel-variations { grid-column: 1/-1; } }
+  @media (max-width: 700px) { #results { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-header {
+    background: var(--card2);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .panel-title { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+  .panel-body { padding: 16px; flex: 1; overflow: auto; }
+
+  /* PREVIEW */
+  #preview-sandbox {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    padding: 32px;
+    transition: background .3s;
+    background: #fff;
+  }
+  #preview-sandbox.dark { background: #111; }
+  .toggle-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .toggle-btn:hover, .toggle-btn.active { border-color: var(--accent); color: var(--accent); }
+  .preview-controls { display: flex; gap: 8px; align-items: center; }
+
+  /* CODE PANEL */
+  .code-wrap { position: relative; }
+  .code-wrap pre {
+    margin: 0;
+    font-size: 12px;
+    border-radius: 8px;
+    max-height: 380px;
+    overflow: auto;
+  }
+  .code-wrap pre code { font-size: 12px !important; }
+  .copy-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { border-color: var(--success); color: var(--success); }
+
+  /* PROPERTY TOOLTIP */
+  .prop-tooltip {
+    position: fixed;
+    background: #2a2a3a;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    max-width: 260px;
+    z-index: 9999;
+    pointer-events: none;
+    box-shadow: 0 8px 24px #0006;
+    display: none;
+  }
+  .prop-tooltip.visible { display: block; }
+  .prop-name { color: var(--accent); font-weight: 700; margin-bottom: 4px; font-family: monospace; }
+
+  /* EXPLANATION */
+  .explanation-box {
+    background: #1b2033;
+    border: 1px solid var(--accent)44;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+    color: #c8d8f0;
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
+  /* TAILWIND BOX */
+  .tailwind-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #a8c8e8;
+    word-break: break-all;
+    margin-top: 10px;
+    line-height: 1.8;
+    min-height: 36px;
+  }
+
+  /* VARIATIONS PANEL */
+  .var-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 12px;
+    padding: 8px 12px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: all .15s;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .var-btn:hover { border-color: var(--accent); background: #1b2033; }
+  .var-btn .icon { font-size: 16px; }
+
+  .alt-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .alt-card:hover { border-color: var(--accent); }
+  .alt-card-header {
+    background: var(--card2);
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .alt-preview {
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: #fff;
+  }
+
+  /* HISTORY */
+  #history-section { margin-bottom: 28px; }
+  .history-list { display: flex; gap: 10px; flex-wrap: wrap; }
+  .history-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 160px;
+  }
+  .history-item:hover { border-color: var(--accent); }
+  .history-name { color: var(--accent); font-weight: 600; font-size: 12px; }
+  .history-meta { color: var(--muted); font-size: 11px; }
+
+  /* EXPORT */
+  .export-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: all .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .export-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* NOTIFICATION */
+  .notif {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+    color: var(--accent);
+    z-index: 9998;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all .3s;
+    pointer-events: none;
+  }
+  .notif.show { opacity: 1; transform: none; }
+
+  /* ERROR */
+  .error-box {
+    background: #2a1a1a;
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+  .error-box.visible { display: block; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- TOOLTIP -->
+<div class="prop-tooltip" id="propTooltip">
+  <div class="prop-name" id="tooltipProp"></div>
+  <div id="tooltipDesc"></div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">🎨 CSS Style Generator <span>Agent #30 · AI Dev</span></div>
+  <div class="api-row">
+    <label>Gemini API Key:</label>
+    <input type="password" class="api-input" id="apiKeyInput" placeholder="AIza...">
+    <button class="api-save-btn" onclick="saveApiKey()">Save</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- COMPONENT SELECTOR -->
+  <div class="section-title">1 — Choose a Component</div>
+  <div class="component-grid" id="componentGrid"></div>
+
+  <!-- CONFIG PANEL -->
+  <div id="config-panel">
+    <div class="section-title" id="configTitle">Configure your style</div>
+
+    <div class="config-grid">
+      <!-- LEFT -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="field-group">
+          <div class="field-label">Style vibe (pick up to 3)</div>
+          <div class="vibe-pills" id="vibePills"></div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Primary color</div>
+          <div class="color-row">
+            <input type="color" id="primaryColor" value="#b8c8e8">
+            <input type="text" class="color-hex" id="primaryHex" value="#b8c8e8" maxlength="7">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Accent color (optional)</div>
+          <div class="color-row">
+            <input type="color" id="accentColor" value="#8aafd4">
+            <input type="text" class="color-hex" id="accentHex" value="#8aafd4" maxlength="7">
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="field-group">
+          <div class="field-label">Border radius</div>
+          <div class="slider-row">
+            <input type="range" id="borderRadius" min="0" max="24" value="8" oninput="document.getElementById('brVal').textContent=this.value+'px'">
+            <span class="slider-val" id="brVal">8px</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Size</div>
+          <div class="size-btns" id="sizeBtns">
+            <button class="size-btn" onclick="selectSize(this,'Compact')">Compact</button>
+            <button class="size-btn selected" onclick="selectSize(this,'Default')">Default</button>
+            <button class="size-btn" onclick="selectSize(this,'Large')">Large</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Framework</div>
+          <select id="framework">
+            <option value="Plain CSS">Plain CSS</option>
+            <option value="Tailwind classes">Tailwind classes</option>
+            <option value="CSS-in-JS (styled-components)">CSS-in-JS (styled-components)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button class="generate-btn" id="generateBtn" onclick="generateStyle()">
+      <div class="spinner" id="genSpinner"></div>
+      <span id="genBtnText">✨ Generate Style</span>
+    </button>
+    <div class="error-box" id="errorBox"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <!-- PANEL 1: PREVIEW -->
+    <div class="panel" id="panel-preview">
+      <div class="panel-header">
+        <div class="panel-title">Live Preview</div>
+        <div class="preview-controls">
+          <button class="toggle-btn" id="bgToggle" onclick="togglePreviewBg()">🌙 Dark bg</button>
+          <button class="toggle-btn" id="hoverToggle" onclick="toggleHover()">👆 Hover</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div id="preview-sandbox"></div>
+        <div class="explanation-box" id="explanationBox"></div>
+      </div>
+    </div>
+
+    <!-- PANEL 2: CSS CODE -->
+    <div class="panel" id="panel-code">
+      <div class="panel-header">
+        <div class="panel-title">CSS Code</div>
+        <div style="display:flex;gap:6px;">
+          <button class="copy-btn" id="copyCssBtn" onclick="copyCss()">📋 Copy CSS</button>
+          <button class="copy-btn" id="copyTwBtn" onclick="copyTailwind()">🎯 Copy Tailwind</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="code-wrap">
+          <pre><code class="language-css" id="cssCode"></code></pre>
+        </div>
+        <div style="margin-top:12px;">
+          <div class="field-label" style="margin-bottom:6px;">Tailwind classes</div>
+          <div class="tailwind-box" id="tailwindBox">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 3: VARIATIONS -->
+    <div class="panel" id="panel-variations">
+      <div class="panel-header">
+        <div class="panel-title">Variations</div>
+      </div>
+      <div class="panel-body">
+        <button class="var-btn" onclick="applyVariation('More rounded')"><span class="icon">⭕</span> More rounded</button>
+        <button class="var-btn" onclick="applyVariation('Darker')"><span class="icon">🌑</span> Darker</button>
+        <button class="var-btn" onclick="applyVariation('Add animation')"><span class="icon">✨</span> Add animation</button>
+        <button class="var-btn" onclick="generateAlternatives()" id="genAltBtn"><span class="icon">🎲</span> Generate 3 alternatives</button>
+        <div id="altCards"></div>
+        <div class="spinner" id="altSpinner" style="margin:12px auto;display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="history-section" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div class="section-title" style="margin:0;">Recent Styles</div>
+      <button class="export-btn" onclick="exportAll()">⬇️ Export all (styles.css)</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const COMPONENTS = [
+  { icon: '🔘', name: 'Button' },
+  { icon: '🃏', name: 'Card' },
+  { icon: '📝', name: 'Input field' },
+  { icon: '🗂️', name: 'Navigation bar' },
+  { icon: '🦸', name: 'Hero section' },
+  { icon: '🏷️', name: 'Badge/pill' },
+  { icon: '🪟', name: 'Modal' },
+  { icon: '📋', name: 'Form' },
+  { icon: '📊', name: 'Table' },
+  { icon: '💬', name: 'Tooltip' },
+  { icon: '⏳', name: 'Loading spinner' },
+  { icon: '👤', name: 'Avatar' },
+  { icon: '⚠️', name: 'Alert/banner' },
+  { icon: '💳', name: 'Pricing card' },
+  { icon: '🦶', name: 'Footer' },
+];
+
+const VIBES = ['Minimal','Bold','Glassmorphism','Neumorphism','Gradient','Brutalist','Soft/Pastel','Dark mode','Corporate','Playful','Retro/Y2K'];
+
+const CSS_PROPS = {
+  'background': 'Sets the background color, gradient, or image of an element.',
+  'background-color': 'Sets the solid background color of an element.',
+  'background-image': 'Sets a background image or gradient on an element.',
+  'border': 'Shorthand for border-width, border-style, and border-color.',
+  'border-radius': 'Rounds the corners of an element. Higher values = more rounded.',
+  'border-color': 'Sets the color of an element\'s border.',
+  'border-width': 'Sets the thickness of an element\'s border.',
+  'border-style': 'Sets the style of the border (solid, dashed, dotted, etc.).',
+  'box-shadow': 'Adds a shadow effect around an element\'s frame.',
+  'color': 'Sets the foreground color, typically the text color.',
+  'cursor': 'Specifies the mouse cursor appearance when hovering over an element.',
+  'display': 'Defines the display type of an element (flex, block, inline, etc.).',
+  'flex': 'Shorthand for flex-grow, flex-shrink, and flex-basis.',
+  'font-family': 'Specifies the font typeface for text content.',
+  'font-size': 'Sets the size of the font for text content.',
+  'font-weight': 'Sets the thickness of the font (bold, normal, 100–900).',
+  'gap': 'Sets the spacing between flex or grid items.',
+  'height': 'Sets the height of an element.',
+  'justify-content': 'Aligns flex/grid items along the main axis.',
+  'align-items': 'Aligns flex/grid items along the cross axis.',
+  'letter-spacing': 'Sets extra spacing between text characters.',
+  'line-height': 'Sets the vertical spacing between lines of text.',
+  'margin': 'Sets outer spacing around an element.',
+  'min-height': 'Sets the minimum height an element can shrink to.',
+  'min-width': 'Sets the minimum width an element can shrink to.',
+  'opacity': 'Sets the transparency level of an element (0 = invisible, 1 = opaque).',
+  'outline': 'Draws a line around an element outside the border — common for focus states.',
+  'outline-offset': 'Sets the space between an element and its outline.',
+  'overflow': 'Controls what happens when content exceeds the element\'s dimensions.',
+  'padding': 'Sets inner spacing between content and the element\'s border.',
+  'position': 'Specifies how an element is positioned (relative, absolute, fixed, etc.).',
+  'text-align': 'Sets the horizontal alignment of text.',
+  'text-decoration': 'Adds decorations to text (underline, line-through, none).',
+  'text-transform': 'Controls text capitalization (uppercase, lowercase, capitalize).',
+  'transform': 'Applies 2D/3D transformations like translate, scale, rotate, skew.',
+  'transition': 'Defines how property changes animate over time (duration, easing).',
+  'width': 'Sets the width of an element.',
+  'white-space': 'Controls how whitespace inside an element is handled.',
+  'z-index': 'Sets the stack order of an element — higher values appear on top.',
+  'animation': 'Shorthand for animation name, duration, timing, iteration, etc.',
+  'backdrop-filter': 'Applies graphical effects (blur, brightness) to the area behind an element.',
+  'filter': 'Applies visual effects (blur, grayscale, brightness) to an element itself.',
+  'grid-template-columns': 'Defines the column structure of a CSS Grid layout.',
+  'grid-template-rows': 'Defines the row structure of a CSS Grid layout.',
+  'content': 'Specifies content to insert before/after an element via pseudo-elements.',
+  'top': 'Sets the position offset from the top edge for positioned elements.',
+  'left': 'Sets the position offset from the left edge for positioned elements.',
+  'right': 'Sets the position offset from the right edge for positioned elements.',
+  'bottom': 'Sets the position offset from the bottom edge for positioned elements.',
+  'max-width': 'Limits the maximum width an element can grow to.',
+  'max-height': 'Limits the maximum height an element can grow to.',
+  'border-top': 'Sets style for the top border only.',
+  'border-bottom': 'Sets style for the bottom border only.',
+  'border-left': 'Sets style for the left border only.',
+  'border-right': 'Sets style for the right border only.',
+  'clip-path': 'Clips an element to a specific shape.',
+  'pointer-events': 'Controls whether an element can receive mouse/touch events.',
+  'resize': 'Controls whether and how an element is resizable by the user.',
+  'user-select': 'Controls whether the user can select text in the element.',
+  'vertical-align': 'Sets vertical alignment of inline or table-cell elements.',
+  'word-break': 'Controls how words break at the end of a line.',
+  'flex-direction': 'Sets the main axis direction for flex items (row or column).',
+  'flex-wrap': 'Controls whether flex items wrap to multiple lines.',
+  'align-content': 'Aligns flex/grid lines when there is extra space in the cross axis.',
+  'object-fit': 'Specifies how an image or video fits within its container.',
+  'font-style': 'Sets whether the font is italic, oblique, or normal.',
+  'list-style': 'Shorthand for list-style-type, list-style-position, list-style-image.',
+  'columns': 'Shorthand for column-count and column-width in multi-column layouts.',
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let selectedComponent = null;
+let selectedVibes = [];
+let selectedSize = 'Default';
+let lastResult = null;
+let previewDark = false;
+let hoverActive = false;
+let sessionStyles = [];
+let history = JSON.parse(localStorage.getItem('cssgen_history') || '[]');
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // API key
+  const savedKey = localStorage.getItem('gemini_api_key');
+  if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
+
+  // Build component grid
+  const grid = document.getElementById('componentGrid');
+  COMPONENTS.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'comp-btn';
+    btn.innerHTML = `<span class="icon">${c.icon}</span>${c.name}`;
+    btn.onclick = () => selectComponent(c.name, btn);
+    grid.appendChild(btn);
+  });
+
+  // Build vibe pills
+  const pillsContainer = document.getElementById('vibePills');
+  VIBES.forEach(v => {
+    const pill = document.createElement('button');
+    pill.className = 'vibe-pill';
+    pill.textContent = v;
+    pill.onclick = () => toggleVibe(v, pill);
+    pillsContainer.appendChild(pill);
+  });
+
+  // Color sync
+  document.getElementById('primaryColor').addEventListener('input', e => {
+    document.getElementById('primaryHex').value = e.target.value;
+  });
+  document.getElementById('primaryHex').addEventListener('input', e => {
+    if (/^#[0-9a-f]{6}$/i.test(e.target.value)) document.getElementById('primaryColor').value = e.target.value;
+  });
+  document.getElementById('accentColor').addEventListener('input', e => {
+    document.getElementById('accentHex').value = e.target.value;
+  });
+  document.getElementById('accentHex').addEventListener('input', e => {
+    if (/^#[0-9a-f]{6}$/i.test(e.target.value)) document.getElementById('accentColor').value = e.target.value;
+  });
+
+  // Property tooltip on code panel
+  document.getElementById('panel-code').addEventListener('mouseover', e => {
+    const code = e.target.closest('code');
+    if (!code) return;
+    const text = e.target.textContent.trim().replace(':', '').replace(';','');
+    const desc = CSS_PROPS[text];
+    if (desc) {
+      const tt = document.getElementById('propTooltip');
+      document.getElementById('tooltipProp').textContent = text;
+      document.getElementById('tooltipDesc').textContent = desc;
+      tt.classList.add('visible');
+    }
+  });
+  document.getElementById('panel-code').addEventListener('mousemove', e => {
+    const tt = document.getElementById('propTooltip');
+    tt.style.left = (e.clientX + 14) + 'px';
+    tt.style.top = (e.clientY - 10) + 'px';
+  });
+  document.getElementById('panel-code').addEventListener('mouseout', e => {
+    if (!e.target.closest('code')) return;
+    document.getElementById('propTooltip').classList.remove('visible');
+  });
+
+  renderHistory();
+});
+
+// ── COMPONENT SELECTION ───────────────────────────────────────────────────────
+function selectComponent(name, btn) {
+  selectedComponent = name;
+  document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('configTitle').textContent = `2 — Configure: ${name}`;
+  const panel = document.getElementById('config-panel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById('errorBox').classList.remove('visible');
+}
+
+// ── VIBE SELECTION ────────────────────────────────────────────────────────────
+function toggleVibe(vibe, pill) {
+  if (pill.classList.contains('selected')) {
+    selectedVibes = selectedVibes.filter(v => v !== vibe);
+    pill.classList.remove('selected');
+  } else {
+    if (selectedVibes.length >= 3) { showNotif('Pick up to 3 vibes'); return; }
+    selectedVibes.push(vibe);
+    pill.classList.add('selected');
+  }
+}
+
+// ── SIZE SELECTION ────────────────────────────────────────────────────────────
+function selectSize(btn, size) {
+  selectedSize = size;
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// ── API KEY ───────────────────────────────────────────────────────────────────
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return;
+  localStorage.setItem('gemini_api_key', key);
+  showNotif('API key saved');
+}
+
+function getApiKey() {
+  return document.getElementById('apiKeyInput').value.trim() || localStorage.getItem('gemini_api_key') || '';
+}
+
+// ── GEMINI CALL ───────────────────────────────────────────────────────────────
+async function callGemini(prompt) {
+  const key = getApiKey();
+  if (!key) throw new Error('Please enter your Gemini API key above.');
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${res.status}`);
+  }
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  // Strip markdown fences
+  const clean = text.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/,'').trim();
+  try { return JSON.parse(clean); }
+  catch(e) {
+    // Try to extract JSON object
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+    throw new Error('Could not parse AI response as JSON. Try again.');
+  }
+}
+
+// ── MAIN GENERATE ─────────────────────────────────────────────────────────────
+async function generateStyle() {
+  if (!selectedComponent) { showNotif('Select a component first'); return; }
+  const vibes = selectedVibes.length ? selectedVibes : ['Minimal'];
+  const primaryColor = document.getElementById('primaryColor').value;
+  const accentColor = document.getElementById('accentColor').value;
+  const borderRadius = document.getElementById('borderRadius').value;
+  const size = selectedSize;
+  const framework = document.getElementById('framework').value;
+
+  setGenerating(true);
+  document.getElementById('errorBox').classList.remove('visible');
+
+  const prompt = `Generate CSS styles for a ${selectedComponent} with this vibe: ${vibes.join(', ')}.
+Primary color: ${primaryColor}. Accent: ${accentColor}
+Border radius: ${borderRadius}px. Size: ${size}. Framework: ${framework}.
+
+Return JSON:
+{
+  "css": "/* Full CSS including :hover, :focus, :active states */",
+  "html": "<the rendered HTML for the component preview>",
+  "tailwind": "Tailwind class string if applicable",
+  "explanation": "2-sentence explanation of the design choices"
+}
+Return only JSON, no markdown.`;
+
+  try {
+    const result = await callGemini(prompt);
+    lastResult = result;
+    renderResult(result);
+    saveToHistory(result);
+  } catch(e) {
+    showError(e.message);
+  } finally {
+    setGenerating(false);
+  }
+}
+
+function setGenerating(on) {
+  document.getElementById('generateBtn').disabled = on;
+  document.getElementById('genSpinner').classList.toggle('visible', on);
+  document.getElementById('genBtnText').textContent = on ? 'Generating…' : '✨ Generate Style';
+}
+
+// ── RENDER RESULT ─────────────────────────────────────────────────────────────
+function renderResult(result) {
+  // Show results section
+  document.getElementById('results').classList.add('visible');
+
+  // CSS code
+  const cssEl = document.getElementById('cssCode');
+  cssEl.textContent = result.css || '';
+  hljs.highlightElement(cssEl);
+
+  // Tailwind
+  document.getElementById('tailwindBox').textContent = result.tailwind || '—';
+
+  // Explanation
+  document.getElementById('explanationBox').textContent = result.explanation || '';
+
+  // Preview
+  renderPreview(result, hoverActive);
+
+  // Scroll to results
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderPreview(result, applyHover) {
+  const sandbox = document.getElementById('preview-sandbox');
+  sandbox.classList.toggle('dark', previewDark);
+
+  // Inject style + HTML
+  const styleTag = `<style>${result.css || ''}</style>`;
+  const html = result.html || `<div class="preview-element">Preview</div>`;
+  sandbox.innerHTML = styleTag + html;
+
+  if (applyHover) {
+    // Force hover state by finding the first element and adding inline style from :hover rules
+    const hoverMatch = (result.css || '').match(/:hover\s*\{([^}]+)\}/);
+    if (hoverMatch) {
+      const hoverStyles = hoverMatch[1];
+      const firstEl = sandbox.querySelector('[class]');
+      if (firstEl) {
+        hoverStyles.split(';').forEach(s => {
+          const [prop, val] = s.split(':').map(x => x.trim());
+          if (prop && val) {
+            try { firstEl.style[prop.replace(/-([a-z])/g, (_, l) => l.toUpperCase())] = val; } catch(e) {}
+          }
+        });
+      }
+    }
+  }
+}
+
+// ── PREVIEW TOGGLES ───────────────────────────────────────────────────────────
+function togglePreviewBg() {
+  previewDark = !previewDark;
+  const btn = document.getElementById('bgToggle');
+  btn.textContent = previewDark ? '☀️ Light bg' : '🌙 Dark bg';
+  btn.classList.toggle('active', previewDark);
+  if (lastResult) renderPreview(lastResult, hoverActive);
+}
+
+function toggleHover() {
+  hoverActive = !hoverActive;
+  const btn = document.getElementById('hoverToggle');
+  btn.classList.toggle('active', hoverActive);
+  btn.textContent = hoverActive ? '👆 Hover ON' : '👆 Hover';
+  if (lastResult) renderPreview(lastResult, hoverActive);
+}
+
+// ── COPY ──────────────────────────────────────────────────────────────────────
+function copyCss() {
+  const css = document.getElementById('cssCode').textContent;
+  navigator.clipboard.writeText(css).then(() => {
+    const btn = document.getElementById('copyCssBtn');
+    btn.textContent = '✅ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copy CSS'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyTailwind() {
+  const tw = document.getElementById('tailwindBox').textContent;
+  if (tw === '—') { showNotif('No Tailwind classes generated'); return; }
+  navigator.clipboard.writeText(tw).then(() => {
+    const btn = document.getElementById('copyTwBtn');
+    btn.textContent = '✅ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '🎯 Copy Tailwind'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── VARIATIONS ────────────────────────────────────────────────────────────────
+async function applyVariation(tweak) {
+  if (!lastResult) { showNotif('Generate a style first'); return; }
+  setGenerating(true);
+  document.getElementById('errorBox').classList.remove('visible');
+
+  const prompt = `Take this CSS and apply the variation "${tweak}". Return the same JSON format:
+{
+  "css": "/* modified CSS */",
+  "html": "<same or updated HTML preview>",
+  "tailwind": "...",
+  "explanation": "2-sentence explanation"
+}
+Original CSS:
+${lastResult.css}
+Return only JSON, no markdown.`;
+
+  try {
+    const result = await callGemini(prompt);
+    lastResult = result;
+    renderResult(result);
+    saveToHistory(result, tweak);
+  } catch(e) {
+    showError(e.message);
+  } finally {
+    setGenerating(false);
+  }
+}
+
+async function generateAlternatives() {
+  if (!selectedComponent) { showNotif('Select a component first'); return; }
+  const vibes = selectedVibes.length ? selectedVibes : ['Minimal'];
+  const spinner = document.getElementById('altSpinner');
+  const btn = document.getElementById('genAltBtn');
+  spinner.style.display = 'block';
+  btn.disabled = true;
+  document.getElementById('altCards').innerHTML = '';
+
+  const prompt = `Generate 3 distinctly different CSS style variations for a ${selectedComponent}. Vibes: ${vibes.join(', ')}.
+Return JSON: { "variations": [{ "name": "Style name", "css": "...", "html": "..." }, ...] }
+Return only JSON, no markdown.`;
+
+  try {
+    const result = await callGemini(prompt);
+    const alts = result.variations || [];
+    const container = document.getElementById('altCards');
+    alts.forEach((alt, i) => {
+      const card = document.createElement('div');
+      card.className = 'alt-card';
+      card.innerHTML = `
+        <div class="alt-card-header">
+          <span>${alt.name || 'Variation ' + (i+1)}</span>
+          <span style="color:var(--accent);cursor:pointer;" onclick='useAltStyle(${JSON.stringify(alt).replace(/'/g,"\\'")})''>Use this</span>
+        </div>
+        <div class="alt-preview" id="alt-prev-${i}">
+          <style>${alt.css || ''}</style>
+          ${alt.html || ''}
+        </div>`;
+      container.appendChild(card);
+    });
+  } catch(e) {
+    showError(e.message);
+  } finally {
+    spinner.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function useAltStyle(alt) {
+  lastResult = alt;
+  renderResult(alt);
+  showNotif('Variation applied!');
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────────────────
+function saveToHistory(result, label) {
+  const entry = {
+    id: Date.now(),
+    component: selectedComponent,
+    label: label || selectedComponent,
+    vibes: selectedVibes.join(', ') || 'Minimal',
+    css: result.css,
+    html: result.html,
+    tailwind: result.tailwind,
+    explanation: result.explanation,
+    ts: new Date().toLocaleTimeString(),
+  };
+  sessionStyles.unshift(entry);
+  history = [entry, ...history].slice(0, 5);
+  localStorage.setItem('cssgen_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const section = document.getElementById('history-section');
+  if (history.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  const list = document.getElementById('historyList');
+  list.innerHTML = '';
+  history.forEach(entry => {
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.innerHTML = `<div class="history-name">${entry.label || entry.component}</div><div class="history-meta">${entry.vibes}<br>${entry.ts}</div>`;
+    item.onclick = () => {
+      lastResult = entry;
+      selectedComponent = entry.component;
+      renderResult(entry);
+    };
+    list.appendChild(item);
+  });
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function exportAll() {
+  if (sessionStyles.length === 0) { showNotif('No styles to export yet'); return; }
+  let content = `/* CSS Style Generator — Exported Styles */\n/* Generated: ${new Date().toLocaleString()} */\n\n`;
+  sessionStyles.forEach(s => {
+    content += `/* ─── ${s.label || s.component} ─── */\n${s.css}\n\n`;
+  });
+  const blob = new Blob([content], { type: 'text/css' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'styles.css';
+  a.click();
+  showNotif('Exported styles.css');
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function showNotif(msg) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 2500);
+}
+
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = '⚠️ ' + msg;
+  box.classList.add('visible');
+}
+</script>
+</body>
+</html>

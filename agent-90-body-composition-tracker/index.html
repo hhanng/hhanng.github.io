@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 Body Composition Tracker — Agent #90</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0f0a1a;
+    --card: #1a1530;
+    --card2: #231e3d;
+    --violet: #8b5cf6;
+    --violet-light: #a78bfa;
+    --cyan: #06b6d4;
+    --cyan-light: #22d3ee;
+    --text: #fff;
+    --text-muted: #94a3b8;
+    --border: #2d2550;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #fb7185;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1a1530 0%, #0f0a1a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 20px 16px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--violet), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+
+  .mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 100px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--violet), #6d28d9);
+    color: white;
+  }
+
+  .tab-content {
+    display: none;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+
+  .tab-content.active { display: block; }
+
+  .section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--violet-light);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  input[type="number"], input[type="date"], input[type="text"], select, textarea {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, select:focus { border-color: var(--violet); }
+
+  textarea { resize: vertical; min-height: 60px; }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 100px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-violet {
+    background: linear-gradient(135deg, var(--violet), #6d28d9);
+    color: white;
+  }
+
+  .btn-cyan {
+    background: linear-gradient(135deg, var(--cyan), #0891b2);
+    color: white;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+
+  label { font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px; }
+
+  .text-muted { color: var(--text-muted); font-size: 0.82rem; }
+  .flex { display: flex; gap: 10px; align-items: center; }
+  .flex-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .badge-violet { background: rgba(139,92,246,0.15); color: var(--violet-light); border: 1px solid rgba(139,92,246,0.3); }
+  .badge-cyan { background: rgba(6,182,212,0.15); color: var(--cyan); border: 1px solid rgba(6,182,212,0.3); }
+  .badge-green { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  .badge-red { background: rgba(251,113,133,0.15); color: var(--red); border: 1px solid rgba(251,113,133,0.3); }
+
+  .stat-card {
+    background: var(--card2);
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .stat-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--violet), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+  .stat-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+  .progress-bar {
+    background: var(--card2);
+    border-radius: 100px;
+    height: 8px;
+    overflow: hidden;
+    margin: 6px 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--violet), var(--cyan));
+    border-radius: 100px;
+    transition: width 0.5s ease;
+  }
+
+  .checkin-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+
+  .checkin-remove {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 4px;
+    transition: color 0.15s;
+  }
+
+  .checkin-remove:hover { color: var(--red); }
+
+  .trend-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.83rem;
+    margin-bottom: 10px;
+  }
+
+  .trend-green { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+  .trend-yellow { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: var(--yellow); }
+  .trend-red { background: rgba(251,113,133,0.1); border: 1px solid rgba(251,113,133,0.3); color: var(--red); }
+  .trend-gray { background: var(--card2); border: 1px solid var(--border); color: var(--text-muted); }
+
+  canvas { display: block; border-radius: 10px; }
+
+  .chart-wrap { margin: 16px 0; }
+
+  .calc-result {
+    background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(6,182,212,0.1));
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 14px;
+  }
+
+  .calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.83rem;
+  }
+
+  .calc-row:last-child { border-bottom: none; }
+  .calc-val { font-weight: 700; color: var(--violet-light); }
+
+  .unit-toggle {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    width: fit-content;
+  }
+
+  .unit-btn {
+    padding: 6px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .unit-btn.active { background: var(--violet); color: white; }
+
+  .note-text {
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.78rem;
+    color: var(--yellow);
+    margin-top: 10px;
+  }
+
+  @media (max-width: 480px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📊 Body Composition Tracker</h1>
+  <p>Your weight is just one number. Track the full picture.</p>
+  <div id="mode-badge-header" onclick="cycleModeFromHeader()"></div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="switchTab('checkin')">📋 Check-In</button>
+  <button class="tab-btn" onclick="switchTab('metrics')">📐 Metrics</button>
+  <button class="tab-btn" onclick="switchTab('progress')">📈 Progress</button>
+  <button class="tab-btn" onclick="switchTab('calculator')">🧮 Calculator</button>
+</nav>
+
+<!-- ========================= CHECK-IN ========================= -->
+<div class="tab-content active" id="tab-checkin">
+  <div class="section-title">📋 Weekly Check-In</div>
+
+  <div class="card mb-12">
+    <div class="card-title">🎯 Current Mode</div>
+    <div class="flex-wrap" id="mode-selector">
+      <button class="btn" id="mode-Cut" onclick="setMode('Cut')">✂️ Cut</button>
+      <button class="btn" id="mode-Bulk" onclick="setMode('Bulk')">💪 Bulk</button>
+      <button class="btn" id="mode-Maintain" onclick="setMode('Maintain')">⚖️ Maintain</button>
+      <button class="btn" id="mode-Recomp" onclick="setMode('Recomp')">🔄 Recomp</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">➕ Log This Week</div>
+
+    <div class="unit-toggle">
+      <button class="unit-btn active" id="unit-kg" onclick="setUnit('kg')">kg</button>
+      <button class="unit-btn" id="unit-lbs" onclick="setUnit('lbs')">lbs</button>
+    </div>
+
+    <label>Date</label>
+    <input type="date" id="ci-date">
+
+    <div class="grid-2">
+      <div>
+        <label id="weight-label">Weight (kg)</label>
+        <input type="number" id="ci-weight" placeholder="e.g. 65.0" step="0.1" min="30" max="300">
+      </div>
+      <div>
+        <label>Body Fat % (optional)</label>
+        <input type="number" id="ci-bf" placeholder="e.g. 22.0" step="0.1" min="3" max="60">
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>Waist (cm, optional)</label>
+        <input type="number" id="ci-waist" placeholder="e.g. 72.0" step="0.1">
+      </div>
+      <div>
+        <label>Notes</label>
+        <input type="text" id="ci-notes" placeholder="How you're feeling...">
+      </div>
+    </div>
+
+    <button class="btn btn-violet" onclick="saveCheckin()">Save Check-In 📊</button>
+  </div>
+
+  <div class="section-title mt-16">📅 Check-In History</div>
+  <div id="checkin-history"></div>
+</div>
+
+<!-- ========================= METRICS ========================= -->
+<div class="tab-content" id="tab-metrics">
+  <div class="section-title">📐 Current Stats Dashboard</div>
+
+  <div class="grid-3 mb-12" id="metrics-grid"></div>
+
+  <div class="card" id="composition-card">
+    <div class="card-title">🧬 Body Composition</div>
+    <div id="composition-display"></div>
+  </div>
+
+  <div class="card" id="bmi-card">
+    <div class="card-title">📏 BMI</div>
+    <div id="bmi-display"></div>
+    <div class="note-text mt-8">Note: BMI is a rough guide and doesn't account for muscle mass, bone density, or ethnicity. Use it as just one data point, not a verdict.</div>
+  </div>
+
+  <div class="card" id="tdee-display-card">
+    <div class="card-title">🔥 Estimated TDEE</div>
+    <div id="tdee-display"></div>
+    <div class="text-muted mt-8" style="font-size:0.75rem;">Set up your profile in the Calculator tab to see your TDEE here.</div>
+  </div>
+</div>
+
+<!-- ========================= PROGRESS ========================= -->
+<div class="tab-content" id="tab-progress">
+  <div class="section-title">📈 Weight Over Time</div>
+
+  <div id="trend-indicator-box"></div>
+
+  <div class="chart-wrap">
+    <canvas id="weight-chart" width="760" height="200" style="max-width:100%;"></canvas>
+  </div>
+
+  <div class="section-title mt-16">📉 Body Fat % Over Time</div>
+  <div class="chart-wrap">
+    <canvas id="bf-chart" width="760" height="160" style="max-width:100%;"></canvas>
+  </div>
+
+  <div class="section-title mt-16">📊 Key Stats</div>
+  <div class="grid-3 mb-12" id="progress-stats"></div>
+
+  <div class="card">
+    <div class="card-title">🎯 Goal Timeline</div>
+    <div id="timeline-display"></div>
+  </div>
+</div>
+
+<!-- ========================= CALCULATOR ========================= -->
+<div class="tab-content" id="tab-calculator">
+
+  <div class="card mb-12">
+    <div class="card-title">👤 Your Profile (saves for TDEE)</div>
+    <div class="grid-2">
+      <div>
+        <label>Sex</label>
+        <select id="calc-sex">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div>
+        <label>Age</label>
+        <input type="number" id="calc-age" placeholder="e.g. 20" min="15" max="80">
+      </div>
+      <div>
+        <label>Height (cm)</label>
+        <input type="number" id="calc-height" placeholder="e.g. 165" min="100" max="250">
+      </div>
+      <div>
+        <label>Weight (kg)</label>
+        <input type="number" id="calc-weight" placeholder="e.g. 65" step="0.1">
+      </div>
+    </div>
+    <label>Activity Level</label>
+    <select id="calc-activity">
+      <option value="1.2">Sedentary (desk job, no exercise)</option>
+      <option value="1.375">Lightly Active (1–3x/week exercise)</option>
+      <option value="1.55" selected>Moderately Active (3–5x/week)</option>
+      <option value="1.725">Very Active (6–7x/week hard training)</option>
+      <option value="1.9">Extremely Active (athlete, 2x/day)</option>
+    </select>
+    <button class="btn btn-violet" onclick="calcTDEE()">Calculate TDEE 🔥</button>
+  </div>
+
+  <div class="calc-result" id="tdee-result" style="display:none;">
+    <div class="card-title">🔥 Your TDEE Results</div>
+    <div id="tdee-result-content"></div>
+  </div>
+
+  <div class="card mt-16">
+    <div class="card-title">🥩 Protein Target Calculator</div>
+    <label>Your Weight (kg)</label>
+    <input type="number" id="prot-weight" placeholder="e.g. 65" step="0.1">
+    <button class="btn btn-cyan" onclick="calcProtein()">Calculate Protein 💪</button>
+    <div id="prot-result" style="display:none; margin-top:12px;"></div>
+  </div>
+
+  <div class="card mt-16">
+    <div class="card-title">📏 US Navy Body Fat % Estimator</div>
+    <label>Sex</label>
+    <select id="navy-sex" onchange="toggleHip()">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+    <div class="grid-2">
+      <div>
+        <label>Height (cm)</label>
+        <input type="number" id="navy-height" placeholder="e.g. 170" step="0.5">
+      </div>
+      <div>
+        <label>Neck (cm)</label>
+        <input type="number" id="navy-neck" placeholder="e.g. 36" step="0.5">
+      </div>
+      <div>
+        <label>Waist (cm)</label>
+        <input type="number" id="navy-waist" placeholder="e.g. 80" step="0.5">
+      </div>
+      <div id="hip-field">
+        <label>Hip (cm, females only)</label>
+        <input type="number" id="navy-hip" placeholder="e.g. 95" step="0.5">
+      </div>
+    </div>
+    <button class="btn btn-cyan" onclick="calcNavyBF()">Estimate Body Fat % 📐</button>
+    <div id="navy-result" style="display:none; margin-top:12px;"></div>
+  </div>
+
+  <div class="card mt-16">
+    <div class="card-title">🎯 Goal Timeline</div>
+    <div class="grid-2">
+      <div>
+        <label>Current Weight (kg)</label>
+        <input type="number" id="goal-current" placeholder="e.g. 70" step="0.1">
+      </div>
+      <div>
+        <label>Target Weight (kg)</label>
+        <input type="number" id="goal-target" placeholder="e.g. 65" step="0.1">
+      </div>
+    </div>
+    <label>Weekly Rate (kg/week)</label>
+    <input type="number" id="goal-rate" placeholder="e.g. 0.5" step="0.1">
+    <button class="btn btn-violet" onclick="calcTimeline()">Calculate Timeline 📅</button>
+    <div id="timeline-result" style="display:none; margin-top:12px;"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA LAYER
+// ============================================================
+const KEY = 'body90_';
+const get = k => JSON.parse(localStorage.getItem(KEY+k) || 'null');
+const set = (k, v) => localStorage.setItem(KEY+k, JSON.stringify(v));
+
+const MODES = {
+  Cut:     { color: '#06b6d4', bg: 'rgba(6,182,212,0.15)', border: 'rgba(6,182,212,0.4)', desc: 'Fat loss phase' },
+  Bulk:    { color: '#a78bfa', bg: 'rgba(167,139,250,0.15)', border: 'rgba(167,139,250,0.4)', desc: 'Muscle gain phase' },
+  Maintain:{ color: '#4ade80', bg: 'rgba(74,222,128,0.15)', border: 'rgba(74,222,128,0.4)', desc: 'Weight stable phase' },
+  Recomp:  { color: '#fbbf24', bg: 'rgba(251,191,36,0.15)', border: 'rgba(251,191,36,0.4)', desc: 'Lose fat + gain muscle' },
+};
+
+let currentUnit = get('unit') || 'kg';
+
+function getCheckins() { return get('checkins') || []; }
+function saveCheckins(arr) { set('checkins', arr); }
+function getProfile() { return get('profile') || {}; }
+function saveProfile(p) { set('profile', p); }
+function getMode() { return get('mode') || 'Cut'; }
+
+function toKg(val) {
+  return currentUnit === 'lbs' ? val / 2.20462 : val;
+}
+function fromKg(val) {
+  return currentUnit === 'lbs' ? val * 2.20462 : val;
+}
+function unitLabel() { return currentUnit; }
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(t) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  event.target.classList.add('active');
+  if (t === 'metrics') renderMetrics();
+  if (t === 'progress') renderProgress();
+  if (t === 'calculator') loadProfile();
+}
+
+// ============================================================
+// UNIT TOGGLE
+// ============================================================
+function setUnit(u) {
+  currentUnit = u;
+  set('unit', u);
+  document.getElementById('unit-kg').classList.toggle('active', u === 'kg');
+  document.getElementById('unit-lbs').classList.toggle('active', u === 'lbs');
+  document.getElementById('weight-label').textContent = `Weight (${u})`;
+}
+
+// ============================================================
+// MODE
+// ============================================================
+function setMode(mode) {
+  set('mode', mode);
+  renderModeBadge();
+  renderModeButtons();
+}
+
+function getModeBadgeHTML(mode) {
+  const m = MODES[mode];
+  const icons = { Cut:'✂️', Bulk:'💪', Maintain:'⚖️', Recomp:'🔄' };
+  return `<div class="mode-badge" style="background:${m.bg}; border:1px solid ${m.border}; color:${m.color};">
+    ${icons[mode]} ${mode} · ${m.desc}
+  </div>`;
+}
+
+function renderModeBadge() {
+  const mode = getMode();
+  document.getElementById('mode-badge-header').innerHTML = getModeBadgeHTML(mode);
+}
+
+function cycleModeFromHeader() {
+  const modes = ['Cut','Bulk','Maintain','Recomp'];
+  const cur = getMode();
+  const next = modes[(modes.indexOf(cur) + 1) % modes.length];
+  setMode(next);
+}
+
+function renderModeButtons() {
+  const mode = getMode();
+  Object.keys(MODES).forEach(m => {
+    const btn = document.getElementById('mode-'+m);
+    if (!btn) return;
+    const mData = MODES[m];
+    btn.style.background = m === mode ? mData.bg : 'transparent';
+    btn.style.border = `1px solid ${m === mode ? mData.border : 'var(--border)'}`;
+    btn.style.color = m === mode ? mData.color : 'var(--text-muted)';
+  });
+}
+
+// ============================================================
+// CHECK-IN
+// ============================================================
+function saveCheckin() {
+  const date = document.getElementById('ci-date').value;
+  if (!date) { alert('Please pick a date.'); return; }
+  const rawWeight = parseFloat(document.getElementById('ci-weight').value);
+  if (!rawWeight) { alert('Weight is required.'); return; }
+  const weightKg = toKg(rawWeight);
+  const bf = parseFloat(document.getElementById('ci-bf').value) || null;
+  const waist = parseFloat(document.getElementById('ci-waist').value) || null;
+  const notes = document.getElementById('ci-notes').value.trim();
+
+  const checkins = getCheckins();
+  const existing = checkins.findIndex(c => c.date === date);
+  const entry = { date, weightKg, bf, waist, notes };
+
+  if (existing >= 0) checkins[existing] = entry;
+  else checkins.push(entry);
+  checkins.sort((a, b) => a.date.localeCompare(b.date));
+  saveCheckins(checkins);
+
+  document.getElementById('ci-weight').value = '';
+  document.getElementById('ci-bf').value = '';
+  document.getElementById('ci-waist').value = '';
+  document.getElementById('ci-notes').value = '';
+  renderCheckinHistory();
+  alert('Check-in saved! 📊');
+}
+
+function removeCheckin(date) {
+  const checkins = getCheckins().filter(c => c.date !== date);
+  saveCheckins(checkins);
+  renderCheckinHistory();
+}
+
+function renderCheckinHistory() {
+  const checkins = getCheckins().slice().reverse();
+  const container = document.getElementById('checkin-history');
+  if (!checkins.length) {
+    container.innerHTML = '<p class="text-muted">No check-ins yet. Log your first one above!</p>';
+    return;
+  }
+  container.innerHTML = checkins.slice(0, 10).map(c => {
+    const w = fromKg(c.weightKg).toFixed(1);
+    const lean = c.bf ? (c.weightKg * (1 - c.bf/100)).toFixed(1) : null;
+    const fat = c.bf ? (c.weightKg * (c.bf/100)).toFixed(1) : null;
+    return `
+      <div class="card mb-8">
+        <div class="checkin-item">
+          <div>
+            <div style="font-weight:600;">${c.date}</div>
+            <div class="text-muted">
+              ${w} ${unitLabel()}
+              ${c.bf ? ` · ${c.bf}% BF` : ''}
+              ${lean ? ` · ${lean}kg lean / ${fat}kg fat` : ''}
+              ${c.waist ? ` · waist ${c.waist}cm` : ''}
+            </div>
+            ${c.notes ? `<div class="text-muted" style="margin-top:3px; font-style:italic;">"${c.notes}"</div>` : ''}
+          </div>
+          <button class="checkin-remove" onclick="removeCheckin('${c.date}')">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// METRICS
+// ============================================================
+function renderMetrics() {
+  const checkins = getCheckins();
+  if (!checkins.length) {
+    document.getElementById('metrics-grid').innerHTML = '<p class="text-muted">No data yet — add a check-in first.</p>';
+    document.getElementById('composition-display').innerHTML = '<p class="text-muted">No data.</p>';
+    document.getElementById('bmi-display').innerHTML = '<p class="text-muted">No data.</p>';
+    return;
+  }
+
+  const latest = checkins[checkins.length - 1];
+  const first = checkins[0];
+  const mode = getMode();
+  const profile = getProfile();
+
+  const wCur = fromKg(latest.weightKg).toFixed(1);
+  const wStart = fromKg(first.weightKg).toFixed(1);
+  const wChange = (fromKg(latest.weightKg - first.weightKg)).toFixed(1);
+  const wSign = latest.weightKg >= first.weightKg ? '+' : '';
+
+  const grid = document.getElementById('metrics-grid');
+  grid.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-num">${wCur}</div>
+      <div class="stat-label">Current ${unitLabel()}</div>
+      <div class="stat-sub" style="color:${wChange >= 0 ? 'var(--cyan)' : 'var(--green)'};">${wSign}${wChange} ${unitLabel()} total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">${wStart}</div>
+      <div class="stat-label">Starting ${unitLabel()}</div>
+      <div class="stat-sub">${first.date}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">${checkins.length}</div>
+      <div class="stat-label">Total Check-Ins</div>
+      <div class="stat-sub">over ${Math.round((new Date(latest.date)-new Date(first.date))/604800000)} weeks</div>
+    </div>
+  `;
+
+  // Composition
+  const compEl = document.getElementById('composition-display');
+  if (latest.bf) {
+    const lean = (latest.weightKg * (1 - latest.bf/100)).toFixed(1);
+    const fat = (latest.weightKg * (latest.bf/100)).toFixed(1);
+    compEl.innerHTML = `
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div class="stat-card"><div class="stat-num">${latest.bf}%</div><div class="stat-label">Body Fat</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--cyan);">${lean}kg</div><div class="stat-label">Lean Mass</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--violet-light);">${fat}kg</div><div class="stat-label">Fat Mass</div></div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${100-latest.bf}%; background:linear-gradient(135deg,var(--cyan),var(--violet));"></div>
+      </div>
+      <div class="flex mt-8" style="justify-content:space-between; font-size:0.72rem;">
+        <span style="color:var(--cyan);">Lean ${(100-latest.bf).toFixed(1)}%</span>
+        <span style="color:var(--text-muted);">Fat ${latest.bf}%</span>
+      </div>
+    `;
+  } else {
+    compEl.innerHTML = '<p class="text-muted">Log body fat % in your check-in to see composition breakdown.</p>';
+  }
+
+  // BMI
+  const bmiEl = document.getElementById('bmi-display');
+  if (profile.height) {
+    const hM = profile.height / 100;
+    const bmi = (latest.weightKg / (hM * hM)).toFixed(1);
+    let bmiCat, bmiColor;
+    if (bmi < 18.5) { bmiCat = 'Underweight'; bmiColor = 'var(--cyan)'; }
+    else if (bmi < 25) { bmiCat = 'Normal weight'; bmiColor = 'var(--green)'; }
+    else if (bmi < 30) { bmiCat = 'Overweight'; bmiColor = 'var(--yellow)'; }
+    else { bmiCat = 'Obese range'; bmiColor = 'var(--red)'; }
+    bmiEl.innerHTML = `
+      <div class="flex">
+        <div class="stat-num" style="font-size:2rem;">${bmi}</div>
+        <div><div style="color:${bmiColor}; font-weight:600;">${bmiCat}</div><div class="text-muted">based on ${profile.height}cm height</div></div>
+      </div>
+    `;
+  } else {
+    bmiEl.innerHTML = '<p class="text-muted">Enter your height in the Calculator tab to see BMI.</p>';
+  }
+
+  // TDEE
+  const tdeeEl = document.getElementById('tdee-display');
+  if (profile.tdee) {
+    const mode = getMode();
+    const mData = MODES[mode];
+    const cutCal = profile.tdee - 400;
+    const bulkCal = profile.tdee + 250;
+    tdeeEl.innerHTML = `
+      <div style="font-size:1.8rem; font-weight:700; color:var(--violet-light);">${profile.tdee} kcal/day</div>
+      <div class="text-muted" style="margin-bottom:10px;">maintenance calories</div>
+      <div class="calc-row"><span>Cut target</span><span class="calc-val" style="color:var(--cyan);">${cutCal} kcal (−400)</span></div>
+      <div class="calc-row"><span>Bulk target</span><span class="calc-val" style="color:var(--violet-light);">${bulkCal} kcal (+250)</span></div>
+      <div class="calc-row"><span>Maintain</span><span class="calc-val" style="color:var(--green);">${profile.tdee} kcal</span></div>
+    `;
+    document.querySelector('#tdee-display-card .text-muted').style.display = 'none';
+  }
+}
+
+// ============================================================
+// PROGRESS
+// ============================================================
+function renderProgress() {
+  const checkins = getCheckins();
+  drawWeightChart(checkins);
+  drawBFChart(checkins);
+  renderTrendIndicator(checkins);
+  renderProgressStats(checkins);
+  renderTimelineEstimate(checkins);
+}
+
+function renderTrendIndicator(checkins) {
+  const box = document.getElementById('trend-indicator-box');
+  if (checkins.length < 2) {
+    box.innerHTML = '<div class="trend-indicator trend-gray">📊 Log at least 2 check-ins to see your trend.</div>';
+    return;
+  }
+  const mode = getMode();
+  const recent = checkins.slice(-4);
+  const oldest = recent[0];
+  const newest = recent[recent.length - 1];
+  const weeks = Math.max(1, (new Date(newest.date) - new Date(oldest.date)) / 604800000);
+  const rateKgPerWeek = (newest.weightKg - oldest.weightKg) / weeks;
+  const rateDisplay = Math.abs(rateKgPerWeek).toFixed(2);
+  const dir = rateKgPerWeek > 0 ? 'gaining' : 'losing';
+
+  let cls, msg;
+  if (mode === 'Cut') {
+    if (rateKgPerWeek < -0.75) { cls = 'trend-red'; msg = `⚠️ Losing too fast (${rateDisplay} kg/week) — muscle loss risk. Increase calories slightly.`; }
+    else if (rateKgPerWeek >= -0.75 && rateKgPerWeek <= -0.25) { cls = 'trend-green'; msg = `✅ Perfect cut rate: ${rateDisplay} kg/week lost. Keep it up!`; }
+    else { cls = 'trend-yellow'; msg = `📊 Losing slowly (${rateDisplay} kg/week). Consider a small calorie reduction or more activity.`; }
+  } else if (mode === 'Bulk') {
+    if (rateKgPerWeek >= 0.1 && rateKgPerWeek <= 0.4) { cls = 'trend-green'; msg = `✅ Clean bulk rate: +${rateDisplay} kg/week. Minimal fat gain!`; }
+    else if (rateKgPerWeek > 0.4) { cls = 'trend-yellow'; msg = `⚠️ Gaining fast (+${rateDisplay} kg/week) — likely adding excess fat. Reduce calories slightly.`; }
+    else { cls = 'trend-red'; msg = `📊 Gaining very slowly (+${rateDisplay} kg/week). Increase calories by 100–200 kcal.`; }
+  } else {
+    cls = 'trend-gray';
+    msg = `📊 Currently ${dir} ${rateDisplay} kg/week on average over the last ${recent.length} check-ins.`;
+  }
+
+  box.innerHTML = `<div class="trend-indicator ${cls} mb-12">${msg}</div>`;
+}
+
+function drawWeightChart(checkins) {
+  const canvas = document.getElementById('weight-chart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  if (checkins.length < 2) {
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '13px Poppins';
+    ctx.textAlign = 'center';
+    ctx.fillText('Log at least 2 check-ins to see your weight chart', W/2, H/2);
+    return;
+  }
+
+  const weights = checkins.map(c => fromKg(c.weightKg));
+  const pad = { top: 20, bottom: 36, left: 42, right: 14 };
+  const gW = W - pad.left - pad.right;
+  const gH = H - pad.top - pad.bottom;
+
+  const minW = Math.min(...weights) - 0.5;
+  const maxW = Math.max(...weights) + 0.5;
+
+  function px(i) { return pad.left + (i / (checkins.length - 1)) * gW; }
+  function py(v) { return pad.top + gH - ((v - minW) / (maxW - minW)) * gH; }
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for (let step = 0; step <= 4; step++) {
+    const v = minW + (step/4) * (maxW - minW);
+    const y = py(v);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = '9px Poppins';
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toFixed(1), pad.left - 4, y + 4);
+  }
+
+  // 7-day moving average
+  if (checkins.length >= 3) {
+    const window = 3;
+    const avgs = weights.map((_, i) => {
+      const slice = weights.slice(Math.max(0, i - window + 1), i + 1);
+      return slice.reduce((a, b) => a + b, 0) / slice.length;
+    });
+    ctx.strokeStyle = 'rgba(251,191,36,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    avgs.forEach((v, i) => { i === 0 ? ctx.moveTo(px(i), py(v)) : ctx.lineTo(px(i), py(v)); });
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Main line
+  const grad = ctx.createLinearGradient(pad.left, 0, W - pad.right, 0);
+  grad.addColorStop(0, '#8b5cf6');
+  grad.addColorStop(1, '#06b6d4');
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  checkins.forEach((c, i) => { i === 0 ? ctx.moveTo(px(i), py(weights[i])) : ctx.lineTo(px(i), py(weights[i])); });
+  ctx.stroke();
+
+  // Area fill
+  ctx.beginPath();
+  checkins.forEach((c, i) => { i === 0 ? ctx.moveTo(px(i), py(weights[i])) : ctx.lineTo(px(i), py(weights[i])); });
+  ctx.lineTo(px(checkins.length - 1), H - pad.bottom);
+  ctx.lineTo(pad.left, H - pad.bottom);
+  ctx.closePath();
+  const areaGrad = ctx.createLinearGradient(0, pad.top, 0, H - pad.bottom);
+  areaGrad.addColorStop(0, 'rgba(139,92,246,0.2)');
+  areaGrad.addColorStop(1, 'rgba(139,92,246,0)');
+  ctx.fillStyle = areaGrad;
+  ctx.fill();
+
+  // Dots
+  checkins.forEach((c, i) => {
+    ctx.beginPath();
+    ctx.arc(px(i), py(weights[i]), 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#8b5cf6';
+    ctx.fill();
+  });
+
+  // Date labels
+  const step = Math.ceil(checkins.length / 5);
+  checkins.forEach((c, i) => {
+    if (i % step === 0 || i === checkins.length - 1) {
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '8px Poppins';
+      ctx.textAlign = 'center';
+      ctx.fillText(c.date.slice(5), px(i), H - 6);
+    }
+  });
+
+  // Legend
+  ctx.strokeStyle = 'rgba(251,191,36,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath(); ctx.moveTo(pad.left, H - 18); ctx.lineTo(pad.left + 20, H - 18); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '8px Poppins';
+  ctx.textAlign = 'left';
+  ctx.fillText('Moving avg', pad.left + 24, H - 14);
+}
+
+function drawBFChart(checkins) {
+  const canvas = document.getElementById('bf-chart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const bfData = checkins.filter(c => c.bf);
+  if (bfData.length < 2) {
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '12px Poppins';
+    ctx.textAlign = 'center';
+    ctx.fillText('Log body fat % in check-ins to see this chart', W/2, H/2);
+    return;
+  }
+
+  const vals = bfData.map(c => c.bf);
+  const pad = { top: 16, bottom: 28, left: 38, right: 14 };
+  const gW = W - pad.left - pad.right;
+  const gH = H - pad.top - pad.bottom;
+  const minV = Math.min(...vals) - 0.5;
+  const maxV = Math.max(...vals) + 0.5;
+
+  function px(i) { return pad.left + (i / (bfData.length - 1)) * gW; }
+  function py(v) { return pad.top + gH - ((v - minV) / (maxV - minV)) * gH; }
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  [0, 0.5, 1].forEach(t => {
+    const v = minV + t * (maxV - minV);
+    const y = py(v);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = '9px Poppins';
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toFixed(1) + '%', pad.left - 4, y + 4);
+  });
+
+  ctx.strokeStyle = '#06b6d4';
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  bfData.forEach((c, i) => { i === 0 ? ctx.moveTo(px(i), py(c.bf)) : ctx.lineTo(px(i), py(c.bf)); });
+  ctx.stroke();
+
+  bfData.forEach((c, i) => {
+    ctx.beginPath();
+    ctx.arc(px(i), py(c.bf), 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#06b6d4';
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '8px Poppins';
+    ctx.textAlign = 'center';
+    ctx.fillText(c.date.slice(5), px(i), H - 4);
+  });
+}
+
+function renderProgressStats(checkins) {
+  const el = document.getElementById('progress-stats');
+  if (checkins.length < 2) { el.innerHTML = ''; return; }
+
+  const weights = checkins.map(c => c.weightKg);
+  const recent4 = checkins.slice(-4);
+  const rateWeeks = Math.max(1, (new Date(recent4[recent4.length-1].date) - new Date(recent4[0].date)) / 604800000);
+  const rate = ((recent4[recent4.length-1].weightKg - recent4[0].weightKg) / rateWeeks).toFixed(2);
+  const rateDisplay = (rate > 0 ? '+' : '') + fromKg(parseFloat(rate)).toFixed(2) + ' ' + unitLabel() + '/wk';
+
+  const best = fromKg(Math.min(...weights)).toFixed(1);
+  const worst = fromKg(Math.max(...weights)).toFixed(1);
+
+  el.innerHTML = `
+    <div class="stat-card"><div class="stat-num">${rateDisplay}</div><div class="stat-label">Rate (last 4 check-ins)</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);">${best}</div><div class="stat-label">Lowest ${unitLabel()}</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--violet-light);">${worst}</div><div class="stat-label">Highest ${unitLabel()}</div></div>
+  `;
+}
+
+function renderTimelineEstimate(checkins) {
+  const el = document.getElementById('timeline-display');
+  const profile = getProfile();
+  if (!profile.goalWeight || checkins.length < 2) {
+    el.innerHTML = '<p class="text-muted">Set a goal weight in the Calculator tab to see your timeline estimate.</p>';
+    return;
+  }
+  const recent = checkins.slice(-4);
+  const weeks = Math.max(1, (new Date(recent[recent.length-1].date) - new Date(recent[0].date)) / 604800000);
+  const rate = (recent[recent.length-1].weightKg - recent[0].weightKg) / weeks;
+  const latest = checkins[checkins.length-1].weightKg;
+  const diff = profile.goalWeight - latest;
+
+  if (Math.abs(rate) < 0.05) {
+    el.innerHTML = '<p class="text-muted">Your weight is currently stable. Adjust nutrition or activity to start moving toward your goal.</p>';
+    return;
+  }
+  if ((diff > 0 && rate < 0) || (diff < 0 && rate > 0)) {
+    el.innerHTML = '<p class="text-muted">Your current trend is moving away from your goal. Adjust your approach.</p>';
+    return;
+  }
+
+  const weeksLeft = Math.abs(diff / rate);
+  const eta = new Date();
+  eta.setDate(eta.getDate() + Math.round(weeksLeft * 7));
+
+  el.innerHTML = `
+    <div class="calc-result">
+      <div class="calc-row"><span>Current weight</span><span class="calc-val">${fromKg(latest).toFixed(1)} ${unitLabel()}</span></div>
+      <div class="calc-row"><span>Goal weight</span><span class="calc-val">${fromKg(profile.goalWeight).toFixed(1)} ${unitLabel()}</span></div>
+      <div class="calc-row"><span>Remaining</span><span class="calc-val">${fromKg(Math.abs(diff)).toFixed(1)} ${unitLabel()}</span></div>
+      <div class="calc-row"><span>Current rate</span><span class="calc-val">${(rate > 0 ? '+' : '')}${fromKg(rate).toFixed(2)} ${unitLabel()}/week</span></div>
+      <div class="calc-row"><span>Estimated weeks</span><span class="calc-val">~${Math.round(weeksLeft)} weeks</span></div>
+      <div class="calc-row"><span>Estimated date</span><span class="calc-val" style="color:var(--cyan);">~${eta.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</span></div>
+    </div>
+  `;
+}
+
+// ============================================================
+// CALCULATOR
+// ============================================================
+function loadProfile() {
+  const p = getProfile();
+  if (p.sex) document.getElementById('calc-sex').value = p.sex;
+  if (p.age) document.getElementById('calc-age').value = p.age;
+  if (p.height) document.getElementById('calc-height').value = p.height;
+  if (p.weight) document.getElementById('calc-weight').value = p.weight;
+  if (p.activity) document.getElementById('calc-activity').value = p.activity;
+}
+
+function calcTDEE() {
+  const sex = document.getElementById('calc-sex').value;
+  const age = parseFloat(document.getElementById('calc-age').value);
+  const height = parseFloat(document.getElementById('calc-height').value);
+  const weight = parseFloat(document.getElementById('calc-weight').value);
+  const activity = parseFloat(document.getElementById('calc-activity').value);
+
+  if (!age || !height || !weight) { alert('Please fill in age, height, and weight.'); return; }
+
+  // Mifflin-St Jeor
+  let bmr;
+  if (sex === 'male') bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  else bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+
+  const tdee = Math.round(bmr * activity);
+  const cut = tdee - 400;
+  const cut500 = tdee - 500;
+  const bulk = tdee + 250;
+  const bulk300 = tdee + 300;
+
+  const profile = getProfile();
+  Object.assign(profile, { sex, age, height, weight, activity, tdee });
+  saveProfile(profile);
+
+  document.getElementById('tdee-result').style.display = 'block';
+  document.getElementById('tdee-result-content').innerHTML = `
+    <div class="calc-row"><span>BMR (Mifflin-St Jeor)</span><span class="calc-val">${Math.round(bmr)} kcal</span></div>
+    <div class="calc-row"><span>Maintenance (TDEE)</span><span class="calc-val">${tdee} kcal/day</span></div>
+    <div class="calc-row" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
+      <span>✂️ Cut (moderate −400)</span><span class="calc-val" style="color:var(--cyan);">${cut} kcal</span>
+    </div>
+    <div class="calc-row">
+      <span>✂️ Cut (aggressive −500)</span><span class="calc-val" style="color:var(--cyan);">${cut500} kcal</span>
+    </div>
+    <div class="calc-row">
+      <span>⚖️ Maintain</span><span class="calc-val" style="color:var(--green);">${tdee} kcal</span>
+    </div>
+    <div class="calc-row">
+      <span>💪 Bulk (lean +250)</span><span class="calc-val" style="color:var(--violet-light);">${bulk} kcal</span>
+    </div>
+    <div class="calc-row">
+      <span>💪 Bulk (moderate +300)</span><span class="calc-val" style="color:var(--violet-light);">${bulk300} kcal</span>
+    </div>
+  `;
+}
+
+function calcProtein() {
+  const weight = parseFloat(document.getElementById('prot-weight').value);
+  if (!weight) { alert('Enter your weight.'); return; }
+  const low = (weight * 1.6).toFixed(0);
+  const high = (weight * 2.2).toFixed(0);
+  const mid = (weight * 1.8).toFixed(0);
+  document.getElementById('prot-result').style.display = 'block';
+  document.getElementById('prot-result').innerHTML = `
+    <div class="calc-result">
+      <div class="calc-row"><span>Minimum (1.6g/kg)</span><span class="calc-val">${low}g protein/day</span></div>
+      <div class="calc-row"><span>Optimal (1.8g/kg)</span><span class="calc-val" style="color:var(--cyan);">${mid}g protein/day</span></div>
+      <div class="calc-row"><span>Maximum (2.2g/kg)</span><span class="calc-val">${high}g protein/day</span></div>
+      <div class="note-text mt-8">Based on ${weight}kg body weight. During a cut, aim toward the higher end to preserve muscle.</div>
+    </div>
+  `;
+}
+
+function toggleHip() {
+  const sex = document.getElementById('navy-sex').value;
+  document.getElementById('hip-field').style.display = sex === 'female' ? 'block' : 'none';
+}
+
+function calcNavyBF() {
+  const sex = document.getElementById('navy-sex').value;
+  const height = parseFloat(document.getElementById('navy-height').value);
+  const neck = parseFloat(document.getElementById('navy-neck').value);
+  const waist = parseFloat(document.getElementById('navy-waist').value);
+  const hip = parseFloat(document.getElementById('navy-hip').value) || 0;
+
+  if (!height || !neck || !waist) { alert('Fill in height, neck, and waist.'); return; }
+  if (sex === 'female' && !hip) { alert('Hip measurement required for females.'); return; }
+
+  let bf;
+  if (sex === 'male') {
+    bf = 495 / (1.0324 - 0.19077 * Math.log10(waist - neck) + 0.15456 * Math.log10(height)) - 450;
+  } else {
+    bf = 495 / (1.29579 - 0.35004 * Math.log10(waist + hip - neck) + 0.22100 * Math.log10(height)) - 450;
+  }
+  bf = Math.max(3, Math.min(60, bf)).toFixed(1);
+
+  let cat, color;
+  const bfN = parseFloat(bf);
+  if (sex === 'male') {
+    if (bfN < 6) { cat = 'Essential fat'; color = 'var(--cyan)'; }
+    else if (bfN < 14) { cat = 'Athletic'; color = 'var(--green)'; }
+    else if (bfN < 18) { cat = 'Fitness'; color = 'var(--green)'; }
+    else if (bfN < 25) { cat = 'Average'; color = 'var(--yellow)'; }
+    else { cat = 'Obese range'; color = 'var(--red)'; }
+  } else {
+    if (bfN < 14) { cat = 'Essential fat'; color = 'var(--cyan)'; }
+    else if (bfN < 21) { cat = 'Athletic'; color = 'var(--green)'; }
+    else if (bfN < 25) { cat = 'Fitness'; color = 'var(--green)'; }
+    else if (bfN < 32) { cat = 'Average'; color = 'var(--yellow)'; }
+    else { cat = 'Obese range'; color = 'var(--red)'; }
+  }
+
+  document.getElementById('navy-result').style.display = 'block';
+  document.getElementById('navy-result').innerHTML = `
+    <div class="calc-result">
+      <div class="calc-row"><span>Estimated Body Fat</span><span class="calc-val" style="color:${color};">${bf}%</span></div>
+      <div class="calc-row"><span>Category</span><span class="calc-val" style="color:${color};">${cat}</span></div>
+      <div class="note-text mt-8">US Navy method. Accuracy ±3–4% vs DEXA scan. Use as a tracking tool, not a diagnosis.</div>
+    </div>
+  `;
+}
+
+function calcTimeline() {
+  const current = parseFloat(document.getElementById('goal-current').value);
+  const target = parseFloat(document.getElementById('goal-target').value);
+  const rate = parseFloat(document.getElementById('goal-rate').value);
+  if (!current || !target || !rate) { alert('Fill in all fields.'); return; }
+  if (rate <= 0) { alert('Rate must be positive.'); return; }
+
+  const profile = getProfile();
+  profile.goalWeight = target;
+  saveProfile(profile);
+
+  const diff = Math.abs(target - current);
+  const weeksLeft = diff / rate;
+  const eta = new Date();
+  eta.setDate(eta.getDate() + Math.round(weeksLeft * 7));
+  const dir = target < current ? 'lose' : 'gain';
+
+  document.getElementById('timeline-result').style.display = 'block';
+  document.getElementById('timeline-result').innerHTML = `
+    <div class="calc-result">
+      <div class="calc-row"><span>To ${dir}</span><span class="calc-val">${diff.toFixed(1)} kg</span></div>
+      <div class="calc-row"><span>At ${rate} kg/week</span><span class="calc-val">~${Math.round(weeksLeft)} weeks</span></div>
+      <div class="calc-row"><span>Target date</span><span class="calc-val" style="color:var(--cyan);">${eta.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span></div>
+      ${rate > 0.75 ? `<div class="note-text mt-8">⚠️ Losing more than 0.75 kg/week risks muscle loss. Consider slowing down to 0.25–0.5 kg/week.</div>` : ''}
+    </div>
+  `;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('ci-date').value = new Date().toISOString().split('T')[0];
+  setUnit(currentUnit);
+  renderModeBadge();
+  renderModeButtons();
+  renderCheckinHistory();
+  toggleHip();
+});
+</script>
+</body>
+</html>

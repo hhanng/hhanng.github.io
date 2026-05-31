@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAT & ACT Full Prep Suite — Agent #112</title>
+<style>
+:root{--bg:#0f1117;--card:#1a1d27;--card2:#20243a;--blue:#4f8ef7;--green:#4ade80;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--text:#e2e8f0;--muted:#64748b;--border:#2d3150;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+header h1{font-size:1rem;font-weight:700;color:var(--blue);}
+header span{font-size:.78rem;color:var(--muted);}
+.nav{display:flex;gap:0;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{padding:11px 18px;background:none;border:none;color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;}
+.nav-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.nav-btn:hover:not(.active){color:var(--text);}
+.page{display:none;padding:16px;max-width:1000px;margin:0 auto;}
+.page.active{display:block;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
+.card-title{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.btn{padding:7px 16px;border:none;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-green{background:var(--green);color:#000;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-yellow{background:var(--yellow);color:#000;}
+.btn-muted{background:var(--card2);color:var(--muted);border:1px solid var(--border);}
+.btn:hover{opacity:.85;transform:translateY(-1px);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+select,input[type=text]{background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:8px;font-size:.85rem;outline:none;}
+select:focus,input[type=text]:focus{border-color:var(--blue);}
+/* Flashcard */
+.fc-wrap{perspective:800px;margin:16px auto;max-width:520px;height:200px;cursor:pointer;}
+.fc{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .5s;}
+.fc.flipped{transform:rotateY(180deg);}
+.fc-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;}
+.fc-front{background:var(--card2);border:2px solid var(--border);}
+.fc-back{background:linear-gradient(135deg,#20243a,#1a1d27);border:2px solid var(--blue);transform:rotateY(180deg);}
+.fc-word{font-size:1.6rem;font-weight:700;margin-bottom:8px;}
+.fc-pos{font-size:.75rem;color:var(--muted);margin-bottom:4px;}
+.fc-def{font-size:.88rem;line-height:1.5;color:var(--text);}
+.fc-tier{position:absolute;top:10px;right:14px;font-size:.7rem;padding:3px 8px;border-radius:20px;}
+.tier1{background:#4ade8030;color:var(--green);}
+.tier2{background:#fbbf2430;color:var(--yellow);}
+.tier3{background:#f8717130;color:var(--red);}
+.fc-hint{font-size:.7rem;color:var(--muted);text-align:center;margin-top:6px;}
+/* MC */
+.mc-q{font-size:1rem;font-weight:600;line-height:1.5;margin-bottom:14px;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;}
+.mc-opt{padding:10px 16px;border-radius:8px;border:2px solid var(--border);background:var(--card2);cursor:pointer;font-size:.88rem;transition:all .2s;text-align:left;}
+.mc-opt:hover:not(.disabled){border-color:var(--blue);background:#4f8ef710;}
+.mc-opt.correct{border-color:var(--green);background:#4ade8020;color:var(--green);}
+.mc-opt.wrong{border-color:var(--red);background:#f8717120;color:var(--red);}
+.mc-opt.disabled{cursor:not-allowed;}
+/* Fill blank */
+.fb-sentence{font-size:1rem;line-height:1.8;margin-bottom:14px;}
+.fb-blank{display:inline-block;min-width:140px;border-bottom:2px solid var(--blue);color:var(--blue);font-weight:600;text-align:center;padding:0 4px;}
+.fb-inp{width:200px;padding:7px 12px;border-radius:8px;border:2px solid var(--border);background:var(--card2);color:var(--text);font-size:.9rem;outline:none;}
+.fb-inp:focus{border-color:var(--blue);}
+/* Match */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.match-col{display:flex;flex-direction:column;gap:6px;}
+.match-item{padding:10px 14px;border-radius:8px;border:2px solid var(--border);background:var(--card2);cursor:pointer;font-size:.82rem;transition:all .2s;text-align:center;}
+.match-item:hover{border-color:var(--blue);}
+.match-item.selected{border-color:var(--yellow);background:#fbbf2420;}
+.match-item.matched{border-color:var(--green);background:#4ade8020;color:var(--green);cursor:default;}
+.match-item.wrong-match{border-color:var(--red);background:#f8717120;}
+/* Progress bars */
+.prog-bar{height:8px;background:var(--card2);border-radius:4px;margin-top:4px;}
+.prog-fill{height:100%;border-radius:4px;background:var(--blue);transition:width .4s;}
+/* Reading */
+.passage-text{font-size:.87rem;line-height:1.8;color:var(--text);max-height:300px;overflow-y:auto;padding-right:6px;margin-bottom:14px;}
+.passage-text::-webkit-scrollbar{width:4px;}
+.passage-text::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.q-item{margin-bottom:14px;padding:12px;background:var(--card2);border-radius:10px;border:1px solid var(--border);}
+.q-text{font-size:.88rem;font-weight:600;margin-bottom:8px;line-height:1.5;}
+.q-opts{display:flex;flex-direction:column;gap:5px;}
+.q-opt{padding:7px 12px;border-radius:6px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:.82rem;transition:all .2s;}
+.q-opt:hover:not(.disabled){border-color:var(--blue);}
+.q-opt.correct{border-color:var(--green);background:#4ade8020;color:var(--green);}
+.q-opt.wrong{border-color:var(--red);background:#f8717120;color:var(--red);}
+/* Math */
+.math-q{font-size:1rem;line-height:1.6;margin-bottom:14px;font-weight:600;}
+.math-hint{font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:10px;}
+/* Dashboard */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+.stat-card{background:var(--card2);border-radius:10px;padding:14px;border:1px solid var(--border);text-align:center;}
+.stat-num{font-size:2rem;font-weight:700;color:var(--blue);}
+.stat-label{font-size:.72rem;color:var(--muted);margin-top:4px;}
+/* Practice test timer */
+.test-timer{font-size:2rem;font-weight:700;color:var(--yellow);text-align:center;margin:10px 0;}
+.test-timer.danger{color:var(--red);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+/* Score */
+.score-circle{width:100px;height:100px;border-radius:50%;border:4px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:var(--blue);margin:0 auto 16px;}
+.feedback-good{color:var(--green);font-weight:700;}
+.feedback-mid{color:var(--yellow);font-weight:700;}
+.feedback-low{color:var(--red);font-weight:700;}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;}
+.badge-green{background:#4ade8030;color:var(--green);}
+.badge-yellow{background:#fbbf2430;color:var(--yellow);}
+.badge-red{background:#f8717130;color:var(--red);}
+.tab-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.tab-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);font-size:.78rem;cursor:pointer;transition:all .2s;}
+.tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.section{display:none;}
+.section.active{display:block;}
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 SAT & ACT Full Prep Suite</h1>
+  <span>Agent #112 · 100 AI Agents Challenge</span>
+  <span id="hdr-stats" style="margin-left:auto;font-size:.78rem;color:var(--muted)"></span>
+</header>
+<div class="nav">
+  <button class="nav-btn active" onclick="showPage('vocab',this)">📖 Vocabulary</button>
+  <button class="nav-btn" onclick="showPage('reading',this)">📰 Reading</button>
+  <button class="nav-btn" onclick="showPage('math',this)">🔢 Math</button>
+  <button class="nav-btn" onclick="showPage('science',this)">🔬 ACT Science</button>
+  <button class="nav-btn" onclick="showPage('test',this)">⏱ Practice Test</button>
+  <button class="nav-btn" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+</div>
+
+<!-- VOCABULARY -->
+<div class="page active" id="page-vocab">
+  <div class="card">
+    <div class="card-title">Study Settings</div>
+    <div class="row">
+      <select id="vocab-tier" onchange="initVocab()">
+        <option value="all">All Tiers</option>
+        <option value="1">Tier 1 — Common</option>
+        <option value="2">Tier 2 — Moderate</option>
+        <option value="3">Tier 3 — Advanced</option>
+      </select>
+      <select id="vocab-mode" onchange="initVocab()">
+        <option value="flashcard">Flashcard</option>
+        <option value="mc">Multiple Choice</option>
+        <option value="fillblank">Fill in the Blank</option>
+        <option value="match">Matching</option>
+      </select>
+      <button class="btn btn-muted" onclick="initVocab()">🔀 Shuffle</button>
+      <span id="vocab-counter" style="font-size:.8rem;color:var(--muted);margin-left:8px"></span>
+    </div>
+  </div>
+
+  <!-- Flashcard mode -->
+  <div id="mode-flashcard" class="section active">
+    <div class="fc-wrap" onclick="flipCard()">
+      <div class="fc" id="fc">
+        <div class="fc-face fc-front">
+          <span class="fc-tier" id="fc-tier"></span>
+          <div class="fc-word" id="fc-word"></div>
+          <div class="fc-pos" id="fc-pos"></div>
+        </div>
+        <div class="fc-face fc-back">
+          <span class="fc-tier" id="fc-tier-b"></span>
+          <div class="fc-def" id="fc-def"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-hint">Click card to flip</div>
+    <div class="row" style="justify-content:center;margin-top:10px;">
+      <button class="btn btn-red" onclick="markFC(false)">✗ Don't Know</button>
+      <button class="btn btn-muted" onclick="skipFC()">→ Skip</button>
+      <button class="btn btn-green" onclick="markFC(true)">✓ Know It</button>
+    </div>
+    <div style="text-align:center;margin-top:8px;">
+      <div class="prog-bar" style="max-width:400px;margin:0 auto;"><div class="prog-fill" id="fc-prog"></div></div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px;" id="fc-score"></div>
+    </div>
+  </div>
+
+  <!-- MC mode -->
+  <div id="mode-mc" class="section">
+    <div class="card">
+      <div id="mc-q" class="mc-q"></div>
+      <div id="mc-opts" class="mc-opts"></div>
+      <div id="mc-feedback" style="margin-top:10px;font-size:.88rem;min-height:20px;"></div>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn btn-blue" id="mc-next-btn" onclick="nextMC()" style="display:none">Next →</button>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <div class="prog-bar" style="max-width:400px;margin:0 auto;"><div class="prog-fill" id="mc-prog"></div></div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px;" id="mc-score"></div>
+    </div>
+  </div>
+
+  <!-- Fill Blank mode -->
+  <div id="mode-fillblank" class="section">
+    <div class="card">
+      <div id="fb-def" class="fb-sentence"></div>
+      <div class="row">
+        <input type="text" id="fb-inp" class="fb-inp" placeholder="Type the word…" onkeydown="if(event.key==='Enter')checkFB()">
+        <button class="btn btn-blue" onclick="checkFB()">Check</button>
+        <button class="btn btn-muted" onclick="skipFB()">Skip</button>
+      </div>
+      <div id="fb-feedback" style="min-height:22px;font-size:.88rem;margin-top:6px;"></div>
+    </div>
+    <div style="text-align:center;">
+      <div class="prog-bar" style="max-width:400px;margin:0 auto;"><div class="prog-fill" id="fb-prog"></div></div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px;" id="fb-score"></div>
+    </div>
+  </div>
+
+  <!-- Match mode -->
+  <div id="mode-match" class="section">
+    <div class="card">
+      <div class="card-title">Match each word to its definition — click a word then click its definition</div>
+      <div class="match-grid">
+        <div class="match-col" id="match-words"></div>
+        <div class="match-col" id="match-defs"></div>
+      </div>
+      <div id="match-feedback" style="min-height:20px;font-size:.88rem;margin-bottom:10px;"></div>
+      <button class="btn btn-blue" id="match-next-btn" onclick="newMatchRound()" style="display:none">Next Round →</button>
+    </div>
+    <div style="text-align:center;">
+      <div class="prog-bar" style="max-width:400px;margin:0 auto;"><div class="prog-fill" id="match-prog"></div></div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px;" id="match-score"></div>
+    </div>
+  </div>
+</div>
+
+<!-- READING -->
+<div class="page" id="page-reading">
+  <div class="card">
+    <div class="card-title">Reading Comprehension</div>
+    <div class="row">
+      <select id="passage-sel" onchange="loadPassage()">
+      </select>
+      <span id="reading-score-badge" style="font-size:.78rem;"></span>
+    </div>
+  </div>
+  <div class="card" id="passage-card">
+    <div class="card-title" id="passage-title">Passage</div>
+    <div class="passage-text" id="passage-text"></div>
+  </div>
+  <div id="passage-qs"></div>
+  <div class="row" style="justify-content:flex-end;">
+    <button class="btn btn-green" onclick="scorePassage()">Submit Answers</button>
+    <button class="btn btn-muted" onclick="resetPassage()">Reset</button>
+  </div>
+  <div id="reading-result" style="margin-top:12px;"></div>
+</div>
+
+<!-- MATH -->
+<div class="page" id="page-math">
+  <div class="card">
+    <div class="card-title">Math Practice</div>
+    <div class="row">
+      <select id="math-cat">
+        <option value="all">All Categories</option>
+        <option value="algebra">Algebra</option>
+        <option value="geometry">Geometry</option>
+        <option value="data">Data & Stats</option>
+        <option value="advanced">Advanced</option>
+      </select>
+      <button class="btn btn-muted" onclick="loadMath()">🔀 New Problem</button>
+      <span id="math-counter" style="font-size:.78rem;color:var(--muted);"></span>
+    </div>
+  </div>
+  <div class="card" id="math-card">
+    <div id="math-q" class="math-q"></div>
+    <div id="math-hint" class="math-hint"></div>
+    <div id="math-opts" class="mc-opts" style="max-width:400px;"></div>
+    <div id="math-feedback" style="min-height:22px;margin-top:10px;font-size:.88rem;"></div>
+    <div class="row" style="margin-top:10px;">
+      <button class="btn btn-muted" id="math-next-btn" onclick="loadMath()" style="display:none">Next Problem →</button>
+      <button class="btn btn-muted" onclick="showMathHint()" id="math-hint-btn">💡 Hint</button>
+    </div>
+  </div>
+  <div style="text-align:center;">
+    <div class="prog-bar" style="max-width:400px;margin:0 auto;"><div class="prog-fill" id="math-prog"></div></div>
+    <div style="font-size:.75rem;color:var(--muted);margin-top:4px;" id="math-score-txt"></div>
+  </div>
+</div>
+
+<!-- ACT SCIENCE -->
+<div class="page" id="page-science">
+  <div class="card">
+    <div class="card-title">ACT Science Reasoning</div>
+    <div class="row">
+      <select id="sci-sel" onchange="loadSci()"></select>
+      <span id="sci-score-badge" style="font-size:.78rem;"></span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" id="sci-title">Passage</div>
+    <div class="passage-text" id="sci-text"></div>
+  </div>
+  <div id="sci-qs"></div>
+  <div class="row" style="justify-content:flex-end;">
+    <button class="btn btn-green" onclick="scoreSci()">Submit Answers</button>
+    <button class="btn btn-muted" onclick="resetSci()">Reset</button>
+  </div>
+  <div id="sci-result" style="margin-top:12px;"></div>
+</div>
+
+<!-- PRACTICE TEST -->
+<div class="page" id="page-test">
+  <div class="card" id="test-setup">
+    <div class="card-title">45-Minute Practice Test</div>
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px;">Simulates a full SAT/ACT section: 10 vocab MC, 5 reading Qs, 10 math Qs. Timed at 45 minutes.</p>
+    <div class="row">
+      <button class="btn btn-blue" onclick="startTest()">▶ Start Test</button>
+    </div>
+    <div id="test-history" style="margin-top:14px;"></div>
+  </div>
+  <div id="test-active" style="display:none;">
+    <div class="card" style="text-align:center;">
+      <div class="test-timer" id="test-timer">45:00</div>
+      <div style="font-size:.8rem;color:var(--muted);" id="test-qnum">Question 1 of 25</div>
+    </div>
+    <div class="card" id="test-q-card">
+      <div id="test-q-text" class="mc-q"></div>
+      <div id="test-q-opts" class="mc-opts"></div>
+    </div>
+    <div class="row" style="justify-content:space-between;">
+      <button class="btn btn-muted" onclick="testSkip()">Skip</button>
+      <button class="btn btn-red" onclick="endTest(true)">End Test</button>
+    </div>
+  </div>
+  <div id="test-results" style="display:none;"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page" id="page-dashboard">
+  <div class="card">
+    <div class="card-title">Overall Progress</div>
+    <div class="stat-grid" id="dash-stats"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Vocabulary Mastery by Tier</div>
+    <div id="dash-vocab"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Section Performance</div>
+    <div id="dash-sections"></div>
+  </div>
+  <div class="row">
+    <button class="btn btn-muted" onclick="if(confirm('Reset all progress?')){clearProgress();renderDash();}">🗑 Reset Progress</button>
+  </div>
+</div>
+
+<script>
+// ─── VOCAB DATA (500 words, 3 tiers) ─────────────────────────────────────────
+// Format: [word, definition, part-of-speech, tier(1-3)]
+const VOCAB = [
+// TIER 1 — Common SAT words
+['abundant','present in large quantities; more than enough','adj',1],
+['adversity','difficult or unpleasant situation; hardship','n',1],
+['advocate','to publicly support or recommend; a person who does so','v/n',1],
+['ambiguous','open to more than one interpretation; unclear','adj',1],
+['benevolent','well-meaning and kindly; charitable','adj',1],
+['candid','truthful and straightforward; frank','adj',1],
+['coherent','logical and consistent; clearly expressed','adj',1],
+['compassion','concern for the suffering of others','n',1],
+['concise','giving much information clearly and briefly','adj',1],
+['contradict','to assert the opposite of; deny the truth of','v',1],
+['controversial','giving rise to public disagreement','adj',1],
+['conviction','a firmly held belief or opinion','n',1],
+['credible','able to be believed; convincing','adj',1],
+['deduce','to reach a conclusion by reasoning','v',1],
+['depict','to show or represent by drawing, painting, or description','v',1],
+['derive','to obtain something from a specified source','v',1],
+['diminish','to make or become less; reduce','v',1],
+['diverse','showing a great deal of variety; very different','adj',1],
+['diligent','having or showing care in one\'s work; hardworking','adj',1],
+['elaborate','involving many details; to explain in more detail','adj/v',1],
+['emphasize','to give special importance to something in speaking or writing','v',1],
+['encounter','to unexpectedly meet; a meeting','v/n',1],
+['enhance','to intensify, increase, or further improve','v',1],
+['evident','clearly seen or understood; obvious','adj',1],
+['explicit','stated clearly and in detail; leaving no room for doubt','adj',1],
+['facilitate','to make an action easier','v',1],
+['fundamental','forming a necessary base; essential','adj',1],
+['generate','to cause something to arise or come about; produce','v',1],
+['genuine','truly what something is said to be; authentic','adj',1],
+['hostile','unfriendly; opposed to something','adj',1],
+['hypothesis','a proposed explanation as a basis for further investigation','n',1],
+['impartial','treating all rivals or disputants equally; fair','adj',1],
+['inevitable','certain to happen; unavoidable','adj',1],
+['influence','the capacity to affect someone or something','n/v',1],
+['inherent','existing as a permanent feature of something; built-in','adj',1],
+['innovative','featuring new methods; original and creative','adj',1],
+['insight','an accurate and deep understanding','n',1],
+['interpret','to explain the meaning of; understand in a particular way','v',1],
+['justify','to show or prove to be right or reasonable','v',1],
+['logical','characterized by clear valid reasoning','adj',1],
+['monitor','to observe and check the progress of something','v',1],
+['motivate','to provide a reason for doing something','v',1],
+['objective','not influenced by personal feelings; a goal','adj/n',1],
+['obtain','to get or acquire something','v',1],
+['perceive','to become aware of through the senses; understand','v',1],
+['persist','to continue firmly despite obstacles','v',1],
+['precise','marked by exactness; exact','adj',1],
+['relevant','closely connected to the matter at hand','adj',1],
+['reluctant','unwilling or disinclined; hesitant','adj',1],
+['significant','sufficiently great to be noteworthy; important','adj',1],
+// TIER 2 — Moderate
+['abridge','to shorten a text while retaining the main sense','v',2],
+['abstain','to refrain from doing something','v',2],
+['acrimony','bitterness or ill feeling','n',2],
+['admonish','to warn or reprimand someone firmly','v',2],
+['alleviate','to make suffering, deficiency, or a problem less severe','v',2],
+['amalgamate','to combine or unite to form one organization or structure','v',2],
+['ambivalent','having mixed feelings or contradictory ideas','adj',2],
+['ameliorate','to make something bad or unsatisfactory better','v',2],
+['anachronism','a thing belonging to a period other than that in which it exists','n',2],
+['animosity','strong hostility','n',2],
+['antithesis','a person or thing that is the direct opposite of another','n',2],
+['appease','to pacify someone by acceding to their demands','v',2],
+['arduous','involving or requiring strenuous effort; difficult','adj',2],
+['articulate','having or showing the ability to speak fluently; to express clearly','adj/v',2],
+['ascertain','to find something out for certain','v',2],
+['aspire','to direct one\'s hopes toward achieving something','v',2],
+['attest','to provide or serve as clear evidence of something','v',2],
+['audacious','showing a willingness to take surprisingly bold risks','adj',2],
+['augment','to make something greater by adding to it','v',2],
+['austere','severe or strict in manner; plain and without luxury','adj',2],
+['banal','so lacking in originality as to be obvious and boring','adj',2],
+['belie','to fail to give a true impression of something','v',2],
+['bolster','to support or strengthen','v',2],
+['brevity','concise and exact use of words; shortness','n',2],
+['capricious','given to sudden and unaccountable changes of mood','adj',2],
+['censure','to express severe disapproval of someone or something officially','v',2],
+['circumvent','to find a way around an obstacle; avoid','v',2],
+['cogent','clear, logical, and convincing','adj',2],
+['complacent','showing smug self-satisfaction in one\'s achievements','adj',2],
+['condone','to accept and allow behavior considered wrong','v',2],
+['convoluted','extremely complex and difficult to follow','adj',2],
+['culpable','responsible for a fault; blameworthy','adj',2],
+['curtail','to reduce or limit; impose a restriction on','v',2],
+['cynical','believing the worst of people; distrustful','adj',2],
+['daunt','to make someone feel intimidated or apprehensive','v',2],
+['dearth','a scarcity or lack of something','n',2],
+['decorum','behavior in keeping with good taste and propriety','n',2],
+['deference','humble submission and respect','n',2],
+['deplore','to feel or express strong disapproval of something','v',2],
+['discern','to recognize or find out','v',2],
+['discord','disagreement between people','n',2],
+['disdain','the feeling that something is unworthy of consideration; contempt','n/v',2],
+['disparate','essentially different in kind; incongruous','adj',2],
+['dissent','to hold or express opinions that differ from those commonly held','v/n',2],
+['dogmatic','inclined to lay down principles as incontrovertibly true','adj',2],
+['dubious','hesitating or doubting; not to be relied upon','adj',2],
+['elusive','difficult to find, catch, or achieve','adj',2],
+['eminent','famous and respected; very distinguished','adj',2],
+['empirical','based on observation or experience rather than theory','adj',2],
+['enigmatic','difficult to interpret or understand; mysterious','adj',2],
+// TIER 3 — Advanced
+['abeyance','a state of temporary disuse or suspension','n',3],
+['abstruse','difficult to understand; obscure','adj',3],
+['acumen','the ability to make good judgments and quick decisions','n',3],
+['adumbrate','to report or represent in outline; foreshadow','v',3],
+['aesthetic','concerned with beauty or the appreciation of beauty','adj/n',3],
+['alacrity','brisk and cheerful readiness','n',3],
+['anathema','something or someone greatly detested or loathed','n',3],
+['antediluvian','of or belonging to the time before the biblical flood; outdated','adj',3],
+['apotheosis','the highest point in the development of something; culmination','n',3],
+['approbation','approval or praise','n',3],
+['arcane','understood by few; mysterious or secret','adj',3],
+['ardor','enthusiasm or passion','n',3],
+['assiduous','showing great care and perseverance','adj',3],
+['atrophy','to gradually decline in effectiveness','v/n',3],
+['avarice','extreme greed for wealth or material gain','n',3],
+['bellicose','demonstrating aggression and willingness to fight','adj',3],
+['beneficent','resulting in good; doing good','adj',3],
+['byzantine','excessively complicated; having a devious nature','adj',3],
+['cacophony','a harsh discordant mixture of sounds','n',3],
+['callous','showing or having an insensitive disregard for others','adj',3],
+['calumny','the making of false and defamatory statements about someone','n',3],
+['cantankerous','bad-tempered, argumentative, and uncooperative','adj',3],
+['capitulate','to cease to resist; to give in','v',3],
+['castigate','to reprimand someone severely','v',3],
+['cavil','to make petty or unnecessary objections','v',3],
+['chicanery','the use of trickery to achieve goals','n',3],
+['choleric','bad-tempered or irritable','adj',3],
+['clandestine','kept secret or done secretly','adj',3],
+['clemency','mercy and leniency','n',3],
+['coalesce','to come together to form one mass or whole','v',3],
+['cogitate','to think deeply about something; ponder','v',3],
+['compunction','a feeling of guilt or moral scruple','n',3],
+['conflagration','an extensive, destructive fire','n',3],
+['consternation','feelings of anxiety or dismay','n',3],
+['contrite','feeling or expressing remorse at wrongdoing','adj',3],
+['corpulent','excessively overweight; fat','adj',3],
+['craven','contemptibly lacking in courage; cowardly','adj',3],
+['cupidity','greed for money or possessions','n',3],
+['dearth','a scarcity or lack of something','n',3],
+['debilitate','to make weak; impair the strength of','v',3],
+['decry','to publicly denounce','v',3],
+['deleterious','causing harm or damage','adj',3],
+['demagogue','a political leader who appeals to popular desires','n',3],
+['denigrate','to criticize unfairly; belittle','v',3],
+['despot','a ruler who holds absolute power tyrannically','n',3],
+['diaphanous','light, delicate, and translucent','adj',3],
+['dilettante','a person who cultivates an area of interest without expertise','n',3],
+['discomfit','to make someone feel uneasy or embarrassed','v',3],
+['discordant','disagreeing or incongruous; harsh in sound','adj',3],
+['disingenuous','not candid or sincere; falsely frank','adj',3],
+['disinterested','not influenced by personal interest; impartial','adj',3],
+['disputatious','fond of having arguments; combative','adj',3],
+['dissemble','to conceal one\'s motives or feelings','v',3],
+['ebullient','cheerful and full of energy; exuberant','adj',3],
+['efficacious','successful in producing a desired result; effective','adj',3],
+['effrontery','insolent or impertinent behavior; audacity','n',3],
+['egregious','outstandingly bad; shocking','adj',3],
+['elegy','a poem of serious reflection, usually lamenting the dead','n',3],
+['eloquent','fluent or persuasive in speaking or writing','adj',3],
+['emulate','to match or surpass by imitation','v',3],
+['enervate','to cause someone to feel drained of energy','v',3],
+['ephemeral','lasting for a very short time','adj',3],
+['equanimity','mental calmness under stress','n',3],
+['equivocate','to use ambiguous language to avoid committing oneself','v',3],
+['erudite','having or showing great knowledge','adj',3],
+['esoteric','intended for or understood by only a small number','adj',3],
+['eulogy','a speech in praise of a person who has recently died','n',3],
+['euphemism','a mild expression substituted for a blunt one','n',3],
+['exacerbate','to make a problem worse','v',3],
+['exculpate','to show that someone is not guilty of wrongdoing','v',3],
+['exigent','pressing; requiring immediate action','adj',3],
+['exonerate','to absolve from blame or fault','v',3],
+['expedient','convenient and practical, though possibly improper','adj/n',3],
+['expedite','to make an action happen sooner; accelerate','v',3],
+['expurgate','to remove matter thought to be objectionable','v',3],
+['extenuate','to make a crime or fault seem less serious','v',3],
+['fallacious','based on a mistaken belief; misleading','adj',3],
+['fastidious','very attentive to accuracy and detail','adj',3],
+['felicitous','well chosen or suited; pleasing','adj',3],
+['fervid','intensely enthusiastic or passionate','adj',3],
+['florid','elaborately ornate; ruddy','adj',3],
+['forbear','to politely or patiently restrain an impulse','v',3],
+['fortuitous','happening by accident or chance rather than design','adj',3],
+['fractious','irritable and quarrelsome','adj',3],
+['garrulous','excessively talkative, especially on trivial matters','adj',3],
+['grandiloquent','pompous or extravagant in language, style, or manner','adj',3],
+['gregarious','fond of company; sociable','adj',3],
+['halcyon','denoting a period of time that was idyllically happy','adj',3],
+['hapless','unfortunate; unlucky','adj',3],
+['hegemony','leadership or dominance of one country or group','n',3],
+['hubris','excessive pride or self-confidence','n',3],
+['hyperbole','exaggerated statements not meant to be taken literally','n',3],
+['iconoclast','a person who attacks established beliefs or customs','n',3],
+['ignominious','deserving or causing public disgrace or shame','adj',3],
+['impecunious','having little or no money; poor','adj',3],
+['impetuous','acting or done quickly without thought; impulsive','adj',3],
+['implacable','unable to be appeased; relentless','adj',3],
+['impugn','to dispute the truth, validity, or honesty of','v',3],
+['impunity','exemption from punishment or freedom from consequences','n',3],
+['inchoate','just begun and not fully formed','adj',3],
+['incorrigible','not able to be corrected or reformed','adj',3],
+['indefatigable','persisting tirelessly','adj',3],
+['indolent','wanting to avoid activity; lazy','adj',3],
+['inimical','tending to obstruct or harm; hostile','adj',3],
+['insipid','lacking vigor or interest; bland','adj',3],
+['inveterate','having a habit that is long-established and unlikely to change','adj',3],
+['irascible','having or showing a tendency to be easily angered','adj',3],
+['laconic','using very few words; brief to the point of seeming rude','adj',3],
+['lassitude','physical or mental weariness; fatigue','n',3],
+['loquacious','tending to talk a great deal; talkative','adj',3],
+['lugubrious','looking or sounding sad and dismal','adj',3],
+['magnanimous','generous or forgiving toward rivals or less powerful people','adj',3],
+['malfeasance','wrongdoing, especially by a public official','n',3],
+['malleable','easily influenced; pliable','adj',3],
+['mendacious','not telling the truth; lying','adj',3],
+['mercurial','subject to sudden unpredictable changes; volatile','adj',3],
+['meticulous','showing great attention to detail; very careful','adj',3],
+['misanthrope','a person who dislikes humankind in general','n',3],
+['mitigate','to make less severe, serious, or painful','v',3],
+['mnemonic','a device used to aid memory','adj/n',3],
+['mollify','to appease the anger or anxiety of someone','v',3],
+['munificent','more generous than is usual or necessary; lavish','adj',3],
+['nefarious','wicked or criminal','adj',3],
+['neophyte','a person who is new to a subject or activity; a beginner','n',3],
+['nihilism','the rejection of all moral and religious principles','n',3],
+['obdurate','stubbornly refusing to change one\'s opinion','adj',3],
+['obfuscate','to make unclear or confusing','v',3],
+['obsequious','obedient or attentive to an excessive degree; servile','adj',3],
+['obstinate','stubbornly refusing to change; not easily overcome','adj',3],
+['obtuse','annoyingly insensitive or slow to understand','adj',3],
+['odious','extremely unpleasant; repulsive','adj',3],
+['officious','asserting authority in an annoyingly domineering way','adj',3],
+['ominous','giving the impression that something bad is going to happen','adj',3],
+['onerous','involving a great deal of effort, trouble, or difficulty; burdensome','adj',3],
+['opaque','not able to be seen through; not easily understood','adj',3],
+['opprobrium','harsh criticism or censure; public disgrace','n',3],
+['ostentatious','characterized by pretentious show; conspicuous','adj',3],
+['ostracize','to exclude from society or group','v',3],
+['overwrought','extremely upset; overly elaborate or complicated','adj',3],
+['pariah','a person who is rejected by others; an outcast','n',3],
+['paucity','smallness of number or quantity; scarcity','n',3],
+['pedantic','excessively concerned with minor details; showing off knowledge','adj',3],
+['pejorative','expressing contempt or disapproval','adj',3],
+['penchant','a strong or habitual liking for something','n',3],
+['penurious','extremely poor; unwilling to spend money','adj',3],
+['perfidious','deceitful and untrustworthy','adj',3],
+['perfunctory','carried out with minimal effort; done as routine','adj',3],
+['perilous','full of danger or risk','adj',3],
+['pernicious','having a harmful effect; deadly','adj',3],
+['perspicacious','having a ready insight into things; shrewd','adj',3],
+['petulant','childishly sulky or bad-tempered','adj',3],
+['phlegmatic','having an unemotional, stolidly calm disposition','adj',3],
+['pithy','concise and forcefully expressive','adj',3],
+['placate','to make someone less angry; appease','v',3],
+['platitude','a remark that has been used too often to be interesting','n',3],
+['plausible','seeming reasonable or probable; credible','adj',3],
+['polemical','of or involving strongly critical or controversial argument','adj',3],
+['pragmatic','dealing with things sensibly and realistically','adj',3],
+['precarious','not securely held; uncertain; risky','adj',3],
+['precocious','having developed abilities at an earlier age than usual','adj',3],
+['prevaricate','to speak or act evasively; to lie','v',3],
+['proclivity','a tendency to choose or do something regularly','n',3],
+['prodigal','spending money recklessly; wasteful','adj',3],
+['profligate','recklessly extravagant; dissolute','adj',3],
+['propitious','giving or indicating a good chance of success; favorable','adj',3],
+['prosaic','having the style of prose; lacking imaginativeness; ordinary','adj',3],
+['provincial','of or relating to a province; limited in perspective; narrow-minded','adj',3],
+['prudent','acting with care and thought; wise','adj',3],
+['pugnacious','eager or quick to argue, quarrel, or fight','adj',3],
+['querulous','complaining in a petulant or whining manner','adj',3],
+['quixotic','exceedingly idealistic; unrealistic','adj',3],
+['recalcitrant','having an obstinately uncooperative attitude','adj',3],
+['reclusive','avoiding the company of other people; solitary','adj',3],
+['recriminate','to make counteraccusations','v',3],
+['redolent','strongly reminiscent or suggestive of something','adj',3],
+['refractory','stubborn or unmanageable; resistant to treatment','adj',3],
+['remonstrate','to make a forcefully reproachful protest','v',3],
+['repudiate','to refuse to accept or be associated with; deny','v',3],
+['rescind','to revoke, cancel, or repeal a law or agreement','v',3],
+['reticent','not revealing one\'s thoughts or feelings readily; reserved','adj',3],
+['rhetoric','the art of effective or persuasive speaking or writing','n',3],
+['sagacious','having good judgment; wise','adj',3],
+['sanctimonious','making a show of being morally superior','adj',3],
+['sardonic','grimly mocking or cynical','adj',3],
+['sedulous','showing dedication and diligence; assiduous','adj',3],
+['sententious','given to moralizing in a pompous way','adj',3],
+['serendipity','the occurrence of fortunate events by chance','n',3],
+['solipsism','the view that the self is the only reality','n',3],
+['soporific','tending to induce drowsiness or sleep; boring','adj',3],
+['specious','superficially plausible but actually wrong','adj',3],
+['spurious','not being what it purports to be; false','adj',3],
+['stoic','enduring pain and hardship without complaint','adj',3],
+['strident','loud and harsh; presenting a point forcefully','adj',3],
+['stupefy','to make someone unable to think; astonish','v',3],
+['stygian','very dark; gloomy; relating to the underworld','adj',3],
+['surmise','to suppose something is true without confirmation','v',3],
+['sycophant','a person who flatters for gain; a servile flatterer','n',3],
+['taciturn','reserved or uncommunicative in speech; quiet','adj',3],
+['tangential','diverging from a course; of superficial relevance','adj',3],
+['tenacious','holding firm to a position; persistent','adj',3],
+['tendentious','promoting a particular cause or point of view; biased','adj',3],
+['timorous','showing or suffering from nervousness; timid','adj',3],
+['torpid','mentally or physically inactive; lethargic','adj',3],
+['tortuous','full of twists and turns; complicated','adj',3],
+['transient','lasting only for a short time; impermanent','adj',3],
+['truculent','eager or quick to argue or fight; aggressively defiant','adj',3],
+['turbid','murky; not clear','adj',3],
+['turpitude','wickedness; depravity','n',3],
+['ubiquitous','present, appearing, or found everywhere','adj',3],
+['umbrage','offense or annoyance','n',3],
+['unconscionable','not right or reasonable; unscrupulous','adj',3],
+['unctuous','excessively flattering; greasy','adj',3],
+['upbraid','to scold or reproach strongly','v',3],
+['vacillate','to waver between different opinions; be indecisive','v',3],
+['vapid','offering nothing stimulating or challenging; bland','adj',3],
+['venerate','to regard with great respect','v',3],
+['veracious','speaking or representing the truth; truthful','adj',3],
+['verbose','using or expressed in more words than necessary','adj',3],
+['vexatious','causing annoyance, frustration, or worry','adj',3],
+['vicarious','experienced in the imagination through another person','adj',3],
+['vigilant','keeping careful watch for possible danger','adj',3],
+['vindictive','having or showing a strong desire for revenge','adj',3],
+['vitriolic','filled with bitter criticism; corrosive','adj',3],
+['vociferous','expressing opinions noisily and forcefully','adj',3],
+['voluble','talking fluently, readily, or incessantly; glib','adj',3],
+['wary','feeling cautious about possible dangers','adj',3],
+['wily','skilled at gaining an advantage; cunning','adj',3],
+['zealous','having great energy or enthusiasm in pursuit of a cause','adj',3]
+];
+
+// ─── READING PASSAGES ─────────────────────────────────────────────────────────
+const PASSAGES = [
+{title:'The Science of Sleep',
+text:`Sleep is far more than a passive state of rest. Scientists now understand that the sleeping brain is extraordinarily active, carrying out vital processes that waking life simply cannot accomplish. During deep sleep, the brain consolidates memories, transferring information from short-term to long-term storage. The glymphatic system, a waste-clearance network discovered only recently, flushes toxic proteins from the brain during sleep—proteins that, if allowed to accumulate, are linked to Alzheimer's disease.
+
+Most adults require between seven and nine hours of sleep per night, yet surveys consistently find that one-third of the population sleeps fewer than six hours. The consequences of this chronic deprivation are severe. Cognitive performance deteriorates after even one shortened night: reaction times slow, decision-making falters, and emotional regulation breaks down. Prolonged sleep loss is associated with obesity, diabetes, cardiovascular disease, and a weakened immune system.
+
+Society's attitude toward sleep has shifted dramatically. Whereas a previous generation might have celebrated the executive who bragged about functioning on four hours, the medical community now regards such behavior as reckless. Corporations have begun installing nap rooms; elite athletic teams employ sleep coaches; some school districts have pushed back start times so that adolescents—whose circadian rhythms naturally run later—can obtain adequate rest. The science is unambiguous: sleep is not a luxury but a biological necessity.`,
+qs:[
+{q:'What does the glymphatic system do during sleep?',opts:['Consolidates memories','Clears toxic proteins from the brain','Regulates emotional responses','Transfers short-term memories'],ans:1},
+{q:'According to the passage, how many hours of sleep do most adults need?',opts:['5–7 hours','6–8 hours','7–9 hours','8–10 hours'],ans:2},
+{q:'Which word best describes the passage\'s tone?',opts:['Alarmist','Informative','Speculative','Dismissive'],ans:1},
+{q:'The phrase "reckless" in the final paragraph suggests the author believes sleep deprivation is:',opts:['Unavoidable for professionals','Dangerous and irresponsible','Socially acceptable','A sign of dedication'],ans:1},
+{q:'Which conclusion is best supported by the passage?',opts:['Sleep research is still in its infancy','Cognitive performance is unrelated to sleep','Cultural attitudes about sleep are changing','Sleep deprivation only affects physical health'],ans:2}
+]},
+{title:'Urban Forests and Climate',
+text:`Cities generate heat. The concentration of concrete, asphalt, and dark rooftops absorbs solar radiation and releases it slowly, creating what climatologists call the urban heat island effect. On a summer afternoon, a dense metropolis can be as much as seven degrees Celsius warmer than the surrounding countryside. This thermal excess strains power grids, worsens air quality, and disproportionately harms low-income residents who lack access to air conditioning.
+
+Urban forests—strategic plantings of trees throughout a city—offer one of the most effective natural countermeasures. Trees provide shade that directly reduces surface temperatures. Through transpiration, they release water vapor, cooling the surrounding air in much the same way that sweating cools the human body. A mature urban tree can lower nearby air temperatures by three to five degrees and reduce cooling energy costs for adjacent buildings by as much as thirty percent.
+
+The benefits extend beyond temperature regulation. Trees absorb carbon dioxide and release oxygen, filter airborne particulates, and attenuate stormwater runoff. Urban forests also provide psychological benefits: studies consistently link access to green space with reduced stress, lower rates of anxiety and depression, and higher reported wellbeing. Yet urban trees face significant threats, including drought, soil compaction, pests, and development pressure. Municipal governments that invest in urban forestry programs—not merely planting trees but also maintaining them—find that the long-term returns in public health and infrastructure savings far exceed the initial costs.`,
+qs:[
+{q:'What causes the urban heat island effect?',opts:['High humidity from transpiration','Concentration of concrete and dark surfaces absorbing solar radiation','Lack of wind circulation in cities','Industrial emissions from factories'],ans:1},
+{q:'How does tree transpiration cool the air?',opts:['By blocking direct sunlight','By releasing water vapor, similar to how sweating cools the body','By absorbing heat into their roots','By creating shade over large areas'],ans:1},
+{q:'The passage implies that low-income residents are especially harmed by urban heat because:',opts:['They live farther from parks','They lack access to air conditioning','They work more outdoor jobs','They consume more energy'],ans:1},
+{q:'Which is NOT listed as a benefit of urban forests?',opts:['Reducing carbon dioxide','Filtering airborne particles','Eliminating urban flooding entirely','Reducing stress and anxiety'],ans:2},
+{q:'What does the final sentence suggest about urban forestry programs?',opts:['They are too expensive for most cities','They yield greater benefits than their costs','They are only effective in wealthy neighborhoods','Their benefits are primarily psychological'],ans:1}
+]},
+{title:'The Printing Press and Society',
+text:`When Johannes Gutenberg introduced movable-type printing to Europe around 1440, he set in motion changes that would reshape civilization. Before the press, books were laboriously copied by hand, making them extraordinarily expensive and accessible only to the wealthy and clergy. A single Bible might take a monk several years to transcribe. Gutenberg's machine could produce hundreds of copies in the same time.
+
+The democratization of text had profound consequences. Literacy rates climbed across Europe as the cost of books fell. Ideas could spread with unprecedented speed, allowing scientific discoveries and philosophical arguments to circulate across national boundaries within months. The Protestant Reformation is often cited as an early example: Martin Luther's Ninety-Five Theses, printed and distributed widely in 1517, reached a vast audience that hand-copying could never have assembled.
+
+Yet the press also amplified harmful content. Misinformation, propaganda, and inflammatory pamphlets spread just as readily as enlightenment. Authorities who had long controlled the flow of information through manuscript culture found themselves unable to suppress heterodox ideas. Some historians argue that the printing press contributed to decades of religious warfare in Europe, as competing factions used print to inflame passions and justify violence.
+
+The lesson many scholars draw is that communication technology is morally neutral: its effects depend entirely on how it is used. The printing press democratized knowledge and also democratized error. In this sense, debates about the social impact of the internet echo arguments made five centuries earlier about Gutenberg's invention.`,
+qs:[
+{q:'How long did it take a monk to copy a single Bible before the printing press?',opts:['A few weeks','Several months','Several years','A decade'],ans:2},
+{q:'The Protestant Reformation is mentioned to illustrate:',opts:['The dangers of religious conflict','How quickly printed ideas could spread','The opposition to Gutenberg\'s invention','The Church\'s use of the press'],ans:1},
+{q:'According to the passage, what is the printing press\'s moral character?',opts:['Primarily beneficial to society','Inherently dangerous','Morally neutral','Mostly harmful in the long run'],ans:2},
+{q:'The passage most strongly suggests that the printing press:',opts:['Had exclusively positive effects on European society','Enabled both progress and harm','Was embraced by all authorities','Primarily benefited the wealthy'],ans:1},
+{q:'The final paragraph draws a comparison between the printing press and:',opts:['Television','Radio','The internet','Social movements'],ans:2}
+]},
+{title:'Coral Reef Ecosystems',
+text:`Coral reefs occupy less than one percent of the ocean floor yet support approximately twenty-five percent of all marine species. This extraordinary biodiversity makes them among the most productive and ecologically important ecosystems on Earth. Corals themselves are animals—small polyps that secrete calcium carbonate skeletons, building the three-dimensional structures that provide habitat for fish, crustaceans, mollusks, and thousands of other organisms.
+
+The relationship between corals and the microscopic algae called zooxanthellae is fundamental to reef health. These algae live within coral tissues and provide up to ninety percent of the coral's energy through photosynthesis. In return, the coral offers shelter and the compounds necessary for the algae's growth. When ocean temperatures rise even slightly above normal—by one to two degrees Celsius sustained over several weeks—corals expel their zooxanthellae in a process called bleaching. Without the algae, the coral turns white and, if the stress persists, dies.
+
+Climate change poses the gravest threat to coral reefs. The oceans have absorbed more than ninety percent of the excess heat trapped by greenhouse gases, causing average sea surface temperatures to rise. Between 2014 and 2017, a global bleaching event damaged or destroyed reefs in every major ocean basin. Ocean acidification—caused by seawater absorbing carbon dioxide—compounds the threat by weakening the calcium carbonate skeletons corals need to build their structures.
+
+Scientists estimate that at current rates of warming, seventy to ninety percent of the world's coral reefs could be lost by 2050. The consequences would extend far beyond marine biodiversity: reefs protect coastlines from wave erosion and storm damage, and support fishing industries on which hundreds of millions of people depend.`,
+qs:[
+{q:'What percentage of marine species do coral reefs support?',opts:['About 10%','About 25%','About 50%','About 75%'],ans:1},
+{q:'What triggers coral bleaching?',opts:['Increased ocean acidity','A decrease in zooxanthellae populations','Sustained elevated water temperatures','Overfishing of reef fish'],ans:2},
+{q:'Why is the coral-zooxanthellae relationship described as fundamental?',opts:['Zooxanthellae protect corals from predators','The algae provide up to 90% of the coral\'s energy','Corals cannot reproduce without algae','The relationship prevents acidification'],ans:1},
+{q:'The passage implies ocean acidification harms corals by:',opts:['Raising water temperatures','Weakening their calcium carbonate structures','Reducing available sunlight','Expelling zooxanthellae'],ans:1},
+{q:'Which best states the main idea of the passage?',opts:['Ocean acidification is a greater threat than warming','Coral reefs are important but severely threatened by climate change','Most coral species can adapt to temperature changes','Reef conservation efforts have been largely successful'],ans:1}
+]},
+{title:'The Psychology of Habit',
+text:`Habits are the brain's efficiency mechanism. When a behavior is repeated enough times in consistent contexts, the neural pathways underlying it become deeply grooved—requiring little conscious thought and resisting deliberate change. This automaticity is enormously useful: it frees cognitive resources for novel tasks. A skilled driver navigates familiar roads almost unconsciously, leaving mental bandwidth for conversation or planning. But the same mechanism that makes habits efficient makes them resistant to alteration, which explains why changing even modestly harmful routines—overeating, procrastinating, reaching for a phone—can feel surprisingly difficult.
+
+Charles Duhigg, drawing on research in behavioral neuroscience, described habits as structured around a three-part loop: a cue that triggers the routine, the routine itself, and a reward that reinforces it. Understanding this structure offers a framework for change. Rather than simply trying to eliminate an unwanted behavior through willpower—an approach that frequently fails—behavioral scientists recommend substituting the routine while keeping the cue and reward intact. A smoker who reaches for a cigarette during a stressful meeting might replace smoking with a brief walk, preserving the stress-relief reward.
+
+Environment design has emerged as one of the most powerful habit-change tools. If unhealthy snacks are visible and accessible, they will be eaten; placing fruit at eye level in the refrigerator consistently increases fruit consumption without requiring willpower. This insight has been embraced by policymakers who design public environments—cafeteria layouts, default opt-in savings plans—to make beneficial choices easier. Critics worry about manipulation, but proponents argue that environments inevitably shape behavior, and it is better to do so deliberately and transparently.`,
+qs:[
+{q:'According to the passage, why does the brain form habits?',opts:['To allow more emotional responses','To free cognitive resources for novel tasks','To strengthen memory consolidation','To reduce the need for environmental cues'],ans:1},
+{q:'What is the correct order of the habit loop described in the passage?',opts:['Routine, reward, cue','Cue, routine, reward','Reward, cue, routine','Cue, reward, routine'],ans:1},
+{q:'What does behavioral science recommend for changing a harmful habit?',opts:['Eliminating the reward entirely','Using sustained willpower to suppress the behavior','Substituting the routine while keeping the cue and reward','Changing the environment to remove all cues'],ans:2},
+{q:'The refrigerator example illustrates which habit-change principle?',opts:['Replacing rewards','Environment design','Habit loop analysis','Cognitive bandwidth'],ans:1},
+{q:'Critics of environment design are worried about:',opts:['Its high cost to implement','Possible manipulation of behavior','Its ineffectiveness compared to willpower','The removal of personal choice in public spaces'],ans:1}
+]}
+];
+
+// ─── MATH PROBLEMS ────────────────────────────────────────────────────────────
+const MATH = [
+// Algebra
+{cat:'algebra',q:'If 3x + 7 = 22, what is the value of x?',hint:'Subtract 7 from both sides, then divide by 3.',opts:['3','4','5','6'],ans:2},
+{cat:'algebra',q:'Which expression is equivalent to (x + 3)(x − 2)?',hint:'Use FOIL: First, Outer, Inner, Last.',opts:['x² + x − 6','x² − x − 6','x² + 5x − 6','x² − 5x − 6'],ans:0},
+{cat:'algebra',q:'If f(x) = 2x² − 3, what is f(−2)?',hint:'Substitute −2 for x, then evaluate.',opts:['−11','1','5','−5'],ans:2},
+{cat:'algebra',q:'A line passes through (0, 4) and (2, 10). What is its slope?',hint:'Slope = (y₂ − y₁) / (x₂ − x₁)',opts:['2','3','4','5'],ans:1},
+{cat:'algebra',q:'Solve: |2x − 1| = 7',hint:'Set 2x − 1 = 7 AND 2x − 1 = −7, solve each.',opts:['x = 3 only','x = −3 only','x = 4 or x = −3','x = 3 or x = −4'],ans:2},
+{cat:'algebra',q:'If 2^x = 32, what is x?',hint:'Express 32 as a power of 2.',opts:['4','5','6','8'],ans:1},
+{cat:'algebra',q:'What are the solutions of x² − 5x + 6 = 0?',hint:'Factor the quadratic: (x − ?)(x − ?)',opts:['x = 2 and x = 3','x = −2 and x = −3','x = 1 and x = 6','x = −1 and x = −6'],ans:0},
+{cat:'algebra',q:'If y varies directly with x and y = 15 when x = 5, what is y when x = 9?',hint:'Find the constant of variation k = y/x.',opts:['24','27','30','45'],ans:1},
+{cat:'algebra',q:'Which inequality represents "x is at most 8"?',hint:'"At most" means less than or equal to.',opts:['x < 8','x > 8','x ≤ 8','x ≥ 8'],ans:2},
+{cat:'algebra',q:'A store sells pencils for $0.25 each and pens for $1.50 each. Maria buys 4 pencils and some pens, spending $7.00 total. How many pens did she buy?',hint:'Set up an equation: 4(0.25) + 1.50p = 7.00',opts:['3','4','5','6'],ans:1},
+// Geometry
+{cat:'geometry',q:'A circle has a radius of 6. What is its area?',hint:'Area = πr²',opts:['12π','24π','36π','72π'],ans:2},
+{cat:'geometry',q:'Two angles of a triangle measure 47° and 68°. What is the third angle?',hint:'The angles of a triangle sum to 180°.',opts:['55°','65°','75°','85°'],ans:1},
+{cat:'geometry',q:'What is the perimeter of a rectangle with length 9 and width 5?',hint:'Perimeter = 2(l + w)',opts:['14','28','45','18'],ans:1},
+{cat:'geometry',q:'In a right triangle, the two legs measure 6 and 8. What is the hypotenuse?',hint:'Use the Pythagorean theorem: a² + b² = c²',opts:['10','11','12','14'],ans:0},
+{cat:'geometry',q:'What is the volume of a rectangular prism with dimensions 3 × 4 × 5?',hint:'Volume = length × width × height',opts:['47','60','12','36'],ans:1},
+{cat:'geometry',q:'A square has a diagonal of length 8√2. What is its side length?',hint:'For a square with side s, diagonal = s√2',opts:['4','8','8√2','16'],ans:1},
+{cat:'geometry',q:'Parallel lines are cut by a transversal. If one interior angle is 110°, what is the co-interior (same-side interior) angle on the same side?',hint:'Co-interior angles sum to 180°.',opts:['70°','80°','90°','110°'],ans:0},
+{cat:'geometry',q:'A cylinder has radius 3 and height 5. What is its volume?',hint:'Volume = πr²h',opts:['15π','30π','45π','90π'],ans:2},
+{cat:'geometry',q:'The area of a triangle is 24 cm². If the base is 8 cm, what is the height?',hint:'Area = ½ × base × height',opts:['3 cm','4 cm','6 cm','8 cm'],ans:2},
+{cat:'geometry',q:'Two similar triangles have corresponding sides in ratio 2:5. What is the ratio of their areas?',hint:'Area ratios equal the square of the side ratio.',opts:['2:5','4:25','4:10','2:10'],ans:1},
+// Data & Stats
+{cat:'data',q:'What is the median of the data set: 3, 7, 2, 9, 5?',hint:'Arrange values in order, then find the middle value.',opts:['5','6','7','2'],ans:0},
+{cat:'data',q:'A bag has 5 red marbles and 3 blue marbles. What is the probability of drawing a blue marble?',hint:'P = favorable outcomes / total outcomes',opts:['3/8','5/8','3/5','1/3'],ans:0},
+{cat:'data',q:'The mean of five numbers is 10. Four of the numbers are 8, 12, 6, and 14. What is the fifth number?',hint:'Mean × count = sum. Find the sum, then subtract the four known values.',opts:['8','10','12','14'],ans:1},
+{cat:'data',q:'Which measure of central tendency is most affected by an outlier?',hint:'Think about what happens when one extremely large or small value is added.',opts:['Median','Mode','Mean','Range'],ans:2},
+{cat:'data',q:'If a die is rolled twice, what is the probability of getting two sixes?',hint:'Multiply the independent probabilities.',opts:['1/6','1/12','1/18','1/36'],ans:3},
+{cat:'data',q:'A scatter plot shows a strong negative correlation. Which statement best describes this?',hint:'Negative correlation: as one variable increases, the other decreases.',opts:['Both variables increase together','As x increases, y tends to decrease','The variables are unrelated','Both variables decrease together'],ans:1},
+{cat:'data',q:'A class of 30 students has an average score of 74. A second class of 20 students has an average of 81. What is the combined average?',hint:'Combined average = total sum / total count. Sum₁ = 74×30, Sum₂ = 81×20.',opts:['76.8','77.0','77.5','78.0'],ans:0},
+{cat:'data',q:'Box A has 3 red and 2 white balls. Box B has 4 red and 6 blue balls. One ball is drawn from each. What is the probability both are red?',hint:'Multiply independent probabilities: P(A red) × P(B red)',opts:['7/50','12/50','3/25','7/25'],ans:0},
+{cat:'data',q:'Which graphical display best shows the distribution shape and spread of a single dataset?',hint:'Think about which display shows quartiles, median, and outliers.',opts:['Pie chart','Bar graph','Box-and-whisker plot','Line graph'],ans:2},
+{cat:'data',q:'A survey asks 200 people which movie genre they prefer. 80 say action, 60 say comedy, 40 say drama, and 20 say other. What percentage prefer comedy?',hint:'Percentage = (part / whole) × 100',opts:['25%','30%','35%','40%'],ans:1},
+// Advanced
+{cat:'advanced',q:'If log₂(x) = 5, what is x?',hint:'Rewrite as an exponential: 2⁵ = x',opts:['10','16','25','32'],ans:3},
+{cat:'advanced',q:'What is the sum of the first 100 positive integers?',hint:'Use the formula: S = n(n+1)/2',opts:['5000','5050','5100','4950'],ans:1},
+{cat:'advanced',q:'A geometric sequence has first term 3 and common ratio 2. What is the 6th term?',hint:'aₙ = a₁ × r^(n−1)',opts:['48','64','96','192'],ans:2},
+{cat:'advanced',q:'Which expression equals sin²θ + cos²θ?',hint:'This is a fundamental trigonometric identity.',opts:['0','2','1','sinθ cosθ'],ans:2},
+{cat:'advanced',q:'If i = √(−1), what is i³?',hint:'i¹=i, i²=−1, i³=?',opts:['1','−1','i','−i'],ans:3},
+{cat:'advanced',q:'A parabola has equation y = (x−3)² + 2. What is its vertex?',hint:'Vertex form: y = a(x − h)² + k, vertex is (h, k)',opts:['(3, 2)','(−3, 2)','(3, −2)','(2, 3)'],ans:0},
+{cat:'advanced',q:'How many ways can 4 students be arranged in a line from a group of 7?',hint:'This is a permutation: ₇P₄ = 7!/(7−4)!',opts:['28','35','840','5040'],ans:2},
+{cat:'advanced',q:'What is the inverse function of f(x) = 2x + 3?',hint:'Replace f(x) with y, swap x and y, solve for y.',opts:['f⁻¹(x) = (x − 3)/2','f⁻¹(x) = (x + 3)/2','f⁻¹(x) = 2x − 3','f⁻¹(x) = (2x + 3)'],ans:0},
+{cat:'advanced',q:'The graph of y = f(x) is shifted 3 units right and 2 units down. What is the new equation?',hint:'Horizontal shift right by h: replace x with (x−h). Vertical shift down by k: subtract k.',opts:['y = f(x+3) + 2','y = f(x−3) − 2','y = f(x+3) − 2','y = f(x−3) + 2'],ans:1},
+{cat:'advanced',q:'If the half-life of a substance is 10 years, what fraction remains after 30 years?',hint:'After each half-life, the amount halves. How many half-lives in 30 years?',opts:['1/4','1/6','1/8','1/16'],ans:2}
+];
+
+// ─── ACT SCIENCE PASSAGES ─────────────────────────────────────────────────────
+const SCI_PASSAGES = [
+{title:'Experiment: Effect of Temperature on Enzyme Activity',
+text:`Students investigated how temperature affects the rate of reaction of the enzyme amylase, which breaks down starch into glucose. They prepared starch solutions and added equal amounts of amylase at five different temperatures: 10°C, 20°C, 37°C, 50°C, and 70°C. After exactly 5 minutes, they tested each mixture with iodine solution (which turns dark blue-black in the presence of starch). The intensity of the blue-black color indicates how much starch remained unreacted.
+
+Results:
+• 10°C: Very dark blue-black (most starch remaining; least reaction)
+• 20°C: Dark blue-black (significant starch remaining)
+• 37°C: Pale yellow (very little starch remaining; most reaction)
+• 50°C: Blue-black (significant starch remaining)
+• 70°C: Very dark blue-black (essentially no reaction occurred)
+
+The students concluded that amylase was most effective at 37°C, which corresponds to normal human body temperature.`,
+qs:[
+{q:'At which temperature did amylase show the least activity?',opts:['10°C','20°C','50°C','70°C'],ans:3},
+{q:'What does a pale yellow iodine result indicate?',opts:['High starch concentration','Little starch remaining; high enzyme activity','Enzyme denaturation','No glucose was produced'],ans:1},
+{q:'Why did activity decrease at 70°C despite high temperature usually speeding up reactions?',opts:['The starch was used up','The enzyme was denatured by high heat','The iodine reacted with glucose','Insufficient amylase was added'],ans:1},
+{q:'A student proposed that testing 37°C was the most important condition. This is because:',opts:['37°C is the easiest temperature to achieve in a lab','37°C is normal human body temperature, making results relevant to biology','The results at 37°C were most surprising','37°C required no heating apparatus'],ans:1},
+{q:'If a student tested amylase at 45°C, the result would most likely be:',opts:['More reaction than at 37°C','Less reaction than at 37°C, but more than at 70°C','No reaction at all','Identical results to 37°C'],ans:1}
+]},
+{title:'Study: Atmospheric CO₂ and Temperature Correlation',
+text:`Scientists analyzed ice core data to reconstruct atmospheric CO₂ concentrations and global average temperatures over the past 400,000 years. Ice cores trap air bubbles, preserving samples of ancient atmosphere. The oxygen isotope ratios in the ice reveal historical temperatures.
+
+Key findings from the data:
+• CO₂ concentrations ranged from approximately 180 ppm during ice ages to 280 ppm during interglacial warm periods.
+• Temperature varied by roughly 8–10°C between ice age minima and interglacial maxima.
+• CO₂ concentrations and temperature showed a strong positive correlation throughout the record.
+• In some periods, temperature increases slightly preceded CO₂ rises; in others, CO₂ led temperature changes.
+• As of 2023, atmospheric CO₂ stands at approximately 420 ppm—well above any value in the 400,000-year record.
+
+Scientist A argues that CO₂ drives temperature change. Scientist B argues that temperature changes drive CO₂ changes, pointing to periods where temperature rose first.`,
+qs:[
+{q:'According to the data, what was the maximum CO₂ concentration before industrialization?',opts:['180 ppm','280 ppm','350 ppm','420 ppm'],ans:1},
+{q:'How do ice cores allow scientists to determine historical temperatures?',opts:['By measuring trapped CO₂ directly','By analyzing oxygen isotope ratios in the ice','By counting annual ice layers','By measuring ice density'],ans:1},
+{q:'Which finding would best support Scientist A\'s argument that CO₂ drives temperature?',opts:['Temperature rose before CO₂ in some periods','CO₂ rose before temperature in other periods','CO₂ and temperature are uncorrelated','Current CO₂ is 420 ppm'],ans:1},
+{q:'Current CO₂ of 420 ppm compared to the 400,000-year record suggests:',opts:['Levels are within normal historical range','Levels are at the low end of historical range','Levels are unprecedented in the 400,000-year record','Levels match those of the last interglacial period'],ans:2},
+{q:'Scientist B\'s argument is BEST described as:',opts:['CO₂ and temperature are unrelated','Temperature changes caused CO₂ changes, not the reverse','CO₂ fluctuations are too small to affect climate','The ice core data is unreliable'],ans:1}
+]},
+{title:'Physics Experiment: Projectile Motion',
+text:`A research team tested how launch angle affects the horizontal range of a projectile (a ball launched from a spring mechanism at a constant speed of 20 m/s). They launched the ball at angles from 15° to 75° in 15° increments and measured horizontal distance traveled. Air resistance was considered negligible.
+
+Data Table:
+• 15°: 19.8 m
+• 30°: 34.6 m
+• 45°: 40.0 m
+• 60°: 34.6 m
+• 75°: 19.8 m
+
+The team also noted that the maximum height reached varied: at 15° the ball reached 1.3 m, at 45° it reached 10.2 m, and at 75° it reached 37.2 m.`,
+qs:[
+{q:'At which angle was the horizontal range greatest?',opts:['15°','30°','45°','75°'],ans:2},
+{q:'What pattern exists between the ranges at 30° and 60°?',opts:['60° produces greater range','They are identical','30° produces greater range','60° produces exactly twice the range'],ans:1},
+{q:'If a golfer wants maximum distance, this data suggests aiming at approximately:',opts:['15°','30°','45°','75°'],ans:2},
+{q:'Based on the data, which angle produces the greatest maximum height?',opts:['15°','30°','45°','75°'],ans:3},
+{q:'A student hypothesizes that 90° (straight up) would have the greatest range. This is:',opts:['Correct; greater angle always means greater range','Incorrect; 90° would produce zero horizontal range','Correct; the ball would travel farthest at 90°','Impossible to predict without additional data'],ans:1}
+]}
+];
+
+// ─── STATE & STORAGE ──────────────────────────────────────────────────────────
+const S=k=>localStorage.getItem('a112_'+k);
+const W=(k,v)=>localStorage.setItem('a112_'+k,JSON.stringify(v));
+const J=k=>{try{return JSON.parse(S(k));}catch{return null;}};
+
+let progress = J('progress') || {
+  vocabSeen: 0, vocabCorrect: 0,
+  mcCorrect: 0, mcTotal: 0,
+  fbCorrect: 0, fbTotal: 0,
+  mathCorrect: 0, mathTotal: 0,
+  readingCorrect: 0, readingTotal: 0,
+  sciCorrect: 0, sciTotal: 0,
+  testsCompleted: 0, testScores: []
+};
+function saveProgress(){ W('progress', progress); updateHdrStats(); }
+
+function updateHdrStats(){
+  const total = progress.mcTotal + progress.fbTotal + progress.mathTotal + progress.readingTotal + progress.sciTotal;
+  const correct = progress.mcCorrect + progress.fbCorrect + progress.mathCorrect + progress.readingCorrect + progress.sciCorrect;
+  const pct = total > 0 ? Math.round(100*correct/total) : 0;
+  document.getElementById('hdr-stats').textContent = total > 0 ? `${correct}/${total} correct (${pct}%)` : '';
+}
+updateHdrStats();
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+function showPage(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='dashboard') renderDash();
+}
+
+// ─── VOCAB ────────────────────────────────────────────────────────────────────
+let vocabDeck=[], vocabIdx=0, fcFlipped=false;
+let mcVocabIdx=0, mcCorrectCount=0, mcTotalCount=0;
+let fbVocabIdx=0, fbCorrectCount=0, fbTotalCount=0;
+let matchWordsLeft=[], matchDefsLeft=[], matchSel=null, matchCorrect=0, matchRounds=0;
+
+function initVocab(){
+  const tier = document.getElementById('vocab-tier').value;
+  const mode = document.getElementById('vocab-mode').value;
+  let deck = tier==='all' ? [...VOCAB] : VOCAB.filter(w=>w[3]==tier);
+  // shuffle
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  vocabDeck = deck;
+  vocabIdx = 0; fcFlipped = false;
+  mcVocabIdx=0; mcCorrectCount=0; mcTotalCount=0;
+  fbVocabIdx=0; fbCorrectCount=0; fbTotalCount=0;
+  matchCorrect=0; matchRounds=0;
+
+  // hide all mode sections
+  document.querySelectorAll('#page-vocab .section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('mode-'+mode).classList.add('active');
+
+  document.getElementById('vocab-counter').textContent = deck.length + ' words';
+
+  if(mode==='flashcard') renderFC();
+  else if(mode==='mc') renderMC();
+  else if(mode==='fillblank') renderFB();
+  else if(mode==='match') newMatchRound();
+}
+
+// Flashcard
+function renderFC(){
+  if(vocabIdx >= vocabDeck.length){ showFCDone(); return; }
+  const w = vocabDeck[vocabIdx];
+  fcFlipped = false;
+  document.getElementById('fc').classList.remove('flipped');
+  document.getElementById('fc-word').textContent = w[0];
+  document.getElementById('fc-pos').textContent = w[2];
+  const tierTxt = ['','Tier 1','Tier 2','Tier 3'][w[3]];
+  const tierCls = ['','tier1','tier2','tier3'][w[3]];
+  document.getElementById('fc-tier').textContent = tierTxt;
+  document.getElementById('fc-tier').className = 'fc-tier '+tierCls;
+  document.getElementById('fc-tier-b').textContent = tierTxt;
+  document.getElementById('fc-tier-b').className = 'fc-tier '+tierCls;
+  document.getElementById('fc-def').textContent = w[1];
+  const pct = vocabDeck.length > 0 ? (vocabIdx/vocabDeck.length*100).toFixed(0) : 0;
+  document.getElementById('fc-prog').style.width = pct+'%';
+  document.getElementById('fc-score').textContent = vocabIdx+' / '+vocabDeck.length+' completed';
+}
+function flipCard(){ document.getElementById('fc').classList.toggle('flipped'); fcFlipped=!fcFlipped; }
+function markFC(know){
+  progress.vocabSeen++;
+  if(know) progress.vocabCorrect++;
+  saveProgress();
+  vocabIdx++; renderFC();
+}
+function skipFC(){ vocabIdx++; renderFC(); }
+function showFCDone(){
+  document.getElementById('fc').querySelector('.fc-front').innerHTML = '<div class="fc-word" style="font-size:1.2rem">✓ Deck Complete!</div><div class="fc-pos" style="color:var(--green);margin-top:8px;">'+progress.vocabCorrect+' / '+progress.vocabSeen+' known</div>';
+  document.getElementById('fc-prog').style.width='100%';
+}
+
+// MC
+function renderMC(){
+  if(mcVocabIdx >= vocabDeck.length){ document.getElementById('mc-q').textContent='✓ All words done! Score: '+mcCorrectCount+'/'+mcTotalCount; document.getElementById('mc-opts').innerHTML=''; return; }
+  const w = vocabDeck[mcVocabIdx];
+  document.getElementById('mc-q').textContent = 'Choose the definition for: "'+w[0]+'"';
+  // generate 4 options: correct + 3 random distractors
+  let pool = vocabDeck.filter((_,i)=>i!==mcVocabIdx);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  const wrong = pool.slice(0,3);
+  const opts = [...wrong.map(x=>x[1]), w[1]];
+  for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+  const correctIdx = opts.indexOf(w[1]);
+  const optEl = document.getElementById('mc-opts');
+  optEl.innerHTML='';
+  opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='mc-opt';
+    btn.textContent=opt;
+    btn.onclick=()=>checkMC(btn,i===correctIdx,opts,correctIdx);
+    optEl.appendChild(btn);
+  });
+  document.getElementById('mc-feedback').textContent='';
+  document.getElementById('mc-next-btn').style.display='none';
+  const pct = vocabDeck.length > 0 ? (mcVocabIdx/vocabDeck.length*100).toFixed(0) : 0;
+  document.getElementById('mc-prog').style.width=pct+'%';
+  document.getElementById('mc-score').textContent=mcVocabIdx+'/'+vocabDeck.length+' | Score: '+mcCorrectCount+'/'+mcTotalCount;
+}
+function checkMC(btn,correct,opts,correctIdx){
+  document.querySelectorAll('#mc-opts .mc-opt').forEach((b,i)=>{
+    b.classList.add('disabled');
+    b.onclick=null;
+    if(i===correctIdx) b.classList.add('correct');
+  });
+  if(correct){ btn.classList.add('correct'); document.getElementById('mc-feedback').innerHTML='<span class="feedback-good">✓ Correct!</span>'; mcCorrectCount++; progress.mcCorrect++; }
+  else{ btn.classList.add('wrong'); document.getElementById('mc-feedback').innerHTML='<span class="feedback-low">✗ Incorrect.</span>'; }
+  mcTotalCount++; progress.mcTotal++;
+  saveProgress();
+  document.getElementById('mc-next-btn').style.display='inline-block';
+}
+function nextMC(){ mcVocabIdx++; renderMC(); }
+
+// Fill Blank
+function renderFB(){
+  if(fbVocabIdx >= vocabDeck.length){ document.getElementById('fb-def').textContent='✓ All done! Score: '+fbCorrectCount+'/'+fbTotalCount; document.getElementById('fb-inp').style.display='none'; return; }
+  const w = vocabDeck[fbVocabIdx];
+  document.getElementById('fb-def').innerHTML='Define this word: <strong style="color:var(--blue)">___</strong><br><em style="font-size:.8rem;color:var(--muted)">Definition: '+w[1]+'</em>';
+  document.getElementById('fb-inp').value='';
+  document.getElementById('fb-inp').style.display='inline-block';
+  document.getElementById('fb-feedback').textContent='';
+  const pct = vocabDeck.length>0?(fbVocabIdx/vocabDeck.length*100).toFixed(0):0;
+  document.getElementById('fb-prog').style.width=pct+'%';
+  document.getElementById('fb-score').textContent=fbVocabIdx+'/'+vocabDeck.length+' | Score: '+fbCorrectCount+'/'+fbTotalCount;
+  document.getElementById('fb-inp').focus();
+}
+function checkFB(){
+  const w = vocabDeck[fbVocabIdx];
+  const inp = document.getElementById('fb-inp').value.trim().toLowerCase();
+  const correct = w[0].toLowerCase();
+  if(inp===correct){
+    document.getElementById('fb-feedback').innerHTML='<span class="feedback-good">✓ Correct!</span>';
+    fbCorrectCount++; progress.fbCorrect++;
+  } else {
+    document.getElementById('fb-feedback').innerHTML='<span class="feedback-low">✗ Answer: <strong>'+w[0]+'</strong></span>';
+  }
+  fbTotalCount++; progress.fbTotal++;
+  saveProgress();
+  setTimeout(()=>{ fbVocabIdx++; renderFB(); }, 1200);
+}
+function skipFB(){ fbVocabIdx++; renderFB(); }
+
+// Match
+function newMatchRound(){
+  if(vocabDeck.length < 5){ document.getElementById('match-feedback').textContent='Need at least 5 words. Choose a larger tier.'; return; }
+  const pool = [...vocabDeck];
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  const selected = pool.slice(0,5);
+  matchWordsLeft = [...selected];
+  matchDefsLeft = [...selected];
+  for(let i=matchDefsLeft.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[matchDefsLeft[i],matchDefsLeft[j]]=[matchDefsLeft[j],matchDefsLeft[i]];}
+  matchSel = null;
+  document.getElementById('match-next-btn').style.display='none';
+  renderMatch();
+  matchRounds++;
+  const pct = Math.min(100, matchCorrect*4);
+  document.getElementById('match-prog').style.width=pct+'%';
+  document.getElementById('match-score').textContent='Correct matches: '+matchCorrect;
+}
+function renderMatch(){
+  const wEl = document.getElementById('match-words');
+  const dEl = document.getElementById('match-defs');
+  wEl.innerHTML=''; dEl.innerHTML='';
+  matchWordsLeft.forEach(w=>{
+    const d=document.createElement('div');
+    d.className='match-item'+(w._matched?' matched':'');
+    d.textContent=w[0];
+    d.dataset.id=w[0];
+    if(!w._matched) d.onclick=()=>selectMatchWord(d,w);
+    wEl.appendChild(d);
+  });
+  matchDefsLeft.forEach(w=>{
+    const d=document.createElement('div');
+    d.className='match-item'+(w._matched?' matched':'');
+    d.textContent=w[1].length>80?w[1].slice(0,80)+'…':w[1];
+    d.dataset.id=w[0];
+    if(!w._matched) d.onclick=()=>selectMatchDef(d,w);
+    dEl.appendChild(d);
+  });
+}
+let matchSelWord=null;
+function selectMatchWord(el,w){
+  document.querySelectorAll('#match-words .match-item').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected'); matchSelWord=w;
+}
+function selectMatchDef(el,w){
+  if(!matchSelWord){ document.getElementById('match-feedback').textContent='First click a word on the left.'; return; }
+  if(matchSelWord[0]===w[0]){
+    matchSelWord._matched=true; w._matched=true;
+    el.classList.add('matched'); matchCorrect++; progress.mcCorrect++;
+    document.getElementById('match-feedback').innerHTML='<span class="feedback-good">✓ Correct match!</span>';
+    if(matchWordsLeft.every(x=>x._matched)){
+      document.getElementById('match-feedback').innerHTML='<span class="feedback-good">🎉 Round complete!</span>';
+      document.getElementById('match-next-btn').style.display='inline-block';
+    }
+  } else {
+    el.classList.add('wrong-match');
+    document.getElementById('match-feedback').innerHTML='<span class="feedback-low">✗ Not a match. Try again.</span>';
+    setTimeout(()=>{ el.classList.remove('wrong-match'); renderMatch(); },800);
+  }
+  matchSelWord=null;
+  document.querySelectorAll('#match-words .match-item').forEach(x=>x.classList.remove('selected'));
+  renderMatch();
+  const pct = Math.min(100, matchCorrect*4);
+  document.getElementById('match-prog').style.width=pct+'%';
+  document.getElementById('match-score').textContent='Correct matches: '+matchCorrect;
+}
+
+// Init vocab on load
+initVocab();
+
+// ─── READING ──────────────────────────────────────────────────────────────────
+function buildPassageSel(){
+  const sel = document.getElementById('passage-sel');
+  PASSAGES.forEach((p,i)=>{ const opt=document.createElement('option'); opt.value=i; opt.textContent=p.title; sel.appendChild(opt); });
+  loadPassage();
+}
+function loadPassage(){
+  const idx = parseInt(document.getElementById('passage-sel').value);
+  const p = PASSAGES[idx];
+  document.getElementById('passage-title').textContent = p.title;
+  document.getElementById('passage-text').textContent = p.text;
+  const qsEl = document.getElementById('passage-qs');
+  qsEl.innerHTML='';
+  p.qs.forEach((q,qi)=>{
+    const div=document.createElement('div');
+    div.className='q-item';
+    div.id='pq-'+qi;
+    let html='<div class="q-text">'+(qi+1)+'. '+q.q+'</div><div class="q-opts">';
+    q.opts.forEach((opt,oi)=>{
+      html+='<button class="q-opt" id="pq-'+qi+'-'+oi+'" onclick="selectPQ('+qi+','+oi+')">'+'ABCD'[oi]+'. '+opt+'</button>';
+    });
+    html+='</div>';
+    div.innerHTML=html;
+    qsEl.appendChild(div);
+  });
+  document.getElementById('reading-result').innerHTML='';
+  document.getElementById('reading-score-badge').textContent='';
+}
+function selectPQ(qi,oi){
+  const qEl=document.getElementById('pq-'+qi);
+  qEl.querySelectorAll('.q-opt').forEach(b=>b.classList.remove('selected'));
+  const btn=document.getElementById('pq-'+qi+'-'+oi);
+  btn.style.borderColor='var(--blue)'; btn.style.background='#4f8ef720';
+  btn.dataset.selected='true';
+}
+function scorePassage(){
+  const idx = parseInt(document.getElementById('passage-sel').value);
+  const p = PASSAGES[idx];
+  let correct=0;
+  p.qs.forEach((q,qi)=>{
+    const qEl=document.getElementById('pq-'+qi);
+    const buttons = qEl.querySelectorAll('.q-opt');
+    buttons.forEach((btn,oi)=>{
+      btn.classList.remove('correct','wrong');
+      if(oi===q.ans) btn.classList.add('correct');
+      else if(btn.dataset.selected==='true') btn.classList.add('wrong');
+      btn.onclick=null;
+    });
+    const selBtn = qEl.querySelector('.q-opt[data-selected="true"]');
+    if(selBtn){
+      const selIdx = Array.from(buttons).indexOf(selBtn);
+      if(selIdx===q.ans) correct++;
+    }
+  });
+  progress.readingCorrect += correct;
+  progress.readingTotal += p.qs.length;
+  saveProgress();
+  const pct = Math.round(100*correct/p.qs.length);
+  let cls = pct>=80?'feedback-good':pct>=60?'feedback-mid':'feedback-low';
+  document.getElementById('reading-result').innerHTML='<div class="card"><span class="'+cls+'" style="font-size:1.1rem;">'+correct+'/'+p.qs.length+' correct ('+pct+'%)</span></div>';
+  document.getElementById('reading-score-badge').innerHTML='<span class="badge '+(pct>=80?'badge-green':pct>=60?'badge-yellow':'badge-red')+'">'+pct+'%</span>';
+}
+function resetPassage(){ loadPassage(); }
+buildPassageSel();
+
+// ─── MATH ─────────────────────────────────────────────────────────────────────
+let mathPool=[], mathIdx=0, mathCorrectCount=0, mathTotalCount=0;
+function loadMath(){
+  const cat = document.getElementById('math-cat').value;
+  mathPool = cat==='all' ? [...MATH] : MATH.filter(m=>m.cat===cat);
+  for(let i=mathPool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[mathPool[i],mathPool[j]]=[mathPool[j],mathPool[i]];}
+  mathIdx = 0;
+  renderMathQ();
+}
+function renderMathQ(){
+  if(mathIdx >= mathPool.length){ mathIdx=0; renderMathQ(); return; }
+  const m = mathPool[mathIdx];
+  document.getElementById('math-q').textContent = m.q;
+  document.getElementById('math-hint').textContent = '';
+  document.getElementById('math-hint-btn').style.display='inline-block';
+  document.getElementById('math-next-btn').style.display='none';
+  document.getElementById('math-feedback').textContent='';
+  const optsEl=document.getElementById('math-opts');
+  optsEl.innerHTML='';
+  m.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='mc-opt';
+    btn.textContent=opt;
+    btn.onclick=()=>checkMath(btn,i===m.ans,m);
+    optsEl.appendChild(btn);
+  });
+  const badge=['algebra','geometry','data','advanced'].includes(m.cat)?{algebra:'Algebra',geometry:'Geometry',data:'Data & Stats',advanced:'Advanced'}[m.cat]:'';
+  document.getElementById('math-counter').innerHTML='<span class="badge badge-yellow">'+badge+'</span> '+mathTotalCount+' solved';
+}
+function checkMath(btn,correct,m){
+  document.querySelectorAll('#math-opts .mc-opt').forEach((b,i)=>{
+    b.classList.add('disabled'); b.onclick=null;
+    if(i===m.ans) b.classList.add('correct');
+  });
+  if(correct){ btn.classList.add('correct'); document.getElementById('math-feedback').innerHTML='<span class="feedback-good">✓ Correct!</span>'; mathCorrectCount++; progress.mathCorrect++; }
+  else{ btn.classList.add('wrong'); document.getElementById('math-feedback').innerHTML='<span class="feedback-low">✗ Incorrect. Hint: '+m.hint+'</span>'; }
+  mathTotalCount++; progress.mathTotal++;
+  saveProgress();
+  const pct=mathTotalCount>0?Math.round(100*mathCorrectCount/mathTotalCount):0;
+  document.getElementById('math-prog').style.width=pct+'%';
+  document.getElementById('math-score-txt').textContent=mathCorrectCount+'/'+mathTotalCount+' correct ('+pct+'%)';
+  document.getElementById('math-next-btn').style.display='inline-block';
+  document.getElementById('math-hint-btn').style.display='none';
+  mathIdx++;
+}
+function showMathHint(){
+  document.getElementById('math-hint').textContent='💡 ' + mathPool[mathIdx].hint;
+  document.getElementById('math-hint-btn').style.display='none';
+}
+loadMath();
+
+// ─── ACT SCIENCE ──────────────────────────────────────────────────────────────
+function buildSciSel(){
+  const sel=document.getElementById('sci-sel');
+  SCI_PASSAGES.forEach((p,i)=>{ const opt=document.createElement('option'); opt.value=i; opt.textContent=p.title; sel.appendChild(opt); });
+  loadSci();
+}
+function loadSci(){
+  const idx=parseInt(document.getElementById('sci-sel').value);
+  const p=SCI_PASSAGES[idx];
+  document.getElementById('sci-title').textContent=p.title;
+  document.getElementById('sci-text').textContent=p.text;
+  const qsEl=document.getElementById('sci-qs');
+  qsEl.innerHTML='';
+  p.qs.forEach((q,qi)=>{
+    const div=document.createElement('div');
+    div.className='q-item';
+    div.id='sq-'+qi;
+    let html='<div class="q-text">'+(qi+1)+'. '+q.q+'</div><div class="q-opts">';
+    q.opts.forEach((opt,oi)=>{
+      html+='<button class="q-opt" id="sq-'+qi+'-'+oi+'" onclick="selectSQ('+qi+','+oi+')">'+'ABCD'[oi]+'. '+opt+'</button>';
+    });
+    html+='</div>';
+    div.innerHTML=html;
+    qsEl.appendChild(div);
+  });
+  document.getElementById('sci-result').innerHTML='';
+  document.getElementById('sci-score-badge').textContent='';
+}
+function selectSQ(qi,oi){
+  const qEl=document.getElementById('sq-'+qi);
+  qEl.querySelectorAll('.q-opt').forEach(b=>{ delete b.dataset.selected; b.style.borderColor=''; b.style.background=''; });
+  const btn=document.getElementById('sq-'+qi+'-'+oi);
+  btn.style.borderColor='var(--blue)'; btn.style.background='#4f8ef720';
+  btn.dataset.selected='true';
+}
+function scoreSci(){
+  const idx=parseInt(document.getElementById('sci-sel').value);
+  const p=SCI_PASSAGES[idx];
+  let correct=0;
+  p.qs.forEach((q,qi)=>{
+    const qEl=document.getElementById('sq-'+qi);
+    const buttons=qEl.querySelectorAll('.q-opt');
+    buttons.forEach((btn,oi)=>{
+      if(oi===q.ans) btn.classList.add('correct');
+      else if(btn.dataset.selected==='true') btn.classList.add('wrong');
+      btn.onclick=null;
+    });
+    const selBtn=qEl.querySelector('.q-opt[data-selected="true"]');
+    if(selBtn&&Array.from(buttons).indexOf(selBtn)===q.ans) correct++;
+  });
+  progress.sciCorrect+=correct; progress.sciTotal+=p.qs.length;
+  saveProgress();
+  const pct=Math.round(100*correct/p.qs.length);
+  let cls=pct>=80?'feedback-good':pct>=60?'feedback-mid':'feedback-low';
+  document.getElementById('sci-result').innerHTML='<div class="card"><span class="'+cls+'" style="font-size:1.1rem;">'+correct+'/'+p.qs.length+' correct ('+pct+'%)</span></div>';
+  document.getElementById('sci-score-badge').innerHTML='<span class="badge '+(pct>=80?'badge-green':pct>=60?'badge-yellow':'badge-red')+'">'+pct+'%</span>';
+}
+function resetSci(){ loadSci(); }
+buildSciSel();
+
+// ─── PRACTICE TEST ────────────────────────────────────────────────────────────
+let testQuestions=[], testAnswers=[], testCurrent=0, testTimer=null, testSecsLeft=2700;
+
+function buildTestQuestions(){
+  // 10 vocab MC
+  let vocabPool=[...VOCAB];
+  for(let i=vocabPool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[vocabPool[i],vocabPool[j]]=[vocabPool[j],vocabPool[i]];}
+  const vocabQs=vocabPool.slice(0,10).map(w=>{
+    let pool=[...vocabPool.filter(x=>x[0]!==w[0])];
+    for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+    const wrong=pool.slice(0,3);
+    const opts=[...wrong.map(x=>x[1]),w[1]];
+    for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+    return {section:'Vocabulary',q:'Define: "'+w[0]+'"',opts,ans:opts.indexOf(w[1])};
+  });
+  // 5 reading Qs from first passage
+  const rp=PASSAGES[0];
+  const readQs=rp.qs.slice(0,5).map(q=>({section:'Reading',q:q.q,opts:q.opts,ans:q.ans}));
+  // 10 math
+  let mathPool2=[...MATH];
+  for(let i=mathPool2.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[mathPool2[i],mathPool2[j]]=[mathPool2[j],mathPool2[i]];}
+  const mathQs=mathPool2.slice(0,10).map(m=>({section:'Math',q:m.q,opts:m.opts,ans:m.ans}));
+  return [...vocabQs,...readQs,...mathQs];
+}
+
+function startTest(){
+  testQuestions=buildTestQuestions();
+  testAnswers=new Array(testQuestions.length).fill(-1);
+  testCurrent=0; testSecsLeft=2700;
+  document.getElementById('test-setup').style.display='none';
+  document.getElementById('test-active').style.display='block';
+  document.getElementById('test-results').style.display='none';
+  renderTestQ();
+  testTimer=setInterval(tickTest,1000);
+}
+function tickTest(){
+  testSecsLeft--;
+  const m=Math.floor(testSecsLeft/60), s=testSecsLeft%60;
+  const tEl=document.getElementById('test-timer');
+  tEl.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  if(testSecsLeft<=300) tEl.classList.add('danger');
+  if(testSecsLeft<=0){ clearInterval(testTimer); endTest(false); }
+}
+function renderTestQ(){
+  if(testCurrent>=testQuestions.length){ endTest(false); return; }
+  const q=testQuestions[testCurrent];
+  document.getElementById('test-qnum').textContent='Question '+(testCurrent+1)+' of '+testQuestions.length+' · '+q.section;
+  document.getElementById('test-q-text').textContent=q.q;
+  const optsEl=document.getElementById('test-q-opts');
+  optsEl.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='mc-opt'+(testAnswers[testCurrent]===i?' selected':'');
+    if(testAnswers[testCurrent]===i){ btn.style.borderColor='var(--blue)'; btn.style.background='#4f8ef720'; }
+    btn.textContent='ABCD'[i]+'. '+opt;
+    btn.onclick=()=>{
+      testAnswers[testCurrent]=i;
+      document.querySelectorAll('#test-q-opts .mc-opt').forEach(b=>{b.style.borderColor='';b.style.background='';});
+      btn.style.borderColor='var(--blue)'; btn.style.background='#4f8ef720';
+      setTimeout(()=>{ testCurrent++; renderTestQ(); },400);
+    };
+    optsEl.appendChild(btn);
+  });
+}
+function testSkip(){ testAnswers[testCurrent]=-1; testCurrent++; renderTestQ(); }
+function endTest(manual){
+  clearInterval(testTimer);
+  let correct=0;
+  testQuestions.forEach((q,i)=>{ if(testAnswers[i]===q.ans) correct++; });
+  const total=testQuestions.length;
+  const pct=Math.round(100*correct/total);
+  progress.testsCompleted++;
+  progress.testScores.push({date:new Date().toLocaleDateString(),score:pct,correct,total});
+  saveProgress();
+  document.getElementById('test-active').style.display='none';
+  const resEl=document.getElementById('test-results');
+  resEl.style.display='block';
+  let breakdown='';
+  ['Vocabulary','Reading','Math'].forEach(sec=>{
+    const secQs=testQuestions.map((q,i)=>({q,a:testAnswers[i]})).filter(x=>x.q.section===sec);
+    const secCorrect=secQs.filter(x=>x.a===x.q.ans).length;
+    breakdown+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem;"><span>'+sec+'</span><span class="badge '+(secCorrect/secQs.length>=0.8?'badge-green':secCorrect/secQs.length>=0.6?'badge-yellow':'badge-red')+'">'+secCorrect+'/'+secQs.length+'</span></div>';
+  });
+  resEl.innerHTML='<div class="card" style="text-align:center;"><div class="card-title">Test Complete'+(manual?' (Ended Early)':'')+'</div><div class="score-circle">'+pct+'%</div><div class="'+(pct>=80?'feedback-good':pct>=60?'feedback-mid':'feedback-low')+'" style="font-size:1.1rem;margin-bottom:12px;">'+correct+'/'+total+' correct</div>'+breakdown+'<button class="btn btn-blue" style="margin-top:14px;" onclick="document.getElementById(\'test-setup\').style.display=\'block\';document.getElementById(\'test-results\').style.display=\'none\';renderTestHistory();">Take Another Test</button></div>';
+}
+function renderTestHistory(){
+  const hist=progress.testScores.slice(-5).reverse();
+  if(hist.length===0){ document.getElementById('test-history').innerHTML='<p style="font-size:.8rem;color:var(--muted);">No tests yet.</p>'; return; }
+  let html='<div class="card-title">Recent Tests</div>';
+  hist.forEach(t=>{ html+='<div style="display:flex;justify-content:space-between;font-size:.82rem;padding:4px 0;"><span>'+t.date+'</span><span class="badge '+(t.score>=80?'badge-green':t.score>=60?'badge-yellow':'badge-red')+'">'+t.correct+'/'+t.total+' ('+t.score+'%)</span></div>'; });
+  document.getElementById('test-history').innerHTML=html;
+}
+renderTestHistory();
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDash(){
+  const total=progress.mcTotal+progress.fbTotal+progress.mathTotal+progress.readingTotal+progress.sciTotal;
+  const correct=progress.mcCorrect+progress.fbCorrect+progress.mathCorrect+progress.readingCorrect+progress.sciCorrect;
+  const pct=total>0?Math.round(100*correct/total):0;
+  const stats=[
+    {num:VOCAB.length,label:'Total Vocab Words'},
+    {num:progress.vocabSeen,label:'Cards Reviewed'},
+    {num:progress.vocabCorrect,label:'Words Known'},
+    {num:total,label:'Qs Attempted'},
+    {num:correct,label:'Correct Answers'},
+    {num:pct+'%',label:'Overall Accuracy'},
+    {num:progress.testsCompleted,label:'Tests Taken'},
+    {num:progress.testScores.length>0?Math.max(...progress.testScores.map(t=>t.score))+'%':'–',label:'Best Test Score'}
+  ];
+  const el=document.getElementById('dash-stats');
+  el.innerHTML=stats.map(s=>'<div class="stat-card"><div class="stat-num">'+s.num+'</div><div class="stat-label">'+s.label+'</div></div>').join('');
+
+  // Vocab by tier
+  const t1=VOCAB.filter(w=>w[3]===1).length;
+  const t2=VOCAB.filter(w=>w[3]===2).length;
+  const t3=VOCAB.filter(w=>w[3]===3).length;
+  document.getElementById('dash-vocab').innerHTML=[
+    {label:'Tier 1 — Common',n:t1,cls:'tier1'},
+    {label:'Tier 2 — Moderate',n:t2,cls:'tier2'},
+    {label:'Tier 3 — Advanced',n:t3,cls:'tier3'}
+  ].map(t=>'<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;"><span>'+t.label+'</span><span class="badge '+t.cls+'">'+t.n+' words</span></div><div class="prog-bar"><div class="prog-fill" style="width:100%;background:var(--'+(t.cls==='tier1'?'green':t.cls==='tier2'?'yellow':'red')+')"></div></div></div>').join('');
+
+  // Section accuracy
+  const sections=[
+    {name:'Vocabulary MC',c:progress.mcCorrect,t:progress.mcTotal},
+    {name:'Fill in Blank',c:progress.fbCorrect,t:progress.fbTotal},
+    {name:'Reading',c:progress.readingCorrect,t:progress.readingTotal},
+    {name:'Math',c:progress.mathCorrect,t:progress.mathTotal},
+    {name:'ACT Science',c:progress.sciCorrect,t:progress.sciTotal}
+  ];
+  document.getElementById('dash-sections').innerHTML=sections.map(s=>{
+    const p=s.t>0?Math.round(100*s.c/s.t):0;
+    return '<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;"><span>'+s.name+'</span><span>'+s.c+'/'+s.t+' ('+p+'%)</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+p+'%;background:var(--'+(p>=80?'green':p>=60?'yellow':'red')+')"></div></div></div>';
+  }).join('');
+}
+function clearProgress(){ progress={vocabSeen:0,vocabCorrect:0,mcCorrect:0,mcTotal:0,fbCorrect:0,fbTotal:0,mathCorrect:0,mathTotal:0,readingCorrect:0,readingTotal:0,sciCorrect:0,sciTotal:0,testsCompleted:0,testScores:[]}; saveProgress(); }
+renderDash();
+</script>
+</body>
+</html>

@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agent #96 — Personal Finance for CS Students</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a1a10;color:#e2e8f0;min-height:100vh}
+header{background:#0f2818;border-bottom:1px solid #1a3d22;padding:16px 24px;display:flex;align-items:center;gap:12px}
+header h1{font-size:1.2rem;font-weight:700;color:#10b981}
+header span{font-size:.85rem;color:#6b7280}
+.badge{background:#10b981;color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px}
+.tabs{display:flex;background:#0a1a10;border-bottom:1px solid #1a3d22;padding:0 24px;gap:4px}
+.tab{padding:12px 20px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:#6b7280;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:#10b981;border-bottom-color:#10b981}
+.tab:hover{color:#a7f3d0}
+.content{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.content.active{display:block}
+.card{background:#0f2818;border:1px solid #1a3d22;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h3{color:#10b981;margin-bottom:12px;font-size:1rem}
+.card h4{color:#fbbf24;margin-bottom:8px;font-size:.9rem}
+label{display:block;font-size:.8rem;color:#9ca3af;margin-bottom:4px;margin-top:12px}
+input[type=number],input[type=text],select{width:100%;background:#061a0c;border:1px solid #1a3d22;border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:.9rem}
+input[type=number]:focus,input[type=text]:focus,select:focus{outline:none;border-color:#10b981}
+input[type=range]{width:100%;accent-color:#10b981}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s}
+.btn-primary{background:#10b981;color:#000}
+.btn-primary:hover{background:#059669}
+.btn-secondary{background:#1a3d22;color:#10b981;border:1px solid #10b981}
+.btn-secondary:hover{background:#10b981;color:#000}
+.btn-sm{padding:5px 10px;font-size:.75rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
+.result-box{background:#061a0c;border:1px solid #1a3d22;border-radius:8px;padding:16px;margin-top:12px}
+.result-box .big{font-size:1.8rem;font-weight:700;color:#10b981}
+.result-box .sub{font-size:.8rem;color:#6b7280;margin-top:4px}
+.year-table{width:100%;border-collapse:collapse;margin-top:12px}
+.year-table th{background:#1a3d22;padding:8px 12px;font-size:.75rem;text-align:left;color:#9ca3af}
+.year-table td{padding:8px 12px;font-size:.85rem;border-bottom:1px solid #1a3d22}
+.year-table tr:last-child td{border-bottom:none;font-weight:700;color:#10b981}
+.section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:12px;margin-top:20px}
+.highlight-box{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:12px;margin-top:8px}
+.highlight-box .label{font-size:.75rem;color:#9ca3af}
+.highlight-box .val{font-size:1.1rem;font-weight:700;color:#10b981}
+.progress-bar{height:8px;background:#1a3d22;border-radius:4px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;background:#10b981;border-radius:4px;transition:width .3s}
+.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:600;margin-right:4px}
+.tag-green{background:rgba(16,185,129,.2);color:#10b981}
+.tag-yellow{background:rgba(251,191,36,.2);color:#fbbf24}
+.tag-red{background:rgba(239,68,68,.2);color:#ef4444}
+.tag-blue{background:rgba(59,130,246,.2);color:#60a5fa}
+.milestone{display:flex;gap:16px;align-items:flex-start;padding:16px;background:#0f2818;border:1px solid #1a3d22;border-radius:10px;margin-bottom:12px}
+.milestone-icon{font-size:1.5rem;flex-shrink:0}
+.milestone-check{width:20px;height:20px;border-radius:6px;border:2px solid #1a3d22;cursor:pointer;flex-shrink:0;transition:all .2s;background:transparent}
+.milestone-check.done{background:#10b981;border-color:#10b981}
+.flip-tip{font-size:.75rem;color:#6b7280;cursor:pointer;text-decoration:underline}
+.tip-content{display:none;margin-top:8px;font-size:.8rem;color:#a7f3d0;background:rgba(16,185,129,.08);border-radius:6px;padding:8px}
+.tip-content.show{display:block}
+.net-worth-bar{display:flex;height:32px;border-radius:8px;overflow:hidden;margin-top:8px}
+.nw-assets{background:#10b981;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#000;transition:width .3s}
+.nw-liabilities{background:#ef4444;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;transition:width .3s}
+table.compare{width:100%;border-collapse:collapse;margin-top:12px}
+table.compare th{background:#1a3d22;padding:8px;font-size:.75rem;text-align:center;color:#9ca3af}
+table.compare td{padding:8px;font-size:.82rem;text-align:center;border-bottom:1px solid #0f2818}
+table.compare td:first-child{text-align:left;font-weight:600;color:#a7f3d0}
+.roth-vs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.roth-box{background:#061a0c;border-radius:8px;padding:12px}
+.roth-box h4{font-size:.85rem;margin-bottom:8px}
+.roth-box ul{list-style:none;font-size:.78rem;color:#9ca3af}
+.roth-box ul li{padding:3px 0;padding-left:12px;position:relative}
+.roth-box ul li::before{content:'▸';position:absolute;left:0;color:#10b981}
+canvas{border-radius:8px;width:100%;max-width:600px;display:block;margin-top:12px}
+.offer-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:8px}
+.offer-row input{flex:1}
+.col-separator{width:1px;background:#1a3d22;align-self:stretch}
+@media(max-width:768px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.roth-vs{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">#96</div>
+  <h1>💰 Personal Finance for CS Students</h1>
+  <span>You're about to earn more than most. Here's what to do with it.</span>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('offer')">OFFER</button>
+  <button class="tab" onclick="showTab('budget')">BUDGET</button>
+  <button class="tab" onclick="showTab('invest')">INVEST</button>
+  <button class="tab" onclick="showTab('roadmap')">ROADMAP</button>
+</div>
+
+<!-- OFFER TAB -->
+<div id="tab-offer" class="content active">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <h3>TC Calculator</h3>
+        <label>Base Salary ($/yr)</label>
+        <input type="number" id="base" value="150000" oninput="calcTC()"/>
+        <label>Signing Bonus — Year 1 ($)</label>
+        <input type="number" id="sign1" value="20000" oninput="calcTC()"/>
+        <label>Signing Bonus — Year 2 ($)</label>
+        <input type="number" id="sign2" value="10000" oninput="calcTC()"/>
+        <label>Annual Bonus Target (%)</label>
+        <input type="number" id="bonus_pct" value="10" min="0" max="50" oninput="calcTC()"/>
+        <label>RSU Total Grant ($)</label>
+        <input type="number" id="rsu_grant" value="200000" oninput="calcTC()"/>
+        <label>Vesting Schedule</label>
+        <select id="vest_sched" onchange="calcTC()">
+          <option value="standard">Standard 25% / yr</option>
+          <option value="backloaded">Backloaded 5/15/40/40</option>
+          <option value="frontloaded">Frontloaded 33/33/22/12</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <h3>Cost of Living Adjuster</h3>
+        <label>Offer City</label>
+        <select id="col_city" onchange="calcCOL()">
+          <option value="SF">San Francisco</option>
+          <option value="NYC">New York City</option>
+          <option value="SEA">Seattle</option>
+          <option value="AUS" selected>Austin (baseline)</option>
+          <option value="REM">Remote</option>
+          <option value="BOS">Boston</option>
+          <option value="CHI">Chicago</option>
+          <option value="LA">Los Angeles</option>
+          <option value="DEN">Denver</option>
+          <option value="MIA">Miami</option>
+        </select>
+        <div id="col-result" class="result-box" style="margin-top:12px">
+          <div class="label" style="font-size:.75rem;color:#9ca3af">Austin equivalent purchasing power</div>
+          <div class="big" id="col-adjusted">—</div>
+          <div class="sub" id="col-note"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>4-Year TC Breakdown</h3>
+        <table class="year-table" id="tc-table">
+          <thead><tr><th>Year</th><th>Base</th><th>Bonus</th><th>RSU</th><th>Signing</th><th>Total</th></tr></thead>
+          <tbody id="tc-tbody"></tbody>
+        </table>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div class="highlight-box">
+            <div class="label">4-Year Total TC</div>
+            <div class="val" id="tc-4yr">$0</div>
+          </div>
+          <div class="highlight-box">
+            <div class="label">Est. Monthly Take-Home</div>
+            <div class="val" id="tc-monthly">$0</div>
+          </div>
+        </div>
+        <div id="tax-info" class="result-box" style="margin-top:12px;font-size:.8rem"></div>
+      </div>
+
+      <div class="card">
+        <h3>RSU Vesting Tracker</h3>
+        <div class="grid3">
+          <div>
+            <label>Grant Date</label>
+            <input type="text" id="grant_date" placeholder="2024-01-01" oninput="calcRSU()"/>
+          </div>
+          <div>
+            <label>Grant Amount ($)</label>
+            <input type="number" id="grant_amt" value="200000" oninput="calcRSU()"/>
+          </div>
+          <div>
+            <label>Current Stock Price ($)</label>
+            <input type="number" id="stock_price" value="100" oninput="calcRSU()"/>
+          </div>
+        </div>
+        <div id="rsu-tracker" style="margin-top:12px;font-size:.8rem;max-height:180px;overflow-y:auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Offer Comparison (up to 3 offers)</h3>
+    <div id="offer-compare-inputs" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+    </div>
+    <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="addOfferField()">+ Add Offer</button>
+    <div id="offer-compare-table" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<!-- BUDGET TAB -->
+<div id="tab-budget" class="content">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <h3>New Grad Budget Builder</h3>
+        <label>Your City</label>
+        <select id="budget_city" onchange="updateBudget()">
+          <option value="SF">San Francisco</option>
+          <option value="NYC">New York City</option>
+          <option value="SEA" selected>Seattle</option>
+        </select>
+        <label>Monthly Take-Home ($)</label>
+        <input type="number" id="take_home" value="8000" oninput="updateBudget()"/>
+        <label>Living Situation</label>
+        <select id="living" onchange="updateBudget()">
+          <option value="shared">Shared apartment</option>
+          <option value="studio">Own studio</option>
+        </select>
+
+        <div class="section-title" style="margin-top:20px">Monthly Expenses</div>
+        <div id="expense-inputs"></div>
+
+        <label>Student Loan Payment ($/mo)</label>
+        <input type="number" id="loan_payment" value="0" oninput="updateBudget()"/>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>Budget Analysis</h3>
+        <div id="budget-analysis"></div>
+      </div>
+
+      <div class="card">
+        <h3>Savings & Emergency Fund</h3>
+        <div id="savings-analysis"></div>
+        <label style="margin-top:16px">Current Emergency Fund ($)</label>
+        <input type="number" id="emergency_saved" value="0" oninput="updateBudget()"/>
+        <div id="emergency-analysis" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INVEST TAB -->
+<div id="tab-invest" class="content">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <h3>401(k) — Your Most Powerful Tool</h3>
+        <p style="font-size:.85rem;color:#9ca3af;margin-bottom:12px">A pre-tax (or Roth) retirement account through your employer. Contributions reduce your taxable income <em>right now</em>.</p>
+        <div class="highlight-box" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><div class="label">2024 Limit</div><div class="val">$23,000</div></div>
+          <div><div class="label">Employer Match (typical)</div><div class="val">3–6%</div></div>
+        </div>
+        <div style="background:#061a0c;border-radius:8px;padding:12px;margin-top:12px;font-size:.82rem;color:#a7f3d0">
+          💡 <strong>Golden rule:</strong> Always contribute <em>at least</em> enough to get the full employer match. That's a 50–100% instant return.
+        </div>
+        <div class="roth-vs">
+          <div class="roth-box">
+            <h4 style="color:#10b981">Traditional 401k</h4>
+            <ul>
+              <li>Pre-tax contributions</li>
+              <li>Pay tax on withdrawal</li>
+              <li>Best if: you expect lower income in retirement</li>
+              <li>Required minimum distributions at 73</li>
+            </ul>
+          </div>
+          <div class="roth-box">
+            <h4 style="color:#fbbf24">Roth 401k</h4>
+            <ul>
+              <li>After-tax contributions</li>
+              <li>Tax-FREE withdrawals</li>
+              <li>Best if: you're in a low bracket now (new grad!)</li>
+              <li>No RMDs</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>RSU Tax Guide</h3>
+        <p style="font-size:.82rem;color:#9ca3af;margin-bottom:10px">RSUs are taxed as <strong style="color:#fbbf24">ordinary income</strong> when they vest — based on the stock price at vest date.</p>
+        <table class="compare">
+          <tr><th>Scenario</th><th>Tax Treatment</th><th>Risk</th></tr>
+          <tr><td>Sell immediately at vest</td><td style="color:#10b981">Income tax only</td><td style="color:#10b981">None</td></tr>
+          <tr><td>Hold &lt; 1 year after vest</td><td style="color:#fbbf24">Income tax + short-term cap gains</td><td style="color:#fbbf24">Medium</td></tr>
+          <tr><td>Hold &gt; 1 year after vest</td><td style="color:#60a5fa">Income tax + long-term cap gains (lower!)</td><td style="color:#ef4444">High (stock volatility)</td></tr>
+        </table>
+        <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px;margin-top:10px;font-size:.78rem">
+          ⚠️ <strong>Watch out:</strong> RSU income is added to your W-2 and may push you into a higher bracket. Your employer withholds ~22% but you may owe more at tax time.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>HSA — Triple Tax Advantage</h3>
+        <p style="font-size:.82rem;color:#9ca3af;margin-bottom:10px">Only available with a High Deductible Health Plan (HDHP). The most tax-efficient account that exists.</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div class="highlight-box" style="text-align:center">
+            <div class="label">Contributions</div>
+            <div style="font-size:1.2rem">🟢</div>
+            <div style="font-size:.75rem;color:#10b981">Pre-tax</div>
+          </div>
+          <div class="highlight-box" style="text-align:center">
+            <div class="label">Growth</div>
+            <div style="font-size:1.2rem">🟢</div>
+            <div style="font-size:.75rem;color:#10b981">Tax-free</div>
+          </div>
+          <div class="highlight-box" style="text-align:center">
+            <div class="label">Withdrawals (medical)</div>
+            <div style="font-size:1.2rem">🟢</div>
+            <div style="font-size:.75rem;color:#10b981">Tax-free</div>
+          </div>
+        </div>
+        <div class="grid2" style="margin-top:8px">
+          <div class="highlight-box"><div class="label">2024 Individual Limit</div><div class="val">$4,150</div></div>
+          <div class="highlight-box"><div class="label">2024 Family Limit</div><div class="val">$8,300</div></div>
+        </div>
+        <p style="font-size:.78rem;color:#9ca3af;margin-top:8px">Strategy: invest the HSA (many custodians offer this), pay medical costs out-of-pocket now, reimburse yourself later — tax-free growth for decades.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>Compound Interest Calculator</h3>
+        <label>Monthly Investment ($)</label>
+        <input type="number" id="monthly_inv" value="1000" oninput="calcCompound()"/>
+        <label>Annual Return: <span id="return_pct_label">7</span>%</label>
+        <input type="range" id="return_pct" min="1" max="15" value="7" oninput="calcCompound();document.getElementById('return_pct_label').textContent=this.value"/>
+        <label>Years: <span id="years_label">30</span></label>
+        <input type="range" id="invest_years" min="1" max="40" value="30" oninput="calcCompound();document.getElementById('years_label').textContent=this.value"/>
+        <canvas id="compound-chart" height="250"></canvas>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px">
+          <div class="highlight-box"><div class="label">Total Invested</div><div class="val" id="total-invested">$0</div></div>
+          <div class="highlight-box"><div class="label">Total Gains</div><div class="val" style="color:#fbbf24" id="total-gains">$0</div></div>
+          <div class="highlight-box"><div class="label">Final Balance</div><div class="val" id="final-balance">$0</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>$1K/month at 7% Annual Return</h3>
+        <table class="compare">
+          <tr><th>Years</th><th>Total Invested</th><th>Ending Balance</th><th>Total Gains</th></tr>
+          <tr><td>10 yrs</td><td>$120,000</td><td style="color:#10b981">$173,084</td><td>$53,084</td></tr>
+          <tr><td>15 yrs</td><td>$180,000</td><td style="color:#10b981">$316,017</td><td>$136,017</td></tr>
+          <tr><td>20 yrs</td><td>$240,000</td><td style="color:#10b981">$528,613</td><td>$288,613</td></tr>
+          <tr><td>25 yrs</td><td>$300,000</td><td style="color:#10b981">$843,933</td><td>$543,933</td></tr>
+          <tr><td>30 yrs</td><td>$360,000</td><td style="color:#fbbf24;font-weight:700">$1,327,243</td><td>$967,243</td></tr>
+        </table>
+
+        <div class="card" style="margin-top:16px">
+          <h3>Index Funds vs Individual Stocks</h3>
+          <table class="compare">
+            <tr><th></th><th>Index Funds (VTI, VOO)</th><th>Individual Stocks</th></tr>
+            <tr><td>Diversification</td><td style="color:#10b981">✅ 500-3600+ companies</td><td style="color:#ef4444">❌ Concentrated</td></tr>
+            <tr><td>Expense Ratio</td><td style="color:#10b981">✅ 0.03–0.07%</td><td style="color:#10b981">✅ $0 commissions</td></tr>
+            <tr><td>Time Required</td><td style="color:#10b981">✅ Set-and-forget</td><td style="color:#ef4444">❌ Research-heavy</td></tr>
+            <tr><td>Beat the market?</td><td style="color:#9ca3af">Matches market</td><td style="color:#ef4444">Most don't over 10yr</td></tr>
+            <tr><td>Best for new grads</td><td style="color:#10b981">✅ Yes</td><td style="color:#9ca3af">Small % only</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROADMAP TAB -->
+<div id="tab-roadmap" class="content">
+  <div class="grid2">
+    <div id="milestone-list"></div>
+    <div>
+      <div class="card">
+        <h3>Net Worth Tracker</h3>
+        <div class="section-title">ASSETS</div>
+        <div id="asset-inputs"></div>
+        <div class="section-title" style="margin-top:16px">LIABILITIES</div>
+        <div id="liability-inputs"></div>
+        <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="saveNetWorth()">Save Snapshot</button>
+        <div id="net-worth-result" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS = 'finance96_';
+const fmt = n => '$' + Math.round(n).toLocaleString();
+const fmtK = n => n >= 1e6 ? '$' + (n/1e6).toFixed(2) + 'M' : '$' + Math.round(n/1000) + 'K';
+
+function showTab(t) {
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── OFFER TAB ─────────────────────────────────────────────────────────────
+const VEST = { standard:[.25,.25,.25,.25], backloaded:[.05,.15,.40,.40], frontloaded:[.33,.33,.22,.12] };
+const COL = { SF:189, NYC:187, SEA:155, AUS:120, REM:100, BOS:162, CHI:107, LA:173, DEN:128, MIA:123 };
+const COL_NAMES = { SF:'San Francisco', NYC:'New York City', SEA:'Seattle', AUS:'Austin', REM:'Remote', BOS:'Boston', CHI:'Chicago', LA:'Los Angeles', DEN:'Denver', MIA:'Miami' };
+
+function calcTC() {
+  const base = +document.getElementById('base').value || 0;
+  const s1 = +document.getElementById('sign1').value || 0;
+  const s2 = +document.getElementById('sign2').value || 0;
+  const bp = (+document.getElementById('bonus_pct').value || 0) / 100;
+  const rsu = +document.getElementById('rsu_grant').value || 0;
+  const sched = document.getElementById('vest_sched').value;
+  const pcts = VEST[sched];
+  const bonus = base * bp;
+  const tbody = document.getElementById('tc-tbody');
+  let total = 0;
+  tbody.innerHTML = '';
+  [1,2,3,4].forEach(y => {
+    const sign = y===1 ? s1 : y===2 ? s2 : 0;
+    const rsuY = rsu * pcts[y-1];
+    const yr = base + bonus + rsuY + sign;
+    total += yr;
+    tbody.innerHTML += `<tr><td>Year ${y}</td><td>${fmt(base)}</td><td>${fmt(bonus)}</td><td>${fmt(rsuY)}</td><td>${fmt(sign)}</td><td style="color:#10b981">${fmt(yr)}</td></tr>`;
+  });
+  tbody.innerHTML += `<tr><td colspan="5">4-Year Total</td><td>${fmt(total)}</td></tr>`;
+  document.getElementById('tc-4yr').textContent = fmtK(total);
+  const monthly = (base * 0.7) / 12;
+  document.getElementById('tc-monthly').textContent = fmt(monthly);
+  document.getElementById('tax-info').innerHTML = calcTax(base);
+  calcCOL();
+}
+
+function calcTax(income) {
+  const brackets = [[11600,.10],[47150,.12],[100525,.22],[191950,.24],[243725,.32],[609350,.35],[Infinity,.37]];
+  let tax = 0, prev = 0;
+  for (const [limit, rate] of brackets) {
+    if (income <= limit) { tax += (income - prev) * rate; break; }
+    tax += (limit - prev) * rate; prev = limit;
+  }
+  const eff = tax / income;
+  const marginal = brackets.find(([l]) => income <= l)?.[1] || .37;
+  return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+    <div><div style="font-size:.7rem;color:#9ca3af">Est. Federal Tax</div><div style="font-weight:700;color:#ef4444">${fmt(tax)}</div></div>
+    <div><div style="font-size:.7rem;color:#9ca3af">Effective Rate</div><div style="font-weight:700;color:#fbbf24">${(eff*100).toFixed(1)}%</div></div>
+    <div><div style="font-size:.7rem;color:#9ca3af">Marginal Rate</div><div style="font-weight:700;color:#fbbf24">${(marginal*100).toFixed(0)}%</div></div>
+  </div><div style="font-size:.7rem;color:#6b7280;margin-top:6px">2024 brackets, single filer. Excludes state tax, FICA, 401k deductions.</div>`;
+}
+
+function calcCOL() {
+  const city = document.getElementById('col_city').value;
+  const base = +document.getElementById('base').value || 0;
+  const index = COL[city];
+  const austin_eq = base * (120 / index);
+  document.getElementById('col-adjusted').textContent = fmt(austin_eq);
+  document.getElementById('col-note').textContent = `${COL_NAMES[city]} COL index: ${index} vs Austin: 120. Your ${fmt(base)} in ${COL_NAMES[city]} has the same purchasing power as ${fmt(austin_eq)} in Austin.`;
+}
+
+function calcRSU() {
+  const amt = +document.getElementById('grant_amt').value || 0;
+  const price = +document.getElementById('stock_price').value || 0;
+  const dateStr = document.getElementById('grant_date').value;
+  const shares = amt / price;
+  let html = '<table class="year-table"><thead><tr><th>Quarter</th><th>Vested %</th><th>Shares</th><th>Value</th></tr></thead><tbody>';
+  const pcts = [0,0,0,25,25,25,25,25,25,25,25,100]; // cliff at 1yr then quarterly
+  let cumPct = 0;
+  for (let i=1; i<=16; i++) {
+    const qPct = (i===4||i===8||i===12||i===16) ? 6.25 : 0;
+    cumPct = Math.min(i >= 4 ? (i-3)*6.25 : 0, 100);
+    const vestedShares = (shares * cumPct / 100).toFixed(1);
+    const val = fmt((shares * cumPct / 100) * price);
+    html += `<tr><td>Q${i}</td><td>${cumPct.toFixed(1)}%</td><td>${vestedShares}</td><td>${val}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('rsu-tracker').innerHTML = html;
+}
+
+// Offer comparison
+const offers = [];
+function addOfferField() {
+  if (offers.length >= 3) return;
+  const idx = offers.length;
+  offers.push({base:0,sign1:0,sign2:0,bonus:0,rsu:0,sched:'standard'});
+  const col = document.createElement('div');
+  col.id = 'offer-col-' + idx;
+  col.innerHTML = `<div class="section-title">Offer ${idx+1}</div>
+    <label>Base ($)</label><input type="number" value="150000" oninput="updateOffer(${idx},'base',this.value)"/>
+    <label>Signing Y1 ($)</label><input type="number" value="20000" oninput="updateOffer(${idx},'sign1',this.value)"/>
+    <label>Bonus %</label><input type="number" value="10" oninput="updateOffer(${idx},'bonus',this.value)"/>
+    <label>RSU Grant ($)</label><input type="number" value="200000" oninput="updateOffer(${idx},'rsu',this.value)"/>
+    <select onchange="updateOffer(${idx},'sched',this.value)">
+      <option value="standard">Standard 25%/yr</option>
+      <option value="backloaded">Backloaded 5/15/40/40</option>
+    </select>`;
+  document.getElementById('offer-compare-inputs').appendChild(col);
+  renderOfferTable();
+}
+
+function updateOffer(idx, key, val) {
+  offers[idx][key] = +val || 0;
+  renderOfferTable();
+}
+
+function renderOfferTable() {
+  if (!offers.length) { document.getElementById('offer-compare-table').innerHTML = ''; return; }
+  let html = '<table class="year-table"><thead><tr><th>Year</th>';
+  offers.forEach((_,i) => html += `<th>Offer ${i+1}</th>`);
+  html += '</tr></thead><tbody>';
+  for (let y=1; y<=4; y++) {
+    html += `<tr><td>Year ${y}</td>`;
+    offers.forEach(o => {
+      const pcts = VEST[o.sched||'standard'];
+      const yr = o.base + o.base*(o.bonus/100) + o.rsu*pcts[y-1] + (y===1?o.sign1:0);
+      html += `<td>${fmt(yr)}</td>`;
+    });
+    html += '</tr>';
+  }
+  html += '<tr><td><strong>4-Yr Total</strong></td>';
+  offers.forEach(o => {
+    const pcts = VEST[o.sched||'standard'];
+    let tot = 0;
+    for (let y=0;y<4;y++) tot += o.base + o.base*(o.bonus/100) + o.rsu*pcts[y] + (y===0?o.sign1:0);
+    html += `<td style="color:#10b981;font-weight:700">${fmt(tot)}</td>`;
+  });
+  html += '</tr></tbody></table>';
+  document.getElementById('offer-compare-table').innerHTML = html;
+}
+
+// ─── BUDGET TAB ─────────────────────────────────────────────────────────────
+const EXPENSES = {
+  rent:    { label:'Rent', SF:{shared:[1200,1800],studio:[2200,3200]}, NYC:{shared:[1100,1700],studio:[2000,3000]}, SEA:{shared:[800,1300],studio:[1500,2200]} },
+  food:    { label:'Groceries', all:[300,500] },
+  dining:  { label:'Dining Out', all:[200,500] },
+  transport:{ label:'Transport', SF:[100,150], NYC:[110,150], SEA:[90,130] },
+  health:  { label:'Health Insurance', all:[0,200] },
+  utilities:{ label:'Utilities', all:[50,150] },
+  subscriptions:{ label:'Subscriptions', all:[50,100] },
+  entertainment:{ label:'Entertainment', all:[100,300] },
+};
+
+function buildExpenseInputs() {
+  const city = document.getElementById('budget_city').value;
+  const living = document.getElementById('living').value;
+  const container = document.getElementById('expense-inputs');
+  container.innerHTML = '';
+  for (const [key, ex] of Object.entries(EXPENSES)) {
+    const range = ex[city] ? (Array.isArray(ex[city]) ? ex[city] : ex[city][living]) : ex.all;
+    const mid = Math.round((range[0]+range[1])/2);
+    const el = document.createElement('div');
+    el.innerHTML = `<label>${ex.label} (range: ${fmt(range[0])}–${fmt(range[1])})</label>
+      <input type="number" id="exp_${key}" value="${mid}" oninput="updateBudget()"/>`;
+    container.appendChild(el);
+  }
+}
+
+function updateBudget() {
+  const takeHome = +document.getElementById('take_home').value || 0;
+  const city = document.getElementById('budget_city').value;
+  const living = document.getElementById('living').value;
+  buildExpenseInputs();
+
+  let needs = 0, wants = 0;
+  const loan = +document.getElementById('loan_payment').value || 0;
+  const items = {};
+  for (const key of Object.keys(EXPENSES)) {
+    const v = +document.getElementById(`exp_${key}`)?.value || 0;
+    items[key] = v;
+    if (['rent','food','transport','health','utilities'].includes(key)) needs += v;
+    else wants += v;
+  }
+  needs += loan;
+  const savings = Math.max(0, takeHome - needs - wants);
+  const total = needs + wants + savings;
+
+  const needsPct = takeHome ? (needs/takeHome*100).toFixed(0) : 0;
+  const wantsPct = takeHome ? (wants/takeHome*100).toFixed(0) : 0;
+  const savePct  = takeHome ? (savings/takeHome*100).toFixed(0) : 0;
+
+  function barColor(pct, target, isGood='less') {
+    return isGood==='less' ? (pct<=target?'#10b981':'#ef4444') : (pct>=target?'#10b981':'#ef4444');
+  }
+
+  document.getElementById('budget-analysis').innerHTML = `
+    <div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px">
+        <span>Needs (50% target)</span><span style="color:${barColor(needsPct,50)}">${needsPct}% — ${fmt(needs)}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(needsPct,100)}%;background:${barColor(needsPct,50)}"></div></div>
+    </div>
+    <div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px">
+        <span>Wants (30% target)</span><span style="color:${barColor(wantsPct,30)}">${wantsPct}% — ${fmt(wants)}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(wantsPct,100)}%;background:${barColor(wantsPct,30)}"></div></div>
+    </div>
+    <div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px">
+        <span>Savings (20% target)</span><span style="color:${barColor(savePct,20,'more')}">${savePct}% — ${fmt(savings)}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(savePct,100)}%;background:${barColor(savePct,20,'more')}"></div></div>
+    </div>
+    <div class="highlight-box" style="margin-top:12px">
+      <div class="label">Monthly Surplus</div>
+      <div class="val" style="color:${savings>=0?'#10b981':'#ef4444'}">${fmt(savings)}</div>
+    </div>`;
+
+  // Savings analysis
+  const monthlyToGoal = savings;
+  const monthsTo100k = monthlyToGoal > 0 ? Math.ceil((-Math.log(1 - 100000*(0.07/12)/monthlyToGoal)) / Math.log(1+0.07/12)) : Infinity;
+  document.getElementById('savings-analysis').innerHTML = `
+    <div class="highlight-box" style="margin-bottom:8px"><div class="label">Monthly Savings Rate</div><div class="val">${savePct}%</div></div>
+    <div style="font-size:.82rem;color:#9ca3af">Time to $100K net worth (at 7% return, saving ${fmt(savings)}/mo):
+      <strong style="color:#10b981">${monthlyToGoal>0 ? monthsTo100k + ' months (' + (monthsTo100k/12).toFixed(1) + ' yrs)' : 'Increase savings first'}</strong>
+    </div>`;
+
+  // Emergency fund
+  const monthlyExpenses = needs + wants;
+  const target3 = monthlyExpenses * 3;
+  const target6 = monthlyExpenses * 6;
+  const saved = +document.getElementById('emergency_saved').value || 0;
+  const pct3 = Math.min(saved/target3*100, 100);
+  document.getElementById('emergency-analysis').innerHTML = `
+    <div style="font-size:.8rem;margin-bottom:6px">3-month target: <strong>${fmt(target3)}</strong> | 6-month: <strong>${fmt(target6)}</strong></div>
+    <div style="font-size:.75rem;color:#9ca3af;margin-bottom:4px">Progress to 3-month goal: ${pct3.toFixed(0)}%</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct3}%"></div></div>
+    <div style="font-size:.75rem;color:#9ca3af;margin-top:6px">You have ${fmt(saved)} of ${fmt(target3)} needed for 3 months.</div>`;
+}
+
+// ─── INVEST TAB ─────────────────────────────────────────────────────────────
+function calcCompound() {
+  const m = +document.getElementById('monthly_inv').value || 0;
+  const r = (+document.getElementById('return_pct').value || 7) / 100 / 12;
+  const n = (+document.getElementById('invest_years').value || 30) * 12;
+  const canvas = document.getElementById('compound-chart');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.parentElement.clientWidth || 560;
+  canvas.height = 250;
+
+  let balance = 0;
+  const balances = [], invested = [];
+  for (let i=1; i<=n; i++) {
+    balance = balance * (1+r) + m;
+    if (i % 12 === 0) { balances.push(balance); invested.push(m*i); }
+  }
+  const maxVal = Math.max(...balances);
+  const years = balances.length;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#061a0c';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  const pad = {t:20,r:20,b:30,l:60};
+  const w = canvas.width - pad.l - pad.r;
+  const h = canvas.height - pad.t - pad.b;
+
+  // Axes
+  ctx.strokeStyle='#1a3d22'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+h); ctx.lineTo(pad.l+w,pad.t+h); ctx.stroke();
+
+  // Grid + labels
+  ctx.fillStyle='#6b7280'; ctx.font='10px sans-serif'; ctx.textAlign='right';
+  for (let i=0;i<=4;i++) {
+    const y = pad.t + h - (i/4)*h;
+    const val = (maxVal * i/4);
+    ctx.fillText(val>=1e6?(val/1e6).toFixed(1)+'M':'$'+Math.round(val/1000)+'K', pad.l-4, y+3);
+    ctx.strokeStyle='#1a3d22'; ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+w,y); ctx.stroke();
+  }
+
+  // Invested area
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t+h);
+  invested.forEach((v,i) => { const x=pad.l+(i/(years-1))*w; const y=pad.t+h-(v/maxVal)*h; ctx.lineTo(x,y); });
+  ctx.lineTo(pad.l+w, pad.t+h);
+  ctx.closePath();
+  ctx.fillStyle='rgba(16,185,129,0.15)'; ctx.fill();
+
+  // Balance line
+  ctx.beginPath();
+  balances.forEach((v,i) => { const x=pad.l+(i/(years-1))*w; const y=pad.t+h-(v/maxVal)*h; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.strokeStyle='#10b981'; ctx.lineWidth=2; ctx.stroke();
+
+  const totalInv = m*n;
+  const finalBal = balances[balances.length-1];
+  document.getElementById('total-invested').textContent = fmtK(totalInv);
+  document.getElementById('total-gains').textContent = fmtK(finalBal - totalInv);
+  document.getElementById('final-balance').textContent = fmtK(finalBal);
+}
+
+// ─── ROADMAP TAB ─────────────────────────────────────────────────────────────
+const MILESTONES = [
+  { stage:'🎓 Student', color:'#60a5fa', items:[
+    { text:'Open a Roth IRA (even $50/month counts)', why:'Contributions can be withdrawn penalty-free. Tax-free growth for 40+ years. 2024 limit: $7,000.', action:'Go to Fidelity or Vanguard, open a Roth IRA today.' },
+    { text:'Build your credit score with a secured card', why:'You need credit history for apartments, car leases, and eventually mortgages. Start early, keep utilization <30%.', action:'Apply for a Discover it® Secured Card.' },
+    { text:'Avoid lifestyle inflation as an intern', why:'Your spending patterns in college/internship become your baseline. Every extra $500/mo saved = ~$30K over 10 years at 7%.', action:'Set a 50% savings target for intern income.' },
+  ]},
+  { stage:'💼 CS Intern ($20–40/hr)', color:'#a3e635', items:[
+    { text:'Save 50%+ of intern salary', why:'3-month internship at $35/hr full time = ~$18K before tax. Save $9K+ and you\'re ahead of 90% of your peers.', action:'Open a HYSA (high-yield savings account) before your first paycheck.' },
+    { text:'Maximize HSA if your internship offers one', why:'Triple tax advantage. Even if you\'re healthy, invest it and let it grow.', action:'Enroll during benefits onboarding, invest in index funds.' },
+    { text:'Open a taxable brokerage account', why:'Even $100/mo in VTI during college compounds dramatically. No income limits like Roth.', action:'Open Fidelity or Schwab brokerage, set up auto-invest.' },
+  ]},
+  { stage:'🚀 New Grad — Year 1', color:'#10b981', items:[
+    { text:'Get the full 401k employer match', why:'If your employer matches 4%, that\'s a guaranteed 100% return on those dollars. Never leave this on the table.', action:'During onboarding, set contribution to at least the match threshold.' },
+    { text:'Build a 3-month emergency fund', why:'Job market volatility, unexpected expenses, layoffs. 3 months = ability to say no to a bad situation.', action:'Target: 3 × monthly expenses in a high-yield savings account.' },
+    { text:'Pay off any high-interest debt (>7%)', why:'Guaranteed 20% return by paying off credit card debt. No investment beats that.', action:'Snowball or avalanche method. Pay minimums on all, max payment on highest rate.' },
+  ]},
+  { stage:'📈 Year 2–3', color:'#fbbf24', items:[
+    { text:'Maximize 401k contributions ($23,000/yr)', why:'At a $200K salary, maxing 401k saves ~$5-8K in taxes and compounds tax-deferred.', action:'Increase contribution % gradually each year.' },
+    { text:'Start backdoor Roth IRA if income > $161K', why:'At FAANG salaries you phase out of direct Roth contributions. Backdoor Roth keeps the tax-free benefit.', action:'Contribute to traditional IRA (no deduction), convert to Roth immediately.' },
+    { text:'Expand emergency fund to 6 months', why:'More security, better negotiating position. You can afford to wait for the right opportunity.', action:'Automate transfers from each paycheck until target hit.' },
+  ]},
+  { stage:'🏠 Year 5+', color:'#d946ef', items:[
+    { text:'Start a home down payment fund', why:'In SF/NYC, 20% down on a $1.2M home = $240K. Start early, keep in a HYSA or short-term bonds.', action:'Open a separate account labeled "House Fund". Don\'t touch it.' },
+    { text:'Open a taxable brokerage account', why:'After maxing tax-advantaged accounts, taxable brokerage for additional wealth building. LTCG rates beat income tax.', action:'Automate monthly investments into VTI + VXUS.' },
+    { text:'Calculate your FI number', why:'Financial Independence = 25× annual expenses (4% rule). Knowing your target makes every savings decision meaningful.', action:'Annual expenses × 25 = FI target. Track progress yearly.' },
+  ]},
+];
+
+function buildMilestones() {
+  const saved = JSON.parse(localStorage.getItem(LS+'milestones') || '{}');
+  const container = document.getElementById('milestone-list');
+  container.innerHTML = '';
+  MILESTONES.forEach((stage, si) => {
+    const div = document.createElement('div');
+    div.innerHTML = `<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${stage.color};margin-bottom:8px;margin-top:${si>0?'20px':'0'}">${stage.stage}</div>`;
+    stage.items.forEach((item, ii) => {
+      const key = `${si}-${ii}`;
+      const done = saved[key];
+      const m = document.createElement('div');
+      m.className = 'milestone';
+      m.innerHTML = `
+        <div class="milestone-check ${done?'done':''}" onclick="toggleMilestone('${key}', this)" title="Mark complete"></div>
+        <div style="flex:1">
+          <div style="font-size:.85rem;font-weight:600;color:${done?'#6b7280':'#e2e8f0'};${done?'text-decoration:line-through':''}">${item.text}</div>
+          <div class="flip-tip" onclick="toggleTip(this)">Why this matters ▾</div>
+          <div class="tip-content">
+            <strong>Why:</strong> ${item.why}<br/><br/>
+            <strong>Action:</strong> ${item.action}
+          </div>
+        </div>`;
+      div.appendChild(m);
+    });
+    container.appendChild(div);
+  });
+}
+
+function toggleMilestone(key, el) {
+  const saved = JSON.parse(localStorage.getItem(LS+'milestones') || '{}');
+  saved[key] = !saved[key];
+  localStorage.setItem(LS+'milestones', JSON.stringify(saved));
+  buildMilestones();
+}
+
+function toggleTip(el) {
+  const tip = el.nextElementSibling;
+  tip.classList.toggle('show');
+  el.textContent = tip.classList.contains('show') ? 'Why this matters ▴' : 'Why this matters ▾';
+}
+
+// Net worth tracker
+const ASSETS_FIELDS = ['Checking ($)','Savings ($)','Brokerage ($)','401k/Roth ($)','RSU Unvested Value ($)','Other Assets ($)'];
+const LIAB_FIELDS = ['Student Loans ($)','Credit Card Debt ($)','Other Liabilities ($)'];
+
+function buildNetWorthInputs() {
+  const aInputs = document.getElementById('asset-inputs');
+  const lInputs = document.getElementById('liability-inputs');
+  const saved = JSON.parse(localStorage.getItem(LS+'networth') || '{}');
+  aInputs.innerHTML = '';
+  lInputs.innerHTML = '';
+  ASSETS_FIELDS.forEach((f,i) => {
+    const key = 'a'+i;
+    aInputs.innerHTML += `<div style="display:grid;grid-template-columns:1fr 140px;gap:8px;margin-bottom:6px;align-items:center">
+      <label style="margin:0;font-size:.8rem">${f}</label>
+      <input type="number" id="nw_${key}" value="${saved[key]||0}" style="width:100%"/>
+    </div>`;
+  });
+  LIAB_FIELDS.forEach((f,i) => {
+    const key = 'l'+i;
+    lInputs.innerHTML += `<div style="display:grid;grid-template-columns:1fr 140px;gap:8px;margin-bottom:6px;align-items:center">
+      <label style="margin:0;font-size:.8rem">${f}</label>
+      <input type="number" id="nw_${key}" value="${saved[key]||0}" style="width:100%"/>
+    </div>`;
+  });
+}
+
+function saveNetWorth() {
+  const data = {};
+  let assets=0, liabilities=0;
+  ASSETS_FIELDS.forEach((_,i) => { const v=+document.getElementById(`nw_a${i}`).value||0; data[`a${i}`]=v; assets+=v; });
+  LIAB_FIELDS.forEach((_,i) => { const v=+document.getElementById(`nw_l${i}`).value||0; data[`l${i}`]=v; liabilities+=v; });
+  localStorage.setItem(LS+'networth', JSON.stringify(data));
+  const nw = assets - liabilities;
+  const totalBar = assets + liabilities;
+  const aPct = totalBar ? (assets/totalBar*100).toFixed(0) : 50;
+  const lPct = 100 - aPct;
+  document.getElementById('net-worth-result').innerHTML = `
+    <div class="highlight-box" style="margin-bottom:12px">
+      <div class="label">Net Worth</div>
+      <div class="val" style="color:${nw>=0?'#10b981':'#ef4444'};font-size:2rem">${fmt(nw)}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div class="highlight-box"><div class="label">Total Assets</div><div class="val">${fmt(assets)}</div></div>
+      <div class="highlight-box"><div class="label">Total Liabilities</div><div class="val" style="color:#ef4444">${fmt(liabilities)}</div></div>
+    </div>
+    <div class="net-worth-bar">
+      <div class="nw-assets" style="width:${aPct}%">${aPct}%</div>
+      <div class="nw-liabilities" style="width:${lPct}%">${lPct}%</div>
+    </div>
+    <div style="font-size:.7rem;color:#6b7280;margin-top:4px;display:flex;gap:16px">
+      <span>🟢 Assets</span><span>🔴 Liabilities</span>
+    </div>`;
+}
+
+// Init
+calcTC();
+buildExpenseInputs();
+updateBudget();
+calcCompound();
+buildMilestones();
+buildNetWorthInputs();
+addOfferField();
+calcRSU();
+</script>
+</body>
+</html>

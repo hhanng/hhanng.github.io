@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Chatbot Builder Guide</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --card: #1a1a1a;
+    --card2: #222;
+    --border: #2a2a2a;
+    --accent: #b8c8e8;
+    --accent2: #8aaad4;
+    --text: #e0e0e0;
+    --muted: #888;
+    --success: #4caf50;
+    --error: #f44336;
+    --warn: #ff9800;
+    --sidebar-w: 260px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.65;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-wrap: wrap;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+  .hamburger { background: none; border: none; cursor: pointer; padding: 4px; display: none; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); margin: 4px 0; border-radius: 2px; }
+  .topbar h1 { font-size: 1rem; font-weight: 600; color: var(--accent); white-space: nowrap; }
+  .key-row { display: flex; align-items: center; gap: 8px; }
+  .key-row label { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  .key-row input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 5px 10px;
+    font-size: 0.82rem;
+    width: 220px;
+    font-family: monospace;
+  }
+  .key-row input:focus { outline: none; border-color: var(--accent); }
+  .save-key-btn {
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .save-key-btn:hover { background: var(--accent2); }
+  .key-status { font-size: 0.78rem; color: var(--muted); }
+
+  /* LAYOUT */
+  .layout { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 57px); }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px 0;
+    transition: transform 0.25s ease;
+  }
+  .sidebar-title { padding: 0 16px 12px; font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .progress-bar-wrap { padding: 0 16px 16px; }
+  .progress-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .progress-track { height: 4px; background: var(--border); border-radius: 4px; }
+  .progress-fill { height: 4px; background: var(--accent); border-radius: 4px; transition: width 0.4s ease; }
+
+  .step-nav-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .step-nav-item:hover { background: rgba(184,200,232,0.06); }
+  .step-nav-item.active { background: rgba(184,200,232,0.1); border-left-color: var(--accent); }
+  .step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--muted);
+  }
+  .step-nav-item.done .step-num { background: var(--success); border-color: var(--success); color: #fff; }
+  .step-nav-item.active .step-num { border-color: var(--accent); color: var(--accent); }
+  .step-nav-label { font-size: 0.85rem; line-height: 1.35; }
+  .step-nav-label strong { display: block; font-size: 0.75rem; color: var(--muted); }
+
+  /* MAIN */
+  .main { flex: 1; overflow-y: auto; padding: 36px 40px; }
+  .step-header { margin-bottom: 28px; }
+  .step-tag { font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .step-header h2 { font-size: 1.85rem; font-weight: 700; margin-bottom: 8px; }
+  .step-header .subtitle { color: var(--muted); font-size: 1rem; }
+
+  /* CARDS / BLOCKS */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+  .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 10px; color: var(--accent); }
+  .card p { color: var(--text); font-size: 0.92rem; margin-bottom: 8px; }
+  .card p:last-child { margin-bottom: 0; }
+
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .info-card { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .info-card h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: var(--accent); }
+  .info-card p { font-size: 0.83rem; color: var(--muted); }
+
+  .ascii-diagram {
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-align: center;
+    line-height: 2;
+    margin-bottom: 20px;
+    white-space: pre;
+  }
+
+  /* COMPARE TABLE */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .compare-table th { padding: 10px 14px; background: var(--card2); text-align: left; font-weight: 600; color: var(--accent); border-bottom: 1px solid var(--border); }
+  .compare-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .check { color: var(--success); }
+  .cross { color: var(--error); }
+
+  /* CODE BLOCKS */
+  pre { margin: 0; border-radius: 8px; overflow-x: auto; }
+  code { font-family: 'SF Mono', 'Fira Code', Consolas, monospace; font-size: 0.83rem; }
+  .code-block { margin-bottom: 20px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .code-header { background: #222; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; }
+  .code-lang { font-size: 0.75rem; color: var(--muted); font-family: monospace; }
+  .copy-btn { background: none; border: 1px solid var(--border); color: var(--text); border-radius: 5px; padding: 3px 10px; font-size: 0.75rem; cursor: pointer; }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* EDITABLE PLAYGROUND */
+  .playground { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+  .playground-header { background: var(--card2); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .playground-header span { font-size: 0.8rem; font-weight: 600; color: var(--accent); }
+  .run-btn { background: var(--accent); color: #0f0f0f; border: none; border-radius: 6px; padding: 6px 16px; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
+  .run-btn:hover { background: var(--accent2); }
+  .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .code-editor {
+    width: 100%;
+    min-height: 200px;
+    background: #111;
+    border: none;
+    color: #e0e0e0;
+    font-family: 'SF Mono', Consolas, monospace;
+    font-size: 0.83rem;
+    padding: 14px;
+    resize: vertical;
+    outline: none;
+    line-height: 1.6;
+  }
+  .output-area { padding: 14px; border-top: 1px solid var(--border); font-family: monospace; font-size: 0.83rem; min-height: 60px; background: #111; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+  .output-area.error { color: var(--error); }
+  .output-area.success { color: var(--success); }
+
+  /* CHAT DEMO */
+  .chat-demo { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+  .chat-header { background: var(--card2); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .chat-header span { font-size: 0.85rem; font-weight: 600; color: var(--accent); }
+  .clear-chat-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: 3px 10px; font-size: 0.75rem; cursor: pointer; }
+  .clear-chat-btn:hover { border-color: var(--error); color: var(--error); }
+  .chat-messages { min-height: 200px; max-height: 340px; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 0.88rem; line-height: 1.5; }
+  .msg.user { background: rgba(184,200,232,0.15); border: 1px solid rgba(184,200,232,0.25); align-self: flex-end; }
+  .msg.bot { background: var(--card2); border: 1px solid var(--border); align-self: flex-start; }
+  .msg.typing { color: var(--muted); font-style: italic; }
+  .chat-input-row { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--border); }
+  .chat-input-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 8px 12px;
+    font-size: 0.88rem;
+    outline: none;
+  }
+  .chat-input-row input:focus { border-color: var(--accent); }
+  .send-btn { background: var(--accent); color: #0f0f0f; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+  .send-btn:hover { background: var(--accent2); }
+  .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* SYSTEM PROMPT CHIPS */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .chip { background: var(--card2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; font-size: 0.8rem; cursor: pointer; transition: all 0.15s; color: var(--text); }
+  .chip:hover, .chip.active { background: rgba(184,200,232,0.15); border-color: var(--accent); color: var(--accent); }
+
+  /* FEATURE CARDS */
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .feature-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .feature-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; color: var(--accent); }
+  .feature-card .desc { font-size: 0.84rem; color: var(--muted); margin-bottom: 10px; }
+  .feature-card details summary { font-size: 0.8rem; color: var(--accent2); cursor: pointer; margin-bottom: 6px; }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; margin-bottom: 20px; }
+  .checklist li { padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '☐'; color: var(--accent); font-size: 1.1rem; }
+
+  /* STEP ACTIONS */
+  .step-footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .mark-done-btn {
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
+  .mark-done-btn:hover { background: var(--accent2); }
+  .mark-done-btn.done { background: var(--success); }
+  .mark-done-btn.done:hover { background: #45a049; }
+
+  .ask-section h4 { font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+  .ask-row { display: flex; gap: 8px; }
+  .ask-row input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 9px 14px;
+    font-size: 0.88rem;
+    outline: none;
+  }
+  .ask-row input:focus { border-color: var(--accent); }
+  .ask-row button { background: var(--card2); border: 1px solid var(--border); color: var(--accent); border-radius: 8px; padding: 9px 16px; font-size: 0.85rem; cursor: pointer; font-weight: 600; white-space: nowrap; }
+  .ask-row button:hover { border-color: var(--accent); }
+  .ask-answer { margin-top: 12px; background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 0.88rem; color: var(--text); display: none; white-space: pre-wrap; line-height: 1.6; }
+
+  /* STEP CONTENT NAV */
+  .step-content { display: none; }
+  .step-content.active { display: block; }
+
+  /* INSTRUCTION STEPS */
+  .instruction-list { list-style: none; counter-reset: steps; margin-bottom: 20px; }
+  .instruction-list li { counter-increment: steps; padding: 10px 0 10px 48px; border-bottom: 1px solid var(--border); position: relative; font-size: 0.9rem; }
+  .instruction-list li:last-child { border-bottom: none; }
+  .instruction-list li::before {
+    content: counter(steps);
+    position: absolute; left: 0; top: 10px;
+    width: 28px; height: 28px;
+    background: rgba(184,200,232,0.1);
+    border: 1px solid rgba(184,200,232,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: var(--accent);
+    line-height: 28px;
+    text-align: center;
+  }
+
+  /* API KEY TESTER */
+  .api-tester { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+  .api-tester h3 { font-size: 0.95rem; font-weight: 600; color: var(--accent); margin-bottom: 14px; }
+  .input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .input-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 9px 14px;
+    font-size: 0.88rem;
+    font-family: monospace;
+    outline: none;
+  }
+  .input-row input:focus { border-color: var(--accent); }
+  .input-row button { background: var(--accent); color: #0f0f0f; border: none; border-radius: 8px; padding: 9px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
+  .input-row button:hover { background: var(--accent2); }
+  .input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .test-result { font-size: 0.85rem; padding: 10px 14px; border-radius: 7px; font-family: monospace; white-space: pre-wrap; }
+  .test-result.ok { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.3); color: var(--success); }
+  .test-result.fail { background: rgba(244,67,54,0.1); border: 1px solid rgba(244,67,54,0.3); color: var(--error); }
+
+  /* LINKS */
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* OVERLAY */
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .hamburger { display: block; }
+    .sidebar {
+      position: fixed;
+      top: 57px;
+      left: 0;
+      bottom: 0;
+      z-index: 95;
+      transform: translateX(-100%);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.open { display: block; }
+    .main { padding: 20px 16px; }
+    .key-row input { width: 160px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <h1>AI Chatbot Builder Guide</h1>
+  </div>
+  <div class="key-row">
+    <label for="global-key">API Key:</label>
+    <input type="password" id="global-key" placeholder="AIza..." autocomplete="off">
+    <button class="save-key-btn" onclick="saveKey()">Save</button>
+    <span class="key-status" id="key-status"></span>
+  </div>
+</div>
+
+<div class="sidebar-overlay" id="overlay"></div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-title">Course Navigation</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-label">
+        <span>Progress</span>
+        <span id="progress-text">0 / 8</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div id="step-nav"></div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+
+    <!-- STEP 1 -->
+    <div class="step-content active" data-step="1">
+      <div class="step-header">
+        <div class="step-tag">Step 1 of 8</div>
+        <h2>What is an AI chatbot?</h2>
+        <p class="subtitle">Understand the core concept before writing a single line of code.</p>
+      </div>
+
+      <div class="card">
+        <h3>Plain English</h3>
+        <p>An AI chatbot is a program that takes text input, sends it to an AI model over the internet, and shows the model's text response back to the user. That's it.</p>
+        <p>The AI model lives on a server (Google's, in our case). Your code just asks it questions and displays answers. You don't need to train anything — the hard work is already done.</p>
+      </div>
+
+      <div class="ascii-diagram">┌─────────────┐         ┌──────────────────┐         ┌─────────────┐
+│   Browser   │──POST──▶│  Gemini API      │──────▶  │  AI Model   │
+│  (Your App) │         │  gemini-2.0-flash│         │  (Google)   │
+└─────────────┘◀────────└──────────────────┘◀────────└─────────────┘
+       ▲               JSON response                        │
+       │          { candidates: [{ text: "..." }] }         │
+   User types                                          Generates text</div>
+
+      <h3 style="margin-bottom:12px; font-size:1rem;">3 Real-World Examples</h3>
+      <div class="info-grid">
+        <div class="info-card">
+          <h4>Customer Support Bot</h4>
+          <p>Answers FAQs 24/7, escalates to humans only when needed. Reduces support ticket volume by ~60%.</p>
+        </div>
+        <div class="info-card">
+          <h4>Coding Assistant</h4>
+          <p>Explains code, suggests fixes, generates boilerplate. Like having a senior dev always available.</p>
+        </div>
+        <div class="info-card">
+          <h4>Language Tutor</h4>
+          <p>Practices conversation, corrects grammar, adapts to your level. Available in 40+ languages.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Why Gemini API?</h3>
+        <table class="compare-table">
+          <thead>
+            <tr><th>Feature</th><th>Gemini API</th><th>OpenAI</th><th>Claude</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Free tier</td><td class="check">✓ Generous</td><td class="cross">✗ Paid only</td><td class="cross">✗ Paid only</td></tr>
+            <tr><td>Speed (Flash)</td><td class="check">✓ Very fast</td><td>~ Medium</td><td>~ Medium</td></tr>
+            <tr><td>Context window</td><td class="check">✓ 1M tokens</td><td>✓ 128k</td><td>✓ 200k</td></tr>
+            <tr><td>Multimodal</td><td class="check">✓ Native</td><td class="check">✓ Yes</td><td class="check">✓ Yes</td></tr>
+            <tr><td>REST API</td><td class="check">✓ Simple</td><td class="check">✓ Simple</td><td class="check">✓ Simple</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="step-footer">
+        <button class="mark-done-btn" id="done-1" onclick="markDone(1)">Mark Step 1 Complete ✓</button>
+        <div class="ask-section">
+          <h4>Have a question about this step?</h4>
+          <div class="ask-row">
+            <input type="text" id="ask-1" placeholder="e.g. What's the difference between an LLM and a chatbot?">
+            <button onclick="askQuestion(1)">Ask Gemini</button>
+          </div>
+          <div class="ask-answer" id="answer-1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-content" data-step="2">
+      <div class="step-header">
+        <div class="step-tag">Step 2 of 8</div>
+        <h2>Get your API key</h2>
+        <p class="subtitle">Your API key is the password that lets your code talk to Gemini.</p>
+      </div>
+
+      <div class="card">
+        <h3>How to get your key</h3>
+        <ol class="instruction-list">
+          <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a> — sign in with your Google account.</li>
+          <li>Click <strong>"Create API key"</strong> → <strong>"Create API key in new project"</strong>.</li>
+          <li>Copy the key that appears (starts with <code>AIza</code>). Store it somewhere safe — it won't show again.</li>
+          <li>Come back here and paste it in the field below (or the one in the top bar).</li>
+        </ol>
+      </div>
+
+      <div class="card" style="background: rgba(255,152,0,0.05); border-color: rgba(255,152,0,0.3);">
+        <h3 style="color: var(--warn);">⚠ Keep your key private</h3>
+        <p>Never put your API key directly in code you share publicly or push to GitHub. For this guide we store it in <code>localStorage</code> (your browser only — never sent anywhere else). For production apps, use a backend server or environment variables.</p>
+      </div>
+
+      <div class="api-tester">
+        <h3>Live API Key Tester</h3>
+        <div class="input-row">
+          <input type="password" id="test-key-input" placeholder="Paste your API key here (AIza...)" autocomplete="off">
+          <button id="test-btn" onclick="testApiKey()">Test my key</button>
+        </div>
+        <div id="test-result"></div>
+      </div>
+
+      <div class="step-footer">
+        <button class="mark-done-btn" id="done-2" onclick="markDone(2)">Mark Step 2 Complete ✓</button>
+        <div class="ask-section">
+          <h4>Have a question about this step?</h4>
+          <div class="ask-row">
+            <input type="text" id="ask-2" placeholder="e.g. Is localStorage safe to store my API key?">
+            <button onclick="askQuestion(2)">Ask Gemini</button>
+          </div>
+          <div class="ask-answer" id="answer-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step-content" data-step="3">
+      <div class="step-header">
+        <div class="step-tag">Step 3 of 8</div>
+        <h2>Your first API call</h2>
+        <p class="subtitle">Send a message to Gemini from your browser with plain JavaScript.</p>
+      </div>
+
+      <div class="card">
+        <h3>How fetch() + REST APIs work</h3>
+        <p><code>fetch()</code> is a built-in browser function that sends HTTP requests. The Gemini API is a REST API — it accepts HTTP POST requests with JSON bodies and returns JSON responses.</p>
+        <p>You send: <code>{ contents: [{ parts: [{ text: "your message" }] }] }</code></p>
+        <p>You get back: <code>{ candidates: [{ content: { parts: [{ text: "the reply" }] } }] }</code></p>
+      </div>
+
+      <div class="playground">
+        <div class="playground-header">
+          <span>Live Code Playground — edit and run</span>
+          <button class="run-btn" id="run-btn-3" onclick="runStep3()">▶ Run this code</button>
+        </div>
+        <textarea class="code-editor" id="editor-3" spellcheck="false">// Your API key is loaded from the top bar
+const API_KEY = localStorage.getItem('geminiKey') || 'YOUR_API_KEY';
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+const response = await fetch(API_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    contents: [{
+      parts: [{ text: 'Say hello and tell me one fun fact about AI!' }]
+    }]
+  })
+});
+
+const data = await response.json();
+const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+return reply || JSON.stringify(data, null, 2);</textarea>
+        <div class="output-area" id="output-3">Click "Run this code" to see the result...</div>
+      </div>
+
+      <div class="card" style="background: rgba(244,67,54,0.05); border-color: rgba(244,67,54,0.2);">
+        <h3 style="color: var(--error);">Common errors explained</h3>
+        <p><strong>400 Bad Request</strong> — your JSON body is malformed. Check the structure matches exactly.</p>
+        <p><strong>401 / 403</strong> — API key is invalid or missing. Paste your key in the top bar first.</p>
+        <p><strong>429 Too Many Requests</strong> — you've hit the rate limit. Wait a minute and try again.</p>
+        <p><strong>undefined response</strong> — the path to the text is wrong. Log <code>data</code> to check the shape.</p>
+      </div>
+
+      <div class="step-footer">
+        <button class="mark-done-btn" id="done-3" onclick="markDone(3)">Mark Step 3 Complete ✓</button>
+        <div class="ask-section">
+          <h4>Have a question about this step?</h4>
+          <div class="ask-row">
+            <input type="text" id="ask-3" placeholder="e.g. What does async/await mean here?">
+            <button onclick="askQuestion(3)">Ask Gemini</button>
+          </div>
+          <div class="ask-answer" id="answer-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-content" data-step="4">
+      <div class="step-header">
+        <div class="step-tag">Step 4 of 8</div>
+        <h2>Add conversation history</h2>
+        <p class="subtitle">Make the chatbot remember what was said earlier in the conversation.</p>
+      </div>
+
+      <div class="card">
+        <h3>The messages array pattern</h3>
+        <p>Gemini (like all LLMs) is stateless — each request is independent. To give it memory, you send the entire conversation history with every request.</p>
+        <p>Each message has a <code>role</code> (<code>"user"</code> or <code>"model"</code>) and <code>parts</code> containing the text. You append each new message to the array before sending.</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">javascript</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-javascript">// Maintain history across turns
+const history = [];
+
+async function chat(userMessage) {
+  // Add user's message
+  history.push({
+    role: 'user',
+    parts: [{ text: userMessage }]
+  });
+
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: history })  // Send ALL history
+  });
+
+  const data = await response.json();
+  const reply = data.candidates[0].content.parts[0].text;
+
+  // Add bot's reply to history
+  history.push({
+    role: 'model',
+    parts: [{ text: reply }]
+  });
+
+  return reply;
+}</code></pre>
+      </div>
+
+      <h3 style="margin-bottom:12px; font-size:1rem;">Try it — Live chat demo</h3>
+      <div class="chat-demo" id="chat4">
+        <div class="chat-header">
+          <span>Mini Chat (with memory)</span>
+          <button class="clear-chat-btn" onclick="clearChat('chat4-history', 'chat4-msgs')">Clear</button>
+        </div>
+        <div class="chat-messages" id="chat4-msgs">
+          <div class="msg bot">Hi! I'm your Gemini demo. I remember what we talk about — try asking a follow-up question!</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chat4-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat4()">
+          <button class="send-btn" id="chat4-btn" onclick="sendChat4()">Send</button>
+        </div>
+      </div>
+
+      <div class="step-footer">
+        <button class="mark-done-btn" id="done-4" onclick="markDone(4)">Mark Step 4 Complete ✓</button>
+        <div class="ask-section">
+          <h4>Have a question about this step?</h4>
+          <div class="ask-row">
+            <input type="text" id="ask-4" placeholder="e.g. Does history grow forever? How do I limit it?">
+            <button onclick="askQuestion(4)">Ask Gemini</button>
+          </div>
+          <div class="ask-answer" id="answer-4"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step-content" data-step="5">
+      <div class="step-header">
+        <div class="step-tag">Step 5 of 8</div>
+        <h2>System prompts &amp; personas</h2>
+        <p class="subtitle">Give your chatbot a personality, rules, and a purpose.</p>
+      </div>
+
+      <div class="card">
+        <h3>What is a system prompt?</h3>
+        <p>A system prompt is a hidden instruction you give the model before the conversation starts. It sets the persona, tone, task, and constraints. Users don't see it, but it shapes every response.</p>
+        <p>With Gemini, you add a <code>system_instruction</code> field alongside <code>contents</code>:</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">javascript</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-javascript">const response = await fetch(API_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    system_instruction: {
+      parts: [{ text: "You are a friendly pirate. Speak in pirate slang and say 'Arrr!' often." }]
+    },
+    contents: history
+  })
+});</code></pre>
+      </div>
+
+      <h3 style="margin-bottom:10px; font-size:1rem;">Try example system prompts:</h3>
+      <div class="chips" id="persona-chips">
+        <div class="chip active" onclick="setPersona(this, 'You are a helpful, friendly assistant. Be concise and clear.')">Helpful Assistant</div>
+        <div class="chip" onclick="setPersona(this, 'You are a pirate captain. Speak in pirate slang, say Arrr frequently, and reference the sea.')">🏴‍☠️ Pirate</div>
+        <div class="chip" onclick="setPersona(this, 'You are a patient tutor. Break down complex topics into simple steps. Ask if the student understands before moving on.')">📚 Tutor</div>
+        <div class="chip" onclick="setPersona(this, 'You are a Shakespearean actor. Respond only in Early Modern English with dramatic flair.')">🎭 Shakespeare</div>
+        <div class="chip" onclick="setPersona(this, 'You are a sarcastic but helpful assistant. Be witty and dry, but always answer the question in the end.')">😏 Sarcastic</div>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label style="font-size:0.82rem; color:var(--muted); display:block; margin-bottom:6px;">Or write your own system prompt:</label>
+        <textarea id="custom-system-prompt" style="width:100%; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:10px 14px; font-size:0.85rem; font-family:inherit; min-height:70px; outline:none; resize:vertical;" placeholder="You are a...">You are a helpful, friendly assistant. Be concise and clear.</textarea>
+      </div>
+
+      <div class="chat-demo" id="chat5">
+        <div class="chat-header">
+          <span>Persona Chat</span>
+          <button class="clear-chat-btn" onclick="clearChat('chat5-history', 'chat5-msgs')">Clear</button>
+        </div>
+        <div class="chat-messages" id="chat5-msgs">
+          <div class="msg bot">Choose a persona above and start chatting!</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chat5-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat5()">
+          <button class="send-btn" id="chat5-btn" onclick="sendChat5()">Send</button>
+        </div>
+      </div>
+
+      <div class="step-footer">
+        <button class="mark-done-btn" id="done-5" onclick="markDone(5)">Mark Step 5 Complete ✓</button>
+        <div class="ask-section">
+          <h4>Have a question about this step?</h4>
+          <div class="ask-row">
+            <input type="text" id="ask-5" placeholder="e.g. Can I change the system prompt mid-conversation?">
+            <button onclick="askQuestion(5)">Ask Gemini</button>
+          </div>
+          <div class="ask-answer" id="answer-5"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="step-content" data-step="6">
+      <div class="step-header">
+        <div class="step-tag">Step 6 of 8</div>
+        <h2>Build the UI</h2>
+        <p class="subtitle">A complete, copy-ready HTML chat interface with CSS included.</p>
+      </div>
+
+      <div class="card">
+        <h3>Structure overview</h3>
+        <p>A chat UI needs 3 parts: a message display area, an input row, and a send button. The JS fetches from Gemini and appends message bubbles to the display area.</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">html — full starter template</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy full template</button>
+        </div>
+        <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;My AI Chatbot&lt;/title&gt;
+  &lt;style&gt;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #0f0f0f; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
+    #header { background: #1a1a1a; padding: 16px 20px; font-weight: 700; border-bottom: 1px solid #2a2a2a; }
+    #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .msg { max-width: 75%; padding: 10px 16px; border-radius: 12px; line-height: 1.5; }
+    .user { background: rgba(184,200,232,0.15); align-self: flex-end; }
+    .bot  { background: #1a1a1a; border: 1px solid #2a2a2a; align-self: flex-start; }
+    #input-row { display: flex; gap: 10px; padding: 16px; background: #1a1a1a; border-top: 1px solid #2a2a2a; }
+    #user-input { flex: 1; background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 8px; color: #e0e0e0; padding: 10px 14px; font-size: 1rem; outline: none; }
+    #send-btn { background: #b8c8e8; color: #0f0f0f; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 700; cursor: pointer; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="header"&gt;My AI Chatbot&lt;/div&gt;
+  &lt;div id="messages"&gt;&lt;/div&gt;
+  &lt;div id="input-row"&gt;
+    &lt;input id="user-input" type="text" placeholder="Type a message..." /&gt;
+    &lt;button id="send-btn" onclick="send()"&gt;Send&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;script&gt;
+    const API_KEY = 'YOUR_API_KEY';  // ← replace this
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+    const history = [];
+
+    document.getElementById('user-input').addEventListener('keydown', e =&gt; { if (e.key === 'Enter') send(); });
+
+    function addMsg(text, role) {
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      div.textContent = text;
+      document.getElementById('messages').appendChild(div);
+      div.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function send() {
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      addMsg(text, 'user');
+      history.push({ role: 'user', parts: [{ text }] });
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: history })
+      });
+      const data = await res.json();
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'Error getting response';
+      history.push({ role: 'model', parts: [{ text: reply }] });
+      addMsg(reply, 'bot');
+    }
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+      </div>
+
+      <div class="step-footer">
+        <button class="mark-done-btn" id="done-6" onclick="markDone(6)">Mark Step 6 Complete ✓</button>
+        <div class="ask-section">
+          <h4>Have a question about this step?</h4>
+          <div class="ask-row">
+            <input type="text" id="ask-6" placeholder="e.g. How do I add markdown rendering to the chat messages?">
+            <button onclick="askQuestion(6)">Ask Gemini</button>
+          </div>
+          <div class="ask-answer" id="answer-6"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 7 -->
+    <div class="step-content" data-step="7">
+      <div class="step-header">
+        <div class="step-tag">Step 7 of 8</div>
+        <h2>Add features</h2>
+        <p class="subtitle">Upgrade your basic chat UI with these practical enhancements.</p>
+      </div>
+
+      <div class="feature-grid">
+
+        <div class="feature-card">
+          <h4>Typing Indicator</h4>
+          <p class="desc">Show an animated "..." while waiting for the API response — prevents users from thinking the app froze.</p>
+          <details>
+            <summary>Show code snippet</summary>
+            <pre style="margin-top:8px; border-radius:6px; overflow:auto;"><code class="language-javascript">// Show before fetch
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'msg bot typing';
+  div.id = 'typing-indicator';
+  div.textContent = '...';
+  messages.appendChild(div);
+}
+// Remove after fetch
+document.getElementById('typing-indicator')?.remove();</code></pre>
+          </details>
+        </div>
+
+        <div class="feature-card">
+          <h4>Copy Button</h4>
+          <p class="desc">Add a small copy icon to each bot message so users can copy the response with one click.</p>
+          <details>
+            <summary>Show code snippet</summary>
+            <pre style="margin-top:8px; border-radius:6px; overflow:auto;"><code class="language-javascript">function addBotMsg(text) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap';
+  const msg = document.createElement('div');
+  msg.className = 'msg bot';
+  msg.textContent = text;
+  const btn = document.createElement('button');
+  btn.textContent = '📋';
+  btn.onclick = () => navigator.clipboard.writeText(text);
+  wrap.appendChild(msg);
+  wrap.appendChild(btn);
+  messages.appendChild(wrap);
+}</code></pre>
+          </details>
+        </div>
+
+        <div class="feature-card">
+          <h4>Clear Chat</h4>
+          <p class="desc">Let users start a fresh conversation without reloading the page.</p>
+          <details>
+            <summary>Show code snippet</summary>
+            <pre style="margin-top:8px; border-radius:6px; overflow:auto;"><code class="language-javascript">function clearChat() {
+  history.length = 0;  // Reset history array
+  document.getElementById('messages').innerHTML = '';
+  // Optional: add a welcome message back
+  addMsg('Chat cleared! Start a new conversation.', 'bot');
+}</code></pre>
+          </details>
+        </div>
+
+        <div class="feature-card">
+          <h4>Token Counter</h4>
+          <p class="desc">Estimate how much of the context window you've used (helpful for long conversations).</p>
+          <details>
+            <summary>Show code snippet</summary>
+            <pre style="margin-top:8px; border-radius:6px; overflow:auto;"><code class="language-javascript">// Rough estimate: ~4 chars per token
+function estimateTokens() {
+  const allText = history
+    .map(m => m.parts[0].text)
+    .join(' ');
+  return Math.round(allText.length / 4);
+}
+// Update after each message
+document.getElementById('token-count').textContent =
+  `~${estimateTokens()} tokens used`;</code></pre>
+          </details>
+        </div>
+
+        <div class="feature-card">
+          <h4>Export Chat</h4>
+          <p class="desc">Let users download the conversation as a .txt file.</p>
+          <details>
+            <summary>Show code snippet</summary>
+            <pre style="margin-top:8px; border-radius:6px; overflow:auto;"><code class="language-javascript">function exportChat() {
+  const text = history.map(m =>
+    `${m.role === 'user' ? 'You' : 'Bot'}: ${m.parts[0].text}`
+  ).join('\n\n');
+
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'chat-export.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}</code></pre>
+          </details>
+        </div>
+
+      </div>
+
+      <div class="step-footer">
+        <button class="mark-done-btn" id="done-7" onclick="markDone(7)">Mark Step 7 Complete ✓</button>
+        <div class="ask-section">
+          <h4>Have a question about this step?</h4>
+          <div class="ask-row">
+            <input type="text" id="ask-7" placeholder="e.g. How do I add voice input to my chatbot?">
+            <button onclick="askQuestion(7)">Ask Gemini</button>
+          </div>
+          <div class="ask-answer" id="answer-7"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 8 -->
+    <div class="step-content" data-step="8">
+      <div class="step-header">
+        <div class="step-tag">Step 8 of 8</div>
+        <h2>Deploy to GitHub Pages</h2>
+        <p class="subtitle">Put your chatbot on the internet — free, fast, and permanent.</p>
+      </div>
+
+      <div class="card">
+        <h3>Step-by-step deploy</h3>
+        <ol class="instruction-list">
+          <li>Go to <a href="https://github.com/new" target="_blank">github.com/new</a> and create a new <strong>public</strong> repository (e.g. <code>my-ai-chatbot</code>).</li>
+          <li>On your computer, open a terminal in your project folder and run: <code>git init &amp;&amp; git add . &amp;&amp; git commit -m "initial commit"</code></li>
+          <li>Push to GitHub: <code>git remote add origin https://github.com/YOUR_USERNAME/my-ai-chatbot.git</code> then <code>git push -u origin main</code></li>
+          <li>In your GitHub repo, go to <strong>Settings → Pages</strong>. Set Source to "Deploy from a branch", Branch to <code>main</code>, folder to <code>/</code>. Click Save.</li>
+          <li>Wait ~2 minutes. Your site will be live at <code>https://YOUR_USERNAME.github.io/my-ai-chatbot/</code></li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3>Pre-launch checklist</h3>
+        <ul class="checklist">
+          <li>Remove hardcoded API key — use a prompt for users to enter their own key</li>
+          <li>Test on mobile (resize browser to 375px width)</li>
+          <li>Test with a slow connection (Chrome DevTools → Network → Slow 3G)</li>
+          <li>Add a README.md explaining what the chatbot does and how to use it</li>
+          <li>Add an error message when the API call fails</li>
+        </ul>
+      </div>
+
+      <div class="card" style="background: rgba(184,200,232,0.05); border-color: rgba(184,200,232,0.3);">
+        <h3>Keep building — 100 AI Agents Project</h3>
+        <p>This guide is Agent #28 of the <strong>100 AI Agents</strong> challenge — a series of 100 useful AI tools built with HTML and Gemini.</p>
+        <p style="margin-top:8px;">Explore the full collection for inspiration on what to build next: <a href="https://hhanng.github.io" target="_blank">hhanng.github.io</a></p>
+      </div>
+
+      <div class="step-footer">
+        <button class="mark-done-btn" id="done-8" onclick="markDone(8)">Mark Step 8 Complete ✓</button>
+        <div class="ask-section">
+          <h4>Have a question about this step?</h4>
+          <div class="ask-row">
+            <input type="text" id="ask-8" placeholder="e.g. How do I set up a custom domain for GitHub Pages?">
+            <button onclick="askQuestion(8)">Ask Gemini</button>
+          </div>
+          <div class="ask-answer" id="answer-8"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+let currentStep = 1;
+let completedSteps = new Set(JSON.parse(localStorage.getItem('chatbot-guide-done') || '[]'));
+let chat4History = [];
+let chat5History = [];
+
+const STEPS = [
+  { num: 1, label: 'What is an AI chatbot?',      sub: 'Core concepts' },
+  { num: 2, label: 'Get your API key',             sub: 'Setup' },
+  { num: 3, label: 'Your first API call',          sub: 'fetch() + REST' },
+  { num: 4, label: 'Add conversation history',     sub: 'Messages array' },
+  { num: 5, label: 'System prompts & personas',    sub: 'Customization' },
+  { num: 6, label: 'Build the UI',                 sub: 'HTML/CSS template' },
+  { num: 7, label: 'Add features',                 sub: 'Enhancements' },
+  { num: 8, label: 'Deploy to GitHub Pages',       sub: 'Go live!' },
+];
+
+const STEP_CONTEXTS = {
+  1: 'The user is reading a lesson about what AI chatbots are, how they work, and why to use the Gemini API.',
+  2: 'The user is setting up their Gemini API key from Google AI Studio.',
+  3: 'The user is learning how to make their first Gemini API call using fetch() and REST.',
+  4: 'The user is learning how to maintain conversation history using a messages array.',
+  5: 'The user is learning about system prompts and how to give their chatbot a persona.',
+  6: 'The user is learning how to build a chat UI with HTML and CSS.',
+  7: 'The user is learning how to add features like typing indicators, copy buttons, and export.',
+  8: 'The user is learning how to deploy their chatbot to GitHub Pages.',
+};
+
+// ──────────────────────────────────────────────
+// API KEY
+// ──────────────────────────────────────────────
+function getKey() {
+  return localStorage.getItem('geminiKey') || '';
+}
+
+function saveKey() {
+  const key = document.getElementById('global-key').value.trim();
+  if (!key) return;
+  localStorage.setItem('geminiKey', key);
+  document.getElementById('key-status').textContent = '✓ Saved';
+  document.getElementById('key-status').style.color = 'var(--success)';
+  setTimeout(() => {
+    document.getElementById('key-status').textContent = '';
+  }, 2000);
+}
+
+function loadSavedKey() {
+  const key = getKey();
+  if (key) {
+    document.getElementById('global-key').value = key;
+    document.getElementById('key-status').textContent = '✓ Key loaded';
+    document.getElementById('key-status').style.color = 'var(--muted)';
+  }
+}
+
+// ──────────────────────────────────────────────
+// GEMINI API
+// ──────────────────────────────────────────────
+async function callGemini({ key, contents, systemInstruction }) {
+  const k = key || getKey();
+  if (!k) throw new Error('No API key set. Enter your key in the top bar and click Save.');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
+  const body = { contents };
+  if (systemInstruction) body.system_instruction = { parts: [{ text: systemInstruction }] };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(`${data.error.code}: ${data.error.message}`);
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+// ──────────────────────────────────────────────
+// NAVIGATION
+// ──────────────────────────────────────────────
+function buildNav() {
+  const nav = document.getElementById('step-nav');
+  nav.innerHTML = STEPS.map(s => `
+    <div class="step-nav-item ${s.num === currentStep ? 'active' : ''} ${completedSteps.has(s.num) ? 'done' : ''}"
+         onclick="goToStep(${s.num})" id="nav-${s.num}">
+      <div class="step-num">${completedSteps.has(s.num) ? '✓' : s.num}</div>
+      <div class="step-nav-label">${s.label}<strong>${s.sub}</strong></div>
+    </div>
+  `).join('');
+  updateProgress();
+}
+
+function goToStep(n) {
+  document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+  document.querySelector(`[data-step="${n}"]`).classList.add('active');
+  document.querySelectorAll('.step-nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById(`nav-${n}`).classList.add('active');
+  currentStep = n;
+  document.getElementById('main').scrollTop = 0;
+  // Close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function markDone(n) {
+  completedSteps.add(n);
+  localStorage.setItem('chatbot-guide-done', JSON.stringify([...completedSteps]));
+  const btn = document.getElementById(`done-${n}`);
+  btn.textContent = 'Step Complete ✓';
+  btn.classList.add('done');
+  buildNav();
+  if (n < 8) setTimeout(() => goToStep(n + 1), 600);
+}
+
+function updateProgress() {
+  const count = completedSteps.size;
+  document.getElementById('progress-text').textContent = `${count} / 8`;
+  document.getElementById('progress-fill').style.width = `${(count / 8) * 100}%`;
+  // Restore mark-done buttons
+  for (let i = 1; i <= 8; i++) {
+    const btn = document.getElementById(`done-${i}`);
+    if (btn && completedSteps.has(i)) {
+      btn.textContent = 'Step Complete ✓';
+      btn.classList.add('done');
+    }
+  }
+}
+
+// ──────────────────────────────────────────────
+// STEP 2 — API KEY TESTER
+// ──────────────────────────────────────────────
+async function testApiKey() {
+  const keyInput = document.getElementById('test-key-input');
+  const key = keyInput.value.trim();
+  if (!key) {
+    showResult('Please enter an API key first.', 'fail');
+    return;
+  }
+  const btn = document.getElementById('test-btn');
+  btn.disabled = true;
+  btn.textContent = 'Testing...';
+  showResult('Sending test request to Gemini...', '');
+
+  try {
+    const reply = await callGemini({
+      key,
+      contents: [{ role: 'user', parts: [{ text: 'Say only the word: WORKING' }] }]
+    });
+    showResult(`✓ Success! Your key works.\n\nGemini replied: "${reply.trim()}"`, 'ok');
+    // Save the key globally
+    localStorage.setItem('geminiKey', key);
+    document.getElementById('global-key').value = key;
+    document.getElementById('key-status').textContent = '✓ Key saved';
+    document.getElementById('key-status').style.color = 'var(--success)';
+  } catch (e) {
+    showResult(`✗ Error: ${e.message}\n\nCheck that:\n• The key starts with "AIza"\n• You have internet access\n• The key hasn't been restricted`, 'fail');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Test my key';
+  }
+}
+
+function showResult(msg, type) {
+  const el = document.getElementById('test-result');
+  el.textContent = msg;
+  el.className = `test-result ${type}`;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+// ──────────────────────────────────────────────
+// STEP 3 — CODE PLAYGROUND
+// ──────────────────────────────────────────────
+async function runStep3() {
+  const code = document.getElementById('editor-3').value;
+  const output = document.getElementById('output-3');
+  const btn = document.getElementById('run-btn-3');
+  btn.disabled = true;
+  btn.textContent = '⏳ Running...';
+  output.textContent = 'Running...';
+  output.className = 'output-area';
+
+  try {
+    const fn = new Function(`return (async () => { ${code} })()`);
+    const result = await fn();
+    output.textContent = result !== undefined ? String(result) : '(no return value)';
+    output.className = 'output-area success';
+  } catch (e) {
+    output.textContent = `Error: ${e.message}`;
+    output.className = 'output-area error';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '▶ Run this code';
+  }
+}
+
+// ──────────────────────────────────────────────
+// STEP 4 — CHAT WITH HISTORY
+// ──────────────────────────────────────────────
+async function sendChat4() {
+  const input = document.getElementById('chat4-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  appendMsg('chat4-msgs', text, 'user');
+  chat4History.push({ role: 'user', parts: [{ text }] });
+  const btn = document.getElementById('chat4-btn');
+  btn.disabled = true;
+  appendMsg('chat4-msgs', '...', 'bot typing', 'chat4-typing');
+  try {
+    const reply = await callGemini({ contents: chat4History });
+    document.getElementById('chat4-typing')?.remove();
+    appendMsg('chat4-msgs', reply, 'bot');
+    chat4History.push({ role: 'model', parts: [{ text: reply }] });
+  } catch (e) {
+    document.getElementById('chat4-typing')?.remove();
+    appendMsg('chat4-msgs', `Error: ${e.message}`, 'bot');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ──────────────────────────────────────────────
+// STEP 5 — PERSONA CHAT
+// ──────────────────────────────────────────────
+let currentPersona = 'You are a helpful, friendly assistant. Be concise and clear.';
+
+function setPersona(el, prompt) {
+  document.querySelectorAll('#persona-chips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentPersona = prompt;
+  document.getElementById('custom-system-prompt').value = prompt;
+  clearChat('chat5-history', 'chat5-msgs');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const customPrompt = document.getElementById('custom-system-prompt');
+  if (customPrompt) {
+    customPrompt.addEventListener('input', () => {
+      currentPersona = customPrompt.value;
+      document.querySelectorAll('#persona-chips .chip').forEach(c => c.classList.remove('active'));
+    });
+  }
+});
+
+async function sendChat5() {
+  const input = document.getElementById('chat5-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  appendMsg('chat5-msgs', text, 'user');
+  chat5History.push({ role: 'user', parts: [{ text }] });
+  const btn = document.getElementById('chat5-btn');
+  btn.disabled = true;
+  appendMsg('chat5-msgs', '...', 'bot typing', 'chat5-typing');
+  try {
+    const persona = document.getElementById('custom-system-prompt').value || currentPersona;
+    const reply = await callGemini({ contents: chat5History, systemInstruction: persona });
+    document.getElementById('chat5-typing')?.remove();
+    appendMsg('chat5-msgs', reply, 'bot');
+    chat5History.push({ role: 'model', parts: [{ text: reply }] });
+  } catch (e) {
+    document.getElementById('chat5-typing')?.remove();
+    appendMsg('chat5-msgs', `Error: ${e.message}`, 'bot');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ──────────────────────────────────────────────
+// ASK A QUESTION
+// ──────────────────────────────────────────────
+async function askQuestion(step) {
+  const input = document.getElementById(`ask-${step}`);
+  const answer = document.getElementById(`answer-${step}`);
+  const question = input.value.trim();
+  if (!question) return;
+  answer.style.display = 'block';
+  answer.textContent = 'Asking Gemini...';
+  try {
+    const context = STEP_CONTEXTS[step] || '';
+    const reply = await callGemini({
+      contents: [{
+        role: 'user',
+        parts: [{ text: question }]
+      }],
+      systemInstruction: `You are a helpful coding tutor helping someone learn to build AI chatbots with the Gemini API. Context: ${context} Answer in 2-4 sentences, be clear and practical.`
+    });
+    answer.textContent = reply;
+  } catch (e) {
+    answer.textContent = `Could not get answer: ${e.message}`;
+    answer.style.color = 'var(--error)';
+  }
+}
+
+// ──────────────────────────────────────────────
+// HELPERS
+// ──────────────────────────────────────────────
+function appendMsg(containerId, text, cls, id) {
+  const container = document.getElementById(containerId);
+  const div = document.createElement('div');
+  div.className = `msg ${cls}`;
+  div.textContent = text;
+  if (id) div.id = id;
+  container.appendChild(div);
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
+function clearChat(historyVar, msgsId) {
+  if (historyVar === 'chat4-history') chat4History = [];
+  if (historyVar === 'chat5-history') chat5History = [];
+  const container = document.getElementById(msgsId);
+  container.innerHTML = '';
+  appendMsg(msgsId, 'Chat cleared! Start a new conversation.', 'bot');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block, .playground').querySelector('code, .code-editor');
+  const text = pre.value || pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = btn.textContent.includes('template') ? 'Copy full template' : 'Copy', 2000);
+  });
+}
+
+// ──────────────────────────────────────────────
+// MOBILE HAMBURGER
+// ──────────────────────────────────────────────
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+});
+document.getElementById('overlay').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+});
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+loadSavedKey();
+buildNav();
+document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+</script>
+</body>
+</html>

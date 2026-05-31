@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Active Recall Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --pink: #ffb7c5; --pink-dark: #e08da0; --pink-light: #ffe4ec;
+  --pink-mid: #f5a0b5; --cream: #fff9fa; --cream-dark: #fef0f3;
+  --ink: #1f2a1b; --ink-muted: #6b5b62; --border: #f7cfd8;
+  --shadow: 0 4px 20px rgba(224,141,160,.15); --radius: 16px; --radius-sm: 10px;
+  --green: #4caf50; --red: #e05a6a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Poppins', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; padding-bottom: 60px; }
+header { background: linear-gradient(135deg,#e08da0 0%,#ffb7c5 60%,#ffd6e0 100%); color: white; padding: 36px 24px 32px; text-align: center; }
+.header-icon { font-size: 2.4rem; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); }
+header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -.5px; text-shadow: 0 1px 3px rgba(0,0,0,.12); }
+header p { opacity: .92; margin-top: 6px; font-size: 1rem; }
+.container { max-width: 700px; margin: 0 auto; padding: 0 18px; }
+.api-bar { background: white; border-bottom: 1.5px solid var(--border); padding: 12px 18px; }
+.api-bar-inner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 700px; margin: 0 auto; }
+.api-bar label { font-size: .8rem; font-weight: 600; color: var(--ink-muted); white-space: nowrap; }
+.api-bar input { flex: 1; min-width: 180px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-size: .86rem; font-family: 'Poppins',sans-serif; background: var(--cream); color: var(--ink); outline: none; transition: border-color .2s; }
+.api-bar input:focus { border-color: var(--pink-dark); }
+.btn-save { background: var(--pink-dark); color: white; border: none; border-radius: var(--radius-sm); padding: 8px 16px; font-size: .82rem; font-weight: 600; font-family: 'Poppins',sans-serif; cursor: pointer; transition: background .2s; }
+.btn-save:hover { background: var(--pink-mid); }
+.api-status { font-size: .78rem; color: var(--pink-dark); font-weight: 600; }
+.card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1.5px solid var(--border); }
+.step-panel { display: none; margin-top: 32px; }
+.step-panel.active { display: block; }
+.step-header { text-align: center; margin-bottom: 22px; }
+.step-pill { display: inline-block; background: var(--pink-light); color: var(--pink-dark); border-radius: 999px; padding: 4px 14px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+.step-header h2 { font-size: 1.5rem; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+.step-desc { font-size: .93rem; color: var(--ink-muted); line-height: 1.6; max-width: 480px; margin: 0 auto; }
+.notes-card { padding: 22px; }
+.notes-card textarea { width: 100%; min-height: 220px; resize: vertical; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-size: .93rem; font-family: 'Poppins',sans-serif; color: var(--ink); background: var(--cream); outline: none; line-height: 1.65; transition: border-color .2s; }
+.notes-card textarea:focus { border-color: var(--pink-dark); }
+.notes-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; flex-wrap: wrap; gap: 10px; }
+.char-count { font-size: .78rem; color: var(--ink-muted); }
+.btn-primary { background: linear-gradient(135deg,#e08da0,#ffb7c5); color: white; border: none; border-radius: var(--radius-sm); padding: 11px 24px; font-size: .95rem; font-weight: 700; font-family: 'Poppins',sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: opacity .2s,transform .15s; }
+.btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-secondary { background: white; color: var(--pink-dark); border: 1.5px solid var(--pink-dark); border-radius: var(--radius-sm); padding: 11px 24px; font-size: .95rem; font-weight: 600; font-family: 'Poppins',sans-serif; cursor: pointer; transition: all .18s; }
+.btn-secondary:hover { background: var(--pink-light); }
+.inline-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+.inline-spinner.active { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-area { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 80px 20px; }
+.big-spinner { width: 52px; height: 52px; border: 4px solid var(--pink-light); border-top-color: var(--pink-dark); border-radius: 50%; animation: spin .8s linear infinite; }
+.loading-text { font-size: 1.05rem; font-weight: 600; color: var(--ink); }
+.loading-sub { font-size: .88rem; color: var(--ink-muted); }
+.progress-bar-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.progress-track { flex: 1; height: 8px; background: var(--pink-light); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg,#e08da0,#ffb7c5); border-radius: 999px; transition: width .4s ease; }
+.progress-label { font-size: .82rem; font-weight: 600; color: var(--pink-dark); white-space: nowrap; }
+.flashcard { padding: 28px; }
+.card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.card-num { font-size: .82rem; font-weight: 600; color: var(--ink-muted); }
+.question-text { font-size: 1.15rem; font-weight: 700; line-height: 1.55; color: var(--ink); margin-bottom: 24px; padding-bottom: 22px; border-bottom: 1.5px solid var(--border); }
+.answer-label { display: block; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--ink-muted); margin-bottom: 8px; }
+.answer-section textarea { width: 100%; min-height: 110px; resize: vertical; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; font-size: .93rem; font-family: 'Poppins',sans-serif; color: var(--ink); background: var(--cream); outline: none; line-height: 1.6; transition: border-color .2s; margin-bottom: 14px; }
+.answer-section textarea:focus { border-color: var(--pink-dark); }
+.reveal-btn { width: 100%; justify-content: center; }
+.model-answer { margin-top: 20px; padding-top: 20px; border-top: 1.5px solid var(--border); }
+.model-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--pink-dark); margin-bottom: 8px; }
+.model-text { font-size: .96rem; line-height: 1.7; color: var(--ink); background: var(--cream-dark); border-left: 4px solid var(--pink-dark); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 14px 16px; margin-bottom: 20px; }
+.rating-section { margin-top: 4px; }
+.rating-label { font-size: .88rem; font-weight: 600; color: var(--ink-muted); margin-bottom: 10px; text-align: center; }
+.rating-btns { display: flex; gap: 12px; }
+.btn-rating { flex: 1; padding: 13px; border: none; border-radius: var(--radius-sm); font-size: 1rem; font-weight: 700; font-family: 'Poppins',sans-serif; cursor: pointer; transition: opacity .18s,transform .15s; }
+.btn-rating:hover { opacity: .88; transform: translateY(-1px); }
+.btn-rating:active { transform: translateY(0); }
+.got-it { background: #e8f5e9; color: #2e7d32; border: 2px solid #a5d6a7; }
+.got-it:hover { background: #c8e6c9; }
+.needs-work { background: #fce4ec; color: #b71c1c; border: 2px solid #f48fb1; }
+.needs-work:hover { background: #f8bbd0; }
+.summary-card { padding: 36px 28px; text-align: center; }
+.summary-icon { font-size: 3rem; margin-bottom: 12px; }
+.summary-title { font-size: 1.6rem; font-weight: 800; color: var(--ink); margin-bottom: 22px; }
+.score-row { display: flex; justify-content: center; gap: 24px; margin-bottom: 18px; flex-wrap: wrap; }
+.score-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.score-num { font-size: 2.2rem; font-weight: 800; }
+.score-num.green { color: #2e7d32; }
+.score-num.red { color: #b71c1c; }
+.score-stat-label { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-muted); }
+.score-bar-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; max-width: 380px; margin-left: auto; margin-right: auto; }
+.score-bar-track { flex: 1; height: 12px; background: var(--pink-light); border-radius: 999px; overflow: hidden; }
+.score-bar-fill { height: 100%; background: linear-gradient(90deg,#4caf50,#81c784); border-radius: 999px; transition: width .6s ease; }
+.score-pct { font-size: .9rem; font-weight: 700; color: #2e7d32; min-width: 36px; }
+.weak-section { background: var(--cream-dark); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 24px; text-align: left; }
+.weak-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--pink-dark); margin-bottom: 10px; }
+.weak-list { display: flex; flex-direction: column; gap: 6px; }
+.weak-item { font-size: .9rem; color: var(--ink); line-height: 1.5; display: flex; gap: 8px; }
+.weak-item::before { content: '✗'; color: #b71c1c; font-weight: 700; flex-shrink: 0; }
+.summary-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.error-msg { background: #fde8ed; border: 1.5px solid var(--pink); border-radius: var(--radius-sm); padding: 16px 18px; font-size: .93rem; color: #7a1a2e; margin-top: 20px; }
+
+/* DECK SELECTOR */
+.deck-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 8px; }
+@media (max-width: 520px) { .deck-grid { grid-template-columns: 1fr; } }
+.deck-card { background: white; border: 2px solid var(--border); border-radius: var(--radius); padding: 22px 16px; text-align: center; cursor: pointer; transition: all .2s; }
+.deck-card:hover { border-color: var(--pink-dark); box-shadow: var(--shadow); transform: translateY(-2px); }
+.deck-card.selected { border-color: var(--pink-dark); background: var(--pink-light); }
+.deck-icon { font-size: 2.2rem; margin-bottom: 10px; }
+.deck-name { font-size: 1rem; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.deck-count { font-size: .78rem; color: var(--ink-muted); }
+.deck-desc { font-size: .78rem; color: var(--ink-muted); margin-top: 6px; line-height: 1.4; }
+
+@media (max-width: 520px) {
+  .rating-btns { flex-direction: column; }
+  header h1 { font-size: 1.6rem; }
+  .flashcard { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-icon">🧠</div>
+    <h1>Active Recall Coach</h1>
+    <p>The best study technique — answer from memory, rate yourself, drill weak spots.</p>
+  </div>
+</header>
+
+<div class="api-bar">
+  <div class="container api-bar-inner">
+    <label for="apiKey">Gemini API Key</label>
+    <input type="password" id="apiKey" placeholder="AIza…" autocomplete="off" />
+    <button class="btn-save" onclick="saveApiKey()">Save</button>
+    <span class="api-status" id="apiStatus"></span>
+  </div>
+</div>
+
+<div class="container" id="appRoot">
+
+  <!-- DECK SELECTOR -->
+  <div id="stepDeck" class="step-panel active">
+    <div class="step-header">
+      <div class="step-pill">Choose Your Deck</div>
+      <h2>What Are You Studying?</h2>
+      <p class="step-desc">Pick a pre-loaded deck or paste your own notes to generate custom questions.</p>
+    </div>
+    <div class="deck-grid">
+      <div class="deck-card" id="deckFaang" onclick="selectDeck('faang')">
+        <div class="deck-icon">💻</div>
+        <div class="deck-name">FAANG DSA</div>
+        <div class="deck-count">150 terms</div>
+        <div class="deck-desc">Data structures, algorithms, BFS/DFS, DP, sorting, complexity</div>
+      </div>
+      <div class="deck-card" id="deckEsl" onclick="selectDeck('esl')">
+        <div class="deck-icon">📚</div>
+        <div class="deck-name">ESL Vocabulary</div>
+        <div class="deck-count">120+ terms</div>
+        <div class="deck-desc">US high school vocab: science, history, math, literature</div>
+      </div>
+      <div class="deck-card" id="deckCustom" onclick="selectDeck('custom')">
+        <div class="deck-icon">✏️</div>
+        <div class="deck-name">Custom Notes</div>
+        <div class="deck-count">AI-generated</div>
+        <div class="deck-desc">Paste any study notes and get AI-crafted recall questions</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:18px">
+      <button class="btn-primary" id="startDeckBtn" onclick="startSelectedDeck()" disabled>Start Session →</button>
+    </div>
+  </div>
+
+  <div id="stepNotes" class="step-panel">
+    <div class="step-header">
+      <div class="step-pill">Step 1 of 4</div>
+      <h2>Paste Your Study Notes</h2>
+      <p class="step-desc">Drop in any text — lecture notes, a chapter summary, your own notes — and we'll turn them into recall questions.</p>
+    </div>
+    <div class="card notes-card">
+      <textarea id="notesInput" placeholder="Paste your study notes here…&#10;&#10;e.g. The mitochondria is the powerhouse of the cell. It produces ATP through cellular respiration…"></textarea>
+      <div class="notes-footer">
+        <span class="char-count" id="charCount">0 characters</span>
+        <div style="display:flex;gap:10px">
+          <button class="btn-secondary" onclick="showStep('stepDeck')">← Back</button>
+          <button class="btn-primary" id="generateBtn" onclick="generateQuestions()">
+            <span id="genBtnText">Generate Questions</span>
+            <div class="inline-spinner" id="genSpinner"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="stepLoading" class="step-panel">
+    <div class="loading-area">
+      <div class="big-spinner"></div>
+      <div class="loading-text">Crafting your recall questions…</div>
+      <div class="loading-sub">This takes just a moment</div>
+    </div>
+  </div>
+
+  <div id="stepFlashcard" class="step-panel">
+    <div class="progress-bar-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="progress-label" id="progressLabel"></span>
+    </div>
+    <div class="card flashcard" id="flashcard">
+      <div class="card-top">
+        <div class="step-pill" id="deckBadge">Question</div>
+        <div class="card-num" id="cardNum"></div>
+      </div>
+      <div class="question-text" id="questionText"></div>
+      <div class="answer-section" id="answerSection">
+        <label class="answer-label">Your Answer</label>
+        <textarea id="userAnswer" placeholder="Type your answer from memory… don't peek!"></textarea>
+        <button class="btn-primary reveal-btn" onclick="revealAnswer()">Reveal Answer</button>
+      </div>
+      <div class="model-answer" id="modelAnswer" style="display:none;">
+        <div class="model-label">Model Answer</div>
+        <div class="model-text" id="modelText"></div>
+        <div class="rating-section">
+          <div class="rating-label">How did you do?</div>
+          <div class="rating-btns">
+            <button class="btn-rating got-it" onclick="rateCard('got')">Got it ✓</button>
+            <button class="btn-rating needs-work" onclick="rateCard('needs')">Needs Work ✗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="stepSummary" class="step-panel">
+    <div class="card summary-card">
+      <div class="summary-icon">🎉</div>
+      <h2 class="summary-title">Session Complete!</h2>
+      <div class="score-row" id="scoreRow"></div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-track"><div class="score-bar-fill" id="scoreBarFill"></div></div>
+        <span class="score-pct" id="scorePct"></span>
+      </div>
+      <div id="weakTopicsSection" class="weak-section" style="display:none;">
+        <div class="weak-label">Topics to review:</div>
+        <div class="weak-list" id="weakList"></div>
+      </div>
+      <div class="summary-actions">
+        <button class="btn-primary" id="redrill-btn" onclick="redrillWeak()" style="display:none;">Re-drill Weak Cards</button>
+        <button class="btn-secondary" onclick="startOver()">New Session</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── PRE-LOADED DECKS ─────────────────────────────────────────────
+const FAANG_DECK = [
+  // Arrays
+  {question:"What is an array?",answer:"A collection of elements stored at contiguous memory locations and accessed by index. Supports O(1) random access, O(n) insertion/deletion in the middle, and O(1) append (amortized for dynamic arrays)."},
+  {question:"What is the Two-Pointer technique?",answer:"A pattern using two indices moving through an array/string — often from opposite ends or the same direction. Solves problems like pair-sum, palindrome check, container-with-most-water in O(n) instead of O(n²)."},
+  {question:"What is the Sliding Window technique?",answer:"Maintains a subarray 'window' by expanding the right pointer and shrinking the left when a condition is violated. Used for max/min subarray of size k, longest substring without repeating characters — O(n)."},
+  {question:"What does it mean for an array to be 'sorted in-place'?",answer:"The sorting modifies the original array without allocating significant extra memory. Algorithms like heapsort, insertion sort, and bubble sort are in-place (O(1) extra space), while merge sort typically is not."},
+  {question:"How does prefix sum work and what is it used for?",answer:"A prefix sum array P[i] = A[0]+…+A[i]. The sum of any subarray A[l..r] = P[r] - P[l-1] in O(1). Used for range sum queries, subarray sum equals k problems."},
+  {question:"What is the time complexity of the Kadane's Algorithm?",answer:"O(n) time, O(1) space. Finds the maximum sum contiguous subarray by tracking a running sum and resetting to 0 when it goes negative. Classic dynamic programming example."},
+  // Linked Lists
+  {question:"What is a singly linked list?",answer:"A sequence of nodes where each node holds data and a pointer to the next node. Supports O(1) insertion at head, O(n) traversal, and O(n) random access. No index-based access."},
+  {question:"What is a doubly linked list?",answer:"Like a singly linked list but each node has both next and prev pointers. Allows O(1) deletion given a node reference, and backward traversal. Costs 2× more pointer memory."},
+  {question:"How do you detect a cycle in a linked list?",answer:"Floyd's Cycle Detection (fast & slow pointer): slow moves one step, fast moves two. If they meet, a cycle exists. No cycle if fast reaches null. O(n) time, O(1) space."},
+  {question:"How do you reverse a singly linked list in-place?",answer:"Iterate once, tracking prev (null), current, and next. At each step: store next=current.next, set current.next=prev, advance prev=current, current=next. O(n) time, O(1) space."},
+  {question:"What is the difference between a stack and a queue?",answer:"Stack is LIFO (Last In First Out) — push and pop from the same end. Queue is FIFO (First In First Out) — enqueue at back, dequeue from front. Both are often implemented with linked lists."},
+  // Trees
+  {question:"What is a binary search tree (BST)?",answer:"A binary tree where every node's left child is smaller and right child is larger. Supports O(log n) average search, insert, delete. Degrades to O(n) for skewed trees — fixed by balanced BSTs (AVL, Red-Black)."},
+  {question:"What are the three depth-first traversal orders for a binary tree?",answer:"Inorder (left → root → right) gives sorted output for BSTs. Preorder (root → left → right) is used for tree copying. Postorder (left → right → root) is used for tree deletion and expression evaluation."},
+  {question:"What is a balanced binary tree?",answer:"A tree where the height of left and right subtrees of every node differs by at most 1 (AVL definition). Ensures O(log n) height and thus O(log n) operations. Examples: AVL tree, Red-Black tree."},
+  {question:"What is a complete binary tree?",answer:"All levels are fully filled except possibly the last, which is filled from left to right. Heaps are stored as complete binary trees, enabling efficient array representation with parent at i, children at 2i+1 and 2i+2."},
+  {question:"What is the height of a binary tree with n nodes?",answer:"O(log n) for a balanced tree; O(n) worst case for a completely skewed tree (degenerate linked list). Height determines the time complexity of tree operations."},
+  {question:"What is a Trie data structure?",answer:"A tree-like structure where each node represents a character, and paths from root to nodes spell out strings. Supports O(m) insert, search, and prefix lookup where m is string length. Used for autocomplete, spell-checkers."},
+  {question:"What is the difference between BFS and DFS on a tree?",answer:"BFS (Breadth-First Search) explores level by level using a queue — good for shortest path in unweighted graphs. DFS explores as deep as possible using a stack (or recursion) — good for cycle detection, topological sort."},
+  // Graphs
+  {question:"What is a directed vs. undirected graph?",answer:"Directed (digraph): edges have direction (A→B ≠ B→A). Undirected: edges are bidirectional. Directed graphs model dependencies, flowcharts; undirected model roads, social connections."},
+  {question:"What is graph adjacency list vs adjacency matrix?",answer:"Adjacency list: array of lists, O(V+E) space, efficient for sparse graphs. Adjacency matrix: V×V grid, O(V²) space, O(1) edge lookup, efficient for dense graphs. Most interview problems use adjacency list."},
+  {question:"How does BFS find the shortest path in an unweighted graph?",answer:"BFS explores all nodes at distance k before distance k+1 (level by level using a queue). The first time a node is reached is via the shortest path. O(V+E) time."},
+  {question:"What is Dijkstra's algorithm?",answer:"Greedy algorithm finding shortest paths from a source in a weighted graph with non-negative edges. Uses a min-heap priority queue. O((V+E) log V) with binary heap. Fails with negative edge weights (use Bellman-Ford instead)."},
+  {question:"What is topological sort?",answer:"Linear ordering of vertices in a DAG such that for every directed edge u→v, u comes before v. Found via DFS (reverse postorder) or Kahn's algorithm (BFS with in-degree). Used for task scheduling, build systems."},
+  {question:"What is Union-Find (Disjoint Set Union)?",answer:"Data structure tracking elements in disjoint sets. Supports find(x) (find root/representative) and union(x,y) (merge sets). With path compression + union by rank: nearly O(1) amortized per operation. Used for Kruskal's MST, cycle detection."},
+  // Heaps
+  {question:"What is a heap?",answer:"A complete binary tree satisfying the heap property: max-heap has every parent ≥ children (root is maximum); min-heap has every parent ≤ children (root is minimum). Insert and extract-min/max are O(log n). Stored as an array."},
+  {question:"What is heap sort?",answer:"Build a max-heap from the array (O(n)), then repeatedly extract the max and place it at the end, re-heapifying. O(n log n) guaranteed, O(1) space. In-place but not stable. Less cache-friendly than quicksort in practice."},
+  {question:"How is a heap stored in an array?",answer:"Root at index 0. For node at index i: left child = 2i+1, right child = 2i+2, parent = (i-1)//2. This representation uses no pointers and leverages cache locality."},
+  {question:"What is a priority queue?",answer:"An abstract data type where each element has a priority and elements are served in priority order. Typically implemented with a heap: O(log n) insert and O(log n) extract-min/max. Used in Dijkstra's, Prim's, job scheduling."},
+  // Hash Maps
+  {question:"What is a hash table / hash map?",answer:"A data structure mapping keys to values using a hash function to compute bucket indices. Average O(1) insert, lookup, delete. Worst case O(n) with many collisions. Used everywhere: caching, frequency counting, memoization."},
+  {question:"What is a hash collision and how is it handled?",answer:"A collision occurs when two keys hash to the same bucket. Chaining (linked list per bucket) and open addressing (probe for next empty slot: linear, quadratic, double hashing) are the main strategies."},
+  {question:"What is the load factor of a hash table?",answer:"Load factor λ = n/m where n is number of entries, m is number of buckets. When λ exceeds a threshold (usually 0.75), the table is rehashed (doubled) to maintain O(1) average performance."},
+  // Dynamic Programming
+  {question:"What is dynamic programming?",answer:"An optimization technique that breaks a problem into overlapping subproblems, solves each once, and stores results (memoization or tabulation). Applies when a problem has optimal substructure and overlapping subproblems. Transforms exponential to polynomial."},
+  {question:"What is the difference between memoization and tabulation?",answer:"Memoization (top-down): recursive function caches results of subproblems as they are computed. Tabulation (bottom-up): fills a table iteratively from smallest subproblems to largest. Both are O(n) for Fibonacci vs O(2^n) naive."},
+  {question:"What is the 0/1 Knapsack problem?",answer:"Given items with weights and values, maximize value placed in a knapsack of capacity W, where each item can be taken at most once. Classic DP: dp[i][w] = max value using first i items with capacity w. O(nW) time and space."},
+  {question:"What is the Longest Common Subsequence (LCS)?",answer:"Finds the longest subsequence common to two strings (characters not necessarily contiguous). DP solution: if s1[i]==s2[j], dp[i][j]=1+dp[i-1][j-1]; else max(dp[i-1][j], dp[i][j-1]). O(mn) time and space."},
+  {question:"What is the Longest Increasing Subsequence (LIS)?",answer:"Finds the length of the longest strictly increasing subsequence in an array. O(n²) DP or O(n log n) with binary search + patience sorting. LIS of [10,9,2,5,3,7,101,18] is 4 ([2,3,7,101])."},
+  {question:"What is coin change problem?",answer:"Given coins of certain denominations, find the minimum number of coins to make amount n. DP: dp[i] = min coins to make i. dp[i] = min(dp[i-c]+1) for each coin c ≤ i. dp[0]=0, dp[i]=∞ initially. O(n·coins) time."},
+  {question:"What is the edit distance (Levenshtein distance)?",answer:"The minimum number of single-character operations (insert, delete, substitute) to transform one string into another. DP: dp[i][j] = edit distance of s1[0..i] and s2[0..j]. O(mn) time. Used in spell checkers, DNA alignment."},
+  // Binary Search
+  {question:"What is binary search?",answer:"Finds a target in a sorted array by repeatedly halving the search space. O(log n) time. Key: maintain lo, hi, mid=(lo+hi)//2. Adjust lo=mid+1 if target>mid, hi=mid-1 if target<mid."},
+  {question:"What is binary search on the answer?",answer:"Instead of searching an array, binary search on the possible range of answers [lo,hi]. At each mid, check if mid is feasible as an answer. Used for 'minimum maximum', 'find smallest k satisfying condition' problems."},
+  {question:"How do you find the first/last occurrence of a value in a sorted array with duplicates?",answer:"For first occurrence: when arr[mid]==target, don't return — set hi=mid-1 and remember mid. For last: set lo=mid+1. Both are O(log n). This variation is key for counting elements and range queries."},
+  // Sorting
+  {question:"What is merge sort?",answer:"Divide-and-conquer: split array in half recursively until single elements, then merge sorted halves. O(n log n) time — all cases. O(n) extra space. Stable sort. Preferred when stability matters or for linked lists."},
+  {question:"What is quicksort?",answer:"Choose a pivot, partition array so elements < pivot are left, > pivot are right, recurse on both sides. O(n log n) average, O(n²) worst case (bad pivot). O(log n) space (stack). Fastest in practice due to cache locality."},
+  {question:"What is the difference between stable and unstable sorting?",answer:"A stable sort preserves the relative order of equal elements (e.g. merge sort, insertion sort, Timsort). Unstable sorts may reorder equals (quicksort, heapsort). Stability matters when sorting by multiple keys sequentially."},
+  {question:"What is counting sort?",answer:"Non-comparison sort that counts occurrences of each value, then reconstructs the sorted array. O(n+k) time and space where k is the range of values. Only works for integer-like keys. Used as a subroutine in radix sort."},
+  {question:"What is the lower bound for comparison-based sorting?",answer:"Ω(n log n) — proven via decision tree argument. Any comparison-based sort needs at least n log n comparisons in the worst case. This is why merge sort and heapsort are optimal. Counting/radix sort bypass this by not comparing elements."},
+  // Complexity
+  {question:"What does O(1) mean?",answer:"Constant time — the operation takes the same time regardless of input size. Array index access, hash table lookup (average), stack push/pop. The best possible complexity."},
+  {question:"What is the difference between O(n log n) and O(n²)?",answer:"For n=1,000,000: O(n log n) ≈ 20M ops vs O(n²) = 1 trillion ops. O(n²) is impractical for large n. Sorting algorithms: merge/quick sort are O(n log n), bubble/insertion/selection are O(n²)."},
+  {question:"What is amortized time complexity?",answer:"The average time per operation over a sequence of operations, even if some individual operations are expensive. Dynamic array append is O(1) amortized — most appends are O(1), occasional O(n) doubling averages out to O(1) per append."},
+  {question:"What is space complexity?",answer:"Amount of memory an algorithm uses as a function of input size. O(1) space = in-place (no extra memory proportional to n). O(n) space = linear extra memory (e.g. storing a copy of array, DFS recursion stack on a balanced tree)."},
+  // More DSA
+  {question:"What is a deque (double-ended queue)?",answer:"A data structure supporting O(1) insertion and deletion at both front and back. Python's collections.deque implements this. Used for sliding window maximum (monotonic deque), BFS, and palindrome checking."},
+  {question:"What is a monotonic stack?",answer:"A stack that maintains elements in monotonically increasing or decreasing order. Used to find next greater/smaller element in O(n). Pop elements that violate the monotonic property. Key technique for histogram area, daily temperatures."},
+  {question:"What is a segment tree?",answer:"A tree for range queries (sum, min, max) and point updates on an array. Build in O(n), query/update in O(log n). Each node stores aggregate info for a range. Used for competitive programming, databases."},
+  {question:"What is a Fenwick tree (Binary Indexed Tree)?",answer:"Space-efficient structure for prefix sum queries and point updates — O(log n) each. Simpler to implement than segment tree. Updates and queries use bit manipulation (i & (-i) to find next responsible node)."},
+  {question:"What is memoization?",answer:"Storing the result of expensive function calls and returning the cached result when the same inputs occur again. Top-down DP. Python: @lru_cache decorator. Transforms exponential recursion to polynomial."},
+  {question:"What is the Boyer-Moore Voting Algorithm?",answer:"Finds the majority element (appearing >n/2 times) in O(n) time, O(1) space. Maintain a candidate and count; increment count if same element, decrement otherwise. When count reaches 0, update candidate."},
+  {question:"What is the Fast and Slow pointer pattern?",answer:"Two pointers where slow moves one step and fast moves two steps per iteration. Used for cycle detection in linked lists (Floyd's algorithm), finding the middle of a linked list, and palindrome linked list detection."},
+  {question:"What is a balanced parentheses check?",answer:"Use a stack: push opening brackets, pop and match for closing brackets. O(n) time, O(n) space. String is balanced if stack is empty at the end. Variation: minimum additions to make balanced using two counters."},
+  {question:"What is BFS level-order traversal?",answer:"Process tree/graph level by level using a queue. Start by enqueuing root. For each dequeued node, process it and enqueue all children. Used for shortest path, zigzag traversal, right-side view of binary tree."},
+  {question:"What is the time complexity of DFS on a graph?",answer:"O(V+E) where V is vertices and E is edges. Each vertex and edge is visited once. Space is O(V) for the visited set and recursion stack (O(h) for trees where h is height)."},
+  {question:"What is Kruskal's algorithm?",answer:"Finds Minimum Spanning Tree (MST) by sorting edges by weight and adding edges that don't form a cycle (using Union-Find). O(E log E) time. Greedy approach — always picks the cheapest safe edge."},
+  {question:"What is Prim's algorithm?",answer:"Finds MST by starting from any vertex and greedily adding the cheapest edge connecting a new vertex to the current tree. Uses a min-heap. O(E log V) with binary heap. Better than Kruskal's for dense graphs."},
+  {question:"What is a DAG (Directed Acyclic Graph)?",answer:"A directed graph with no cycles. Used to model dependencies, workflows, and scheduling. Key algorithms: topological sort, critical path, DAG shortest/longest path (linear time DP). Opposite: graphs with cycles need cycle detection."},
+  {question:"What is backtracking?",answer:"Explores all possible solutions by building candidates incrementally and abandoning (backtracking) when a candidate can't lead to a valid solution. Used for N-Queens, Sudoku, permutations, combinations. Exponential worst case."},
+  {question:"What is recursion and what is a base case?",answer:"Recursion is a function calling itself with a smaller input. A base case is the terminating condition that stops recursion (e.g. n==0 for factorial). Without a base case, you get infinite recursion and a stack overflow."},
+  {question:"What is the call stack and how does recursion use it?",answer:"The call stack tracks active function calls. Each recursive call adds a frame with local variables and return address. Maximum recursion depth = stack size. Deep recursion risks stack overflow — iterative solutions or tail recursion optimization avoid this."},
+  {question:"What is the Master Theorem?",answer:"A formula for solving divide-and-conquer recurrences T(n)=aT(n/b)+O(n^c). Three cases: if log_b(a)>c: O(n^log_b(a)); if equal: O(n^c log n); if less: O(n^c). Examples: merge sort T(n)=2T(n/2)+O(n) → O(n log n)."},
+  {question:"What is a greedy algorithm?",answer:"Makes the locally optimal choice at each step, hoping to find a global optimum. Works when the problem has the greedy choice property and optimal substructure. Examples: coin change (with canonical coins), interval scheduling, Huffman coding."},
+  {question:"What is interval scheduling / interval overlap problem?",answer:"Given intervals, find maximum non-overlapping intervals (greedy: sort by end time, greedily pick). Or find minimum intervals to cover a range (sort by start, greedily extend). O(n log n) for sorting."},
+  {question:"What is a graph coloring problem?",answer:"Assign colors to vertices so no two adjacent vertices share a color. Minimum colors = chromatic number. NP-hard in general; bipartite graphs are 2-colorable (check with BFS). Used in register allocation, scheduling."},
+  {question:"What is the Floyd-Warshall algorithm?",answer:"Finds shortest paths between all pairs of vertices in a weighted graph (including negative edges, no negative cycles). O(V³) time, O(V²) space. Uses DP: dp[i][j][k] = shortest path from i to j using only vertices 1..k."},
+  {question:"What is memoized DFS (DFS with cache)?",answer:"DFS that stores results of visited states to avoid recomputation, combining graph traversal with dynamic programming. Used for problems like counting paths in a DAG, course scheduling, word break. Essentially top-down DP on a graph."},
+  {question:"What is a monotonic queue?",answer:"A deque maintaining elements in monotonically increasing or decreasing order. Used for sliding window max/min in O(n) total. Front of deque holds current window's max (or min). Elements older than window are removed from front."},
+  {question:"What is a sparse table?",answer:"A data structure for range minimum/maximum queries (RMQ). Built in O(n log n), answers queries in O(1). Uses precomputed table where table[i][j] = min of 2^j elements starting at i. Ideal for static arrays with many queries."},
+  {question:"What is the difference between a min-heap and max-heap?",answer:"Min-heap: parent ≤ children, root is minimum. Max-heap: parent ≥ children, root is maximum. Both support O(log n) insert and O(log n) extract. Python's heapq is a min-heap. For max-heap in Python, negate values."},
+  {question:"What is a string trie and what are its advantages?",answer:"A trie storing characters at each node, forming strings along root-to-node paths. Advantages over hash sets: supports prefix queries (starts-with), sorted iteration, no hash collisions. Used in autocomplete, IP routing, dictionary."},
+  {question:"What is the Rabin-Karp algorithm?",answer:"String search using rolling hash. Hash the pattern and each window of the text, compare hashes first (O(1)), confirm with character check only on match. Average O(n+m), worst O(nm). Key: polynomial rolling hash, modular arithmetic."},
+  {question:"What is the KMP algorithm?",answer:"Knuth-Morris-Pratt string search: preprocesses pattern to build failure function (longest proper prefix which is also suffix). Avoids re-examining characters after mismatch. O(n+m) time, O(m) space. Better than naive O(nm)."},
+  {question:"What is a Red-Black Tree?",answer:"A self-balancing BST with color (red/black) on each node satisfying: root is black, red nodes have black children, all paths from node to leaves have equal black nodes. Guarantees O(log n) height. Used in Java TreeMap, Linux task scheduler."},
+  {question:"What is an AVL Tree?",answer:"A self-balancing BST maintaining height balance factor (-1, 0, 1) at each node. Rebalances via rotations after insert/delete. Stricter than Red-Black — faster lookups but slower insertions. O(log n) for all operations."},
+  {question:"What is a B-Tree?",answer:"A self-balancing tree with nodes that can have many keys and children, optimized for disk I/O. Used in databases and file systems. All leaves at same depth. Minimizes disk reads by fitting entire nodes in disk blocks."},
+  {question:"What is the two-sum problem?",answer:"Find two numbers in an array that add to a target. Brute force: O(n²). Optimal: use a hash set — for each element x, check if target-x is in the set. O(n) time, O(n) space. Variant: sorted array → two pointers, O(n) time, O(1) space."},
+  {question:"What is the three-sum problem?",answer:"Find all unique triplets summing to zero. Sort the array, then for each element a[i], use two pointers on the remaining sorted subarray. O(n²) time, O(1) extra space (ignoring output). Dedup by skipping duplicates."},
+  {question:"What is the stock buy/sell problem?",answer:"Find maximum profit from one buy and one sell. Greedy: track running min price, compute profit at each price. O(n) time, O(1) space. Multiple transactions: sum up all positive differences. Cooldown/k-transactions: DP."},
+  {question:"What is matrix BFS (flood fill / word search)?",answer:"BFS/DFS on a 2D grid treating each cell as a graph node with up to 4 (or 8) neighbors. Track visited cells to avoid cycles. Used for island counting, word search, shortest path in maze, flood fill. O(rows×cols) time."},
+  {question:"What are the SOLID principles in software design?",answer:"S: Single Responsibility. O: Open/Closed (open for extension, closed for modification). L: Liskov Substitution. I: Interface Segregation. D: Dependency Inversion. These 5 principles guide object-oriented design for maintainability."},
+  {question:"What is the time complexity of building a heap?",answer:"O(n) — not O(n log n) as one might expect. Starting from the last non-leaf node and sifting down, the total work converges to O(n) by summing a geometric series. This is why heapify (build_heap) is O(n)."},
+  {question:"What is memoization vs. tabulation performance?",answer:"Both are O(n) for Fibonacci. Memoization has function call overhead and risk of recursion depth limit. Tabulation has no recursion risk and is often more cache-friendly. Memoization is easier to write; tabulation is typically faster in practice."},
+  {question:"What is the 'meeting rooms' interval problem?",answer:"Determine if a person can attend all meetings: check for any overlap. Sort by start time, check if any meeting starts before previous ends. O(n log n). Variant: minimum meeting rooms needed = maximum overlapping intervals at any point."},
+  {question:"What is a permutation vs combination?",answer:"Permutation: ordered arrangement of r items from n (nPr = n!/(n-r)!). Combination: unordered selection of r items from n (nCr = n!/(r!(n-r)!)). In backtracking: permutations require tracking used elements; combinations avoid backward picks."},
+  {question:"What is the time complexity of common operations on a balanced BST?",answer:"Search, insert, delete: O(log n) average and worst case (when balanced). Inorder traversal: O(n). Finding min/max: O(log n). Successor/predecessor: O(log n). Unbalanced BST degrades to O(n) for all operations."},
+  {question:"What is the difference between Prim's and Kruskal's algorithms for MST?",answer:"Prim's: grows MST from a vertex by greedily adding cheapest edge to new vertex. Better for dense graphs (E ≈ V²). Kruskal's: sorts all edges, adds cheapest non-cycle-forming edge. Better for sparse graphs. Both produce MST."},
+  {question:"What is a suffix array?",answer:"Sorted array of all suffixes of a string. Built in O(n log n) or O(n). Enables O(m log n) pattern matching and O(n) LCP (Longest Common Prefix) computation with LCP array. Space-efficient alternative to suffix tree."},
+  {question:"What is amortized O(1) for dynamic array append?",answer:"Most appends are O(1). When the array doubles (rare: at sizes 1,2,4,8,...), it costs O(n). Over n operations: total work = n + n/2 + n/4 + ... ≈ 2n = O(n). Per operation: O(n)/n = O(1) amortized."},
+  {question:"What is tail recursion?",answer:"A recursive call that is the last operation in a function, allowing the compiler/interpreter to reuse the current stack frame instead of creating a new one. Turns O(n) stack space into O(1). Python doesn't optimize tail recursion; languages like Scheme, Haskell, and some C compilers do."},
+  {question:"What is the difference between a graph and a tree?",answer:"A tree is a connected acyclic undirected graph with n vertices and exactly n-1 edges. A graph can have cycles, be disconnected, or be directed. Every tree is a graph, not every graph is a tree."},
+  {question:"What is in-order traversal of a BST used for?",answer:"Inorder traversal (left→root→right) of a BST visits nodes in sorted (ascending) order. Used to: print sorted elements, validate a BST (check strictly increasing), kth smallest element, convert BST to sorted list."},
+  {question:"What is a graph's connected component?",answer:"A maximal set of vertices where every vertex is reachable from every other vertex (undirected). Found via BFS/DFS: run from each unvisited vertex, all reachable nodes form a component. O(V+E) total. Directed graphs have strongly connected components (Tarjan's/Kosaraju's)."},
+  {question:"What is the 'word ladder' problem?",answer:"Transform one word to another by changing one letter at a time (each intermediate word must be in a dictionary). Modeled as BFS on a graph where words are nodes, edges connect words differing by one letter. BFS gives shortest path."},
+  // Additional algorithmic patterns
+  {question:"What is divide and conquer?",answer:"Break problem into smaller subproblems, solve each recursively, combine solutions. Examples: merge sort, quicksort, binary search, Karatsuba multiplication, closest pair of points. Typically O(n log n) when dividing evenly."},
+  {question:"What is the fast exponentiation algorithm?",answer:"Computes a^n in O(log n) time: if n is even, a^n = (a^(n/2))². If odd, a^n = a × a^(n-1). Also called 'exponentiation by squaring'. Used for modular exponentiation in cryptography and competitive programming."},
+  {question:"What is the XOR swap trick?",answer:"a ^= b; b ^= a; a ^= b; — swaps a and b without a temporary variable using XOR properties. Note: fails if a and b are the same memory location. Useful for understanding bitwise operations but temp variable swap is clearer."},
+  {question:"What is the difference between DFS pre-order and post-order in graphs?",answer:"Pre-order DFS visits a node before its descendants — useful for copying a tree. Post-order visits a node after all descendants — useful for deletion, evaluating expressions, and computing finish times for topological sort."},
+  {question:"What is matrix chain multiplication?",answer:"Find optimal parenthesization of a chain of matrices to minimize scalar multiplications. Classic DP: dp[i][j] = minimum multiplications for matrices i through j. O(n³) time. Foundation for understanding interval DP."},
+];
+
+const ESL_DECK = [
+  // Science
+  {question:"What does 'hypothesis' mean in science?",answer:"A testable, specific prediction about the expected outcome of an experiment. It is the 'if...then...' statement of scientific inquiry. Example: 'If plants are given more sunlight, then they will grow taller.'"},
+  {question:"What is 'osmosis'?",answer:"The movement of water molecules through a semi-permeable membrane from an area of low solute concentration to an area of high solute concentration. Explains why plant cells become turgid in water and cells shrivel in salt water."},
+  {question:"What does 'photosynthesis' mean?",answer:"The process by which plants use sunlight, water, and carbon dioxide to produce glucose (food) and oxygen. Occurs in chloroplasts. Equation: 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂."},
+  {question:"What is 'mitosis'?",answer:"Cell division producing two genetically identical daughter cells from one parent cell. Used for growth, repair, and asexual reproduction. Stages: prophase, metaphase, anaphase, telophase. Compare with meiosis (produces sex cells, 4 genetically unique cells)."},
+  {question:"What does 'evolution' mean?",answer:"The change in inherited characteristics of a species over successive generations through natural selection. Organisms with traits better suited to their environment survive and reproduce more (survival of the fittest). Proposed by Charles Darwin."},
+  {question:"What is 'gravity'?",answer:"A fundamental force that attracts objects with mass toward one another. The greater the mass and the closer the objects, the stronger the gravitational force. Earth's gravity gives objects weight and keeps the Moon in orbit."},
+  {question:"What is 'velocity'?",answer:"Speed in a specific direction — a vector quantity. Formula: v = d/t. Unlike speed, velocity includes direction: 60 mph north and 60 mph south are different velocities. Acceleration is change in velocity per unit time."},
+  {question:"What does 'atoms' vs 'molecules' mean?",answer:"Atoms are the smallest unit of an element that retains its properties (e.g., a carbon atom). Molecules are two or more atoms bonded together (e.g., O₂, H₂O, CO₂). Compounds are molecules containing different elements."},
+  {question:"What is 'DNA'?",answer:"Deoxyribonucleic acid — the molecule that carries genetic information in living organisms. Found in the nucleus, it is a double helix made of nucleotide base pairs (A-T, G-C). Genes are segments of DNA that encode proteins."},
+  {question:"What is 'biodiversity'?",answer:"The variety of life on Earth — including the diversity of species, genes, and ecosystems. High biodiversity makes ecosystems more resilient. Threatened by habitat destruction, pollution, climate change, and invasive species."},
+  {question:"What is 'photosynthesis vs cellular respiration'?",answer:"Photosynthesis (plants, light): CO₂ + H₂O → glucose + O₂. Cellular respiration (all cells): glucose + O₂ → CO₂ + H₂O + ATP (energy). They are essentially reverse processes — one stores energy, the other releases it."},
+  {question:"What is a 'food web'?",answer:"A diagram showing feeding relationships among organisms in an ecosystem. Producers (plants) → Primary consumers (herbivores) → Secondary consumers (carnivores) → Decomposers. Energy flows through the web but decreases at each level (~90% lost as heat)."},
+  {question:"What does 'density' mean in science?",answer:"Mass per unit volume (D = m/V). A denser object sinks in a less dense fluid (e.g., iron sinks in water). Units: g/cm³ or kg/m³. Water's density is 1 g/cm³ — objects denser than 1 sink, less dense float."},
+  {question:"What is the 'scientific method'?",answer:"A systematic process for investigating questions: (1) Observe and ask a question, (2) Form a hypothesis, (3) Design and run an experiment, (4) Collect and analyze data, (5) Draw conclusions. Essential for producing reliable, reproducible results."},
+  {question:"What is 'Newton's third law of motion'?",answer:"For every action, there is an equal and opposite reaction. When you push on a wall, the wall pushes back on you with equal force. Explains rocket propulsion: gases expelled downward push rocket upward."},
+  {question:"What is 'natural selection'?",answer:"The mechanism of evolution where organisms with favorable traits for their environment survive and reproduce more, passing those traits to offspring. Over time, traits that improve survival become more common in a population."},
+  {question:"What is 'homeostasis'?",answer:"The ability of an organism to maintain a stable internal environment despite external changes. Examples: body temperature regulation (98.6°F), blood sugar regulation by insulin, kidney regulation of water balance."},
+  {question:"What is a 'chemical reaction'?",answer:"A process that transforms one set of substances (reactants) into new substances (products) by breaking and forming chemical bonds. Signs: color change, gas production, temperature change, precipitate formation. Law of Conservation of Mass: mass is neither created nor destroyed."},
+  {question:"What does 'periodic table' organize?",answer:"The periodic table arranges elements by increasing atomic number (protons). Elements in the same column (group) share similar chemical properties. Rows (periods) show elements with the same number of electron shells. Metals on left, nonmetals on right."},
+  {question:"What is 'climate change'?",answer:"Long-term shifts in global temperatures and weather patterns, primarily caused by human activities since the 1800s — especially burning fossil fuels which release greenhouse gases (CO₂, CH₄). Effects: rising sea levels, extreme weather, habitat loss."},
+  // History
+  {question:"What was the 'American Revolution'?",answer:"The colonial revolt (1775–1783) in which American colonies broke free from British rule. Key events: Declaration of Independence (1776), Valley Forge, Yorktown. Led to the Constitution (1787) and establishment of the United States."},
+  {question:"What was the 'Civil War'?",answer:"The war fought in the United States (1861–1865) between the Union (North) and Confederate States (South) over slavery and states' rights. Union victory preserved the nation and led to the abolition of slavery via the 13th Amendment."},
+  {question:"What was the 'Great Depression'?",answer:"The worst economic downturn in US history (1929–1939), triggered by the stock market crash of 1929. Unemployment reached 25%. Franklin D. Roosevelt's New Deal programs aimed to provide relief, recovery, and reform."},
+  {question:"What was 'World War II'?",answer:"A global conflict (1939–1945) involving the Allies (US, UK, USSR, France) vs. the Axis Powers (Germany, Italy, Japan). The Holocaust killed 6 million Jews. Ended with Germany's surrender and US atomic bombings of Hiroshima and Nagasaki."},
+  {question:"What was the 'Civil Rights Movement'?",answer:"A social and political movement (1950s–1960s) in the US to end racial segregation and discrimination against African Americans. Leaders include Martin Luther King Jr. Key achievements: Civil Rights Act (1964), Voting Rights Act (1965)."},
+  {question:"What was 'Reconstruction' in US history?",answer:"The period (1865–1877) after the Civil War when the US government worked to reintegrate Southern states and address the status of freed slaves. Led to the 13th, 14th, and 15th amendments (abolishing slavery, guaranteeing citizenship, and voting rights)."},
+  {question:"What was the 'Industrial Revolution'?",answer:"The transition (late 1700s–1800s) from hand production to machine manufacturing, beginning in Britain. Steam power, factories, railroads transformed economies. Led to urbanization, child labor, and the rise of the working class."},
+  {question:"What is 'Manifest Destiny'?",answer:"The 19th-century belief that the US was destined to expand its territory across the entire North American continent. Justified westward expansion, the displacement of Native Americans, the Mexican-American War, and the Oregon Trail migrations."},
+  {question:"What was the 'Cold War'?",answer:"A geopolitical tension (1947–1991) between the US (capitalism/democracy) and USSR (communism). No direct military conflict but proxy wars (Korea, Vietnam), arms race, Space Race, and nuclear standoff (Cuban Missile Crisis)."},
+  {question:"What was 'Brown v. Board of Education'?",answer:"A landmark 1954 US Supreme Court case that declared racial segregation in public schools unconstitutional, overturning Plessy v. Ferguson (1896) 'separate but equal' doctrine. A turning point for the Civil Rights Movement."},
+  {question:"What is the 'Bill of Rights'?",answer:"The first 10 amendments to the US Constitution (ratified 1791), protecting fundamental individual rights: freedom of speech, religion, press (1st), right to bear arms (2nd), protection from unreasonable search (4th), right to trial (6th)."},
+  {question:"What was the 'New Deal'?",answer:"FDR's programs (1933–1939) responding to the Great Depression: relief (jobs/food for the unemployed), recovery (economic programs), and reform (regulations to prevent future crashes). Created Social Security, SEC, and federal jobs programs."},
+  {question:"What was the 'Trail of Tears'?",answer:"The forced relocation (1830–1850) of Native American nations (especially Cherokee) from southeastern US to 'Indian Territory' (Oklahoma) under the Indian Removal Act. Roughly 15,000 Cherokee died during the march."},
+  {question:"What was 'Watergate'?",answer:"A political scandal (1972–1974) involving the Nixon administration's cover-up of a break-in at Democratic headquarters. Led to the first presidential resignation in US history (Nixon, 1974). Symbol of government dishonesty and abuse of power."},
+  // Math
+  {question:"What is a 'proportion'?",answer:"An equation stating two ratios are equal (a/b = c/d). Solved by cross-multiplication: a×d = b×c. Used for scale models, unit conversion, and percent problems. Example: if 3/4 = x/20, then x = 15."},
+  {question:"What is 'slope' in algebra?",answer:"The rate of change of a line — how steep it is. Slope m = (y₂-y₁)/(x₂-x₁) = rise/run. Positive slope: line goes up left to right. Negative: goes down. Zero: horizontal. Undefined: vertical. Key for linear equations (y = mx + b)."},
+  {question:"What is the 'Pythagorean theorem'?",answer:"In a right triangle, a² + b² = c², where c is the hypotenuse (longest side, opposite the right angle) and a, b are the legs. Used to find distances. Example: legs of 3 and 4 → hypotenuse = √(9+16) = 5."},
+  {question:"What is 'mean, median, and mode'?",answer:"Mean (average): sum ÷ count. Median: middle value when sorted (or average of two middle values). Mode: most frequent value. Mean is affected by outliers; median is more robust. 'Average' usually refers to mean."},
+  {question:"What is a 'quadratic equation'?",answer:"An equation of the form ax² + bx + c = 0. Solved by factoring, completing the square, or the quadratic formula: x = (-b ± √(b²-4ac)) / 2a. The discriminant b²-4ac tells you: >0 two real roots, =0 one root, <0 no real roots."},
+  {question:"What is 'probability'?",answer:"The likelihood of an event occurring, from 0 (impossible) to 1 (certain). P(event) = favorable outcomes / total outcomes. P(A and B) = P(A) × P(B) if independent. P(A or B) = P(A) + P(B) - P(A and B)."},
+  {question:"What is 'standard deviation'?",answer:"A measure of how spread out data values are from the mean. Low SD: values clustered near mean. High SD: values spread out. Calculated as the square root of variance. Used in statistics, test scores, scientific data."},
+  {question:"What is 'scientific notation'?",answer:"A way to write very large or small numbers: a × 10^n where 1 ≤ a < 10. Examples: 3,000,000 = 3 × 10⁶; 0.00045 = 4.5 × 10⁻⁴. Simplifies calculations with extreme values in science, engineering, and astronomy."},
+  {question:"What is a 'system of equations'?",answer:"Two or more equations with the same variables, solved simultaneously. Methods: substitution (solve one for a variable, substitute into other), elimination (add/subtract equations to cancel a variable), or graphing (find intersection)."},
+  {question:"What is 'exponent' and what are the laws of exponents?",answer:"An exponent tells how many times to multiply the base by itself (x³ = x×x×x). Key laws: x^a × x^b = x^(a+b); x^a ÷ x^b = x^(a-b); (x^a)^b = x^(ab); x^0 = 1; x^(-a) = 1/x^a."},
+  {question:"What is a 'function' in math?",answer:"A relation where each input (x) has exactly one output (y). Written as f(x). A vertical line test: if a vertical line crosses a graph more than once, it's not a function. Examples: f(x) = 2x+1 (linear), f(x) = x² (quadratic)."},
+  {question:"What is 'percent change'?",answer:"The relative change in a value, expressed as a percentage. Formula: ((New - Old) / Old) × 100%. Positive = increase, negative = decrease. Example: price from $50 to $60 = (10/50) × 100% = 20% increase."},
+  // Literature
+  {question:"What is 'theme' in literature?",answer:"The central message or underlying meaning of a literary work — the insight about life or human nature the author wants to convey. Not just a topic (love, war) but a specific idea about it (e.g., 'War destroys innocence')."},
+  {question:"What is 'irony' in literature?",answer:"A contrast between expectation and reality. Three types: verbal irony (saying the opposite of what you mean, like sarcasm), situational irony (unexpected outcome), dramatic irony (audience knows something characters don't)."},
+  {question:"What is a 'metaphor' vs a 'simile'?",answer:"Both compare two unlike things. Simile uses 'like' or 'as': 'She runs like the wind.' Metaphor makes a direct comparison: 'She is the wind.' Metaphors tend to feel stronger and more poetic. Both are types of figurative language."},
+  {question:"What is 'foreshadowing'?",answer:"A literary technique where the author gives clues or hints about events that will happen later in the story. Creates suspense and dramatic irony. Example: a storm before a battle, a character coughing early in a story before getting ill."},
+  {question:"What is 'characterization'?",answer:"The way an author creates and develops characters. Direct: the author explicitly tells you the character's traits. Indirect: you infer traits from speech, actions, thoughts, appearance, and others' reactions (STEAL method)."},
+  {question:"What is the 'protagonist' vs 'antagonist'?",answer:"The protagonist is the main character — the hero or central figure the story follows. The antagonist is the force opposing the protagonist — often a villain but can be nature, society, or internal conflict. Conflict between them drives the plot."},
+  {question:"What is 'point of view' in literature?",answer:"The perspective from which a story is narrated. First person: 'I' — narrator is in the story. Second person: 'you' — rare. Third person limited: follows one character's thoughts. Third person omniscient: narrator knows all characters' thoughts."},
+  {question:"What is a 'symbol' in literature?",answer:"An object, person, place, or event that represents something beyond its literal meaning. Examples: the green light in The Great Gatsby (the American Dream), the conch in Lord of the Flies (order and civilization), a dove (peace)."},
+  {question:"What is 'alliteration'?",answer:"The repetition of the same consonant sound at the beginning of nearby words. Example: 'Peter Piper picked a peck of pickled peppers.' Used to create rhythm, emphasis, and a memorable sound pattern in poetry and prose."},
+  {question:"What is a 'thesis statement'?",answer:"The main argument or central claim of an essay, usually the last sentence of the introduction. It is specific, debatable, and tells the reader what the essay will argue and why. A strong thesis goes beyond stating a fact."},
+  {question:"What is 'conflict' in a story?",answer:"The central struggle that drives the plot. Types: Person vs. Person (external), Person vs. Nature, Person vs. Society, Person vs. Self (internal conflict about choices, identity). Most stories have multiple types of conflict."},
+  {question:"What is a 'narrative arc'?",answer:"The structure of a story's plot: Exposition (introduction/setting) → Rising Action (buildup of conflict) → Climax (turning point/highest tension) → Falling Action (consequences) → Resolution/Denouement (conclusion)."},
+  {question:"What is 'allusion' in literature?",answer:"An indirect reference to a well-known person, place, event, or work (historical, mythological, literary, or biblical). Example: 'He had a Midas touch' (alludes to Greek myth). Allusions deepen meaning without explicit explanation."},
+  {question:"What is 'personification'?",answer:"Giving human qualities, actions, or emotions to non-human things. Example: 'The wind whispered through the trees'; 'Time is a thief.' A type of figurative language that makes descriptions more vivid and relatable."},
+  {question:"What is 'tone' vs 'mood' in literature?",answer:"Tone is the author's attitude toward the subject (e.g., sarcastic, reverent, melancholic) — inferred from word choice and style. Mood is the emotional atmosphere the reader feels (e.g., tense, joyful, ominous). Different but related."},
+  {question:"What is 'hyperbole'?",answer:"Extreme exaggeration used for emphasis or humor, not meant literally. Examples: 'I've told you a million times'; 'I'm so hungry I could eat a horse.' Opposite of understatement. Common in everyday speech and literature."},
+  {question:"What is a 'round' vs 'flat' character?",answer:"A round character is complex, multi-dimensional, and may change (dynamic). A flat character is simple, one-dimensional, and does not change (static). Major characters tend to be round; minor characters may be flat."},
+  {question:"What is the difference between 'denotation' and 'connotation'?",answer:"Denotation: the literal, dictionary definition of a word. Connotation: the emotional or cultural associations a word carries. Example: 'house' (denotation: a building) vs 'home' (connotation: warmth, belonging). Word choice (diction) affects tone."},
+  {question:"What is an 'inference' in reading?",answer:"A logical conclusion you draw from evidence and reasoning in the text, combined with background knowledge — something the author implies but doesn't state directly. 'Reading between the lines.' Central skill tested in reading comprehension."},
+  {question:"What is 'satire'?",answer:"A genre that uses humor, irony, and exaggeration to criticize and expose the foolishness or corruption of individuals, society, or institutions. Examples: political cartoons, Jonathan Swift's 'A Modest Proposal', 'The Onion'. Purpose: to provoke change."},
+];
+
+// ── APP STATE ─────────────────────────────────────────────────────
+let session = { questions: [], current: 0, ratings: [], weakIndices: [], isRedrill: false };
+let activeDeck = null;
+
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('gemini_api_key');
+  if (saved) { document.getElementById('apiKey').value = saved; document.getElementById('apiStatus').textContent = '✓ Key loaded'; }
+  const ta = document.getElementById('notesInput');
+  ta.addEventListener('input', () => { document.getElementById('charCount').textContent = ta.value.length.toLocaleString() + ' characters'; });
+});
+
+function saveApiKey() {
+  const key = document.getElementById('apiKey').value.trim(); if (!key) return;
+  localStorage.setItem('gemini_api_key', key);
+  const s = document.getElementById('apiStatus'); s.textContent = '✓ Saved!';
+  setTimeout(() => { s.textContent = ''; }, 2000);
+}
+
+function getApiKey() { return localStorage.getItem('gemini_api_key') || document.getElementById('apiKey').value.trim(); }
+
+async function callGemini(apiKey, prompt) {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.candidates[0].content.parts[0].text;
+}
+
+function showStep(id) {
+  document.querySelectorAll('.step-panel').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── DECK SELECTOR ─────────────────────────────────────────────────
+function selectDeck(deckId) {
+  activeDeck = deckId;
+  document.querySelectorAll('.deck-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('deck' + deckId.charAt(0).toUpperCase() + deckId.slice(1))?.classList.add('selected');
+  document.getElementById('startDeckBtn').disabled = false;
+}
+
+function startSelectedDeck() {
+  if (!activeDeck) return;
+  if (activeDeck === 'custom') { showStep('stepNotes'); return; }
+  const deck = activeDeck === 'faang' ? FAANG_DECK : ESL_DECK;
+  // Shuffle and pick 20 cards
+  const shuffled = [...deck].sort(() => Math.random() - .5).slice(0, 20);
+  loadDeck(shuffled, activeDeck === 'faang' ? '💻 FAANG DSA' : '📚 ESL Vocab');
+}
+
+function loadDeck(cards, label) {
+  session.questions = cards;
+  session.current = 0;
+  session.ratings = new Array(cards.length).fill(null);
+  session.weakIndices = [];
+  session.isRedrill = false;
+  document.getElementById('deckBadge').textContent = label || 'Question';
+  showFlashcard(0);
+}
+
+// ── CUSTOM NOTES → GENERATE ───────────────────────────────────────
+async function generateQuestions() {
+  const notes = document.getElementById('notesInput').value.trim();
+  const apiKey = getApiKey();
+  if (!notes || notes.length < 30) { alert('Please paste some study notes first.'); return; }
+  if (!apiKey) { alert('Please enter your Gemini API key.'); return; }
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  document.getElementById('genBtnText').textContent = 'Generating…';
+  document.getElementById('genSpinner').classList.add('active');
+  showStep('stepLoading');
+
+  const prompt = `You are an expert study coach. Read the following study notes and generate 8-10 high-quality recall questions testing genuine understanding.
+
+Study Notes:
+"""
+${notes}
+"""
+
+Return ONLY a valid JSON array (no markdown, no extra text):
+[{"question":"The full question text","answer":"A clear model answer in 2-4 sentences"}]
+
+Make questions varied: conceptual understanding, application, comparison, and explanation. No trivial yes/no.`;
+
+  try {
+    let raw = await callGemini(apiKey, prompt);
+    raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+    loadDeck(JSON.parse(raw), 'Question');
+  } catch(e) {
+    showStep('stepNotes');
+    const old = document.getElementById('errorMsg'); if (old) old.remove();
+    const err = document.createElement('div'); err.id = 'errorMsg'; err.className = 'error-msg';
+    err.textContent = 'Error: ' + e.message; document.getElementById('appRoot').appendChild(err);
+  }
+  btn.disabled = false; document.getElementById('genBtnText').textContent = 'Generate Questions';
+  document.getElementById('genSpinner').classList.remove('active');
+}
+
+// ── FLASHCARD ─────────────────────────────────────────────────────
+function showFlashcard(index) {
+  const q = session.questions[index]; if (!q) return;
+  const total = session.questions.length;
+  document.getElementById('progressFill').style.width = (index / total * 100) + '%';
+  document.getElementById('progressLabel').textContent = `${index + 1} / ${total}`;
+  document.getElementById('cardNum').textContent = `Card ${index + 1} of ${total}`;
+  document.getElementById('questionText').textContent = q.question;
+  document.getElementById('userAnswer').value = '';
+  document.getElementById('modelAnswer').style.display = 'none';
+  document.getElementById('answerSection').style.display = 'block';
+  document.getElementById('answerSection').querySelector('button').style.display = 'block';
+  showStep('stepFlashcard');
+}
+
+function revealAnswer() {
+  const q = session.questions[session.current];
+  document.getElementById('modelText').textContent = q.answer;
+  document.getElementById('modelAnswer').style.display = 'block';
+  document.getElementById('answerSection').querySelector('button').style.display = 'none';
+}
+
+function rateCard(rating) {
+  session.ratings[session.current] = rating;
+  if (rating === 'needs') session.weakIndices.push(session.current);
+  const next = session.current + 1;
+  if (next < session.questions.length) { session.current = next; showFlashcard(next); }
+  else showSummary();
+}
+
+function showSummary() {
+  const total = session.questions.length;
+  const got = session.ratings.filter(r => r === 'got').length;
+  const needs = session.ratings.filter(r => r === 'needs').length;
+  const pct = Math.round((got / total) * 100);
+
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = `${total} / ${total}`;
+
+  document.getElementById('scoreRow').innerHTML = `
+    <div class="score-stat"><div class="score-num green">${got}</div><div class="score-stat-label">Got It</div></div>
+    <div class="score-stat"><div class="score-num red">${needs}</div><div class="score-stat-label">Needs Work</div></div>
+    <div class="score-stat"><div class="score-num" style="color:var(--pink-dark)">${total}</div><div class="score-stat-label">Total Cards</div></div>`;
+
+  setTimeout(() => { document.getElementById('scoreBarFill').style.width = pct + '%'; }, 100);
+  document.getElementById('scorePct').textContent = pct + '%';
+
+  const weakSection = document.getElementById('weakTopicsSection');
+  const redrillBtn = document.getElementById('redrill-btn');
+  if (session.weakIndices.length > 0) {
+    document.getElementById('weakList').innerHTML = session.weakIndices.map(i =>
+      `<div class="weak-item">${escHtml(session.questions[i].question)}</div>`).join('');
+    weakSection.style.display = 'block'; redrillBtn.style.display = 'inline-flex';
+  } else { weakSection.style.display = 'none'; redrillBtn.style.display = 'none'; }
+  showStep('stepSummary');
+}
+
+function redrillWeak() {
+  const weakQs = session.weakIndices.map(i => session.questions[i]);
+  session.questions = weakQs; session.current = 0;
+  session.ratings = new Array(weakQs.length).fill(null);
+  session.weakIndices = []; session.isRedrill = true;
+  showFlashcard(0);
+}
+
+function startOver() {
+  session = {questions:[],current:0,ratings:[],weakIndices:[],isRedrill:false};
+  activeDeck = null;
+  document.querySelectorAll('.deck-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('startDeckBtn').disabled = true;
+  document.getElementById('notesInput').value = '';
+  document.getElementById('charCount').textContent = '0 characters';
+  const old = document.getElementById('errorMsg'); if (old) old.remove();
+  document.getElementById('scoreBarFill').style.width = '0%';
+  showStep('stepDeck');
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

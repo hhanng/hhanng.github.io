@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Period & Cycle Tracker — Agent #86</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #1a0a14; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+    .header { background: #2d1020; border-bottom: 1px solid #3d1830; padding: 18px 24px; text-align: center; }
+    .header h1 { font-size: 1.5rem; font-weight: 700; color: #f472b6; margin-bottom: 4px; }
+    .header p { font-size: 0.82rem; color: #c084fc; opacity: 0.85; }
+
+    .tab-bar { display: flex; background: #2d1020; border-bottom: 1px solid #3d1830; overflow-x: auto; }
+    .tab-btn { flex: 1; padding: 11px 8px 10px; border: none; background: transparent; color: #c084fc; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; line-height: 1.2; }
+    .tab-btn.active { color: #f472b6; border-bottom-color: #f472b6; background: rgba(244,114,182,0.06); }
+    .tab-btn:hover:not(.active) { color: #f9a8d4; background: rgba(244,114,182,0.04); }
+    .tab-vi { font-size: 0.57rem; color: #c084fc; font-weight: 400; letter-spacing: 0.03em; display: block; margin-top: 2px; opacity: 0.75; }
+    .tab-btn.active .tab-vi { color: #f9a8d4; opacity: 1; }
+
+    .tab-content { display: none; padding: 16px; max-width: 900px; margin: 0 auto; }
+    .tab-content.active { display: block; }
+
+    .card { background: #2d1020; border: 1px solid #3d1830; border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+    .card-title { font-size: 0.92rem; font-weight: 700; color: #f472b6; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+    /* Stats */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 14px; margin-bottom: 14px; }
+    .stat-box { background: #2d1020; border: 1px solid #3d1830; border-radius: 10px; padding: 12px; text-align: center; }
+    .stat-value { font-size: 1.3rem; font-weight: 700; color: #f472b6; }
+    .stat-label { font-size: 0.68rem; color: #c084fc; margin-top: 2px; }
+
+    /* Calendar */
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .cal-nav { background: #3d1830; border: none; color: #f472b6; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
+    .cal-month-label { font-size: 0.95rem; font-weight: 600; color: #fff; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-day-name { text-align: center; font-size: 0.68rem; color: #c084fc; padding: 3px 0; font-weight: 600; }
+    .cal-day { aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; cursor: pointer; position: relative; transition: all 0.15s; border: 1px solid transparent; }
+    .cal-day:hover { background: #3d1830; }
+    .cal-day.today { border-color: #c084fc; color: #c084fc; font-weight: 700; }
+    .cal-day.period { background: #f472b6; color: #1a0a14; font-weight: 700; border-radius: 50%; }
+    .cal-day.fertile { background: rgba(192,132,252,0.25); border-color: #c084fc; }
+    .cal-day.ovulation { background: #c084fc; color: #1a0a14; }
+    .cal-day.empty { cursor: default; }
+    .cal-day.has-mood::after { content: ''; position: absolute; bottom: 2px; width: 4px; height: 4px; border-radius: 50%; background: #f9a8d4; }
+    .cal-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; font-size: 0.7rem; color: #c9a8c4; }
+    .leg-item { display: flex; align-items: center; gap: 5px; }
+    .leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Period controls */
+    .period-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .btn { padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: all 0.15s; }
+    .btn-primary { background: #f472b6; color: #1a0a14; }
+    .btn-primary:hover { background: #ec4899; }
+    .btn-secondary { background: #3d1830; color: #f472b6; border: 1px solid #f472b6; }
+    .btn-secondary:hover { background: #4d2040; }
+    .btn-outline { background: transparent; color: #c084fc; border: 1px solid #c084fc; }
+    .btn-outline:hover { background: rgba(192,132,252,0.1); }
+
+    /* Phases */
+    .phase-display { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .phase-card { background: #1a0a14; border: 1px solid #3d1830; border-radius: 12px; padding: 12px; text-align: center; }
+    .phase-card.active-phase { border-color: #f472b6; background: rgba(244,114,182,0.08); }
+    .phase-icon { font-size: 1.5rem; margin-bottom: 5px; }
+    .phase-name { font-size: 0.76rem; font-weight: 700; margin-bottom: 3px; }
+    .phase-days { font-size: 0.66rem; color: #c084fc; margin-bottom: 5px; }
+    .phase-desc { font-size: 0.68rem; color: #d4a8c4; line-height: 1.4; }
+
+    /* Mood */
+    .mood-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .mood-btn { background: #1a0a14; border: 1px solid #3d1830; border-radius: 10px; padding: 8px 10px; cursor: pointer; font-size: 1.2rem; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: all 0.15s; min-width: 58px; }
+    .mood-btn span.label { font-size: 0.62rem; color: #c084fc; }
+    .mood-btn:hover { background: #3d1830; }
+    .mood-btn.selected { border-color: #f472b6; background: rgba(244,114,182,0.15); }
+    .mood-date-label { font-size: 0.8rem; color: #d4a8c4; margin-bottom: 6px; }
+
+    /* Symptoms */
+    .symptom-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #2a1025; }
+    .symptom-check { width: 18px; height: 18px; border-radius: 4px; border: 1px solid #4d2040; background: #1a0a14; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.68rem; transition: all 0.15s; }
+    .symptom-check.checked { background: #f472b6; border-color: #f472b6; color: #1a0a14; }
+    .symptom-name { flex: 1; font-size: 0.8rem; color: #e8d4e0; }
+    .symptom-vi { font-size: 0.67rem; color: #c084fc; opacity: 0.8; margin-left: 4px; }
+    .severity-slider { display: flex; gap: 3px; }
+    .sev-btn { width: 22px; height: 22px; border-radius: 4px; border: 1px solid #4d2040; background: #1a0a14; color: #c084fc; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .sev-btn.active-sev { background: #c084fc; color: #1a0a14; border-color: #c084fc; }
+    .symptom-group-title { font-size: 0.75rem; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #3d1830; }
+
+    /* Patterns */
+    .phase-pattern-row { margin-bottom: 12px; background: #1a0a14; border-radius: 10px; padding: 12px; border: 1px solid #3d1830; }
+    .phase-pattern-name { font-size: 0.76rem; font-weight: 700; color: #f472b6; margin-bottom: 8px; }
+    .symptom-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .symptom-tag { background: rgba(244,114,182,0.15); border: 1px solid rgba(244,114,182,0.3); border-radius: 12px; padding: 3px 10px; font-size: 0.68rem; color: #f9a8d4; }
+
+    /* Vocabulary */
+    .vocab-search { width: 100%; padding: 10px 14px; background: #2d1020; border: 1px solid #4d2040; border-radius: 10px; color: #fff; font-size: 0.88rem; margin-bottom: 12px; }
+    .vocab-search:focus { outline: none; border-color: #f472b6; }
+    .vocab-search::placeholder { color: #8a5878; }
+    .vocab-category-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .cat-btn { padding: 6px 12px; border-radius: 20px; border: 1px solid #4d2040; background: transparent; color: #c084fc; font-size: 0.73rem; cursor: pointer; transition: all 0.15s; }
+    .cat-btn.active { background: #f472b6; color: #1a0a14; border-color: #f472b6; font-weight: 700; }
+    .cat-btn:hover:not(.active) { background: rgba(244,114,182,0.1); }
+    .vocab-list { display: flex; flex-direction: column; gap: 8px; }
+    .vocab-card { background: #2d1020; border: 1px solid #3d1830; border-radius: 10px; padding: 12px; }
+    .vocab-en { font-size: 0.92rem; font-weight: 700; color: #f472b6; }
+    .vocab-vi { font-size: 0.84rem; color: #c084fc; margin: 2px 0; }
+    .vocab-pron { font-size: 0.72rem; color: #9a6888; font-style: italic; }
+    .vocab-example { font-size: 0.75rem; color: #d4a8c4; margin-top: 6px; line-height: 1.4; }
+    .vocab-cat-badge { display: inline-block; font-size: 0.62rem; padding: 2px 8px; border-radius: 10px; background: rgba(192,132,252,0.2); color: #c084fc; margin-bottom: 5px; }
+    .product-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .prod-col-title { font-size: 0.74rem; font-weight: 700; color: #f472b6; margin-bottom: 6px; }
+    .prod-item { background: #1a0a14; border-radius: 8px; padding: 8px 10px; font-size: 0.73rem; color: #e8d4e0; margin-bottom: 6px; border: 1px solid #2d1020; line-height: 1.4; }
+    .prod-name { font-weight: 600; color: #f9a8d4; margin-bottom: 2px; }
+
+    /* Doctor */
+    .scenario-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .scenario-btn { background: #2d1020; border: 1px solid #3d1830; border-radius: 10px; padding: 11px 14px; color: #e8d4e0; font-size: 0.8rem; cursor: pointer; text-align: left; transition: all 0.15s; }
+    .scenario-btn:hover, .scenario-btn.active { border-color: #f472b6; background: rgba(244,114,182,0.1); color: #f9a8d4; }
+    .script-box { background: #1a0a14; border: 1px solid #3d1830; border-radius: 12px; padding: 16px; margin-top: 10px; }
+    .script-title { font-size: 0.95rem; font-weight: 700; color: #f472b6; margin-bottom: 12px; }
+    .script-section { margin-bottom: 12px; }
+    .script-section-title { font-size: 0.72rem; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .script-bilingual { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .script-lang-badge { font-size: 0.63rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-bottom: 6px; display: inline-block; }
+    .script-lang-badge.en { background: rgba(244,114,182,0.15); color: #f472b6; }
+    .script-lang-badge.vi { background: rgba(192,132,252,0.15); color: #c084fc; }
+    .script-text { background: rgba(244,114,182,0.08); border-left: 3px solid #f472b6; border-radius: 0 8px 8px 0; padding: 10px 12px; font-size: 0.8rem; color: #f0d4e8; line-height: 1.65; font-style: italic; }
+    .script-text-vi { background: rgba(192,132,252,0.08); border-left: 3px solid #c084fc; border-radius: 0 8px 8px 0; padding: 10px 12px; font-size: 0.8rem; color: #dcc8f0; line-height: 1.65; font-style: italic; }
+    .key-phrases { display: flex; flex-wrap: wrap; gap: 5px; }
+    .key-phrase { background: rgba(192,132,252,0.15); border: 1px solid rgba(192,132,252,0.3); border-radius: 8px; padding: 3px 9px; font-size: 0.72rem; color: #c084fc; }
+    .doctor-qs { display: flex; flex-direction: column; gap: 3px; }
+    .doctor-q { font-size: 0.76rem; color: #d4a8c4; padding: 3px 0; }
+    .doctor-q::before { content: "• "; color: #f472b6; }
+    .emergency-list { display: flex; flex-direction: column; gap: 8px; }
+    .emerg-phrase { background: #1a0a14; border: 1px solid #3d1830; border-radius: 8px; padding: 10px 12px; }
+    .emerg-en { font-size: 0.83rem; color: #f9a8d4; font-weight: 600; }
+    .emerg-vi { font-size: 0.76rem; color: #c084fc; margin-top: 2px; }
+    .checklist { display: flex; flex-direction: column; gap: 5px; }
+    .check-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.78rem; color: #d4a8c4; padding: 5px; border-radius: 6px; line-height: 1.4; }
+    .check-icon { color: #f472b6; font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* Explain to My Parents */
+    .parents-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .parents-scenario-btn { background: #2d1020; border: 1px solid #3d1830; border-radius: 10px; padding: 11px 14px; color: #e8d4e0; font-size: 0.8rem; cursor: pointer; text-align: left; transition: all 0.15s; }
+    .parents-scenario-btn:hover, .parents-scenario-btn.active-par { border-color: #c084fc; background: rgba(192,132,252,0.1); color: #c084fc; }
+    .parents-subtitle-small { font-size: 0.67rem; color: #9a6888; display: block; margin-top: 2px; }
+    .parents-script-box { background: #1a0a14; border: 1px solid #3d1830; border-radius: 12px; padding: 16px; margin-top: 10px; }
+    .parents-script-title { font-size: 0.95rem; font-weight: 700; color: #c084fc; margin-bottom: 3px; }
+    .parents-script-en { font-size: 0.72rem; color: #9a6888; margin-bottom: 12px; font-style: italic; }
+    .parents-script-text { background: rgba(192,132,252,0.08); border-left: 3px solid #c084fc; border-radius: 0 8px 8px 0; padding: 12px 14px; font-size: 0.83rem; color: #e8d4e0; line-height: 1.8; margin-bottom: 10px; }
+    .parents-tip { font-size: 0.73rem; color: #c9a8c4; padding: 8px 12px; background: rgba(244,114,182,0.05); border-radius: 8px; line-height: 1.55; }
+    .parents-tip::before { content: "💡 Mẹo: "; font-weight: 600; color: #f472b6; }
+
+    .info-text { font-size: 0.76rem; color: #9a6888; line-height: 1.5; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 600px) {
+      .phase-display { grid-template-columns: 1fr 1fr; }
+      .product-compare { grid-template-columns: 1fr; }
+      .cal-day { font-size: 0.7rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .script-bilingual { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🌸 Period & Cycle Tracker</h1>
+  <p>Track your cycle · Know your body &nbsp;·&nbsp; Theo dõi chu kỳ · Hiểu cơ thể bạn &nbsp;·&nbsp; Agent #86</p>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('tracker',this)">TRACKER<span class="tab-vi">THEO DÕI</span></button>
+  <button class="tab-btn" onclick="switchTab('symptoms',this)">SYMPTOMS<span class="tab-vi">TRIỆU CHỨNG</span></button>
+  <button class="tab-btn" onclick="switchTab('vocabulary',this)">VOCABULARY<span class="tab-vi">TỪ VỰNG</span></button>
+  <button class="tab-btn" onclick="switchTab('doctor',this)">DOCTOR<span class="tab-vi">BÁC SĨ</span></button>
+</div>
+
+<!-- ===== TRACKER ===== -->
+<div class="tab-content active" id="tab-tracker">
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-value" id="stat-cycle-len">—</div><div class="stat-label">Avg cycle (days)</div></div>
+    <div class="stat-box"><div class="stat-value" id="stat-period-dur">—</div><div class="stat-label">Period duration</div></div>
+    <div class="stat-box"><div class="stat-value" id="stat-next-period">—</div><div class="stat-label">Next period</div></div>
+    <div class="stat-box"><div class="stat-value" id="stat-fertile">—</div><div class="stat-label">Fertile window</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📅 Cycle Calendar</div>
+    <div class="period-controls">
+      <button class="btn btn-primary" onclick="markPeriodStart()">🔴 Period Start Today</button>
+      <button class="btn btn-secondary" onclick="markPeriodEnd()">⏹ Period End Today</button>
+      <button class="btn btn-outline" onclick="clearToday()">✕ Clear Today</button>
+    </div>
+    <div class="calendar-header">
+      <button class="cal-nav" onclick="prevMonth()">‹</button>
+      <span class="cal-month-label" id="cal-month-label"></span>
+      <button class="cal-nav" onclick="nextMonth()">›</button>
+    </div>
+    <div class="calendar-grid" id="calendar-grid"></div>
+    <div class="cal-legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#f472b6"></div>Period</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(192,132,252,0.5);border:1px solid #c084fc"></div>Fertile window</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#c084fc"></div>Ovulation est.</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#f9a8d4;width:6px;height:6px"></div>Mood logged</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🌙 Today's Cycle Phase</div>
+    <div class="phase-display" id="phase-display"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">😊 Mood Log</div>
+    <div class="mood-date-label">Logging for: <strong id="mood-log-date"></strong> <span style="font-size:0.68rem;color:#9a6888">(tap a calendar day to change)</span></div>
+    <div class="mood-grid" id="mood-grid">
+      <button class="mood-btn" onclick="toggleMood('happy')" id="mood-happy">😊<span class="label">Happy</span></button>
+      <button class="mood-btn" onclick="toggleMood('tired')" id="mood-tired">😴<span class="label">Tired</span></button>
+      <button class="mood-btn" onclick="toggleMood('anxious')" id="mood-anxious">😰<span class="label">Anxious</span></button>
+      <button class="mood-btn" onclick="toggleMood('cramps')" id="mood-cramps">😣<span class="label">Cramps</span></button>
+      <button class="mood-btn" onclick="toggleMood('bloated')" id="mood-bloated">🫠<span class="label">Bloated</span></button>
+      <button class="mood-btn" onclick="toggleMood('energized')" id="mood-energized">⚡<span class="label">Energized</span></button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== SYMPTOMS ===== -->
+<div class="tab-content" id="tab-symptoms">
+  <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-size:0.82rem;color:#c084fc">Tracking for: <strong style="color:#f472b6" id="symptom-date-label"></strong></div>
+    <button class="btn btn-outline" onclick="showSymptomPatterns()">📊 Patterns</button>
+  </div>
+
+  <div class="card hidden" id="pattern-view">
+    <div class="card-title">📊 Symptom Patterns by Phase</div>
+    <p class="info-text" style="margin-bottom:12px">Based on your logged data — which symptoms appear most in each phase:</p>
+    <div id="phase-patterns"></div>
+    <button class="btn btn-outline" style="margin-top:10px" onclick="hidePatterns()">← Back to logging</button>
+  </div>
+
+  <div id="symptom-logger">
+    <div class="card">
+      <div class="card-title">🩺 Physical Symptoms <span style="font-size:0.72rem;color:#9a6888;font-weight:400">· Triệu chứng thể chất</span></div>
+      <div class="symptom-group-title">Physical · Thể chất</div>
+      <div id="symptoms-physical"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">💭 Emotional Symptoms <span style="font-size:0.72rem;color:#9a6888;font-weight:400">· Cảm xúc</span></div>
+      <div class="symptom-group-title">Emotional · Cảm xúc</div>
+      <div id="symptoms-emotional"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚡ Energy & Appetite <span style="font-size:0.72rem;color:#9a6888;font-weight:400">· Năng lượng & Ăn uống</span></div>
+      <div class="symptom-group-title">Energy & Appetite · Năng lượng & Ăn uống</div>
+      <div id="symptoms-energy"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VOCABULARY ===== -->
+<div class="tab-content" id="tab-vocabulary">
+  <div style="margin-top:14px">
+    <input type="text" class="vocab-search" id="vocab-search" placeholder="Search in English or Vietnamese..." oninput="filterVocab()">
+    <div class="vocab-category-tabs">
+      <button class="cat-btn active" onclick="filterCat('all',this)">All (50)</button>
+      <button class="cat-btn" onclick="filterCat('cycle',this)">Cycle Basics</button>
+      <button class="cat-btn" onclick="filterCat('doctor',this)">Doctor Visit</button>
+      <button class="cat-btn" onclick="filterCat('pharmacy',this)">Pharmacy</button>
+    </div>
+    <div class="vocab-list" id="vocab-list"></div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">🛍️ US vs Vietnamese Products</div>
+      <p class="info-text" style="margin-bottom:12px">Common US drugstore products and what to use instead if you grew up with Vietnamese options:</p>
+      <div class="product-compare" id="product-compare"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DOCTOR ===== -->
+<div class="tab-content" id="tab-doctor">
+  <div style="margin-top:14px">
+
+    <div class="card">
+      <div class="card-title">🗣️ Script Generator — Talk to Your Doctor <span style="font-size:0.72rem;color:#9a6888;font-weight:400">· Nói chuyện với bác sĩ</span></div>
+      <p class="info-text" style="margin-bottom:12px">Choose a scenario to get a full script in English and Vietnamese / Chọn tình huống để xem kịch bản bằng tiếng Anh và tiếng Việt.</p>
+      <div class="scenario-list" id="scenario-list"></div>
+      <div id="script-display"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👨‍👩‍👧 Giải thích với Ba Mẹ <span style="font-size:0.72rem;color:#9a6888;font-weight:400">· Explain to My Parents</span></div>
+      <p class="info-text" style="margin-bottom:12px">Các đoạn hội thoại bằng tiếng Việt để giúp bạn nói chuyện với ba mẹ về sức khỏe của mình — lịch sự, tôn trọng và dễ hiểu.</p>
+      <div class="parents-list" id="parents-list"></div>
+      <div id="parents-display"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🚨 Emergency Phrases — EN/VI</div>
+      <div class="emergency-list" id="emergency-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 What to Bring to a US Doctor Visit <span style="font-size:0.72rem;color:#9a6888;font-weight:400">· Cần mang gì khi đi khám</span></div>
+      <div class="checklist" id="doctor-checklist"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+
+const SYMPTOMS = {
+  physical: [
+    {en:'Cramps',            vi:'Đau bụng kinh'},
+    {en:'Headache',          vi:'Đau đầu'},
+    {en:'Bloating',          vi:'Đầy bụng'},
+    {en:'Breast tenderness', vi:'Căng ngực'},
+    {en:'Fatigue',           vi:'Mệt mỏi'},
+    {en:'Backache',          vi:'Đau lưng'},
+    {en:'Nausea',            vi:'Buồn nôn'},
+    {en:'Acne',              vi:'Mụn'},
+    {en:'Spotting',          vi:'Ra máu nhẹ'},
+    {en:'Heat in the body',  vi:'Nóng trong người'}
+  ],
+  emotional: [
+    {en:'Mood swings',    vi:'Thay đổi cảm xúc'},
+    {en:'Irritability',   vi:'Dễ cáu'},
+    {en:'Anxiety',        vi:'Lo âu'},
+    {en:'Sadness',        vi:'Buồn'},
+    {en:'Low motivation', vi:'Thiếu động lực'}
+  ],
+  energy: [
+    {en:'High energy',        vi:'Năng lượng cao'},
+    {en:'Low energy',         vi:'Năng lượng thấp'},
+    {en:'Brain fog',          vi:'Đầu óc mơ hồ'},
+    {en:'Trouble sleeping',   vi:'Khó ngủ'},
+    {en:'Food cravings',      vi:'Thèm ăn'},
+    {en:'Increased appetite', vi:'Ăn nhiều hơn'},
+    {en:'Loss of appetite',   vi:'Chán ăn'}
+  ]
+};
+
+const VOCAB = [
+  // Cycle basics (21 terms)
+  {en:'Menstruation',vi:'Kinh nguyệt / Chu kỳ kinh',pron:'men-stroo-AY-shun',cat:'cycle',ex:'"My menstruation started today." — Kinh nguyệt của tôi bắt đầu hôm nay.'},
+  {en:'Period',vi:'Kỳ kinh',pron:'PEER-ee-ud',cat:'cycle',ex:'"I have my period this week." — Tôi đang có kỳ kinh tuần này.'},
+  {en:'Ovulation',vi:'Rụng trứng',pron:'ov-yoo-LAY-shun',cat:'cycle',ex:'"Ovulation usually happens mid-cycle." — Rụng trứng thường xảy ra giữa chu kỳ.'},
+  {en:'Cramps',vi:'Đau bụng kinh / Chuột rút',pron:'kramps',cat:'cycle',ex:'"I have bad cramps today." — Hôm nay tôi bị đau bụng kinh nặng.'},
+  {en:'Discharge',vi:'Khí hư / Dịch tiết âm đạo',pron:'DIS-charj',cat:'cycle',ex:'"Normal discharge is clear or white." — Khí hư bình thường trong suốt hoặc trắng.'},
+  {en:'Fertile window',vi:'Cửa sổ thụ thai',pron:'FUR-til WIN-doh',cat:'cycle',ex:'"The fertile window is days 11–17 of a 28-day cycle." — Cửa sổ thụ thai là ngày 11–17 của chu kỳ 28 ngày.'},
+  {en:'PMS (Premenstrual Syndrome)',vi:'Hội chứng tiền kinh nguyệt',pron:'pee-em-ess',cat:'cycle',ex:'"I always have PMS the week before my period." — Tôi luôn bị PMS tuần trước kỳ kinh.'},
+  {en:'Irregular period',vi:'Kinh nguyệt không đều',pron:'ih-REG-yoo-ler',cat:'cycle',ex:'"My periods are irregular — sometimes every 25 days, sometimes 40." — Kinh nguyệt của tôi không đều.'},
+  {en:'Flow / Heavy flow',vi:'Lượng kinh / Kinh nhiều',pron:'floh',cat:'cycle',ex:'"I have a heavy flow for the first two days." — Hai ngày đầu tôi có lượng kinh nhiều.'},
+  {en:'Spotting',vi:'Ra máu nhẹ / Hoen máu',pron:'SPOT-ing',cat:'cycle',ex:'"I noticed spotting between periods." — Tôi thấy ra máu nhẹ giữa hai kỳ kinh.'},
+  {en:'Cycle length',vi:'Độ dài chu kỳ kinh',pron:'SY-kul length',cat:'cycle',ex:'"My cycle length is about 28 days." — Độ dài chu kỳ kinh của tôi khoảng 28 ngày.'},
+  {en:'Luteal phase',vi:'Pha hoàng thể',pron:'LOO-tee-ul fayz',cat:'cycle',ex:'"PMS usually happens in the luteal phase." — PMS thường xảy ra trong pha hoàng thể.'},
+  {en:'Follicular phase',vi:'Pha nang noãn',pron:'fol-IK-yoo-ler',cat:'cycle',ex:'"Energy tends to be higher in the follicular phase." — Năng lượng thường cao hơn trong pha nang noãn.'},
+  {en:'Endometriosis',vi:'Lạc nội mạc tử cung',pron:'en-doh-mee-tree-OH-sis',cat:'cycle',ex:'"Endometriosis can cause very painful periods." — Lạc nội mạc tử cung có thể gây đau kinh nặng.'},
+  {en:'PCOS (Polycystic Ovary Syndrome)',vi:'Hội chứng buồng trứng đa nang',pron:'pee-see-oh-ess',cat:'cycle',ex:'"PCOS can cause irregular periods and excess hair." — PCOS có thể gây kinh không đều và mọc lông nhiều.'},
+  {en:'Hormone',vi:'Nội tiết tố / Hormone',pron:'HOR-mohn',cat:'cycle',ex:'"Estrogen is a female hormone." — Estrogen là một nội tiết tố nữ.'},
+  {en:'Cervical mucus',vi:'Chất nhầy cổ tử cung',pron:'SUR-vih-kul MYOO-kus',cat:'cycle',ex:'"Cervical mucus becomes clear and stretchy around ovulation." — Chất nhầy cổ tử cung trong và co dãn vào thời điểm rụng trứng.'},
+  {en:'Estrogen',vi:'Estrogen — nội tiết tố nữ chính',pron:'ES-troh-jen',cat:'cycle',ex:'"Estrogen rises in the first half of your cycle, boosting energy and mood." — Estrogen tăng trong nửa đầu chu kỳ, cải thiện năng lượng và tâm trạng.'},
+  {en:'Progesterone',vi:'Progesterone — nội tiết tố pha hoàng thể',pron:'proh-JES-ter-ohn',cat:'cycle',ex:'"Progesterone rises after ovulation and may cause fatigue and mood dips." — Progesterone tăng sau rụng trứng và có thể gây mệt mỏi, giảm tâm trạng.'},
+  {en:'Ovarian cyst',vi:'Nang buồng trứng',pron:'oh-VAIR-ee-un sist',cat:'cycle',ex:'"Many ovarian cysts are harmless and resolve on their own." — Nhiều nang buồng trứng lành tính và tự biến mất.'},
+  {en:'Uterine fibroids',vi:'U xơ tử cung',pron:'YOO-ter-in FY-broydz',cat:'cycle',ex:'"Fibroids can cause heavy periods and pelvic pressure." — U xơ tử cung có thể gây kinh nhiều và tức vùng chậu.'},
+  // Doctor visit (15 terms)
+  {en:'Gynecologist',vi:'Bác sĩ phụ khoa',pron:'guy-neh-KOL-oh-jist',cat:'doctor',ex:'"I need to see a gynecologist." — Tôi cần gặp bác sĩ phụ khoa.'},
+  {en:'Pelvic exam',vi:'Khám vùng chậu',pron:'PEL-vik ig-ZAM',cat:'doctor',ex:'"The doctor will do a pelvic exam." — Bác sĩ sẽ khám vùng chậu.'},
+  {en:'Prescription',vi:'Đơn thuốc',pron:'prih-SKRIP-shun',cat:'doctor',ex:'"Can I get a prescription for pain medication?" — Tôi có thể được kê đơn thuốc giảm đau không?'},
+  {en:'Symptoms',vi:'Triệu chứng',pron:'SIMP-tumz',cat:'doctor',ex:'"Please describe your symptoms." — Hãy mô tả triệu chứng của bạn.'},
+  {en:'Diagnosis',vi:'Chẩn đoán',pron:'dy-ig-NOH-sis',cat:'doctor',ex:'"The doctor made a diagnosis of PCOS." — Bác sĩ chẩn đoán PCOS.'},
+  {en:'Birth control / Contraception',vi:'Tránh thai / Biện pháp tránh thai',pron:'burth kun-TROL',cat:'doctor',ex:'"What birth control options do I have?" — Tôi có những biện pháp tránh thai nào?'},
+  {en:'Insurance / Co-pay',vi:'Bảo hiểm y tế / Phần tự trả',pron:'in-SHUR-ens / KOH-pay',cat:'doctor',ex:'"My co-pay is $20 per visit." — Chi phí tự trả của tôi là $20 mỗi lần khám.'},
+  {en:'Referral',vi:'Giấy chuyển viện',pron:'rih-FUR-ul',cat:'doctor',ex:'"I need a referral to see a specialist." — Tôi cần giấy chuyển để gặp bác sĩ chuyên khoa.'},
+  {en:'Ultrasound',vi:'Siêu âm',pron:'UL-trah-sownd',cat:'doctor',ex:'"The doctor ordered a pelvic ultrasound." — Bác sĩ yêu cầu siêu âm vùng chậu.'},
+  {en:'Blood test / Lab work',vi:'Xét nghiệm máu',pron:'blud test',cat:'doctor',ex:'"I need blood work to check hormone levels." — Tôi cần xét nghiệm máu để kiểm tra hormone.'},
+  {en:'Medical history',vi:'Tiền sử bệnh',pron:'MED-ih-kul HIS-tor-ee',cat:'doctor',ex:'"Please fill out your medical history form." — Vui lòng điền vào mẫu tiền sử bệnh.'},
+  {en:'Anemia',vi:'Thiếu máu',pron:'ah-NEE-mee-ah',cat:'doctor',ex:'"Heavy periods can cause iron-deficiency anemia." — Kinh nhiều có thể gây thiếu máu thiếu sắt.'},
+  {en:'Pap smear',vi:'Xét nghiệm phết tế bào cổ tử cung',pron:'pap smeer',cat:'doctor',ex:'"A Pap smear screens for cervical cancer — usually done every 3 years from age 21." — Xét nghiệm Pap phát hiện sớm ung thư cổ tử cung.'},
+  {en:'Speculum',vi:'Mỏ vịt (dụng cụ khám phụ khoa)',pron:'SPEK-yoo-lum',cat:'doctor',ex:'"The doctor uses a speculum during a pelvic exam — it may feel uncomfortable but not painful." — Bác sĩ dùng mỏ vịt khi khám — có thể hơi khó chịu nhưng không đau.'},
+  {en:'Thyroid function',vi:'Chức năng tuyến giáp',pron:'THY-royd FUNG-shun',cat:'doctor',ex:'"Thyroid problems can cause irregular periods — a blood test can check your levels." — Rối loạn tuyến giáp có thể gây kinh không đều — xét nghiệm máu sẽ kiểm tra.'},
+  // Pharmacy (14 terms)
+  {en:'Ibuprofen (Advil / Motrin)',vi:'Ibuprofen — thuốc giảm đau, chống viêm',pron:'eye-byoo-PROH-fen',cat:'pharmacy',ex:'"Take ibuprofen with food for cramps." — Uống ibuprofen với thức ăn để giảm đau bụng kinh.'},
+  {en:'Acetaminophen (Tylenol)',vi:'Acetaminophen — thuốc giảm đau nhẹ',pron:'ah-see-tah-MIN-oh-fen',cat:'pharmacy',ex:'"Acetaminophen is gentler on the stomach than ibuprofen." — Acetaminophen nhẹ hơn với dạ dày.'},
+  {en:'Midol',vi:'Midol — thuốc đặc trị PMS (chỉ có ở Mỹ)',pron:'MY-dol',cat:'pharmacy',ex:'"Midol targets cramps, bloating, and fatigue." — Midol trị đau bụng, đầy hơi và mệt mỏi.'},
+  {en:'Heating pad',vi:'Miếng chườm nóng điện',pron:'HEET-ing pad',cat:'pharmacy',ex:'"A heating pad on your belly really helps with cramps." — Chườm nóng lên bụng rất giúp giảm đau.'},
+  {en:'Pad / Sanitary pad',vi:'Băng vệ sinh (dạng dán)',pron:'pad',cat:'pharmacy',ex:'"I use an overnight pad for heavy nights." — Tôi dùng băng vệ sinh ban đêm cho những đêm kinh nhiều.'},
+  {en:'Tampon',vi:'Băng vệ sinh dạng ống (đặt trong âm đạo)',pron:'TAM-pon',cat:'pharmacy',ex:'"Tampons are good for swimming." — Tampon thích hợp khi bơi lội.'},
+  {en:'Panty liner',vi:'Băng vệ sinh mỏng / Lót quần',pron:'PAN-tee LY-ner',cat:'pharmacy',ex:'"I use a panty liner for light spotting days." — Tôi dùng băng mỏng vào những ngày ra ít.'},
+  {en:'Menstrual cup',vi:'Cốc nguyệt san',pron:'MEN-stroo-ul kup',cat:'pharmacy',ex:'"A menstrual cup is eco-friendly and reusable." — Cốc nguyệt san thân thiện với môi trường và tái sử dụng được.'},
+  {en:'Period underwear',vi:'Quần lót kỳ kinh (có lớp thấm hút)',pron:'PEER-ee-ud UN-der-wair',cat:'pharmacy',ex:'"Period underwear works as a backup on heavy days." — Quần lót kỳ kinh dùng thêm vào những ngày kinh nhiều.'},
+  {en:'Iron supplement',vi:'Viên sắt bổ sung',pron:'EYE-urn SUP-luh-ment',cat:'pharmacy',ex:'"Take iron supplements if you have a heavy period." — Uống bổ sung sắt nếu kinh nhiều.'},
+  {en:'Naproxen (Aleve)',vi:'Naproxen — thuốc giảm đau kéo dài',pron:'nah-PROX-en',cat:'pharmacy',ex:'"Aleve lasts 8–12 hours, better for cramps at school." — Aleve kéo dài 8–12 giờ, tốt hơn để dùng ở trường.'},
+  {en:'Probiotic',vi:'Men vi sinh',pron:'pro-by-OT-ik',cat:'pharmacy',ex:'"Some doctors recommend probiotics for vaginal health." — Một số bác sĩ khuyên dùng men vi sinh cho sức khỏe phụ khoa.'},
+  {en:'Magnesium supplement',vi:'Viên bổ sung magiê',pron:'mag-NEE-zee-um SUP-luh-ment',cat:'pharmacy',ex:'"Magnesium may help reduce PMS cramping and mood symptoms." — Magiê có thể giúp giảm đau bụng kinh và triệu chứng PMS về tâm lý.'},
+  {en:'Evening primrose oil',vi:'Dầu hoa anh thảo',pron:'EEV-ning PRIM-rohz oyl',cat:'pharmacy',ex:'"Some people take evening primrose oil for breast tenderness and PMS." — Một số người dùng dầu hoa anh thảo để giảm căng ngực và PMS.'}
+];
+
+const PRODUCTS = [
+  {us:{name:'Always Ultra Thin Pads',detail:'Most popular pad in the US. Comes in Regular, Long, Overnight. The overnight version has wings and is extra long — great for heavy first days.'},vi:{name:'Diana / Kotex Việt Nam',detail:'Diana và Kotex là hai thương hiệu phổ biến nhất tại VN. Băng Mỹ thường mỏng hơn và có cánh ở hầu hết loại.'}},
+  {us:{name:'Tampax Pearl Tampons',detail:'Leading tampon brand. Use Regular for lighter days, Super for heavier. Always start with the lowest absorbency you need.'},vi:{name:'Ít phổ biến ở VN',detail:'Tampon chưa phổ biến tại Việt Nam. Cần thời gian làm quen với cách đặt. Bắt đầu với size Regular và đọc kỹ hướng dẫn.'}},
+  {us:{name:'Midol Complete',detail:'Contains acetaminophen (pain), caffeine (fatigue), antihistamine (bloating). Available OTC at CVS, Walgreens, Walmart. ~$8 per box.'},vi:{name:'Không có ở Việt Nam',detail:'Ở VN, dùng Panadol Extra hoặc Efferalgan để giảm đau. Không có thuốc kết hợp tương tự như Midol.'}},
+  {us:{name:'Advil / Motrin (Ibuprofen)',detail:'Best OTC option for period cramps. Take 200–400mg with food, every 4–6 hours. Start before cramps get bad for best effect.'},vi:{name:'Ibuprofen / Brufen',detail:'Cùng hoạt chất ibuprofen — có bán ở các nhà thuốc Việt Nam. Liều dùng và cách dùng tương tự.'}},
+  {us:{name:'Thermacare Heat Patches',detail:'Disposable heat patches you stick inside your underwear. Lasts ~8 hours. Great for school or work when you cannot use a plug-in heating pad.'},vi:{name:'Dầu nóng / Miếng cao dán',detail:'Người Việt thường dùng dầu gió, dầu nóng, hoặc miếng cao dán nhiệt (như Salonpas) để chườm bụng.'}},
+  {us:{name:'Always Discreet / Period Underwear (Thinx)',detail:'Period underwear looks like regular underwear but has a built-in absorbent layer. Thinx is popular. Reusable — saves money long-term.'},vi:{name:'Chưa phổ biến ở VN',detail:'Quần lót kỳ kinh mới xuất hiện tại Việt Nam. Nếu bạn đã quen với loại này, cách giặt và dùng tương tự.'}}
+];
+
+const SCENARIOS = [
+  {title:'First gynecologist visit',
+   script:'Hi, this is my first time seeing a gynecologist. I\'m [your age] years old. My periods started when I was [age]. They come about every [number] days and last about [number] days. I don\'t have major health issues. I\'m just here for a general check-up and to ask some questions. Is there anything I should expect today?',
+   vi_script:'Chào bác sĩ, đây là lần đầu tiên tôi đến khám phụ khoa. Tôi [tuổi] tuổi. Tôi có kinh lần đầu lúc [tuổi]. Chu kỳ khoảng [số] ngày và kéo dài [số] ngày. Tôi không có bệnh lý nghiêm trọng — tôi đến để kiểm tra sức khỏe định kỳ và muốn hỏi thêm. Hôm nay bác sĩ sẽ khám những gì ạ?',
+   keyPhrases:['first visit','menstrual history','cycle length','period started at age','general check-up'],
+   doctorMayAsk:['When did your periods start?','How long is your cycle?','Are you sexually active?','Any family history of reproductive issues?','Any medications?'],
+   vocab:'gynecologist · pelvic exam · menstrual history · cycle length · contraception'},
+  {title:'Describing cramps',
+   script:'I have really painful cramps during my period. The pain is in my lower belly and sometimes goes to my lower back. On a scale of 1 to 10, it\'s about [number] — bad enough to miss school sometimes. It usually starts [when] and lasts [how long]. Ibuprofen helps a little but not enough. Can you help me find something stronger, or figure out why my cramps are so bad?',
+   vi_script:'Bác sĩ ơi, tôi bị đau bụng kinh rất nặng. Cơn đau ở vùng bụng dưới, đôi khi lan xuống lưng dưới. Trên thang điểm 1–10, đau khoảng [số] — đủ để đôi khi phải nghỉ học. Cơn đau thường bắt đầu [khi nào] và kéo dài [bao lâu]. Ibuprofen có hiệu quả nhưng không đủ. Bác sĩ có thể giúp tôi tìm giải pháp mạnh hơn, hoặc tìm hiểu tại sao đau kinh của tôi lại nặng như vậy không?',
+   keyPhrases:['lower abdominal pain','lower back pain','pain scale 1–10','ibuprofen not effective','disrupts daily life'],
+   doctorMayAsk:['How long have you had painful periods?','Is it getting worse?','Do you pass any blood clots?','Does the pain happen at other times too?'],
+   vocab:'dysmenorrhea · cramps · ibuprofen · NSAID · pelvic pain · endometriosis'},
+  {title:'Irregular periods',
+   script:'My periods are really irregular. My cycle length changes every month — sometimes 25 days, sometimes 40 days, I never know when to expect it. This has been going on for about [time]. I\'m not sure if it\'s normal or if something is wrong. I\'ve also noticed [other symptoms]. Could we look into what\'s causing this?',
+   vi_script:'Bác sĩ ơi, kinh nguyệt của tôi rất không đều. Độ dài chu kỳ thay đổi mỗi tháng — khi thì 25 ngày, khi thì 40 ngày, tôi không biết bao giờ kinh sẽ đến. Điều này đã xảy ra khoảng [thời gian]. Tôi không chắc có bình thường không. Tôi cũng nhận thấy [các triệu chứng khác]. Chúng ta có thể tìm hiểu nguyên nhân không ạ?',
+   keyPhrases:['irregular cycle','unpredictable timing','cycle length varies','hormone imbalance','PCOS screening'],
+   doctorMayAsk:['Has your weight changed recently?','Are you under a lot of stress?','Do you exercise intensely?','Any family history of thyroid or PCOS?'],
+   vocab:'irregular periods · PCOS · thyroid · estrogen · progesterone · cycle tracking'},
+  {title:'Asking about birth control',
+   script:'I\'d like to learn about birth control options. I\'ve heard about the pill, the patch, the IUD, and condoms, but I\'m not sure what\'s right for me. I\'m interested because [your reason — e.g. to manage cramps / to regulate my cycle]. Can you explain the main differences and side effects, and help me decide?',
+   vi_script:'Bác sĩ ơi, tôi muốn tìm hiểu về các biện pháp tránh thai. Tôi đã nghe về thuốc uống, miếng dán, vòng tránh thai và bao cao su, nhưng không chắc loại nào phù hợp. Tôi quan tâm vì [lý do — ví dụ: để giảm đau kinh / để điều hòa chu kỳ]. Bác sĩ có thể giải thích sự khác biệt và tác dụng phụ để tôi quyết định không?',
+   keyPhrases:['birth control options','oral contraceptive pill','IUD','hormonal vs non-hormonal','side effects'],
+   doctorMayAsk:['Do you smoke?','Do you have migraines with aura?','Any blood clotting history?','What are your main goals?'],
+   vocab:'birth control · contraception · IUD · hormonal · side effects · prescription'},
+  {title:'Requesting stronger pain medication',
+   script:'I\'ve been using Advil and Tylenol for my period cramps, but they\'re not giving me enough relief. The pain is bad enough that I sometimes can\'t go to school. I\'ve also tried [heating pad / rest / etc.]. Can you prescribe something stronger? I\'m not looking for anything addictive — just something that actually works for severe period pain.',
+   vi_script:'Bác sĩ ơi, tôi đã dùng Advil và Tylenol cho cơn đau kinh nhưng không đủ hiệu quả. Đau đến mức đôi khi tôi không thể đi học. Tôi cũng đã thử [chườm nóng, nghỉ ngơi]. Bác sĩ có thể kê thuốc mạnh hơn không ạ? Tôi chỉ cần thuốc trị đau kinh nghiêm trọng — không phải thuốc gây nghiện.',
+   keyPhrases:['OTC not effective','severe pain','affects school attendance','prescription NSAID','naproxen prescription'],
+   doctorMayAsk:['How many days per month are you in severe pain?','Do you have stomach issues?','Have you tried higher-dose ibuprofen?'],
+   vocab:'prescription · NSAID · naproxen (Anaprox) · tramadol · pain management'},
+  {title:'Explaining heavy flow',
+   script:'My periods are very heavy. I go through [number] pads or tampons in [timeframe] — sometimes I need to change every hour on the first day. I also pass some blood clots. I feel really tired and sometimes dizzy during my period. I\'m worried I might be anemic. Is this amount of bleeding normal, or should we investigate further?',
+   vi_script:'Bác sĩ ơi, kinh nguyệt của tôi rất nhiều. Tôi phải thay [số] băng vệ sinh trong [khoảng thời gian] — đôi khi phải thay mỗi giờ vào ngày đầu. Tôi cũng ra cục máu đông. Tôi cảm thấy rất mệt và đôi khi chóng mặt. Tôi lo mình có thể bị thiếu máu. Lượng kinh này có bình thường không, hay cần kiểm tra thêm ạ?',
+   keyPhrases:['heavy menstrual bleeding','menorrhagia','blood clots','changes pads frequently','fatigue and dizziness','iron deficiency'],
+   doctorMayAsk:['How many pads per day?','Do you pass clots larger than a quarter?','Are you always tired or only during period?','Have you had a CBC blood test?'],
+   vocab:'menorrhagia · heavy flow · iron deficiency anemia · blood clots · hemoglobin · CBC test'},
+  {title:'Asking about PMS',
+   script:'I get really bad PMS every month. For about [number] days before my period, I feel very moody, sad, irritable, and anxious. I also get headaches, bloating, and food cravings. It\'s affecting my mood at home and at school. Is there anything I can do? Are there medications or lifestyle changes that help with PMS?',
+   vi_script:'Bác sĩ ơi, tôi bị PMS rất nặng mỗi tháng. Khoảng [số] ngày trước kỳ kinh, tôi rất dễ cáu, buồn và lo lắng. Tôi cũng bị đau đầu, đầy bụng và thèm ăn. Điều này ảnh hưởng đến cuộc sống ở nhà và ở trường. Có thuốc hoặc thay đổi lối sống nào giúp ích không ạ?',
+   keyPhrases:['premenstrual syndrome','mood changes','emotional symptoms','physical PMS symptoms','cycle timing','PMDD'],
+   doctorMayAsk:['Do you track your cycle?','Does PMS significantly affect your daily life?','Have you tried any remedies?','When exactly do symptoms start?'],
+   vocab:'PMS · PMDD · progesterone · serotonin · SSRIs · cycle tracking'},
+  {title:'Getting a prescription refilled',
+   script:'Hi, I need to get a refill on my prescription. The medication is [name of medication]. It was prescribed by [doctor name] on [date]. I\'m almost out and I need more. It\'s been working well and I\'ve been taking it exactly as directed. Can I get a refill today, or do I need to come in for an appointment first?',
+   vi_script:'Chào bác sĩ, tôi cần gia hạn đơn thuốc. Thuốc tên là [tên thuốc], được kê bởi bác sĩ [tên] vào [ngày]. Thuốc sắp hết và tôi cần thêm. Thuốc vẫn đang có hiệu quả và tôi uống đúng hướng dẫn. Tôi có thể gia hạn hôm nay không, hay cần đặt lịch tái khám ạ?',
+   keyPhrases:['prescription refill','medication name','previously prescribed','running low','same dosage and instructions'],
+   doctorMayAsk:['Is the medication still working well?','Any side effects?','When was your last check-up?'],
+   vocab:'refill · prescription · pharmacy · dosage · medication · insurance'}
+];
+
+const PARENTS_SCENARIOS = [
+  {
+    title: 'Tại sao con cần dùng băng vệ sinh',
+    subtitle: 'Why I need period products',
+    script: 'Mẹ (Ba) ơi, con cần nói chuyện về một điều quan trọng liên quan đến sức khỏe của con. Khi con có kinh nguyệt, cơ thể con cần dùng băng vệ sinh để giữ vệ sinh và tránh nhiễm khuẩn. Đây là nhu cầu sức khỏe thiết yếu, không phải xa xỉ phẩm. Mỗi tháng con cần khoảng một đến hai gói băng. Con có thể nhờ mẹ (ba) mua giúp hoặc cho con tiền để tự mua không ạ?',
+    tip: 'Nói chuyện bình tĩnh, nhẹ nhàng khi mẹ hoặc ba đang thoải mái, không bận việc. Nếu ngại, có thể nhắn tin trước.'
+  },
+  {
+    title: 'PMS là gì và tại sao con hay thay đổi tâm trạng',
+    subtitle: 'What PMS is & why my mood changes',
+    script: 'Mẹ (Ba) ơi, con muốn giải thích tại sao đôi khi con hay cáu gắt hoặc buồn trước kỳ kinh. Đây gọi là PMS — hội chứng tiền kinh nguyệt — xảy ra do hormone trong cơ thể thay đổi tự nhiên. Đây là phản ứng sinh lý hoàn toàn bình thường, không phải con cố tình khó chịu hay thiếu tôn trọng ba mẹ. Con chỉ muốn mẹ (ba) hiểu và không hiểu lầm con vào những ngày đó.',
+    tip: 'Nếu ba mẹ chưa tin, bạn có thể chỉ tài liệu y tế về PMS trên internet, hoặc đề nghị cùng hỏi bác sĩ.'
+  },
+  {
+    title: 'Tại sao con muốn đi khám bác sĩ phụ khoa',
+    subtitle: 'Why I want to see a gynecologist',
+    script: 'Mẹ (Ba) ơi, con muốn đi khám bác sĩ phụ khoa một lần. Bác sĩ phụ khoa là bác sĩ chuyên về sức khỏe phụ nữ — như bác sĩ nha khoa chuyên về răng vậy. Con không bị bệnh gì nặng, con chỉ muốn kiểm tra sức khỏe định kỳ và có chuyên gia để hỏi những thắc mắc về cơ thể. Ở Mỹ, điều này được khuyến khích từ khi bắt đầu có kinh. Con có thể nhờ mẹ (ba) đặt lịch hẹn không ạ?',
+    tip: 'Nhấn mạnh đây là kiểm tra sức khỏe định kỳ. Đề nghị mẹ hoặc ba đi cùng nếu ba mẹ muốn.'
+  },
+  {
+    title: 'Thuốc tránh thai được dùng để chữa bệnh',
+    subtitle: 'Birth control for medical reasons, not pregnancy prevention',
+    script: 'Mẹ (Ba) ơi, con cần nói về một điều hơi tế nhị. Bác sĩ đôi khi kê thuốc tránh thai không phải để tránh thai — mà để điều trị các vấn đề sức khỏe như đau bụng kinh rất nặng, kinh nguyệt không đều, hoặc mụn do hormone. Đây là điều phổ biến tại Mỹ và được bác sĩ chỉ định vì lý do y tế hoàn toàn. Con muốn được thảo luận với mẹ (ba) và bác sĩ về điều này để tìm giải pháp tốt nhất cho sức khỏe của con.',
+    tip: 'Nếu ba mẹ lo lắng, đề nghị cùng đi gặp bác sĩ để nghe giải thích trực tiếp từ chuyên gia y tế.'
+  },
+  {
+    title: 'Tại sao con đôi khi phải nghỉ học khi có kinh',
+    subtitle: 'Why I might need to miss school during my period',
+    script: 'Mẹ (Ba) ơi, đôi khi con bị đau bụng kinh rất nặng vào những ngày đầu của kỳ kinh — đau đến mức khó ngồi tập trung hoặc thậm chí không thể di chuyển bình thường. Đây không phải con lười hay muốn trốn học — đây là triệu chứng y tế được bác sĩ công nhận, gọi là dysmenorrhea (đau kinh). Nếu cần, bác sĩ có thể viết giấy xác nhận cho trường. Con chỉ cần mẹ (ba) tin tưởng và cho phép con nghỉ khi con thực sự không chịu nổi.',
+    tip: 'Nếu cần bằng chứng, hỏi bác sĩ viết giấy xác nhận tình trạng đau kinh. Bạn cũng có thể cho ba mẹ xem tài liệu về dysmenorrhea.'
+  }
+];
+
+const EMERGENCY_PHRASES = [
+  {en:'I am in severe pain.',vi:'Tôi đang đau rất dữ dội.'},
+  {en:'I need to see a doctor right away.',vi:'Tôi cần gặp bác sĩ ngay lập tức.'},
+  {en:'Can you explain that again, more slowly?',vi:'Bạn có thể giải thích lại chậm hơn không?'},
+  {en:'I don\'t understand. Can you write it down?',vi:'Tôi không hiểu. Bạn có thể viết ra không?'},
+  {en:'I am bleeding very heavily.',vi:'Tôi đang chảy máu rất nhiều.'},
+  {en:'I feel dizzy and weak.',vi:'Tôi cảm thấy chóng mặt và yếu sức.'},
+  {en:'I am allergic to [this medication].',vi:'Tôi bị dị ứng với [thuốc này].'},
+  {en:'Is this covered by my insurance?',vi:'Cái này có được bảo hiểm chi trả không?'},
+  {en:'Can I get a copy of my medical records?',vi:'Tôi có thể lấy bản sao hồ sơ y tế không?'},
+  {en:'I need a note for school.',vi:'Tôi cần giấy xác nhận đã đi khám để nộp cho trường.'}
+];
+
+const DOCTOR_CHECKLIST = [
+  'Insurance card (thẻ bảo hiểm y tế)',
+  'Photo ID — student ID or driver\'s license',
+  'Your period tracking notes: last period date, cycle length, period duration',
+  'List of current medications (name + dosage)',
+  'List of symptoms and when they started',
+  'Questions you want to ask — write them down beforehand',
+  'Parent or guardian if you are under 18',
+  'Copay or payment method (cash, debit, credit)',
+  'Any past test results or medical records if available',
+  'Your pharmacy name and address (for prescriptions)'
+];
+
+// ============ STORAGE ============
+const P = 'cycle86_';
+const get = k => { try { return JSON.parse(localStorage.getItem(P+k)) } catch { return null; } };
+const set = (k,v) => localStorage.setItem(P+k, JSON.stringify(v));
+
+// ============ STATE ============
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let selectedDate = todayStr();
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+function dateStr(y,m,d) { return `${y}-${pad(m+1)}-${pad(d)}`; }
+function fmtDate(ds) {
+  const d = new Date(ds+'T12:00:00');
+  return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+
+// ============ PERIOD DAYS ============
+function getPD() { return get('periodDays') || {}; }
+function savePD(obj) { set('periodDays', obj); }
+
+function markPeriodStart() {
+  const pd = getPD(); pd[todayStr()] = 'start'; savePD(pd);
+  recalcStats(); renderCalendar();
+}
+function markPeriodEnd() {
+  const pd = getPD(); pd[todayStr()] = 'end'; savePD(pd);
+  recalcStats(); renderCalendar();
+}
+function clearToday() {
+  const pd = getPD(); delete pd[todayStr()]; savePD(pd);
+  recalcStats(); renderCalendar();
+}
+
+// ============ STATS ============
+function recalcStats() {
+  const pd = getPD();
+  const all = Object.keys(pd).sort();
+  const starts = all.filter(d => pd[d] === 'start');
+
+  let avgCycle = null;
+  if (starts.length >= 2) {
+    let tot = 0;
+    for (let i = 1; i < starts.length; i++) tot += (new Date(starts[i]) - new Date(starts[i-1])) / 86400000;
+    avgCycle = Math.round(tot / (starts.length - 1));
+  }
+
+  let avgDur = null;
+  if (starts.length > 0) {
+    const last = starts[starts.length-1];
+    let dur = 1, d = new Date(last+'T12:00:00');
+    for (let i = 0; i < 10; i++) {
+      d.setDate(d.getDate()+1);
+      const ds = d.toISOString().slice(0,10);
+      if (pd[ds] === 'period' || pd[ds] === 'end') dur++;
+      else break;
+    }
+    avgDur = dur;
+  }
+
+  let nextPeriod = null, fertileStr = null;
+  if (starts.length > 0) {
+    const cl = avgCycle || 28;
+    const last = new Date(starts[starts.length-1]+'T12:00:00');
+    const next = new Date(last); next.setDate(next.getDate()+cl);
+    nextPeriod = next.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const ovDay = cl - 14;
+    const fs = new Date(last); fs.setDate(fs.getDate()+ovDay-3);
+    const fe = new Date(last); fe.setDate(fe.getDate()+ovDay+3);
+    fertileStr = fs.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + '–' + fe.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  }
+
+  document.getElementById('stat-cycle-len').textContent = avgCycle ? avgCycle+'d' : '—';
+  document.getElementById('stat-period-dur').textContent = avgDur ? avgDur+'d' : '—';
+  document.getElementById('stat-next-period').textContent = nextPeriod || '—';
+  document.getElementById('stat-fertile').textContent = fertileStr || '—';
+  renderPhaseIndicator();
+}
+
+// ============ CALENDAR ============
+function renderCalendar() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = `${months[calMonth]} ${calYear}`;
+  const grid = document.getElementById('calendar-grid');
+  grid.innerHTML = '';
+  ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-name'; el.textContent = d; grid.appendChild(el);
+  });
+  const pd = getPD();
+  const all = Object.keys(pd).sort();
+  const starts = all.filter(d => pd[d] === 'start');
+  const moods = get('moods') || {};
+  const cl = getAvgCycle(starts);
+  const fertSet = new Set(), ovSet = new Set();
+  starts.forEach(s => {
+    const ovDay = cl - 14;
+    const base = new Date(s+'T12:00:00');
+    const ov = new Date(base); ov.setDate(ov.getDate()+ovDay);
+    ovSet.add(ov.toISOString().slice(0,10));
+    for (let i = -3; i <= 3; i++) { if(i!==0) { const fd=new Date(ov); fd.setDate(fd.getDate()+i); fertSet.add(fd.toISOString().slice(0,10)); } }
+  });
+  const today = todayStr();
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const dim = new Date(calYear, calMonth+1, 0).getDate();
+  for (let i=0;i<first;i++) { const el=document.createElement('div'); el.className='cal-day empty'; grid.appendChild(el); }
+  for (let d=1;d<=dim;d++) {
+    const ds = dateStr(calYear, calMonth, d);
+    const el = document.createElement('div');
+    let cls = 'cal-day';
+    if (ds===today) cls+=' today';
+    if (pd[ds]==='start'||pd[ds]==='period'||pd[ds]==='end') cls+=' period';
+    else if (ovSet.has(ds)) cls+=' ovulation';
+    else if (fertSet.has(ds)) cls+=' fertile';
+    if (moods[ds]&&moods[ds].length>0) cls+=' has-mood';
+    el.className = cls; el.textContent = d;
+    el.onclick = () => { selectedDate = ds; document.getElementById('mood-log-date').textContent = fmtDate(ds); renderMoodButtons(); };
+    grid.appendChild(el);
+  }
+}
+function getAvgCycle(starts) {
+  if (starts.length < 2) return 28;
+  let tot = 0;
+  for (let i=1;i<starts.length;i++) tot += (new Date(starts[i])-new Date(starts[i-1]))/86400000;
+  return Math.round(tot/(starts.length-1));
+}
+function prevMonth() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function nextMonth() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+
+// ============ PHASES ============
+const PHASES = [
+  {name:'Menstrual',icon:'🔴',days:'Days 1–5',desc:'Your uterus sheds its lining. Rest, heat, and gentle movement help. Cramps are normal — but severe pain is worth discussing with a doctor.',color:'#f472b6'},
+  {name:'Follicular',icon:'🌱',days:'Days 6–13',desc:'Estrogen rises, energy picks up. Your body is preparing an egg to release. Great time for focus, learning, and social activities.',color:'#34d399'},
+  {name:'Ovulation',icon:'✨',days:'Days 14–16',desc:'An egg is released. You may feel your best — high energy, clear-headed, and social. This is your fertile window.',color:'#c084fc'},
+  {name:'Luteal',icon:'🌙',days:'Days 17–28',desc:'Progesterone rises and energy dips. PMS symptoms may appear in the last week. Be gentle with yourself.',color:'#f59e0b'}
+];
+function renderPhaseIndicator() {
+  const pd = getPD();
+  const starts = Object.keys(pd).filter(d=>pd[d]==='start').sort();
+  let cycleDay = null;
+  if (starts.length > 0) {
+    const last = new Date(starts[starts.length-1]+'T12:00:00');
+    cycleDay = Math.floor((new Date()-last)/86400000)+1;
+  }
+  let active = -1;
+  if (cycleDay!==null) {
+    if (cycleDay<=5) active=0;
+    else if (cycleDay<=13) active=1;
+    else if (cycleDay<=16) active=2;
+    else active=3;
+  }
+  const c = document.getElementById('phase-display');
+  c.innerHTML = '';
+  PHASES.forEach((p,i) => {
+    const d = document.createElement('div');
+    d.className = 'phase-card'+(i===active?' active-phase':'');
+    d.innerHTML = `<div class="phase-icon">${p.icon}</div><div class="phase-name" style="color:${p.color}">${p.name}</div><div class="phase-days">${p.days}</div><div class="phase-desc">${p.desc}</div>${i===active&&cycleDay?`<div style="font-size:0.66rem;color:#f9a8d4;margin-top:5px;font-weight:700">← Day ${cycleDay}</div>`:''}`;
+    c.appendChild(d);
+  });
+  if (cycleDay===null) c.innerHTML += '<p class="info-text" style="text-align:center;padding:10px;width:100%">Log your period start date above to see your current phase.</p>';
+}
+
+// ============ MOODS ============
+function getMoods() { return get('moods')||{}; }
+function toggleMood(mood) {
+  const m = getMoods();
+  if (!m[selectedDate]) m[selectedDate]=[];
+  const i = m[selectedDate].indexOf(mood);
+  if (i>-1) m[selectedDate].splice(i,1); else m[selectedDate].push(mood);
+  set('moods',m); renderMoodButtons(); renderCalendar();
+}
+function renderMoodButtons() {
+  const m = getMoods(); const sel = m[selectedDate]||[];
+  ['happy','tired','anxious','cramps','bloated','energized'].forEach(mood => {
+    const btn = document.getElementById('mood-'+mood);
+    if(btn) btn.className='mood-btn'+(sel.includes(mood)?' selected':'');
+  });
+}
+
+// ============ SYMPTOMS ============
+function renderSymptoms() {
+  renderSGroup('symptoms-physical', SYMPTOMS.physical);
+  renderSGroup('symptoms-emotional', SYMPTOMS.emotional);
+  renderSGroup('symptoms-energy', SYMPTOMS.energy);
+}
+function renderSGroup(id, list) {
+  const c = document.getElementById(id); if(!c) return;
+  const data = get('symptoms')||{};
+  const day = data[selectedDate]||{};
+  c.innerHTML = '';
+  list.forEach(sym => {
+    const name = typeof sym === 'object' ? sym.en : sym;
+    const vi   = typeof sym === 'object' ? sym.vi : null;
+    const k = name.toLowerCase().replace(/\s+/g,'_');
+    const checked = day[k]&&day[k].checked;
+    const sev = day[k]?day[k].severity:1;
+    const row = document.createElement('div');
+    row.className = 'symptom-item';
+    row.innerHTML = `<div class="symptom-check ${checked?'checked':''}" onclick="toggleSym('${k}','${id}')">${checked?'✓':''}</div><span class="symptom-name">${name}${vi?`<span class="symptom-vi">· ${vi}</span>`:''}</span>${checked?`<div class="severity-slider"><button class="sev-btn ${sev===1?'active-sev':''}" onclick="setSev('${k}',1,'${id}')">1</button><button class="sev-btn ${sev===2?'active-sev':''}" onclick="setSev('${k}',2,'${id}')">2</button><button class="sev-btn ${sev===3?'active-sev':''}" onclick="setSev('${k}',3,'${id}')">3</button></div>`:''}`;
+    c.appendChild(row);
+  });
+}
+function toggleSym(k, id) {
+  const data = get('symptoms')||{};
+  if (!data[selectedDate]) data[selectedDate]={};
+  if (data[selectedDate][k]&&data[selectedDate][k].checked) data[selectedDate][k].checked=false;
+  else data[selectedDate][k]={checked:true,severity:1};
+  set('symptoms',data); renderSymptoms();
+}
+function setSev(k, sev, id) {
+  const data = get('symptoms')||{};
+  if (!data[selectedDate]) data[selectedDate]={};
+  if (!data[selectedDate][k]) data[selectedDate][k]={checked:true};
+  data[selectedDate][k].severity = sev; set('symptoms',data); renderSymptoms();
+}
+
+// ============ PATTERNS ============
+function showSymptomPatterns() {
+  document.getElementById('symptom-logger').classList.add('hidden');
+  document.getElementById('pattern-view').classList.remove('hidden');
+  renderPatterns();
+}
+function hidePatterns() {
+  document.getElementById('symptom-logger').classList.remove('hidden');
+  document.getElementById('pattern-view').classList.add('hidden');
+}
+function renderPatterns() {
+  const data = get('symptoms')||{};
+  const pd = getPD();
+  const starts = Object.keys(pd).filter(d=>pd[d]==='start').sort();
+  const counts = {0:{},1:{},2:{},3:{}};
+  Object.keys(data).forEach(date => {
+    let cycleDay = null;
+    for (let i=starts.length-1;i>=0;i--) {
+      if (date>=starts[i]) { cycleDay=Math.floor((new Date(date)-new Date(starts[i]))/86400000)+1; break; }
+    }
+    let ph = -1;
+    if (cycleDay!==null) { if(cycleDay<=5)ph=0; else if(cycleDay<=13)ph=1; else if(cycleDay<=16)ph=2; else ph=3; }
+    if (ph<0) return;
+    Object.keys(data[date]).forEach(sym => { if(data[date][sym]&&data[date][sym].checked) { counts[ph][sym]=(counts[ph][sym]||0)+1; } });
+  });
+  const c = document.getElementById('phase-patterns'); c.innerHTML='';
+  PHASES.forEach((p,i) => {
+    const syms = Object.entries(counts[i]).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const tags = syms.length>0 ? syms.map(([s,n])=>`<span class="symptom-tag">${s.replace(/_/g,' ')} (${n}×)</span>`).join('') : '<span style="font-size:0.72rem;color:#6a4858">No data yet — keep logging daily!</span>';
+    const row = document.createElement('div'); row.className='phase-pattern-row';
+    row.innerHTML=`<div class="phase-pattern-name">${p.icon} ${p.name} — ${p.days}</div><div class="symptom-tags">${tags}</div>`;
+    c.appendChild(row);
+  });
+}
+
+// ============ VOCAB ============
+let activeCat='all', searchQ='';
+function filterVocab() { searchQ=document.getElementById('vocab-search').value.toLowerCase(); renderVocab(); }
+function filterCat(cat,btn) { activeCat=cat; document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderVocab(); }
+function renderVocab() {
+  const list = document.getElementById('vocab-list'); list.innerHTML='';
+  const catNames = {cycle:'Cycle Basics',doctor:'Doctor Visit',pharmacy:'Pharmacy'};
+  const filtered = VOCAB.filter(v => (activeCat==='all'||v.cat===activeCat) && (!searchQ||v.en.toLowerCase().includes(searchQ)||v.vi.toLowerCase().includes(searchQ)));
+  if (!filtered.length) { list.innerHTML='<p class="info-text" style="text-align:center;padding:20px">No terms found.</p>'; return; }
+  filtered.forEach(v => {
+    const card=document.createElement('div'); card.className='vocab-card';
+    card.innerHTML=`<span class="vocab-cat-badge">${catNames[v.cat]}</span><div class="vocab-en">${v.en}</div><div class="vocab-vi">🇻🇳 ${v.vi}</div><div class="vocab-pron">🔊 /${v.pron}/</div><div class="vocab-example">${v.ex}</div>`;
+    list.appendChild(card);
+  });
+}
+function renderProducts() {
+  const c = document.getElementById('product-compare');
+  const left = `<div><div class="prod-col-title">🇺🇸 US Drugstore</div>${PRODUCTS.map(p=>`<div class="prod-item"><div class="prod-name">${p.us.name}</div>${p.us.detail}</div>`).join('')}</div>`;
+  const right = `<div><div class="prod-col-title">🇻🇳 Vietnamese Equivalent</div>${PRODUCTS.map(p=>`<div class="prod-item"><div class="prod-name">${p.vi.name}</div>${p.vi.detail}</div>`).join('')}</div>`;
+  c.innerHTML = left+right;
+}
+
+// ============ DOCTOR ============
+function renderScenarios() {
+  const list=document.getElementById('scenario-list'); list.innerHTML='';
+  SCENARIOS.forEach((s,i) => {
+    const btn=document.createElement('button'); btn.className='scenario-btn';
+    btn.textContent=`${i+1}. ${s.title}`;
+    btn.onclick=()=>{ document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); showScript(s); };
+    list.appendChild(btn);
+  });
+}
+function showScript(s) {
+  const box=document.getElementById('script-display');
+  const bilingualScript = s.vi_script
+    ? `<div class="script-bilingual">
+        <div>
+          <span class="script-lang-badge en">🇺🇸 English</span>
+          <div class="script-text">${s.script}</div>
+        </div>
+        <div>
+          <span class="script-lang-badge vi">🇻🇳 Tiếng Việt</span>
+          <div class="script-text-vi">${s.vi_script}</div>
+        </div>
+      </div>`
+    : `<div class="script-text">${s.script}</div>`;
+  box.innerHTML=`<div class="script-box">
+    <div class="script-title">🗣️ ${s.title}</div>
+    <div class="script-section"><div class="script-section-title">What to say · Cách nói</div>${bilingualScript}</div>
+    <div class="script-section"><div class="script-section-title">Key phrases to know</div><div class="key-phrases">${s.keyPhrases.map(p=>`<span class="key-phrase">${p}</span>`).join('')}</div></div>
+    <div class="script-section"><div class="script-section-title">The doctor might ask</div><div class="doctor-qs">${s.doctorMayAsk.map(q=>`<div class="doctor-q">${q}</div>`).join('')}</div></div>
+    <div class="script-section"><div class="script-section-title">Helpful vocabulary</div><div style="font-size:0.76rem;color:#c084fc;line-height:1.6">${s.vocab}</div></div>
+  </div>`;
+}
+
+// ============ PARENTS SCENARIOS ============
+function renderParentsScenarios() {
+  const list = document.getElementById('parents-list'); list.innerHTML='';
+  PARENTS_SCENARIOS.forEach((s,i) => {
+    const btn = document.createElement('button'); btn.className='parents-scenario-btn';
+    btn.innerHTML=`${i+1}. ${s.title}<span class="parents-subtitle-small">${s.subtitle}</span>`;
+    btn.onclick=()=>{ document.querySelectorAll('.parents-scenario-btn').forEach(b=>b.classList.remove('active-par')); btn.classList.add('active-par'); showParentsScript(s); };
+    list.appendChild(btn);
+  });
+}
+function showParentsScript(s) {
+  const box = document.getElementById('parents-display');
+  box.innerHTML=`<div class="parents-script-box">
+    <div class="parents-script-title">💬 ${s.title}</div>
+    <div class="parents-script-en">${s.subtitle}</div>
+    <div class="parents-script-text">${s.script}</div>
+    <div class="parents-tip">${s.tip}</div>
+  </div>`;
+}
+
+function renderEmergency() {
+  document.getElementById('emergency-list').innerHTML = EMERGENCY_PHRASES.map(p=>`<div class="emerg-phrase"><div class="emerg-en">🗣️ "${p.en}"</div><div class="emerg-vi">🇻🇳 "${p.vi}"</div></div>`).join('');
+}
+function renderChecklist() {
+  document.getElementById('doctor-checklist').innerHTML = DOCTOR_CHECKLIST.map(item=>`<div class="check-item"><span class="check-icon">✓</span><span>${item}</span></div>`).join('');
+}
+
+// ============ TAB SWITCHING ============
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ============ INIT ============
+(function init() {
+  renderCalendar(); recalcStats(); renderMoodButtons();
+  renderSymptoms(); renderVocab(); renderProducts();
+  renderScenarios(); renderParentsScenarios();
+  renderEmergency(); renderChecklist();
+  document.getElementById('mood-log-date').textContent = fmtDate(selectedDate);
+  document.getElementById('symptom-date-label').textContent = fmtDate(selectedDate);
+})();
+</script>
+</body>
+</html>

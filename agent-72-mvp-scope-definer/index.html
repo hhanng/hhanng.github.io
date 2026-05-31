@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MVP Scope Definer — Agent #72</title>
+<style>
+  :root {
+    --bg: #0d1a0f;
+    --card: #1a2e1a;
+    --card2: #1f361f;
+    --lime: #84cc16;
+    --cyan: #22d3ee;
+    --text: #f0f4f0;
+    --muted: #7a9e7a;
+    --border: #2a3d2a;
+    --must: #84cc16;
+    --should: #22d3ee;
+    --could: #f59e0b;
+    --wont: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  /* Header */
+  .header { padding: 20px 24px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+  .header-badge { background: var(--lime); color: #0d1a0f; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 1px; }
+  .header h1 { font-size: 20px; font-weight: 700; color: var(--text); }
+  .header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 24px; }
+  .tab { padding: 12px 20px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; letter-spacing: 0.5px; }
+  .tab:hover { color: var(--lime); }
+  .tab.active { color: var(--lime); border-bottom-color: var(--lime); }
+
+  /* Content */
+  .content { padding: 24px; max-width: 900px; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Form */
+  .section-title { font-size: 13px; font-weight: 700; color: var(--lime); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; }
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; }
+  input[type="text"], textarea, select {
+    width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 14px; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, textarea:focus { border-color: var(--lime); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  /* Scope questions */
+  .questions { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+  .q-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); gap: 12px; }
+  .q-row:last-child { border-bottom: none; }
+  .q-text { font-size: 13px; color: var(--text); flex: 1; }
+  .q-num { font-size: 11px; color: var(--muted); font-weight: 700; margin-right: 10px; min-width: 20px; }
+  .toggle-group { display: flex; gap: 6px; }
+  .toggle-btn { padding: 5px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: var(--card2); color: var(--muted); transition: all 0.15s; }
+  .toggle-btn.yes.active { background: #166534; border-color: var(--lime); color: var(--lime); }
+  .toggle-btn.no.active { background: #7f1d1d; border-color: #ef4444; color: #ef4444; }
+
+  /* Verdict */
+  .verdict-box { border-radius: 12px; padding: 20px 24px; margin: 20px 0; border: 2px solid; }
+  .verdict-box.lean { background: #0f2d0f; border-color: var(--lime); }
+  .verdict-box.standard { background: #0c2233; border-color: var(--cyan); }
+  .verdict-box.overscoped { background: #2d0f0f; border-color: #ef4444; }
+  .verdict-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .verdict-box.lean .verdict-label { color: var(--lime); }
+  .verdict-box.standard .verdict-label { color: var(--cyan); }
+  .verdict-box.overscoped .verdict-label { color: #ef4444; }
+  .verdict-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .verdict-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; font-family: inherit; letter-spacing: 0.3px; }
+  .btn-lime { background: var(--lime); color: #0d1a0f; }
+  .btn-lime:hover { background: #a3e635; }
+  .btn-cyan { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); }
+  .btn-cyan:hover { background: rgba(34,211,238,0.1); }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-ghost:hover { border-color: var(--lime); color: var(--lime); }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* Features board */
+  .feature-add { display: flex; gap: 10px; margin-bottom: 20px; }
+  .feature-add input { flex: 1; }
+  .moscow-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 700px) { .moscow-cols { grid-template-columns: 1fr 1fr; } }
+  .moscow-col { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; min-height: 200px; }
+  .moscow-col-header { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 12px; }
+  .col-must .moscow-col-header { color: var(--must); }
+  .col-should .moscow-col-header { color: var(--should); }
+  .col-could .moscow-col-header { color: var(--could); }
+  .col-wont .moscow-col-header { color: var(--wont); }
+
+  .feature-card { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; cursor: grab; transition: box-shadow 0.15s; }
+  .feature-card:hover { box-shadow: 0 0 0 1px var(--lime); }
+  .feature-card.dragging { opacity: 0.4; }
+  .fc-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .fc-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+  .fc-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+  .tag-must { background: #166534; color: var(--must); }
+  .tag-should { background: #0c3a4a; color: var(--should); }
+  .tag-could { background: #451a03; color: var(--could); }
+  .tag-wont { background: #1f2937; color: var(--wont); }
+  .effort-select, .tag-select { background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-size: 11px; padding: 2px 6px; font-family: inherit; }
+  .fc-notes { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--muted); border-radius: 5px; font-size: 11px; padding: 4px 7px; font-family: inherit; resize: none; height: 36px; }
+  .fc-delete { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; padding: 0; line-height: 1; }
+
+  /* Canvas */
+  .canvas-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px 32px; margin-bottom: 20px; }
+  .canvas-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .canvas-logo-sq { width: 36px; height: 36px; background: var(--lime); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #0d1a0f; font-weight: 900; font-size: 16px; }
+  .canvas-name { font-size: 20px; font-weight: 800; }
+  .canvas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 600px) { .canvas-grid { grid-template-columns: 1fr; } }
+  .canvas-block { background: var(--card2); border-radius: 8px; padding: 14px 16px; }
+  .canvas-block-label { font-size: 10px; font-weight: 700; color: var(--lime); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .canvas-block-value { font-size: 13px; line-height: 1.6; color: var(--text); }
+  .canvas-features { list-style: none; }
+  .canvas-features li { font-size: 13px; padding: 3px 0; display: flex; align-items: center; gap: 8px; }
+  .canvas-features li::before { content: '✦'; color: var(--lime); font-size: 10px; }
+
+  /* Export */
+  .export-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; color: #a8e6a8; white-space: pre-wrap; word-break: break-word; margin-bottom: 16px; max-height: 400px; overflow-y: auto; }
+  .history-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color 0.2s; }
+  .history-item:hover { border-color: var(--lime); }
+  .history-name { font-size: 14px; font-weight: 700; }
+  .history-date { font-size: 11px; color: var(--muted); }
+  .history-verdict { font-size: 11px; font-weight: 700; }
+  .history-verdict.lean { color: var(--lime); }
+  .history-verdict.standard { color: var(--cyan); }
+  .history-verdict.overscoped { color: #ef4444; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--lime); color: #0d1a0f; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 13px; z-index: 9999; animation: fadeInOut 2.2s ease forwards; }
+  @keyframes fadeInOut { 0%{opacity:0;transform:translateY(10px)} 15%{opacity:1;transform:translateY(0)} 80%{opacity:1} 100%{opacity:0} }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* Drop zone highlight */
+  .moscow-col.drag-over { border-color: var(--lime); background: #1a2e1a; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 30px 10px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="header-badge">#72</span>
+      <h1>MVP Scope Definer</h1>
+    </div>
+    <p>Ship less. Learn faster. Define exactly what your MVP needs — nothing more.</p>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="define">DEFINE</div>
+  <div class="tab" data-tab="features">FEATURES</div>
+  <div class="tab" data-tab="canvas">CANVAS</div>
+  <div class="tab" data-tab="export">EXPORT</div>
+</div>
+
+<!-- DEFINE TAB -->
+<div class="content">
+<div class="panel active" id="panel-define">
+  <div class="section-title">Product Info</div>
+  <div class="form-group"><label>Product Name</label><input type="text" id="pname" placeholder="e.g. TaskFlow AI" oninput="saveDefine()"></div>
+  <div class="form-group"><label>Problem It Solves</label><textarea id="pproblem" placeholder="e.g. Teams waste hours in status meetings because there's no single source of truth for task status." oninput="saveDefine()"></textarea></div>
+  <div class="form-group"><label>Target User (1 line)</label><input type="text" id="ptarget" placeholder="e.g. Startup founders with teams of 2–10 people" oninput="saveDefine()"></div>
+  <div class="form-group"><label>Core Value Proposition</label><input type="text" id="pvalue" placeholder="e.g. Real-time task sync that replaces daily standups" oninput="saveDefine()"></div>
+
+  <div class="divider"></div>
+  <div class="section-title">Scope Questions</div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Answer all 5 questions to get your scope verdict.</p>
+
+  <div class="questions">
+    <div class="q-row">
+      <span class="q-num">1</span>
+      <span class="q-text">Does this feature exist in your top competitor?</span>
+      <div class="toggle-group">
+        <button class="toggle-btn yes" data-q="1" data-v="yes" onclick="setQ(1,'yes',this)">Yes</button>
+        <button class="toggle-btn no" data-q="1" data-v="no" onclick="setQ(1,'no',this)">No</button>
+      </div>
+    </div>
+    <div class="q-row">
+      <span class="q-num">2</span>
+      <span class="q-text">Will users churn without it on Day 1?</span>
+      <div class="toggle-group">
+        <button class="toggle-btn yes" data-q="2" data-v="yes" onclick="setQ(2,'yes',this)">Yes</button>
+        <button class="toggle-btn no" data-q="2" data-v="no" onclick="setQ(2,'no',this)">No</button>
+      </div>
+    </div>
+    <div class="q-row">
+      <span class="q-num">3</span>
+      <span class="q-text">Can it be faked or done manually first?</span>
+      <div class="toggle-group">
+        <button class="toggle-btn yes" data-q="3" data-v="yes" onclick="setQ(3,'yes',this)">Yes</button>
+        <button class="toggle-btn no" data-q="3" data-v="no" onclick="setQ(3,'no',this)">No</button>
+      </div>
+    </div>
+    <div class="q-row">
+      <span class="q-num">4</span>
+      <span class="q-text">Does it require an external API or 3rd-party service?</span>
+      <div class="toggle-group">
+        <button class="toggle-btn yes" data-q="4" data-v="yes" onclick="setQ(4,'yes',this)">Yes</button>
+        <button class="toggle-btn no" data-q="4" data-v="no" onclick="setQ(4,'no',this)">No</button>
+      </div>
+    </div>
+    <div class="q-row">
+      <span class="q-num">5</span>
+      <span class="q-text">Can it ship in under 2 weeks?</span>
+      <div class="toggle-group">
+        <button class="toggle-btn yes" data-q="5" data-v="yes" onclick="setQ(5,'yes',this)">Yes</button>
+        <button class="toggle-btn no" data-q="5" data-v="no" onclick="setQ(5,'no',this)">No</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="verdict-area"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-lime" onclick="computeVerdict()">Get Scope Verdict ▶</button>
+    <button class="btn btn-ghost" onclick="saveToHistory()">Save to History</button>
+    <button class="btn btn-ghost" onclick="clearDefine()">Clear</button>
+  </div>
+</div>
+
+<!-- FEATURES TAB -->
+<div class="panel" id="panel-features">
+  <div class="section-title">Feature Prioritization Board</div>
+  <div class="feature-add">
+    <input type="text" id="feat-input" placeholder="Add a feature idea..." onkeydown="if(event.key==='Enter')addFeature()">
+    <button class="btn btn-lime" onclick="addFeature()">+ Add</button>
+  </div>
+  <div class="moscow-cols">
+    <div class="moscow-col col-must" id="col-must" ondragover="dragOver(event,this)" ondrop="dropFeature(event,'Must Have')" ondragleave="dragLeave(this)">
+      <div class="moscow-col-header">MUST HAVE</div>
+      <div id="list-must" class="feat-list"></div>
+    </div>
+    <div class="moscow-col col-should" id="col-should" ondragover="dragOver(event,this)" ondrop="dropFeature(event,'Should Have')" ondragleave="dragLeave(this)">
+      <div class="moscow-col-header">SHOULD HAVE</div>
+      <div id="list-should" class="feat-list"></div>
+    </div>
+    <div class="moscow-col col-could" id="col-could" ondragover="dragOver(event,this)" ondrop="dropFeature(event,'Could Have')" ondragleave="dragLeave(this)">
+      <div class="moscow-col-header">COULD HAVE</div>
+      <div id="list-could" class="feat-list"></div>
+    </div>
+    <div class="moscow-col col-wont" id="col-wont" ondragover="dragOver(event,this)" ondrop="dropFeature(event,'Won\'t Have')" ondragleave="dragLeave(this)">
+      <div class="moscow-col-header">WON'T HAVE</div>
+      <div id="list-wont" class="feat-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CANVAS TAB -->
+<div class="panel" id="panel-canvas">
+  <div class="section-title">MVP Canvas</div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:20px;">Auto-generated from your DEFINE inputs and Must Have features.</p>
+  <div id="canvas-content"></div>
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn btn-lime" onclick="renderCanvas()">Refresh Canvas</button>
+    <button class="btn btn-cyan" onclick="copyCanvas()">Copy as Text</button>
+  </div>
+</div>
+
+<!-- EXPORT TAB -->
+<div class="panel" id="panel-export">
+  <div class="section-title">Export Summary</div>
+  <div id="export-content" class="export-box">Click "Generate Export" to create your markdown summary.</div>
+  <div class="btn-row" style="margin-bottom:24px">
+    <button class="btn btn-lime" onclick="generateExport()">Generate Export</button>
+    <button class="btn btn-cyan" onclick="copyExport()">Copy to Clipboard</button>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-title">History</div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Last 5 saved products — click to reload.</p>
+  <div id="history-list"></div>
+</div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const LS = 'mvp72_';
+let answers = {};
+let features = [];
+let dragId = null;
+
+function ls(k, v) { if (v===undefined) return JSON.parse(localStorage.getItem(LS+k)||'null'); localStorage.setItem(LS+k, JSON.stringify(v)); }
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+  if (t.dataset.tab === 'canvas') renderCanvas();
+  if (t.dataset.tab === 'export') { generateExport(); renderHistory(); }
+}));
+
+// ── DEFINE ─────────────────────────────────────────────────────────────────
+function saveDefine() {
+  ls('define', {
+    name: document.getElementById('pname').value,
+    problem: document.getElementById('pproblem').value,
+    target: document.getElementById('ptarget').value,
+    value: document.getElementById('pvalue').value,
+  });
+}
+
+function loadDefine() {
+  const d = ls('define') || {};
+  document.getElementById('pname').value = d.name || '';
+  document.getElementById('pproblem').value = d.problem || '';
+  document.getElementById('ptarget').value = d.target || '';
+  document.getElementById('pvalue').value = d.value || '';
+  answers = ls('answers') || {};
+  Object.entries(answers).forEach(([q, v]) => {
+    document.querySelectorAll(`[data-q="${q}"]`).forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.v === v);
+    });
+  });
+  if (Object.keys(answers).length === 5) renderVerdict();
+}
+
+function setQ(q, v, btn) {
+  answers[q] = v;
+  document.querySelectorAll(`[data-q="${q}"]`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ls('answers', answers);
+}
+
+function computeVerdict() {
+  if (Object.keys(answers).length < 5) { toast('Answer all 5 questions first!'); return; }
+  renderVerdict();
+}
+
+function renderVerdict() {
+  const a = answers;
+  if (Object.keys(a).length < 5) return;
+  const y = v => v === 'yes';
+
+  // Scoring: overscoped signals
+  let overFlags = 0, leanFlags = 0;
+  if (y(a[4])) overFlags++;   // needs external API
+  if (!y(a[5])) overFlags++;  // can't ship in 2 weeks
+  if (y(a[1]) && !y(a[2])) leanFlags++; // competitor has it but not day-1 critical
+  if (y(a[3])) leanFlags++;  // can be faked = lean
+  if (!y(a[2])) leanFlags++; // no day-1 churn risk
+
+  let type, title, desc;
+  if (overFlags >= 2) {
+    type = 'overscoped';
+    title = '⚠ Overscoped';
+    desc = 'Your MVP is carrying too much weight. External dependencies and a longer-than-2-week timeline are red flags. Strip back to the absolute core: what's the ONE thing that proves your hypothesis? Cut everything else ruthlessly.';
+  } else if (leanFlags >= 3) {
+    type = 'lean';
+    title = '⚡ Lean MVP';
+    desc = 'This is a lean, ship-fast MVP. You can fake or manually handle several parts, your timeline is tight, and it doesn\'t add external complexity. Ship it this week — validate before you build more.';
+  } else {
+    type = 'standard';
+    title = '✦ Standard MVP';
+    desc = 'Your MVP scope is reasonable. Some features are essential for Day 1, and the complexity is manageable. Focus on the Must Haves, set a hard deadline, and resist scope creep once the build starts.';
+  }
+  ls('verdict', { type, title });
+
+  const area = document.getElementById('verdict-area');
+  area.innerHTML = `<div class="verdict-box ${type}" style="margin:20px 0">
+    <div class="verdict-label">Scope Verdict</div>
+    <div class="verdict-title">${title}</div>
+    <div class="verdict-desc">${desc}</div>
+  </div>`;
+}
+
+function clearDefine() {
+  document.getElementById('pname').value = '';
+  document.getElementById('pproblem').value = '';
+  document.getElementById('ptarget').value = '';
+  document.getElementById('pvalue').value = '';
+  answers = {};
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('verdict-area').innerHTML = '';
+  ls('define', null); ls('answers', null); ls('verdict', null);
+}
+
+// ── FEATURES ───────────────────────────────────────────────────────────────
+const TAGS = ['Must Have', 'Should Have', 'Could Have', "Won't Have"];
+const TAG_MAP = { 'Must Have': 'must', 'Should Have': 'should', 'Could Have': 'could', "Won't Have": 'wont' };
+const EFFORT_OPTS = ['S', 'M', 'L'];
+
+function autoTag(title) {
+  const t = title.toLowerCase();
+  if (/login|auth|sign|register|password|core|essential|basic|main/.test(t)) return 'Must Have';
+  if (/notif|email|dashboard|search|filter|sort|profile|setting/.test(t)) return 'Should Have';
+  if (/dark mode|theme|analytics|report|export|share|social|comment/.test(t)) return 'Could Have';
+  if (/ai|ml|blockchain|ar|vr|3d|gamif|leader/.test(t)) return "Won't Have";
+  return 'Must Have';
+}
+
+function addFeature() {
+  const input = document.getElementById('feat-input');
+  const title = input.value.trim();
+  if (!title) return;
+  const tag = autoTag(title);
+  const feat = { id: Date.now(), title, tag, effort: 'M', notes: '' };
+  features.push(feat);
+  saveFeatures();
+  renderFeatures();
+  input.value = '';
+  input.focus();
+}
+
+function saveFeatures() { ls('features', features); }
+
+function loadFeatures() {
+  features = ls('features') || [];
+  renderFeatures();
+}
+
+function renderFeatures() {
+  const cols = { 'Must Have': 'must', 'Should Have': 'should', 'Could Have': 'could', "Won't Have": 'wont' };
+  Object.entries(cols).forEach(([tag, id]) => {
+    const list = document.getElementById('list-' + id);
+    const items = features.filter(f => f.tag === tag);
+    list.innerHTML = items.length ? items.map(f => featureCardHTML(f)).join('') : '<div class="empty">Drop here</div>';
+  });
+  attachFeatureEvents();
+}
+
+function featureCardHTML(f) {
+  const cls = TAG_MAP[f.tag];
+  return `<div class="feature-card" draggable="true" data-id="${f.id}" ondragstart="dragStart(event,${f.id})">
+    <div class="fc-title">${esc(f.title)}</div>
+    <div class="fc-row">
+      <span class="fc-tag tag-${cls}">${esc(f.tag)}</span>
+      <select class="effort-select" data-id="${f.id}" onchange="updateEffort(${f.id},this.value)">
+        ${EFFORT_OPTS.map(e => `<option${f.effort===e?' selected':''}>${e}</option>`).join('')}
+      </select>
+      <select class="tag-select" data-id="${f.id}" onchange="updateTag(${f.id},this.value)">
+        ${TAGS.map(t => `<option${f.tag===t?' selected':''}>${t}</option>`).join('')}
+      </select>
+      <button class="fc-delete" onclick="deleteFeature(${f.id})">✕</button>
+    </div>
+    <textarea class="fc-notes" placeholder="Notes..." data-id="${f.id}" oninput="updateNotes(${f.id},this.value)">${esc(f.notes)}</textarea>
+  </div>`;
+}
+
+function attachFeatureEvents() {}
+
+function updateEffort(id, v) { const f = features.find(x=>x.id===id); if(f){f.effort=v; saveFeatures();} }
+function updateTag(id, v) { const f = features.find(x=>x.id===id); if(f){f.tag=v; saveFeatures(); renderFeatures();} }
+function updateNotes(id, v) { const f = features.find(x=>x.id===id); if(f){f.notes=v; saveFeatures();} }
+function deleteFeature(id) { features = features.filter(x=>x.id!==id); saveFeatures(); renderFeatures(); }
+
+// Drag-and-drop
+function dragStart(e, id) { dragId = id; e.dataTransfer.effectAllowed='move'; setTimeout(()=>{ const el=document.querySelector(`[data-id="${id}"]`); if(el)el.classList.add('dragging'); },0); }
+function dragOver(e, col) { e.preventDefault(); col.classList.add('drag-over'); }
+function dragLeave(col) { col.classList.remove('drag-over'); }
+function dropFeature(e, tag) {
+  e.preventDefault();
+  const col = e.currentTarget;
+  col.classList.remove('drag-over');
+  if (dragId === null) return;
+  const f = features.find(x=>x.id===dragId);
+  if (f) { f.tag = tag; saveFeatures(); renderFeatures(); }
+  dragId = null;
+}
+
+// ── CANVAS ─────────────────────────────────────────────────────────────────
+function renderCanvas() {
+  const d = ls('define') || {};
+  const musts = features.filter(f => f.tag === 'Must Have');
+  const verdict = ls('verdict') || {};
+  const name = d.name || 'Your Product';
+  const initial = (name[0] || 'M').toUpperCase();
+
+  const effortMap = { S: '1 week', M: '2 weeks', L: '3+ weeks' };
+  const maxEffort = musts.length ? effortMap[musts.sort((a,b)=>'SML'.indexOf(b.effort)-'SML'.indexOf(a.effort))[0].effort] : '1–2 weeks';
+
+  document.getElementById('canvas-content').innerHTML = `
+  <div class="canvas-card">
+    <div class="canvas-logo">
+      <div class="canvas-logo-sq">${initial}</div>
+      <div>
+        <div class="canvas-name">${esc(name)}</div>
+        ${verdict.title ? `<div style="font-size:11px;color:var(--lime);font-weight:700;margin-top:2px">${esc(verdict.title)}</div>` : ''}
+      </div>
+    </div>
+    <div class="canvas-grid">
+      <div class="canvas-block">
+        <div class="canvas-block-label">Problem</div>
+        <div class="canvas-block-value">${esc(d.problem || '—')}</div>
+      </div>
+      <div class="canvas-block">
+        <div class="canvas-block-label">Core Value Prop</div>
+        <div class="canvas-block-value">${esc(d.value || '—')}</div>
+      </div>
+      <div class="canvas-block">
+        <div class="canvas-block-label">Target User</div>
+        <div class="canvas-block-value">${esc(d.target || '—')}</div>
+      </div>
+      <div class="canvas-block">
+        <div class="canvas-block-label">Timeline Estimate</div>
+        <div class="canvas-block-value">${maxEffort}</div>
+      </div>
+      <div class="canvas-block" style="grid-column:span 2">
+        <div class="canvas-block-label">Must-Have Features (${musts.length})</div>
+        ${musts.length ? `<ul class="canvas-features">${musts.map(f=>`<li>${esc(f.title)} <span style="font-size:10px;color:var(--muted)">[${f.effort}]</span></li>`).join('')}</ul>` : '<div style="color:var(--muted);font-size:12px">No Must Have features added yet.</div>'}
+      </div>
+      <div class="canvas-block">
+        <div class="canvas-block-label">Success Metric</div>
+        <div class="canvas-block-value">10 paying users in 30 days</div>
+      </div>
+      <div class="canvas-block">
+        <div class="canvas-block-label">Launch Strategy</div>
+        <div class="canvas-block-value">Manual onboarding → first 10 users → iterate</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function canvasText() {
+  const d = ls('define') || {};
+  const musts = features.filter(f=>f.tag==='Must Have');
+  const verdict = ls('verdict') || {};
+  const lines = [
+    `MVP CANVAS — ${d.name || 'Your Product'}`,
+    verdict.title ? `Scope: ${verdict.title}` : '',
+    '',
+    `PROBLEM\n${d.problem || '—'}`,
+    '',
+    `TARGET USER\n${d.target || '—'}`,
+    '',
+    `CORE VALUE PROPOSITION\n${d.value || '—'}`,
+    '',
+    `MUST-HAVE FEATURES`,
+    ...musts.map(f=>`  • ${f.title} [${f.effort}]`),
+    musts.length ? '' : '  (none)',
+    '',
+    `SUCCESS METRIC\n10 paying users in 30 days`,
+    `LAUNCH STRATEGY\nManual onboarding → first 10 users → iterate`,
+  ];
+  return lines.filter(l=>l!==null).join('\n');
+}
+
+function copyCanvas() {
+  navigator.clipboard.writeText(canvasText()).then(()=>toast('Copied!'));
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+function generateExport() {
+  const d = ls('define') || {};
+  const verdict = ls('verdict') || {};
+  const musts = features.filter(f=>f.tag==='Must Have');
+  const shoulds = features.filter(f=>f.tag==='Should Have');
+
+  const md = [
+    `# MVP Scope: ${d.name || 'Untitled'}`,
+    `_Exported ${new Date().toLocaleDateString()}_`,
+    '',
+    `## Scope Verdict`,
+    verdict.title ? `**${verdict.title}**` : '_Not computed yet_',
+    '',
+    `## Product`,
+    `**Problem:** ${d.problem || '—'}`,
+    `**Target User:** ${d.target || '—'}`,
+    `**Value Prop:** ${d.value || '—'}`,
+    '',
+    `## Must Have Features`,
+    ...musts.map(f=>`- [ ] ${f.title} [${f.effort}]${f.notes?` — ${f.notes}`:''}`),
+    musts.length ? '' : '_None defined_',
+    '',
+    `## Should Have Features`,
+    ...shoulds.map(f=>`- ${f.title} [${f.effort}]`),
+    shoulds.length ? '' : '_None defined_',
+    '',
+    `## MVP Canvas`,
+    canvasText(),
+  ].join('\n');
+
+  document.getElementById('export-content').textContent = md;
+}
+
+function copyExport() {
+  const text = document.getElementById('export-content').textContent;
+  navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard!'));
+}
+
+// ── HISTORY ─────────────────────────────────────────────────────────────────
+function saveToHistory() {
+  const d = ls('define') || {};
+  if (!d.name) { toast('Add a product name first!'); return; }
+  const verdict = ls('verdict') || {};
+  let history = ls('history') || [];
+  history.unshift({ name: d.name, date: new Date().toLocaleDateString(), verdict: verdict.type || 'unknown', data: { define: d, answers, features, verdict } });
+  history = history.slice(0, 5);
+  ls('history', history);
+  toast('Saved to history!');
+}
+
+function renderHistory() {
+  const history = ls('history') || [];
+  const el = document.getElementById('history-list');
+  if (!history.length) { el.innerHTML = '<div class="empty">No saved products yet.</div>'; return; }
+  el.innerHTML = history.map((h, i) => `
+    <div class="history-item" onclick="loadFromHistory(${i})">
+      <div>
+        <div class="history-name">${esc(h.name)}</div>
+        <div class="history-date">${h.date}</div>
+      </div>
+      <div class="history-verdict ${h.verdict}">${h.verdict === 'lean' ? '⚡ Lean MVP' : h.verdict === 'standard' ? '✦ Standard MVP' : h.verdict === 'overscoped' ? '⚠ Overscoped' : '—'}</div>
+    </div>`).join('');
+}
+
+function loadFromHistory(i) {
+  const history = ls('history') || [];
+  const h = history[i];
+  if (!h) return;
+  ls('define', h.data.define);
+  ls('answers', h.data.answers);
+  ls('verdict', h.data.verdict);
+  features = h.data.features || [];
+  saveFeatures();
+  loadDefine();
+  renderFeatures();
+  toast('Loaded: ' + h.name);
+  // Switch to define tab
+  document.querySelectorAll('.tab')[0].click();
+}
+
+// ── Utils ──────────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2300);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+loadDefine();
+loadFeatures();
+renderCanvas();
+</script>
+</body>
+</html>

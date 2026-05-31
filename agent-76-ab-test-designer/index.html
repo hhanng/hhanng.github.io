@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent #76 — A/B Test Designer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a1a12;
+    --card: #0f2d1e;
+    --card2: #122a1c;
+    --border: #1e4d30;
+    --em: #10b981;
+    --em-dim: #065f46;
+    --rose: #f43f5e;
+    --rose-dim: #4c0519;
+    --amber: #f59e0b;
+    --amber-dim: #451a03;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --white: #f8fafc;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  header { padding: 20px 24px 0; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+  .logo { width: 38px; height: 38px; background: var(--em); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .header-info h1 { font-size: 1.25rem; font-weight: 700; color: var(--white); }
+  .header-info p { font-size: 0.78rem; color: var(--muted); }
+  .badge { margin-left: auto; background: var(--em-dim); color: var(--em); font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; white-space: nowrap; }
+
+  nav { display: flex; gap: 2px; padding: 16px 24px 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 8px 18px; font-size: 0.82rem; font-weight: 600; color: var(--muted); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; letter-spacing: 0.08em; transition: all .15s; }
+  .tab.active { color: var(--em); border-bottom-color: var(--em); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .page { display: none; padding: 24px; max-width: 960px; }
+  .page.active { display: block; }
+
+  /* Form elements */
+  label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 5px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+  input, select, textarea { width: 100%; background: #0a1f14; border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 9px 12px; font-size: 0.88rem; font-family: inherit; outline: none; transition: border-color .15s; }
+  input:focus, select:focus, textarea:focus { border-color: var(--em); }
+  textarea { resize: vertical; min-height: 80px; }
+  select option { background: #0a1f14; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-group { margin-bottom: 14px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 0.78rem; font-weight: 700; color: var(--em); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+
+  btn, .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
+  .btn-primary { background: var(--em); color: #000; }
+  .btn-primary:hover { background: #059669; }
+  .btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--em); color: var(--em); }
+  .btn-danger { background: var(--rose-dim); color: var(--rose); border: 1px solid var(--rose); }
+  .btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+
+  /* Hypothesis builder */
+  .hyp-builder { background: #0a1f14; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 0.9rem; line-height: 2; }
+  .hyp-builder span { color: var(--muted); }
+  .hyp-input { display: inline; width: auto; min-width: 80px; padding: 2px 8px; margin: 0 4px; border-radius: 4px; font-size: 0.88rem; background: var(--card); border: 1px solid var(--border); color: var(--em); }
+  .hyp-select { display: inline; width: auto; padding: 2px 6px; margin: 0 4px; border-radius: 4px; font-size: 0.88rem; background: var(--card); border: 1px solid var(--border); color: var(--em); }
+
+  /* Slider */
+  .slider-wrap { display: flex; align-items: center; gap: 12px; }
+  input[type=range] { flex: 1; accent-color: var(--em); }
+  .slider-val { font-size: 0.95rem; font-weight: 700; color: var(--em); min-width: 38px; text-align: right; }
+
+  /* Radio */
+  .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
+  .radio-btn { padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.83rem; cursor: pointer; color: var(--muted); background: none; transition: all .15s; }
+  .radio-btn.selected { background: var(--em-dim); color: var(--em); border-color: var(--em); }
+
+  /* Results / badges */
+  .badge-sig { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; }
+  .badge-sig.pass { background: #052e16; color: var(--em); }
+  .badge-sig.fail { background: var(--rose-dim); color: var(--rose); }
+  .badge-sig.warn { background: var(--amber-dim); color: var(--amber); }
+
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .result-row:last-child { border-bottom: none; }
+  .result-label { font-size: 0.83rem; color: var(--muted); }
+  .result-val { font-size: 0.95rem; font-weight: 700; color: var(--white); }
+  .result-val.green { color: var(--em); }
+  .result-val.red { color: var(--rose); }
+  .result-val.amber { color: var(--amber); }
+
+  /* Variant boxes */
+  .variant-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .variant-box { border-radius: 8px; padding: 14px; }
+  .variant-a { background: #0a2518; border: 1px solid var(--em-dim); }
+  .variant-b { background: #1a0a11; border: 1px solid #7f1d3a; }
+  .variant-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .variant-a .variant-label { color: var(--em); }
+  .variant-b .variant-label { color: var(--rose); }
+
+  /* History cards */
+  .history-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: border-color .15s; }
+  .history-card:hover { border-color: var(--em); }
+  .history-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .history-card-name { font-weight: 700; font-size: 0.95rem; }
+  .history-card-meta { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  .status-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .status-running { background: #1e3a5f; color: #60a5fa; }
+  .status-significant { background: #052e16; color: var(--em); }
+  .status-inconclusive { background: var(--amber-dim); color: var(--amber); }
+  .status-stopped { background: #1a1a1a; color: var(--muted); }
+
+  /* Calculator output */
+  .calc-output { background: #071410; border: 1px solid var(--em-dim); border-radius: 8px; padding: 18px; }
+  .calc-main-val { font-size: 2.4rem; font-weight: 800; color: var(--em); line-height: 1; }
+  .calc-main-label { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  /* Significance meter */
+  .sig-meter { height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; margin: 8px 0; }
+  .sig-fill { height: 100%; border-radius: 4px; transition: width .4s; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--em-dim); color: var(--em); border: 1px solid var(--em); padding: 10px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; z-index: 999; opacity: 0; transform: translateY(10px); transition: all .3s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .section-header h2 { font-size: 1rem; font-weight: 700; color: var(--white); }
+
+  @media (max-width: 640px) {
+    .form-row, .form-row.three, .variant-grid { grid-template-columns: 1fr; }
+    nav { overflow-x: auto; }
+    .calc-output { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🧪</div>
+  <div class="header-info">
+    <h1>A/B Test Designer</h1>
+    <p>Design, calculate, and call winners with statistical confidence</p>
+  </div>
+  <div class="badge">#76 / 100</div>
+</header>
+
+<nav>
+  <button class="tab active" onclick="switchTab('design')">DESIGN</button>
+  <button class="tab" onclick="switchTab('calculator')">CALCULATOR</button>
+  <button class="tab" onclick="switchTab('results')">RESULTS</button>
+  <button class="tab" onclick="switchTab('history')">HISTORY</button>
+</nav>
+
+<!-- ═══════════ DESIGN TAB ═══════════ -->
+<div class="page active" id="page-design">
+  <div class="section-header">
+    <h2>Design a New A/B Test</h2>
+    <button class="btn btn-secondary btn-sm" onclick="clearDesignForm()">Clear</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Test Identity</div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:0">
+        <label>Test Name</label>
+        <input id="d-name" type="text" placeholder="e.g. Homepage CTA Button Test">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>What You're Testing</label>
+        <select id="d-type">
+          <option value="">Select element...</option>
+          <option>Headline</option>
+          <option>CTA</option>
+          <option>Image</option>
+          <option>Layout</option>
+          <option>Price</option>
+          <option>Email Subject</option>
+          <option>Color</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Hypothesis</div>
+    <div class="hyp-builder" id="hyp-display">
+      <span>We believe changing</span>
+      <input class="hyp-input" id="hyp-x" type="text" placeholder="current X" style="width:130px" oninput="updateHypPreview()">
+      <span>to</span>
+      <input class="hyp-input" id="hyp-y" type="text" placeholder="new Y" style="width:130px" oninput="updateHypPreview()">
+      <span>will</span>
+      <select class="hyp-select" id="hyp-dir" onchange="updateHypPreview()">
+        <option>increase</option>
+        <option>decrease</option>
+      </select>
+      <input class="hyp-input" id="hyp-metric" type="text" placeholder="conversion rate" style="width:140px" oninput="updateHypPreview()">
+      <span>because</span>
+      <input class="hyp-input" id="hyp-reason" type="text" placeholder="users prefer..." style="width:200px" oninput="updateHypPreview()">
+    </div>
+    <div id="hyp-preview" style="margin-top:10px; font-size:0.8rem; color:var(--muted); font-style:italic;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Variants</div>
+    <div class="variant-grid">
+      <div class="variant-box variant-a">
+        <div class="variant-label">Variant A — Control</div>
+        <textarea id="d-variant-a" placeholder="Describe the control version (what exists today)..." style="min-height:90px; background:#071a0f; border-color:#1e4d30;"></textarea>
+      </div>
+      <div class="variant-box variant-b">
+        <div class="variant-label">Variant B — Challenger</div>
+        <textarea id="d-variant-b" placeholder="Describe the challenger version (what you're testing)..." style="min-height:90px; background:#12060b; border-color:#7f1d3a;"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Metrics & Parameters</div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:0">
+        <label>Primary Metric</label>
+        <select id="d-metric">
+          <option value="">Select metric...</option>
+          <option>Conversion Rate</option>
+          <option>Click Rate</option>
+          <option>Revenue</option>
+          <option>Bounce Rate</option>
+          <option>Sign-ups</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>Secondary Metric (optional)</label>
+        <input id="d-metric2" type="text" placeholder="e.g. Time on page">
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <label>Minimum Detectable Effect: <span id="mde-val" style="color:var(--em)">10%</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="d-mde" min="1" max="30" value="10" oninput="document.getElementById('mde-val').textContent=this.value+'%'">
+        <span class="slider-val" id="mde-display">10%</span>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <label>Confidence Level</label>
+      <div class="radio-group" id="d-conf">
+        <button class="radio-btn" onclick="selectRadio('d-conf',this,'90')">90%</button>
+        <button class="radio-btn selected" onclick="selectRadio('d-conf',this,'95')">95%</button>
+        <button class="radio-btn" onclick="selectRadio('d-conf',this,'99')">99%</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="saveTest()" style="width:100%">💾 Save Test</button>
+</div>
+
+<!-- ═══════════ CALCULATOR TAB ═══════════ -->
+<div class="page" id="page-calculator">
+  <h2 style="font-size:1rem; font-weight:700; color:var(--white); margin-bottom:16px;">Statistical Tools</h2>
+
+  <div class="card">
+    <div class="card-title">Sample Size Calculator</div>
+    <div class="form-row three">
+      <div class="form-group" style="margin-bottom:0">
+        <label>Baseline Conversion %</label>
+        <input id="c-base" type="number" min="0.1" max="99" step="0.1" value="5" placeholder="5">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>Min Detectable Effect %</label>
+        <input id="c-mde" type="number" min="1" max="50" step="0.5" value="10" placeholder="10">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>Daily Traffic (both variants)</label>
+        <input id="c-traffic" type="number" min="1" value="1000" placeholder="1000">
+      </div>
+    </div>
+    <div style="margin-top:12px; margin-bottom:14px">
+      <label>Confidence Level</label>
+      <div class="radio-group" id="c-conf">
+        <button class="radio-btn" onclick="selectRadio('c-conf',this,'90')">90%</button>
+        <button class="radio-btn selected" onclick="selectRadio('c-conf',this,'95')">95%</button>
+        <button class="radio-btn" onclick="selectRadio('c-conf',this,'99')">99%</button>
+      </div>
+    </div>
+    <div style="margin-top:12px; margin-bottom:16px">
+      <label>Statistical Power</label>
+      <div class="radio-group" id="c-power">
+        <button class="radio-btn selected" onclick="selectRadio('c-power',this,'80')">80%</button>
+        <button class="radio-btn" onclick="selectRadio('c-power',this,'90')">90%</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="calcSampleSize()" style="margin-bottom:16px">Calculate</button>
+    <div id="sample-output" style="display:none">
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px">
+        <div class="calc-output">
+          <div class="calc-main-val" id="ss-size">—</div>
+          <div class="calc-main-label">Users per variant</div>
+        </div>
+        <div class="calc-output">
+          <div class="calc-main-val" id="ss-total">—</div>
+          <div class="calc-main-label">Total users needed</div>
+        </div>
+        <div class="calc-output">
+          <div class="calc-main-val" id="ss-days">—</div>
+          <div class="calc-main-label">Estimated days</div>
+        </div>
+      </div>
+      <p id="ss-note" style="font-size:0.78rem; color:var(--muted); margin-top:12px;"></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Significance Checker</div>
+    <div class="variant-grid" style="margin-bottom:14px">
+      <div class="variant-box variant-a">
+        <div class="variant-label">Variant A — Control</div>
+        <div class="form-group">
+          <label>Visitors</label>
+          <input id="sig-va" type="number" min="1" placeholder="e.g. 5000" style="background:#071a0f; border-color:#1e4d30;">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Conversions</label>
+          <input id="sig-ca" type="number" min="0" placeholder="e.g. 250" style="background:#071a0f; border-color:#1e4d30;">
+        </div>
+      </div>
+      <div class="variant-box variant-b">
+        <div class="variant-label">Variant B — Challenger</div>
+        <div class="form-group">
+          <label>Visitors</label>
+          <input id="sig-vb" type="number" min="1" placeholder="e.g. 5000" style="background:#12060b; border-color:#7f1d3a;">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Conversions</label>
+          <input id="sig-cb" type="number" min="0" placeholder="e.g. 290" style="background:#12060b; border-color:#7f1d3a;">
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="checkSignificance()" style="margin-bottom:16px">Check Significance</button>
+    <div id="sig-output" style="display:none">
+      <div class="variant-grid" style="margin-bottom:14px">
+        <div class="calc-output">
+          <div class="calc-main-val" id="sig-rate-a" style="font-size:1.8rem">—</div>
+          <div class="calc-main-label">Conversion Rate A</div>
+        </div>
+        <div class="calc-output" style="background:#1a060e; border-color:#7f1d3a;">
+          <div class="calc-main-val" id="sig-rate-b" style="font-size:1.8rem; color:var(--rose)">—</div>
+          <div class="calc-main-label">Conversion Rate B</div>
+        </div>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Relative Uplift</span>
+        <span class="result-val" id="sig-uplift">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Z-Score</span>
+        <span class="result-val" id="sig-z">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">P-Value (approx)</span>
+        <span class="result-val" id="sig-p">—</span>
+      </div>
+      <div class="result-row" style="border:none">
+        <span class="result-label">Result</span>
+        <div id="sig-verdict"></div>
+      </div>
+      <div class="sig-meter">
+        <div class="sig-fill" id="sig-fill" style="width:0%; background:var(--em)"></div>
+      </div>
+      <p id="sig-conf-note" style="font-size:0.78rem; color:var(--muted); margin-top:4px;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ RESULTS TAB ═══════════ -->
+<div class="page" id="page-results">
+  <div class="section-header">
+    <h2>Log Test Results</h2>
+  </div>
+
+  <div id="results-select-wrap" style="margin-bottom:16px">
+    <label>Select Test</label>
+    <select id="r-test-select" onchange="loadResultTest()">
+      <option value="">— pick a saved test —</option>
+    </select>
+  </div>
+
+  <div id="results-form" style="display:none">
+    <div id="r-test-header" class="card" style="margin-bottom:16px"></div>
+
+    <div class="card">
+      <div class="card-title">Actual Results</div>
+      <div class="variant-grid" style="margin-bottom:14px">
+        <div class="variant-box variant-a">
+          <div class="variant-label">Variant A</div>
+          <div class="form-group">
+            <label>Visitors</label>
+            <input id="r-va" type="number" min="0" placeholder="0" style="background:#071a0f; border-color:#1e4d30;">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>Conversions</label>
+            <input id="r-ca" type="number" min="0" placeholder="0" style="background:#071a0f; border-color:#1e4d30;">
+          </div>
+        </div>
+        <div class="variant-box variant-b">
+          <div class="variant-label">Variant B</div>
+          <div class="form-group">
+            <label>Visitors</label>
+            <input id="r-vb" type="number" min="0" placeholder="0" style="background:#12060b; border-color:#7f1d3a;">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>Conversions</label>
+            <input id="r-cb" type="number" min="0" placeholder="0" style="background:#12060b; border-color:#7f1d3a;">
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label>Test Duration (days)</label>
+          <input id="r-duration" type="number" min="1" placeholder="e.g. 14">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Status</label>
+          <select id="r-status">
+            <option>Running</option>
+            <option>Significant</option>
+            <option>Inconclusive</option>
+            <option>Stopped</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:14px; margin-bottom:0">
+        <label>Notes</label>
+        <textarea id="r-notes" placeholder="Observations, context, next steps..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveResults()" style="margin-bottom:12px; width:100%">Save Results</button>
+
+    <div id="results-output" style="display:none" class="card">
+      <div class="card-title">Analysis</div>
+      <div id="results-analysis"></div>
+    </div>
+  </div>
+
+  <div id="results-empty" class="empty-state">
+    <div class="empty-icon">📊</div>
+    <p style="margin-bottom:8px; color:var(--text)">No saved tests yet</p>
+    <p>Design a test first in the DESIGN tab, then log results here.</p>
+  </div>
+</div>
+
+<!-- ═══════════ HISTORY TAB ═══════════ -->
+<div class="page" id="page-history">
+  <div class="section-header">
+    <h2>All Tests</h2>
+    <button class="btn btn-secondary btn-sm" onclick="exportMarkdown()">Export as Markdown</button>
+  </div>
+  <div id="history-list"></div>
+  <div id="history-empty" class="empty-state" style="display:none">
+    <div class="empty-icon">🔬</div>
+    <p style="margin-bottom:8px; color:var(--text)">No tests saved</p>
+    <p>Start by designing your first A/B test.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────
+const STORE = 'ab76_';
+let activeConf = { 'd-conf': '95', 'c-conf': '95', 'c-power': '80' };
+
+function getTests() {
+  const keys = Object.keys(localStorage).filter(k => k.startsWith(STORE + 'test_'));
+  return keys.map(k => JSON.parse(localStorage.getItem(k))).sort((a,b) => b.createdAt - a.createdAt);
+}
+function saveTestObj(t) { localStorage.setItem(STORE + 'test_' + t.id, JSON.stringify(t)); }
+function deleteTestObj(id) { localStorage.removeItem(STORE + 'test_' + id); }
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('page-' + name).classList.add('active');
+  if (name === 'results') refreshResultsSelect();
+  if (name === 'history') renderHistory();
+}
+
+// ─── Radio helper ─────────────────────────────────────────────────────────
+function selectRadio(groupId, btn, val) {
+  document.querySelectorAll('#' + groupId + ' .radio-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  activeConf[groupId] = val;
+}
+function getRadio(groupId) { return activeConf[groupId] || '95'; }
+
+// ─── Hypothesis preview ───────────────────────────────────────────────────
+function updateHypPreview() {
+  const x = document.getElementById('hyp-x').value || '[X]';
+  const y = document.getElementById('hyp-y').value || '[Y]';
+  const dir = document.getElementById('hyp-dir').value;
+  const m = document.getElementById('hyp-metric').value || '[metric]';
+  const r = document.getElementById('hyp-reason').value || '[reason]';
+  document.getElementById('hyp-preview').textContent =
+    `"We believe changing ${x} to ${y} will ${dir} ${m} because ${r}."`;
+}
+
+// ─── MDE slider sync ─────────────────────────────────────────────────────
+document.getElementById('d-mde').addEventListener('input', function() {
+  document.getElementById('mde-display').textContent = this.value + '%';
+});
+
+// ─── Save Test ────────────────────────────────────────────────────────────
+function saveTest() {
+  const name = document.getElementById('d-name').value.trim();
+  if (!name) { showToast('Enter a test name first'); return; }
+  const t = {
+    id: Date.now(),
+    createdAt: Date.now(),
+    name,
+    type: document.getElementById('d-type').value,
+    hypX: document.getElementById('hyp-x').value,
+    hypY: document.getElementById('hyp-y').value,
+    hypDir: document.getElementById('hyp-dir').value,
+    hypMetric: document.getElementById('hyp-metric').value,
+    hypReason: document.getElementById('hyp-reason').value,
+    variantA: document.getElementById('d-variant-a').value,
+    variantB: document.getElementById('d-variant-b').value,
+    metric: document.getElementById('d-metric').value,
+    metric2: document.getElementById('d-metric2').value,
+    mde: document.getElementById('d-mde').value,
+    confidence: getRadio('d-conf'),
+    status: 'Running',
+    results: null
+  };
+  saveTestObj(t);
+  showToast('Test saved!');
+  clearDesignForm();
+}
+
+function clearDesignForm() {
+  ['d-name','d-type','hyp-x','hyp-y','hyp-metric','hyp-reason','d-variant-a','d-variant-b','d-metric','d-metric2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('d-mde').value = 10;
+  document.getElementById('mde-val').textContent = '10%';
+  document.getElementById('mde-display').textContent = '10%';
+  document.getElementById('hyp-dir').value = 'increase';
+  document.getElementById('hyp-preview').textContent = '';
+}
+
+// ─── Sample Size Calculator ───────────────────────────────────────────────
+function calcSampleSize() {
+  const base = parseFloat(document.getElementById('c-base').value) / 100;
+  const mde = parseFloat(document.getElementById('c-mde').value) / 100;
+  const traffic = parseInt(document.getElementById('c-traffic').value);
+  const conf = getRadio('c-conf');
+  const power = getRadio('c-power');
+
+  if (!base || !mde || !traffic) { showToast('Fill in all fields'); return; }
+
+  // Z-scores
+  const zConf = conf === '90' ? 1.645 : conf === '95' ? 1.96 : 2.576;
+  const zPow = power === '80' ? 0.842 : 1.282;
+
+  const p1 = base;
+  const p2 = base * (1 + mde);
+  const pBar = (p1 + p2) / 2;
+
+  // Standard formula: n = (z_alpha/2 + z_beta)^2 * (p1(1-p1) + p2(1-p2)) / (p1-p2)^2
+  const numerator = Math.pow(zConf + zPow, 2) * (p1*(1-p1) + p2*(1-p2));
+  const denominator = Math.pow(p2 - p1, 2);
+  const n = Math.ceil(numerator / denominator);
+  const total = n * 2;
+  const days = Math.ceil(total / traffic);
+
+  document.getElementById('ss-size').textContent = n.toLocaleString();
+  document.getElementById('ss-total').textContent = total.toLocaleString();
+  document.getElementById('ss-days').textContent = days;
+  document.getElementById('ss-note').textContent =
+    `At ${(base*100).toFixed(1)}% baseline, detecting a ${(mde*100).toFixed(0)}% relative change to ${(p2*100).toFixed(2)}% with ${conf}% confidence and ${power}% power.`;
+  document.getElementById('sample-output').style.display = 'block';
+}
+
+// ─── Significance Checker ─────────────────────────────────────────────────
+function normalCDF(z) {
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const poly = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+  const pdf = Math.exp(-0.5 * z * z) / Math.sqrt(2 * Math.PI);
+  const cdf = 1 - pdf * poly;
+  return z >= 0 ? cdf : 1 - cdf;
+}
+
+function checkSignificance() {
+  const va = parseInt(document.getElementById('sig-va').value);
+  const ca = parseInt(document.getElementById('sig-ca').value);
+  const vb = parseInt(document.getElementById('sig-vb').value);
+  const cb = parseInt(document.getElementById('sig-cb').value);
+
+  if (!va || ca == null || !vb || cb == null) { showToast('Fill in all four fields'); return; }
+  if (ca > va || cb > vb) { showToast('Conversions cannot exceed visitors'); return; }
+
+  const ra = ca / va;
+  const rb = cb / vb;
+  const uplift = ra > 0 ? ((rb - ra) / ra * 100) : 0;
+
+  const pPool = (ca + cb) / (va + vb);
+  const se = Math.sqrt(pPool * (1 - pPool) * (1/va + 1/vb));
+  const z = se > 0 ? (rb - ra) / se : 0;
+  const pVal = 2 * (1 - normalCDF(Math.abs(z)));
+
+  document.getElementById('sig-rate-a').textContent = (ra * 100).toFixed(2) + '%';
+  document.getElementById('sig-rate-b').textContent = (rb * 100).toFixed(2) + '%';
+
+  const upliftEl = document.getElementById('sig-uplift');
+  upliftEl.textContent = (uplift >= 0 ? '+' : '') + uplift.toFixed(2) + '%';
+  upliftEl.className = 'result-val ' + (uplift > 0 ? 'green' : uplift < 0 ? 'red' : '');
+
+  document.getElementById('sig-z').textContent = z.toFixed(3);
+  document.getElementById('sig-p').textContent = pVal.toFixed(4);
+
+  const isSignificant = pVal < 0.05;
+  const verdict = document.getElementById('sig-verdict');
+  verdict.innerHTML = isSignificant
+    ? `<span class="badge-sig pass">✓ Significant (p < 0.05)</span>`
+    : `<span class="badge-sig fail">✗ Not Yet Significant</span>`;
+
+  const conf = Math.min((1 - pVal) * 100, 99.99);
+  document.getElementById('sig-fill').style.width = Math.min(conf, 100) + '%';
+  document.getElementById('sig-fill').style.background = isSignificant ? 'var(--em)' : 'var(--amber)';
+  document.getElementById('sig-conf-note').textContent =
+    `Statistical confidence: ~${conf.toFixed(1)}% | Winner: ${rb > ra ? 'Variant B' : rb < ra ? 'Variant A' : 'Tie'}`;
+
+  document.getElementById('sig-output').style.display = 'block';
+}
+
+// ─── Results Tab ──────────────────────────────────────────────────────────
+function refreshResultsSelect() {
+  const tests = getTests();
+  const sel = document.getElementById('r-test-select');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— pick a saved test —</option>' +
+    tests.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  if (cur) sel.value = cur;
+
+  const hasTests = tests.length > 0;
+  document.getElementById('results-empty').style.display = hasTests ? 'none' : 'block';
+  if (!hasTests) { document.getElementById('results-form').style.display = 'none'; }
+}
+
+function loadResultTest() {
+  const id = document.getElementById('r-test-select').value;
+  if (!id) { document.getElementById('results-form').style.display = 'none'; return; }
+  const t = JSON.parse(localStorage.getItem(STORE + 'test_' + id));
+  if (!t) return;
+
+  document.getElementById('results-form').style.display = 'block';
+  document.getElementById('results-output').style.display = 'none';
+  document.getElementById('r-test-header').innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:flex-start">
+      <div>
+        <div style="font-weight:700; font-size:1rem; margin-bottom:4px">${t.name}</div>
+        <div style="font-size:0.8rem; color:var(--muted)">Testing: ${t.type || '—'} · Primary: ${t.metric || '—'} · MDE: ${t.mde}%</div>
+        <div style="font-size:0.8rem; color:var(--muted); margin-top:2px; font-style:italic">${buildHypString(t)}</div>
+      </div>
+      <span class="status-badge status-${(t.status || 'running').toLowerCase()}">${t.status || 'Running'}</span>
+    </div>`;
+
+  if (t.results) {
+    document.getElementById('r-va').value = t.results.va || '';
+    document.getElementById('r-ca').value = t.results.ca || '';
+    document.getElementById('r-vb').value = t.results.vb || '';
+    document.getElementById('r-cb').value = t.results.cb || '';
+    document.getElementById('r-duration').value = t.results.duration || '';
+    document.getElementById('r-status').value = t.status || 'Running';
+    document.getElementById('r-notes').value = t.results.notes || '';
+    showResultsAnalysis(t);
+  }
+}
+
+function buildHypString(t) {
+  if (!t.hypX) return '';
+  return `"We believe changing ${t.hypX} to ${t.hypY} will ${t.hypDir} ${t.hypMetric} because ${t.hypReason}."`;
+}
+
+function saveResults() {
+  const id = document.getElementById('r-test-select').value;
+  if (!id) return;
+  const t = JSON.parse(localStorage.getItem(STORE + 'test_' + id));
+  if (!t) return;
+
+  const va = parseInt(document.getElementById('r-va').value) || 0;
+  const ca = parseInt(document.getElementById('r-ca').value) || 0;
+  const vb = parseInt(document.getElementById('r-vb').value) || 0;
+  const cb = parseInt(document.getElementById('r-cb').value) || 0;
+
+  t.results = {
+    va, ca, vb, cb,
+    duration: document.getElementById('r-duration').value,
+    notes: document.getElementById('r-notes').value
+  };
+  t.status = document.getElementById('r-status').value;
+
+  if (va && vb) {
+    const ra = ca / va, rb = cb / vb;
+    const pPool = (ca + cb) / (va + vb);
+    const se = Math.sqrt(pPool * (1 - pPool) * (1/va + 1/vb));
+    const z = se > 0 ? (rb - ra) / se : 0;
+    const pVal = 2 * (1 - normalCDF(Math.abs(z)));
+    t.results.winner = pVal < 0.05 ? (rb > ra ? 'B' : 'A') : 'Inconclusive';
+    t.results.uplift = ra > 0 ? ((rb - ra) / ra * 100).toFixed(2) : '0';
+    t.results.pVal = pVal.toFixed(4);
+  }
+
+  saveTestObj(t);
+  showToast('Results saved!');
+  showResultsAnalysis(t);
+  loadResultTest();
+}
+
+function showResultsAnalysis(t) {
+  if (!t.results || !t.results.va) { document.getElementById('results-output').style.display = 'none'; return; }
+  const r = t.results;
+  const ra = r.va ? (r.ca / r.va * 100).toFixed(2) : '—';
+  const rb = r.vb ? (r.cb / r.vb * 100).toFixed(2) : '—';
+  const winnerText = r.winner === 'B' ? '🏆 Variant B wins' : r.winner === 'A' ? '🏆 Variant A wins' : '⚖️ Inconclusive';
+  const winClass = r.winner === 'B' ? 'green' : r.winner === 'A' ? 'green' : 'amber';
+
+  document.getElementById('results-analysis').innerHTML = `
+    <div class="result-row"><span class="result-label">Conversion A</span><span class="result-val">${ra}%</span></div>
+    <div class="result-row"><span class="result-label">Conversion B</span><span class="result-val" style="color:var(--rose)">${rb}%</span></div>
+    <div class="result-row"><span class="result-label">Uplift</span><span class="result-val ${r.uplift >= 0 ? 'green':'red'}">${r.uplift !== undefined ? (r.uplift >= 0 ? '+':'') + r.uplift + '%' : '—'}</span></div>
+    <div class="result-row"><span class="result-label">P-Value</span><span class="result-val">${r.pVal || '—'}</span></div>
+    <div class="result-row" style="border:none"><span class="result-label">Verdict</span><span class="result-val ${winClass}">${winnerText}</span></div>`;
+  document.getElementById('results-output').style.display = 'block';
+}
+
+// ─── History Tab ──────────────────────────────────────────────────────────
+function renderHistory() {
+  const tests = getTests();
+  const list = document.getElementById('history-list');
+  const empty = document.getElementById('history-empty');
+
+  if (!tests.length) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.innerHTML = tests.map(t => {
+    const r = t.results;
+    const winnerBadge = r && r.winner !== 'Inconclusive' && r.winner
+      ? `<span style="font-size:0.75rem; color:var(--em)">Winner: Variant ${r.winner}</span>`
+      : '';
+    return `<div class="history-card" onclick="openFromHistory(${t.id})">
+      <div class="history-card-top">
+        <div>
+          <div class="history-card-name">${t.name}</div>
+          <div class="history-card-meta">${t.type || 'Test'} · ${t.metric || '—'} · MDE ${t.mde}%</div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px">
+          <span class="status-badge status-${(t.status||'running').toLowerCase()}">${t.status||'Running'}</span>
+          ${winnerBadge}
+        </div>
+      </div>
+      ${r ? `<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px">
+        <div style="font-size:0.78rem"><span style="color:var(--muted)">A: </span>${r.va?((r.ca/r.va*100).toFixed(1)+'%'):'—'}</div>
+        <div style="font-size:0.78rem"><span style="color:var(--rose)">B: </span>${r.vb?((r.cb/r.vb*100).toFixed(1)+'%'):'—'}</div>
+        <div style="font-size:0.78rem"><span style="color:var(--muted)">Uplift: </span><span style="color:${r.uplift>=0?'var(--em)':'var(--rose)'}">${r.uplift!==undefined?(r.uplift>=0?'+':'')+r.uplift+'%':'—'}</span></div>
+      </div>` : ''}
+      <div style="margin-top:10px; display:flex; justify-content:flex-end; gap:8px" onclick="event.stopPropagation()">
+        <button class="btn btn-secondary btn-sm" onclick="openFromHistory(${t.id})">Open</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTest(${t.id})">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openFromHistory(id) {
+  // Switch to results tab and select this test
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.remove('active'));
+  document.querySelectorAll('.tab')[2].classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-results').classList.add('active');
+  refreshResultsSelect();
+  document.getElementById('r-test-select').value = id;
+  loadResultTest();
+}
+
+function deleteTest(id) {
+  if (!confirm('Delete this test?')) return;
+  deleteTestObj(id);
+  renderHistory();
+  showToast('Test deleted');
+}
+
+function exportMarkdown() {
+  const tests = getTests();
+  if (!tests.length) { showToast('No tests to export'); return; }
+
+  let md = '# A/B Test Summary\n\n';
+  md += `Generated: ${new Date().toLocaleDateString()}\n\n`;
+  tests.forEach(t => {
+    md += `## ${t.name}\n`;
+    md += `- **Element:** ${t.type || '—'}\n`;
+    md += `- **Hypothesis:** ${buildHypString(t) || '—'}\n`;
+    md += `- **Primary Metric:** ${t.metric || '—'}\n`;
+    md += `- **Status:** ${t.status || 'Running'}\n`;
+    if (t.results) {
+      const r = t.results;
+      md += `- **Variant A:** ${r.va} visitors, ${r.ca} conversions (${r.va?(r.ca/r.va*100).toFixed(2):'—'}%)\n`;
+      md += `- **Variant B:** ${r.vb} visitors, ${r.cb} conversions (${r.vb?(r.cb/r.vb*100).toFixed(2):'—'}%)\n`;
+      md += `- **Uplift:** ${r.uplift !== undefined ? r.uplift + '%' : '—'}\n`;
+      md += `- **Winner:** ${r.winner || '—'}\n`;
+      if (r.notes) md += `- **Notes:** ${r.notes}\n`;
+    }
+    md += '\n';
+  });
+
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ab-tests-summary.md';
+  a.click();
+  showToast('Exported!');
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+refreshResultsSelect();
+renderHistory();
+</script>
+</body>
+</html>

@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Binary Search Masterclass | 100 AI Agents #52</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #1a1d27;
+  --accent: #4f8ef7;
+  --green: #4ade80;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --border: #2d3148;
+  --card2: #1e2235;
+  --radius: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100vh;font-size:15px}
+code,pre,kbd{font-family:'Fira Code','Cascadia Code',monospace}
+
+/* ── Header ── */
+.header{background:linear-gradient(135deg,#0d1526 0%,#1a1d27 50%,#0f1117 100%);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200}
+.header-left{display:flex;align-items:center;gap:12px}
+.header h1{font-size:1.1rem;font-weight:700;color:var(--text)}
+.header h1 span{color:var(--accent)}
+.badge-52{background:rgba(79,142,247,.15);border:1px solid rgba(79,142,247,.4);color:var(--accent);border-radius:99px;padding:3px 12px;font-size:.75rem;font-weight:600}
+.header-right{display:flex;align-items:center;gap:16px}
+.clock{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.progress-bar-top{position:absolute;bottom:0;left:0;height:3px;background:var(--accent);transition:width .4s}
+
+/* ── Nav Tabs ── */
+.nav{background:var(--card);border-bottom:1px solid var(--border);display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{background:none;border:none;color:var(--muted);padding:14px 24px;font-size:.9rem;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s}
+.nav-btn:hover{color:var(--text)}
+.nav-btn.active{color:#fff;border-bottom-color:var(--accent)}
+
+/* ── Layout ── */
+.content{padding:24px;max-width:1200px;margin:0 auto}
+.tab-panel{display:none;animation:fadeIn .2s ease}
+.tab-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.card-sm{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+
+/* ── Grid ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+
+/* ── Badges ── */
+.badge{display:inline-block;border-radius:99px;padding:2px 10px;font-size:.72rem;font-weight:600}
+.badge-easy{background:rgba(74,222,128,.15);color:var(--green)}
+.badge-medium{background:rgba(251,191,36,.15);color:var(--yellow)}
+.badge-hard{background:rgba(248,113,113,.15);color:var(--red)}
+.badge-beginner{background:rgba(74,222,128,.15);color:var(--green)}
+.badge-intermediate{background:rgba(251,191,36,.15);color:var(--yellow)}
+.badge-advanced{background:rgba(248,113,113,.15);color:var(--red)}
+
+/* ── Pattern Cards ── */
+.pattern-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.pattern-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:border-color .2s,transform .15s}
+.pattern-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pattern-card .icon{font-size:2rem;margin-bottom:10px}
+.pattern-card h3{font-size:1rem;font-weight:600;margin-bottom:6px}
+.pattern-card p{color:var(--muted);font-size:.85rem;margin-bottom:12px;line-height:1.5}
+.pattern-card .footer{display:flex;align-items:center;justify-content:space-between}
+.learn-btn{background:rgba(79,142,247,.15);color:var(--accent);border:1px solid rgba(79,142,247,.3);border-radius:6px;padding:6px 14px;font-size:.82rem;cursor:pointer;transition:all .2s;font-weight:500}
+.learn-btn:hover{background:rgba(79,142,247,.3)}
+
+/* ── Learn Layout ── */
+.learn-layout{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start}
+.learn-sidebar{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:sticky;top:100px}
+.learn-sidebar-item{padding:12px 16px;cursor:pointer;font-size:.85rem;color:var(--muted);border-left:3px solid transparent;transition:all .15s;display:flex;align-items:center;gap:8px}
+.learn-sidebar-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.learn-sidebar-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(79,142,247,.08)}
+.learn-sidebar-label{font-size:.7rem;font-weight:600;color:var(--muted);padding:10px 16px 6px;text-transform:uppercase;letter-spacing:.06em}
+
+.learn-main h2{font-size:1.3rem;font-weight:700;margin-bottom:6px}
+.learn-main .subtitle{color:var(--muted);font-size:.9rem;margin-bottom:20px}
+
+/* ── Visualizer ── */
+.viz-box{background:#0d1020;border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+.viz-title{font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.viz-controls{display:flex;gap:8px;align-items:center}
+.viz-btn{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 12px;font-size:.78rem;cursor:pointer;transition:background .2s}
+.viz-btn:hover{background:rgba(255,255,255,.12)}
+.viz-step-label{font-size:.75rem;color:var(--muted)}
+.array-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end}
+.arr-cell{width:44px;height:44px;border:2px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:600;transition:all .4s;position:relative;flex-shrink:0;background:var(--card2)}
+.arr-cell.active{background:var(--accent);border-color:var(--accent);color:#fff;transform:scale(1.1);box-shadow:0 0 16px rgba(79,142,247,.5)}
+.arr-cell.found{background:var(--green);border-color:var(--green);color:#fff;transform:scale(1.15);box-shadow:0 0 20px rgba(74,222,128,.5)}
+.arr-cell.elim{opacity:.25}
+.arr-cell.lo-marker{border-color:#4ade80}
+.arr-cell.hi-marker{border-color:var(--red)}
+.arr-cell.mid-marker{border-color:var(--accent)}
+.pointer-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.ptr{width:44px;text-align:center;font-size:.65rem;font-weight:700;flex-shrink:0}
+.ptr.lo{color:#4ade80}
+.ptr.mid{color:var(--accent)}
+.ptr.hi{color:var(--red)}
+.viz-msg{font-size:.85rem;color:var(--muted);padding:10px;background:rgba(255,255,255,.03);border-radius:6px;line-height:1.6}
+.viz-msg strong{color:var(--text)}
+
+/* Matrix grid */
+.matrix-row-viz{display:flex;gap:4px;margin-bottom:4px}
+
+/* Answer space bar */
+.ans-bar{height:24px;background:linear-gradient(90deg,var(--card2) 0%,var(--card2) 100%);border-radius:99px;overflow:hidden;position:relative;margin:8px 0}
+.ans-bar-fill{height:100%;border-radius:99px;transition:width .5s,background .4s}
+.ans-labels{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:2px}
+
+/* ── Code Block ── */
+.code-wrap{position:relative;margin:16px 0}
+.code-wrap pre{border-radius:var(--radius)!important;padding:18px!important;font-size:.83rem!important;overflow-x:auto;line-height:1.6}
+.copy-btn{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:var(--muted);border-radius:6px;padding:4px 10px;font-size:.72rem;cursor:pointer;transition:all .2s}
+.copy-btn:hover{background:rgba(255,255,255,.18);color:var(--text)}
+
+/* ── Callout boxes ── */
+.callout{border-radius:8px;padding:14px 16px;margin:16px 0;font-size:.87rem;line-height:1.6}
+.callout-mistake{border-left:4px solid var(--red);background:rgba(248,113,113,.08)}
+.callout-tip{border-left:4px solid var(--accent);background:rgba(79,142,247,.08)}
+.callout-title{font-weight:700;margin-bottom:6px}
+
+/* ── When to use ── */
+.when-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.when-box{background:var(--card2);border-radius:8px;padding:14px}
+.when-box h4{font-size:.8rem;font-weight:700;margin-bottom:8px}
+.when-box.use h4{color:var(--green)}
+.when-box.dont h4{color:var(--red)}
+.when-box ul{list-style:none;font-size:.83rem;color:var(--muted);line-height:1.8}
+.when-box.use ul li::before{content:"✓ ";color:var(--green)}
+.when-box.dont ul li::before{content:"✗ ";color:var(--red)}
+
+/* ── Quiz ── */
+.quiz-wrap{margin-top:20px}
+.quiz-wrap h3{font-size:1rem;font-weight:600;margin-bottom:14px;color:var(--accent)}
+.quiz-q{background:var(--card2);border-radius:8px;padding:16px;margin-bottom:12px}
+.quiz-q p{font-size:.9rem;font-weight:500;margin-bottom:12px;line-height:1.5}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quiz-opt{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:.83rem;cursor:pointer;transition:all .2s;text-align:left;color:var(--text)}
+.quiz-opt:hover{background:rgba(255,255,255,.08)}
+.quiz-opt.correct{background:rgba(74,222,128,.15);border-color:var(--green);color:var(--green)}
+.quiz-opt.wrong{background:rgba(248,113,113,.12);border-color:var(--red);color:var(--red)}
+.quiz-opt.disabled{pointer-events:none}
+.quiz-explain{font-size:.8rem;color:var(--muted);margin-top:8px;padding:8px;background:rgba(255,255,255,.03);border-radius:6px;display:none;line-height:1.5}
+.quiz-explain.show{display:block}
+
+/* ── Practice Table ── */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.filter-btn{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:6px 14px;font-size:.82rem;cursor:pointer;transition:all .2s}
+.filter-btn:hover{color:var(--text)}
+.filter-btn.active{background:rgba(79,142,247,.15);border-color:rgba(79,142,247,.4);color:var(--accent)}
+.prob-table{width:100%;border-collapse:collapse}
+.prob-table th{text-align:left;padding:10px 12px;font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+.prob-table td{padding:11px 12px;font-size:.87rem;border-bottom:1px solid rgba(45,49,72,.5);vertical-align:middle}
+.prob-table tr:hover td{background:rgba(255,255,255,.02)}
+.prob-table tr.solved td{opacity:.6}
+.prob-table tr.solved .prob-name{text-decoration:line-through}
+.solved-cb{width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+.lc-link{color:var(--accent);text-decoration:none;font-size:.8rem}
+.lc-link:hover{text-decoration:underline}
+.hint-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:2px 8px;font-size:.72rem;cursor:pointer;transition:all .2s}
+.hint-btn:hover{color:var(--text);border-color:var(--muted)}
+.hint-text{font-size:.78rem;color:var(--muted);margin-top:6px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:4px;display:none;line-height:1.5}
+.hint-text.show{display:block}
+.variant-tag{background:rgba(79,142,247,.1);color:var(--accent);border-radius:4px;padding:1px 7px;font-size:.7rem;font-weight:500}
+
+/* ── Progress ── */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.metric-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center}
+.metric-num{font-size:2.2rem;font-weight:700;color:var(--accent)}
+.metric-label{font-size:.78rem;color:var(--muted);margin-top:4px}
+.prog-bars{margin-bottom:24px}
+.prog-item{margin-bottom:14px}
+.prog-header{display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:6px}
+.prog-bar{height:8px;background:var(--card2);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .6s}
+.diff-section{margin-bottom:24px}
+.diff-section h3{font-size:1rem;font-weight:600;margin-bottom:14px}
+.diff-bars{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.diff-bar-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.diff-bar-num{font-size:1.6rem;font-weight:700}
+.diff-bar-num.easy{color:var(--green)}
+.diff-bar-num.med{color:var(--yellow)}
+.diff-bar-num.hard{color:var(--red)}
+.diff-bar-label{font-size:.75rem;color:var(--muted);margin-top:2px}
+.diff-bar-total{font-size:.7rem;color:var(--muted);margin-top:4px}
+.quiz-score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.qs-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.qs-card h4{font-size:.75rem;color:var(--muted);margin-bottom:8px;line-height:1.4}
+.qs-score{font-size:1.4rem;font-weight:700;color:var(--text)}
+.qs-badge{margin-top:6px;font-size:.65rem;font-weight:600;padding:2px 8px;border-radius:99px}
+.qs-mastered{background:rgba(74,222,128,.15);color:var(--green)}
+.qs-good{background:rgba(251,191,36,.15);color:var(--yellow)}
+.qs-keep{background:rgba(255,255,255,.07);color:var(--muted)}
+.reset-btn{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red);border-radius:6px;padding:8px 18px;font-size:.85rem;cursor:pointer;transition:all .2s}
+.reset-btn:hover{background:rgba(248,113,113,.22)}
+
+/* ── Section titles ── */
+.section-title{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px}
+
+/* ── Separator ── */
+.sep{border:none;border-top:1px solid var(--border);margin:20px 0}
+
+/* ── Donut CSS ── */
+.donut-wrap{display:flex;align-items:center;gap:24px}
+.donut{width:100px;height:100px;border-radius:50%;background:conic-gradient(var(--green) 0% 38.3%,var(--yellow) 38.3% 89.4%,var(--red) 89.4% 100%)}
+.donut-legend{display:flex;flex-direction:column;gap:8px}
+.donut-legend-item{display:flex;align-items:center;gap:8px;font-size:.83rem}
+.donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── Footer ── */
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:.78rem;border-top:1px solid var(--border);margin-top:40px}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  .grid-2,.grid-4,.metric-grid,.quiz-score-grid{grid-template-columns:1fr 1fr}
+  .learn-layout{grid-template-columns:1fr}
+  .learn-sidebar{position:static;display:flex;overflow-x:auto}
+  .learn-sidebar-label{display:none}
+  .when-grid,.quiz-options{grid-template-columns:1fr}
+  .pattern-grid{grid-template-columns:1fr}
+  .diff-bars{grid-template-columns:1fr}
+  .header h1{font-size:.95rem}
+}
+@media(max-width:480px){
+  .metric-grid,.quiz-score-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="header">
+  <div class="header-left">
+    <h1>🔍 <span>Binary Search</span> Masterclass</h1>
+    <span class="badge-52">#52 / 100 AI Agents</span>
+  </div>
+  <div class="header-right">
+    <span id="clock" class="clock">00:00:00</span>
+  </div>
+  <div class="progress-bar-top" id="topBar"></div>
+</header>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="switchTab('patterns')">🗂 Patterns</button>
+  <button class="nav-btn" onclick="switchTab('learn')">📖 Learn</button>
+  <button class="nav-btn" onclick="switchTab('practice')">💻 Practice</button>
+  <button class="nav-btn" onclick="switchTab('progress')">📊 Progress</button>
+</nav>
+
+<!-- ════════════════════════════════
+     TAB 1 — PATTERNS
+════════════════════════════════ -->
+<div id="tab-patterns" class="tab-panel active">
+<div class="content">
+  <div style="margin-bottom:20px">
+    <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:4px">8 Binary Search Patterns</h2>
+    <p style="color:var(--muted);font-size:.9rem">Master every variant — click a card to jump to the lesson</p>
+  </div>
+
+  <div class="pattern-grid" id="patternGrid"></div>
+
+  <div style="margin-top:24px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)">
+    <p style="font-size:.85rem;color:var(--muted);line-height:1.7">
+      <strong style="color:var(--text)">Total progress:</strong>
+      <span id="solvedLabel">0 / 47 problems solved</span>
+      <span style="margin:0 8px">·</span>
+      <strong style="color:var(--text)">Variants mastered:</strong>
+      <span id="masteredLabel">0 / 8</span>
+    </p>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     TAB 2 — LEARN
+════════════════════════════════ -->
+<div id="tab-learn" class="tab-panel">
+<div class="content">
+<div class="learn-layout">
+  <!-- Sidebar -->
+  <div class="learn-sidebar">
+    <div class="learn-sidebar-label">Variants</div>
+    <div id="learnSidebar"></div>
+  </div>
+  <!-- Main content -->
+  <div class="learn-main" id="learnMain"></div>
+</div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     TAB 3 — PRACTICE
+════════════════════════════════ -->
+<div id="tab-practice" class="tab-panel">
+<div class="content">
+  <div style="margin-bottom:20px">
+    <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:4px">47 Practice Problems</h2>
+    <p style="color:var(--muted);font-size:.9rem">Filter by difficulty or variant · Check off problems as you solve them</p>
+  </div>
+  <div class="filter-row" id="filterRow"></div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="prob-table">
+      <thead>
+        <tr>
+          <th style="width:40px"></th>
+          <th style="width:36px">#</th>
+          <th>Problem</th>
+          <th style="width:90px">Difficulty</th>
+          <th style="width:140px">Variant</th>
+          <th style="width:60px">Hint</th>
+          <th style="width:60px">Link</th>
+        </tr>
+      </thead>
+      <tbody id="probTbody"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     TAB 4 — PROGRESS
+════════════════════════════════ -->
+<div id="tab-progress" class="tab-panel">
+<div class="content">
+  <div style="margin-bottom:20px">
+    <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:4px">Your Progress</h2>
+    <p style="color:var(--muted);font-size:.9rem">Track solved problems, quiz mastery, and streaks</p>
+  </div>
+
+  <!-- Metric cards -->
+  <div class="metric-grid" id="metricGrid"></div>
+
+  <!-- Variant progress bars -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="section-title">Variant Progress</div>
+    <div class="prog-bars" id="variantBars"></div>
+  </div>
+
+  <!-- Difficulty breakdown -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="section-title">Difficulty Breakdown</div>
+    <div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap">
+      <div class="donut-wrap">
+        <div class="donut"></div>
+        <div class="donut-legend">
+          <div class="donut-legend-item"><div class="donut-dot" style="background:var(--green)"></div><span>Easy — 18 problems</span></div>
+          <div class="donut-legend-item"><div class="donut-dot" style="background:var(--yellow)"></div><span>Medium — 24 problems</span></div>
+          <div class="donut-legend-item"><div class="donut-dot" style="background:var(--red)"></div><span>Hard — 5 problems</span></div>
+        </div>
+      </div>
+      <div class="diff-bars" id="diffBars" style="flex:1;min-width:200px"></div>
+    </div>
+  </div>
+
+  <!-- Quiz scores -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="section-title">Quiz Scores</div>
+    <div class="quiz-score-grid" id="quizScoreGrid"></div>
+  </div>
+
+  <button class="reset-btn" onclick="resetProgress()">↺ Reset All Progress</button>
+</div>
+</div>
+
+<footer class="footer">Agent #52 · 100 AI Agents Challenge · Built with Claude</footer>
+
+<!-- ═══════════════════════════
+     DATA & LOGIC
+═══════════════════════════ -->
+<script>
+/* ──────────────────────────────────────────
+   DATA
+────────────────────────────────────────── */
+const VARIANTS = [
+  {
+    icon:"🎯", name:"Classic Binary Search", diff:"Beginner",
+    desc:"Find an exact target in a sorted array",
+    use:["Array is sorted, need O(log n) lookup","Exact match needed","Array is large"],
+    dont:["Array is unsorted","Need all occurrences","Small arrays (linear is fine)"],
+    intuition:"The core idea: if the middle element equals target — done. If it's less than target, the answer must be in the right half. If greater, left half. Each step halves the search space, giving us O(log n) time.",
+    mistakes:["Using (lo+hi)//2 which overflows int32 on large arrays — always use lo+(hi-lo)//2","Forgetting to check the return value; array might not contain target","Using lo < hi instead of lo <= hi — this misses the last element"],
+    tips:["The invariant: target is always in [lo, hi] if it exists","After the loop, lo > hi means target doesn't exist"],
+    code:`def binary_search(nums, target):
+    lo, hi = 0, len(nums) - 1
+    while lo <= hi:
+        mid = lo + (hi - lo) // 2   # avoids integer overflow
+        if nums[mid] == target:
+            return mid
+        elif nums[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1   # not found`,
+    quiz:[
+      {q:"What is the time complexity of binary search?",opts:["O(n)","O(log n)","O(n log n)","O(1)"],ans:1,exp:"Each step halves the search space → log₂(n) steps"},
+      {q:"Why use mid = lo + (hi - lo) // 2 instead of (lo + hi) // 2?",opts:["It's faster","Prevents integer overflow","Gives different results","Style preference"],ans:1,exp:"lo + hi can overflow int32 on large arrays; subtracting first keeps the sum small"},
+      {q:"Binary search requires the array to be...",opts:["Sorted","Unique elements","Integers only","Fixed size"],ans:0,exp:"The key invariant is that we can eliminate half based on comparison to mid"},
+    ]
+  },
+  {
+    icon:"◀", name:"Left Boundary (First Occurrence)", diff:"Intermediate",
+    desc:"Find the leftmost position where condition is true",
+    use:["Finding first occurrence of duplicate","Lower_bound queries","Counting elements < target"],
+    dont:["Only one element matches","You need all matches","Array is unsorted"],
+    intuition:"Instead of stopping when we find the target, we keep shrinking the right boundary (hi = mid). This forces the search to keep moving left, eventually landing at the leftmost occurrence. We use a half-open interval [lo, hi) so lo == hi signals the answer.",
+    mistakes:["Returning mid immediately on match — this gives any occurrence, not the leftmost","Forgetting to validate nums[lo] == target after the loop","Off-by-one: hi should be len(nums), not len(nums)-1"],
+    tips:["Template: when nums[mid] < target → lo=mid+1; else → hi=mid","After loop: lo==hi, check if nums[lo] is actually target"],
+    code:`def left_bound(nums, target):
+    lo, hi = 0, len(nums)   # hi is exclusive
+    while lo < hi:
+        mid = lo + (hi - lo) // 2
+        if nums[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid   # shrink right boundary
+    # lo == hi; check if valid
+    if lo < len(nums) and nums[lo] == target:
+        return lo
+    return -1`,
+    quiz:[
+      {q:"In left boundary search, when nums[mid] == target, what do we do?",opts:["Return mid immediately","Search right","Set hi = mid","Set lo = mid + 1"],ans:2,exp:"We don't stop — we keep shrinking hi to find the leftmost occurrence"},
+      {q:"When does the loop terminate in left boundary search with hi = len(nums)?",opts:["lo > hi","lo == hi","mid == target","lo >= len(nums)"],ans:1,exp:"With half-open interval [lo, hi), loop runs while lo < hi"},
+      {q:"What does left_bound return if target is not in the array?",opts:["-1","0","lo","len(nums)"],ans:0,exp:"We must validate nums[lo] == target after the loop"},
+    ]
+  },
+  {
+    icon:"▶", name:"Right Boundary (Last Occurrence)", diff:"Intermediate",
+    desc:"Find the rightmost position where condition is true",
+    use:["Finding last occurrence of duplicate","Upper_bound queries","Counting occurrences with left bound"],
+    dont:["Array has no duplicates for the target","Need insert position"],
+    intuition:"Mirror of left boundary: when nums[mid] == target, we move lo = mid + 1 (go right past it). This forces the answer to keep increasing. After the loop, lo-1 is the last position that was ≤ target.",
+    mistakes:["Returning mid on match — you'll get any occurrence, not rightmost","Forgetting to check lo > 0 and nums[lo-1] == target","Using lo <= hi loop — causes infinite loop since hi = mid (not mid-1)"],
+    tips:["After loop: answer is lo - 1","Combined with left_bound: count = right - left + 1"],
+    code:`def right_bound(nums, target):
+    lo, hi = 0, len(nums)   # hi is exclusive
+    while lo < hi:
+        mid = lo + (hi - lo) // 2
+        if nums[mid] <= target:
+            lo = mid + 1   # go right even on match
+        else:
+            hi = mid
+    # lo - 1 is last position <= target
+    if lo > 0 and nums[lo - 1] == target:
+        return lo - 1
+    return -1`,
+    quiz:[
+      {q:"In right boundary search, when nums[mid] == target, what do we do?",opts:["Return mid","Set hi = mid","Set lo = mid + 1","Set hi = mid - 1"],ans:2,exp:"We move lo right past mid to keep finding later occurrences"},
+      {q:"After the loop, the last occurrence is at index...",opts:["lo","hi","lo - 1","mid"],ans:2,exp:"lo stopped just past the last match, so lo - 1 is the answer"},
+      {q:"How do you count occurrences of target using left + right boundary?",opts:["right - left","right - left + 1","right + left","(right - left) // 2"],ans:1,exp:"Inclusive range: if left=1, right=3, count = 3 - 1 + 1 = 3"},
+    ]
+  },
+  {
+    icon:"🔢", name:"Binary Search on Answer", diff:"Advanced",
+    desc:"Binary search over the answer space, not the array",
+    use:["\"Minimize the maximum\" / \"Maximize the minimum\"","Optimization problems","Feasibility checks with monotonic condition"],
+    dont:["Answer space isn't monotonic","Brute force is fast enough","Non-integer answer space (use floating point BS)"],
+    intuition:"Don't search the array — search the answer space. Key insight: if a capacity X works, then X+1 also works (monotonic). Binary search over [lo, hi] where lo = minimum possible answer, hi = maximum. Check feasibility at mid, and narrow bounds.",
+    mistakes:["Wrong initial bounds — lo should be min viable answer, hi should be max","Feasibility function has a bug — test it on boundary cases","Not understanding the monotonic property — it must hold or BS gives wrong answer"],
+    tips:["For 'minimize', set hi=mid when feasible, lo=mid+1 when not","For 'maximize', set lo=mid when feasible, hi=mid-1 when not"],
+    code:`def min_capacity(weights, days):
+    def can_ship(cap):
+        ships, load = 1, 0
+        for w in weights:
+            if load + w > cap:
+                ships += 1
+                load = 0
+            load += w
+        return ships <= days
+
+    lo, hi = max(weights), sum(weights)
+    while lo < hi:
+        mid = lo + (hi - lo) // 2
+        if can_ship(mid):
+            hi = mid   # try smaller
+        else:
+            lo = mid + 1   # need more capacity
+    return lo`,
+    quiz:[
+      {q:"What is the key condition that makes binary search on answer work?",opts:["The array is sorted","The feasibility function is monotonic","Answers are integers","The range is small"],ans:1,exp:"If canDo(x) is true, then canDo(x+1) must also be true (or false for minimize problems)"},
+      {q:"For \"minimize the maximum load\", when canDo(mid) is True, what do we do?",opts:["lo = mid + 1","hi = mid","return mid","hi = mid - 1"],ans:1,exp:"mid is a valid answer, but maybe smaller works — shrink hi to explore left"},
+      {q:"What is the initial search space for \"ship weights [1..10] in 5 days\"?",opts:["[0, 100]","[1, 10]","[10, 55]","[5, 55]"],ans:2,exp:"min capacity = max single weight (10), max = ship everything in 1 day (sum = 55)"},
+    ]
+  },
+  {
+    icon:"🔄", name:"Rotated Sorted Array", diff:"Advanced",
+    desc:"Binary search on an array that has been rotated",
+    use:["Array was once sorted but rotated at a pivot point","Finding min in rotated array","Search in rotated array"],
+    dont:["Array was rotated multiple times unpredictably","Has many duplicates (LC 81 handles this specially)"],
+    intuition:"After one rotation, at least one half of the array [lo..mid] or [mid..hi] is always fully sorted. Compare nums[lo] with nums[mid]: if nums[lo] <= nums[mid], the left half is sorted; otherwise the right half is. Then check if target falls in the sorted half.",
+    mistakes:["Forgetting the edge case when nums[lo] == nums[mid] (duplicates)","Using nums[mid] > nums[hi] to check — valid but less intuitive","Wrong comparison: check nums[lo] <= nums[mid], not <"],
+    tips:["Always compare nums[lo] with nums[mid] to find the sorted half","Once you find the sorted half, use standard binary search logic for that half"],
+    code:`def search_rotated(nums, target):
+    lo, hi = 0, len(nums) - 1
+    while lo <= hi:
+        mid = lo + (hi - lo) // 2
+        if nums[mid] == target:
+            return mid
+        if nums[lo] <= nums[mid]:   # left half is sorted
+            if nums[lo] <= target < nums[mid]:
+                hi = mid - 1
+            else:
+                lo = mid + 1
+        else:   # right half is sorted
+            if nums[mid] < target <= nums[hi]:
+                lo = mid + 1
+            else:
+                hi = mid - 1
+    return -1`,
+    quiz:[
+      {q:"After rotation, at least one half of [lo, mid] or [mid, hi] is always...",opts:["Empty","Sorted","Reversed","Contains the pivot"],ans:1,exp:"The rotation creates exactly one break point, so one side of mid is always sorted"},
+      {q:"How do you detect which half is sorted?",opts:["Check if nums[mid] > target","Compare nums[lo] and nums[mid]","Check if hi - lo is even","Compare nums[mid] and nums[hi]"],ans:1,exp:"If nums[lo] <= nums[mid], left half [lo..mid] is sorted; otherwise right half is sorted"},
+      {q:"What happens if the array has duplicates (e.g., [1,3,1,1,1])?",opts:["Algorithm still works perfectly","Need to handle lo++/hi-- when nums[lo]==nums[mid]","Use linear scan instead","Sort first"],ans:1,exp:"Duplicates prevent us from determining which half is sorted; shrink bounds by 1"},
+    ]
+  },
+  {
+    icon:"🔲", name:"Search in 2D Matrix", diff:"Intermediate",
+    desc:"Treat a sorted 2D matrix as a 1D sorted array",
+    use:["Matrix rows sorted, each row starts after previous row ends","Need O(log(mn)) search","Matrix is 'fully sorted'"],
+    dont:["Matrix is not fully sorted (use staircase search instead)","Matrix is sorted column-wise only"],
+    intuition:"If a matrix is fully sorted (row i's last element < row i+1's first element), we can pretend it's a 1D array. Convert 1D index mid to (row, col) using: row = mid // n, col = mid % n. Then apply classic binary search.",
+    mistakes:["Using this approach on LC 240 — that matrix is NOT fully sorted, use staircase","Wrong formula: must divide/mod by n (columns), not m (rows)","Forgetting bounds: hi = m*n - 1"],
+    tips:["Key formula: row = mid // n, col = mid % n","This only works when every element in row i < every element in row i+1"],
+    code:`def search_matrix(matrix, target):
+    m, n = len(matrix), len(matrix[0])
+    lo, hi = 0, m * n - 1
+    while lo <= hi:
+        mid = lo + (hi - lo) // 2
+        val = matrix[mid // n][mid % n]   # key formula
+        if val == target:
+            return True
+        elif val < target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return False`,
+    quiz:[
+      {q:"To convert 1D index mid to 2D (row, col) in an m×n matrix, use:",opts:["row = mid // m, col = mid % m","row = mid // n, col = mid % n","row = mid * n, col = mid + n","row = mid % n, col = mid // n"],ans:1,exp:"Divide by number of columns (n) for row, remainder for column"},
+      {q:"This approach works only if:",opts:["Matrix is square","All values are positive","Each row's last element < next row's first element","Matrix is sorted column-wise"],ans:2,exp:"The matrix must be 'fully sorted' — row by row it reads as one sorted list"},
+      {q:"What is the time complexity of 2D binary search?",opts:["O(m + n)","O(log(mn))","O(m log n)","O(log m + log n)"],ans:1,exp:"We treat the m×n matrix as a 1D array of size m*n → log(m*n) steps"},
+    ]
+  },
+  {
+    icon:"⛰️", name:"Peak / Mountain Element", diff:"Intermediate",
+    desc:"Find a local maximum where neighbors are smaller",
+    use:["Need any peak element, not necessarily global max","Array is unsorted but has at least one local max","Fast O(log n) peak finding"],
+    dont:["Need global maximum (use linear scan)","All elements are equal","Array has length 1"],
+    intuition:"Treat positions outside the array as -∞. If nums[mid] < nums[mid+1], we're on an ascending slope — the peak must be to the right (mid+1 or beyond). Otherwise, we're on a descending slope — the peak is at mid or to the left. Loop until lo == hi.",
+    mistakes:["Using lo <= hi loop — since hi = mid (not mid-1), this can loop forever","Checking nums[mid] > nums[mid+1] first — valid but need to handle out-of-bounds","Not realizing lo == hi is guaranteed to be the peak index"],
+    tips:["Loop condition: lo < hi (not lo <= hi)","If ascending (nums[mid] < nums[mid+1]): lo = mid + 1; else hi = mid"],
+    code:`def find_peak(nums):
+    lo, hi = 0, len(nums) - 1
+    while lo < hi:
+        mid = lo + (hi - lo) // 2
+        if nums[mid] < nums[mid + 1]:
+            lo = mid + 1   # ascending → peak is right
+        else:
+            hi = mid       # descending → peak is here or left
+    return lo   # lo == hi == peak index`,
+    quiz:[
+      {q:"Why can we always find a peak element in any array?",opts:["Arrays are sorted","Boundaries are -infinity","All elements are distinct","Arrays have odd length"],ans:1,exp:"We can treat positions outside array as -∞, guaranteeing at least one local max exists"},
+      {q:"If nums[mid] < nums[mid+1], where is the peak?",opts:["At mid","At mid-1","To the right of mid","At hi"],ans:2,exp:"Since mid+1 is higher than mid, ascending slope means peak is at mid+1 or further right"},
+      {q:"The loop condition lo < hi (not lo <= hi) ensures:",opts:["We never check mid twice","We always find lo == hi at the peak","mid never equals lo","hi never goes below 0"],ans:1,exp:"hi = mid (not mid-1) means if lo < hi we still make progress; lo==hi is the peak"},
+    ]
+  },
+  {
+    icon:"🏆", name:"Kth Smallest / BS on Value", diff:"Advanced",
+    desc:"Binary search over value range to find Kth smallest",
+    use:["Kth smallest in sorted matrix","BST range queries","When you can count elements ≤ x efficiently"],
+    dont:["K is close to N (use heap)","Array fits in memory (sort + index)","Counting elements ≤ x is slow"],
+    intuition:"Search over the value range [min, max]. For a mid value, count how many elements are ≤ mid. If count < k, the kth smallest is > mid (lo = mid+1). If count ≥ k, it might be ≤ mid (hi = mid). The staircase walk counts elements ≤ mid in O(n) from the bottom-left corner.",
+    mistakes:["Starting the staircase walk from wrong corner — must be bottom-left","count_le < k → lo = mid+1 (not hi = mid); remember which direction","Answer is lo, not mid — lo converges to an actual value in the matrix"],
+    tips:["count_le walk: start at (n-1, 0); go right if ≤ mid, go up if > mid","Loop: if count_le(mid) < k → lo=mid+1; else hi=mid"],
+    code:`def kth_smallest(matrix, k):
+    n = len(matrix)
+    def count_le(mid):
+        count, row, col = 0, n - 1, 0
+        while row >= 0 and col < n:
+            if matrix[row][col] <= mid:
+                count += row + 1
+                col += 1
+            else:
+                row -= 1
+        return count
+
+    lo, hi = matrix[0][0], matrix[n-1][n-1]
+    while lo < hi:
+        mid = lo + (hi - lo) // 2
+        if count_le(mid) < k:
+            lo = mid + 1
+        else:
+            hi = mid
+    return lo`,
+    quiz:[
+      {q:"In the count_le(mid) function for sorted matrix, we walk from:",opts:["Top-left corner","Bottom-left corner","Top-right corner","Center"],ans:1,exp:"Start at bottom-left: go right if matrix[row][col] <= mid, go up if >"},
+      {q:"When count_le(mid) < k, what do we do?",opts:["hi = mid","lo = mid + 1","return mid","lo = mid"],ans:1,exp:"Not enough numbers ≤ mid, so the kth smallest must be > mid → increase lo"},
+      {q:"What guarantees the answer lo exists in the matrix?",opts:["Matrix is square","lo always lands on an actual matrix value","k is always valid","Values are integers"],ans:1,exp:"The loop preserves the invariant that the answer is in [lo, hi]; lo converges to a value that exists in the matrix"},
+    ]
+  }
+];
+
+/* ── 47 Problems ── */
+const PROBLEMS = [
+  // Classic (6)
+  {n:1,lc:704,name:"Binary Search",diff:"Easy",variant:"Classic",hint:"Standard template. lo <= hi, mid = lo + (hi-lo)//2. Return mid on match, adjust bounds otherwise."},
+  {n:2,lc:374,name:"Guess Number Higher or Lower",diff:"Easy",variant:"Classic",hint:"Replace comparison with guess() API. Same template, just different comparison source."},
+  {n:3,lc:35,name:"Search Insert Position",diff:"Easy",variant:"Classic",hint:"If not found, lo is the insert position. Return lo after the loop."},
+  {n:4,lc:744,name:"Find Smallest Letter Greater Than Target",diff:"Easy",variant:"Classic",hint:"Wrap around: if no letter > target exists in array, return arr[0]. Use lo after loop."},
+  {n:5,lc:367,name:"Valid Perfect Square",diff:"Easy",variant:"Classic",hint:"Binary search on 1..num. Check if mid*mid == num. Return True if found."},
+  {n:6,lc:69,name:"Sqrt(x)",diff:"Easy",variant:"Classic",hint:"Binary search on 0..x. Find largest mid where mid*mid <= x. Return hi after loop."},
+  // Left/Right Boundary (5)
+  {n:7,lc:34,name:"Find First and Last Position of Element",diff:"Medium",variant:"Left/Right Boundary",hint:"Run left_bound then right_bound. Return [-1,-1] if either returns -1."},
+  {n:8,lc:2089,name:"Find Target Indices After Sorting Array",diff:"Easy",variant:"Left/Right Boundary",hint:"Sort, then find left and right bounds. Return list(range(left, right+1))."},
+  {n:9,lc:658,name:"Find K Closest Elements",diff:"Medium",variant:"Left/Right Boundary",hint:"Binary search for insertion point of x. Then use two pointers expanding outward to pick K closest."},
+  {n:10,lc:1385,name:"Find the Distance Value Between Two Arrays",diff:"Easy",variant:"Left/Right Boundary",hint:"Sort arr2. For each element in arr1, binary search in arr2 to check if any element is within d."},
+  {n:11,lc:2300,name:"Successful Pairs of Spells and Potions",diff:"Medium",variant:"Left/Right Boundary",hint:"Sort potions. For each spell, binary search for the leftmost potion where spell*potion >= success."},
+  // BS on Answer (8)
+  {n:12,lc:875,name:"Koko Eating Bananas",diff:"Medium",variant:"BS on Answer",hint:"lo=1, hi=max(piles). For each speed mid, compute hours = sum(ceil(p/mid)). Find min speed where hours <= h."},
+  {n:13,lc:1011,name:"Capacity to Ship Packages Within D Days",diff:"Medium",variant:"BS on Answer",hint:"lo=max(weights), hi=sum(weights). canShip(cap): simulate loading, count days."},
+  {n:14,lc:410,name:"Split Array Largest Sum",diff:"Hard",variant:"BS on Answer",hint:"lo=max(nums), hi=sum(nums). canSplit(mid,m): greedily split, check if splits <= m."},
+  {n:15,lc:1482,name:"Minimum Number of Days to Make m Bouquets",diff:"Medium",variant:"BS on Answer",hint:"lo=1, hi=max(bloomDay). canMake(day): count consecutive bloomed flowers."},
+  {n:16,lc:1283,name:"Find the Smallest Divisor Given a Threshold",diff:"Medium",variant:"BS on Answer",hint:"lo=1, hi=max(nums). For divisor mid, sum = sum(ceil(n/mid)). Find min divisor where sum <= threshold."},
+  {n:17,lc:2064,name:"Minimized Maximum of Products Distributed to Any Store",diff:"Medium",variant:"BS on Answer",hint:"lo=1, hi=max(quantities). For each max m, stores needed = sum(ceil(q/m))."},
+  {n:18,lc:1760,name:"Minimum Limit of Balls in a Bag",diff:"Medium",variant:"BS on Answer",hint:"lo=1, hi=max(nums). ops needed for max m = sum(ceil((n-1)/m)) for each bag of size n."},
+  {n:19,lc:2187,name:"Minimum Time to Complete Trips",diff:"Medium",variant:"BS on Answer",hint:"lo=1, hi=min(time)*totalTrips. trips(t) = sum(t//time[i]). Find min t where trips >= total."},
+  // Rotated (5)
+  {n:20,lc:33,name:"Search in Rotated Sorted Array",diff:"Medium",variant:"Rotated",hint:"Determine which half is sorted. Check if target is in the sorted half."},
+  {n:21,lc:81,name:"Search in Rotated Sorted Array II",diff:"Medium",variant:"Rotated",hint:"Same as LC33 but add: if nums[lo]==nums[mid]==nums[hi], do lo++, hi-- to skip duplicates."},
+  {n:22,lc:153,name:"Find Minimum in Rotated Sorted Array",diff:"Medium",variant:"Rotated",hint:"If nums[mid] > nums[hi], min is in right half. Else min is in left half (including mid)."},
+  {n:23,lc:154,name:"Find Minimum in Rotated Sorted Array II",diff:"Hard",variant:"Rotated",hint:"Same as LC153 but when nums[mid]==nums[hi], do hi-- to reduce ambiguity."},
+  {n:24,lc:852,name:"Peak Index in a Mountain Array",diff:"Easy",variant:"Rotated",hint:"If nums[mid] < nums[mid+1], go right. Else go left. Loop until lo==hi."},
+  // 2D Matrix (4)
+  {n:25,lc:74,name:"Search a 2D Matrix",diff:"Medium",variant:"2D Matrix",hint:"Treat as 1D: row = mid//n, col = mid%n. Standard binary search."},
+  {n:26,lc:240,name:"Search a 2D Matrix II",diff:"Medium",variant:"2D Matrix",hint:"NOT fully sorted — use staircase search. Start top-right. Go left if too big, down if too small."},
+  {n:27,lc:378,name:"Kth Smallest Element in a Sorted Matrix",diff:"Medium",variant:"2D Matrix",hint:"Binary search on value [matrix[0][0], matrix[n-1][n-1]]. Use count_le(mid) with staircase walk."},
+  {n:28,lc:668,name:"Kth Smallest Number in Multiplication Table",diff:"Hard",variant:"2D Matrix",hint:"BS on value [1, m*n]. count(x) = sum(min(x//i, n) for i in 1..m)."},
+  // Peak (3)
+  {n:29,lc:162,name:"Find Peak Element",diff:"Medium",variant:"Peak",hint:"If nums[mid] < nums[mid+1], go right. Else go left. lo==hi is the peak."},
+  {n:30,lc:1901,name:"Find a Peak Element II (2D)",diff:"Medium",variant:"Peak",hint:"Binary search on columns. For each mid column, find the row max. Compare with neighbors."},
+  {n:31,lc:2137,name:"Pour Water Between Buckets to Equal Level",diff:"Medium",variant:"Peak",hint:"BS on the answer (water level). canEqual(level): sum of water transferred feasibility check."},
+  // Kth Smallest (4)
+  {n:32,lc:378,name:"Kth Smallest Element in Sorted Matrix",diff:"Medium",variant:"Kth Smallest",hint:"lo=matrix[0][0], hi=matrix[-1][-1]. count_le walks from bottom-left."},
+  {n:33,lc:719,name:"Find K-th Smallest Pair Distance",diff:"Hard",variant:"Kth Smallest",hint:"lo=0, hi=max-min. count(mid) = pairs with distance <= mid (two pointers on sorted array)."},
+  {n:34,lc:786,name:"K-th Smallest Prime Fraction",diff:"Hard",variant:"Kth Smallest",hint:"lo=0.0, hi=1.0. For fraction mid, count pairs arr[i]/arr[j] <= mid using two pointers."},
+  {n:35,lc:1201,name:"Ugly Number III",diff:"Medium",variant:"Kth Smallest",hint:"BS on answer. count(x) = x//a + x//b + x//c - LCM terms (inclusion-exclusion)."},
+  // Mixed (12)
+  {n:36,lc:278,name:"First Bad Version",diff:"Easy",variant:"Left Boundary",hint:"left_bound variant. When isBadVersion(mid) is true, go left (hi=mid). Else lo=mid+1."},
+  {n:37,lc:374,name:"Guess Number Higher or Lower (revisit)",diff:"Easy",variant:"Classic",hint:"Replace array comparison with guess() API call. Same template."},
+  {n:38,lc:1064,name:"Fixed Point",diff:"Easy",variant:"Left Boundary",hint:"Find first index where arr[i] >= i, then check if arr[lo] == lo."},
+  {n:39,lc:1539,name:"Kth Missing Positive Number",diff:"Easy",variant:"Classic",hint:"At index i, missing count = arr[i] - (i+1). Binary search for first index where missing >= k."},
+  {n:40,lc:1870,name:"Minimum Speed to Arrive on Time",diff:"Medium",variant:"BS on Answer",hint:"lo=1, hi=10^7. time(speed): sum(ceil(dist/speed)) for all but last, + last/speed."},
+  {n:41,lc:2226,name:"Maximum Candies Allocated to K Children",diff:"Medium",variant:"BS on Answer",hint:"lo=0, hi=max(candies). canAllocate(m): sum(c//m for c in candies) >= k."},
+  {n:42,lc:1343,name:"Subarrays of Size K and Avg >= Threshold",diff:"Medium",variant:"Classic",hint:"Sliding window is O(n) but BS is educational here. Prefix sum + BS on window boundaries."},
+  {n:43,lc:540,name:"Single Element in a Sorted Array",diff:"Medium",variant:"Classic",hint:"Pairs break at the position of the single element. If mid is even, check arr[mid]==arr[mid+1]."},
+  {n:44,lc:1150,name:"Check If Majority Element in Sorted Array",diff:"Easy",variant:"Left/Right Boundary",hint:"Find left and right boundaries of target. Check if right-left+1 > n//2."},
+  {n:45,lc:1064,name:"Fixed Point (variant)",diff:"Easy",variant:"Left Boundary",hint:"Sorted array with distinct ints. arr[i] >= i always for valid fixed points. BS for first i where arr[i]-i == 0."},
+  {n:46,lc:2529,name:"Maximum Count of Positive and Negative Integer",diff:"Easy",variant:"Left/Right Boundary",hint:"Find first non-negative index (left_bound of 0). Find right bound of 0. Compute negatives and positives counts."},
+  {n:47,lc:1337,name:"The K Weakest Rows in a Matrix",diff:"Easy",variant:"Classic",hint:"For each row, BS for last 1 (right boundary). Sort rows by soldier count, return first k indices."},
+];
+
+/* ── Visualizer step data ── */
+const VIZ_STEPS = [
+  // Variant 0 — Classic
+  [
+    {arr:[2,5,8,12,16,23,38,45,56,72,91],lo:0,hi:10,mid:5,msg:"lo=0, hi=10, mid=5 → arr[5]=<strong>23</strong> == target → <strong>FOUND!</strong>",found:5,elim:[]},
+  ],
+  // Variant 1 — Left Boundary
+  [
+    {arr:[1,3,3,3,5,7,9],lo:0,hi:6,mid:3,msg:"lo=0, hi=6, mid=3 → arr[3]=3 ≥ target → go left, hi=3",found:-1,elim:[4,5,6]},
+    {arr:[1,3,3,3,5,7,9],lo:0,hi:3,mid:1,msg:"lo=0, hi=3, mid=1 → arr[1]=3 ≥ target → go left, hi=1",found:-1,elim:[2,3,4,5,6]},
+    {arr:[1,3,3,3,5,7,9],lo:0,hi:1,mid:0,msg:"lo=0, hi=1, mid=0 → arr[0]=1 < target → go right, lo=1",found:-1,elim:[2,3,4,5,6]},
+    {arr:[1,3,3,3,5,7,9],lo:1,hi:1,mid:1,msg:"lo=1 == hi=1 → <strong>First occurrence of 3 at index 1</strong>",found:1,elim:[0,2,3,4,5,6]},
+  ],
+  // Variant 2 — Right Boundary
+  [
+    {arr:[1,3,3,3,5,7,9],lo:0,hi:6,mid:3,msg:"lo=0, hi=6, mid=3 → arr[3]=3 ≤ target → go right, lo=4",found:-1,elim:[0,1,2]},
+    {arr:[1,3,3,3,5,7,9],lo:4,hi:6,mid:5,msg:"lo=4, hi=6, mid=5 → arr[5]=7 > target → go left, hi=4",found:-1,elim:[0,1,2,5,6]},
+    {arr:[1,3,3,3,5,7,9],lo:4,hi:4,mid:4,msg:"lo=4 == hi=4 → arr[4]=5 > target → answer = index 3 → <strong>Last occurrence of 3 at index 3</strong>",found:3,elim:[0,1,2,4,5,6]},
+  ],
+  // Variant 3 — BS on Answer (answer space animation)
+  [
+    {ansLo:10,ansHi:55,ansMid:32,feasible:true,msg:"lo=10, hi=55, mid=<strong>32</strong> → canShip(32,5)? <strong>YES</strong> → hi=32"},
+    {ansLo:10,ansHi:32,ansMid:21,feasible:true,msg:"lo=10, hi=32, mid=<strong>21</strong> → canShip(21,5)? <strong>YES</strong> → hi=21"},
+    {ansLo:10,ansHi:21,ansMid:15,feasible:true,msg:"lo=10, hi=21, mid=<strong>15</strong> → canShip(15,5)? <strong>YES</strong> → hi=15"},
+    {ansLo:10,ansHi:15,ansMid:12,feasible:false,msg:"lo=10, hi=15, mid=<strong>12</strong> → canShip(12,5)? <strong>NO</strong> → lo=13"},
+    {ansLo:13,ansHi:15,ansMid:14,feasible:true,msg:"lo=13, hi=15, mid=<strong>14</strong> → canShip(14,5)? <strong>YES</strong> → hi=14"},
+    {ansLo:13,ansHi:14,ansMid:13,feasible:true,msg:"lo=13, hi=14, mid=<strong>13</strong> → canShip(13,5)? <strong>YES</strong> → hi=13 → <strong>Answer: 15</strong>"},
+  ],
+  // Variant 4 — Rotated
+  [
+    {arr:[4,5,6,7,0,1,2],lo:0,hi:6,mid:3,msg:"lo=0, hi=6, mid=3 → arr[3]=7 > arr[0]=4 → <strong>left sorted</strong><br>target=0 not in [4,7] → search right, lo=4",found:-1,elim:[],leftSorted:true},
+    {arr:[4,5,6,7,0,1,2],lo:4,hi:6,mid:5,msg:"lo=4, hi=6, mid=5 → arr[5]=1 > arr[4]=0 → <strong>left sorted</strong><br>target=0 in [0,1] → search left, hi=4",found:-1,elim:[0,1,2,3,6],leftSorted:true},
+    {arr:[4,5,6,7,0,1,2],lo:4,hi:4,mid:4,msg:"lo=4 == hi=4 → arr[4]=<strong>0</strong> == target → <strong>FOUND at index 4</strong>",found:4,elim:[0,1,2,3,5,6]},
+  ],
+  // Variant 5 — 2D Matrix
+  [
+    {flat:[1,3,5,7,10,11,16,20,23,30,34,60],rows:3,cols:4,lo:0,hi:11,mid:5,msg:"lo=0, hi=11, mid=5 → matrix[1][1]=11 > 3 → go left, hi=4",found:-1,elim:[5,6,7,8,9,10,11]},
+    {flat:[1,3,5,7,10,11,16,20,23,30,34,60],rows:3,cols:4,lo:0,hi:4,mid:2,msg:"lo=0, hi=4, mid=2 → matrix[0][2]=5 > 3 → go left, hi=1",found:-1,elim:[2,3,4,5,6,7,8,9,10,11]},
+    {flat:[1,3,5,7,10,11,16,20,23,30,34,60],rows:3,cols:4,lo:0,hi:1,mid:0,msg:"lo=0, hi=1, mid=0 → matrix[0][0]=1 < 3 → go right, lo=1",found:-1,elim:[2,3,4,5,6,7,8,9,10,11]},
+    {flat:[1,3,5,7,10,11,16,20,23,30,34,60],rows:3,cols:4,lo:1,hi:1,mid:1,msg:"lo=1 == hi=1 → matrix[0][1]=<strong>3</strong> == target → <strong>FOUND!</strong>",found:1,elim:[0,2,3,4,5,6,7,8,9,10,11]},
+  ],
+  // Variant 6 — Peak
+  [
+    {arr:[1,2,3,1],lo:0,hi:3,mid:1,msg:"lo=0, hi=3, mid=1 → arr[1]=2 < arr[2]=3 → ascending → go right, lo=2",found:-1,elim:[0]},
+    {arr:[1,2,3,1],lo:2,hi:3,mid:2,msg:"lo=2, hi=3, mid=2 → arr[2]=3 > arr[3]=1 → descending → go left, hi=2",found:-1,elim:[0,3]},
+    {arr:[1,2,3,1],lo:2,hi:2,mid:2,msg:"lo=2 == hi=2 → <strong>PEAK at index 2, value=3</strong> ⛰️",found:2,elim:[0,1,3]},
+  ],
+  // Variant 7 — Kth Smallest
+  [
+    {ansLo:1,ansHi:15,ansMid:8,countLe:3,k:8,feasible:false,msg:"lo=1, hi=15, mid=<strong>8</strong> → countLe(8)=3 < 8 → lo=9"},
+    {ansLo:9,ansHi:15,ansMid:12,countLe:6,k:8,feasible:false,msg:"lo=9, hi=15, mid=<strong>12</strong> → countLe(12)=6 < 8 → lo=13"},
+    {ansLo:13,ansHi:15,ansMid:14,countLe:8,k:8,feasible:true,msg:"lo=13, hi=15, mid=<strong>14</strong> → countLe(14)=8 ≥ 8 → hi=14"},
+    {ansLo:13,ansHi:14,ansMid:13,countLe:8,k:8,feasible:true,msg:"lo=13, hi=14, mid=<strong>13</strong> → countLe(13)=8 ≥ 8 → hi=13"},
+    {ansLo:13,ansHi:13,ansMid:13,countLe:8,k:8,feasible:true,msg:"lo=13 == hi=13 → <strong>Answer: 13</strong> 🏆"},
+  ],
+];
+
+/* ──────────────────────────────────────────
+   STATE
+────────────────────────────────────────── */
+let solved = JSON.parse(localStorage.getItem('bs52_solved') || '[]');
+let quizScores = JSON.parse(localStorage.getItem('bs52_quizScores') || '{}');
+let streak = JSON.parse(localStorage.getItem('bs52_streak') || '{"lastDate":"","count":0}');
+let activeVariant = parseInt(localStorage.getItem('bs52_activeVariant') || '0');
+let activeTab = localStorage.getItem('bs52_activeTab') || 'patterns';
+let activeFilter = 'All';
+let vizTimers = {};
+let vizStates = {};
+
+function save() {
+  localStorage.setItem('bs52_solved', JSON.stringify(solved));
+  localStorage.setItem('bs52_quizScores', JSON.stringify(quizScores));
+  localStorage.setItem('bs52_streak', JSON.stringify(streak));
+  localStorage.setItem('bs52_activeVariant', activeVariant);
+  localStorage.setItem('bs52_activeTab', activeTab);
+}
+
+/* ──────────────────────────────────────────
+   CLOCK
+────────────────────────────────────────── */
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    [now.getHours(), now.getMinutes(), now.getSeconds()]
+      .map(n => String(n).padStart(2,'0')).join(':');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ──────────────────────────────────────────
+   TOP PROGRESS BAR
+────────────────────────────────────────── */
+function updateTopBar() {
+  document.getElementById('topBar').style.width = (solved.length / 47 * 100) + '%';
+}
+
+/* ──────────────────────────────────────────
+   TAB SWITCHING
+────────────────────────────────────────── */
+function switchTab(tab) {
+  activeTab = tab;
+  save();
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const tabs = ['patterns','learn','practice','progress'];
+  document.querySelectorAll('.nav-btn')[tabs.indexOf(tab)].classList.add('active');
+  if (tab === 'progress') renderProgress();
+  if (tab === 'patterns') updatePatternStats();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ──────────────────────────────────────────
+   TAB 1 — PATTERNS
+────────────────────────────────────────── */
+function renderPatterns() {
+  const grid = document.getElementById('patternGrid');
+  grid.innerHTML = VARIANTS.map((v, i) => `
+    <div class="pattern-card" onclick="goLearn(${i})">
+      <div class="icon">${v.icon}</div>
+      <h3>${v.name}</h3>
+      <p>${v.desc}</p>
+      <div class="footer">
+        <span class="badge badge-${v.diff.toLowerCase()}">${v.diff}</span>
+        <button class="learn-btn" onclick="event.stopPropagation();goLearn(${i})">→ Learn</button>
+      </div>
+    </div>
+  `).join('');
+  updatePatternStats();
+}
+
+function updatePatternStats() {
+  document.getElementById('solvedLabel').textContent = `${solved.length} / 47 problems solved`;
+  const mastered = Object.values(quizScores).filter(s => s >= 2).length;
+  document.getElementById('masteredLabel').textContent = `${mastered} / 8`;
+  updateTopBar();
+}
+
+function goLearn(i) {
+  activeVariant = i;
+  save();
+  switchTab('learn');
+  renderLearn();
+  updateSidebar();
+}
+
+/* ──────────────────────────────────────────
+   TAB 2 — LEARN
+────────────────────────────────────────── */
+function renderLearnSidebar() {
+  const sb = document.getElementById('learnSidebar');
+  sb.innerHTML = VARIANTS.map((v, i) => `
+    <div class="learn-sidebar-item ${i===activeVariant?'active':''}"
+         id="sb-${i}" onclick="goLearn(${i})">
+      <span>${v.icon}</span>
+      <span>${v.name}</span>
+    </div>
+  `).join('');
+}
+
+function updateSidebar() {
+  document.querySelectorAll('.learn-sidebar-item').forEach((el, i) => {
+    el.classList.toggle('active', i === activeVariant);
+  });
+}
+
+function renderLearn() {
+  clearVizTimers();
+  const v = VARIANTS[activeVariant];
+  const main = document.getElementById('learnMain');
+  main.innerHTML = `
+    <h2>${v.icon} ${v.name}</h2>
+    <p class="subtitle">${v.desc} · <span class="badge badge-${v.diff.toLowerCase()}">${v.diff}</span></p>
+
+    <!-- Visualizer -->
+    <div class="viz-box" id="viz-${activeVariant}">
+      <div class="viz-title">
+        <span>Step-by-Step Visualizer</span>
+        <div class="viz-controls">
+          <span class="viz-step-label" id="stepLabel-${activeVariant}">Step 1 / 1</span>
+          <button class="viz-btn" id="playBtn-${activeVariant}" onclick="toggleViz(${activeVariant})">⏸ Pause</button>
+          <button class="viz-btn" onclick="resetViz(${activeVariant})">↺ Reset</button>
+        </div>
+      </div>
+      <div id="vizContent-${activeVariant}"></div>
+    </div>
+
+    <!-- Intuition -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="section-title">Key Intuition</div>
+      <p style="line-height:1.7;color:var(--text);font-size:.9rem">${v.intuition}</p>
+    </div>
+
+    <!-- When to use -->
+    <div class="when-grid">
+      <div class="when-box use">
+        <h4>✓ Use when</h4>
+        <ul>${v.use.map(u=>`<li>${u}</li>`).join('')}</ul>
+      </div>
+      <div class="when-box dont">
+        <h4>✗ Don't use when</h4>
+        <ul>${v.dont.map(d=>`<li>${d}</li>`).join('')}</ul>
+      </div>
+    </div>
+
+    <!-- Code -->
+    <div class="section-title" style="margin-top:20px">Python Template</div>
+    <div class="code-wrap">
+      <pre><code class="language-python">${escHtml(v.code)}</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <!-- Mistakes -->
+    <div class="callout callout-mistake">
+      <div class="callout-title">⚠️ Common Mistakes</div>
+      <ul style="padding-left:16px;line-height:1.9">${v.mistakes.map(m=>`<li>${m}</li>`).join('')}</ul>
+    </div>
+
+    <!-- Tips -->
+    <div class="callout callout-tip">
+      <div class="callout-title">💡 Pro Tips</div>
+      <ul style="padding-left:16px;line-height:1.9">${v.tips.map(t=>`<li>${t}</li>`).join('')}</ul>
+    </div>
+
+    <!-- Quiz -->
+    <div class="quiz-wrap">
+      <h3>Quiz — Test Your Understanding</h3>
+      ${v.quiz.map((q,qi) => renderQuizQ(qi, q)).join('')}
+      <div style="margin-top:12px;font-size:.85rem;color:var(--muted)">
+        Quiz score: <strong id="qScore-${activeVariant}" style="color:var(--accent)">${quizScores[activeVariant]||0}/3</strong>
+      </div>
+    </div>
+  `;
+
+  // Syntax highlight
+  main.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+
+  // Start visualizer
+  initViz(activeVariant);
+}
+
+function renderQuizQ(qi, q) {
+  const vi = activeVariant;
+  const answered = window._quizAnswered || {};
+  const key = `${vi}-${qi}`;
+  return `
+    <div class="quiz-q" id="qq-${vi}-${qi}">
+      <p>${q.q}</p>
+      <div class="quiz-options">
+        ${q.opts.map((o,oi)=>`
+          <button class="quiz-opt" onclick="answerQuiz(${vi},${qi},${oi})">${o}</button>
+        `).join('')}
+      </div>
+      <div class="quiz-explain" id="qe-${vi}-${qi}">💡 ${q.exp}</div>
+    </div>
+  `;
+}
+
+window._quizAnswered = {};
+
+function answerQuiz(vi, qi, chosen) {
+  const key = `${vi}-${qi}`;
+  if (window._quizAnswered[key]) return;
+  window._quizAnswered[key] = true;
+  const correct = VARIANTS[vi].quiz[qi].ans;
+  const wrapper = document.getElementById(`qq-${vi}-${qi}`);
+  const opts = wrapper.querySelectorAll('.quiz-opt');
+  opts.forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === correct) btn.classList.add('correct');
+    else if (i === chosen && i !== correct) btn.classList.add('wrong');
+  });
+  document.getElementById(`qe-${vi}-${qi}`).classList.add('show');
+
+  // Update score
+  if (!quizScores[vi]) quizScores[vi] = 0;
+  if (chosen === correct) {
+    quizScores[vi]++;
+    const el = document.getElementById(`qScore-${vi}`);
+    if (el) el.textContent = `${quizScores[vi]}/3`;
+  }
+  save();
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyCode(btn) {
+  const code = btn.previousElementSibling.querySelector('code').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+/* ──────────────────────────────────────────
+   VISUALIZERS
+────────────────────────────────────────── */
+function clearVizTimers() {
+  Object.values(vizTimers).forEach(t => clearInterval(t));
+  vizTimers = {};
+  window._quizAnswered = {};
+}
+
+function initViz(vi) {
+  vizStates[vi] = 0;
+  renderVizFrame(vi);
+  vizTimers[vi] = setInterval(() => {
+    advanceViz(vi);
+  }, 1500);
+}
+
+function advanceViz(vi) {
+  const steps = VIZ_STEPS[vi];
+  vizStates[vi] = (vizStates[vi] + 1) % steps.length;
+  renderVizFrame(vi);
+}
+
+function toggleViz(vi) {
+  const btn = document.getElementById(`playBtn-${vi}`);
+  if (vizTimers[vi]) {
+    clearInterval(vizTimers[vi]);
+    vizTimers[vi] = null;
+    btn.textContent = '▶ Play';
+  } else {
+    vizTimers[vi] = setInterval(() => advanceViz(vi), 1500);
+    btn.textContent = '⏸ Pause';
+  }
+}
+
+function resetViz(vi) {
+  vizStates[vi] = 0;
+  renderVizFrame(vi);
+}
+
+function renderVizFrame(vi) {
+  const steps = VIZ_STEPS[vi];
+  const si = vizStates[vi];
+  const step = steps[si];
+  const label = document.getElementById(`stepLabel-${vi}`);
+  if (label) label.textContent = `Step ${si+1} / ${steps.length}`;
+
+  const container = document.getElementById(`vizContent-${vi}`);
+  if (!container) return;
+
+  // Answer space variants (3 & 7)
+  if (step.ansLo !== undefined) {
+    renderAnsBar(container, step, vi);
+  } else if (step.flat !== undefined) {
+    renderMatrixViz(container, step);
+  } else {
+    renderArrayViz(container, step);
+  }
+}
+
+function renderArrayViz(container, step) {
+  const {arr, lo, hi, mid, found, elim, msg} = step;
+  let arrHtml = '<div class="array-row">';
+  arr.forEach((v, i) => {
+    let cls = 'arr-cell';
+    if (found === i) cls += ' found';
+    else if (i === mid && found < 0) cls += ' active mid-marker';
+    else if (elim && elim.includes(i)) cls += ' elim';
+    else {
+      if (i === lo) cls += ' lo-marker';
+      if (i === hi) cls += ' hi-marker';
+    }
+    arrHtml += `<div class="${cls}">${v}</div>`;
+  });
+  arrHtml += '</div>';
+
+  let ptrHtml = '<div class="pointer-row">';
+  arr.forEach((_, i) => {
+    let ptrs = [];
+    if (i === lo && found < 0) ptrs.push('<span class="lo">lo</span>');
+    if (i === mid && found < 0) ptrs.push('<span class="mid">mid</span>');
+    if (i === hi && found < 0) ptrs.push('<span class="hi">hi</span>');
+    ptrHtml += `<div class="ptr">${ptrs.join(' ')}</div>`;
+  });
+  ptrHtml += '</div>';
+
+  container.innerHTML = arrHtml + ptrHtml + `<div class="viz-msg">${msg}</div>`;
+}
+
+function renderAnsBar(container, step, vi) {
+  const {ansLo, ansHi, ansMid, feasible, msg} = step;
+  const TOTAL_MIN = vi===3 ? 10 : 1;
+  const TOTAL_MAX = vi===3 ? 55 : 15;
+  const range = TOTAL_MAX - TOTAL_MIN;
+  const loPct = (ansLo - TOTAL_MIN) / range * 100;
+  const hiPct = (ansHi - TOTAL_MIN) / range * 100;
+  const midPct = (ansMid - TOTAL_MIN) / range * 100;
+
+  container.innerHTML = `
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin-bottom:6px">
+        <span>lo = <strong style="color:var(--green)">${ansLo}</strong></span>
+        <span>mid = <strong style="color:var(--accent)">${ansMid}</strong> ${feasible ? '✓ feasible' : '✗ not feasible'}</span>
+        <span>hi = <strong style="color:var(--red)">${ansHi}</strong></span>
+      </div>
+      <div style="position:relative;height:30px;background:var(--card2);border-radius:8px;overflow:visible">
+        <!-- eliminated left -->
+        <div style="position:absolute;left:0;width:${loPct}%;height:100%;background:rgba(255,255,255,.05);border-radius:8px 0 0 8px"></div>
+        <!-- active range -->
+        <div style="position:absolute;left:${loPct}%;width:${hiPct-loPct}%;height:100%;background:${feasible?'rgba(74,222,128,.2)':'rgba(248,113,113,.2)'};border-radius:4px;transition:all .4s"></div>
+        <!-- eliminated right -->
+        <div style="position:absolute;left:${hiPct}%;width:${100-hiPct}%;height:100%;background:rgba(255,255,255,.05);border-radius:0 8px 8px 0"></div>
+        <!-- mid pointer -->
+        <div style="position:absolute;left:${midPct}%;transform:translateX(-50%);top:-6px;width:3px;height:42px;background:var(--accent);border-radius:2px;transition:left .4s"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:4px">
+        <span>${TOTAL_MIN}</span><span>${TOTAL_MAX}</span>
+      </div>
+    </div>
+    <div class="viz-msg">${msg}</div>
+  `;
+}
+
+function renderMatrixViz(container, step) {
+  const {flat, rows, cols, lo, hi, mid, found, elim, msg} = step;
+  let html = '';
+  for (let r = 0; r < rows; r++) {
+    html += '<div class="matrix-row-viz">';
+    for (let c = 0; c < cols; c++) {
+      const idx = r * cols + c;
+      let cls = 'arr-cell';
+      if (found === idx) cls += ' found';
+      else if (idx === mid && found < 0) cls += ' active mid-marker';
+      else if (elim && elim.includes(idx)) cls += ' elim';
+      html += `<div class="${cls}" style="width:40px;height:40px;font-size:.8rem">${flat[idx]}</div>`;
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html + `
+    <div style="font-size:.75rem;color:var(--muted);margin:8px 0">
+      ${found>=0?'':`lo=${lo}, hi=${hi}, mid=${mid} → [${Math.floor(mid/cols)}][${mid%cols}]`}
+    </div>
+    <div class="viz-msg">${msg}</div>
+  `;
+}
+
+/* ──────────────────────────────────────────
+   TAB 3 — PRACTICE
+────────────────────────────────────────── */
+const FILTERS = ['All','Easy','Medium','Hard','Classic','Left/Right Boundary','BS on Answer','Rotated','2D Matrix','Peak','Kth Smallest'];
+
+function renderFilters() {
+  const row = document.getElementById('filterRow');
+  row.innerHTML = FILTERS.map(f => `
+    <button class="filter-btn ${f===activeFilter?'active':''}" onclick="setFilter('${f}')">${f}</button>
+  `).join('');
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  renderFilters();
+  renderProblems();
+}
+
+function renderProblems() {
+  const tbody = document.getElementById('probTbody');
+  const filtered = PROBLEMS.filter(p => {
+    if (activeFilter === 'All') return true;
+    if (['Easy','Medium','Hard'].includes(activeFilter)) return p.diff === activeFilter;
+    return p.variant.includes(activeFilter) || p.variant === activeFilter;
+  });
+
+  tbody.innerHTML = filtered.map(p => {
+    const isSolved = solved.includes(p.lc);
+    return `
+      <tr class="${isSolved?'solved':''}" id="prob-${p.lc}">
+        <td><input type="checkbox" class="solved-cb" ${isSolved?'checked':''} onchange="toggleSolved(${p.lc}, this)"></td>
+        <td style="color:var(--muted);font-size:.8rem">${p.n}</td>
+        <td>
+          <div class="prob-name">${p.name}</div>
+          <div class="hint-text" id="hint-${p.lc}">${p.hint}</div>
+        </td>
+        <td><span class="badge badge-${p.diff.toLowerCase()}">${p.diff}</span></td>
+        <td><span class="variant-tag">${p.variant}</span></td>
+        <td><button class="hint-btn" onclick="toggleHint(${p.lc})">Hint</button></td>
+        <td><a class="lc-link" href="https://leetcode.com/problems/problem-${p.lc}/" target="_blank">LC ${p.lc} ↗</a></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function toggleSolved(lc, cb) {
+  if (cb.checked) {
+    if (!solved.includes(lc)) solved.push(lc);
+    const row = document.getElementById(`prob-${lc}`);
+    if (row) row.classList.add('solved');
+    updateStreak();
+  } else {
+    solved = solved.filter(x => x !== lc);
+    const row = document.getElementById(`prob-${lc}`);
+    if (row) row.classList.remove('solved');
+  }
+  save();
+  updateTopBar();
+}
+
+function toggleHint(lc) {
+  const hint = document.getElementById(`hint-${lc}`);
+  if (hint) hint.classList.toggle('show');
+}
+
+function updateStreak() {
+  const today = new Date().toISOString().split('T')[0];
+  if (streak.lastDate === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  if (streak.lastDate === yesterday) {
+    streak.count++;
+  } else {
+    streak.count = 1;
+  }
+  streak.lastDate = today;
+  save();
+}
+
+/* ──────────────────────────────────────────
+   TAB 4 — PROGRESS
+────────────────────────────────────────── */
+function renderProgress() {
+  // Metrics
+  const mastered = Object.values(quizScores).filter(s => s >= 2).length;
+  const pct = Math.round(solved.length / 47 * 100);
+  document.getElementById('metricGrid').innerHTML = `
+    <div class="metric-card"><div class="metric-num">${solved.length}</div><div class="metric-label">Problems Solved</div></div>
+    <div class="metric-card"><div class="metric-num" style="color:var(--green)">${mastered}</div><div class="metric-label">Variants Mastered</div></div>
+    <div class="metric-card"><div class="metric-num" style="color:var(--yellow)">${streak.count}</div><div class="metric-label">Current Streak (days)</div></div>
+    <div class="metric-card"><div class="metric-num" style="color:var(--accent)">${pct}%</div><div class="metric-label">Mastery %</div></div>
+  `;
+
+  // Variant progress bars
+  const variantDef = [
+    {name:"Classic",lcs:[704,374,35,744,367,69],total:6},
+    {name:"Left/Right Boundary",lcs:[34,2089,658,1385,2300,278,1064,1150,2529],total:5},
+    {name:"BS on Answer",lcs:[875,1011,410,1482,1283,2064,1760,2187,1870,2226],total:8},
+    {name:"Rotated",lcs:[33,81,153,154,852],total:5},
+    {name:"2D Matrix",lcs:[74,240,378,668],total:4},
+    {name:"Peak",lcs:[162,1901,2137],total:3},
+    {name:"Kth Smallest",lcs:[378,719,786,1201],total:4},
+    {name:"Mixed",lcs:[278,374,1064,1539,1870,2226,1343,540,1150,1064,2529,1337],total:12},
+  ];
+  document.getElementById('variantBars').innerHTML = variantDef.map(v => {
+    const count = v.lcs.filter(lc => solved.includes(lc)).length;
+    const pct = Math.round(count / v.total * 100);
+    return `
+      <div class="prog-item">
+        <div class="prog-header">
+          <span>${v.name}</span>
+          <span style="color:var(--muted)">${count}/${v.total}</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join('');
+
+  // Difficulty breakdown
+  const easySolved = PROBLEMS.filter(p => p.diff==='Easy' && solved.includes(p.lc)).length;
+  const medSolved = PROBLEMS.filter(p => p.diff==='Medium' && solved.includes(p.lc)).length;
+  const hardSolved = PROBLEMS.filter(p => p.diff==='Hard' && solved.includes(p.lc)).length;
+  document.getElementById('diffBars').innerHTML = `
+    <div class="diff-bar-item">
+      <div class="diff-bar-num easy">${easySolved}</div>
+      <div class="diff-bar-label">Easy Solved</div>
+      <div class="diff-bar-total">of 18</div>
+    </div>
+    <div class="diff-bar-item">
+      <div class="diff-bar-num med">${medSolved}</div>
+      <div class="diff-bar-label">Medium Solved</div>
+      <div class="diff-bar-total">of 24</div>
+    </div>
+    <div class="diff-bar-item">
+      <div class="diff-bar-num hard">${hardSolved}</div>
+      <div class="diff-bar-label">Hard Solved</div>
+      <div class="diff-bar-total">of 5</div>
+    </div>
+  `;
+
+  // Quiz scores
+  document.getElementById('quizScoreGrid').innerHTML = VARIANTS.map((v, i) => {
+    const score = quizScores[i] || 0;
+    let badgeCls = 'qs-keep', badgeText = 'Keep going';
+    if (score === 3) { badgeCls = 'qs-mastered'; badgeText = 'Mastered'; }
+    else if (score >= 2) { badgeCls = 'qs-good'; badgeText = 'Good'; }
+    return `
+      <div class="qs-card">
+        <h4>${v.icon} ${v.name}</h4>
+        <div class="qs-score">${score}/3</div>
+        <div class="qs-badge ${badgeCls}">${badgeText}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ──────────────────────────────────────────
+   RESET
+────────────────────────────────────────── */
+function resetProgress() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  solved = [];
+  quizScores = {};
+  streak = {lastDate:'', count:0};
+  window._quizAnswered = {};
+  ['bs52_solved','bs52_quizScores','bs52_streak','bs52_activeVariant','bs52_activeTab']
+    .forEach(k => localStorage.removeItem(k));
+  renderProgress();
+  updateTopBar();
+  updatePatternStats();
+}
+
+/* ──────────────────────────────────────────
+   INIT
+────────────────────────────────────────── */
+function init() {
+  renderPatterns();
+  renderLearnSidebar();
+  renderFilters();
+  renderProblems();
+  updateTopBar();
+
+  // Restore active tab
+  if (activeTab !== 'patterns') {
+    switchTab(activeTab);
+  }
+
+  // Render learn content immediately
+  renderLearn();
+  updateSidebar();
+}
+
+init();
+</script>
+</body>
+</html>

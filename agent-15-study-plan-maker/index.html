@@ -20,6 +20,10 @@
     --gray-bg: #f0f0f0;
     --shadow: 0 2px 12px rgba(58,112,48,0.10);
     --radius: 12px;
+    --orange: #e65100;
+    --orange-light: #ff9800;
+    --orange-bg: #fff3e0;
+    --orange-border: #ffe0b2;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -70,6 +74,36 @@
     font-family: monospace;
   }
   .api-bar .hint { font-size: 0.75rem; color: #999; }
+  .api-bar .faang-hint { font-size: 0.75rem; color: var(--accent-dark); font-weight: 600; background: var(--accent); padding: 2px 8px; border-radius: 10px; }
+
+  /* ── Mode tabs ── */
+  .mode-tabs-bar {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    gap: 4px;
+  }
+  .mode-tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 12px 20px 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: inherit;
+    white-space: nowrap;
+    margin-bottom: -2px;
+  }
+  .mode-tab-btn:hover { color: var(--accent-dark); }
+  .mode-tab-btn.active { color: var(--accent-dark); border-bottom-color: var(--accent-mid); }
+  .mode-tab-btn.faang-btn.active { color: var(--orange); border-bottom-color: var(--orange-light); }
+
+  .mode-panel { display: none; }
+  .mode-panel.active { display: block; }
 
   main { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
 
@@ -82,6 +116,8 @@
     margin-bottom: 28px;
   }
   .form-card h2 { font-size: 1.05rem; font-weight: 700; color: var(--accent-dark); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  .form-card.faang-card { border-color: var(--orange-border); }
+  .form-card.faang-card h2 { color: var(--orange); }
 
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   @media(max-width:640px){ .form-grid { grid-template-columns: 1fr; } }
@@ -89,6 +125,7 @@
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field.full { grid-column: 1 / -1; }
   label.field-label { font-size: 0.82rem; font-weight: 600; color: var(--accent-dark); }
+  label.field-label.orange { color: var(--orange); }
   input[type=text], input[type=date], textarea, select {
     padding: 9px 13px;
     border: 1.5px solid var(--border);
@@ -133,12 +170,18 @@
     color: var(--muted);
     font-weight: 500;
     white-space: nowrap;
+    user-select: none;
   }
   .pill.active {
     background: var(--accent-mid);
     border-color: var(--accent-mid);
     color: white;
     font-weight: 700;
+  }
+  .pill.orange-pill.active {
+    background: var(--orange-light);
+    border-color: var(--orange-light);
+    color: white;
   }
 
   .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -159,6 +202,8 @@
     color: white;
   }
   .btn-primary:hover { background: #2a5520; transform: translateY(-1px); }
+  .btn-primary.orange-btn { background: var(--orange); }
+  .btn-primary.orange-btn:hover { background: var(--orange-light); }
   .btn-secondary {
     background: var(--accent);
     color: var(--accent-dark);
@@ -405,6 +450,136 @@
     display: none;
   }
   .error-box.show { display: block; }
+
+  /* ── FAANG Prep Mode ── */
+  #faang-results { display: none; }
+
+  .faang-header-bar {
+    background: var(--orange-bg);
+    border: 1.5px solid var(--orange-border);
+    border-radius: var(--radius);
+    padding: 16px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    align-items: center;
+    box-shadow: var(--shadow);
+  }
+  .faang-header-bar .stat-val { color: var(--orange); }
+
+  .faang-week-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .faang-week-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    animation: fadeUp 0.3s ease both;
+  }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: none; } }
+  .faang-week-card:nth-child(n+2) { animation-delay: calc((var(--i, 1)) * 0.04s); }
+
+  .faang-week-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    background: var(--bg);
+    border-bottom: 1.5px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .faang-week-header:hover { background: #e6f0e4; }
+  .faang-week-num {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--orange);
+    background: var(--orange-bg);
+    border: 1px solid var(--orange-border);
+    padding: 3px 10px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+  .faang-week-topic {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+    flex: 1;
+  }
+  .faang-week-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .faang-meta-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .faang-week-toggle {
+    font-size: 1.1rem;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .faang-week-card.open .faang-week-toggle { transform: rotate(180deg); }
+
+  .faang-week-body {
+    display: none;
+    padding: 18px 20px;
+    gap: 14px;
+  }
+  .faang-week-card.open .faang-week-body { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width:560px) { .faang-week-card.open .faang-week-body { grid-template-columns: 1fr; } }
+
+  .faang-detail-box {
+    background: var(--bg);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+  .faang-detail-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent-dark);
+    margin-bottom: 8px;
+  }
+  .faang-detail-label.orange { color: var(--orange); }
+  .faang-detail-text {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .faang-detail-text ul { padding-left: 16px; }
+  .faang-detail-text li { margin-bottom: 3px; }
+  .faang-detail-box.full { grid-column: 1 / -1; }
+  .faang-company-note {
+    background: var(--orange-bg);
+    border: 1px solid var(--orange-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    grid-column: 1 / -1;
+  }
+
+  .faang-result-actions {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+  }
 </style>
 </head>
 <body>
@@ -413,7 +588,7 @@
   <div class="logo">📅</div>
   <div class="header-text">
     <h1>Study Plan Maker</h1>
-    <p>Personalized day-by-day study schedule powered by Gemini AI</p>
+    <p>General study plans + FAANG 12-week interview prep</p>
   </div>
   <span class="badge">Agent #15 / 100</span>
 </header>
@@ -422,8 +597,17 @@
   <label for="apiKey">🔑 Gemini API Key</label>
   <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
   <span class="hint">Stored locally · never sent anywhere except Google</span>
+  <span class="faang-hint">⚡ FAANG Prep Mode works offline — no API needed!</span>
 </div>
 
+<!-- Mode tabs -->
+<div class="mode-tabs-bar">
+  <button class="mode-tab-btn active" onclick="switchMode('general', this)">📅 General Study Plan</button>
+  <button class="mode-tab-btn faang-btn" onclick="switchMode('faang', this)">🎯 FAANG Prep Mode</button>
+</div>
+
+<!-- ═══════════════ GENERAL STUDY PLAN MODE ═══════════════ -->
+<div id="mode-general" class="mode-panel active">
 <main>
   <div class="form-card">
     <h2>📝 Plan Details</h2>
@@ -495,6 +679,54 @@
     <div class="saved-list" id="savedList"></div>
   </div>
 </main>
+</div><!-- /mode-general -->
+
+<!-- ═══════════════ FAANG PREP MODE ═══════════════ -->
+<div id="mode-faang" class="mode-panel">
+<main>
+  <div class="form-card faang-card">
+    <h2>🎯 FAANG Prep Setup</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label orange" for="faangCompany">Target Company</label>
+        <select id="faangCompany">
+          <option value="Google">Google</option>
+          <option value="Meta">Meta</option>
+          <option value="Amazon">Amazon</option>
+          <option value="Apple">Apple</option>
+          <option value="Netflix">Netflix</option>
+          <option value="General FAANG">General FAANG (any big tech)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label orange" for="faangDate">Interview Date <span style="color:var(--muted);font-weight:400">(approximate)</span></label>
+        <input type="date" id="faangDate">
+      </div>
+      <div class="field full">
+        <label class="field-label orange">Skill Level</label>
+        <div class="pill-group" id="faangLevelGroup">
+          <div class="pill orange-pill" data-level="Beginner">🌱 Beginner</div>
+          <div class="pill orange-pill active" data-level="Intermediate">⚡ Intermediate</div>
+          <div class="pill orange-pill" data-level="Advanced">🔥 Advanced</div>
+        </div>
+      </div>
+    </div>
+    <div class="error-box" id="faangErrorBox"></div>
+    <div class="form-actions">
+      <button class="btn btn-primary orange-btn" id="faangGenBtn" onclick="generateFAANG()">🎯 Generate 12-Week Schedule</button>
+    </div>
+  </div>
+
+  <div id="faang-results">
+    <div class="faang-header-bar" id="faangHeaderBar"></div>
+    <div class="faang-result-actions">
+      <button class="btn btn-outline btn-sm" id="faangCopyBtn">📋 Export as Text</button>
+      <button class="btn btn-outline btn-sm" id="faangDownloadBtn">💾 Download .txt</button>
+    </div>
+    <div class="faang-week-grid" id="faangWeekGrid"></div>
+  </div>
+</main>
+</div><!-- /mode-faang -->
 
 <!-- Loading -->
 <div class="loading-overlay" id="loadingOverlay">
@@ -510,11 +742,22 @@
 <script>
 // ─── State ───────────────────────────────────────────────────────────────────
 let currentPlan = null;
+let currentFAANGPlan = null;
 let selectedStyle = 'Balanced (all topics daily)';
+let selectedFAANGLevel = 'Intermediate';
 const today = new Date().toISOString().split('T')[0];
+
+// ─── Mode switching ───────────────────────────────────────────────────────────
+function switchMode(name, btn) {
+  document.querySelectorAll('.mode-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('mode-' + name).classList.add('active');
+}
 
 // ─── Init ────────────────────────────────────────────────────────────────────
 document.getElementById('examDate').min = today;
+document.getElementById('faangDate').min = today;
 
 const savedKey = document.getElementById('apiKey');
 savedKey.value = localStorage.getItem('gemini_api_key') || '';
@@ -529,13 +772,22 @@ hoursSlider.addEventListener('input', () => {
   hoursLabel.textContent = v + 'h';
 });
 
-// Style pills
+// Style pills (general)
 document.getElementById('styleGroup').addEventListener('click', e => {
   const pill = e.target.closest('.pill');
   if (!pill) return;
-  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#styleGroup .pill').forEach(p => p.classList.remove('active'));
   pill.classList.add('active');
   selectedStyle = pill.dataset.style;
+});
+
+// Level pills (FAANG)
+document.getElementById('faangLevelGroup').addEventListener('click', e => {
+  const pill = e.target.closest('.pill');
+  if (!pill) return;
+  document.querySelectorAll('#faangLevelGroup .pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  selectedFAANGLevel = pill.dataset.level;
 });
 
 // Modal close
@@ -545,7 +797,7 @@ document.getElementById('modalOverlay').addEventListener('click', e => {
 
 renderSavedList();
 
-// ─── Generate ────────────────────────────────────────────────────────────────
+// ─── Generate (General) ──────────────────────────────────────────────────────
 document.getElementById('generateBtn').addEventListener('click', generate);
 document.getElementById('regenerateBtn').addEventListener('click', generate);
 
@@ -688,17 +940,14 @@ function renderCalendar(plan) {
   if (!days.length) return;
 
   const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-  // Build week rows (Sunday-first)
   const firstDate = new Date(days[0].date + 'T00:00:00');
-  const startDow = firstDate.getDay(); // 0=Sun
+  const startDow = firstDate.getDay();
   const grid = [];
-  let week = new Array(startDow).fill(null); // padding
+  let week = new Array(startDow).fill(null);
   days.forEach(d => {
     const dow = new Date(d.date + 'T00:00:00').getDay();
     if (week.length === 7) { grid.push(week); week = []; }
-    // If this day's DOW doesn't line up, fill gaps
     while (week.length < dow) week.push(null);
     week.push(d);
   });
@@ -713,10 +962,6 @@ function renderCalendar(plan) {
       const isToday = day.date === today;
       const isPast = day.date < today;
       const isOff = day.isOff;
-      let cls = 'day-cell';
-      if (isToday) cls += ' today';
-      else if (isPast) cls += ' past';
-      if (isOff) cls += ' off';
 
       const dateObj = new Date(day.date + 'T00:00:00');
       const label = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
@@ -784,7 +1029,7 @@ function closeModal() {
   document.getElementById('modalOverlay').classList.remove('show');
 }
 
-// ─── Export ───────────────────────────────────────────────────────────────────
+// ─── Export (General) ─────────────────────────────────────────────────────────
 document.getElementById('copyBtn').addEventListener('click', () => {
   navigator.clipboard.writeText(planToText(currentPlan)).then(() => {
     const btn = document.getElementById('copyBtn');
@@ -862,6 +1107,377 @@ function deleteSaved(idx) {
   renderSavedList();
 }
 
+// ═══════════════════════════════════════════════════════
+//  FAANG PREP MODE — fully client-side, no API needed
+// ═══════════════════════════════════════════════════════
+
+const FAANG_BASE_SCHEDULE = [
+  {
+    week: 1,
+    topic: 'Arrays & Strings',
+    topics: ['Two pointers', 'Sliding window', 'Prefix sums', 'Kadane\'s algorithm'],
+    sysDesign: 'Introduction to System Design thinking',
+    leetcodeTarget: { Beginner: 8, Intermediate: 15, Advanced: 25 },
+    dailyHours: { Beginner: 2, Intermediate: 3, Advanced: 4 },
+    technique: 'Pattern recognition — identify array problem types',
+    focus: 'Fundamentals & pattern building',
+  },
+  {
+    week: 2,
+    topic: 'Hashing & Two Pointers',
+    topics: ['HashMap patterns', 'Anagram detection', 'Fast & slow pointers', 'Cycle detection'],
+    sysDesign: 'Horizontal vs. Vertical Scaling',
+    leetcodeTarget: { Beginner: 8, Intermediate: 15, Advanced: 25 },
+    dailyHours: { Beginner: 2, Intermediate: 3, Advanced: 4 },
+    technique: 'Solve each problem in 2 ways; pick the optimal',
+    focus: 'Speed up your hash-map intuition',
+  },
+  {
+    week: 3,
+    topic: 'Stacks, Queues & Linked Lists',
+    topics: ['Monotonic stack', 'BFS/queue patterns', 'Reverse linked list', 'Merge sorted lists'],
+    sysDesign: 'Load Balancers & CDNs',
+    leetcodeTarget: { Beginner: 8, Intermediate: 12, Advanced: 20 },
+    dailyHours: { Beginner: 2, Intermediate: 3, Advanced: 4 },
+    technique: 'Draw diagrams for pointer manipulation problems',
+    focus: 'Pointer confidence & stack intuition',
+  },
+  {
+    week: 4,
+    topic: 'Trees & Binary Search Trees',
+    topics: ['DFS traversals (pre/in/post)', 'Level-order BFS', 'BST insert/delete/search', 'Lowest common ancestor'],
+    sysDesign: 'Databases: SQL vs NoSQL',
+    leetcodeTarget: { Beginner: 8, Intermediate: 12, Advanced: 20 },
+    dailyHours: { Beginner: 2, Intermediate: 3, Advanced: 4 },
+    technique: 'Recursive thinking: trust the recursion; define base + recursive case',
+    focus: 'Tree traversal fluency',
+  },
+  {
+    week: 5,
+    topic: 'Binary Search & Sorting',
+    topics: ['Classic binary search', 'Search in rotated array', 'Merge sort', 'Quick sort', 'Search on answer'],
+    sysDesign: 'Caching strategies (Redis, Memcached)',
+    leetcodeTarget: { Beginner: 7, Intermediate: 12, Advanced: 18 },
+    dailyHours: { Beginner: 2, Intermediate: 3, Advanced: 4 },
+    technique: '"Search on answer" pattern for optimization problems',
+    focus: 'O(log n) intuition',
+  },
+  {
+    week: 6,
+    topic: 'Heaps & Priority Queues',
+    topics: ['Min/Max heap operations', 'Top-K elements', 'Merge K sorted lists', 'Median from data stream'],
+    sysDesign: 'Message Queues (Kafka, RabbitMQ)',
+    leetcodeTarget: { Beginner: 6, Intermediate: 10, Advanced: 15 },
+    dailyHours: { Beginner: 2, Intermediate: 3, Advanced: 4 },
+    technique: 'Visualize the heap tree; practice Python heapq & Java PriorityQueue',
+    focus: 'Priority queue mastery',
+  },
+  {
+    week: 7,
+    topic: 'Graphs (BFS & DFS)',
+    topics: ['Graph representations', 'BFS shortest path', 'DFS connected components', 'Topological sort', 'Cycle detection'],
+    sysDesign: 'Microservices Architecture',
+    leetcodeTarget: { Beginner: 7, Intermediate: 12, Advanced: 18 },
+    dailyHours: { Beginner: 2.5, Intermediate: 3.5, Advanced: 5 },
+    technique: 'Always identify: directed vs undirected, weighted vs unweighted',
+    focus: 'Graph traversal confidence',
+  },
+  {
+    week: 8,
+    topic: 'Dynamic Programming I',
+    topics: ['Memoization vs tabulation', '1D DP (climbing stairs, fibonacci)', 'Knapsack 0/1', 'Coin change'],
+    sysDesign: 'Consistent Hashing & Distributed Storage',
+    leetcodeTarget: { Beginner: 6, Intermediate: 10, Advanced: 15 },
+    dailyHours: { Beginner: 3, Intermediate: 4, Advanced: 5 },
+    technique: 'State definition first: what does dp[i] mean? Write recurrence before code',
+    focus: 'DP pattern identification',
+  },
+  {
+    week: 9,
+    topic: 'Dynamic Programming II',
+    topics: ['2D DP (LCS, Edit Distance)', 'Intervals DP', 'Subsequence problems', 'DP on trees'],
+    sysDesign: 'URL Shortener (full system design walkthrough)',
+    leetcodeTarget: { Beginner: 5, Intermediate: 8, Advanced: 12 },
+    dailyHours: { Beginner: 3, Intermediate: 4, Advanced: 5 },
+    technique: 'Practice explaining your DP state + transitions out loud',
+    focus: 'Advanced DP + system design integration',
+  },
+  {
+    week: 10,
+    topic: 'System Design Deep Dive',
+    topics: ['Design Twitter Feed', 'Design Uber backend', 'Rate limiting patterns', 'Consistent hashing', 'CAP theorem'],
+    sysDesign: 'Design a distributed key-value store',
+    leetcodeTarget: { Beginner: 5, Intermediate: 8, Advanced: 10 },
+    dailyHours: { Beginner: 3, Intermediate: 4, Advanced: 5 },
+    technique: 'Use RESHADED framework: Requirements, Estimation, Storage, High-level, APIs, Data flow, Edge cases',
+    focus: 'System design vocabulary & frameworks',
+  },
+  {
+    week: 11,
+    topic: 'Behavioral & Company Research',
+    topics: ['STAR method stories', 'Leadership/conflict scenarios', 'Company values & products', 'Past project narratives'],
+    sysDesign: 'Review: design the system you\'d build at your target company',
+    leetcodeTarget: { Beginner: 5, Intermediate: 8, Advanced: 10 },
+    dailyHours: { Beginner: 2.5, Intermediate: 3, Advanced: 4 },
+    technique: 'Record yourself answering STAR questions — review playback for clarity',
+    focus: 'Story prep + company alignment',
+  },
+  {
+    week: 12,
+    topic: 'Mock Interviews & Final Review',
+    topics: ['2 full mock interviews per day', 'Timed LeetCode sessions (45 min)', 'Weak area review', 'Behavioral question bank drill'],
+    sysDesign: 'Full system design mock (timed 45 minutes)',
+    leetcodeTarget: { Beginner: 8, Intermediate: 12, Advanced: 15 },
+    dailyHours: { Beginner: 3, Intermediate: 4, Advanced: 5 },
+    technique: 'Think out loud every single session — interviewers evaluate process, not just answers',
+    focus: 'Simulate real interview conditions',
+  },
+];
+
+const COMPANY_NOTES = {
+  Google: [
+    'Google values elegant, scalable solutions — O(n log n) is often expected over O(n²)',
+    'Expect 2 coding rounds + 1 Googleyness/behavioral + 1-2 system design at L4+',
+    'Core focus: strong CS fundamentals — graphs, DP, trees are very common',
+    'Google loves "what\'s the most optimal solution?" — always discuss trade-offs',
+    'System design: focus on Google-scale (billions of users, globally distributed)',
+    'Heavy tree/graph coverage at Google — invest extra time here',
+    'Google rarely asks pure behavioral — focus on "Googleyness" alignment stories',
+    'System design at Google: MapReduce, Bigtable, Spanner concepts are relevant',
+    'Deepen DP knowledge — Google often brings DP problems to final rounds',
+    'Design Gmail, Google Search, YouTube — practice these canonical systems',
+    'Research "Google\'s 10 things we know to be true" — internalize them for behavioral',
+    'Mock with ex-Googlers on Pramp or interviewing.io',
+  ],
+  Meta: [
+    'Meta uses a condensed interview format: 2 coding + 1 system design + behavioral (E3-E5)',
+    'Coding at Meta is often medium-hard graphs and arrays; DP is less common than Google',
+    'Behavioral at Meta maps to their core values: Move Fast, Be Direct, Build Social Value',
+    'Understand Meta\'s family of apps: Facebook, Instagram, WhatsApp, Messenger, Oculus',
+    'Meta loves designing feeds, notification systems, and social graphs',
+    'Focus graph skills: social networks are graph problems at scale',
+    'Meta behavioral: prepare for "Tell me about a time you disagreed and committed"',
+    'System design: News Feed is the canonical Meta design question',
+    'Meta often tests DP in E5+ roles — be ready for harder variants',
+    'Design Instagram, WhatsApp, Messenger — these appear often in system design rounds',
+    'Prepare Meta leadership principles: "Impact", "Move Fast", "Be Open"',
+    'Focus mocks on 45-minute coding sessions — Meta enforces strict time limits',
+  ],
+  Amazon: [
+    'Amazon interviews are unique: Leadership Principles (LPs) pervade every round',
+    'Every behavioral question maps to an LP — prep 2-3 STAR stories per principle',
+    'Coding at Amazon: medium LeetCode, often O(n) or O(n log n) array/string/tree',
+    'System design at Amazon: AWS-centric — know S3, DynamoDB, SQS, Lambda, EC2',
+    'Amazon bar-raiser round: focuses entirely on LPs — this is often the decisive round',
+    'Coding focus: arrays, trees, BFS/DFS — Amazon rarely asks hard DP in SDE interviews',
+    'Deep-dive LPs: "Customer Obsession", "Ownership", "Invent and Simplify" most commonly tested',
+    'System design: design Amazon warehouse system, recommendation engine, or order tracking',
+    'Know 16 Leadership Principles by heart — recite them, align all stories to them',
+    'Design Amazon Delivery Tracking, Prime Video — prepare these specifically',
+    'Amazon behavioral: have a "failure story" ready — they specifically ask for it',
+    'Mock LP interviews are crucial — most candidates lose here, not in coding',
+  ],
+  Apple: [
+    'Apple interviews are less standardized — expect deep technical dives in your domain',
+    'Apple values attention to detail, craftsmanship, and user-centric thinking',
+    'Coding rounds emphasize clean, production-quality code — readability matters',
+    'Apple behavioral: tie answers to "making incredible products" and user experience',
+    'System design: focus on hardware/software integration patterns (unique to Apple)',
+    'Tree/graph problems are common; Apple loves elegant recursive solutions',
+    'Apple values: "We believe in the simple, not the complex" — show this in your code',
+    'System design at Apple: iCloud, App Store, Siri backend are relevant examples',
+    'Apple DP: emphasis on correctness and clean implementation over theoretical complexity',
+    'Design Apple Pay, AirDrop, Siri architecture — these are Apple-specific scenarios',
+    'Behavioral at Apple: "perfectionism" is valued — use stories showing relentless quality',
+    'Apple often does team-match interviews — research specific team before your final loop',
+  ],
+  Netflix: [
+    'Netflix only hires senior+ (E5+) and values high-performing senior engineers',
+    'Netflix culture: "Keeper Test" — every employee should be a top performer',
+    'Coding at Netflix: complex graphs, caching, and streaming-related patterns',
+    'System design at Netflix: focus on CDN, video encoding, recommendation systems',
+    'Netflix behavioral: "Freedom and Responsibility" culture — show extreme ownership',
+    'Advanced graphs & streaming algorithms — Netflix problems are often domain-specific',
+    'Netflix loves designing recommendation systems — collaborative filtering & content-based',
+    'DP at Netflix: often related to streaming optimization or resource scheduling',
+    'Design Netflix CDN, recommendation engine, or A/B testing platform',
+    'Behavioral: Netflix asks "What\'s the most ambitious project you\'ve shipped?" — have a strong answer',
+    'Netflix system design: microservices at massive scale — know Chaos Engineering, Hystrix',
+    'Mock senior-level interviews: Netflix expects you to drive the conversation independently',
+  ],
+  'General FAANG': [
+    'Build a solid CS fundamentals base — all FAANG companies value this',
+    'Coding patterns: two pointers, sliding window, BFS/DFS, binary search on answer',
+    'Arrays and hashing are the most universally tested topic across all companies',
+    'Trees are tested at every FAANG — invest heavily in recursive tree patterns',
+    'Behavioral: STAR method with measurable impact — "I improved X by Y% which resulted in Z"',
+    'Graph fluency is critical — connected components, topological sort, shortest path',
+    'System design: know CAP theorem, consistent hashing, and load balancing patterns',
+    'Dynamic programming: focus on the 10 most common patterns (knapsack, LCS, coin change)',
+    'System design deep-dive: URL shortener, Twitter, Uber are the universal practice cases',
+    'Mock at interviewing.io or with a study partner — verbalize your thought process',
+    'Behavioral: prepare 5 core stories (impact, conflict, failure, leadership, technical challenge)',
+    'Final week: simulate full interview loops — 45-min coding + 45-min system design',
+  ],
+};
+
+function generateFAANG() {
+  const company = document.getElementById('faangCompany').value;
+  const interviewDate = document.getElementById('faangDate').value;
+  const level = selectedFAANGLevel;
+
+  document.getElementById('faangErrorBox').classList.remove('show');
+
+  if (!interviewDate) {
+    document.getElementById('faangErrorBox').textContent = 'Please select your approximate interview date.';
+    document.getElementById('faangErrorBox').classList.add('show');
+    return;
+  }
+
+  const interviewDateObj = new Date(interviewDate + 'T00:00:00');
+  const todayObj = new Date(today + 'T00:00:00');
+  const daysUntil = Math.ceil((interviewDateObj - todayObj) / 86400000);
+  if (daysUntil <= 0) {
+    document.getElementById('faangErrorBox').textContent = 'Interview date must be in the future.';
+    document.getElementById('faangErrorBox').classList.add('show');
+    return;
+  }
+
+  const companyNotes = COMPANY_NOTES[company] || COMPANY_NOTES['General FAANG'];
+
+  // Build plan from base schedule + company notes
+  const plan = FAANG_BASE_SCHEDULE.map((week, i) => ({
+    ...week,
+    companyNote: companyNotes[i] || companyNotes[companyNotes.length - 1],
+    dailyHoursForLevel: week.dailyHours[level],
+    leetcodeForLevel: week.leetcodeTarget[level],
+  }));
+
+  currentFAANGPlan = { company, level, interviewDate, plan };
+
+  // Save to localStorage
+  localStorage.setItem('faang_plan_15', JSON.stringify(currentFAANGPlan));
+
+  renderFAANGPlan(currentFAANGPlan, daysUntil);
+  document.getElementById('faang-results').style.display = 'block';
+  document.getElementById('faang-results').scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderFAANGPlan(data, daysUntil) {
+  const { company, level, plan } = data;
+  const totalLC = plan.reduce((a, w) => a + w.leetcodeForLevel, 0);
+  const totalH = plan.reduce((a, w) => a + w.dailyHoursForLevel * 7, 0);
+
+  // Header stats
+  document.getElementById('faangHeaderBar').innerHTML = `
+    <div class="stat"><div class="stat-val" style="color:var(--orange)">${company}</div><div class="stat-label">Target Company</div></div>
+    <div class="stats-divider"></div>
+    <div class="stat"><div class="stat-val" style="color:var(--orange)">12</div><div class="stat-label">Weeks</div></div>
+    <div class="stats-divider"></div>
+    <div class="stat"><div class="stat-val" style="color:var(--orange)">${totalLC}</div><div class="stat-label">LeetCode Target</div></div>
+    <div class="stats-divider"></div>
+    <div class="stat"><div class="stat-val" style="color:var(--orange)">${Math.round(totalH)}h</div><div class="stat-label">Total Study Hours</div></div>
+    <div class="stats-divider"></div>
+    <div class="stat"><div class="stat-val" style="color:var(--orange)">${level}</div><div class="stat-label">Level</div></div>
+    <div class="stats-divider"></div>
+    <div class="stat"><div class="stat-val" style="color:var(--orange)">${daysUntil}</div><div class="stat-label">Days Until Interview</div></div>
+  `;
+
+  // Week cards
+  const grid = document.getElementById('faangWeekGrid');
+  grid.innerHTML = '';
+  plan.forEach((week, i) => {
+    const card = document.createElement('div');
+    card.className = 'faang-week-card';
+    card.style.setProperty('--i', i);
+    card.innerHTML = `
+      <div class="faang-week-header" onclick="toggleFAANGWeek(this)">
+        <span class="faang-week-num">Week ${week.week}</span>
+        <span class="faang-week-topic">${week.topic}</span>
+        <div class="faang-week-meta">
+          <span class="faang-meta-badge">⏱ ${week.dailyHoursForLevel}h/day</span>
+          <span class="faang-meta-badge">💻 ${week.leetcodeForLevel} problems</span>
+          <span class="faang-meta-badge">🎯 ${week.focus}</span>
+        </div>
+        <span class="faang-week-toggle">▾</span>
+      </div>
+      <div class="faang-week-body">
+        <div class="faang-detail-box">
+          <div class="faang-detail-label">📚 Topics to Cover</div>
+          <div class="faang-detail-text"><ul>${week.topics.map(t => `<li>${t}</li>`).join('')}</ul></div>
+        </div>
+        <div class="faang-detail-box">
+          <div class="faang-detail-label">🏗️ System Design</div>
+          <div class="faang-detail-text">${week.sysDesign}</div>
+        </div>
+        <div class="faang-detail-box">
+          <div class="faang-detail-label">🧠 Study Technique</div>
+          <div class="faang-detail-text">${week.technique}</div>
+        </div>
+        <div class="faang-detail-box">
+          <div class="faang-detail-label">💻 LeetCode Target</div>
+          <div class="faang-detail-text"><strong>${week.leetcodeForLevel} problems</strong> (${week.dailyHoursForLevel}h/day)</div>
+        </div>
+        <div class="faang-company-note">
+          <div class="faang-detail-label orange">🏷️ ${company}-specific Note</div>
+          <div class="faang-detail-text">${week.companyNote}</div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function toggleFAANGWeek(header) {
+  const card = header.closest('.faang-week-card');
+  card.classList.toggle('open');
+}
+
+// Export FAANG plan
+document.getElementById('faangCopyBtn').addEventListener('click', () => {
+  if (!currentFAANGPlan) return;
+  navigator.clipboard.writeText(faangPlanToText(currentFAANGPlan)).then(() => {
+    const btn = document.getElementById('faangCopyBtn');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Export as Text', 2000);
+  });
+});
+
+document.getElementById('faangDownloadBtn').addEventListener('click', () => {
+  if (!currentFAANGPlan) return;
+  const text = faangPlanToText(currentFAANGPlan);
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `faang-prep-${currentFAANGPlan.company.toLowerCase().replace(/\s+/g,'-')}.txt`;
+  a.click();
+});
+
+function faangPlanToText(data) {
+  const { company, level, interviewDate, plan } = data;
+  let out = `12-Week FAANG Interview Prep — ${company}\n`;
+  out += `${'='.repeat(50)}\n`;
+  out += `Level: ${level} | Target Date: ${interviewDate}\n\n`;
+  plan.forEach(w => {
+    out += `Week ${w.week}: ${w.topic}\n`;
+    out += `  Daily: ${w.dailyHoursForLevel}h/day | LeetCode target: ${w.leetcodeForLevel} problems\n`;
+    out += `  Topics: ${w.topics.join(', ')}\n`;
+    out += `  System Design: ${w.sysDesign}\n`;
+    out += `  Technique: ${w.technique}\n`;
+    out += `  ${company} Note: ${w.companyNote}\n\n`;
+  });
+  return out;
+}
+
+// Load saved FAANG plan on init
+(function loadSavedFAANG() {
+  const saved = localStorage.getItem('faang_plan_15');
+  if (!saved) return;
+  try {
+    currentFAANGPlan = JSON.parse(saved);
+  } catch {}
+})();
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function showLoading(on) {
   document.getElementById('loadingOverlay').classList.toggle('show', on);
@@ -875,7 +1491,6 @@ function clearError() {
   document.getElementById('errorBox').classList.remove('show');
 }
 function darken(hex) {
-  // Darken a pastel hex color for text
   try {
     let r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
     r = Math.max(0, r - 70); g = Math.max(0, g - 70); b = Math.max(0, b - 70);

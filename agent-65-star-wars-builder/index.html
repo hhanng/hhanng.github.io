@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Wars Creative Hub — Agent #65</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--card:#21262d;--border:#30363d;--text:#e6edf3;--sub:#8b949e;--gold:#FFD700;--gold2:#b8860b;--red:#f85149;--green:#3fb950;--blue:#58a6ff;--mono:'Fira Code',Consolas,monospace}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+header{background:#0a0c10;border-bottom:2px solid var(--gold);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.1rem;font-weight:800;color:var(--gold);letter-spacing:.05em}
+header h1 span{color:var(--sub);font-weight:400;font-size:.8rem;margin-left:8px;letter-spacing:0}
+.api-row{display:flex;align-items:center;gap:8px;margin-left:auto}
+.api-row label{font-size:.75rem;color:var(--sub)}
+.api-row input{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:.78rem;font-family:var(--mono);width:240px;outline:none}
+.api-row input:focus{border-color:var(--gold)}
+.tabs{display:flex;background:#0a0c10;border-bottom:1px solid var(--gold)50;padding:0 20px;gap:4px}
+.tab{padding:11px 18px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--sub);border-bottom:2px solid transparent;transition:.15s;white-space:nowrap}
+.tab:hover{color:var(--gold)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.page{display:none;padding:24px 20px;max-width:1000px;margin:0 auto}
+.page.active{display:block}
+label.lbl{display:block;font-size:.78rem;font-weight:600;color:var(--sub);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+select,input[type=text]{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:.88rem;outline:none;width:100%;transition:.15s}
+select:focus,input:focus{border-color:var(--gold)}
+textarea{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:.9rem;line-height:1.7;resize:vertical;outline:none;width:100%;transition:.15s}
+textarea:focus{border-color:var(--gold)}
+.btn{padding:9px 20px;border-radius:7px;border:none;cursor:pointer;font-size:.85rem;font-weight:700;transition:.15s}
+.btn-gold{background:var(--gold);color:#0d1117}
+.btn-gold:hover{background:#e6c200}
+.btn-sm{padding:5px 12px;font-size:.75rem;border-radius:5px;background:var(--card);color:var(--sub);border:1px solid var(--border);cursor:pointer}
+.btn-sm:hover{border-color:var(--gold);color:var(--gold)}
+.row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.col{flex:1;min-width:180px}
+.sec-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--sub);margin-bottom:10px}
+/* Character grid */
+.char-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.char-btn{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:.82rem;color:var(--text);transition:.15s;white-space:nowrap}
+.char-btn:hover{border-color:var(--gold);color:var(--gold)}
+.char-btn.active{border-color:var(--gold);background:#21262d;color:var(--gold)}
+/* Mission cards */
+.mission-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.mission-card{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;text-align:center;transition:.15s}
+.mission-card:hover{border-color:var(--gold)}
+.mission-card.active{border-color:var(--gold);background:#21262d}
+.mission-icon{font-size:1.6rem;display:block;margin-bottom:4px}
+.mission-name{font-size:.8rem;color:var(--text);font-weight:600}
+/* Story area */
+.story-box{background:#0a0c10;border:1px solid var(--gold)40;border-radius:10px;padding:20px;font-size:.92rem;line-height:1.9;color:#e8d5a0;min-height:100px;margin-bottom:12px;font-family:Georgia,'Times New Roman',serif}
+.story-box .vocab-word{color:var(--gold);cursor:pointer;border-bottom:1px dashed var(--gold);position:relative}
+.vocab-popup{display:none;position:absolute;bottom:calc(100% + 6px);left:0;background:var(--surface);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:.78rem;min-width:200px;z-index:10;color:var(--text);font-family:'Segoe UI',sans-serif;box-shadow:0 4px 20px #00000080}
+.vocab-popup.show{display:block}
+.vocab-popup strong{color:var(--gold)}
+.exchange-count{font-size:.75rem;color:var(--sub);margin-bottom:10px}
+/* Wiki */
+.wiki-output{background:#0a0c10;border:1px solid var(--gold)30;border-radius:10px;padding:20px;line-height:1.8}
+.wiki-infobox{float:right;margin:0 0 16px 16px;background:var(--card);border:2px solid var(--gold)50;border-radius:8px;padding:12px;min-width:200px;font-size:.8rem}
+.wiki-infobox h4{color:var(--gold);font-size:.88rem;font-weight:700;margin-bottom:8px;border-bottom:1px solid var(--gold)30;padding-bottom:4px}
+.wiki-infobox tr td:first-child{color:var(--sub);padding-right:10px;font-weight:600;white-space:nowrap}
+.wiki-infobox tr td{padding:3px 0;vertical-align:top}
+.wiki-h2{font-size:1.1rem;font-weight:700;color:var(--gold);margin:16px 0 8px;border-bottom:1px solid var(--gold)30;padding-bottom:4px}
+.wiki-h3{font-size:.95rem;font-weight:700;color:#e8d5a0;margin:12px 0 6px}
+.wiki-p{font-size:.88rem;color:#c8c0a8;margin-bottom:8px;line-height:1.7}
+/* Trivia */
+.trivia-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.diff-btn{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:8px 18px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--sub);transition:.15s}
+.diff-btn:hover,.diff-btn.active{border-color:var(--gold);color:var(--gold);background:#21262d}
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:12px}
+.q-text{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:16px;line-height:1.5}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.options-grid{grid-template-columns:1fr}}
+.opt-btn{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;font-size:.85rem;color:var(--text);text-align:left;transition:.15s}
+.opt-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.opt-btn.correct{border-color:var(--green);background:#0e2a14;color:var(--green)!important}
+.opt-btn.wrong{border-color:var(--red);background:#2a0e0e;color:var(--red)!important}
+.timer-bar-wrap{background:var(--border);border-radius:4px;height:6px;overflow:hidden;margin-bottom:12px}
+.timer-bar-fill{height:100%;border-radius:4px;background:var(--gold);transition:width 1s linear}
+.timer-label{font-size:.78rem;color:var(--sub);margin-bottom:6px}
+.score-display{font-size:3rem;font-weight:800;text-align:center;color:var(--gold);margin:16px 0 6px}
+.rank-display{text-align:center;font-size:1.1rem;color:#e8d5a0;margin-bottom:16px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>⭐ STAR WARS CREATIVE HUB <span>Agent #65</span></h1>
+  <div class="api-row">
+    <label>Gemini API Key</label>
+    <input type="password" id="api-key" placeholder="AIza..." oninput="localStorage.setItem('ag65_key',this.value)">
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('story',this)">✍️ Co-Write an Adventure</div>
+  <div class="tab" onclick="switchTab('wiki',this)">📖 Fan Wiki Generator</div>
+  <div class="tab" onclick="switchTab('trivia',this)">🏆 Trivia Challenge</div>
+</div>
+
+<!-- ══════════════ TAB 1 — CO-WRITE ══════════════ -->
+<div class="page active" id="tab-story">
+  <div id="story-setup">
+    <div class="sec-title">Step 1 — Choose Your Character</div>
+    <div class="char-grid" id="char-grid"></div>
+
+    <div class="sec-title">Step 2 — Mission Type</div>
+    <div class="mission-grid" id="mission-grid"></div>
+
+    <div class="row" style="align-items:flex-end">
+      <div class="col" style="max-width:240px">
+        <label class="lbl">Setting</label>
+        <select id="story-setting">
+          <option>Death Star</option><option>Tatooine</option><option>Hoth</option>
+          <option>Dagobah</option><option>Coruscant</option><option>Mandalore</option>
+          <option>Ahch-To</option><option>Random</option>
+        </select>
+      </div>
+      <button class="btn btn-gold" id="story-begin-btn" onclick="beginStory()" disabled>⭐ Begin Story</button>
+    </div>
+  </div>
+
+  <div id="story-area" style="display:none">
+    <div class="exchange-count" id="exchange-count">Exchange 0 / 10</div>
+    <div class="story-box" id="story-display"></div>
+
+    <div style="margin-bottom:10px">
+      <label class="lbl">Continue the story...</label>
+      <textarea id="story-input" rows="3" placeholder="Write your next paragraph..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-gold" id="continue-btn" onclick="continueStory()">➡️ Continue Story</button>
+      <button class="btn-sm" onclick="downloadStory()">⬇️ Save Story (.txt)</button>
+      <button class="btn-sm" onclick="resetStory()">↺ New Story</button>
+    </div>
+    <div id="vocab-section" style="display:none">
+      <div class="sec-title">📚 Vocabulary — click any gold word in the story</div>
+      <div id="vocab-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 2 — FAN WIKI ══════════════ -->
+<div class="page" id="tab-wiki">
+  <div class="row">
+    <div class="col">
+      <label class="lbl">Name</label>
+      <input type="text" id="wiki-name" placeholder="Ahsoka Tano, Mandalore, etc.">
+    </div>
+    <div class="col" style="max-width:200px">
+      <label class="lbl">Type</label>
+      <select id="wiki-type">
+        <option>Character</option><option>Planet</option><option>Faction</option>
+        <option>Vehicle</option><option>Weapon</option><option>Event</option>
+      </select>
+    </div>
+    <div class="col" style="max-width:220px">
+      <label class="lbl">Era</label>
+      <select id="wiki-era">
+        <option>Old Republic</option><option>Prequel / Clone Wars</option>
+        <option>Original Trilogy</option><option>New Republic</option>
+        <option>Sequel Era</option><option>Legends</option>
+      </select>
+    </div>
+  </div>
+  <div style="margin-bottom:14px">
+    <label class="lbl">Known Facts (3–5 bullet points)</label>
+    <textarea id="wiki-facts" rows="5" placeholder="- Former Jedi Padawan to Anakin Skywalker
+- Left the Jedi Order after the Siege of Mandalore
+- Uses twin white lightsabers
+- Became a key figure in the early Rebellion"></textarea>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn btn-gold" id="wiki-btn" onclick="generateWiki()">📖 Generate Wiki Article</button>
+    <button class="btn-sm" id="wiki-copy-html" style="display:none" onclick="copyWikiHTML()">📋 Copy as HTML</button>
+    <button class="btn-sm" id="wiki-download" style="display:none" onclick="downloadWiki()">⬇️ Download Wiki Page</button>
+  </div>
+  <div id="wiki-output" style="display:none">
+    <div class="wiki-output" id="wiki-content"></div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 3 — TRIVIA ══════════════ -->
+<div class="page" id="tab-trivia">
+  <div id="trivia-start">
+    <div class="sec-title">Choose Difficulty</div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="diff-btn active" id="diff-easy" onclick="selectDiff('easy',this)">⭐ Easy</button>
+      <button class="diff-btn" id="diff-medium" onclick="selectDiff('medium',this)">⭐⭐ Medium</button>
+      <button class="diff-btn" id="diff-hard" onclick="selectDiff('hard',this)">⭐⭐⭐ Hard</button>
+    </div>
+    <div id="high-scores" style="margin-bottom:16px;font-size:.85rem;color:var(--sub)"></div>
+    <button class="btn btn-gold" onclick="startTrivia()">▶ Start Trivia</button>
+  </div>
+  <div id="trivia-game" style="display:none">
+    <div class="trivia-meta">
+      <span id="q-progress" style="font-size:.85rem;color:var(--sub)">Question 1 / 10</span>
+      <span id="q-score" style="font-size:.85rem;color:var(--gold);font-weight:700">Score: 0</span>
+    </div>
+    <div class="timer-label" id="timer-label">⏱ 30 seconds</div>
+    <div class="timer-bar-wrap"><div class="timer-bar-fill" id="trivia-timer-bar"></div></div>
+    <div class="q-card">
+      <div class="q-text" id="q-text"></div>
+      <div class="options-grid" id="q-options"></div>
+    </div>
+    <div id="q-feedback" style="font-size:.85rem;color:var(--sub);min-height:20px;margin-top:6px"></div>
+  </div>
+  <div id="trivia-result" style="display:none;text-align:center">
+    <div class="score-display" id="final-score"></div>
+    <div class="rank-display" id="final-rank"></div>
+    <div id="high-score-note" style="color:var(--sub);font-size:.82rem;margin-bottom:16px"></div>
+    <button class="btn btn-gold" onclick="restartTrivia()">↺ Play Again</button>
+    <button class="btn-sm" onclick="showTriviaStart()" style="margin-left:10px">← Change Difficulty</button>
+  </div>
+</div>
+
+<script>
+document.getElementById('api-key').value = localStorage.getItem('ag65_key') || '';
+
+// ── QUESTIONS DATA ──
+const QUESTIONS = {
+  easy:[
+    {q:"What color is Luke Skywalker's lightsaber in Return of the Jedi?",opts:["Blue","Green","Red","Purple"],a:1},
+    {q:"What is the name of Han Solo's ship?",opts:["X-Wing","Millennium Falcon","Star Destroyer","TIE Fighter"],a:1},
+    {q:"Who says 'I am your father'?",opts:["Emperor Palpatine","Grand Moff Tarkin","Darth Vader","Darth Maul"],a:2},
+    {q:"What planet is Luke Skywalker from?",opts:["Coruscant","Hoth","Endor","Tatooine"],a:3},
+    {q:"What creature does Yoda belong to?",opts:["Wookiee","Unknown species","Ewok","Togruta"],a:1},
+    {q:"Who is R2-D2's constant companion droid?",opts:["BB-8","C-3PO","K-2SO","R4-P17"],a:1},
+    {q:"What is the name of the Rebel base on the ice planet?",opts:["Echo Base","Yavin Base","Hoth Base","Rebel HQ"],a:0},
+    {q:"What weapon do Jedi use?",opts:["Blaster","Lightsaber","Force lightning","Vibroblade"],a:1},
+    {q:"What is the name of the small bear-like creatures on Endor?",opts:["Jawas","Ewoks","Gungans","Porgs"],a:1},
+    {q:"Who trained Obi-Wan Kenobi?",opts:["Yoda","Qui-Gon Jinn","Mace Windu","Count Dooku"],a:1},
+  ],
+  medium:[
+    {q:"Who trained Count Dooku as a Jedi?",opts:["Mace Windu","Yoda","Ki-Adi-Mundi","Plo Koon"],a:1},
+    {q:"What is the name of Darth Vader's Star Destroyer?",opts:["Vengeance","Devastator","Conquest","Eclipse"],a:1},
+    {q:"Which planet is the Jedi Temple located on?",opts:["Naboo","Alderaan","Coruscant","Ilum"],a:2},
+    {q:"What is the name of Anakin Skywalker's mother?",opts:["Padmé","Shmi","Jocasta","Maz"],a:1},
+    {q:"Who is the Mandalorian's real name?",opts:["Jango","Boba","Din Djarin","Paz Vizsla"],a:2},
+    {q:"What color is Mace Windu's lightsaber?",opts:["Blue","Green","Purple","Yellow"],a:2},
+    {q:"What species is Ahsoka Tano?",opts:["Twi'lek","Togruta","Zabrak","Mirialan"],a:1},
+    {q:"What is the Clone Army's order to kill the Jedi called?",opts:["Order 65","Order 66","Operation Knightfall","Contingency"],a:1},
+    {q:"Who is Rey's father?",opts:["Han Solo","Luke Skywalker","Sheev Palpatine","Snoke"],a:2},
+    {q:"What system contains the planet Naboo?",opts:["Chommell sector","Outer Rim","Corellian system","Sullust system"],a:0},
+  ],
+  hard:[
+    {q:"What is the name of Boba Fett's ship?",opts:["Slave I (Firespray)","Razor Crest","The Mandator","Punishing One"],a:0},
+    {q:"What is Grand Admiral Thrawn's full name?",opts:["Eli Thrawn","Mitth'raw'nuruodo","Thrawn Zahn","Raw Nuruodo"],a:1},
+    {q:"What Sith Rule limits the Sith to only two at any time?",opts:["Rule of One","Rule of Two","Rule of Three","Darth Bane's Code"],a:1},
+    {q:"What is the name of the planet where Qui-Gon Jinn is buried?",opts:["Naboo","Coruscant","Tatooine","Ossus"],a:0},
+    {q:"Who killed Darth Plagueis?",opts:["Darth Sidious","Darth Maul","Count Dooku","Darth Vader"],a:0},
+    {q:"What species built the Death Star?",opts:["Geonosians","Kaminoans","Separatists","Mandalorians"],a:0},
+    {q:"In what year was the Battle of Geonosis?",opts:["22 BBY","19 BBY","32 BBY","0 BBY"],a:0},
+    {q:"What is the name of Obi-Wan Kenobi's master who died on Naboo?",opts:["Mace Windu","Dooku","Qui-Gon Jinn","Sifo-Dyas"],a:2},
+    {q:"What is the Darksaber?",opts:["A Sith weapon","An ancient Mandalorian black lightsaber","A double-bladed red saber","Revan's blade"],a:1},
+    {q:"What was Luke Skywalker's callsign in the Battle of Yavin?",opts:["Red Leader","Gold One","Red Five","Rogue One"],a:2},
+  ]
+};
+
+const CHARACTERS = [
+  {name:'Luke Skywalker',emoji:'⚔️'},{name:'Leia Organa',emoji:'👸'},{name:'Han Solo',emoji:'🚀'},
+  {name:'Rey',emoji:'🌟'},{name:'Finn',emoji:'🛡️'},{name:'Poe Dameron',emoji:'✈️'},
+  {name:'Ahsoka Tano',emoji:'🤺'},{name:'Obi-Wan Kenobi',emoji:'🧘'},{name:'Darth Vader',emoji:'😮‍💨'},
+  {name:'Yoda',emoji:'🌿'},{name:'The Mandalorian',emoji:'🪖'},{name:'Grogu',emoji:'🐸'},
+  {name:'Padmé Amidala',emoji:'💫'},{name:'Darth Maul',emoji:'🔴'},{name:'Grand Admiral Thrawn',emoji:'🎨'}
+];
+
+const MISSIONS = [
+  {name:'Rescue Mission',emoji:'🚁'},{name:'Infiltration',emoji:'🕵️'},{name:'Escape',emoji:'🏃'},
+  {name:'Diplomatic Negotiation',emoji:'🤝'},{name:'Battle',emoji:'⚔️'},{name:'Discovery',emoji:'🔭'}
+];
+
+// ── STORY STATE ──
+let storyState = {char:'', mission:'', setting:'', exchanges:0, storyText:'', vocab:[]};
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+async function callGemini(prompt) {
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) throw new Error('Enter your Gemini API key in the header.');
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  const d = await res.json();
+  return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function extractJSON(raw){const m=raw.match(/```(?:json)?\s*([\s\S]*?)```/);return m?m[1].trim():raw.trim()}
+
+// ── BUILD CHARACTER GRID ──
+(function() {
+  const grid = document.getElementById('char-grid');
+  grid.innerHTML = CHARACTERS.map(c => `
+    <button class="char-btn" onclick="selectChar('${escJs(c.name)}',this)">${c.emoji} ${c.name}</button>`).join('');
+  const mg = document.getElementById('mission-grid');
+  mg.innerHTML = MISSIONS.map(m => `
+    <div class="mission-card" onclick="selectMission('${escJs(m.name)}',this)">
+      <span class="mission-icon">${m.emoji}</span>
+      <div class="mission-name">${m.name}</div>
+    </div>`).join('');
+})();
+
+function selectChar(name, btn) {
+  storyState.char = name;
+  document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  checkStoryReady();
+}
+
+function selectMission(name, el) {
+  storyState.mission = name;
+  document.querySelectorAll('.mission-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  checkStoryReady();
+}
+
+function checkStoryReady() {
+  document.getElementById('story-begin-btn').disabled = !(storyState.char && storyState.mission);
+}
+
+async function beginStory() {
+  storyState.setting = document.getElementById('story-setting').value;
+  storyState.exchanges = 0;
+  storyState.storyText = '';
+  storyState.vocab = [];
+  const btn = document.getElementById('story-begin-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Opening crawl...';
+  try {
+    const prompt = `You are co-writing a Star Wars adventure story.
+
+Character: ${storyState.char}
+Mission: ${storyState.mission}
+Setting: ${storyState.setting === 'Random' ? 'a dramatic Star Wars location of your choice' : storyState.setting}
+
+Write the opening 2 paragraphs of the adventure in the character's voice and perspective.
+Make it exciting and immersive. Use rich Star Wars vocabulary.
+
+Respond ONLY with JSON:
+{
+  "story": "Two vivid opening paragraphs. Total 150-200 words.",
+  "vocab": [
+    {"word":"VocabWord1","definition":"plain English definition","example":"example sentence"},
+    {"word":"VocabWord2","definition":"...","example":"..."},
+    {"word":"VocabWord3","definition":"...","example":"..."},
+    {"word":"VocabWord4","definition":"...","example":"..."},
+    {"word":"VocabWord5","definition":"...","example":"..."}
+  ]
+}`;
+    const raw = await callGemini(prompt);
+    const d = JSON.parse(extractJSON(raw));
+    storyState.storyText = d.story || '';
+    storyState.vocab = d.vocab || [];
+    storyState.exchanges = 1;
+    document.getElementById('story-setup').style.display = 'none';
+    document.getElementById('story-area').style.display = 'block';
+    renderStory();
+  } catch(e) { alert('Error: ' + e.message); }
+  btn.disabled = false;
+  btn.innerHTML = '⭐ Begin Story';
+}
+
+async function continueStory() {
+  if (storyState.exchanges >= 10) { alert('Story complete! Save it before starting a new one.'); return; }
+  const userInput = document.getElementById('story-input').value.trim();
+  if (!userInput) { alert('Write your paragraph first!'); return; }
+  const btn = document.getElementById('continue-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Writing...';
+  try {
+    const prompt = `Continue this Star Wars co-written adventure story. Stay in the same tone and setting.
+
+Character: ${storyState.char}, Mission: ${storyState.mission}, Setting: ${storyState.setting}
+Story so far (last 500 chars): ...${storyState.storyText.slice(-500)}
+
+User continues with: ${userInput}
+
+Write the next 2 paragraphs that naturally follow and build on what the user wrote.
+
+Respond ONLY with JSON:
+{
+  "story": "Next 2 paragraphs, 100-150 words total, picking up from user input.",
+  "vocab": [
+    {"word":"Word1","definition":"definition","example":"example"},
+    {"word":"Word2","definition":"...","example":"..."},
+    {"word":"Word3","definition":"...","example":"..."},
+    {"word":"Word4","definition":"...","example":"..."},
+    {"word":"Word5","definition":"...","example":"..."}
+  ]
+}`;
+    const raw = await callGemini(prompt);
+    const d = JSON.parse(extractJSON(raw));
+    storyState.storyText += '\n\n' + userInput + '\n\n' + (d.story || '');
+    storyState.vocab = d.vocab || [];
+    storyState.exchanges++;
+    document.getElementById('story-input').value = '';
+    renderStory();
+  } catch(e) { alert('Error: ' + e.message); }
+  btn.disabled = false;
+  btn.innerHTML = '➡️ Continue Story';
+}
+
+function renderStory() {
+  const display = document.getElementById('story-display');
+  // Highlight vocab words
+  let html = escHtml(storyState.storyText).replace(/\n/g,'<br>');
+  storyState.vocab.forEach((v, i) => {
+    const re = new RegExp(`\\b${escHtml(v.word)}\\b`, 'g');
+    html = html.replace(re, `<span class="vocab-word" onclick="showVocab(${i},event)">${escHtml(v.word)}<div class="vocab-popup" id="vp-${i}"><strong>${escHtml(v.word)}</strong><br>${escHtml(v.definition)}<br><em style="color:var(--sub)">"${escHtml(v.example)}"</em></div></span>`);
+  });
+  display.innerHTML = html;
+  document.getElementById('exchange-count').textContent = `Exchange ${storyState.exchanges} / 10`;
+  // Vocab list
+  const vl = document.getElementById('vocab-list');
+  vl.innerHTML = storyState.vocab.map((v,i) => `<button class="btn-sm" onclick="showVocab(${i},event)">${escHtml(v.word)}</button>`).join('');
+  document.getElementById('vocab-section').style.display = storyState.vocab.length ? 'block' : 'none';
+}
+
+function showVocab(idx, e) {
+  e.stopPropagation();
+  document.querySelectorAll('.vocab-popup').forEach(p => p.classList.remove('show'));
+  const popup = document.getElementById('vp-' + idx);
+  if (popup) popup.classList.add('show');
+}
+document.addEventListener('click', () => document.querySelectorAll('.vocab-popup').forEach(p => p.classList.remove('show')));
+
+function downloadStory() {
+  const text = `STAR WARS ADVENTURE\n${'='.repeat(40)}\nCharacter: ${storyState.char}\nMission: ${storyState.mission}\nSetting: ${storyState.setting}\n${'='.repeat(40)}\n\n${storyState.storyText}`;
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+  a.download = `star-wars-${storyState.char.replace(/\s+/g,'-').toLowerCase()}.txt`;
+  a.click();
+}
+
+function resetStory() {
+  storyState = {char:'',mission:'',setting:'',exchanges:0,storyText:'',vocab:[]};
+  document.getElementById('story-setup').style.display = 'block';
+  document.getElementById('story-area').style.display = 'none';
+  document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mission-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('story-begin-btn').disabled = true;
+}
+
+// ── WIKI GENERATOR ──
+async function generateWiki() {
+  const name = document.getElementById('wiki-name').value.trim();
+  const type = document.getElementById('wiki-type').value;
+  const era = document.getElementById('wiki-era').value;
+  const facts = document.getElementById('wiki-facts').value.trim();
+  if (!name) { alert('Enter a name first.'); return; }
+  const btn = document.getElementById('wiki-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Generating...';
+  try {
+    const fieldMap = {
+      Character:['Homeworld','Species','Affiliation','Occupation','Born','Status'],
+      Planet:['Region','System','Climate','Terrain','Population','Affiliation'],
+      Faction:['Founded','Headquarters','Leader','Members','Ideology','Status'],
+      Vehicle:['Class','Manufacturer','Length','Crew','Speed','Armament'],
+      Weapon:['Type','Creator','Length','Color','Owner','Status'],
+      Event:['Date','Location','Participants','Outcome','Casualties','Significance']
+    };
+    const fields = fieldMap[type] || fieldMap.Character;
+    const prompt = `Write a Wookieepedia-style Star Wars wiki article for:
+Name: ${name}
+Type: ${type}
+Era: ${era}
+Known facts: ${facts}
+
+Respond ONLY with JSON:
+{
+  "infobox": { ${fields.map(f=>`"${f}":"value"`).join(',')} },
+  "biography": ["paragraph 1 (3-4 sentences)","paragraph 2 (3-4 sentences)","paragraph 3 (3-4 sentences)"],
+  "personality": ["paragraph 1 (2-3 sentences)","paragraph 2 (2-3 sentences)"],
+  "relationships": [{"name":"Character/Entity","relation":"1-sentence description"},{"name":"...","relation":"..."},{"name":"...","relation":"..."}],
+  "behindScenes": "1 paragraph about real-world production, inspirations, or concept art notes"
+}`;
+    const raw = await callGemini(prompt);
+    const d = JSON.parse(extractJSON(raw));
+    const wikiEl = document.getElementById('wiki-content');
+    let html = `<div class="wiki-infobox"><h4>${escHtml(name)}</h4><table>`;
+    Object.entries(d.infobox||{}).forEach(([k,v]) => {
+      html += `<tr><td>${escHtml(k)}</td><td>${escHtml(v)}</td></tr>`;
+    });
+    html += '</table></div>';
+    html += `<h2 class="wiki-h2">${escHtml(type === 'Character' ? 'Biography' : 'History')}</h2>`;
+    (d.biography||[]).forEach(p => { html += `<p class="wiki-p">${escHtml(p)}</p>`; });
+    html += '<div style="clear:both"></div>';
+    html += `<h2 class="wiki-h2">${type==='Character'?'Personality &amp; Traits':'Characteristics'}</h2>`;
+    (d.personality||[]).forEach(p => { html += `<p class="wiki-p">${escHtml(p)}</p>`; });
+    if (d.relationships?.length) {
+      html += '<h2 class="wiki-h2">Relationships</h2>';
+      d.relationships.forEach(r => { html += `<h3 class="wiki-h3">${escHtml(r.name)}</h3><p class="wiki-p">${escHtml(r.relation)}</p>`; });
+    }
+    html += '<h2 class="wiki-h2">Behind the Scenes</h2>';
+    html += `<p class="wiki-p">${escHtml(d.behindScenes||'')}</p>`;
+    wikiEl.innerHTML = html;
+    document.getElementById('wiki-output').style.display = 'block';
+    document.getElementById('wiki-copy-html').style.display = 'inline';
+    document.getElementById('wiki-download').style.display = 'inline';
+    // Store for download
+    wikiEl.dataset.name = name;
+  } catch(e) { alert('Error: ' + e.message); }
+  btn.disabled = false;
+  btn.innerHTML = '📖 Generate Wiki Article';
+}
+
+function copyWikiHTML() {
+  const content = document.getElementById('wiki-content').innerHTML;
+  navigator.clipboard.writeText(content).then(() => {
+    document.getElementById('wiki-copy-html').textContent = '✅ Copied!';
+    setTimeout(() => document.getElementById('wiki-copy-html').textContent = '📋 Copy as HTML', 1500);
+  });
+}
+
+function downloadWiki() {
+  const name = document.getElementById('wiki-content').dataset.name || 'wiki';
+  const content = document.getElementById('wiki-content').innerHTML;
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escHtml(name)} - Star Wars Wiki</title>
+<style>body{max-width:900px;margin:40px auto;font-family:Georgia,serif;background:#fff;color:#202122;padding:0 20px}
+h2{font-size:1.2rem;border-bottom:1px solid #a2a9b1;margin:16px 0 8px}
+h3{font-size:1rem;margin:10px 0 4px}
+.wiki-infobox{float:right;margin:0 0 16px 16px;background:#f8f9fa;border:1px solid #a2a9b1;padding:10px;font-size:.85rem;min-width:200px}
+.wiki-infobox h4{text-align:center;font-size:.95rem;border-bottom:1px solid #a2a9b1;padding-bottom:4px;margin-bottom:6px}
+table{border-collapse:collapse;width:100%}td{padding:3px 4px;vertical-align:top}
+td:first-child{font-weight:600;white-space:nowrap;padding-right:8px}p{margin-bottom:8px;line-height:1.7}
+</style></head><body>${content}<br style="clear:both">
+<hr><p style="font-size:.75rem;color:#666">Generated by <a href="https://hhanng.github.io/agent-65-star-wars-builder/">Star Wars Creative Hub</a></p></body></html>`;
+  const a = document.createElement('a');
+  a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+  a.download = name.replace(/\s+/g,'-').toLowerCase() + '-wiki.html';
+  a.click();
+}
+
+// ── TRIVIA ──
+let trivia = {diff:'easy', qIdx:0, score:0, answered:false, timerInterval:null};
+
+function selectDiff(d, btn) {
+  trivia.diff = d;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHighScores();
+}
+
+function renderHighScores() {
+  const scores = JSON.parse(localStorage.getItem('ag65_trivia_scores') || '{}');
+  const el = document.getElementById('high-scores');
+  const diffs = ['easy','medium','hard'];
+  el.innerHTML = 'High Scores: ' + diffs.map(d => `${d}: ${scores[d] !== undefined ? scores[d] + '/10' : '—'}`).join(' · ');
+}
+
+function startTrivia() {
+  trivia.qIdx = 0; trivia.score = 0; trivia.answered = false;
+  document.getElementById('trivia-start').style.display = 'none';
+  document.getElementById('trivia-result').style.display = 'none';
+  document.getElementById('trivia-game').style.display = 'block';
+  showQuestion();
+}
+
+function showQuestion() {
+  const qs = QUESTIONS[trivia.diff];
+  if (trivia.qIdx >= qs.length) { endTrivia(); return; }
+  const q = qs[trivia.qIdx];
+  trivia.answered = false;
+  document.getElementById('q-progress').textContent = `Question ${trivia.qIdx+1} / ${qs.length}`;
+  document.getElementById('q-score').textContent = `Score: ${trivia.score}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-feedback').textContent = '';
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = q.opts.map((o,i) => `<button class="opt-btn" onclick="answerTrivia(${i})">${o}</button>`).join('');
+  startQTimer();
+}
+
+function startQTimer() {
+  if (trivia.timerInterval) clearInterval(trivia.timerInterval);
+  let secs = 30;
+  document.getElementById('trivia-timer-bar').style.width = '100%';
+  document.getElementById('trivia-timer-bar').style.background = 'var(--gold)';
+  document.getElementById('timer-label').textContent = '⏱ 30 seconds';
+  trivia.timerInterval = setInterval(() => {
+    secs--;
+    const pct = (secs/30*100);
+    document.getElementById('trivia-timer-bar').style.width = pct + '%';
+    document.getElementById('trivia-timer-bar').style.background = secs <= 10 ? 'var(--red)' : secs <= 20 ? 'var(--amber, #e3b341)' : 'var(--gold)';
+    document.getElementById('timer-label').textContent = `⏱ ${secs} second${secs!==1?'s':''}`;
+    if (secs <= 0) {
+      clearInterval(trivia.timerInterval);
+      if (!trivia.answered) {
+        trivia.answered = true;
+        const qs = QUESTIONS[trivia.diff];
+        const a = qs[trivia.qIdx].a;
+        document.querySelectorAll('.opt-btn')[a].classList.add('correct');
+        document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+        document.getElementById('q-feedback').textContent = '⏰ Time\'s up!';
+        setTimeout(() => { trivia.qIdx++; showQuestion(); }, 1500);
+      }
+    }
+  }, 1000);
+}
+
+function answerTrivia(idx) {
+  if (trivia.answered) return;
+  trivia.answered = true;
+  clearInterval(trivia.timerInterval);
+  const q = QUESTIONS[trivia.diff][trivia.qIdx];
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+  if (idx === q.a) {
+    btns[idx].classList.add('correct');
+    trivia.score++;
+    document.getElementById('q-feedback').textContent = '✅ Correct! The Force is strong with you.';
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.a].classList.add('correct');
+    document.getElementById('q-feedback').textContent = `❌ The answer was: ${q.opts[q.a]}`;
+  }
+  document.getElementById('q-score').textContent = `Score: ${trivia.score}`;
+  setTimeout(() => { trivia.qIdx++; showQuestion(); }, 1800);
+}
+
+function endTrivia() {
+  document.getElementById('trivia-game').style.display = 'none';
+  document.getElementById('trivia-result').style.display = 'block';
+  const s = trivia.score;
+  document.getElementById('final-score').textContent = `${s} / 10`;
+  const ranks = [{max:5,r:'Youngling 🌱',d:'Keep studying the ways of the Force.'},{max:10,r:'Padawan 📚',d:'Your training is progressing.'},{max:15,r:'Jedi Knight ⚔️',d:'A true Guardian of peace.'},{max:20,r:'Jedi Master 🧘',d:'Your mastery is extraordinary.'},{max:30,r:'Grand Master 👑',d:'The Council bows to your wisdom.'}];
+    // Scale for 10 questions
+  const rank = s >= 9 ? ranks[4] : s >= 7 ? ranks[3] : s >= 5 ? ranks[2] : s >= 3 ? ranks[1] : ranks[0];
+  document.getElementById('final-rank').textContent = `${rank.r} — ${rank.d}`;
+  const scores = JSON.parse(localStorage.getItem('ag65_trivia_scores') || '{}');
+  const prev = scores[trivia.diff];
+  if (prev === undefined || s > prev) {
+    scores[trivia.diff] = s;
+    localStorage.setItem('ag65_trivia_scores', JSON.stringify(scores));
+    document.getElementById('high-score-note').textContent = prev === undefined ? '🌟 First score saved!' : `🏆 New high score! Previous best: ${prev}/10`;
+  } else {
+    document.getElementById('high-score-note').textContent = `Personal best: ${prev}/10`;
+  }
+}
+
+function restartTrivia() { startTrivia(); }
+function showTriviaStart() {
+  document.getElementById('trivia-game').style.display = 'none';
+  document.getElementById('trivia-result').style.display = 'none';
+  document.getElementById('trivia-start').style.display = 'block';
+  renderHighScores();
+}
+
+function escJs(s){return s.replace(/'/g,"\\'")}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+renderHighScores();
+</script>
+</body>
+</html>

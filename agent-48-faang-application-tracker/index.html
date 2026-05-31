@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FAANG Application Tracker — Agent #48</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+/* =============================================
+   FAANG Application Tracker — Agent #48
+   ============================================= */
+
+:root {
+  --pink: #ffb7c5;
+  --pink-dark: #e08da0;
+  --pink-light: #ffeef2;
+  --cream: #fff9fa;
+  --ink: #1f2a1b;
+  --ink-muted: #5a6672;
+  --white: #ffffff;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.10);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+
+  --s-applied:  #6366f1;
+  --s-oa:       #f59e0b;
+  --s-oa-done:  #84cc16;
+  --s-phone:    #06b6d4;
+  --s-tech:     #8b5cf6;
+  --s-onsite:   #ec4899;
+  --s-offer:    #10b981;
+  --s-rejected: #ef4444;
+  --s-ghosted:  #9ca3af;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Poppins", system-ui, sans-serif;
+  background: radial-gradient(circle at 70% 15%, #fff0f5 0%, #fff5f8 60%, #ffffff 100%);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--cream);
+  border-bottom: 1.5px solid var(--pink-light);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.app-header h1 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--pink-dark);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── MAIN LAYOUT ── */
+.main-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 24px;
+}
+
+/* ── STATS DASHBOARD ── */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--pink-light);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+.stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--ink-muted);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 4px;
+  color: var(--pink-dark);
+}
+
+.stat-card.offer .stat-value  { color: var(--s-offer); }
+.stat-card.reject .stat-value { color: var(--s-rejected); }
+.stat-card.active .stat-value { color: var(--s-phone); }
+
+/* ── WIN-RATE PANEL ── */
+.winrate-panel { margin-bottom: 24px; }
+
+.winrate-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--pink-dark);
+  margin-bottom: 12px;
+}
+
+.winrate-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.winrate-card {
+  background: var(--white);
+  border: 1.5px solid var(--pink-light);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.winrate-tier-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+
+.winrate-examples {
+  font-size: 0.66rem;
+  color: var(--ink-muted);
+  opacity: 0.65;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.winrate-total {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.winrate-total small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.winrate-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.77rem;
+  color: var(--ink-muted);
+  padding: 2px 0;
+}
+
+.winrate-pct { font-weight: 700; font-size: 0.82rem; }
+.winrate-pct.green { color: var(--s-offer); }
+.winrate-pct.amber { color: #f59e0b; }
+
+.winrate-bar-wrap {
+  height: 3px;
+  background: var(--pink-light);
+  border-radius: 2px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.winrate-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--pink-dark);
+  transition: width 0.5s ease;
+}
+
+.winrate-empty {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  padding: 10px 0;
+  opacity: 0.6;
+}
+
+/* ── NUDGE SECTION ── */
+.nudge-section { margin-bottom: 24px; }
+
+.nudge-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #b45309;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nudge-card {
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 0.84rem;
+  color: #78350f;
+}
+
+.nudge-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 1px; }
+.nudge-text { flex: 1; line-height: 1.55; }
+
+.btn-nudge-edit {
+  background: #f59e0b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 13px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.btn-nudge-edit:hover { background: #d97706; }
+
+/* ── DEADLINE BADGES ── */
+.deadline-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.67rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.deadline-safe    { background: rgba(16,185,129,0.1);  color: #065f46; }
+.deadline-warning { background: rgba(245,158,11,0.15); color: #92400e; }
+.deadline-urgent  { background: rgba(239,68,68,0.18);  color: #991b1b; }
+.deadline-passed  { background: rgba(156,163,175,0.12); color: #6b7280; }
+
+/* ── ADD FORM PANEL ── */
+.form-panel {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--pink-light);
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.form-panel h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--pink-dark);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+.form-full { grid-column: 1 / -1; }
+
+.field label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid #f0d6de;
+  background: var(--cream);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.88rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(255,183,197,0.25);
+}
+
+.quick-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.quick-pick {
+  padding: 4px 11px;
+  border-radius: 20px;
+  border: 1.5px solid #f0d6de;
+  background: var(--cream);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--pink-dark);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quick-pick:hover {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 20px;
+  border-radius: var(--radius-sm);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn-primary { background: var(--pink); color: white; border: 1px solid var(--pink); }
+.btn-primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-secondary { background: var(--white); color: var(--pink-dark); border: 1.5px solid var(--pink-light); }
+.btn-secondary:hover { background: var(--pink-light); border-color: var(--pink); }
+.btn-danger { background: #fff0f0; color: var(--s-rejected); border: 1.5px solid #fdd; padding: 6px 12px; font-size: 0.78rem; }
+.btn-danger:hover { background: var(--s-rejected); color: white; border-color: var(--s-rejected); }
+.btn-edit { background: #f0f7ff; color: #3b82f6; border: 1.5px solid #d0e6ff; padding: 6px 12px; font-size: 0.78rem; }
+.btn-edit:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
+
+.btn-icon {
+  padding: 7px;
+  border-radius: 8px;
+  background: var(--pink-light);
+  border: 1.5px solid var(--pink-light);
+  color: var(--pink-dark);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.btn-icon:hover { background: var(--pink); color: white; }
+
+/* ── TABLE VIEW ── */
+.table-section {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--pink-light);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.table-header {
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1.5px solid var(--pink-light);
+}
+
+.table-header h2 { font-size: 1rem; font-weight: 700; color: var(--pink-dark); }
+
+.table-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.table-controls input,
+.table-controls select {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #f0d6de;
+  background: var(--cream);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.8rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.table-controls input:focus,
+.table-controls select:focus { border-color: var(--pink); }
+
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+
+thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink-muted);
+  background: var(--cream);
+  border-bottom: 1.5px solid var(--pink-light);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+thead th:hover { color: var(--pink-dark); }
+thead th.sort-asc::after  { content: " ↑"; color: var(--pink-dark); }
+thead th.sort-desc::after { content: " ↓"; color: var(--pink-dark); }
+
+tbody tr { border-bottom: 1px solid #faf0f3; transition: background 0.15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #fff5f8; }
+
+tbody td { padding: 13px 16px; vertical-align: middle; }
+
+.company-cell { font-weight: 700; color: var(--ink); }
+.role-cell    { color: var(--ink-muted); font-size: 0.82rem; }
+.date-cell    { color: var(--ink-muted); font-size: 0.82rem; white-space: nowrap; }
+.url-cell a   { color: var(--pink-dark); font-size: 0.8rem; text-decoration: none; font-weight: 600; }
+.url-cell a:hover { text-decoration: underline; }
+.actions-cell { display: flex; gap: 6px; align-items: center; }
+
+/* ── STATUS BADGE ── */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.4px;
+}
+
+.badge-applied  { background: rgba(99,102,241,0.12);  color: var(--s-applied); }
+.badge-oa       { background: rgba(245,158,11,0.12);  color: var(--s-oa); }
+.badge-oa-done  { background: rgba(132,204,22,0.12);  color: var(--s-oa-done); }
+.badge-phone    { background: rgba(6,182,212,0.12);   color: var(--s-phone); }
+.badge-tech     { background: rgba(139,92,246,0.12);  color: var(--s-tech); }
+.badge-onsite   { background: rgba(236,72,153,0.12);  color: var(--s-onsite); }
+.badge-offer    { background: rgba(16,185,129,0.15);  color: var(--s-offer); border: 1px solid rgba(16,185,129,0.3); }
+.badge-rejected { background: rgba(239,68,68,0.10);   color: var(--s-rejected); }
+.badge-ghosted  { background: rgba(156,163,175,0.15); color: var(--s-ghosted); }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 56px 24px; color: var(--ink-muted); }
+.empty-state .emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
+.empty-state p { font-size: 0.95rem; opacity: 0.8; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31,42,27,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 20px;
+  backdrop-filter: blur(3px);
+}
+
+.modal-overlay.hidden { display: none; }
+
+.modal-box {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--pink-light);
+  padding: 32px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+  animation: popIn 0.22s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.modal-box h2 { font-size: 1.1rem; font-weight: 700; color: var(--pink-dark); margin-bottom: 22px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+/* ── TOAST ── */
+.toast-wrap {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  background: var(--white);
+  border: 1.5px solid var(--pink-light);
+  border-left: 4px solid var(--pink);
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  box-shadow: var(--shadow-md);
+  animation: slideIn 0.25s ease;
+  max-width: 300px;
+}
+
+.toast.success { border-left-color: var(--s-offer); }
+.toast.error   { border-left-color: var(--s-rejected); }
+
+@keyframes slideIn {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* ── CONFIRM DIALOG ── */
+.confirm-box {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 2px solid #fdd;
+  padding: 30px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: var(--shadow-md);
+}
+
+.confirm-box h3 { font-size: 1rem; color: var(--s-rejected); margin-bottom: 8px; }
+.confirm-box p  { font-size: 0.88rem; color: var(--ink-muted); margin-bottom: 20px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  .app-header { padding: 14px 18px; }
+  .main-wrap  { padding: 18px 14px; }
+  .form-grid, .form-grid.three { grid-template-columns: 1fr; }
+  .form-panel { padding: 20px 18px; }
+  .stats-bar  { grid-template-columns: 1fr 1fr; }
+  .modal-box  { padding: 22px 18px; }
+  .winrate-grid { grid-template-columns: 1fr; }
+}
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <h1>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="18" rx="3"/><path d="M8 10h8M8 14h5"/>
+      </svg>
+      FAANG Application Tracker
+    </h1>
+    <div class="header-actions">
+      <a href="../" class="btn btn-secondary" style="font-size:0.8rem;">← Portfolio</a>
+      <button id="export-btn" class="btn btn-secondary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+  </header>
+
+  <div class="main-wrap">
+
+    <!-- STATS DASHBOARD -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-label">Total Applied</div>
+        <div class="stat-value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card active">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value" id="stat-progress">0</div>
+      </div>
+      <div class="stat-card offer">
+        <div class="stat-label">Offers</div>
+        <div class="stat-value" id="stat-offers">0</div>
+      </div>
+      <div class="stat-card reject">
+        <div class="stat-label">Rejection Rate</div>
+        <div class="stat-value" id="stat-reject">0%</div>
+      </div>
+    </div>
+
+    <!-- WIN-RATE PANEL (new) -->
+    <div class="winrate-panel" id="winrate-panel"></div>
+
+    <!-- NUDGE SECTION (new) -->
+    <div class="nudge-section" id="nudge-section" style="display:none"></div>
+
+    <!-- ADD FORM -->
+    <div class="form-panel">
+      <h2>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Add Application
+      </h2>
+      <form id="add-form" autocomplete="off">
+        <div class="field form-full" style="margin-bottom:14px">
+          <label>Company *</label>
+          <input type="text" id="f-company" placeholder="e.g. Google, Meta, or any company…" />
+          <div class="quick-picks" id="quick-picks"></div>
+        </div>
+
+        <div class="form-grid" style="margin-bottom:14px">
+          <div class="field">
+            <label>Role *</label>
+            <input type="text" id="f-role" placeholder="e.g. SWE Intern, PM Intern…" />
+          </div>
+          <div class="field">
+            <label>Date Applied</label>
+            <input type="date" id="f-date" />
+          </div>
+          <div class="field">
+            <label>Status</label>
+            <select id="f-status">
+              <option value="applied">Applied</option>
+              <option value="oa">OA Sent</option>
+              <option value="oa-done">OA Complete</option>
+              <option value="phone">Phone Screen</option>
+              <option value="tech">Technical</option>
+              <option value="onsite">Onsite</option>
+              <option value="offer">Offer</option>
+              <option value="rejected">Rejected</option>
+              <option value="ghosted">Ghosted</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Application Deadline</label>
+            <input type="date" id="f-deadline" />
+          </div>
+          <div class="field form-full">
+            <label>Application URL</label>
+            <input type="url" id="f-url" placeholder="https://…" />
+          </div>
+        </div>
+
+        <div class="field form-full" style="margin-bottom:18px">
+          <label>Notes (optional)</label>
+          <input type="text" id="f-notes" placeholder="Referral, recruiter name, key details…" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Application
+        </button>
+      </form>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-section">
+      <div class="table-header">
+        <h2>All Applications</h2>
+        <div class="table-controls">
+          <input type="text" id="filter-text" placeholder="Search company or role…" />
+          <select id="filter-status">
+            <option value="">All Statuses</option>
+            <option value="applied">Applied</option>
+            <option value="oa">OA Sent</option>
+            <option value="oa-done">OA Complete</option>
+            <option value="phone">Phone Screen</option>
+            <option value="tech">Technical</option>
+            <option value="onsite">Onsite</option>
+            <option value="offer">Offer</option>
+            <option value="rejected">Rejected</option>
+            <option value="ghosted">Ghosted</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="company">Company</th>
+              <th data-sort="role">Role</th>
+              <th data-sort="dateApplied">Date Applied</th>
+              <th>Link</th>
+              <th data-sort="status">Status</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="app-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main-wrap -->
+
+  <!-- EDIT MODAL -->
+  <div class="modal-overlay hidden" id="edit-modal">
+    <div class="modal-box">
+      <h2>Edit Application</h2>
+      <form id="edit-form" autocomplete="off">
+        <div class="field" style="margin-bottom:14px">
+          <label>Company *</label>
+          <input type="text" id="e-company" />
+        </div>
+        <div class="form-grid" style="margin-bottom:14px">
+          <div class="field">
+            <label>Role *</label>
+            <input type="text" id="e-role" />
+          </div>
+          <div class="field">
+            <label>Date Applied</label>
+            <input type="date" id="e-date" />
+          </div>
+          <div class="field">
+            <label>Status</label>
+            <select id="e-status">
+              <option value="applied">Applied</option>
+              <option value="oa">OA Sent</option>
+              <option value="oa-done">OA Complete</option>
+              <option value="phone">Phone Screen</option>
+              <option value="tech">Technical</option>
+              <option value="onsite">Onsite</option>
+              <option value="offer">Offer</option>
+              <option value="rejected">Rejected</option>
+              <option value="ghosted">Ghosted</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Application Deadline</label>
+            <input type="date" id="e-deadline" />
+          </div>
+          <div class="field form-full">
+            <label>Application URL</label>
+            <input type="url" id="e-url" placeholder="https://…" />
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:18px">
+          <label>Notes</label>
+          <input type="text" id="e-notes" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="edit-cancel" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONFIRM DELETE MODAL -->
+  <div class="modal-overlay hidden" id="confirm-modal">
+    <div class="confirm-box">
+      <h3>Delete Application?</h3>
+      <p>Remove <strong id="confirm-company"></strong>? This cannot be undone.</p>
+      <div class="modal-actions">
+        <button id="confirm-no"  class="btn btn-secondary">Cancel</button>
+        <button id="confirm-yes" class="btn btn-danger" style="padding:9px 20px;font-size:0.85rem;">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOASTS -->
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script>
+'use strict';
+
+// ── CONSTANTS ──────────────────────────────────
+const STORAGE_KEY = 'faang-tracker-48-v1';
+
+const QUICK_COMPANIES = ['Google','Meta','Apple','Amazon','Netflix','Microsoft'];
+
+const STATUSES = [
+  { key: 'applied',  label: 'Applied',       badge: 'badge-applied'  },
+  { key: 'oa',       label: 'OA Sent',        badge: 'badge-oa'       },
+  { key: 'oa-done',  label: 'OA Complete',    badge: 'badge-oa-done'  },
+  { key: 'phone',    label: 'Phone Screen',   badge: 'badge-phone'    },
+  { key: 'tech',     label: 'Technical',      badge: 'badge-tech'     },
+  { key: 'onsite',   label: 'Onsite',         badge: 'badge-onsite'   },
+  { key: 'offer',    label: 'Offer',          badge: 'badge-offer'    },
+  { key: 'rejected', label: 'Rejected',       badge: 'badge-rejected' },
+  { key: 'ghosted',  label: 'Ghosted',        badge: 'badge-ghosted'  },
+];
+
+const statusMap = {};
+STATUSES.forEach(s => statusMap[s.key] = s);
+
+// ── TIER CLASSIFICATION ────────────────────────
+const FAANG_SET = new Set([
+  'google','alphabet','meta','facebook','apple','amazon','netflix',
+  'microsoft','openai','anthropic','deepmind'
+]);
+const MID_TIER_SET = new Set([
+  'salesforce','adobe','uber','airbnb','linkedin','twitter','x',
+  'stripe','shopify','spotify','square','block','paypal','nvidia',
+  'intel','amd','qualcomm','cisco','oracle','ibm','dell','hp',
+  'dropbox','slack','zoom','atlassian','github','gitlab','mongodb',
+  'snowflake','databricks','palantir','roblox','snap','pinterest',
+  'lyft','doordash','instacart','coinbase','robinhood','klarna',
+  'plaid','twilio','okta','datadog','splunk','cloudflare','hashicorp',
+  'figma','notion','asana','hubspot','zendesk','workday','servicenow'
+]);
+
+function getTier(company) {
+  const k = company.toLowerCase().trim();
+  if (FAANG_SET.has(k)) return 'faang';
+  if (MID_TIER_SET.has(k)) return 'mid';
+  return 'startup';
+}
+
+// ── DATE HELPERS ───────────────────────────────
+function daysSince(dateStr) {
+  if (!dateStr) return 0;
+  const d = new Date(dateStr + 'T00:00:00');
+  return Math.floor((Date.now() - d) / 86400000);
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + 'T00:00:00');
+  const t = new Date(); t.setHours(0,0,0,0);
+  return Math.ceil((d - t) / 86400000);
+}
+
+function deadlineBadgeHtml(deadline) {
+  if (!deadline) return '';
+  const d = daysUntil(deadline);
+  if (d === null) return '';
+  if (d < 0)  return `<br><span class="deadline-badge deadline-passed">Deadline passed</span>`;
+  if (d === 0) return `<br><span class="deadline-badge deadline-urgent">Due today!</span>`;
+  if (d <= 2) return `<br><span class="deadline-badge deadline-urgent">${d} day${d > 1 ? 's' : ''} left</span>`;
+  if (d <= 7) return `<br><span class="deadline-badge deadline-warning">${d} days left</span>`;
+  return `<br><span class="deadline-badge deadline-safe">${d} days left</span>`;
+}
+
+// ── DATA LAYER ─────────────────────────────────
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { apps: [] }; }
+  catch { return { apps: [] }; }
+}
+
+function persist(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function getApps() { return load().apps; }
+
+function saveApp(app) {
+  const data = load();
+  const idx = data.apps.findIndex(a => a.id === app.id);
+  if (idx >= 0) data.apps[idx] = app;
+  else data.apps.push(app);
+  persist(data);
+}
+
+function deleteApp(id) {
+  const data = load();
+  data.apps = data.apps.filter(a => a.id !== id);
+  persist(data);
+}
+
+function makeApp(fields) {
+  return {
+    id:          Date.now().toString(36) + Math.random().toString(36).slice(2),
+    company:     fields.company   || '',
+    role:        fields.role      || '',
+    dateApplied: fields.date      || new Date().toISOString().slice(0,10),
+    deadline:    fields.deadline  || '',
+    url:         fields.url       || '',
+    status:      fields.status    || 'applied',
+    notes:       fields.notes     || '',
+    createdAt:   new Date().toISOString(),
+  };
+}
+
+// ── SORT STATE ─────────────────────────────────
+let sortCol = 'dateApplied';
+let sortDir = 'desc';
+let filterText = '';
+let filterStatus = '';
+let editingId = null;
+
+// ── HELPERS ────────────────────────────────────
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escAttr(str) { return String(str).replace(/'/g,'&#39;'); }
+
+// ── RENDER: STATS ──────────────────────────────
+function renderStats() {
+  const apps = getApps();
+  const total    = apps.length;
+  const inProg   = apps.filter(a => !['offer','rejected','ghosted'].includes(a.status)).length;
+  const offers   = apps.filter(a => a.status === 'offer').length;
+  const rejected = apps.filter(a => a.status === 'rejected').length;
+  const rejRate  = total > 0 ? Math.round((rejected / total) * 100) : 0;
+
+  document.getElementById('stat-total').textContent    = total;
+  document.getElementById('stat-progress').textContent = inProg;
+  document.getElementById('stat-offers').textContent   = offers;
+  document.getElementById('stat-reject').textContent   = rejRate + '%';
+}
+
+// ── RENDER: WIN-RATE PANEL ─────────────────────
+function calcTierStats(arr) {
+  const total = arr.length;
+  if (!total) return null;
+  const responded = arr.filter(a => !['applied','ghosted'].includes(a.status)).length;
+  const offers    = arr.filter(a => a.status === 'offer').length;
+  return {
+    total,
+    responseRate: Math.round(responded / total * 100),
+    offerRate:    Math.round(offers    / total * 100)
+  };
+}
+
+function winRateCardHtml(label, examples, stats) {
+  if (!stats) {
+    return `<div class="winrate-card">
+      <div class="winrate-tier-label">${label}</div>
+      <div class="winrate-examples">${examples}</div>
+      <div class="winrate-empty">No apps yet</div>
+    </div>`;
+  }
+  const respColor  = stats.responseRate >= 50 ? 'green' : 'amber';
+  const offerColor = stats.offerRate    >= 20 ? 'green' : 'amber';
+  return `<div class="winrate-card">
+    <div class="winrate-tier-label">${label}</div>
+    <div class="winrate-examples">${examples}</div>
+    <div class="winrate-total">${stats.total} <small>app${stats.total !== 1 ? 's' : ''}</small></div>
+    <div class="winrate-row">
+      <span>Response rate</span>
+      <span class="winrate-pct ${respColor}">${stats.responseRate}%</span>
+    </div>
+    <div class="winrate-bar-wrap"><div class="winrate-bar-fill" style="width:${stats.responseRate}%"></div></div>
+    <div class="winrate-row" style="margin-top:6px">
+      <span>Offer rate</span>
+      <span class="winrate-pct ${offerColor}">${stats.offerRate}%</span>
+    </div>
+    <div class="winrate-bar-wrap"><div class="winrate-bar-fill" style="width:${stats.offerRate}%;background:var(--s-offer)"></div></div>
+  </div>`;
+}
+
+function renderWinRate() {
+  const apps = getApps();
+  const byTier = { faang: [], mid: [], startup: [] };
+  apps.forEach(a => byTier[getTier(a.company)].push(a));
+
+  document.getElementById('winrate-panel').innerHTML = `
+    <div class="winrate-panel-header">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Win Rate by Tier
+    </div>
+    <div class="winrate-grid">
+      ${winRateCardHtml('FAANG', 'Google · Meta · Apple · Amazon · Netflix', calcTierStats(byTier.faang))}
+      ${winRateCardHtml('Mid-Tier', 'Stripe · Airbnb · Shopify · Uber…', calcTierStats(byTier.mid))}
+      ${winRateCardHtml('Startup', 'All other companies', calcTierStats(byTier.startup))}
+    </div>`;
+}
+
+// ── RENDER: NUDGES ─────────────────────────────
+const NUDGE_STATUSES = new Set(['applied', 'oa']);
+
+function renderNudges() {
+  const apps = getApps();
+  const stale = apps.filter(a =>
+    NUDGE_STATUSES.has(a.status) && daysSince(a.dateApplied) > 12
+  );
+  const el = document.getElementById('nudge-section');
+  if (!stale.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="nudge-header">⏰ Follow-up Reminders (${stale.length})</div>
+    ${stale.map(a => `
+      <div class="nudge-card">
+        <span class="nudge-icon">📬</span>
+        <div class="nudge-text">
+          You haven't followed up on <strong>${escHtml(a.company)}</strong> — applied
+          ${daysSince(a.dateApplied)} days ago. Average response window is 14 days.
+        </div>
+        <button class="btn-nudge-edit" onclick="openEdit('${a.id}')">Update Status</button>
+      </div>`).join('')}`;
+}
+
+// ── RENDER: TABLE ──────────────────────────────
+function getStatusInfo(key) {
+  return statusMap[key] || { key, label: key, badge: 'badge-applied' };
+}
+
+function getFilteredSortedApps() {
+  let apps = getApps();
+
+  if (filterText) {
+    const q = filterText.toLowerCase();
+    apps = apps.filter(a =>
+      a.company.toLowerCase().includes(q) || a.role.toLowerCase().includes(q)
+    );
+  }
+
+  if (filterStatus) apps = apps.filter(a => a.status === filterStatus);
+
+  apps.sort((a, b) => {
+    let va = a[sortCol] || '';
+    let vb = b[sortCol] || '';
+    if (sortCol === 'status') {
+      va = STATUSES.findIndex(s => s.key === va);
+      vb = STATUSES.findIndex(s => s.key === vb);
+    }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ?  1 : -1;
+    return 0;
+  });
+
+  return apps;
+}
+
+function renderTable() {
+  const apps = getFilteredSortedApps();
+  const tbody = document.getElementById('app-tbody');
+
+  document.querySelectorAll('thead th[data-sort]').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.sort === sortCol) th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+  });
+
+  if (apps.length === 0) {
+    tbody.innerHTML = `
+      <tr><td colspan="7">
+        <div class="empty-state">
+          <span class="emoji">📋</span>
+          <p>No applications yet — add your first one above!</p>
+        </div>
+      </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = apps.map(app => {
+    const si = getStatusInfo(app.status);
+    const urlHtml = app.url
+      ? `<a href="${escHtml(app.url)}" target="_blank" rel="noopener">View</a>`
+      : '<span style="color:#ccc">—</span>';
+
+    return `
+      <tr>
+        <td class="company-cell">${escHtml(app.company)}</td>
+        <td class="role-cell">${escHtml(app.role)}</td>
+        <td class="date-cell">${app.dateApplied || '—'}${deadlineBadgeHtml(app.deadline)}</td>
+        <td class="url-cell">${urlHtml}</td>
+        <td><span class="badge ${si.badge}">${si.label}</span></td>
+        <td class="role-cell" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(app.notes)}">${escHtml(app.notes || '—')}</td>
+        <td class="actions-cell">
+          <button class="btn btn-edit" onclick="openEdit('${app.id}')">Edit</button>
+          <button class="btn btn-danger" onclick="confirmDelete('${app.id}','${escAttr(app.company)}')">Del</button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function render() {
+  renderStats();
+  renderWinRate();
+  renderNudges();
+  renderTable();
+}
+
+// ── SORT ───────────────────────────────────────
+document.querySelectorAll('thead th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.sort;
+    if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortCol = col; sortDir = 'asc'; }
+    renderTable();
+  });
+});
+
+// ── FILTER ─────────────────────────────────────
+document.getElementById('filter-text').addEventListener('input', e => {
+  filterText = e.target.value;
+  renderTable();
+});
+
+document.getElementById('filter-status').addEventListener('change', e => {
+  filterStatus = e.target.value;
+  renderTable();
+});
+
+// ── QUICK PICKS ────────────────────────────────
+QUICK_COMPANIES.forEach(name => {
+  const btn = document.createElement('button');
+  btn.className = 'quick-pick';
+  btn.type = 'button';
+  btn.textContent = name;
+  btn.addEventListener('click', () => {
+    document.getElementById('f-company').value = name;
+  });
+  document.getElementById('quick-picks').appendChild(btn);
+});
+
+const customBtn = document.createElement('button');
+customBtn.className = 'quick-pick';
+customBtn.type = 'button';
+customBtn.textContent = 'Custom ✎';
+customBtn.style.fontStyle = 'italic';
+customBtn.addEventListener('click', () => {
+  document.getElementById('f-company').focus();
+  document.getElementById('f-company').value = '';
+});
+document.getElementById('quick-picks').appendChild(customBtn);
+
+// ── ADD FORM ───────────────────────────────────
+document.getElementById('add-form').addEventListener('submit', e => {
+  e.preventDefault();
+
+  const company = document.getElementById('f-company').value.trim();
+  const role    = document.getElementById('f-role').value.trim();
+
+  if (!company) { toast('Company name is required', 'error'); return; }
+  if (!role)    { toast('Role is required', 'error'); return; }
+
+  const app = makeApp({
+    company,
+    role,
+    date:     document.getElementById('f-date').value,
+    deadline: document.getElementById('f-deadline').value,
+    url:      document.getElementById('f-url').value.trim(),
+    status:   document.getElementById('f-status').value,
+    notes:    document.getElementById('f-notes').value.trim(),
+  });
+
+  saveApp(app);
+  document.getElementById('add-form').reset();
+  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+  toast('Application added!', 'success');
+  render();
+});
+
+document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+
+// ── EDIT MODAL ─────────────────────────────────
+function openEdit(id) {
+  const app = getApps().find(a => a.id === id);
+  if (!app) return;
+  editingId = id;
+
+  document.getElementById('e-company').value  = app.company;
+  document.getElementById('e-role').value     = app.role;
+  document.getElementById('e-date').value     = app.dateApplied || '';
+  document.getElementById('e-deadline').value = app.deadline || '';
+  document.getElementById('e-url').value      = app.url || '';
+  document.getElementById('e-status').value   = app.status;
+  document.getElementById('e-notes').value    = app.notes || '';
+
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+document.getElementById('edit-form').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!editingId) return;
+
+  const data = load();
+  const app  = data.apps.find(a => a.id === editingId);
+  if (!app) return;
+
+  app.company     = document.getElementById('e-company').value.trim();
+  app.role        = document.getElementById('e-role').value.trim();
+  app.dateApplied = document.getElementById('e-date').value;
+  app.deadline    = document.getElementById('e-deadline').value;
+  app.url         = document.getElementById('e-url').value.trim();
+  app.status      = document.getElementById('e-status').value;
+  app.notes       = document.getElementById('e-notes').value.trim();
+
+  if (!app.company) { toast('Company name is required', 'error'); return; }
+
+  persist(data);
+  closeEditModal();
+  toast('Application updated!', 'success');
+  render();
+});
+
+document.getElementById('edit-cancel').addEventListener('click', closeEditModal);
+document.getElementById('edit-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('edit-modal')) closeEditModal();
+});
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.add('hidden');
+  editingId = null;
+}
+
+// ── DELETE CONFIRM ─────────────────────────────
+let _deleteCb = null;
+
+function confirmDelete(id, company) {
+  document.getElementById('confirm-company').textContent = company;
+  _deleteCb = () => {
+    deleteApp(id);
+    toast('Application deleted', 'error');
+    render();
+  };
+  document.getElementById('confirm-modal').classList.remove('hidden');
+}
+
+document.getElementById('confirm-yes').addEventListener('click', () => {
+  if (_deleteCb) _deleteCb();
+  document.getElementById('confirm-modal').classList.add('hidden');
+  _deleteCb = null;
+});
+
+document.getElementById('confirm-no').addEventListener('click', () => {
+  document.getElementById('confirm-modal').classList.add('hidden');
+  _deleteCb = null;
+});
+
+document.getElementById('confirm-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('confirm-modal')) {
+    document.getElementById('confirm-modal').classList.add('hidden');
+    _deleteCb = null;
+  }
+});
+
+// ── EXPORT CSV ─────────────────────────────────
+document.getElementById('export-btn').addEventListener('click', () => {
+  const apps = getApps();
+  if (!apps.length) { toast('No applications to export', 'error'); return; }
+
+  const headers = ['Company','Role','Date Applied','Deadline','URL','Status','Notes'];
+  const rows = apps.map(a => [
+    a.company, a.role, a.dateApplied, a.deadline || '',
+    a.url, getStatusInfo(a.status).label,
+    (a.notes || '').replace(/"/g, "'")
+  ].map(v => `"${v || ''}"`).join(','));
+
+  const csv = [headers.join(','), ...rows].join('\n');
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  link.download = `faang-applications-${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+  toast(`Exported ${apps.length} applications`, 'success');
+});
+
+// ── TOAST ──────────────────────────────────────
+function toast(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ` ${type}` : '');
+  el.textContent = msg;
+  document.getElementById('toast-wrap').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ── INIT ───────────────────────────────────────
+render();
+  </script>
+</body>
+</html>

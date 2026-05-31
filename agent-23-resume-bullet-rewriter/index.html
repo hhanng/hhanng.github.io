@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Bullet Rewriter · Agent 23</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --pink: #ffb7c5; --pink-dark: #e08da0; --pink-light: #ffe4ec;
+  --pink-xlight: #fff0f4; --cream: #fff9fa; --ink: #1f2a1b;
+  --ink-muted: #6b7c68; --ink-faint: #a8b5a4; --white: #ffffff;
+  --border: #f0dde3; --shadow: 0 2px 16px rgba(224,141,160,.12);
+  --radius: 16px; --font: 'Poppins', sans-serif;
+}
+body { font-family: var(--font); background: var(--cream); color: var(--ink); min-height: 100vh; line-height: 1.6; }
+.topnav { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.back-link { color: var(--pink-dark); text-decoration: none; font-size: .85rem; font-weight: 600; transition: opacity .15s; }
+.back-link:hover { opacity: .7; }
+.nav-badge { background: var(--pink-light); color: var(--pink-dark); font-size: .75rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+.hero { text-align: center; padding: 48px 24px 32px; }
+.hero-icon { font-size: 2.8rem; margin-bottom: 12px; }
+.hero h1 { font-size: 2rem; font-weight: 700; color: var(--ink); letter-spacing: -.03em; margin-bottom: 8px; }
+.hero p { color: var(--ink-muted); font-size: 1rem; max-width: 480px; margin: 0 auto; }
+.container { max-width: 900px; margin: 0 auto; padding: 0 20px 80px; }
+.card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+.api-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 20px; margin-bottom: 16px; }
+.api-bar label { font-size: .82rem; font-weight: 600; color: var(--ink-muted); white-space: nowrap; }
+.api-bar input { flex: 1; min-width: 200px; max-width: 320px; background: var(--cream); border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: .85rem; font-family: var(--font); color: var(--ink); outline: none; transition: border-color .15s; }
+.api-bar input:focus { border-color: var(--pink); }
+.api-saved { font-size: .78rem; color: #6dbf8a; font-weight: 600; }
+.hidden { display: none !important; }
+.section-title { font-size: 1rem; font-weight: 700; margin-bottom: 20px; }
+.form-row { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.flex-1 { flex: 1; min-width: 200px; }
+.form-group label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-muted); }
+.label-hint { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-faint); }
+.form-group input[type="text"], .form-group textarea { background: var(--cream); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: .9rem; font-family: var(--font); color: var(--ink); outline: none; resize: vertical; transition: border-color .15s; }
+.form-group input[type="text"]:focus, .form-group textarea:focus { border-color: var(--pink); }
+.form-group textarea { min-height: 160px; }
+.mt-16 { margin-top: 16px; }
+.level-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.level-btn { padding: 7px 14px; border-radius: 24px; border: 1.5px solid var(--border); background: transparent; color: var(--ink-muted); font-family: var(--font); font-size: .82rem; font-weight: 500; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.level-btn:hover { border-color: var(--pink); color: var(--pink-dark); }
+.level-btn.active { background: var(--pink); border-color: var(--pink); color: var(--ink); font-weight: 700; }
+.error-box { background: #fff0f4; border: 1.5px solid var(--pink); border-radius: 10px; padding: 10px 14px; font-size: .85rem; color: #c0395a; margin-top: 12px; }
+.actions-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; border: none; background: linear-gradient(135deg,var(--pink) 0%,var(--pink-dark) 100%); color: var(--ink); font-family: var(--font); font-size: .95rem; font-weight: 700; cursor: pointer; transition: all .2s; box-shadow: 0 4px 16px rgba(224,141,160,.35); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(224,141,160,.45); }
+.btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.btn-copy-all { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 12px; border: 1.5px solid var(--pink-dark); background: transparent; color: var(--pink-dark); font-family: var(--font); font-size: .88rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-copy-all:hover { background: var(--pink-xlight); }
+.btn-copy-all.copied { background: #edf7f2; border-color: #6dbf8a; color: #2e6b45; }
+.loading-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 48px 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 20px; }
+.loading-card p { color: var(--ink-muted); font-size: .9rem; }
+.spinner { width: 36px; height: 36px; border: 3px solid var(--pink-light); border-top-color: var(--pink-dark); border-radius: 50%; animation: spin .75s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.bullet-result-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); margin-top: 16px; animation: fadeIn .3s ease; }
+.bullet-card-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 640px) { .bullet-card-layout { grid-template-columns: 1fr; } }
+.original-col { background: var(--cream); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.col-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+.col-label.original-label { color: var(--ink-faint); }
+.col-label.improved-label { color: var(--pink-dark); }
+.original-text { font-size: .88rem; color: var(--ink-muted); line-height: 1.6; font-style: italic; }
+.improved-col { display: flex; flex-direction: column; gap: 10px; }
+.improved-option { background: var(--pink-xlight); border: 1px solid var(--pink-light); border-radius: 12px; padding: 12px 14px; }
+.option-num { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--pink-dark); margin-bottom: 5px; }
+.option-text { font-size: .88rem; color: var(--ink); line-height: 1.6; margin-bottom: 6px; }
+.option-why { font-size: .76rem; color: var(--ink-muted); font-style: italic; margin-bottom: 8px; padding-top: 6px; border-top: 1px solid var(--pink-light); }
+.btn-copy-option { padding: 4px 12px; border-radius: 8px; border: 1px solid var(--pink); background: transparent; color: var(--pink-dark); font-family: var(--font); font-size: .75rem; font-weight: 600; cursor: pointer; transition: all .12s; }
+.btn-copy-option:hover { background: var(--pink); color: var(--ink); }
+.btn-copy-option.copied { background: #edf7f2; border-color: #6dbf8a; color: #2e6b45; }
+.results-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 4px; margin-top: 24px; }
+.results-count { font-size: .82rem; color: var(--ink-muted); font-weight: 600; }
+
+/* MODE TOGGLE */
+.mode-toggle { display: flex; background: var(--cream); border: 1.5px solid var(--border); border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 20px; }
+.mode-btn { flex: 1; padding: 9px 16px; border: none; border-radius: 9px; font-family: var(--font); font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .18s; color: var(--ink-muted); background: transparent; }
+.mode-btn.active { background: white; color: var(--pink-dark); box-shadow: var(--shadow); }
+
+/* SCORE BADGE */
+.score-badge { display: inline-flex; align-items: baseline; gap: 2px; }
+.score-num { font-size: 1.5rem; font-weight: 800; }
+.score-denom { font-size: .85rem; color: var(--ink-muted); }
+.score-bar-wrap { margin: 6px 0 8px; }
+.score-bar-track { height: 7px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 999px; transition: width .5s ease; }
+.score-breakdown { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.score-row { display: flex; align-items: center; justify-content: space-between; font-size: .75rem; }
+.score-row-label { color: var(--ink-muted); }
+.score-row-val { font-weight: 600; }
+.score-missing { font-size: .75rem; color: #c0395a; background: #fff0f4; border-radius: 8px; padding: 8px 10px; margin-top: 8px; line-height: 1.5; }
+.score-missing strong { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+
+/* FAANG FORMULA BANNER */
+.faang-banner { background: linear-gradient(135deg,#fff0f4,#ffe4ec); border: 1.5px solid var(--pink-light); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; font-size: .85rem; }
+.faang-banner strong { color: var(--pink-dark); font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 6px; }
+.faang-formula { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .85rem; }
+.formula-part { background: white; border: 1px solid var(--pink); border-radius: 8px; padding: 4px 12px; color: var(--ink); font-weight: 600; }
+.formula-plus { color: var(--ink-muted); font-size: 1rem; }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="back-link" href="../index.html">← Portfolio</a>
+  <span class="nav-badge">Agent #23</span>
+</nav>
+
+<div class="hero">
+  <div class="hero-icon">📝</div>
+  <h1>Resume Bullet Rewriter</h1>
+  <p>Turn weak bullets into strong, metric-driven, FAANG-ready statements — with a strength score.</p>
+</div>
+
+<div class="container">
+  <div class="card api-bar">
+    <label for="apiKey">Gemini API Key</label>
+    <input type="password" id="apiKey" placeholder="AIza…" autocomplete="off">
+    <span class="api-saved hidden" id="apiSaved">✓ Saved</span>
+  </div>
+
+  <div class="card inputs-card">
+    <h2 class="section-title">Your Bullets</h2>
+
+    <!-- Mode toggle -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeSingle" onclick="setMode('single')">✏️ Single / Multi Bullets</button>
+      <button class="mode-btn" id="modeBatch" onclick="setMode('batch')">📄 Batch (Full Section)</button>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>Industry / Role Context</label>
+        <input type="text" id="context" placeholder="e.g. Software Engineer at a fintech startup">
+      </div>
+      <div class="form-group">
+        <label>Level</label>
+        <div class="level-tabs" id="levelTabs">
+          <button class="level-btn active" data-level="Student">Student</button>
+          <button class="level-btn" data-level="Entry">Entry</button>
+          <button class="level-btn" data-level="Mid">Mid</button>
+          <button class="level-btn" data-level="Senior">Senior</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group mt-16" id="singleModeLabel">
+      <label>Weak Bullet Points <span class="label-hint">(one per line)</span></label>
+      <textarea id="bullets" rows="8" placeholder="Worked on the backend API&#10;Helped with customer issues&#10;Did some data analysis&#10;Managed social media accounts"></textarea>
+    </div>
+
+    <div class="form-group mt-16 hidden" id="batchModeArea">
+      <label>Full Resume Section <span class="label-hint">(paste the entire section — headers and bullets)</span></label>
+      <textarea id="batchInput" rows="12" placeholder="Experience&#10;Software Engineer Intern — Acme Corp&#10;• Worked on the backend&#10;• Helped users with issues&#10;• Did data analysis work&#10;• Managed multiple projects"></textarea>
+    </div>
+
+    <div id="errorBox" class="error-box hidden"></div>
+
+    <div class="actions-row">
+      <button class="btn-primary" id="rewriteBtn">
+        <span>✨</span> <span id="rewriteBtnLabel">Rewrite Bullets</span>
+      </button>
+      <button class="btn-copy-all hidden" id="copyAllBtn">Copy All Best</button>
+    </div>
+  </div>
+
+  <div id="resultsArea"></div>
+</div>
+
+<script>
+let selectedLevel = 'Student';
+let currentMode = 'single';
+let rewrittenBullets = [];
+
+const apiKeyInput = document.getElementById('apiKey');
+const apiSaved = document.getElementById('apiSaved');
+const rewriteBtn = document.getElementById('rewriteBtn');
+const copyAllBtn = document.getElementById('copyAllBtn');
+const errorBox = document.getElementById('errorBox');
+const resultsArea = document.getElementById('resultsArea');
+
+const saved = localStorage.getItem('geminiKey');
+if (saved) { apiKeyInput.value = saved; apiSaved.classList.remove('hidden'); }
+
+apiKeyInput.addEventListener('input', () => {
+  const v = apiKeyInput.value.trim();
+  if (v) { localStorage.setItem('geminiKey', v); apiSaved.classList.remove('hidden'); }
+  else apiSaved.classList.add('hidden');
+});
+
+document.getElementById('levelTabs').addEventListener('click', e => {
+  const btn = e.target.closest('.level-btn'); if (!btn) return;
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedLevel = btn.dataset.level;
+});
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeSingle').classList.toggle('active', mode === 'single');
+  document.getElementById('modeBatch').classList.toggle('active', mode === 'batch');
+  document.getElementById('singleModeLabel').classList.toggle('hidden', mode === 'batch');
+  document.getElementById('batchModeArea').classList.toggle('hidden', mode === 'single');
+  document.getElementById('rewriteBtnLabel').textContent = mode === 'batch' ? 'Batch Rewrite All' : 'Rewrite Bullets';
+}
+
+async function callGemini(apiKey, prompt) {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}]}) });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.candidates[0].content.parts[0].text;
+}
+
+// ── BULLET STRENGTH SCORER ────────────────────────────────────────
+const ACTION_VERBS = ['led','built','developed','designed','implemented','improved','increased',
+  'reduced','launched','created','managed','optimized','delivered','architected','engineered',
+  'deployed','automated','streamlined','established','scaled','mentored','spearheaded','drove',
+  'achieved','generated','migrated','integrated','refactored','collaborated','executed','owned',
+  'shipped','resolved','boosted','accelerated','partnered','authored','transformed'];
+
+const TECH_TERMS = /\b(python|java|javascript|typescript|react|angular|vue|node|go|golang|rust|swift|kotlin|c\+\+|ruby|scala|aws|gcp|azure|docker|kubernetes|terraform|sql|nosql|mongodb|postgres|redis|kafka|spark|tensorflow|pytorch|ml|ai|api|rest|graphql|microservices|ci\/cd|linux|git|bash)\b/i;
+
+function scoreBullet(text) {
+  let score = 0;
+  const reasons = [];
+  const missing = [];
+  const words = text.trim().split(/\s+/).filter(Boolean);
+
+  // +3 Quantified impact
+  if (/\b\d+\s*%|\b\d+x\b|\$\d+|\d+\s*(users?|customers?|clients?|engineers?|ms|seconds?|hours?|days?|million|billion|thousand|k\b)/i.test(text)) {
+    score += 3; reasons.push({ label: 'Quantified impact', pts: '+3' });
+  } else {
+    missing.push('Missing quantified impact — add a number, %, or $ result');
+  }
+
+  // +2 Action verb start
+  const firstWord = words[0]?.replace(/[^a-z]/gi, '').toLowerCase();
+  if (ACTION_VERBS.some(v => firstWord?.startsWith(v.slice(0, Math.min(5, v.length))))) {
+    score += 2; reasons.push({ label: 'Strong action verb', pts: '+2' });
+  } else {
+    missing.push('Start with a strong action verb (Led, Built, Designed, Reduced...)');
+  }
+
+  // +2 Tech stack
+  if (TECH_TERMS.test(text)) {
+    score += 2; reasons.push({ label: 'Tech stack mentioned', pts: '+2' });
+  } else {
+    missing.push('Mention a specific technology, tool, or platform');
+  }
+
+  // +2 Scope/team size
+  if (/\b(\d+[\-\s]*(person|people|engineer|developer|member|user)|team\s+of|cross[-\s]functional|company[-\s]wide|org[-\s]wide|stakeholder|million users?|k users?|global)\b/i.test(text)) {
+    score += 2; reasons.push({ label: 'Scope / team size', pts: '+2' });
+  } else {
+    missing.push('Add scope context (team size, users affected, cross-functional...)');
+  }
+
+  // +1 Concise ≤20 words
+  if (words.length <= 20) {
+    score += 1; reasons.push({ label: `Concise (${words.length} words ≤20)`, pts: '+1' });
+  } else {
+    missing.push(`Too long (${words.length} words) — aim for ≤20 words`);
+  }
+
+  return { score, max: 10, reasons, missing };
+}
+
+function scoreColor(score) {
+  if (score >= 8) return '#2e7d32';
+  if (score >= 6) return '#f57c00';
+  return '#c62828';
+}
+
+function buildScoreWidget(text) {
+  const { score, max, reasons, missing } = scoreBullet(text);
+  const pct = (score / max) * 100;
+  const color = scoreColor(score);
+  const reasonsHtml = reasons.map(r =>
+    `<div class="score-row"><span class="score-row-label">${r.label}</span><span class="score-row-val" style="color:${color}">${r.pts}</span></div>`
+  ).join('');
+  const missingHtml = missing.length ? `
+    <div class="score-missing">
+      <strong>💡 To improve:</strong>
+      ${missing.map(m => `<div>• ${escHtml(m)}</div>`).join('')}
+    </div>` : `<div style="font-size:.78rem;color:#2e7d32;margin-top:6px;font-weight:600">🏆 Perfect FAANG-ready bullet!</div>`;
+
+  return `
+    <div style="border-top:1px solid var(--pink-light);margin-top:10px;padding-top:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-muted)">Strength Score</span>
+        <div class="score-badge">
+          <span class="score-num" style="color:${color}">${score}</span>
+          <span class="score-denom">/ ${max}</span>
+        </div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="width:${pct}%;background:${color}"></div>
+        </div>
+      </div>
+      <div class="score-breakdown">${reasonsHtml}</div>
+      ${missingHtml}
+    </div>`;
+}
+
+rewriteBtn.addEventListener('click', async () => {
+  const apiKey = apiKeyInput.value.trim();
+  const context = document.getElementById('context').value.trim();
+  const isBatch = currentMode === 'batch';
+  const rawInput = isBatch
+    ? document.getElementById('batchInput').value.trim()
+    : document.getElementById('bullets').value.trim();
+
+  errorBox.classList.add('hidden');
+  copyAllBtn.classList.add('hidden');
+  rewrittenBullets = [];
+
+  if (!apiKey) { showError('Please enter your Gemini API key.'); return; }
+  if (!rawInput) { showError('Please enter at least one bullet point.'); return; }
+
+  let bullets;
+  if (isBatch) {
+    // Extract bullet lines from the full section
+    bullets = rawInput.split('\n')
+      .map(l => l.replace(/^[\•\-\*\–]\s*/, '').trim())
+      .filter(l => l.length > 5 && !/^[A-Z\s]+$/.test(l) && !/^\d{4}/.test(l));
+  } else {
+    bullets = rawInput.split('\n').map(b => b.replace(/^[-•*]\s*/,'').trim()).filter(Boolean);
+  }
+
+  if (!bullets.length) { showError('No valid bullet points found.'); return; }
+
+  rewriteBtn.disabled = true;
+  rewriteBtn.innerHTML = '<span>⏳</span> Rewriting…';
+  resultsArea.innerHTML = '';
+
+  const loadingEl = document.createElement('div');
+  loadingEl.className = 'loading-card';
+  loadingEl.innerHTML = `<div class="spinner"></div><p>Rewriting ${bullets.length} bullet${bullets.length > 1 ? 's' : ''} with FAANG scoring…</p>`;
+  resultsArea.appendChild(loadingEl);
+
+  const prompt = `You are an expert resume writer specializing in FAANG-level resumes. Rewrite the following resume bullet points for a ${selectedLevel}-level ${context || 'professional'}.
+
+CRITICAL FAANG FRAMING RULE: Every output bullet MUST follow the formula:
+[Impact] + [Scope] + [Tech Stack]
+Example: "Reduced API latency by 40% for 2M users by refactoring Redis caching layer, improving P99 from 800ms to 480ms."
+
+For EACH bullet, provide exactly 3 improved versions. Each must:
+- Follow Impact + Scope + Tech Stack formula
+- Start with a strong action verb
+- Include a specific metric or quantified impact (estimate if not given)
+- Include relevant ATS keywords for the role/industry
+- Be concise (under 20 words ideally)
+- Mention team size or user scope when possible
+
+Return ONLY valid JSON (no markdown):
+{
+  "results": [
+    {
+      "original": "the original bullet text",
+      "options": [
+        {"text": "Improved bullet option 1", "why": "One-liner explaining improvements"},
+        {"text": "Improved bullet option 2", "why": "One-liner explaining improvements"},
+        {"text": "Improved bullet option 3", "why": "One-liner explaining improvements"}
+      ]
+    }
+  ]
+}
+
+Bullets to rewrite:
+${bullets.map((b,i) => `${i+1}. ${b}`).join('\n')}`;
+
+  try {
+    const raw = await callGemini(apiKey, prompt);
+    const cleaned = raw.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/i,'').trim();
+    const parsed = JSON.parse(cleaned);
+    const results = parsed.results || [];
+
+    resultsArea.innerHTML = '';
+
+    if (!results.length) { showError('No results returned. Please try again.'); return; }
+
+    // FAANG formula banner
+    const bannerEl = document.createElement('div');
+    bannerEl.className = 'faang-banner';
+    bannerEl.innerHTML = `
+      <strong>💼 FAANG Framing Guide Applied</strong>
+      <div class="faang-formula">
+        <span class="formula-part">📈 Impact</span>
+        <span class="formula-plus">+</span>
+        <span class="formula-part">👥 Scope</span>
+        <span class="formula-plus">+</span>
+        <span class="formula-part">⚙️ Tech Stack</span>
+        <span style="color:var(--ink-muted);font-size:.8rem;margin-left:4px">— Every bullet scored on this formula</span>
+      </div>`;
+    resultsArea.appendChild(bannerEl);
+
+    const header = document.createElement('div');
+    header.className = 'results-header';
+    header.innerHTML = `<span class="results-count">${results.length} bullet${results.length > 1 ? 's' : ''} rewritten</span>`;
+    resultsArea.appendChild(header);
+
+    results.forEach((item, idx) => {
+      rewrittenBullets.push(item.options?.[0]?.text || '');
+      resultsArea.appendChild(buildBulletCard(item, idx));
+    });
+
+    copyAllBtn.classList.remove('hidden');
+  } catch(err) {
+    resultsArea.innerHTML = '';
+    showError('Rewrite failed: ' + err.message);
+  } finally {
+    rewriteBtn.disabled = false;
+    rewriteBtn.innerHTML = `<span>✨</span> ${currentMode === 'batch' ? 'Batch Rewrite All' : 'Rewrite Bullets'}`;
+  }
+});
+
+function buildBulletCard(item, idx) {
+  const card = document.createElement('div');
+  card.className = 'bullet-result-card';
+  const options = item.options || [];
+
+  const optionsHtml = options.map((opt, i) => {
+    const scoreWidget = buildScoreWidget(opt.text || '');
+    return `
+      <div class="improved-option">
+        <div class="option-num">Option ${i + 1}</div>
+        <div class="option-text">${escHtml(opt.text || '')}</div>
+        <div class="option-why">${escHtml(opt.why || '')}</div>
+        <button class="btn-copy-option" data-text="${escAttr(opt.text || '')}">Copy</button>
+        ${scoreWidget}
+      </div>`;
+  }).join('');
+
+  card.innerHTML = `
+    <div class="bullet-card-layout">
+      <div class="original-col">
+        <div class="col-label original-label">Original</div>
+        <div class="original-text">${escHtml(item.original || '')}</div>
+      </div>
+      <div class="improved-col">
+        <div class="col-label improved-label">Improved Options</div>
+        ${optionsHtml}
+      </div>
+    </div>`;
+
+  card.querySelectorAll('.btn-copy-option').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.text);
+        btn.textContent = '✓ Copied'; btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+      } catch { btn.textContent = 'Failed'; }
+    });
+  });
+  return card;
+}
+
+copyAllBtn.addEventListener('click', async () => {
+  const text = rewrittenBullets.filter(Boolean).map(b => `• ${b}`).join('\n');
+  try {
+    await navigator.clipboard.writeText(text);
+    copyAllBtn.textContent = '✓ Copied All!'; copyAllBtn.classList.add('copied');
+    setTimeout(() => { copyAllBtn.textContent = 'Copy All Best'; copyAllBtn.classList.remove('copied'); }, 2500);
+  } catch { copyAllBtn.textContent = 'Copy failed'; }
+});
+
+function showError(msg) { errorBox.textContent = msg; errorBox.classList.remove('hidden'); }
+function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(str) { return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+</script>
+</body>
+</html>

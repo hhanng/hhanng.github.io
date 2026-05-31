@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agent #97 — Build in Public Playbook</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#12080f;color:#e2e8f0;min-height:100vh}
+header{background:#1f0d1a;border-bottom:1px solid #3b1634;padding:13px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.15rem;font-weight:700;color:#d946ef}
+header span{font-size:.82rem;color:#6b7280}
+.badge{background:#d946ef;color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px}
+.tabs{display:flex;background:#12080f;border-bottom:2px solid #3b1634;padding:0 24px;gap:2px;overflow-x:auto}
+.tab{padding:11px 18px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .2s}
+.tab.active{color:#d946ef;border-bottom-color:#d946ef}
+.tab:hover{color:#e879f9}
+.content{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.content.active{display:block}
+.card{background:#1f0d1a;border:1px solid #3b1634;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h3{color:#d946ef;margin-bottom:12px;font-size:.95rem}
+.card h4{color:#38bdf8;margin-bottom:8px;font-size:.9rem}
+.btn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s}
+.btn-fuchsia{background:#d946ef;color:#fff}
+.btn-fuchsia:hover{background:#c026d3}
+.btn-sky{background:#38bdf8;color:#000}
+.btn-sky:hover{background:#0ea5e9}
+.btn-ghost{background:transparent;border:1px solid #3b1634;color:#9ca3af}
+.btn-ghost:hover{border-color:#d946ef;color:#d946ef}
+.btn-sm{padding:4px 10px;font-size:.73rem}
+label{display:block;font-size:.78rem;color:#9ca3af;margin-bottom:4px;margin-top:10px}
+input[type=text],input[type=email],textarea,select{background:#0e060d;border:1px solid #3b1634;border-radius:8px;padding:8px 10px;color:#e2e8f0;font-size:.85rem;width:100%}
+input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:#d946ef}
+textarea{resize:vertical;min-height:80px}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;margin-right:4px;margin-bottom:4px}
+.tag-f{background:rgba(217,70,239,.15);color:#d946ef}
+.tag-s{background:rgba(56,189,248,.15);color:#38bdf8}
+.tag-g{background:rgba(16,185,129,.15);color:#10b981}
+.tag-y{background:rgba(251,191,36,.15);color:#fbbf24}
+.platform-card{background:#1f0d1a;border:1px solid #3b1634;border-radius:10px;padding:14px;margin-bottom:10px}
+.platform-card.recommended{border-color:#d946ef;background:rgba(217,70,239,.05)}
+.question-card{background:#0e060d;border:1px solid #3b1634;border-radius:10px;padding:14px;margin-bottom:10px}
+.q-btn{padding:6px 14px;border-radius:20px;border:1px solid #3b1634;background:transparent;color:#9ca3af;font-size:.78rem;cursor:pointer;transition:all .15s;margin-right:6px;margin-bottom:6px}
+.q-btn.selected-yes{background:#10b981;border-color:#10b981;color:#000}
+.q-btn.selected-no{background:#374151;border-color:#374151;color:#9ca3af}
+.pillar-check{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;margin-bottom:6px;border:1px solid transparent}
+.pillar-check:hover{border-color:#3b1634}
+.pillar-check input[type=checkbox]{width:16px;height:16px;accent-color:#d946ef;flex-shrink:0}
+.content-card{background:#1f0d1a;border:1px solid #3b1634;border-radius:10px;padding:14px;margin-bottom:10px}
+.content-card h4{font-size:.88rem;color:#e2e8f0;margin-bottom:6px}
+.content-card .template{font-size:.78rem;color:#9ca3af;font-style:italic;line-height:1.5}
+.cat-btn{padding:5px 12px;border-radius:16px;border:1px solid #3b1634;background:transparent;color:#9ca3af;font-size:.75rem;cursor:pointer;transition:all .2s}
+.cat-btn.active{background:#d946ef;color:#fff;border-color:#d946ef}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px}
+.day-cell{background:#0e060d;border:1px solid #3b1634;border-radius:8px;padding:8px;min-height:80px}
+.day-cell h5{font-size:.7rem;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.day-item{font-size:.7rem;color:#e2e8f0;background:#1f0d1a;border-radius:4px;padding:3px 6px;margin-bottom:3px;display:flex;align-items:center;justify-content:space-between;gap:4px}
+.day-item button{background:none;border:none;color:#6b7280;cursor:pointer;font-size:.7rem}
+.streak-day{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.7rem;font-weight:700;transition:all .15s;border:1px solid #3b1634}
+.streak-day.posted{background:#d946ef;border-color:#d946ef;color:#fff}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.brand-output{background:#0e060d;border:1px solid #3b1634;border-radius:8px;padding:12px;margin-top:8px;font-family:monospace;font-size:.78rem;color:#e2e8f0;white-space:pre-wrap;min-height:60px}
+.bio-score{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.score-item{flex:1;min-width:100px;background:#0e060d;border-radius:8px;padding:8px;text-align:center}
+.score-item .score-val{font-size:1.1rem;font-weight:700;color:#d946ef}
+.score-item .score-lbl{font-size:.68rem;color:#6b7280;margin-top:2px}
+.tagline-card{background:#0e060d;border:1px solid #3b1634;border-radius:8px;padding:10px;margin-bottom:6px}
+.tagline-card .tone{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.tagline-card .line{font-size:.9rem;color:#e2e8f0}
+.draft-badge{background:rgba(217,70,239,.15);color:#d946ef;font-size:.68rem;padding:2px 6px;border-radius:6px}
+@media(max-width:700px){.week-grid{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <span class="badge">#97</span>
+  <h1>📢 Build in Public Playbook</h1>
+  <span>Ship agents. Share the journey. Land the job.</span>
+</header>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('strategy',this)">STRATEGY</button>
+  <button class="tab" onclick="showTab('content',this)">CONTENT</button>
+  <button class="tab" onclick="showTab('planner',this)">PLANNER</button>
+  <button class="tab" onclick="showTab('brand',this)">BRAND</button>
+</div>
+
+<!-- STRATEGY -->
+<div id="tab-strategy" class="content active">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <h3>Why Build in Public?</h3>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px;background:#0e060d;border-radius:8px">
+            <span style="font-size:1.2rem">👁️</span>
+            <div><div style="font-size:.85rem;font-weight:600;color:#e2e8f0;margin-bottom:2px">Recruiter visibility</div><div style="font-size:.78rem;color:#9ca3af">Recruiters at FAANG actively look for candidates who demonstrate skills publicly. Your GitHub + social presence IS your portfolio.</div></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px;background:#0e060d;border-radius:8px">
+            <span style="font-size:1.2rem">🔗</span>
+            <div><div style="font-size:.85rem;font-weight:600;color:#e2e8f0;margin-bottom:2px">Network compounding</div><div style="font-size:.78rem;color:#9ca3af">Each post connects you with people. Those people refer you, answer your questions, hire you. The network builds on itself.</div></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px;background:#0e060d;border-radius:8px">
+            <span style="font-size:1.2rem">📊</span>
+            <div><div style="font-size:.85rem;font-weight:600;color:#e2e8f0;margin-bottom:2px">Public accountability</div><div style="font-size:.78rem;color:#9ca3af">Announcing what you're building holds you to it. Consistent output compounds over time.</div></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px;background:#0e060d;border-radius:8px">
+            <span style="font-size:1.2rem">✅</span>
+            <div><div style="font-size:.85rem;font-weight:600;color:#e2e8f0;margin-bottom:2px">Portfolio proof</div><div style="font-size:.78rem;color:#9ca3af">Show don't tell. 100 public commits + build threads = stronger signal than any resume bullet.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Content Pillar Selector</h3>
+        <div style="font-size:.78rem;color:#9ca3af;margin-bottom:12px">Pick 2–3 pillars to stay consistent and build a clear audience expectation.</div>
+        <div id="pillar-checkboxes"></div>
+        <div id="pillar-result" style="margin-top:12px;font-size:.8rem;color:#d946ef"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>Platform Picker</h3>
+        <div style="font-size:.78rem;color:#9ca3af;margin-bottom:12px">Answer these 5 questions to find your best platform(s).</div>
+        <div id="platform-questions"></div>
+        <div id="platform-result" style="margin-top:16px"></div>
+      </div>
+      <div class="card">
+        <h3>Personal Brand Statement Builder</h3>
+        <div style="font-size:.78rem;color:#9ca3af;margin-bottom:10px">Fill in the blanks → generates your Twitter bio, LinkedIn headline, and portfolio tagline.</div>
+        <label>I help...</label>
+        <input id="pb-audience" type="text" placeholder="CS students / developers / new grads" oninput="buildBrandStatement()"/>
+        <label>Achieve...</label>
+        <input id="pb-result" type="text" placeholder="their first FAANG offer / ship faster" oninput="buildBrandStatement()"/>
+        <label>By...</label>
+        <input id="pb-method" type="text" placeholder="building 100 AI tools in public" oninput="buildBrandStatement()"/>
+        <div id="brand-statement-result" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div id="tab-content" class="content">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="content-cats"></div>
+  <div style="font-size:.78rem;color:#6b7280;margin-bottom:12px" id="content-count"></div>
+  <div id="content-list"></div>
+</div>
+
+<!-- PLANNER -->
+<div id="tab-planner" class="content">
+  <div class="grid2" style="margin-bottom:16px">
+    <div class="card">
+      <h3>Recommended Posting Cadence</h3>
+      <div style="font-size:.8rem">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #3b1634"><span style="color:#9ca3af">Twitter / X</span><span style="color:#38bdf8">1–3 posts/day</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #3b1634"><span style="color:#9ca3af">LinkedIn</span><span style="color:#38bdf8">3–5 posts/week</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #3b1634"><span style="color:#9ca3af">GitHub</span><span style="color:#38bdf8">Daily commits</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0"><span style="color:#9ca3af">Blog / Substack</span><span style="color:#38bdf8">1–2 posts/week</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Streak Tracker</h3>
+      <div style="font-size:.78rem;color:#9ca3af;margin-bottom:10px">Check in each day you post something publicly.</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px" id="streak-days"></div>
+      <div id="streak-stats" style="font-size:.82rem;color:#d946ef"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h3 style="margin:0">Weekly Content Calendar</h3>
+      <button class="btn btn-fuchsia btn-sm" onclick="suggestWeek()">✨ Suggest My Week</button>
+    </div>
+    <div class="week-grid" id="week-calendar"></div>
+    <div style="font-size:.75rem;color:#6b7280">Click any content card from the Backlog to add it to a day, or use Suggest My Week.</div>
+  </div>
+  <div class="card">
+    <h3>Content Backlog</h3>
+    <div style="font-size:.78rem;color:#9ca3af;margin-bottom:12px">Save ideas from the CONTENT tab. Click a saved draft to add it to the calendar.</div>
+    <div id="backlog-list"></div>
+  </div>
+</div>
+
+<!-- BRAND -->
+<div id="tab-brand" class="content">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <h3>GitHub Profile README Generator</h3>
+        <label>Your Name</label>
+        <input id="gh-name" type="text" placeholder="Han Han Nguyen" oninput="generateREADME()"/>
+        <label>Tagline</label>
+        <input id="gh-tagline" type="text" placeholder="Building 100 AI tools in public 🚀" oninput="generateREADME()"/>
+        <label>Current Focus</label>
+        <input id="gh-focus" type="text" placeholder="100 AI Agents Challenge" oninput="generateREADME()"/>
+        <label>Tech Stack (comma separated)</label>
+        <input id="gh-stack" type="text" placeholder="Python, JavaScript, React, Node.js, AWS" oninput="generateREADME()"/>
+        <label>Project 1 (name | url)</label>
+        <input id="gh-p1" type="text" placeholder="100 AI Agents | https://hhanng.github.io" oninput="generateREADME()"/>
+        <label>Project 2 (name | url)</label>
+        <input id="gh-p2" type="text" placeholder="ML Visualizer | https://github.com/..." oninput="generateREADME()"/>
+        <label>Currently Learning</label>
+        <input id="gh-learning" type="text" placeholder="System Design, TypeScript, Rust" oninput="generateREADME()"/>
+        <label>Fun Fact</label>
+        <input id="gh-fun" type="text" placeholder="I've built 97 tools and counting..." oninput="generateREADME()"/>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-fuchsia btn-sm" onclick="copyREADME()">Copy README.md</button>
+        </div>
+        <div class="brand-output" id="readme-output" style="max-height:300px;overflow-y:auto"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>Twitter / X Bio Optimizer</h3>
+        <label>Your Current Bio</label>
+        <textarea id="bio-input" placeholder="CS student at XYZ. Building stuff. Learning things." rows="3" oninput="analyzeBio()"></textarea>
+        <div class="bio-score" id="bio-scores"></div>
+        <div id="bio-suggestions" style="margin-top:10px"></div>
+      </div>
+      <div class="card">
+        <h3>LinkedIn Headline Builder</h3>
+        <label>Your Role</label>
+        <input id="li-role" type="text" placeholder="CS Student / Software Engineer" oninput="buildLinkedIn()"/>
+        <label>Your Differentiator</label>
+        <input id="li-diff" type="text" placeholder="Building 100 AI tools in public" oninput="buildLinkedIn()"/>
+        <label>Aspiration / Social Proof</label>
+        <input id="li-proof" type="text" placeholder="FAANG intern | open to opportunities" oninput="buildLinkedIn()"/>
+        <div id="li-results" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <h3>Portfolio Tagline Generator</h3>
+        <label>Project 1</label>
+        <input id="tg-p1" type="text" placeholder="ML Visualizer" oninput="generateTaglines()"/>
+        <label>Project 2</label>
+        <input id="tg-p2" type="text" placeholder="Cybersecurity Trainer" oninput="generateTaglines()"/>
+        <label>Project 3</label>
+        <input id="tg-p3" type="text" placeholder="Cloud Architecture Designer" oninput="generateTaglines()"/>
+        <div id="tagline-results" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS='bip97_';
+const get=k=>JSON.parse(localStorage.getItem(LS+k)||'null');
+const set=(k,v)=>localStorage.setItem(LS+k,JSON.stringify(v));
+
+function showTab(id,btn){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+// ─── STRATEGY ─────────────────────────────────────────────────────────────
+const PILLARS=[
+  'Learning in public','Project updates','CS concepts explained','Interview prep journey','Career advice','Tech opinions','Life as CS student','Side project building'
+];
+const PLATFORM_QS=[
+  {q:'Do you enjoy writing long-form content?',yes:'Substack / Blog',no:''},
+  {q:'Are you comfortable on camera?',yes:'YouTube / TikTok',no:''},
+  {q:'Do you want quick daily updates?',yes:'Twitter / X',no:''},
+  {q:'Do you want professional visibility?',yes:'LinkedIn',no:''},
+  {q:'Do you want to show code?',yes:'GitHub + Twitter combo',no:''},
+];
+const pAnswers={};
+
+function renderPlatformQuestions(){
+  document.getElementById('platform-questions').innerHTML=PLATFORM_QS.map((q,i)=>`
+    <div class="question-card">
+      <div style="font-size:.85rem;color:#e2e8f0;margin-bottom:8px">${q.q}</div>
+      <button class="q-btn${pAnswers[i]==='yes'?' selected-yes':''}" onclick="setPAnswer(${i},'yes')">Yes</button>
+      <button class="q-btn${pAnswers[i]==='no'?' selected-no':''}" onclick="setPAnswer(${i},'no')">No</button>
+    </div>`).join('');
+}
+
+function setPAnswer(i,v){
+  pAnswers[i]=v;
+  renderPlatformQuestions();
+  renderPlatformResult();
+}
+
+function renderPlatformResult(){
+  const recs=PLATFORM_QS.map((q,i)=>pAnswers[i]==='yes'?q.yes:'').filter(Boolean);
+  if(!recs.length){document.getElementById('platform-result').innerHTML='';return;}
+  document.getElementById('platform-result').innerHTML=`
+    <div style="background:rgba(217,70,239,.08);border:1px solid rgba(217,70,239,.3);border-radius:8px;padding:12px">
+      <div style="font-size:.75rem;color:#d946ef;font-weight:700;margin-bottom:8px">RECOMMENDED PLATFORMS</div>
+      ${recs.map(r=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.85rem"><span style="color:#d946ef">✓</span><span>${r}</span></div>`).join('')}
+      <div style="margin-top:8px;font-size:.75rem;color:#9ca3af">Start with 1–2 platforms. Consistency beats breadth.</div>
+    </div>`;
+}
+
+function renderPillars(){
+  const saved=get('pillars')||[];
+  document.getElementById('pillar-checkboxes').innerHTML=PILLARS.map((p,i)=>`
+    <div class="pillar-check">
+      <input type="checkbox" id="pillar-${i}" ${saved.includes(p)?'checked':''} onchange="savePillars()">
+      <label for="pillar-${i}" style="font-size:.85rem;color:#e2e8f0;cursor:pointer;margin:0">${p}</label>
+    </div>`).join('');
+  updatePillarResult(saved);
+}
+
+function savePillars(){
+  const selected=PILLARS.filter((_,i)=>document.getElementById('pillar-'+i)?.checked);
+  set('pillars',selected);
+  updatePillarResult(selected);
+}
+
+function updatePillarResult(selected){
+  const r=document.getElementById('pillar-result');
+  if(!selected.length){r.textContent='Choose 2–3 pillars above';return;}
+  if(selected.length<=3){r.innerHTML=`✓ Good choice! Your pillars: ${selected.map(p=>`<strong>${p}</strong>`).join(', ')}`;}
+  else{r.innerHTML=`⚠️ You've picked ${selected.length} — consider narrowing to 2–3 for a clear focus.`;}
+}
+
+function buildBrandStatement(){
+  const audience=document.getElementById('pb-audience').value;
+  const result=document.getElementById('pb-result').value;
+  const method=document.getElementById('pb-method').value;
+  if(!audience&&!result&&!method){document.getElementById('brand-statement-result').innerHTML='';return;}
+  const bio=`I help ${audience||'[audience]'} ${result||'[achieve result]'} by ${method||'[your method]'}`.slice(0,160);
+  const headline=`${audience?audience.split('/')[0].trim():''} → ${result||'[result]'} | ${method||'[method]'}`.slice(0,220);
+  document.getElementById('brand-statement-result').innerHTML=`
+    <div style="margin-bottom:8px">
+      <div style="font-size:.72rem;color:#6b7280;margin-bottom:3px">Twitter bio (${bio.length}/160 chars)</div>
+      <div style="background:#0e060d;border:1px solid #3b1634;border-radius:7px;padding:8px;font-size:.82rem;color:#e2e8f0">${bio}</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:4px" onclick="copyText('${bio.replace(/'/g,"\'")}')">Copy</button>
+    </div>
+    <div>
+      <div style="font-size:.72rem;color:#6b7280;margin-bottom:3px">LinkedIn headline</div>
+      <div style="background:#0e060d;border:1px solid #3b1634;border-radius:7px;padding:8px;font-size:.82rem;color:#e2e8f0">${headline}</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:4px" onclick="copyText('${headline.replace(/'/g,"\'")}')">Copy</button>
+    </div>`;
+}
+
+// ─── CONTENT ──────────────────────────────────────────────────────────────
+const CONTENT=[
+  // Project Updates (0-9)
+  {cat:'Project Updates',title:'Ship announcement',template:'Just shipped [PROJECT] — here\'s how it works in 5 points:\n\n1. [Main feature]\n2. [Technical detail]\n3. [Problem it solves]\n4. [Interesting challenge]\n5. [What\'s next]\n\n🔗 [LINK] #buildinpublic'},
+  {cat:'Project Updates',title:'Honest retrospective',template:'What I learned building [PROJECT] (the honest version):\n\n✅ What worked: [thing]\n❌ What failed: [thing]\n🤯 Biggest surprise: [thing]\n\nBuilding in public so you can skip my mistakes. #buildinpublic'},
+  {cat:'Project Updates',title:'V1 was terrible',template:'Why my first version of [PROJECT] was terrible — and what I changed:\n\nV1: [what was wrong]\nV2: [what I changed]\nResult: [measurable improvement]\n\nFirst versions are supposed to be bad. Ship anyway. 🚀'},
+  {cat:'Project Updates',title:'Bugs week',template:'3 bugs that took me all week in [PROJECT]:\n\n🐛 Bug 1: [description]\n🐛 Bug 2: [description]\n🐛 Bug 3: [description]\n\nTime lost: ~[N] hours. Lesson learned: [insight]'},
+  {cat:'Project Updates',title:'Decision regret',template:'The one architectural decision in [PROJECT] I\'d do differently:\n\nWhat I built: [approach]\nWhat I should have done: [better approach]\nWhy it matters: [consequence]\n\nTag someone who\'s made the same mistake 👇'},
+  {cat:'Project Updates',title:'Speed to deploy',template:'From idea to deployment in [N] days.\n\nHere\'s the full breakdown:\n\nDay 1: [what you did]\nDay 2: [what you did]\nDay 3: [what you did]\n\nTools that made this possible: [stack] 🛠️'},
+  {cat:'Project Updates',title:'Rebuild',template:'I rebuilt [PROJECT] from scratch. Here\'s what\'s different:\n\nOld approach: [what changed]\nNew approach: [improvement]\nPerformance: [numbers]\n\nSometimes the best refactor is a rewrite. 🔄'},
+  {cat:'Project Updates',title:'Month 1 update',template:'Month 1 update on [PROJECT]:\n\n📊 [X] users\n⭐ [Y] stars\n💡 [Z] lessons\n\nBiggest thing I got wrong: [honest admission]\nWhat\'s shipping next: [teaser]\n\nBuilding in public 👇 details in thread'},
+  {cat:'Project Updates',title:'Surprise feature',template:'The feature no one asked for in [PROJECT] that became the most used:\n\nI built [feature] as an afterthought.\nTurns out [what users actually do with it].\n\nListen to usage data, not assumptions. 📊'},
+  {cat:'Project Updates',title:'Tech stack breakdown',template:'Tech stack breakdown for [PROJECT] — why I chose each tool:\n\nFrontend: [tech] → [why]\nBackend: [tech] → [why]\nDB: [tech] → [why]\nDeploy: [tech] → [why]\n\nWould choose differently? Tell me 👇'},
+  // Learning (10-19)
+  {cat:'Learning',title:'Concept simplified',template:'Explained simply: [CS CONCEPT] — took me 3 tries to understand.\n\nHere\'s the version I wish I had:\n\n[Simple explanation in your own words]\n\nThe key insight: [one sentence]\n\nWho else struggled with this? 👇'},
+  {cat:'Learning',title:'Algorithm click',template:'The one insight that made [ALGORITHM] finally click for me:\n\n"[The insight]"\n\nBefore: [confused approach]\nAfter: [clear mental model]\n\nSave this if you\'re learning algorithms 🔖'},
+  {cat:'Learning',title:'Hours well spent',template:'I spent [N] hours on [TOPIC]. Here\'s what actually matters:\n\n1. [core insight]\n2. [practical application]\n3. [common mistake to avoid]\n\nTL;DR: [one sentence summary]\n\nFull notes 🧵👇'},
+  {cat:'Learning',title:'Mental model',template:'Mental model I use for [CONCEPT] that no textbook taught me:\n\n[Your mental model / analogy]\n\nThis maps to [technical reality] because [reason].\n\nWhat\'s your mental model for [CONCEPT]?'},
+  {cat:'Learning',title:'Analogy post',template:'[TOPIC] explained using [RELATABLE ANALOGY]:\n\n[ANALOGY PART 1] = [TECH CONCEPT PART 1]\n[ANALOGY PART 2] = [TECH CONCEPT PART 2]\n[ANALOGY PART 3] = [TECH CONCEPT PART 3]\n\nAm I missing anything? 👇'},
+  {cat:'Learning',title:'More nuanced',template:'Why [COMMON CS PRACTICE] is actually more nuanced than you think:\n\nEveryone says: "[common advice]"\n\nReality: it depends on [factor 1] and [factor 2]\n\nWhen to break the rule: [scenario]\n\nNuance > rules 🧵'},
+  {cat:'Learning',title:'Better resources',template:'Resources that taught me [TOPIC] better than my professor did:\n\n📚 [Resource 1] — [why it\'s good]\n🎥 [Resource 2] — [why it\'s good]\n💻 [Resource 3] — [hands-on practice]\n\nSave for anyone learning [TOPIC] 🔖'},
+  {cat:'Learning',title:'Book notes',template:'My notes from [COURSE/BOOK] — the 20% that gave me 80% of the value:\n\n1. [Key insight 1]\n2. [Key insight 2]\n3. [Key insight 3]\n4. [Key insight 4]\n5. [Key insight 5]\n\nFull thread below 🧵'},
+  {cat:'Learning',title:'A vs B comparison',template:'[CONCEPT A] vs [CONCEPT B] — how I finally understand the difference:\n\n[CONCEPT A]: [when to use]\n[CONCEPT B]: [when to use]\n\nRule of thumb: [your heuristic]\n\nConfused the two for months. Don\'t be me. 😅'},
+  {cat:'Learning',title:'Wish I knew',template:'Things I wish I knew before taking [CS COURSE]:\n\n1. [Practical tip]\n2. [Common mistake]\n3. [Best resource]\n4. [Mindset shift]\n\nSharing for anyone about to start. Tag someone who needs this 👇'},
+  // Career (20-29)
+  {cat:'Career',title:'First interview',template:'How I got my first [COMPANY] interview as a [YEAR] student:\n\n1. [What I did differently]\n2. [What I focused on]\n3. [What surprised me]\n\nEveryone\'s path is different. Here\'s mine. 🧵'},
+  {cat:'Career',title:'Intern review',template:'My honest review of [COMPANY] internship:\n\n✅ Loved: [thing]\n✅ Loved: [thing]\n❌ Didn\'t expect: [thing]\n\nWould I return? [yes/no/maybe] and here\'s why:\n[Reason]\n\nHappy to answer DMs 📬'},
+  {cat:'Career',title:'What actually helped',template:'What actually helped in my FAANG prep (and what wasted time):\n\n✅ Helped: [practice type]\n✅ Helped: [resource]\n❌ Waste of time: [thing]\n❌ Waste of time: [thing]\n\n[N] months of prep, here\'s the honest breakdown 🧵'},
+  {cat:'Career',title:'Rejection story',template:'Rejected by [COMPANY]. Here\'s what I did instead:\n\n1. [How I processed it]\n2. [What I changed]\n3. [What happened next]\n\nRejection is data, not a verdict. 💪'},
+  {cat:'Career',title:'Non-technical skills',template:'The non-technical skills that got me offers no one talks about:\n\n1. [Skill] — how I developed it\n2. [Skill] — why it matters\n3. [Skill] — concrete example\n\nTechnical skills get you to the interview. These get you the offer. 🎯'},
+  {cat:'Career',title:'Recruiter found me',template:'A recruiter from [COMPANY] reached out because of [POST/PROJECT].\n\nHere\'s the exact [post/project] that got their attention:\n\n[Link]\n\nBuild in public. The right people will find you. 👀'},
+  {cat:'Career',title:'Day in the life',template:'What a typical day at [COMPANY TYPE] looks like as a new grad:\n\n9am: [what]\n11am: [what]\n1pm: [what]\n3pm: [what]\n5pm: [what]\n\nThe parts they don\'t tell you in the offer letter: 🧵'},
+  {cat:'Career',title:'Beyond base salary',template:'What I negotiated beyond base salary and how:\n\n✅ [What I asked for]\n✅ [What I got]\n✅ [What I left on the table]\n\nNever negotiate without knowing your leverage. Here\'s what I had: [leverage]'},
+  {cat:'Career',title:'Interview question',template:'The question I asked in every interview that impressed hiring managers:\n\n"[Your question]"\n\nWhy it works: [reason]\nWhat answers told me: [what you learned about company culture]\n\nSteal this. 🎯'},
+  {cat:'Career',title:'Timeline to offer',template:'My timeline from [START] to [OFFER]:\n\n[Month 1]: [what]\n[Month 2]: [what]\n[Month 3]: [what]\n[Final week]: [what]\n\nTotal time: [N] months\nTotal LeetCode problems: [N]\nTotal applications: [N]\n\nAMA 👇'},
+  // Code (30-39)
+  {cat:'Code',title:'5 lines of code',template:'5 lines of code that changed how I think about [CONCEPT]:\n\n```[language]\n[code]\n```\n\nBefore seeing this, I thought [old belief].\nNow I understand [new understanding].\n\nSave this 🔖'},
+  {cat:'Code',title:'Before/after refactor',template:'Before/after: refactored [FUNCTION/MODULE] from [Y] lines to [Z] lines, [N]x faster:\n\nBefore:\n```\n[old code]\n```\n\nAfter:\n```\n[new code]\n```\n\nThe key change: [insight]'},
+  {cat:'Code',title:'Bug took hours',template:'The bug that took me [N] hours — and the 1-line fix:\n\nProblem: [what was happening]\nWhat I tried: [all the wrong things]\nRoot cause: [actual issue]\nFix: [one-liner]\n\nNotes to future self: [lesson]'},
+  {cat:'Code',title:'Code review feedback',template:'Code review feedback that made me a better engineer:\n\n"[Exact feedback]"\n\nWhat I changed: [specific change]\nWhy it mattered: [impact]\n\nGood code review is a gift. Thank your reviewers. 🙏'},
+  {cat:'Code',title:'OSS patterns',template:'I reviewed 50 open source repos and found these patterns everywhere:\n\n1. [Pattern 1]\n2. [Pattern 2]\n3. [Pattern 3]\n\nMost important: [#1 takeaway]\n\nRepo links in thread 🧵'},
+  {cat:'Code',title:'One-liner',template:'This [LANGUAGE] one-liner that I use every day now:\n\n```[language]\n[one-liner]\n```\n\nWhat it does: [explanation]\nWhen I use it: [use case]\n\nBefore I knew this: [what I used to do]'},
+  {cat:'Code',title:'Data structure switch',template:'The data structure switch that made my solution [N]x faster:\n\nOriginal: [approach] O([complexity])\nImproved: [approach] O([complexity])\n\nKey insight: [why it\'s faster]\n\nBenchmark results: [numbers]'},
+  {cat:'Code',title:'Debug process',template:'How I debug: my step-by-step process when stuck:\n\n1. [First step]\n2. [Second step]\n3. [Third step]\n4. [Last resort]\n\nMost bugs are found at step [N].\n\nWhat\'s your debug process? 👇'},
+  {cat:'Code',title:'Stopped doing',template:'Things I stopped doing in my code after joining [COMPANY]:\n\n❌ [Habit 1] → ✅ Now: [better habit]\n❌ [Habit 2] → ✅ Now: [better habit]\n❌ [Habit 3] → ✅ Now: [better habit]\n\nSenior engineers don\'t write more code. They write better code.'},
+  {cat:'Code',title:'Language feature',template:'[LANGUAGE] feature I ignored for months that I now use daily:\n\n[Feature name]\n\nWhat it does: [explanation]\nOld way:\n```\n[old code]\n```\nNew way:\n```\n[new code]\n```'},
+  // Engagement (40-49)
+  {cat:'Engagement',title:'Hot take',template:'Hot take: [YOUR CONTROVERSIAL BUT DEFENSIBLE CS OPINION]\n\nMy reasoning:\n[2-3 sentences of justification]\n\nDisagree? Explain your reasoning in the replies 👇'},
+  {cat:'Engagement',title:'Poll',template:'When you get stuck on a bug for >1 hour, your first instinct is:\n\n🅰️ Google it\n🅱️ Ask a colleague / StackOverflow\n🅾️ Read the docs\n🆙 Step away and come back\n\nVoting tells me so much about a developer\'s style 👇'},
+  {cat:'Engagement',title:'Question',template:'What\'s the most surprising thing you\'ve built this month?\n\nDrop it below — I\'ll respond to every reply 👇\n\nMine: [your thing]'},
+  {cat:'Engagement',title:'Unpopular opinion',template:'Unpopular opinion: [YOUR TAKE ON A CS TOPIC]\n\nI know, I know. Hear me out:\n\n[Your argument in 2-3 sentences]\n\nAm I wrong? Tell me specifically why 👇'},
+  {cat:'Engagement',title:'Wish list',template:'Name one CS tool that doesn\'t exist yet but should.\n\nI\'ll build the best suggestion. 🛠️\n\nI\'ll go first: [your idea]'},
+  {cat:'Engagement',title:'Code quality poll',template:'Rate your code quality right now (be honest):\n\n1 = spaghetti\n5 = textbook clean\n\nNo shame. Code quality is a skill, not a personality trait. 📊'},
+  {cat:'Engagement',title:'One thing',template:'What\'s one thing you know now that you wish you knew when you started CS?\n\nI\'ll go first: [your thing]\n\n👇 Drop yours — I read every reply'},
+  {cat:'Engagement',title:'Two truths',template:'Two truths and a lie about my CS journey:\n\n1. [Statement]\n2. [Statement]\n3. [Statement]\n\nGuess the lie 👇 (answer in replies)'},
+  {cat:'Engagement',title:'Current status',template:'Current status: [RELATABLE CS STUDENT SITUATION]\n\n[Meme description or brief rant]\n\nWho else? 😭 #CSlife'},
+  {cat:'Engagement',title:'Accountability',template:'I\'ll share my [THING] if you share yours.\n\nDrop your [repos / projects / LeetCode score / current TC / etc] below.\n\nI\'ll go first: [your thing] 👇'},
+];
+
+let activeCat='All';
+const savedDrafts=get('drafts')||[];
+
+function renderContentCats(){
+  const cats=['All','Project Updates','Learning','Career','Code','Engagement'];
+  document.getElementById('content-cats').innerHTML=cats.map(c=>
+    `<button class="cat-btn${activeCat===c?' active':''}" onclick="setContentCat('${c}')">${c}</button>`
+  ).join('');
+}
+
+function setContentCat(c){activeCat=c;renderContentCats();renderContent();}
+
+function renderContent(){
+  const list=activeCat==='All'?CONTENT:CONTENT.filter(c=>c.cat===activeCat);
+  document.getElementById('content-count').textContent=list.length+' content ideas';
+  document.getElementById('content-list').innerHTML=list.map((c,i)=>`
+    <div class="content-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px">
+        <h4>${c.title}</h4>
+        <span class="tag tag-f">${c.cat}</span>
+      </div>
+      <div class="template">${c.template.replace(/</g,'&lt;').replace(/\n/g,'<br/>')}</div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="copyContentTemplate(${CONTENT.indexOf(c)})">Copy Template</button>
+        <button class="btn btn-ghost btn-sm" onclick="saveDraft(${CONTENT.indexOf(c)})">Save as Draft</button>
+      </div>
+    </div>`).join('');
+}
+
+function copyContentTemplate(idx){
+  navigator.clipboard.writeText(CONTENT[idx].template).catch(()=>{});
+  event.target.textContent='Copied!';
+  setTimeout(()=>event.target.textContent='Copy Template',1500);
+}
+
+function saveDraft(idx){
+  const item=CONTENT[idx];
+  const drafts=get('drafts')||[];
+  if(!drafts.find(d=>d.idx===idx)){
+    drafts.push({idx,title:item.title,cat:item.cat});
+    set('drafts',drafts);
+    renderBacklog();
+    event.target.textContent='Saved! ✓';
+    setTimeout(()=>event.target.textContent='Save as Draft',1500);
+  } else {
+    event.target.textContent='Already saved';
+    setTimeout(()=>event.target.textContent='Save as Draft',1500);
+  }
+}
+
+// ─── PLANNER ──────────────────────────────────────────────────────────────
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+let calendar=get('calendar')||Array(7).fill(null).map(()=>[]);
+let streakData=get('streakData')||[];
+
+function renderCalendar(){
+  document.getElementById('week-calendar').innerHTML=DAYS.map((d,i)=>`
+    <div class="day-cell" id="day-${i}">
+      <h5>${d}</h5>
+      ${(calendar[i]||[]).map(item=>`<div class="day-item">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.68rem">${item}</span>
+        <button onclick="removeFromDay(${i},'${item.replace(/'/g,"\\'")}')">×</button>
+      </div>`).join('')}
+    </div>`).join('');
+}
+
+function addToDay(dayIdx,title){
+  if(!calendar[dayIdx])calendar[dayIdx]=[];
+  calendar[dayIdx].push(title);
+  set('calendar',calendar);
+  renderCalendar();
+}
+
+function removeFromDay(dayIdx,title){
+  calendar[dayIdx]=calendar[dayIdx].filter(t=>t!==title);
+  set('calendar',calendar);
+  renderCalendar();
+}
+
+function suggestWeek(){
+  const drafts=get('drafts')||[];
+  const pool=drafts.length>=5?drafts:CONTENT.slice(0,10).map((c,i)=>({idx:i,title:c.title,cat:c.cat}));
+  const shuffled=[...pool].sort(()=>Math.random()-.5).slice(0,5);
+  calendar=Array(7).fill(null).map(()=>[]);
+  const postDays=[0,1,2,3,4]; // Mon-Fri
+  shuffled.forEach((item,i)=>{ if(calendar[postDays[i]])calendar[postDays[i]].push(item.title); });
+  set('calendar',calendar);
+  renderCalendar();
+}
+
+function renderStreak(){
+  const today=new Date();
+  const days=Array.from({length:21},(_,i)=>{
+    const d=new Date(today);
+    d.setDate(today.getDate()-20+i);
+    return d.toISOString().slice(0,10);
+  });
+  const posted=new Set(streakData);
+  document.getElementById('streak-days').innerHTML=days.map(d=>`
+    <div class="streak-day${posted.has(d)?' posted':''}" onclick="toggleStreak('${d}')" title="${d}">
+      ${posted.has(d)?'✓':'·'}
+    </div>`).join('');
+  const current=calcCurrentStreak(days,posted);
+  document.getElementById('streak-stats').textContent=`Current streak: ${current} days 🔥`;
+}
+
+function toggleStreak(d){
+  const data=get('streakData')||[];
+  const idx=data.indexOf(d);
+  if(idx>=0)data.splice(idx,1);else data.push(d);
+  set('streakData',data);
+  streakData=data;
+  renderStreak();
+}
+
+function calcCurrentStreak(days,posted){
+  let streak=0;
+  for(let i=days.length-1;i>=0;i--){
+    if(posted.has(days[i]))streak++;
+    else if(i<days.length-1)break;
+  }
+  return streak;
+}
+
+function renderBacklog(){
+  const drafts=get('drafts')||[];
+  const container=document.getElementById('backlog-list');
+  if(!drafts.length){container.innerHTML='<div style="color:#6b7280;font-size:.82rem">No saved drafts yet. Go to CONTENT → save ideas you like.</div>';return;}
+  container.innerHTML=drafts.map((d,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1f0d1a;flex-wrap:wrap">
+      <span class="draft-badge">${d.cat}</span>
+      <span style="font-size:.82rem;flex:1">${d.title}</span>
+      <select id="day-select-${i}" style="width:90px;background:#0e060d;border:1px solid #3b1634;border-radius:6px;padding:4px;color:#e2e8f0;font-size:.72rem">
+        ${DAYS.map((day,di)=>`<option value="${di}">${day}</option>`).join('')}
+      </select>
+      <button class="btn btn-sky btn-sm" onclick="addToDay(+document.getElementById('day-select-${i}').value,'${d.title.replace(/'/g,"\\'")}')">Add to day</button>
+      <button class="btn btn-ghost btn-sm" onclick="removeDraft(${i})">Remove</button>
+    </div>`).join('');
+}
+
+function removeDraft(i){
+  const drafts=get('drafts')||[];
+  drafts.splice(i,1);
+  set('drafts',drafts);
+  renderBacklog();
+}
+
+// ─── BRAND ────────────────────────────────────────────────────────────────
+function generateREADME(){
+  const name=document.getElementById('gh-name').value||'Your Name';
+  const tagline=document.getElementById('gh-tagline').value||'Building things in public 🚀';
+  const focus=document.getElementById('gh-focus').value||'[Current project]';
+  const stack=document.getElementById('gh-stack').value||'Python, JavaScript';
+  const p1=document.getElementById('gh-p1').value||'';
+  const p2=document.getElementById('gh-p2').value||'';
+  const learning=document.getElementById('gh-learning').value||'Always learning';
+  const fun=document.getElementById('gh-fun').value||'[fun fact]';
+
+  const badges=stack.split(',').map(s=>s.trim()).filter(Boolean).map(s=>`![${s}](https://img.shields.io/badge/-${encodeURIComponent(s)}-black?style=flat-square&logo=${s.toLowerCase().replace(/\s/g,'')})`).join(' ');
+
+  const projs=[p1,p2].filter(Boolean).map(p=>{
+    const parts=p.split('|');
+    const n=parts[0]?.trim()||'Project';
+    const url=parts[1]?.trim()||'#';
+    return `| [${n}](${url}) | [View →](${url}) |`;
+  }).join('\n');
+
+  const readme=`# Hi, I'm ${name} 👋
+
+### ${tagline}
+
+---
+
+## 🔭 What I'm working on
+- ${focus}
+
+## 🛠️ Tech Stack
+${badges}
+
+## 🌟 Featured Projects
+| Project | Link |
+|---------|------|
+${projs||'| Your project | [View →](#) |'}
+
+## 📚 Currently Learning
+- ${learning}
+
+## 💡 Fun Fact
+${fun}
+
+---
+
+*⭐ Star a repo if you find it useful!*`;
+
+  document.getElementById('readme-output').textContent=readme;
+}
+
+function copyREADME(){
+  navigator.clipboard.writeText(document.getElementById('readme-output').textContent).catch(()=>{});
+  event.target.textContent='Copied! ✓';
+  setTimeout(()=>event.target.textContent='Copy README.md',1500);
+}
+
+function analyzeBio(){
+  const bio=document.getElementById('bio-input').value;
+  if(!bio){document.getElementById('bio-scores').innerHTML='';document.getElementById('bio-suggestions').innerHTML='';return;}
+  const scores={
+    keywords: bio.length>10 && /student|engineer|builder|developer|cs|coding|ai|dev/i.test(bio) ? 18 : 10,
+    audience: bio.includes('help')||bio.includes('for')||bio.includes('teach') ? 16 : 8,
+    cta: /follow|dm|link|check|building|shipping/i.test(bio) ? 18 : 8,
+    personality: bio.includes('|')||bio.includes('.')||bio.length>60 ? 16 : 10,
+    length: bio.length<=160 ? 20 : Math.max(0,20-Math.floor((bio.length-160)/5)),
+  };
+  const total=Object.values(scores).reduce((a,b)=>a+b,0);
+  document.getElementById('bio-scores').innerHTML=Object.entries(scores).map(([k,v])=>`
+    <div class="score-item">
+      <div class="score-val">${v}/20</div>
+      <div class="score-lbl">${k}</div>
+    </div>`).join('')+`<div class="score-item" style="background:rgba(217,70,239,.1);border:1px solid rgba(217,70,239,.3)">
+      <div class="score-val" style="font-size:1.4rem">${total}/100</div>
+      <div class="score-lbl">Total</div>
+    </div>`;
+
+  const suggestions=[
+    `${bio} | Building in public → follow for daily updates`,
+    `CS student building [X]. ${bio.slice(0,60)} 🔗 hhanng.github.io`,
+    `I help [audience] with [result]. Currently: ${bio.slice(0,50)}... | Open to opportunities`,
+  ];
+  document.getElementById('bio-suggestions').innerHTML=suggestions.map(s=>`
+    <div style="background:#0e060d;border:1px solid #3b1634;border-radius:7px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div style="font-size:.8rem;color:#e2e8f0;flex:1">${s}</div>
+      <button class="btn btn-ghost btn-sm" onclick="copyText('${s.replace(/'/g,"\\'").replace(/"/g,'\\"')}')">Copy</button>
+    </div>`).join('');
+}
+
+function buildLinkedIn(){
+  const role=document.getElementById('li-role').value||'[Your Role]';
+  const diff=document.getElementById('li-diff').value||'[Differentiator]';
+  const proof=document.getElementById('li-proof').value||'[Social Proof]';
+  const variations=[
+    `${role} | ${diff} | ${proof}`,
+    `${diff} · ${role} @ [Company] | ${proof}`,
+    `Building: ${diff} | ${role} | ${proof}`,
+  ];
+  document.getElementById('li-results').innerHTML=variations.map(v=>`
+    <div style="background:#0e060d;border:1px solid #3b1634;border-radius:7px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div style="font-size:.82rem;color:#e2e8f0;flex:1">${v} <span style="font-size:.7rem;color:#6b7280">(${v.length} chars)</span></div>
+      <button class="btn btn-ghost btn-sm" onclick="copyText('${v.replace(/'/g,"\\'").replace(/"/g,'\\"')}')">Copy</button>
+    </div>`).join('');
+}
+
+function generateTaglines(){
+  const p1=document.getElementById('tg-p1').value||'Project 1';
+  const p2=document.getElementById('tg-p2').value||'Project 2';
+  const p3=document.getElementById('tg-p3').value||'Project 3';
+  const taglines=[
+    {tone:'Bold',color:'#d946ef',line:`I build what doesn't exist yet — ${p1}, ${p2}, ${p3} and counting.`},
+    {tone:'Humble',color:'#38bdf8',line:`Learning out loud, one project at a time. ${p1}, ${p2}, ${p3}.`},
+    {tone:'Technical',color:'#10b981',line:`Full-stack builder shipping ${p1}, ${p2}, and ${p3} — in public.`},
+    {tone:'Story',color:'#fbbf24',line:`From student to software engineer — here's my work: ${p1}, ${p2}, ${p3}.`},
+    {tone:'Punchy',color:'#f97316',line:`${p1}. ${p2}. ${p3}. What's next? You'll see. 🚀`},
+  ];
+  document.getElementById('tagline-results').innerHTML=taglines.map(t=>`
+    <div class="tagline-card">
+      <div class="tone" style="color:${t.color}">${t.tone}</div>
+      <div class="line">${t.line}</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="copyText('${t.line.replace(/'/g,"\\'").replace(/"/g,'\\"')}')">Copy</button>
+    </div>`).join('');
+}
+
+function copyText(t){
+  navigator.clipboard.writeText(t).catch(()=>{});
+}
+
+// Init
+renderPlatformQuestions();
+renderPillars();
+renderContentCats();
+renderContent();
+renderCalendar();
+renderStreak();
+renderBacklog();
+generateREADME();
+analyzeBio();
+buildLinkedIn();
+generateTaglines();
+</script>
+</body>
+</html>

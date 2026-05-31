@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agent #94 — Cybersecurity Basics Trainer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cascadia Code','Fira Code','Courier New',monospace;background:#0a1a0a;color:#e2e8f0;min-height:100vh}
+header{background:#0d200d;border-bottom:1px solid #1a3d1a;padding:13px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.1rem;font-weight:700;color:#22c55e;font-family:'Segoe UI',sans-serif}
+header span{font-size:.8rem;color:#6b7280}
+.badge{background:#22c55e;color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px;font-family:sans-serif}
+.tabs{display:flex;background:#0a1a0a;border-bottom:2px solid #1a3d1a;padding:0 24px;gap:2px;overflow-x:auto}
+.tab{padding:11px 18px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .2s;font-family:'Segoe UI',sans-serif}
+.tab.active{color:#22c55e;border-bottom-color:#22c55e}
+.tab:hover{color:#4ade80}
+.content{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.content.active{display:block}
+.card{background:#0d200d;border:1px solid #1a3d1a;border-radius:10px;padding:18px;margin-bottom:14px}
+.card h3{color:#22c55e;margin-bottom:10px;font-size:.95rem;font-family:'Segoe UI',sans-serif}
+.btn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s;font-family:sans-serif}
+.btn-green{background:#22c55e;color:#000}
+.btn-green:hover{background:#16a34a}
+.btn-red{background:#ef4444;color:#fff}
+.btn-ghost{background:transparent;border:1px solid #1a3d1a;color:#9ca3af;font-family:sans-serif}
+.btn-ghost:hover{border-color:#22c55e;color:#22c55e}
+.btn-sm{padding:4px 10px;font-size:.73rem}
+label{display:block;font-size:.78rem;color:#9ca3af;margin-bottom:4px;margin-top:10px;font-family:sans-serif}
+input,select,textarea{background:#061406;border:1px solid #1a3d1a;border-radius:7px;padding:7px 10px;color:#e2e8f0;font-size:.85rem;font-family:monospace;width:100%}
+textarea{resize:vertical;min-height:80px}
+.challenge-card{background:#0d200d;border:1px solid #1a3d1a;border-radius:10px;padding:16px;margin-bottom:12px}
+.challenge-card h4{color:#e2e8f0;font-size:.9rem;margin-bottom:8px;font-family:'Segoe UI',sans-serif;display:flex;align-items:center;gap:8px}
+.diff-badge{padding:2px 7px;border-radius:8px;font-size:.68rem;font-weight:700;font-family:sans-serif}
+.diff-easy{background:rgba(34,197,94,.2);color:#22c55e}
+.diff-med{background:rgba(251,191,36,.2);color:#fbbf24}
+.diff-hard{background:rgba(239,68,68,.2);color:#ef4444}
+.pts-badge{padding:2px 7px;border-radius:8px;font-size:.68rem;font-weight:700;background:rgba(0,229,255,.15);color:#00e5ff;font-family:sans-serif}
+.score-bar{display:flex;align-items:center;gap:12px;background:#0d200d;border:1px solid #22c55e;border-radius:10px;padding:12px 16px;margin-bottom:16px}
+.score-num{font-size:1.6rem;font-weight:700;color:#22c55e}
+.score-label{font-size:.75rem;color:#6b7280;font-family:sans-serif}
+.result-reveal{background:#061406;border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:12px;margin-top:10px;font-size:.8rem;line-height:1.6;display:none;font-family:'Segoe UI',sans-serif}
+.result-reveal.show{display:block}
+.code-snippet{font-family:monospace;font-size:.8rem;background:#040e04;border:1px solid #1a3d1a;border-radius:6px;padding:10px;white-space:pre;overflow-x:auto;line-height:1.5;color:#4ade80}
+.vuln-snippet{border-color:#ef4444}
+.safe-snippet{border-color:#22c55e}
+.snippet-label{font-size:.7rem;font-weight:700;margin-bottom:4px;font-family:sans-serif}
+.snippet-label.vuln{color:#ef4444}
+.snippet-label.safe{color:#22c55e}
+.owasp-item{background:#0d200d;border:1px solid #1a3d1a;border-radius:10px;margin-bottom:10px;overflow:hidden}
+.owasp-header{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px}
+.owasp-rank{font-size:1.1rem;font-weight:700;color:#22c55e;min-width:32px;font-family:sans-serif}
+.owasp-name{font-size:.9rem;color:#e2e8f0;font-family:'Segoe UI',sans-serif}
+.owasp-body{padding:0 16px 16px;display:none;font-family:'Segoe UI',sans-serif;font-size:.82rem}
+.owasp-body.open{display:block}
+.owasp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.tool-card{background:#0d200d;border:1px solid #1a3d1a;border-radius:10px;padding:14px}
+.tool-card h4{color:#22c55e;font-size:.9rem;margin-bottom:6px;font-family:'Segoe UI',sans-serif}
+.tool-card p{font-size:.78rem;color:#9ca3af;font-family:'Segoe UI',sans-serif;line-height:1.5}
+.stars{color:#fbbf24;font-size:.9rem}
+.tag{display:inline-block;padding:2px 7px;border-radius:8px;font-size:.68rem;font-weight:700;margin-right:4px;margin-bottom:4px;font-family:sans-serif}
+.tag-g{background:rgba(34,197,94,.15);color:#22c55e}
+.tag-r{background:rgba(239,68,68,.15);color:#ef4444}
+.tag-y{background:rgba(251,191,36,.15);color:#fbbf24}
+.tag-b{background:rgba(0,229,255,.15);color:#00e5ff}
+.qa-card{background:#0d200d;border:1px solid #1a3d1a;border-radius:10px;margin-bottom:8px;overflow:hidden;cursor:pointer}
+.qa-q{padding:12px 16px;font-size:.85rem;color:#e2e8f0;font-family:'Segoe UI',sans-serif;display:flex;justify-content:space-between;align-items:center}
+.qa-a{padding:12px 16px;font-size:.82rem;color:#9ca3af;background:#061406;display:none;border-top:1px solid #1a3d1a;font-family:'Segoe UI',sans-serif;line-height:1.6}
+.qa-a.show{display:block}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filter-btn{padding:5px 12px;border-radius:16px;border:1px solid #1a3d1a;background:transparent;color:#9ca3af;font-size:.75rem;cursor:pointer;font-family:sans-serif}
+.filter-btn.active{background:#22c55e;color:#000;border-color:#22c55e}
+.know-btn{padding:3px 8px;border-radius:6px;border:none;cursor:pointer;font-size:.7rem;font-weight:600;font-family:sans-serif}
+.know-it{background:rgba(34,197,94,.2);color:#22c55e}
+.review-it{background:rgba(251,191,36,.2);color:#fbbf24}
+@media(max-width:600px){.owasp-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <span class="badge">#94</span>
+  <h1>🔐 Cybersecurity Basics Trainer</h1>
+  <span>Learn to think like a hacker. Defend like an engineer.</span>
+</header>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('challenges',this)">CHALLENGES</button>
+  <button class="tab" onclick="showTab('owasp',this)">OWASP</button>
+  <button class="tab" onclick="showTab('tools',this)">TOOLS</button>
+  <button class="tab" onclick="showTab('interview',this)">INTERVIEW</button>
+</div>
+
+<!-- CHALLENGES -->
+<div id="tab-challenges" class="content active">
+  <div class="score-bar">
+    <div><div class="score-num" id="score-display">0</div><div class="score-label">Points</div></div>
+    <div style="flex:1;background:#1a3d1a;border-radius:4px;height:8px;overflow:hidden">
+      <div id="score-fill" style="height:100%;background:#22c55e;border-radius:4px;transition:width .4s;width:0%"></div>
+    </div>
+    <div id="progress-display" style="font-size:.75rem;color:#6b7280;font-family:sans-serif">0 / 10 completed</div>
+  </div>
+  <div id="challenges-list"></div>
+</div>
+
+<!-- OWASP -->
+<div id="tab-owasp" class="content">
+  <div style="font-size:.82rem;color:#6b7280;margin-bottom:16px;font-family:sans-serif">OWASP Top 10 Web Application Security Risks (2021 Edition). Click any item to expand.</div>
+  <div id="owasp-list"></div>
+</div>
+
+<!-- TOOLS -->
+<div id="tab-tools" class="content">
+  <div class="filter-bar" id="tools-filter-bar"></div>
+  <div class="tools-grid" id="tools-grid"></div>
+</div>
+
+<!-- INTERVIEW -->
+<div id="tab-interview" class="content">
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterInterview('all',this)">All (20)</button>
+    <button class="filter-btn" onclick="filterInterview('known',this)">Known</button>
+    <button class="filter-btn" onclick="filterInterview('review',this)">Review</button>
+  </div>
+  <div id="interview-list"></div>
+</div>
+
+<script>
+const LS='cyber94_';
+const get=k=>JSON.parse(localStorage.getItem(LS+k)||'null');
+const set=(k,v)=>localStorage.setItem(LS+k,JSON.stringify(v));
+let scores=get('scores')||{};
+let interviewStatus=get('interviewStatus')||{};
+
+function showTab(id,btn){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+// ─── CHALLENGES ──────────────────────────────────────────────────────────
+const MAX_SCORE=200;
+
+function updateScoreDisplay(){
+  const total=Object.values(scores).reduce((a,b)=>a+b,0);
+  const completed=Object.keys(scores).length;
+  document.getElementById('score-display').textContent=total;
+  document.getElementById('score-fill').style.width=Math.min(total/MAX_SCORE*100,100)+'%';
+  document.getElementById('progress-display').textContent=`${completed} / 10 completed`;
+}
+
+function awardPoints(id,pts){
+  if(!scores[id]){scores[id]=pts;set('scores',scores);updateScoreDisplay();}
+}
+
+// Challenge 1: Caesar Cipher
+function initCaesar(){
+  const msg='KHOOR ZRUOG'; // "HELLO WORLD" shifted 3
+  const div=document.getElementById('caesar-body');
+  if(!div)return;
+  div.innerHTML=`<div style="font-family:monospace;background:#040e04;border:1px solid #1a3d1a;padding:10px;border-radius:6px;margin-bottom:10px;color:#4ade80;font-size:1.1rem">Encrypted: ${msg}</div>
+    <label>Shift: <span id="caesar-shift-val">1</span></label>
+    <input type="range" min="1" max="25" value="1" id="caesar-slider" oninput="updateCaesar()">
+    <div style="margin-top:8px;font-family:monospace;font-size:.9rem;color:#e2e8f0" id="caesar-decoded"></div>
+    <button class="btn btn-green btn-sm" style="margin-top:8px" onclick="checkCaesar()">Check Answer</button>
+    <div class="result-reveal" id="caesar-result"></div>`;
+  updateCaesar();
+}
+
+function updateCaesar(){
+  const shift=+document.getElementById('caesar-slider').value;
+  document.getElementById('caesar-shift-val').textContent=shift;
+  const msg='KHOOR ZRUOG';
+  const decoded=msg.split('').map(c=>{
+    if(c===' ')return ' ';
+    const code=c.charCodeAt(0)-65;
+    return String.fromCharCode(((code-shift+26)%26)+65);
+  }).join('');
+  document.getElementById('caesar-decoded').textContent='Decoded: '+decoded;
+}
+
+function checkCaesar(){
+  const shift=+document.getElementById('caesar-slider').value;
+  const r=document.getElementById('caesar-result');
+  r.style.display='block';
+  if(shift===3){r.style.borderColor='#22c55e';r.innerHTML='✅ Correct! Shift of 3 → "HELLO WORLD". Caesar cipher was used by Julius Caesar to encode military messages. Still seen in ROT13 (shift 13) in modern contexts. Always try every shift 1-25.';awardPoints('caesar',20);}
+  else{r.style.borderColor='#ef4444';r.innerHTML=`❌ Not quite. Try shift 3. Hint: 'K' decoded with shift 3 = 'H'`;}
+}
+
+// Challenge 2: Hash Identifier
+function identifyHash(){
+  const input=document.getElementById('hash-input').value.trim();
+  const r=document.getElementById('hash-result');
+  if(!input){r.textContent='Enter a hash value above';return;}
+  let type='Unknown', info='';
+  if(/^[a-f0-9]{32}$/i.test(input)){type='MD5';info='32 hex chars. Fast but broken — never use for passwords. Collision attacks demonstrated.';}
+  else if(/^[a-f0-9]{40}$/i.test(input)){type='SHA-1';info='40 hex chars. Also broken for security purposes. Google demonstrated SHA-1 collision (2017).';}
+  else if(/^[a-f0-9]{64}$/i.test(input)){type='SHA-256';info='64 hex chars. Still secure for most purposes. Part of SHA-2 family. Used in Bitcoin, TLS certificates.';}
+  else if(/^\$2[ab]\$/.test(input)){type='bcrypt';info='Starts with $2b$ or $2a$. Adaptive hash — designed slow. Work factor (cost parameter) in the string. Gold standard for passwords.';}
+  else if(/^[a-f0-9]{128}$/i.test(input)){type='SHA-512';info='128 hex chars. Strongest SHA-2 variant. Used for high-security applications.';}
+  else if(/^\$argon2/.test(input)){type='Argon2';info='Winner of Password Hashing Competition 2015. Memory-hard — GPU cracking resistant. Current best practice for passwords.';}
+  r.style.display='block';
+  r.style.borderColor=type!=='Unknown'?'#22c55e':'#ef4444';
+  r.innerHTML=`<strong style="color:${type!=='Unknown'?'#22c55e':'#ef4444'}">${type}</strong><br/>${info}`;
+  if(type!=='Unknown')awardPoints('hash',15);
+}
+
+// Challenge 3: SQL Injection Spotter
+const SQL_SNIPPETS=[
+  {code:`# VULNERABLE
+query = "SELECT * FROM users WHERE username='"+username+"' AND password='"+password+"'"
+db.execute(query)`,vuln:true,why:"String concatenation directly into SQL. Attacker inputs: ' OR '1'='1 — bypasses auth entirely."},
+  {code:`# SAFE
+cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))`,vuln:false,why:"Parameterized query. ? placeholders are never interpreted as SQL — user input is data, not code."},
+  {code:`# VULNERABLE
+$id = $_GET['id'];
+$query = "SELECT * FROM products WHERE id = $id";`,vuln:true,why:"PHP: user-controlled $id injected directly. Input '1 OR 1=1' dumps entire table."},
+  {code:`# SAFE
+const query = 'SELECT * FROM orders WHERE user_id = $1';
+await db.query(query, [userId]);`,vuln:false,why:"Node.js with pg library. Parameterized. $1 is a placeholder bound to userId — injection impossible."},
+  {code:`# VULNERABLE
+search = request.args.get('q')
+results = db.execute(f"SELECT * FROM posts WHERE title LIKE '%{search}%'")`,vuln:true,why:"Python f-string directly in SQL. Input: '; DROP TABLE posts;-- deletes the table."},
+];
+
+function initSQLSnippets(){
+  const div=document.getElementById('sql-body');
+  if(!div)return;
+  div.innerHTML=SQL_SNIPPETS.map((s,i)=>`
+    <div style="margin-bottom:12px">
+      <div class="code-snippet">${s.code.replace(/</g,'&lt;')}</div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn btn-sm" style="background:rgba(239,68,68,.15);color:#ef4444;border:1px solid #ef4444" onclick="checkSQL(${i},'vuln')">Vulnerable</button>
+        <button class="btn btn-sm" style="background:rgba(34,197,94,.15);color:#22c55e;border:1px solid #22c55e" onclick="checkSQL(${i},'safe')">Safe</button>
+        <span id="sql-ans-${i}"></span>
+      </div>
+      <div class="result-reveal" id="sql-reveal-${i}"></div>
+    </div>`).join('');
+}
+
+function checkSQL(i,ans){
+  const correct=SQL_SNIPPETS[i].vuln?(ans==='vuln'):(ans==='safe');
+  document.getElementById('sql-ans-'+i).innerHTML=correct?'<span style="color:#22c55e">✓</span>':'<span style="color:#ef4444">✗</span>';
+  const r=document.getElementById('sql-reveal-'+i);
+  r.style.display='block';
+  r.style.borderColor=correct?'#22c55e':'#ef4444';
+  r.innerHTML=(SQL_SNIPPETS[i].vuln?'<strong style="color:#ef4444">⚠️ VULNERABLE</strong>':'<strong style="color:#22c55e">✅ SAFE</strong>')+': '+SQL_SNIPPETS[i].why;
+  if(correct)awardPoints('sql_'+i,5);
+}
+
+// Challenge 4: Password Strength
+function analyzePassword(){
+  const pwd=document.getElementById('pwd-input').value;
+  const r=document.getElementById('pwd-result');
+  if(!pwd){r.style.display='none';return;}
+  let score=0,issues=[],strength='';
+  if(pwd.length>=8)score+=1;else issues.push('Too short (min 8 chars)');
+  if(pwd.length>=12)score+=1;
+  if(pwd.length>=16)score+=1;
+  if(/[a-z]/.test(pwd)&&/[A-Z]/.test(pwd))score+=1;else issues.push('Mix upper and lowercase letters');
+  if(/[0-9]/.test(pwd))score+=1;else issues.push('Add numbers');
+  if(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(pwd))score+=1;else issues.push('Add special characters (!@#$...)');
+  if(!/^[a-zA-Z]+$/.test(pwd)&&!/^[0-9]+$/.test(pwd))score+=1;
+  const commonWords=['password','123456','qwerty','admin','letmein','monkey','dragon','master'];
+  if(commonWords.some(w=>pwd.toLowerCase().includes(w))){score=Math.max(0,score-2);issues.push('Contains common pattern/word');}
+  const entropy=pwd.length*Math.log2([26,52,62,94][score>=3?3:score>=2?2:score>=1?1:0]);
+  const crack=entropy<30?'< 1 second':entropy<50?'minutes–hours':entropy<70?'years':entropy<90?'centuries':'billions of years';
+  const strengthMap=['Very Weak','Weak','Fair','Good','Strong','Very Strong','Excellent'];
+  const colorMap=['#ef4444','#f97316','#fbbf24','#fbbf24','#22c55e','#22c55e','#22c55e'];
+  strength=strengthMap[Math.min(score,6)];
+  r.style.display='block';
+  r.style.borderColor=colorMap[Math.min(score,6)];
+  r.innerHTML=`<div style="display:flex;gap:16px;align-items:center;margin-bottom:8px;font-family:sans-serif">
+    <div style="font-size:1.2rem;font-weight:700;color:${colorMap[Math.min(score,6)]}">${strength}</div>
+    <div style="font-size:.78rem;color:#9ca3af">Entropy: ~${entropy.toFixed(0)} bits · Est. crack time: <strong>${crack}</strong></div>
+  </div>
+  ${issues.length?`<div style="font-size:.78rem;color:#fbbf24">Issues:<br/>${issues.map(i=>'• '+i).join('<br/>')}</div>`:'<div style="font-size:.78rem;color:#22c55e">✓ Strong password — no major issues found</div>'}`;
+  if(score>=4)awardPoints('password',20);
+}
+
+// Challenge 5: Base64 Tool
+function encodeB64(){
+  try{document.getElementById('b64-output').value=btoa(document.getElementById('b64-input').value);awardPoints('base64',10);}
+  catch(e){document.getElementById('b64-output').value='Error: '+e.message;}
+}
+function decodeB64(){
+  try{document.getElementById('b64-output').value=atob(document.getElementById('b64-input').value);awardPoints('base64',10);}
+  catch(e){document.getElementById('b64-output').value='Error: Invalid base64';}
+}
+
+// Challenge 6: Binary/Hex converter
+function convertText(){
+  const txt=document.getElementById('conv-input').value;
+  if(!txt)return;
+  const hex=Array.from(txt).map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join(' ');
+  const bin=Array.from(txt).map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
+  const ascii=Array.from(txt).map(c=>c.charCodeAt(0)).join(', ');
+  document.getElementById('conv-hex').textContent=hex;
+  document.getElementById('conv-bin').textContent=bin;
+  document.getElementById('conv-ascii').textContent=ascii;
+  awardPoints('converter',10);
+}
+
+function renderChallenges(){
+  document.getElementById('challenges-list').innerHTML=`
+  <div class="challenge-card">
+    <h4><span>1. Caesar Cipher Decoder</span><span class="diff-badge diff-easy">Easy</span><span class="pts-badge">20 pts</span>${scores.caesar?'<span style="color:#22c55e;font-size:.75rem;font-family:sans-serif">✓ Completed</span>':''}</h4>
+    <p style="font-size:.8rem;color:#9ca3af;margin-bottom:10px;font-family:sans-serif">Decode the encrypted message. Adjust the shift slider until it makes sense.</p>
+    <div id="caesar-body"></div>
+  </div>
+
+  <div class="challenge-card">
+    <h4><span>2. Hash Identifier</span><span class="diff-badge diff-easy">Easy</span><span class="pts-badge">15 pts</span>${scores.hash?'<span style="color:#22c55e;font-size:.75rem;font-family:sans-serif">✓ Completed</span>':''}</h4>
+    <p style="font-size:.8rem;color:#9ca3af;margin-bottom:10px;font-family:sans-serif">Paste a hash string — the tool identifies the type and security status.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('hash-input').value='5f4dcc3b5aa765d61d8327deb882cf99';identifyHash()">Try MD5</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('hash-input').value='e10adc3949ba59abbe56e057f20f883e';identifyHash()">Try MD5 (2)</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('hash-input').value='$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW';identifyHash()">Try bcrypt</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('hash-input').value='a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3';identifyHash()">Try SHA-256</button>
+    </div>
+    <input id="hash-input" placeholder="Paste a hash string here..." oninput="identifyHash()">
+    <div class="result-reveal show" id="hash-result" style="margin-top:8px">Enter a hash above to identify it</div>
+  </div>
+
+  <div class="challenge-card">
+    <h4><span>3. SQL Injection Spotter</span><span class="diff-badge diff-med">Medium</span><span class="pts-badge">25 pts</span></h4>
+    <p style="font-size:.8rem;color:#9ca3af;margin-bottom:10px;font-family:sans-serif">Identify which code snippets are vulnerable to SQL injection. Click Vulnerable or Safe for each.</p>
+    <div id="sql-body"></div>
+  </div>
+
+  <div class="challenge-card">
+    <h4><span>4. Password Strength Analyzer</span><span class="diff-badge diff-easy">Easy</span><span class="pts-badge">20 pts</span></h4>
+    <p style="font-size:.8rem;color:#9ca3af;margin-bottom:10px;font-family:sans-serif">Type a password — see entropy, crack time estimate, and specific weaknesses.</p>
+    <input id="pwd-input" type="password" placeholder="Type a password..." oninput="analyzePassword()">
+    <div class="result-reveal" id="pwd-result" style="margin-top:8px"></div>
+  </div>
+
+  <div class="challenge-card">
+    <h4><span>5. Base64 Tool</span><span class="diff-badge diff-easy">Easy</span><span class="pts-badge">10 pts</span></h4>
+    <p style="font-size:.8rem;color:#9ca3af;margin-bottom:10px;font-family:sans-serif">Base64 is not encryption — it's encoding. Used in HTTP headers, JWTs, email attachments.</p>
+    <input id="b64-input" placeholder="Enter text or base64..." value="Hello, Security!">
+    <div style="display:flex;gap:8px;margin-top:6px"><button class="btn btn-green btn-sm" onclick="encodeB64()">Encode →</button><button class="btn btn-ghost btn-sm" onclick="decodeB64()">← Decode</button></div>
+    <div style="margin-top:8px;font-size:.75rem;color:#6b7280;font-family:sans-serif">Output:</div>
+    <textarea id="b64-output" readonly rows="2" style="margin-top:4px"></textarea>
+  </div>
+
+  <div class="challenge-card">
+    <h4><span>6. Binary / Hex Converter</span><span class="diff-badge diff-easy">Easy</span><span class="pts-badge">10 pts</span></h4>
+    <p style="font-size:.8rem;color:#9ca3af;margin-bottom:10px;font-family:sans-serif">Every string is just numbers. Understanding binary and hex is foundational to security.</p>
+    <input id="conv-input" placeholder="Enter text..." value="hack" oninput="convertText()">
+    <div style="margin-top:10px;font-size:.78rem;font-family:sans-serif">
+      <div style="color:#6b7280;margin-bottom:3px">Hex:</div><div class="code-snippet" id="conv-hex" style="word-break:break-all;min-height:28px"></div>
+      <div style="color:#6b7280;margin-top:8px;margin-bottom:3px">Binary:</div><div class="code-snippet" id="conv-bin" style="word-break:break-all;min-height:28px"></div>
+      <div style="color:#6b7280;margin-top:8px;margin-bottom:3px">ASCII values:</div><div class="code-snippet" id="conv-ascii" style="min-height:28px"></div>
+    </div>
+  </div>`;
+
+  initCaesar(); initSQLSnippets(); convertText(); updateScoreDisplay();
+}
+
+// ─── OWASP ────────────────────────────────────────────────────────────────
+const OWASP=[
+  {id:'A01',name:'A01: Broken Access Control',risk:'Critical',what:'Users can act outside their intended permissions — accessing other users\' data, admin functions, or modifying other accounts.',breach:'2019: Capital One breach — misconfigured AWS IAM role allowed attacker to read 100M+ customer records.',detect:'Test IDOR (Insecure Direct Object References), try accessing other users\' resources by changing IDs in URLs.',fix:'Deny by default. Enforce access control server-side. Log and alert on failures.',
+    vuln:`# VULNERABLE: IDOR
+app.get('/user/:id', (req, res) => {
+  const user = db.getUser(req.params.id); // No auth check!
+  res.json(user);
+});`,
+    safe:`# SAFE
+app.get('/user/:id', authenticate, (req, res) => {
+  if (req.user.id !== req.params.id && !req.user.isAdmin) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const user = db.getUser(req.params.id);
+  res.json(user);
+});`},
+  {id:'A02',name:'A02: Cryptographic Failures',risk:'High',what:'Weak cryptography or lack of encryption exposes sensitive data in transit or at rest.',breach:'2013: Adobe — 130M passwords stored with reversible encryption and no salt. Cracked in hours.',detect:'Check for HTTP (not HTTPS), MD5/SHA1 passwords, unencrypted sensitive data in databases.',fix:'Use TLS everywhere. bcrypt/Argon2 for passwords. AES-256 for data at rest. Never roll your own crypto.',
+    vuln:`# VULNERABLE
+import hashlib
+password_hash = hashlib.md5(password.encode()).hexdigest()
+# MD5 is broken — rainbow tables crack it instantly`,
+    safe:`# SAFE
+import bcrypt
+password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12))
+# bcrypt with work factor 12 — slow by design`},
+  {id:'A03',name:'A03: Injection',risk:'Critical',what:'User-supplied data sent to an interpreter (SQL, OS, LDAP) as part of a command or query.',breach:'2017: Equifax — 147M records exposed via Apache Struts injection vulnerability (CVE-2017-5638).',detect:'Test every input field with SQL injection payloads. Check for eval(), exec(), os.system().',fix:'Use parameterized queries. Validate/sanitize all input. Least-privilege database accounts.',
+    vuln:`# VULNERABLE
+query = f"SELECT * FROM users WHERE id={user_id}"
+# user_id = "1; DROP TABLE users;--"  💥`,
+    safe:`# SAFE
+cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
+# user_id is bound as data, never interpreted as SQL`},
+  {id:'A04',name:'A04: Insecure Design',risk:'High',what:'Missing or ineffective security controls built into the design — not just implementation bugs.',breach:'2021: Peloton API exposed private account data due to missing object-level authorization in design.',detect:'Threat modeling, security requirements review, abuse case analysis.',fix:'Shift security left — design for security. Threat model before building. Security design patterns.',
+    vuln:`// Insecure design: password reset via security questions
+// Security questions are guessable or findable on social media
+app.post('/reset-password', async (req, res) => {
+  const { username, mothersMaidenName } = req.body;
+  // Trivially bypassed...
+});`,
+    safe:`// Secure design: time-limited token sent to verified email
+app.post('/reset-password', async (req, res) => {
+  const token = crypto.randomBytes(32).toString('hex');
+  await storeToken(username, token, Date.now() + 900000); // 15min
+  await sendEmail(userEmail, '/reset?token=' + token);
+});`},
+  {id:'A05',name:'A05: Security Misconfiguration',risk:'High',what:'Default credentials, unnecessary features enabled, verbose error messages, missing security headers.',breach:'2017: Uber — exposed AWS keys in GitHub repository due to misconfiguration.',detect:'Security scanning, check HTTP headers (X-Frame-Options, CSP), default credentials, debug mode in prod.',fix:'Minimal platform. Disable default accounts. Security headers. Regular config audits.',
+    vuln:`# VULNERABLE: Flask debug mode in production
+app = Flask(__name__)
+app.run(debug=True)  # Exposes interactive debugger to anyone!`,
+    safe:`# SAFE
+app = Flask(__name__)
+app.config['DEBUG'] = os.environ.get('DEBUG', 'False').lower() == 'true'
+app.run(debug=app.config['DEBUG'])`},
+  {id:'A06',name:'A06: Vulnerable Components',risk:'High',what:'Using components (libraries, frameworks) with known vulnerabilities.',breach:'2017: Equifax again — Apache Struts 2 with known CVE unpatched for 2 months.',detect:'npm audit, pip-audit, Snyk, GitHub Dependabot alerts.',fix:'Inventory all components. Subscribe to CVE alerts. Automated dependency updates (Dependabot).',
+    vuln:`// package.json with outdated dependencies
+{
+  "dependencies": {
+    "lodash": "4.17.4",  // CVE-2019-10744: prototype pollution
+    "express": "4.16.0"  // Multiple known vulns
+  }
+}`,
+    safe:`// Use audit tools + lock versions
+// npm audit fix
+// Then verify: npm audit
+{
+  "dependencies": {
+    "lodash": "4.17.21",  // Patched version
+    "express": "4.18.2"
+  }
+}`},
+  {id:'A07',name:'A07: Identification & Auth Failures',risk:'High',what:'Weak authentication: no MFA, weak passwords allowed, session tokens in URLs, no account lockout.',breach:'2012: LinkedIn — 6.5M SHA-1 unsalted password hashes leaked. Most cracked within hours.',detect:'Test for weak passwords, session fixation, credential stuffing attacks.',fix:'MFA. Strong password policy. Secure session management (httpOnly, secure, SameSite cookies). Rate limiting.',
+    vuln:`# VULNERABLE: No rate limiting
+@app.route('/login', methods=['POST'])
+def login():
+    user = authenticate(username, password)  # Unlimited attempts!`,
+    safe:`# SAFE: Rate limiting + account lockout
+@app.route('/login', methods=['POST'])
+@limiter.limit("5 per minute")
+def login():
+    if is_locked_out(username): return error('Account locked. Try in 15 min.')
+    user = authenticate(username, password)`},
+  {id:'A08',name:'A08: Software & Data Integrity Failures',risk:'High',what:'Deserialization vulnerabilities, insecure CI/CD pipelines, auto-updates without integrity checks.',breach:'2020: SolarWinds — malicious code injected into build pipeline, distributed to 18,000+ customers.',detect:'Check for insecure deserialization, unsigned software updates, unverified npm packages.',fix:'Digital signatures for code. Verify integrity of dependencies. Secure CI/CD with code review.',
+    vuln:`# VULNERABLE: Unsafe deserialization (Python pickle)
+import pickle
+data = pickle.loads(user_provided_bytes)  # Arbitrary code execution!`,
+    safe:`# SAFE: Use safe serialization format
+import json
+data = json.loads(user_provided_string)  # JSON cannot execute code`},
+  {id:'A09',name:'A09: Security Logging & Monitoring Failures',risk:'Medium',what:'Insufficient logging means attacks go undetected. Average breach dwell time: 200+ days.',breach:'2013: Target — alerts from FireEye system were ignored. 40M credit cards stolen over 3 weeks.',detect:'Check: are failed logins logged? Are logs monitored? Can you detect an attack in progress?',fix:'Log auth events, access control failures, input validation failures. Centralized monitoring (SIEM). Alerting.',
+    vuln:`# VULNERABLE: No logging
+@app.route('/login', methods=['POST'])
+def login():
+    if not authenticate(username, password):
+        return error('Invalid credentials')  # Silent failure`,
+    safe:`# SAFE: Log security events
+@app.route('/login', methods=['POST'])
+def login():
+    if not authenticate(username, password):
+        security_logger.warning(f'FAILED_LOGIN user={username} ip={request.remote_addr}')
+        return error('Invalid credentials')`},
+  {id:'A10',name:'A10: Server-Side Request Forgery (SSRF)',risk:'High',what:'App fetches a remote resource using attacker-supplied URL. Can access internal services, cloud metadata.',breach:'2019: Capital One — SSRF to AWS metadata endpoint retrieved IAM credentials.',detect:'Test URL input fields by pointing to internal IPs (169.254.169.254, 127.0.0.1, 10.x.x.x).',fix:'Allowlist valid domains. Block internal IP ranges. Disable HTTP redirects. Use network segmentation.',
+    vuln:`# VULNERABLE: Fetch user-supplied URL
+@app.route('/fetch')
+def fetch():
+    url = request.args['url']
+    return requests.get(url).text  # http://169.254.169.254/latest/meta-data/iam`,
+    safe:`# SAFE: Allowlist approach
+ALLOWED_HOSTS = {'api.example.com', 'cdn.example.com'}
+@app.route('/fetch')
+def fetch():
+    parsed = urlparse(request.args['url'])
+    if parsed.hostname not in ALLOWED_HOSTS: return error('Host not allowed')
+    return requests.get(request.args['url']).text`},
+];
+
+function renderOWASP(){
+  document.getElementById('owasp-list').innerHTML=OWASP.map((o,i)=>`
+    <div class="owasp-item">
+      <div class="owasp-header" onclick="toggleOWASP(${i})">
+        <div class="owasp-rank">${o.id}</div>
+        <div class="owasp-name">${o.name.replace(o.id+': ','')}</div>
+        <span class="diff-badge ${o.risk==='Critical'?'diff-hard':o.risk==='High'?'diff-med':'diff-easy'}" style="margin-left:auto;margin-right:8px">${o.risk}</span>
+        <span id="owasp-toggle-${i}" style="color:#6b7280">▼</span>
+      </div>
+      <div class="owasp-body" id="owasp-body-${i}">
+        <p style="margin-bottom:10px;color:#9ca3af">${o.what}</p>
+        <div class="owasp-grid">
+          <div>
+            <div style="font-size:.72rem;color:#ef4444;font-weight:700;margin-bottom:4px">REAL BREACH EXAMPLE</div>
+            <div style="font-size:.78rem;color:#9ca3af;background:#040e04;border-radius:6px;padding:8px">${o.breach}</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:4px">HOW TO DETECT</div>
+            <div style="font-size:.78rem;color:#9ca3af;background:#040e04;border-radius:6px;padding:8px">${o.detect}</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:.72rem;color:#22c55e;font-weight:700;margin-bottom:4px">HOW TO FIX</div>
+        <div style="font-size:.78rem;color:#9ca3af;background:#040e04;border-radius:6px;padding:8px;margin-bottom:10px">${o.fix}</div>
+        <div class="owasp-grid">
+          <div>
+            <div class="snippet-label vuln">VULNERABLE CODE</div>
+            <div class="code-snippet vuln-snippet">${o.vuln.replace(/</g,'&lt;')}</div>
+          </div>
+          <div>
+            <div class="snippet-label safe">FIXED CODE</div>
+            <div class="code-snippet safe-snippet">${o.safe.replace(/</g,'&lt;')}</div>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleOWASP(i){
+  const b=document.getElementById('owasp-body-'+i);
+  const a=document.getElementById('owasp-toggle-'+i);
+  b.classList.toggle('open');
+  a.textContent=b.classList.contains('open')?'▲':'▼';
+}
+
+// ─── TOOLS ───────────────────────────────────────────────────────────────
+const TOOLS=[
+  {name:'Burp Suite',use:'Web app pentesting',what:'Intercepts HTTP/HTTPS traffic, modifies requests, scans for vulnerabilities. The de-facto web security testing tool.',free:true,stars:5,type:'Offense',faang:'Security engineers at FAANG use this for pentest assessments. Shows up in security interview portfolio discussions.'},
+  {name:'Wireshark',use:'Network analysis',what:'Captures and analyzes network packets in real-time. Essential for understanding protocols and detecting anomalies.',free:true,stars:5,type:'Defense',faang:'Understanding packet structure is fundamental. Interviewers may ask you to describe what a captured packet contains.'},
+  {name:'Nmap',use:'Network scanning',what:'Discovers hosts, open ports, and services on a network. First tool in any pentest recon phase.',free:true,stars:5,type:'Offense',faang:'Network fundamentals question: "How would you discover what\'s running on a network?" Answer involves Nmap.'},
+  {name:'Metasploit',use:'Exploitation framework',what:'Framework for developing and executing exploit code. Contains hundreds of ready-to-use exploits for known CVEs.',free:true,stars:4,type:'Offense',faang:'Used for authorized penetration testing. Knowledge shows understanding of the attacker mindset.'},
+  {name:'OWASP ZAP',use:'Web app scanning',what:'Open-source alternative to Burp Suite. Automated scanner + manual testing tools for web vulnerabilities.',free:true,stars:4,type:'Offense',faang:'Free tier is popular in CI/CD pipelines for automated security scanning.'},
+  {name:'John the Ripper',use:'Password cracking',what:'Cracks password hashes using dictionary attacks, brute force, and rules. Supports 100+ hash types.',free:true,stars:4,type:'Offense',faang:'Demonstrates why password hashing matters. Shows the difference between MD5 and bcrypt crack times.'},
+  {name:'Hashcat',use:'GPU password cracking',what:'Fastest password cracker. Uses GPU acceleration — cracks millions of MD5 hashes per second.',free:true,stars:4,type:'Offense',faang:'Visualizes why algorithm choice matters: bcrypt/Argon2 vs MD5. Key for password security discussions.'},
+  {name:'Nikto',use:'Web server scanning',what:'Scans web servers for dangerous files, outdated versions, misconfigurations, and 6700+ potential issues.',free:true,stars:4,type:'Offense',faang:'Quick recon tool. Shows configuration issues that should be caught in security reviews.'},
+  {name:'sqlmap',use:'SQL injection',what:'Automated SQL injection detection and database takeover. Can dump databases, read/write files.',free:true,stars:4,type:'Offense',faang:'Demonstrates SQL injection impact. Why parameterized queries are non-negotiable.'},
+  {name:'Netcat',use:'Network debugging',what:'"Swiss Army knife" for networking. TCP/UDP connections, port scanning, file transfer, reverse shells.',free:true,stars:5,type:'Offense',faang:'Basic tool every security engineer knows. "How would you set up a listener for a reverse shell?"'},
+  {name:'tcpdump',use:'Packet capture (CLI)',what:'Command-line packet capture tool. Captures network traffic and saves to pcap files for later analysis.',free:true,stars:4,type:'Defense',faang:'Linux fundamental. Used in incident response to capture traffic from a suspicious host.'},
+  {name:'Snort',use:'Intrusion detection',what:'Open-source IDS/IPS. Monitors network traffic for suspicious patterns using rule-based detection.',free:true,stars:4,type:'Defense',faang:'Understanding IDS/IPS is a defense-in-depth concept frequently asked about in security architecture.'},
+  {name:'Nessus',use:'Vulnerability scanning',what:'Enterprise vulnerability scanner. Discovers and assesses vulnerabilities across entire network infrastructure.',free:false,stars:4,type:'Defense',faang:'Used in enterprise security teams for compliance scanning. Shows professional security operations knowledge.'},
+  {name:'OpenVAS',use:'Vulnerability scanning (free)',what:'Open-source alternative to Nessus. Full vulnerability scanning framework for network and web.',free:true,stars:3,type:'Defense',faang:'Free alternative to commercial scanners. Used in smaller security teams.'},
+  {name:'Ghidra',use:'Reverse engineering',what:'NSA-developed reverse engineering tool. Decompiles binaries to analyze malware or proprietary software.',free:true,stars:4,type:'Forensics',faang:'Advanced. Shows binary analysis skills. Used in malware analysis and vulnerability research.'},
+  {name:'CyberChef',use:'Data transformation',what:'"Cyber Swiss Army Knife" by GCHQ. Web app for encoding, decoding, hashing, formatting — no install needed.',free:true,stars:5,type:'Defense',faang:'Practical tool for CTFs and quick data manipulation. Bookmark this one.'},
+  {name:'Shodan',use:'Internet scanning',what:'Search engine for Internet-connected devices. Finds exposed webcams, databases, ICS systems, servers.',free:false,stars:5,type:'Offense',faang:'"How would an attacker find your exposed assets?" Shodan is the answer. Shows recon methodology.'},
+  {name:'VirusTotal',use:'Malware analysis',what:'Scans files/URLs with 70+ antivirus engines. Shares results to help identify malware and malicious URLs.',free:true,stars:5,type:'Forensics',faang:'Used in incident response: "Is this file malicious?" First step in basic malware triage.'},
+  {name:'Hydra',use:'Password brute forcing',what:'Fast password cracker for 50+ protocols: SSH, FTP, HTTP, MySQL, etc. Supports parallel attacks.',free:true,stars:3,type:'Offense',faang:'Demonstrates why SSH should use key auth not passwords, and why rate limiting matters.'},
+  {name:'IDA Free',use:'Disassembler',what:'Industry-standard disassembler. Converts binary code back to assembly for analysis.',free:true,stars:3,type:'Forensics',faang:'Advanced tool. Relevant for security research roles. Shows depth of low-level security knowledge.'},
+];
+
+let toolFilter='All';
+const toolTypes=['All','Offense','Defense','Forensics'];
+
+function renderTools(){
+  document.getElementById('tools-filter-bar').innerHTML=toolTypes.map(t=>
+    `<button class="filter-btn${toolFilter===t?' active':''}" onclick="setToolFilter('${t}')">${t}</button>`
+  ).join('');
+  const list=toolFilter==='All'?TOOLS:TOOLS.filter(t=>t.type===toolFilter);
+  document.getElementById('tools-grid').innerHTML=list.map(t=>`
+    <div class="tool-card">
+      <h4>${t.name} ${t.free?'<span class="tag tag-g">Free</span>':'<span class="tag tag-y">Paid</span>'}</h4>
+      <div style="display:flex;gap:4px;margin-bottom:6px">
+        <span class="tag ${t.type==='Offense'?'tag-r':t.type==='Defense'?'tag-g':'tag-b'}">${t.type}</span>
+        <span class="tag tag-y">${t.use}</span>
+      </div>
+      <p style="margin-bottom:8px">${t.what}</p>
+      <div class="stars">${'★'.repeat(t.stars)}${'☆'.repeat(5-t.stars)}</div>
+      <div style="margin-top:6px;font-size:.72rem;color:#22c55e;font-style:italic;font-family:sans-serif">${t.faang}</div>
+    </div>`).join('');
+}
+
+function setToolFilter(t){toolFilter=t;renderTools();}
+
+// ─── INTERVIEW ───────────────────────────────────────────────────────────
+const INTERVIEW_QA=[
+  ['What is the difference between symmetric and asymmetric encryption?','Symmetric: same key to encrypt and decrypt (AES, DES). Fast, used for bulk data. Key distribution problem. Asymmetric: public/private key pair (RSA, ECC). Public key encrypts, private key decrypts. Slower, used for key exchange and digital signatures. TLS uses asymmetric to exchange symmetric keys.'],
+  ['Explain how TLS handshake works.','1. Client Hello: client sends supported cipher suites + random number. 2. Server Hello: server picks cipher, sends certificate (public key). 3. Client verifies cert against CA. 4. Key exchange (RSA or DH): establish shared session key. 5. Both sides confirm with Finished message. 6. Symmetric encryption (AES) used for session data.'],
+  ['What is CSRF and how do you prevent it?','Cross-Site Request Forgery: attacker tricks a browser into making authenticated requests to a target site. The browser automatically sends cookies. Prevention: CSRF tokens (unique per session, verified server-side), SameSite cookie attribute (Strict/Lax), check Origin/Referer headers, require re-authentication for sensitive actions.'],
+  ['How does SQL injection work? Show a mitigation.','Untrusted input is interpreted as SQL. Example: WHERE username=\''+username+'\' — input: \' OR \'1\'=\'1 makes it always true. Mitigation: parameterized queries (prepared statements) — user input is always treated as data, never as SQL code. Also: ORM, input validation, least privilege DB user.'],
+  ['What\'s the difference between authentication and authorization?','Authentication (AuthN): verify who you are. Identity verification via password, biometric, MFA. Authorization (AuthZ): verify what you\'re allowed to do. Role/permission checks after authentication. Example: logging in = authentication. Accessing /admin = authorization check. JWT contains both: identity claims (AuthN) + role claims (AuthZ).'],
+  ['Explain the principle of least privilege.','Give users/processes only the minimum permissions needed to do their job. Examples: DB user can only SELECT/INSERT, not DROP. AWS IAM: only allow specific S3 bucket actions. Process runs as non-root. Reduces blast radius of a breach — compromised account has limited damage potential.'],
+  ['What is a buffer overflow? How is it exploited?','When a program writes more data to a buffer than it can hold, overwriting adjacent memory. Attacker can overwrite the return address on the stack to redirect execution to shellcode. Mitigations: ASLR (randomize memory layout), DEP/NX (no-execute bit), stack canaries, bounds checking, use memory-safe languages (Rust, Go).'],
+  ['What is a man-in-the-middle attack?','Attacker intercepts communication between two parties. They can read, modify, and inject messages. Examples: ARP spoofing on local network, rogue Wi-Fi hotspots. Prevention: end-to-end encryption (TLS), certificate pinning, mutual TLS (mTLS), HTTPS Strict Transport Security (HSTS).'],
+  ['How does HTTPS work?','HTTP + TLS. TLS provides: confidentiality (encryption), integrity (MAC prevents tampering), authentication (certificates verify server identity). Certificate: signed by trusted CA, contains server\'s public key. Browser has root CA store. Chain of trust: root CA → intermediate CA → server cert. HTTPS makes MITM and packet sniffing ineffective.'],
+  ['What is XSS and how do you prevent it?','Cross-Site Scripting: inject malicious scripts into pages viewed by other users. Reflected XSS: malicious script in URL, reflected in response. Stored XSS: script saved in database, executed when displayed. Prevention: encode output (htmlspecialchars), Content Security Policy (CSP) header, HttpOnly cookies, validate/sanitize input.'],
+  ['What is CORS and why does it exist?','Cross-Origin Resource Sharing: browser security feature blocking cross-origin requests by default (Same-Origin Policy). Server can allow specific origins via Access-Control-Allow-Origin header. Misconfigured CORS (wildcard *) can expose APIs. CORS is enforced by browsers, not servers — server-to-server requests bypass it.'],
+  ['What are JWT security best practices?','Sign with strong algorithm (RS256 > HS256). Verify signature on every request. Short expiration times. Never store sensitive data in payload (it\'s base64, not encrypted). Validate all claims (exp, iss, aud). Use HTTPS. Store in httpOnly cookies, not localStorage (XSS vulnerable). Implement token revocation/blacklist for logout.'],
+  ['How should passwords be stored?','Never plain text. Never reversible encryption. Use adaptive hashing: bcrypt (work factor 12+), Argon2 (winner of PHC), scrypt. These are intentionally slow + memory-hard to resist GPU cracking. Always use a unique salt per password (automatic in bcrypt/Argon2). NEVER use MD5/SHA1/SHA256 for passwords — too fast.'],
+  ['What is a zero-day vulnerability?','Vulnerability unknown to the software vendor — zero days to prepare a patch. Extremely valuable in black markets. After disclosure: vendor has zero days to fix before it\'s public knowledge. CVE system tracks publicly disclosed vulnerabilities. Zero-days are used in nation-state attacks and advanced malware (Stuxnet had 4 zero-days).'],
+  ['What is defense in depth?','Security strategy using multiple independent layers of protection. No single point of failure. Layers: network (firewall, IDS), host (antivirus, EDR), application (WAF, input validation), data (encryption, DLP), user (MFA, security training). If one layer is breached, others provide protection. Based on the principle that no single security control is perfect.'],
+  ['Explain public key infrastructure (PKI).','PKI manages digital certificates and encryption keys. Components: Certificate Authority (CA) issues/signs certificates. Registration Authority (RA) verifies identities. Certificate Revocation List (CRL) / OCSP for revoked certs. Trust chain: root CA (self-signed) → intermediate CA → end-entity cert. Root CAs are pre-installed in OS/browsers.'],
+  ['What is salting in password hashing?','A salt is a random unique value added to each password before hashing. Prevents rainbow table attacks (pre-computed hash→password lookups). Prevents identical passwords from having identical hashes. Modern functions (bcrypt) generate and store the salt automatically. Each password has a different hash even if passwords are identical.'],
+  ['What is a penetration test?','Authorized, simulated cyberattack to evaluate security. Types: Black box (no prior knowledge), White box (full access to source/config), Gray box (partial info). Phases: Reconnaissance → Scanning → Gaining access → Maintaining access → Reporting. Bug bounty programs crowdsource this. Different from vulnerability scanning — pentest involves active exploitation.'],
+  ['What is threat modeling?','Systematic process to identify security threats and mitigations during design. STRIDE framework: Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege. PASTA: attack simulation methodology. Output: list of threats, severity ratings, mitigations. Done before building — cheaper than finding bugs in production.'],
+  ['What is the CIA triad?','Confidentiality: information only accessible to authorized parties (encryption, access control). Integrity: data is accurate and unmodified (hashing, digital signatures, audit logs). Availability: systems are accessible when needed (redundancy, DDoS protection, backups). Foundation of all security thinking — every security decision maps to one or more of these.'],
+];
+
+let interviewFilter='all';
+function renderInterview(){
+  const list=INTERVIEW_QA.map((qa,i)=>{
+    const s=interviewStatus[i];
+    if(interviewFilter==='known'&&s!=='known')return '';
+    if(interviewFilter==='review'&&s!=='review')return '';
+    return `<div class="qa-card">
+      <div class="qa-q" onclick="toggleQA(${i})">${qa[0]}<span id="qa-arr-${i}">▼</span></div>
+      <div class="qa-a" id="qa-ans-${i}">
+        <div style="margin-bottom:10px">${qa[1]}</div>
+        <div style="display:flex;gap:8px">
+          <button class="know-btn know-it" onclick="markInterview(${i},'known')">✓ Know it</button>
+          <button class="know-btn review-it" onclick="markInterview(${i},'review')">↺ Review</button>
+        </div>
+        ${s?`<div style="margin-top:6px;font-size:.7rem;color:${s==='known'?'#22c55e':'#fbbf24'}">${s==='known'?'✓ Marked as known':'↺ Marked for review'}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('interview-list').innerHTML=list||'<div style="color:#6b7280;padding:20px;font-family:sans-serif">No cards match this filter.</div>';
+}
+
+function toggleQA(i){
+  const a=document.getElementById('qa-ans-'+i);
+  const arr=document.getElementById('qa-arr-'+i);
+  a.classList.toggle('show');
+  arr.textContent=a.classList.contains('show')?'▲':'▼';
+}
+function markInterview(i,s){interviewStatus[i]=s;set('interviewStatus',interviewStatus);renderInterview();}
+function filterInterview(f,btn){
+  interviewFilter=f;
+  document.querySelectorAll('.filter-bar .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderInterview();
+}
+
+// Init
+renderChallenges();
+renderOWASP();
+renderTools();
+renderInterview();
+</script>
+</body>
+</html>

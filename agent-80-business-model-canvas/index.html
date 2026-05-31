@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Model Canvas — Agent #80</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f1623; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+    .header { background: #1a2540; border-bottom: 1px solid #2a3a60; padding: 14px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .header h1 { font-size: 1.2rem; font-weight: 700; color: #3b82f6; }
+    .header p { font-size: 0.76rem; color: #64748b; }
+
+    .tab-bar { display: flex; background: #1a2540; border-bottom: 1px solid #2a3a60; overflow-x: auto; }
+    .tab-btn { flex: 1; min-width: 70px; padding: 12px 8px; border: none; background: transparent; color: #64748b; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+    .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; background: rgba(59,130,246,0.06); }
+    .tab-btn:hover:not(.active) { color: #cbd5e1; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Canvas controls */
+    .canvas-ctrl { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: rgba(26,37,64,0.6); border-bottom: 1px solid #2a3a60; flex-wrap: wrap; }
+    .canvas-ctrl select { background: #1a2540; border: 1px solid #2a3a60; border-radius: 6px; color: #fff; padding: 5px 10px; font-size: 0.8rem; }
+    .canvas-ctrl select:focus { outline: none; border-color: #3b82f6; }
+    .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.76rem; font-weight: 600; transition: all 0.15s; }
+    .btn-blue { background: #3b82f6; color: #fff; }
+    .btn-blue:hover { background: #2563eb; }
+    .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2a3a60; }
+    .btn-outline:hover { border-color: #3b82f6; color: #fff; }
+    .btn-red { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.25); }
+    .btn-red:hover { background: rgba(248,113,113,0.22); }
+    .btn-yellow { background: #fbbf24; color: #1a2540; }
+    .btn-yellow:hover { background: #f59e0b; }
+
+    /* BMC Grid */
+    .bmc-wrap { padding: 10px; overflow-x: auto; }
+    .bmc-main {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.25fr 1fr 1fr;
+      grid-template-rows: 155px 120px;
+      gap: 5px;
+      min-width: 700px;
+    }
+    .bmc-bottom { display: flex; gap: 5px; margin-top: 5px; min-width: 700px; }
+    .bmc-block {
+      background: #1a2540; border: 1.5px solid #2a3a60; border-radius: 8px;
+      padding: 9px; cursor: pointer; transition: border-color 0.18s, background 0.18s;
+      overflow: hidden; display: flex; flex-direction: column; gap: 4px;
+    }
+    .bmc-block:hover { border-color: #3b82f6; background: #1e2e52; }
+    .bmc-block.filled { border-color: #3b82f6; }
+    .bmc-block.editing { border-color: #fbbf24; background: #1f2d4a; }
+    .block-kp  { grid-column: 1; grid-row: 1 / 3; }
+    .block-ka  { grid-column: 2; grid-row: 1; }
+    .block-kr  { grid-column: 2; grid-row: 2; }
+    .block-vp  { grid-column: 3; grid-row: 1 / 3; background: #162038; }
+    .block-cr  { grid-column: 4; grid-row: 1; }
+    .block-ch  { grid-column: 4; grid-row: 2; }
+    .block-cs  { grid-column: 5; grid-row: 1 / 3; }
+    .bmc-bottom .bmc-block { flex: 1; min-height: 95px; }
+
+    .bl { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .bl-icon { font-size: 0.88rem; }
+    .bl-name { font-size: 0.66rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; }
+    .block-notes { display: flex; flex-wrap: wrap; gap: 3px; overflow: hidden; flex: 1; align-content: flex-start; }
+    .sn { background: #1e3a6e; border: 1px solid #2a4a8e; border-radius: 4px; padding: 2px 6px 2px 5px; font-size: 0.66rem; color: #bfdbfe; display: inline-flex; align-items: center; gap: 2px; max-width: 100%; }
+    .sn-txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px; }
+    .sn-x { color: #475569; cursor: pointer; font-size: 0.85rem; line-height: 1; flex-shrink: 0; }
+    .sn-x:hover { color: #f87171; }
+
+    /* Edit Panel */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 99; }
+    .overlay.show { display: block; }
+    .edit-panel {
+      position: fixed; top: 0; right: -360px; bottom: 0; width: 340px;
+      background: #1a2540; border-left: 1px solid #2a3a60;
+      z-index: 100; transition: right 0.24s ease;
+      display: flex; flex-direction: column;
+      box-shadow: -6px 0 24px rgba(0,0,0,0.5);
+    }
+    .edit-panel.open { right: 0; }
+    .ph { padding: 14px 16px; border-bottom: 1px solid #2a3a60; display: flex; align-items: center; gap: 8px; }
+    .ph-icon { font-size: 1.3rem; }
+    .ph-title { flex: 1; font-size: 0.96rem; font-weight: 700; color: #fff; }
+    .ph-close { background: transparent; border: none; color: #64748b; font-size: 1.3rem; cursor: pointer; padding: 2px 6px; }
+    .ph-close:hover { color: #fff; }
+    .pd { padding: 10px 16px; font-size: 0.73rem; color: #94a3b8; border-bottom: 1px solid #2a3a60; line-height: 1.5; }
+    .pa { padding: 10px 14px; border-bottom: 1px solid #2a3a60; display: flex; gap: 6px; }
+    .pa input { flex: 1; background: #0f1623; border: 1px solid #2a3a60; border-radius: 6px; color: #fff; padding: 7px 10px; font-size: 0.8rem; }
+    .pa input:focus { outline: none; border-color: #3b82f6; }
+    .pi-list { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 5px; }
+    .pi { background: #0f1623; border: 1px solid #2a3a60; border-radius: 7px; padding: 8px 10px; display: flex; align-items: flex-start; gap: 8px; }
+    .pi-txt { flex: 1; font-size: 0.79rem; color: #e2e8f0; line-height: 1.4; }
+    .pi-del { color: #475569; cursor: pointer; font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .pi-del:hover { color: #f87171; }
+    .pi-empty { text-align: center; color: #475569; font-size: 0.76rem; padding: 24px; }
+
+    /* Guide */
+    .guide-wrap { padding: 14px; max-width: 940px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+    .gc { background: #1a2540; border: 1px solid #2a3a60; border-radius: 10px; padding: 14px; }
+    .gc-h { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+    .gc-icon { font-size: 1.2rem; }
+    .gc-name { font-size: 0.86rem; font-weight: 700; color: #3b82f6; }
+    .gc-def { font-size: 0.73rem; color: #94a3b8; margin-bottom: 8px; line-height: 1.5; }
+    .gc-sec { font-size: 0.65rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+    .gc-q { font-size: 0.72rem; color: #cbd5e1; padding: 2px 0 2px 8px; border-left: 2px solid #3b82f6; margin-bottom: 3px; line-height: 1.4; }
+    .gc-ex { font-size: 0.7rem; color: #64748b; margin-bottom: 3px; padding-left: 6px; }
+    .gc-ex::before { content: "→ "; color: #3b82f6; }
+
+    /* Examples */
+    .ex-wrap { padding: 14px; max-width: 1100px; margin: 0 auto; }
+    .ex-card { background: #1a2540; border: 1px solid #2a3a60; border-radius: 10px; margin-bottom: 18px; overflow: hidden; }
+    .ex-hdr { padding: 12px 16px; border-bottom: 1px solid #2a3a60; display: flex; align-items: center; justify-content: space-between; }
+    .ex-name { font-size: 0.96rem; font-weight: 700; color: #fbbf24; }
+    .ex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; padding: 10px; }
+    .ex-blk { background: #0f1623; border: 1px solid #2a3a60; border-radius: 7px; padding: 9px; }
+    .ex-bname { font-size: 0.63rem; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .ex-item { font-size: 0.71rem; color: #94a3b8; padding: 1px 0; }
+    .ex-item::before { content: "• "; color: #3b82f6; }
+
+    /* Export */
+    .exp-wrap { padding: 18px; max-width: 780px; margin: 0 auto; }
+    .exp-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .exp-md { background: #1a2540; border: 1px solid #2a3a60; border-radius: 10px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.76rem; color: #e2e8f0; white-space: pre-wrap; min-height: 280px; line-height: 1.65; }
+    .info-txt { font-size: 0.74rem; color: #4a5568; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🗂️ Business Model Canvas</h1>
+    <p>Nine blocks · One page · Total clarity on how your business works · Agent #80</p>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('canvas',this)">CANVAS</button>
+  <button class="tab-btn" onclick="switchTab('guide',this)">GUIDE</button>
+  <button class="tab-btn" onclick="switchTab('examples',this)">EXAMPLES</button>
+  <button class="tab-btn" onclick="switchTab('export',this)">EXPORT</button>
+</div>
+
+<!-- CANVAS TAB -->
+<div class="tab-panel active" id="tab-canvas">
+  <div class="canvas-ctrl">
+    <span class="info-txt">Canvas:</span>
+    <select id="canvas-sel" onchange="switchCanvas(this.value)"></select>
+    <button class="btn btn-blue" onclick="newCanvas()">+ New</button>
+    <button class="btn btn-outline" onclick="renameCanvas()">✏ Rename</button>
+    <button class="btn btn-red" onclick="deleteCanvas()">🗑 Delete</button>
+  </div>
+  <div class="bmc-wrap">
+    <div class="bmc-main">
+      <div class="bmc-block block-kp" id="block-kp" onclick="openPanel('kp')">
+        <div class="bl"><span class="bl-icon">🤝</span><span class="bl-name">Key Partners</span></div>
+        <div class="block-notes" id="notes-kp"></div>
+      </div>
+      <div class="bmc-block block-ka" id="block-ka" onclick="openPanel('ka')">
+        <div class="bl"><span class="bl-icon">⚙️</span><span class="bl-name">Key Activities</span></div>
+        <div class="block-notes" id="notes-ka"></div>
+      </div>
+      <div class="bmc-block block-vp" id="block-vp" onclick="openPanel('vp')">
+        <div class="bl"><span class="bl-icon">💎</span><span class="bl-name">Value Propositions</span></div>
+        <div class="block-notes" id="notes-vp"></div>
+      </div>
+      <div class="bmc-block block-cr" id="block-cr" onclick="openPanel('cr')">
+        <div class="bl"><span class="bl-icon">💬</span><span class="bl-name">Customer Relationships</span></div>
+        <div class="block-notes" id="notes-cr"></div>
+      </div>
+      <div class="bmc-block block-cs" id="block-cs" onclick="openPanel('cs')">
+        <div class="bl"><span class="bl-icon">👥</span><span class="bl-name">Customer Segments</span></div>
+        <div class="block-notes" id="notes-cs"></div>
+      </div>
+      <div class="bmc-block block-kr" id="block-kr" onclick="openPanel('kr')">
+        <div class="bl"><span class="bl-icon">🔑</span><span class="bl-name">Key Resources</span></div>
+        <div class="block-notes" id="notes-kr"></div>
+      </div>
+      <div class="bmc-block block-ch" id="block-ch" onclick="openPanel('ch')">
+        <div class="bl"><span class="bl-icon">📣</span><span class="bl-name">Channels</span></div>
+        <div class="block-notes" id="notes-ch"></div>
+      </div>
+    </div>
+    <div class="bmc-bottom">
+      <div class="bmc-block" id="block-c$" onclick="openPanel('c$')">
+        <div class="bl"><span class="bl-icon">💸</span><span class="bl-name">Cost Structure</span></div>
+        <div class="block-notes" id="notes-c$"></div>
+      </div>
+      <div class="bmc-block" id="block-r$" onclick="openPanel('r$')">
+        <div class="bl"><span class="bl-icon">💰</span><span class="bl-name">Revenue Streams</span></div>
+        <div class="block-notes" id="notes-r$"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GUIDE TAB -->
+<div class="tab-panel" id="tab-guide">
+  <div class="guide-wrap" id="guide-wrap"></div>
+</div>
+
+<!-- EXAMPLES TAB -->
+<div class="tab-panel" id="tab-examples">
+  <div class="ex-wrap" id="ex-wrap"></div>
+</div>
+
+<!-- EXPORT TAB -->
+<div class="tab-panel" id="tab-export">
+  <div class="exp-wrap">
+    <div class="exp-bar">
+      <button class="btn btn-blue" onclick="copyMd()">📋 Copy Markdown</button>
+      <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
+    </div>
+    <div class="exp-md" id="exp-md"></div>
+  </div>
+</div>
+
+<!-- Overlay + Edit Panel -->
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="edit-panel" id="edit-panel">
+  <div class="ph">
+    <span class="ph-icon" id="ph-icon"></span>
+    <span class="ph-title" id="ph-title"></span>
+    <button class="ph-close" onclick="closePanel()">×</button>
+  </div>
+  <div class="pd" id="pd"></div>
+  <div class="pa">
+    <input id="pa-inp" placeholder="Add an item and press Enter..." onkeydown="if(event.key==='Enter')addItem()">
+    <button class="btn btn-blue" onclick="addItem()">Add</button>
+  </div>
+  <div class="pi-list" id="pi-list"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const BLOCKS = [
+  {id:'kp',name:'Key Partners',        icon:'🤝',desc:'Your network of suppliers and partners that make the business model work. Partners help you reduce risk, acquire resources, and focus on your core.'},
+  {id:'ka',name:'Key Activities',       icon:'⚙️',desc:'The most critical things a company must do to deliver value — product development, platform maintenance, marketing, and operations.'},
+  {id:'vp',name:'Value Propositions',   icon:'💎',desc:'The bundle of products and services that create value for a specific customer segment. The reason a customer chooses you over the competition.'},
+  {id:'cr',name:'Customer Relationships',icon:'💬',desc:'The types of relationships established with each segment — from fully automated and self-service to high-touch personal assistance.'},
+  {id:'cs',name:'Customer Segments',    icon:'👥',desc:'The distinct groups of people or organizations you serve. A good model clearly defines who the most important customers are.'},
+  {id:'kr',name:'Key Resources',        icon:'🔑',desc:'The most critical assets required to make your model work — physical, intellectual, human, or financial.'},
+  {id:'ch',name:'Channels',             icon:'📣',desc:'How you reach and communicate with customer segments to deliver the value proposition — from awareness to after-sales support.'},
+  {id:'c$',name:'Cost Structure',       icon:'💸',desc:'All costs incurred to operate the business model. Which key resources, activities, and partnerships are most expensive?'},
+  {id:'r$',name:'Revenue Streams',      icon:'💰',desc:'The cash generated from each customer segment. Multiple streams (subscription, one-time, licensing, advertising) diversify income.'},
+];
+
+const GUIDE_D = {
+  kp:{def:'The network of suppliers, partners, and allies that make your business model work. Partnerships reduce risk, help acquire resources, and let you focus on your core competency.',qs:['Who are your key suppliers?','Which key resources do you acquire from partners?','Which key activities do partners perform?'],exs:['Airbnb relies on hosts (property owners) as the core supply side — without them there is no product','Nike partners with contracted manufacturing facilities in Asia for all physical production']},
+  ka:{def:'The most important actions a company must take to make its business model work. These are the critical operational and strategic things that create and deliver value daily.',qs:['What key activities does your value proposition require?','What activities do your channels require?','Which activities are most important for your revenue streams?'],exs:['Spotify must continuously negotiate music licensing — without this the product simply cannot exist','Airbnb must invest heavily in platform trust and safety to sustain both sides of the two-sided market']},
+  vp:{def:'The bundle of products and services that create value for a specific customer segment. It is the core reason a customer chooses you over an alternative solution.',qs:['What value do you deliver to the customer?','Which customer problem are you solving?','What job does your product do for each segment?'],exs:["Airbnb guests: access to unique, affordable accommodations worldwide; Airbnb hosts: earn money from unused space","Slack: reduce internal email and make team communication searchable, organized, and persistent"]},
+  cr:{def:'The types of relationships a company establishes with specific segments — from fully automated and self-service to high-touch personal assistance and community building.',qs:['What type of relationship does each segment expect?','Which relationships have you established?','How are they integrated and how costly are they?'],exs:['Spotify drives relationships through Discover Weekly and Wrapped — personalized, algorithmic, low-cost','Apple maintains community loyalty through the developer ecosystem, retail experience, and premium support']},
+  cs:{def:'The different groups of people or organizations a company aims to reach and serve. Segments are distinct with different needs, behaviors, and willingness to pay.',qs:['For whom are we creating value?','Who are our most important customers?','What jobs-to-be-done do they have?'],exs:['Airbnb serves two completely distinct segments: travelers seeking stays, and homeowners seeking income','Slack segments differently: SMBs on self-serve PLG, and Enterprise accounts with dedicated sales']},
+  kr:{def:'The most important assets required to make a business model work. Resources can be physical, intellectual, human, or financial.',qs:['What key resources does your value proposition require?','What resources do your channels need?','Which resources are hardest to replace or replicate?'],exs:["YouTube's irreplaceable resource is its user-generated content library combined with recommendation algorithm","Tesla's moat includes Gigafactories, battery IP, and the Supercharger network — all hard to replicate fast"]},
+  ch:{def:'How a company communicates with and reaches its customer segments to deliver its value proposition — from awareness and purchase to post-sale support.',qs:['Which channels do your segments prefer?','Which channels work best for cost vs reach tradeoffs?','How are your channels integrated with each other?'],exs:['Dollar Shave Club built its entire brand through one viral YouTube video, then direct e-commerce','Notion grew through product-led growth — users shared templates and duplicated workspaces organically']},
+  c$:{def:'All costs incurred to operate a business model. Understanding your cost structure determines whether you are cost-driven (like budget airlines) or value-driven (like luxury hotels).',qs:['What are the most important costs in your model?','Which key resources and activities are most expensive?','Is your model cost-driven or value-driven?'],exs:['Spotify spends ~70% of revenue on music royalties — a fixed cost that makes profitability structurally hard','Airbnb has low COGS (no properties) but high S&M spend and trust/safety operational complexity']},
+  r$:{def:'The cash a company generates from each customer segment. Revenue models include one-time sales, subscription, usage fees, licensing, advertising, and brokerage.',qs:['What value are customers willing to pay for?','How are they currently paying and how would they prefer to pay?','How much does each stream contribute to total revenue?'],exs:['Airbnb earns a split service fee: ~14–20% from guests and ~3% from hosts per booking','Slack uses freemium: free tier drives viral adoption, Pro ($8.75/seat) and Enterprise ($15/seat) convert power users']},
+};
+
+const EXAMPLES_DATA = [
+  {name:'Airbnb',emoji:'🏠',data:{kp:['Hosts (property owners)','Payment processors (Stripe)','Photography services','Insurance partners'],ka:['Platform development','Host acquisition & trust','Customer support','Marketing & SEO'],vp:['Unique accommodations worldwide','Earn income from unused space','More authentic than hotels','Host guarantee & insurance'],cr:['Community reviews & ratings','Automated messaging tools','24/7 customer support','Resolution center'],cs:['Travelers seeking unique stays','Business travelers','Homeowners earning income','Property investors'],'kr':['Platform & mobile app','Two-sided trust network','Review & rating system','Brand recognition'],'ch':['Website & mobile app','SEO & content','Referral program','App stores'],'c$':['Engineering & platform','Trust & safety operations','Customer support','Marketing & host acquisition'],'r$':['Guest service fee (14–20%)','Host service fee (3%)','Airbnb Experiences fees','Airbnb Plus & Luxe listings']}},
+  {name:'Spotify',emoji:'🎵',data:{kp:['Music labels (Universal, Sony, Warner)','Podcast publishers','App stores (Apple, Google)','Payment processors'],ka:['Music licensing & rights','Algorithm development','Podcast acquisition','Platform scaling'],vp:['80M+ songs, instant access','Personalized discovery (Discover Weekly)','Offline listening (Premium)','Ad-free Premium experience'],cr:['Freemium self-service model','Personalized recommendations','Spotify Wrapped annual recap','Artist & fan tools'],cs:['Free tier listeners','Premium subscribers','Artists & creators','Advertisers'],kr:['Music licensing catalog','Recommendation algorithm','User data & behavior','Global brand & app'],ch:['iOS & Android apps','Smart speakers (Alexa, Google)','Web player','Pre-installed on devices'],'c$':['Music royalties (~70% of revenue)','R&D & engineering','Sales & marketing','Podcast content deals'],'r$':['Individual Premium ($10.99/mo)','Student & Family plans','Advertising (free tier)','Podcast advertising deals']}},
+  {name:'SaaS Startup',emoji:'🚀',data:{kp:['Cloud infra (AWS/GCP)','Integration partners (Zapier)','Resellers & agencies','Auth & payments tools'],ka:['Product & engineering','Customer success','Sales & growth','Data pipeline ops'],vp:['Real-time dashboards in 5 min','No-code insights for any team','Automated anomaly alerts','10× cheaper than Tableau'],cr:['Self-serve free trial','In-app chat support','Enterprise CS calls','Community Slack group'],cs:['Early-stage SaaS startups','Marketing teams at SMBs','Product managers','E-commerce brands'],kr:['Data processing engine','Engineering team & IP','Customer behavior data','Brand & case studies'],ch:['Product-led freemium growth','Google Ads & SEO','G2 & Capterra reviews','Founder social media'],'c$':['Engineering salaries','Cloud infrastructure','Marketing & acquisition','Customer success team'],'r$':['Starter: $29/mo','Growth: $99/mo','Enterprise: $499+/mo','Annual plan discount (2 months free)']}},
+];
+
+// ===== STORAGE =====
+const P='bmc80_';
+const get=k=>{try{return JSON.parse(localStorage.getItem(P+k))}catch{return null}};
+const set=(k,v)=>localStorage.setItem(P+k,JSON.stringify(v));
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+// ===== STATE =====
+let canvases=get('canvases')||[];
+let activeId=get('activeId')||'';
+let editBlock=null;
+
+if(!canvases.length){const c=mkC('My First Canvas');canvases=[c];activeId=c.id;saveAll();}
+if(!canvases.find(c=>c.id===activeId)){activeId=canvases[0].id;}
+
+function mkC(name){return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),name,blocks:{kp:[],ka:[],vp:[],cr:[],cs:[],kr:[],ch:[],'c$':[],'r$':[]}};}
+function getA(){return canvases.find(c=>c.id===activeId)||canvases[0];}
+function saveAll(){set('canvases',canvases);set('activeId',activeId);}
+
+// Canvas CRUD
+function newCanvas(){const n=prompt('Canvas name:','New Canvas');if(!n)return;const c=mkC(n);canvases.push(c);activeId=c.id;saveAll();renderAll();}
+function renameCanvas(){const c=getA();const n=prompt('Rename:',c.name);if(!n)return;c.name=n;saveAll();renderAll();}
+function deleteCanvas(){if(canvases.length<=1){alert('Cannot delete the only canvas.');return;}if(!confirm('Delete this canvas?'))return;canvases=canvases.filter(c=>c.id!==activeId);activeId=canvases[0].id;saveAll();renderAll();}
+function switchCanvas(id){activeId=id;saveAll();renderSelect();renderGrid();renderExport();}
+
+// ===== RENDER =====
+function renderSelect(){const s=document.getElementById('canvas-sel');s.innerHTML=canvases.map(c=>`<option value="${esc(c.id)}"${c.id===activeId?' selected':''}>${esc(c.name)}</option>`).join('');}
+function renderGrid(){
+  const canvas=getA();
+  BLOCKS.forEach(b=>{
+    const items=canvas.blocks[b.id]||[];
+    const el=document.getElementById('notes-'+b.id);if(!el)return;
+    el.innerHTML=items.map((item,i)=>`<span class="sn"><span class="sn-txt" title="${esc(item)}">${esc(item)}</span><span class="sn-x" onclick="event.stopPropagation();delItem('${b.id}',${i})">×</span></span>`).join('');
+    const blk=document.getElementById('block-'+b.id);if(blk)blk.classList.toggle('filled',items.length>0);
+  });
+}
+function renderAll(){renderSelect();renderGrid();renderPanel();renderExport();}
+
+// ===== PANEL =====
+function openPanel(bid){
+  editBlock=bid;
+  const b=BLOCKS.find(x=>x.id===bid);
+  document.getElementById('ph-icon').textContent=b.icon;
+  document.getElementById('ph-title').textContent=b.name;
+  document.getElementById('pd').textContent=b.desc;
+  document.getElementById('pa-inp').value='';
+  renderPanel();
+  document.getElementById('edit-panel').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+  document.querySelectorAll('.bmc-block').forEach(el=>el.classList.remove('editing'));
+  const blk=document.getElementById('block-'+bid);if(blk)blk.classList.add('editing');
+  setTimeout(()=>document.getElementById('pa-inp').focus(),200);
+}
+function renderPanel(){
+  if(!editBlock)return;
+  const items=getA().blocks[editBlock]||[];
+  const el=document.getElementById('pi-list');
+  el.innerHTML=!items.length?'<div class="pi-empty">No items yet. Type one above and press Enter.</div>':items.map((item,i)=>`<div class="pi"><span class="pi-txt">${esc(item)}</span><span class="pi-del" onclick="delItem('${editBlock}',${i})">×</span></div>`).join('');
+}
+function addItem(){
+  const inp=document.getElementById('pa-inp');
+  const txt=inp.value.trim();if(!txt)return;
+  const c=getA();if(!c.blocks[editBlock])c.blocks[editBlock]=[];
+  c.blocks[editBlock].push(txt);inp.value='';saveAll();renderGrid();renderPanel();renderExport();
+}
+function delItem(bid,i){
+  const c=getA();c.blocks[bid].splice(i,1);saveAll();renderGrid();renderPanel();renderExport();
+}
+function closePanel(){
+  editBlock=null;
+  document.getElementById('edit-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  document.querySelectorAll('.bmc-block').forEach(el=>el.classList.remove('editing'));
+}
+
+// ===== GUIDE =====
+function renderGuide(){
+  document.getElementById('guide-wrap').innerHTML=BLOCKS.map(b=>{
+    const g=GUIDE_D[b.id];
+    return`<div class="gc"><div class="gc-h"><span class="gc-icon">${b.icon}</span><span class="gc-name">${b.name}</span></div><div class="gc-def">${g.def}</div><div class="gc-sec">Guiding Questions</div>${g.qs.map(q=>`<div class="gc-q">${q}</div>`).join('')}<div class="gc-sec" style="margin-top:8px">Real-World Examples</div>${g.exs.map(e=>`<div class="gc-ex">${e}</div>`).join('')}</div>`;
+  }).join('');
+}
+
+// ===== EXAMPLES =====
+function renderExamples(){
+  document.getElementById('ex-wrap').innerHTML=EXAMPLES_DATA.map((ex,ei)=>`
+    <div class="ex-card">
+      <div class="ex-hdr"><span class="ex-name">${ex.emoji} ${ex.name}</span><button class="btn btn-yellow" onclick="useTemplate(${ei})">Use as Template →</button></div>
+      <div class="ex-grid">${BLOCKS.map(b=>`<div class="ex-blk"><div class="ex-bname">${b.icon} ${b.name}</div>${(ex.data[b.id]||[]).map(item=>`<div class="ex-item">${esc(item)}</div>`).join('')}</div>`).join('')}</div>
+    </div>`).join('');
+}
+function useTemplate(ei){
+  const ex=EXAMPLES_DATA[ei];
+  const c=mkC(ex.name+' (copy)');
+  c.blocks=JSON.parse(JSON.stringify(ex.data));
+  canvases.push(c);activeId=c.id;saveAll();
+  switchTab('canvas',document.querySelectorAll('.tab-btn')[0]);
+  renderAll();
+}
+
+// ===== EXPORT =====
+function renderExport(){
+  const c=getA();
+  const lines=[`# ${c.name}`,`_Business Model Canvas_`,``,`---`,``];
+  BLOCKS.forEach(b=>{
+    const items=c.blocks[b.id]||[];
+    lines.push(`## ${b.icon} ${b.name}`);
+    items.length?items.forEach(i=>lines.push('- '+i)):lines.push('_No entries yet_');
+    lines.push('');
+  });
+  document.getElementById('exp-md').textContent=lines.join('\n');
+}
+function copyMd(){
+  navigator.clipboard.writeText(document.getElementById('exp-md').textContent).then(()=>{const b=event.target;b.textContent='✓ Copied!';setTimeout(()=>b.textContent='📋 Copy Markdown',2000);}).catch(()=>alert('Copy failed — try selecting the text manually'));
+}
+
+// ===== TABS =====
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(tab==='export')renderExport();
+}
+
+// ===== INIT =====
+renderSelect(); renderGrid(); renderGuide(); renderExamples(); renderExport();
+</script>
+</body>
+</html>

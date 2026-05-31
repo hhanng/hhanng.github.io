@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vietnamese ↔ English Bilingual Phrasebook — Agent #113</title>
+<style>
+:root{--bg:#0f1117;--card:#1a1d27;--card2:#20243a;--blue:#4f8ef7;--green:#4ade80;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--text:#e2e8f0;--muted:#64748b;--border:#2d3150;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+header h1{font-size:1rem;font-weight:700;color:var(--blue);}
+header span{font-size:.78rem;color:var(--muted);}
+.nav{display:flex;gap:0;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{padding:11px 16px;background:none;border:none;color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;}
+.nav-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.nav-btn:hover:not(.active){color:var(--text);}
+.page{display:none;padding:16px;max-width:900px;margin:0 auto;}
+.page.active{display:block;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+.card-title{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.btn{padding:7px 14px;border:none;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-green{background:var(--green);color:#000;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-yellow{background:var(--yellow);color:#000;}
+.btn-muted{background:var(--card2);color:var(--muted);border:1px solid var(--border);}
+.btn:hover{opacity:.85;transform:translateY(-1px);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+select,input[type=text]{background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:8px;font-size:.85rem;outline:none;}
+select:focus,input[type=text]:focus{border-color:var(--blue);}
+/* Phrase cards */
+.phrase-list{display:flex;flex-direction:column;gap:8px;}
+.phrase-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;gap:12px;transition:border-color .2s;}
+.phrase-card:hover{border-color:var(--blue);}
+.phrase-card .texts{flex:1;}
+.phrase-en{font-size:.92rem;font-weight:600;margin-bottom:3px;}
+.phrase-vi{font-size:.88rem;color:var(--yellow);font-style:italic;}
+.phrase-cat{font-size:.65rem;color:var(--muted);margin-top:3px;}
+.audio-btn{background:none;border:none;cursor:pointer;font-size:1.2rem;padding:2px 6px;border-radius:6px;transition:background .2s;}
+.audio-btn:hover{background:var(--card);}
+.star-btn{background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 6px;border-radius:6px;transition:all .2s;color:var(--muted);}
+.star-btn.starred{color:var(--yellow);}
+/* Flashcard */
+.fc-wrap{perspective:800px;margin:16px auto;max-width:500px;height:220px;cursor:pointer;}
+.fc{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .5s;}
+.fc.flipped{transform:rotateY(180deg);}
+.fc-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:8px;}
+.fc-front{background:var(--card2);border:2px solid var(--border);}
+.fc-back{background:linear-gradient(135deg,#20243a,#1a1d27);border:2px solid var(--blue);transform:rotateY(180deg);}
+.fc-main{font-size:1.5rem;font-weight:700;}
+.fc-sub{font-size:.85rem;color:var(--muted);}
+.fc-translation{font-size:1.2rem;color:var(--yellow);font-weight:600;}
+.fc-hint{font-size:.72rem;color:var(--muted);text-align:center;margin-top:6px;}
+/* Quiz */
+.quiz-q{font-size:1rem;font-weight:600;margin-bottom:4px;}
+.quiz-ctx{font-size:.8rem;color:var(--muted);margin-bottom:12px;}
+.quiz-inp{width:100%;max-width:400px;padding:10px 14px;border:2px solid var(--border);border-radius:8px;background:var(--card2);color:var(--text);font-size:.95rem;outline:none;}
+.quiz-inp:focus{border-color:var(--blue);}
+.quiz-inp.correct{border-color:var(--green);background:#4ade8020;}
+.quiz-inp.wrong{border-color:var(--red);background:#f8717120;}
+.quiz-feedback{font-size:.88rem;min-height:22px;margin:8px 0;}
+.prog-bar{height:6px;background:var(--card2);border-radius:3px;margin-top:6px;}
+.prog-fill{height:100%;border-radius:3px;background:var(--blue);transition:width .4s;}
+/* Search highlight */
+.hl{background:#fbbf2440;color:var(--yellow);border-radius:3px;padding:0 2px;}
+/* Stats */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;}
+.badge-blue{background:#4f8ef730;color:var(--blue);}
+.badge-green{background:#4ade8030;color:var(--green);}
+.badge-yellow{background:#fbbf2430;color:var(--yellow);}
+.badge-red{background:#f8717130;color:var(--red);}
+/* Pagination */
+.pagination{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap;}
+.page-btn{padding:5px 12px;border:1px solid var(--border);background:none;color:var(--muted);border-radius:6px;cursor:pointer;font-size:.78rem;transition:all .2s;}
+.page-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.page-btn:hover:not(.active){border-color:var(--blue);color:var(--blue);}
+.cat-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.cat-chip{padding:5px 12px;border:1px solid var(--border);background:none;color:var(--muted);border-radius:20px;cursor:pointer;font-size:.75rem;transition:all .2s;white-space:nowrap;}
+.cat-chip.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.empty-state{text-align:center;padding:40px;color:var(--muted);font-size:.9rem;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🇻🇳🇺🇸 Vietnamese ↔ English Phrasebook</h1>
+  <span>Agent #113 · 100 AI Agents Challenge</span>
+  <span id="hdr-count" style="margin-left:auto;font-size:.78rem;color:var(--muted);"></span>
+</header>
+<div class="nav">
+  <button class="nav-btn active" onclick="showPage('browse',this)">📖 Browse</button>
+  <button class="nav-btn" onclick="showPage('flashcard',this)">🃏 Flashcard</button>
+  <button class="nav-btn" onclick="showPage('quiz',this)">✏️ Quiz</button>
+  <button class="nav-btn" onclick="showPage('starred',this)">⭐ My Phrasebook</button>
+  <button class="nav-btn" onclick="showPage('search',this)">🔍 Search</button>
+</div>
+
+<!-- BROWSE -->
+<div class="page active" id="page-browse">
+  <div class="card">
+    <div class="row">
+      <select id="browse-cat" onchange="renderBrowse()">
+        <option value="all">All Categories</option>
+      </select>
+      <span id="browse-count" style="font-size:.78rem;color:var(--muted);"></span>
+    </div>
+    <div class="cat-chips" id="browse-chips"></div>
+  </div>
+  <div id="browse-list" class="phrase-list"></div>
+  <div class="pagination" id="browse-pages"></div>
+</div>
+
+<!-- FLASHCARD -->
+<div class="page" id="page-flashcard">
+  <div class="card">
+    <div class="row">
+      <select id="fc-cat">
+        <option value="all">All Categories</option>
+      </select>
+      <select id="fc-dir">
+        <option value="en">English → Vietnamese</option>
+        <option value="vi">Vietnamese → English</option>
+        <option value="random">Random Direction</option>
+      </select>
+      <button class="btn btn-muted" onclick="initFC()">🔀 Shuffle</button>
+    </div>
+  </div>
+  <div class="fc-wrap" onclick="flipFC()">
+    <div class="fc" id="fc">
+      <div class="fc-face fc-front">
+        <div class="fc-sub" id="fc-prompt"></div>
+        <div class="fc-main" id="fc-q"></div>
+        <div class="fc-sub" id="fc-cat-lbl"></div>
+      </div>
+      <div class="fc-face fc-back">
+        <div class="fc-sub" id="fc-ans-label">Translation</div>
+        <div class="fc-translation" id="fc-ans"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="audio-btn" id="fc-audio-q" onclick="event.stopPropagation();speakFC(false)">🔊 Q</button>
+          <button class="audio-btn" id="fc-audio-a" onclick="event.stopPropagation();speakFC(true)">🔊 A</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="fc-hint">Click card to flip</div>
+  <div class="row" style="justify-content:center;margin-top:10px;">
+    <button class="btn btn-red" onclick="markFC(false)">✗ Practice More</button>
+    <button class="btn btn-muted" onclick="skipFC()">→ Skip</button>
+    <button class="btn btn-green" onclick="markFC(true)">✓ Got It</button>
+  </div>
+  <div style="text-align:center;margin-top:8px;">
+    <div class="prog-bar" style="max-width:400px;margin:0 auto;"><div class="prog-fill" id="fc-prog"></div></div>
+    <div style="font-size:.75rem;color:var(--muted);margin-top:4px;" id="fc-score-txt"></div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="page" id="page-quiz">
+  <div class="card">
+    <div class="row">
+      <select id="quiz-cat">
+        <option value="all">All Categories</option>
+      </select>
+      <select id="quiz-dir">
+        <option value="en">Translate to Vietnamese</option>
+        <option value="vi">Translate to English</option>
+      </select>
+      <button class="btn btn-muted" onclick="initQuiz()">Start Quiz</button>
+    </div>
+  </div>
+  <div class="card" id="quiz-card" style="display:none;">
+    <div id="quiz-q" class="quiz-q"></div>
+    <div id="quiz-ctx" class="quiz-ctx"></div>
+    <input type="text" class="quiz-inp" id="quiz-inp" placeholder="Type your answer…" onkeydown="if(event.key==='Enter')checkQuiz()">
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+    <div class="row" style="margin-top:6px;">
+      <button class="btn btn-blue" onclick="checkQuiz()">Check</button>
+      <button class="btn btn-muted" onclick="skipQuiz()">Skip</button>
+      <button class="btn btn-muted" onclick="showHint()">💡 Hint</button>
+    </div>
+    <div style="margin-top:10px;">
+      <div class="prog-bar"><div class="prog-fill" id="quiz-prog"></div></div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px;" id="quiz-score-txt"></div>
+    </div>
+  </div>
+  <div id="quiz-result"></div>
+</div>
+
+<!-- STARRED -->
+<div class="page" id="page-starred">
+  <div class="card">
+    <div class="card-title">My Personal Phrasebook <span id="star-count" class="badge badge-yellow">0</span></div>
+    <div class="row">
+      <button class="btn btn-muted" onclick="exportStarred()">📋 Export</button>
+      <button class="btn btn-muted" onclick="clearStarred()">🗑 Clear All</button>
+    </div>
+  </div>
+  <div id="starred-list" class="phrase-list"></div>
+  <div id="starred-empty" class="empty-state" style="display:none;">⭐ Star phrases while browsing to add them here.</div>
+</div>
+
+<!-- SEARCH -->
+<div class="page" id="page-search">
+  <div class="card">
+    <div class="row">
+      <input type="text" id="search-inp" placeholder="Search English or Vietnamese…" style="flex:1;" oninput="runSearch()">
+      <select id="search-cat" onchange="runSearch()">
+        <option value="all">All Categories</option>
+      </select>
+    </div>
+    <div style="font-size:.78rem;color:var(--muted);" id="search-count"></div>
+  </div>
+  <div id="search-results" class="phrase-list"></div>
+  <div id="search-empty" class="empty-state" style="display:none;">No phrases found.</div>
+</div>
+
+<script>
+// ─── PHRASE DATA ───────────────────────────────────────────────────────────────
+// Format: [english, vietnamese]  — 50 phrases × 10 categories = 500 total
+const CATEGORIES = [
+  {id:'greetings', name:'Greetings & Introductions'},
+  {id:'family',    name:'Family & Home'},
+  {id:'food',      name:'Food & Dining'},
+  {id:'shopping',  name:'Shopping & Money'},
+  {id:'health',    name:'Healthcare & Emergency'},
+  {id:'transport', name:'Transportation & Travel'},
+  {id:'work',      name:'Work & Bureaucracy'},
+  {id:'school',    name:'School & Learning'},
+  {id:'community', name:'Community & Social'},
+  {id:'daily',     name:'Daily Life & Routines'}
+];
+
+const PHRASES_RAW = {
+greetings:[
+['Hello!','Xin chào!'],
+['Good morning.','Chào buổi sáng.'],
+['Good afternoon.','Chào buổi chiều.'],
+['Good evening.','Chào buổi tối.'],
+['Good night.','Chúc ngủ ngon.'],
+['How are you?','Bạn khỏe không?'],
+['I am fine, thank you.','Tôi khỏe, cảm ơn.'],
+['What is your name?','Tên bạn là gì?'],
+['My name is...','Tên tôi là...'],
+['Nice to meet you.','Rất vui được gặp bạn.'],
+['Where are you from?','Bạn đến từ đâu?'],
+['I am from America.','Tôi đến từ Mỹ.'],
+['I am from Vietnam.','Tôi đến từ Việt Nam.'],
+['Do you speak English?','Bạn có nói tiếng Anh không?'],
+['I speak a little Vietnamese.','Tôi nói được một ít tiếng Việt.'],
+['Please speak slowly.','Xin nói chậm hơn.'],
+['Can you repeat that?','Bạn có thể nói lại không?'],
+['I don\'t understand.','Tôi không hiểu.'],
+['I understand.','Tôi hiểu.'],
+['Please','Làm ơn'],
+['Thank you very much.','Cảm ơn bạn rất nhiều.'],
+['You\'re welcome.','Không có gì.'],
+['Excuse me.','Xin lỗi.'],
+['I\'m sorry.','Tôi xin lỗi.'],
+['Goodbye.','Tạm biệt.'],
+['See you later.','Hẹn gặp lại.'],
+['See you tomorrow.','Hẹn gặp nhau ngày mai.'],
+['How old are you?','Bạn bao nhiêu tuổi?'],
+['I am ... years old.','Tôi ... tuổi.'],
+['Are you married?','Bạn đã kết hôn chưa?'],
+['I am single.','Tôi độc thân.'],
+['I am married.','Tôi đã kết hôn.'],
+['Do you have children?','Bạn có con chưa?'],
+['I have two children.','Tôi có hai người con.'],
+['What do you do for work?','Bạn làm nghề gì?'],
+['I am a teacher.','Tôi là giáo viên.'],
+['I am a student.','Tôi là học sinh.'],
+['I am an engineer.','Tôi là kỹ sư.'],
+['I am a nurse.','Tôi là y tá.'],
+['I am a doctor.','Tôi là bác sĩ.'],
+['What is your phone number?','Số điện thoại của bạn là gì?'],
+['What is your email?','Email của bạn là gì?'],
+['This is my card.','Đây là danh thiếp của tôi.'],
+['Happy birthday!','Chúc mừng sinh nhật!'],
+['Congratulations!','Xin chúc mừng!'],
+['Good luck!','Chúc may mắn!'],
+['Happy New Year!','Chúc Mừng Năm Mới!'],
+['Have a good day.','Chúc bạn một ngày tốt lành.'],
+['Take care.','Giữ gìn sức khỏe.'],
+['Welcome!','Chào mừng!']
+],
+family:[
+['This is my mother.','Đây là mẹ của tôi.'],
+['This is my father.','Đây là ba của tôi.'],
+['This is my husband.','Đây là chồng của tôi.'],
+['This is my wife.','Đây là vợ của tôi.'],
+['This is my son.','Đây là con trai của tôi.'],
+['This is my daughter.','Đây là con gái của tôi.'],
+['This is my brother.','Đây là anh/em trai của tôi.'],
+['This is my sister.','Đây là chị/em gái của tôi.'],
+['This is my grandmother.','Đây là bà của tôi.'],
+['This is my grandfather.','Đây là ông của tôi.'],
+['I live with my family.','Tôi sống cùng gia đình.'],
+['We have a big family.','Gia đình chúng tôi đông người.'],
+['I miss my family.','Tôi nhớ gia đình.'],
+['Where do you live?','Bạn sống ở đâu?'],
+['I live in a house.','Tôi sống trong một ngôi nhà.'],
+['I live in an apartment.','Tôi sống trong một căn hộ.'],
+['How many rooms does your house have?','Nhà bạn có bao nhiêu phòng?'],
+['My house has three bedrooms.','Nhà tôi có ba phòng ngủ.'],
+['What is your address?','Địa chỉ của bạn là gì?'],
+['I live near the park.','Tôi sống gần công viên.'],
+['Can you give me directions?','Bạn có thể chỉ đường cho tôi không?'],
+['Turn left here.','Rẽ trái ở đây.'],
+['Turn right here.','Rẽ phải ở đây.'],
+['Go straight ahead.','Đi thẳng.'],
+['It is nearby.','Nó ở gần đây.'],
+['My rent is ... per month.','Tiền thuê nhà của tôi là ... mỗi tháng.'],
+['The electricity bill is due.','Hóa đơn điện đến hạn thanh toán.'],
+['I need to fix something in my apartment.','Tôi cần sửa thứ gì đó trong căn hộ của tôi.'],
+['The internet is not working.','Internet không hoạt động.'],
+['Can I have the Wi-Fi password?','Tôi có thể xin mật khẩu Wi-Fi không?'],
+['Please take off your shoes.','Xin hãy bỏ giày ra.'],
+['Dinner is ready.','Cơm chín rồi.'],
+['Let\'s eat together.','Mình ăn cùng nhau nào.'],
+['I will do the dishes.','Tôi sẽ rửa bát.'],
+['Can you help me clean?','Bạn có thể giúp tôi dọn dẹp không?'],
+['The trash needs to go out.','Rác cần được đổ.'],
+['The baby is sleeping.','Em bé đang ngủ.'],
+['My child is sick.','Con tôi bị bệnh.'],
+['When is the school bus coming?','Xe buýt trường đến lúc mấy giờ?'],
+['I need to pick up my kids.','Tôi cần đón con.'],
+['Family is most important.','Gia đình là quan trọng nhất.'],
+['I send money to my family in Vietnam.','Tôi gửi tiền cho gia đình ở Việt Nam.'],
+['My parents are visiting next month.','Bố mẹ tôi sẽ đến thăm tháng tới.'],
+['We are having a family gathering.','Chúng tôi có buổi họp mặt gia đình.'],
+['Happy Mother\'s Day!','Chúc Mừng Ngày của Mẹ!'],
+['Happy Father\'s Day!','Chúc Mừng Ngày của Ba!'],
+['I love you.','Tôi yêu bạn.'],
+['I care about you.','Tôi quan tâm đến bạn.'],
+['I am proud of you.','Tôi tự hào về bạn.'],
+['You are doing great.','Bạn đang làm rất tốt.']
+],
+food:[
+['I am hungry.','Tôi đói.'],
+['I am thirsty.','Tôi khát nước.'],
+['What would you like to eat?','Bạn muốn ăn gì?'],
+['I would like a bowl of pho.','Tôi muốn một tô phở.'],
+['I would like banh mi.','Tôi muốn bánh mì.'],
+['Do you have a menu?','Bạn có thực đơn không?'],
+['I am a vegetarian.','Tôi ăn chay.'],
+['I am allergic to peanuts.','Tôi bị dị ứng với đậu phộng.'],
+['No spicy food, please.','Không cay, làm ơn.'],
+['This is delicious!','Cái này ngon quá!'],
+['Can I have the bill please?','Cho tôi hóa đơn được không?'],
+['How much does this cost?','Cái này giá bao nhiêu?'],
+['I would like water.','Tôi muốn uống nước.'],
+['I would like coffee.','Tôi muốn cà phê.'],
+['I would like Vietnamese iced coffee.','Tôi muốn cà phê sữa đá.'],
+['Can I have chopsticks?','Cho tôi đũa được không?'],
+['Can I have a fork?','Cho tôi cái dĩa được không?'],
+['Is this gluten-free?','Cái này không có gluten không?'],
+['I\'ll take this to go.','Tôi muốn mang về.'],
+['Is this rice or noodles?','Cái này là cơm hay bún/phở?'],
+['I would like spring rolls.','Tôi muốn gỏi cuốn.'],
+['What is the soup of the day?','Hôm nay có súp gì?'],
+['Can I order?','Tôi có thể gọi món không?'],
+['I would like this dish.','Tôi muốn món này.'],
+['Can I have more rice?','Cho thêm cơm được không?'],
+['The food is too salty.','Món ăn mặn quá.'],
+['The food is too sweet.','Món ăn ngọt quá.'],
+['More sauce please.','Cho thêm nước sốt được không?'],
+['This is my favorite food.','Đây là món ăn yêu thích của tôi.'],
+['Do you have a children\'s menu?','Bạn có thực đơn cho trẻ em không?'],
+['I would like dessert.','Tôi muốn ăn tráng miệng.'],
+['What flavors of ice cream do you have?','Bạn có những vị kem gì?'],
+['I would like mango.','Tôi muốn xoài.'],
+['Can I try a sample?','Tôi có thể thử không?'],
+['This smells wonderful.','Cái này thơm tuyệt vời.'],
+['I overcooked the rice.','Tôi nấu cơm bị nhão.'],
+['Can you teach me this recipe?','Bạn có thể dạy tôi công thức này không?'],
+['I want to learn to cook Vietnamese food.','Tôi muốn học nấu ăn Việt Nam.'],
+['We should have dinner together.','Chúng ta nên ăn tối cùng nhau.'],
+['Let\'s go to a restaurant.','Hãy đi nhà hàng nào.'],
+['I prefer home cooking.','Tôi thích ăn cơm nhà hơn.'],
+['Happy eating!','Ăn ngon miệng!'],
+['The tea is hot.','Trà nóng.'],
+['No MSG please.','Không bột ngọt, làm ơn.'],
+['Is this dish very spicy?','Món này có cay không?'],
+['I would like a glass of fresh juice.','Tôi muốn một ly nước ép tươi.'],
+['Can I have a doggy bag?','Cho tôi hộp đựng thức ăn thừa được không?'],
+['Cheers!','Chúc sức khỏe!'],
+['This restaurant is excellent.','Nhà hàng này rất tuyệt.'],
+['I would like to make a reservation.','Tôi muốn đặt bàn.']
+],
+shopping:[
+['How much is this?','Cái này giá bao nhiêu?'],
+['That is too expensive.','Đắt quá.'],
+['Can you give me a discount?','Bạn có thể giảm giá không?'],
+['I will take it.','Tôi sẽ mua nó.'],
+['Do you accept credit cards?','Bạn có chấp nhận thẻ tín dụng không?'],
+['I only have cash.','Tôi chỉ có tiền mặt.'],
+['Do you have a smaller size?','Bạn có cỡ nhỏ hơn không?'],
+['Do you have a larger size?','Bạn có cỡ lớn hơn không?'],
+['I would like to try this on.','Tôi muốn thử cái này.'],
+['Where is the fitting room?','Phòng thử đồ ở đâu?'],
+['This is too big.','Cái này lớn quá.'],
+['This is too small.','Cái này nhỏ quá.'],
+['This fits perfectly.','Cái này vừa vặn lắm.'],
+['Can I exchange this?','Tôi có thể đổi cái này không?'],
+['What is the return policy?','Chính sách đổi trả là gì?'],
+['I would like a receipt.','Tôi muốn hóa đơn.'],
+['I am just looking, thank you.','Tôi chỉ xem thôi, cảm ơn.'],
+['Where is the supermarket?','Siêu thị ở đâu?'],
+['Where can I find the market?','Tôi có thể tìm chợ ở đâu?'],
+['I need to buy groceries.','Tôi cần mua đồ ăn.'],
+['Do you have organic products?','Bạn có sản phẩm hữu cơ không?'],
+['I need a shopping bag.','Tôi cần túi mua hàng.'],
+['Where is the pharmacy?','Nhà thuốc ở đâu?'],
+['I am looking for a bank.','Tôi đang tìm ngân hàng.'],
+['I need to exchange money.','Tôi cần đổi tiền.'],
+['What is the exchange rate?','Tỷ giá hối đoái là bao nhiêu?'],
+['I need to send money overseas.','Tôi cần gửi tiền ra nước ngoài.'],
+['I am looking for clothing.','Tôi đang tìm quần áo.'],
+['Do you have this in another color?','Bạn có cái này màu khác không?'],
+['I need shoes.','Tôi cần giày.'],
+['What size are your shoes?','Giày bạn mang cỡ bao nhiêu?'],
+['Where is the electronics store?','Cửa hàng điện tử ở đâu?'],
+['I need a phone charger.','Tôi cần sạc điện thoại.'],
+['Do you have that in stock?','Hàng đó còn không?'],
+['When will it be back in stock?','Khi nào sẽ có hàng trở lại?'],
+['I would like to place an order.','Tôi muốn đặt hàng.'],
+['Can you deliver to my home?','Bạn có thể giao hàng tận nhà không?'],
+['What is the delivery fee?','Phí giao hàng là bao nhiêu?'],
+['How long does delivery take?','Giao hàng mất bao lâu?'],
+['I have a coupon.','Tôi có phiếu giảm giá.'],
+['Is there a sale today?','Hôm nay có khuyến mãi không?'],
+['This is on sale.','Cái này đang được giảm giá.'],
+['I need a birthday gift.','Tôi cần quà sinh nhật.'],
+['Can you wrap this as a gift?','Bạn có thể gói quà này không?'],
+['I paid too much.','Tôi trả quá nhiều.'],
+['The cashier made an error.','Thu ngân đã tính sai.'],
+['I need a price check.','Tôi cần kiểm tra giá.'],
+['The ATM is not working.','Máy ATM không hoạt động.'],
+['I lost my wallet.','Tôi mất ví.'],
+['I need to call my bank.','Tôi cần gọi cho ngân hàng.']
+],
+health:[
+['I need a doctor.','Tôi cần gặp bác sĩ.'],
+['Call an ambulance!','Gọi xe cứu thương!'],
+['Call the police!','Gọi cảnh sát!'],
+['I am in pain.','Tôi đang đau.'],
+['My head hurts.','Đầu tôi đau.'],
+['I have a stomachache.','Tôi đau bụng.'],
+['I have a fever.','Tôi bị sốt.'],
+['I have a cough.','Tôi bị ho.'],
+['I can\'t breathe well.','Tôi thở khó.'],
+['I feel dizzy.','Tôi cảm thấy chóng mặt.'],
+['I feel nauseous.','Tôi buồn nôn.'],
+['I had an accident.','Tôi bị tai nạn.'],
+['I was in a car accident.','Tôi bị tai nạn xe hơi.'],
+['I need medicine.','Tôi cần thuốc.'],
+['I have diabetes.','Tôi bị tiểu đường.'],
+['I have high blood pressure.','Tôi bị cao huyết áp.'],
+['I am allergic to penicillin.','Tôi bị dị ứng với penicillin.'],
+['Where is the nearest hospital?','Bệnh viện gần nhất ở đâu?'],
+['I need to make an appointment.','Tôi cần đặt lịch hẹn.'],
+['I have insurance.','Tôi có bảo hiểm.'],
+['What is your insurance?','Bảo hiểm của bạn là gì?'],
+['How long is the wait?','Phải chờ bao lâu?'],
+['I need a prescription.','Tôi cần đơn thuốc.'],
+['Where is the pharmacy?','Nhà thuốc ở đâu?'],
+['How often should I take this?','Tôi nên uống thuốc này bao nhiêu lần?'],
+['Take this twice a day.','Uống thuốc này hai lần mỗi ngày.'],
+['I am pregnant.','Tôi đang mang thai.'],
+['I have chest pain.','Tôi đau ngực.'],
+['I broke my arm.','Tôi bị gãy tay.'],
+['I sprained my ankle.','Tôi bị bong gân mắt cá chân.'],
+['I need stitches.','Tôi cần khâu vết thương.'],
+['I have been bleeding.','Tôi đang chảy máu.'],
+['Where is the emergency room?','Phòng cấp cứu ở đâu?'],
+['This is an emergency.','Đây là trường hợp khẩn cấp.'],
+['I need help immediately.','Tôi cần giúp đỡ ngay.'],
+['I fainted.','Tôi bị ngất.'],
+['I am feeling better now.','Bây giờ tôi cảm thấy khỏe hơn.'],
+['I need to rest.','Tôi cần nghỉ ngơi.'],
+['I have not slept well.','Tôi không ngủ ngon.'],
+['I am very stressed.','Tôi rất căng thẳng.'],
+['I need to see a dentist.','Tôi cần gặp nha sĩ.'],
+['My tooth hurts.','Răng tôi đau.'],
+['I need a blood test.','Tôi cần xét nghiệm máu.'],
+['The doctor will see you now.','Bác sĩ sẽ khám bạn bây giờ.'],
+['Open your mouth.','Há miệng ra.'],
+['Take a deep breath.','Hít thở sâu.'],
+['Do you have any symptoms?','Bạn có triệu chứng gì không?'],
+['How long have you felt this way?','Bạn cảm thấy như vậy bao lâu rồi?'],
+['I need a note for work.','Tôi cần giấy chứng nhận cho công việc.'],
+['Thank you, doctor.','Cảm ơn bác sĩ.']
+],
+transport:[
+['Where is the bus stop?','Trạm xe buýt ở đâu?'],
+['Which bus goes to...?','Xe buýt nào đi...?'],
+['How much is the bus fare?','Vé xe buýt giá bao nhiêu?'],
+['Where is the subway station?','Ga tàu điện ngầm ở đâu?'],
+['I need a taxi.','Tôi cần gọi taxi.'],
+['Please take me to this address.','Làm ơn đưa tôi đến địa chỉ này.'],
+['How long will it take?','Mất bao lâu?'],
+['I am late.','Tôi trễ rồi.'],
+['Can you drive faster?','Bạn có thể lái nhanh hơn không?'],
+['Please slow down.','Làm ơn lái chậm lại.'],
+['I am lost.','Tôi bị lạc.'],
+['Can you show me on the map?','Bạn có thể chỉ cho tôi trên bản đồ không?'],
+['Where is the airport?','Sân bay ở đâu?'],
+['I need to catch a flight.','Tôi cần đi máy bay.'],
+['My flight is delayed.','Chuyến bay của tôi bị trễ.'],
+['I need to check in.','Tôi cần làm thủ tục.'],
+['Where is baggage claim?','Khu lấy hành lý ở đâu?'],
+['I lost my luggage.','Tôi mất hành lý.'],
+['I need to rent a car.','Tôi cần thuê xe.'],
+['Where can I park?','Tôi có thể đậu xe ở đâu?'],
+['I got a parking ticket.','Tôi bị phạt đậu xe.'],
+['The car broke down.','Xe bị hỏng.'],
+['I have a flat tire.','Tôi bị xẹp lốp.'],
+['Can you call a tow truck?','Bạn có thể gọi xe kéo không?'],
+['Where is the gas station?','Trạm xăng ở đâu?'],
+['Fill it up please.','Xin đổ đầy bình.'],
+['How far is it?','Cách bao xa?'],
+['It is about two miles.','Khoảng hai dặm.'],
+['Turn around here.','Quay đầu ở đây.'],
+['The road is closed.','Đường bị đóng.'],
+['There is a traffic jam.','Đường đang kẹt xe.'],
+['Where is the train station?','Ga tàu hỏa ở đâu?'],
+['I need a one-way ticket.','Tôi cần vé một chiều.'],
+['I need a round-trip ticket.','Tôi cần vé khứ hồi.'],
+['When is the next bus?','Xe buýt kế tiếp lúc mấy giờ?'],
+['Is this seat taken?','Ghế này có ai ngồi chưa?'],
+['This is my stop.','Đây là trạm dừng của tôi.'],
+['Does this train stop at...?','Tàu này có dừng ở... không?'],
+['I need to transfer here.','Tôi cần đổi tuyến ở đây.'],
+['The escalator is broken.','Thang cuốn bị hỏng.'],
+['Bicycles are not allowed here.','Xe đạp không được phép ở đây.'],
+['I am walking home.','Tôi đi bộ về nhà.'],
+['Is there a shortcut?','Có đường tắt không?'],
+['Follow this street.','Đi theo con đường này.'],
+['It is the second building on the right.','Đó là tòa nhà thứ hai bên phải.'],
+['Can I drop you off here?','Tôi có thể thả bạn xuống đây không?'],
+['This is my destination.','Đây là điểm đến của tôi.'],
+['How do I get to downtown?','Làm thế nào để đến trung tâm thành phố?'],
+['I need a map.','Tôi cần bản đồ.'],
+['Is public transport reliable here?','Giao thông công cộng ở đây có đáng tin không?']
+],
+work:[
+['I have a job interview.','Tôi có buổi phỏng vấn xin việc.'],
+['I am applying for this job.','Tôi đang nộp đơn xin việc này.'],
+['What are the working hours?','Giờ làm việc là mấy giờ?'],
+['My salary is...','Lương của tôi là...'],
+['I need to renew my visa.','Tôi cần gia hạn thị thực.'],
+['I need a work permit.','Tôi cần giấy phép lao động.'],
+['I am self-employed.','Tôi tự kinh doanh.'],
+['I am looking for work.','Tôi đang tìm việc.'],
+['Can you sign this form?','Bạn có thể ký vào mẫu này không?'],
+['I need this translated.','Tôi cần dịch cái này.'],
+['Where is the office?','Văn phòng ở đâu?'],
+['I have a meeting at 2 PM.','Tôi có cuộc họp lúc 2 giờ chiều.'],
+['I need to send this email.','Tôi cần gửi email này.'],
+['Can you print this for me?','Bạn có thể in cái này cho tôi không?'],
+['I need to file my taxes.','Tôi cần nộp thuế.'],
+['Where is the tax office?','Văn phòng thuế ở đâu?'],
+['I need a Social Security card.','Tôi cần thẻ An sinh Xã hội.'],
+['I need to open a bank account.','Tôi cần mở tài khoản ngân hàng.'],
+['What documents do I need?','Tôi cần những giấy tờ gì?'],
+['I need an interpreter.','Tôi cần phiên dịch.'],
+['My boss is asking for this.','Sếp của tôi cần cái này.'],
+['When is the deadline?','Thời hạn là khi nào?'],
+['I will finish this tomorrow.','Tôi sẽ hoàn thành cái này vào ngày mai.'],
+['Can we reschedule?','Chúng ta có thể dời lịch không?'],
+['I am on sick leave.','Tôi đang nghỉ bệnh.'],
+['I need vacation days.','Tôi cần ngày nghỉ phép.'],
+['I want to resign.','Tôi muốn từ chức.'],
+['Can I get a raise?','Tôi có thể được tăng lương không?'],
+['This is my resume.','Đây là sơ yếu lý lịch của tôi.'],
+['I have experience in this field.','Tôi có kinh nghiệm trong lĩnh vực này.'],
+['I am reliable and hardworking.','Tôi đáng tin cậy và chăm chỉ.'],
+['When will I receive my paycheck?','Khi nào tôi nhận lương?'],
+['My paycheck was wrong.','Lương của tôi bị sai.'],
+['I need workers\' compensation.','Tôi cần bồi thường tai nạn lao động.'],
+['I was fired.','Tôi bị sa thải.'],
+['I was laid off.','Tôi bị cho thôi việc.'],
+['I am applying for unemployment.','Tôi đang xin trợ cấp thất nghiệp.'],
+['Where is the employment office?','Sở lao động ở đâu?'],
+['I need to notarize this document.','Tôi cần công chứng tài liệu này.'],
+['Can you certify this copy?','Bạn có thể xác nhận bản sao này không?'],
+['I need a letter of recommendation.','Tôi cần thư giới thiệu.'],
+['What are my employee rights?','Quyền lợi của tôi với tư cách nhân viên là gì?'],
+['There is a problem at work.','Có vấn đề ở nơi làm việc.'],
+['I need to report harassment.','Tôi cần tố cáo hành vi quấy rối.'],
+['My employer is not paying me.','Chủ lao động không trả lương cho tôi.'],
+['I need legal help.','Tôi cần tư vấn pháp lý.'],
+['The office is closed today.','Văn phòng đóng cửa hôm nay.'],
+['I work from home.','Tôi làm việc tại nhà.'],
+['I work night shifts.','Tôi làm ca đêm.'],
+['The job pays minimum wage.','Công việc này trả lương tối thiểu.']
+],
+school:[
+['Where is the school?','Trường học ở đâu?'],
+['I need to enroll my child.','Tôi cần đăng ký cho con tôi.'],
+['What grade is your child in?','Con bạn học lớp mấy?'],
+['My child is in third grade.','Con tôi học lớp ba.'],
+['I need to speak to the teacher.','Tôi cần nói chuyện với giáo viên.'],
+['When is parent-teacher conference?','Khi nào có cuộc họp phụ huynh-giáo viên?'],
+['My child needs extra help.','Con tôi cần được giúp đỡ thêm.'],
+['Does the school have ESL classes?','Trường có lớp học tiếng Anh cho người mới không?'],
+['I want to learn English.','Tôi muốn học tiếng Anh.'],
+['Where are English classes?','Lớp học tiếng Anh ở đâu?'],
+['I am a new student.','Tôi là học sinh mới.'],
+['Can I see the school calendar?','Tôi có thể xem lịch của trường không?'],
+['What time does school start?','Trường bắt đầu lúc mấy giờ?'],
+['What time does school end?','Trường tan lúc mấy giờ?'],
+['My child is absent today.','Con tôi vắng mặt hôm nay.'],
+['My child was bullied.','Con tôi bị bắt nạt.'],
+['My child has special needs.','Con tôi có nhu cầu đặc biệt.'],
+['Does the school offer free lunch?','Trường có cung cấp bữa trưa miễn phí không?'],
+['I need a school transfer.','Tôi cần chuyển trường.'],
+['I need to apply for college.','Tôi cần nộp đơn vào đại học.'],
+['What is your GPA?','Điểm trung bình của bạn là bao nhiêu?'],
+['I need a scholarship.','Tôi cần học bổng.'],
+['I am studying English.','Tôi đang học tiếng Anh.'],
+['Can you help me with homework?','Bạn có thể giúp tôi làm bài tập không?'],
+['I have a test tomorrow.','Ngày mai tôi có bài kiểm tra.'],
+['I failed the exam.','Tôi thi trượt.'],
+['I passed the exam.','Tôi đã vượt qua kỳ thi.'],
+['I graduated.','Tôi đã tốt nghiệp.'],
+['I have a library card.','Tôi có thẻ thư viện.'],
+['Where is the library?','Thư viện ở đâu?'],
+['Can I borrow this book?','Tôi có thể mượn quyển sách này không?'],
+['This book is overdue.','Quyển sách này đã quá hạn.'],
+['I need to use the computer.','Tôi cần dùng máy tính.'],
+['Is there free Wi-Fi here?','Ở đây có Wi-Fi miễn phí không?'],
+['I am learning to read.','Tôi đang học đọc.'],
+['Can you write that down?','Bạn có thể viết điều đó không?'],
+['I do not understand the assignment.','Tôi không hiểu bài tập.'],
+['When is the assignment due?','Bài tập nộp khi nào?'],
+['I want to improve my English.','Tôi muốn cải thiện tiếng Anh của mình.'],
+['Can you recommend a good textbook?','Bạn có thể giới thiệu sách giáo khoa tốt không?'],
+['I am in an adult education program.','Tôi đang trong chương trình giáo dục người lớn.'],
+['Does this school offer citizenship classes?','Trường này có lớp học quốc tịch không?'],
+['I want to get my GED.','Tôi muốn lấy bằng tốt nghiệp phổ thông.'],
+['I am training for a new career.','Tôi đang đào tạo cho nghề mới.'],
+['Where can I take a vocational course?','Tôi có thể học khóa dạy nghề ở đâu?'],
+['Education is very important.','Giáo dục rất quan trọng.'],
+['I support my child\'s education.','Tôi ủng hộ việc học của con.'],
+['I need tutoring.','Tôi cần gia sư.'],
+['How much does tutoring cost?','Học thêm giá bao nhiêu?'],
+['Keep up the good work!','Tiếp tục phát huy nhé!']
+],
+community:[
+['Where is the community center?','Trung tâm cộng đồng ở đâu?'],
+['When are community events?','Khi nào có sự kiện cộng đồng?'],
+['I want to volunteer.','Tôi muốn tình nguyện.'],
+['Can I join this group?','Tôi có thể tham gia nhóm này không?'],
+['Where is the Vietnamese community?','Cộng đồng người Việt ở đâu?'],
+['Are there Vietnamese festivals here?','Ở đây có lễ hội Việt Nam không?'],
+['I am celebrating Tết.','Tôi đang đón Tết.'],
+['Happy Tết!','Chúc Mừng Năm Mới/Chúc Mừng Tết!'],
+['What church do you attend?','Bạn đi nhà thờ nào?'],
+['Where is the nearest temple?','Chùa gần nhất ở đâu?'],
+['I am looking for a support group.','Tôi đang tìm nhóm hỗ trợ.'],
+['Where can I find social services?','Tôi có thể tìm dịch vụ xã hội ở đâu?'],
+['I need food assistance.','Tôi cần hỗ trợ thực phẩm.'],
+['Where is the food bank?','Ngân hàng thực phẩm ở đâu?'],
+['I need housing assistance.','Tôi cần hỗ trợ nhà ở.'],
+['I am applying for benefits.','Tôi đang xin trợ cấp.'],
+['I need help with my application.','Tôi cần giúp đỡ với đơn xin trợ cấp của mình.'],
+['Are there bilingual services here?','Ở đây có dịch vụ song ngữ không?'],
+['I am a new immigrant.','Tôi là người nhập cư mới.'],
+['I am applying for citizenship.','Tôi đang nộp đơn xin quốc tịch.'],
+['I have a green card.','Tôi có thẻ xanh.'],
+['I need a lawyer.','Tôi cần luật sư.'],
+['Do you know a good immigration lawyer?','Bạn có biết luật sư di trú giỏi không?'],
+['My English is limited.','Tiếng Anh của tôi còn hạn chế.'],
+['I need an interpreter.','Tôi cần phiên dịch.'],
+['This is a cultural misunderstanding.','Đây là sự hiểu lầm văn hóa.'],
+['I respect all cultures.','Tôi tôn trọng tất cả các nền văn hóa.'],
+['I am proud of my heritage.','Tôi tự hào về nguồn gốc của mình.'],
+['I want to teach my children Vietnamese.','Tôi muốn dạy con tiếng Việt.'],
+['Where can my child learn Vietnamese?','Con tôi có thể học tiếng Việt ở đâu?'],
+['I am homesick.','Tôi nhớ nhà.'],
+['I miss Vietnam.','Tôi nhớ Việt Nam.'],
+['I plan to visit Vietnam.','Tôi dự định thăm Việt Nam.'],
+['I sent a package to Vietnam.','Tôi đã gửi gói hàng về Việt Nam.'],
+['My relatives are coming to visit.','Người thân của tôi sắp đến thăm.'],
+['Can you help me fill out this form?','Bạn có thể giúp tôi điền vào mẫu này không?'],
+['I do not understand my rights.','Tôi không hiểu quyền của mình.'],
+['I was discriminated against.','Tôi bị phân biệt đối xử.'],
+['I want to report a problem.','Tôi muốn báo cáo một vấn đề.'],
+['Who can I contact for help?','Tôi có thể liên hệ ai để được giúp đỡ?'],
+['What services are available?','Những dịch vụ nào có sẵn?'],
+['I need childcare.','Tôi cần dịch vụ trông trẻ.'],
+['Where is the daycare center?','Trung tâm trông trẻ ở đâu?'],
+['We are a strong community.','Chúng ta là một cộng đồng vững mạnh.'],
+['Help each other.','Giúp đỡ lẫn nhau.'],
+['Together we can do it.','Cùng nhau chúng ta có thể làm được.'],
+['Thank you for your help.','Cảm ơn bạn đã giúp đỡ.'],
+['You are a good neighbor.','Bạn là hàng xóm tốt.'],
+['Let us celebrate together.','Chúng ta hãy cùng kỷ niệm.'],
+['I am happy to be here.','Tôi vui khi được ở đây.'],
+['America is my home now.','Nước Mỹ bây giờ là nhà của tôi.']
+],
+daily:[
+['What time is it?','Mấy giờ rồi?'],
+['It is 9 o\'clock.','Chín giờ rồi.'],
+['I wake up at 7 AM.','Tôi thức dậy lúc 7 giờ sáng.'],
+['I go to bed at 10 PM.','Tôi đi ngủ lúc 10 giờ đêm.'],
+['I brush my teeth.','Tôi đánh răng.'],
+['I take a shower.','Tôi tắm.'],
+['I get dressed.','Tôi mặc quần áo.'],
+['I eat breakfast.','Tôi ăn sáng.'],
+['I drink coffee every morning.','Tôi uống cà phê mỗi sáng.'],
+['I go to work.','Tôi đi làm.'],
+['I come home at 6 PM.','Tôi về nhà lúc 6 giờ chiều.'],
+['I cook dinner.','Tôi nấu bữa tối.'],
+['I watch TV in the evening.','Tôi xem TV vào buổi tối.'],
+['I read a book before bed.','Tôi đọc sách trước khi ngủ.'],
+['Today is Monday.','Hôm nay là thứ Hai.'],
+['What day is today?','Hôm nay là thứ mấy?'],
+['Today is my day off.','Hôm nay tôi nghỉ.'],
+['I exercise every day.','Tôi tập thể dục mỗi ngày.'],
+['I go for a walk.','Tôi đi dạo.'],
+['The weather is nice today.','Hôm nay thời tiết đẹp.'],
+['It is raining.','Trời đang mưa.'],
+['It is cold today.','Hôm nay trời lạnh.'],
+['It is very hot.','Trời nóng lắm.'],
+['I need an umbrella.','Tôi cần ô.'],
+['I need to do laundry.','Tôi cần giặt quần áo.'],
+['The clothes are in the dryer.','Quần áo đang ở trong máy sấy.'],
+['I need to go grocery shopping.','Tôi cần đi mua đồ ăn.'],
+['I check my phone every morning.','Tôi kiểm tra điện thoại mỗi sáng.'],
+['I video call my parents.','Tôi gọi video cho bố mẹ.'],
+['I am very busy this week.','Tuần này tôi rất bận.'],
+['I have free time on weekends.','Tôi có thời gian rảnh vào cuối tuần.'],
+['Let\'s hang out this weekend.','Cuối tuần này mình ra ngoài chơi nhé.'],
+['I like to go to the park.','Tôi thích đi công viên.'],
+['I enjoy cooking.','Tôi thích nấu ăn.'],
+['I listen to music to relax.','Tôi nghe nhạc để thư giãn.'],
+['I watch Vietnamese movies.','Tôi xem phim Việt Nam.'],
+['I am learning something new every day.','Tôi học điều mới mỗi ngày.'],
+['Today was a good day.','Hôm nay là một ngày tốt.'],
+['I am tired.','Tôi mệt.'],
+['I need a break.','Tôi cần nghỉ ngơi.'],
+['I feel happy today.','Hôm nay tôi cảm thấy vui.'],
+['I am grateful.','Tôi biết ơn.'],
+['Every day is a new chance.','Mỗi ngày là một cơ hội mới.'],
+['I will try my best.','Tôi sẽ cố gắng hết sức.'],
+['Don\'t give up!','Đừng bỏ cuộc!'],
+['You can do it!','Bạn làm được!'],
+['Life is beautiful.','Cuộc sống thật đẹp.'],
+['I am learning and growing.','Tôi đang học hỏi và trưởng thành.'],
+['Have a wonderful day!','Chúc một ngày tuyệt vời!'],
+['Good night, sweet dreams.','Chúc ngủ ngon, ngủ mơ đẹp.']
+]
+};
+
+// Build flat array with category info
+const ALL_PHRASES = [];
+CATEGORIES.forEach(cat=>{
+  (PHRASES_RAW[cat.id]||[]).forEach(p=>{
+    ALL_PHRASES.push({en:p[0], vi:p[1], cat:cat.id, catName:cat.name});
+  });
+});
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const S=k=>localStorage.getItem('a113_'+k);
+const W=(k,v)=>localStorage.setItem('a113_'+k,JSON.stringify(v));
+const J=k=>{try{return JSON.parse(S(k));}catch{return null;}};
+let starred = J('starred') || {};
+let quizStats = J('qstats') || {correct:0,total:0};
+
+function isStarred(en){ return !!starred[en]; }
+function toggleStar(en){
+  if(starred[en]) delete starred[en]; else starred[en]=true;
+  W('starred',starred);
+}
+
+document.getElementById('hdr-count').textContent = ALL_PHRASES.length+' phrases · '+Object.keys(starred).length+' starred';
+
+// ─── SPEECH ───────────────────────────────────────────────────────────────────
+function speak(text, lang){
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = lang==='vi' ? 'vi-VN' : 'en-US';
+  utt.rate = 0.9;
+  window.speechSynthesis.speak(utt);
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+function showPage(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='starred') renderStarred();
+  if(id==='search') runSearch();
+}
+
+// ─── BROWSE ───────────────────────────────────────────────────────────────────
+let browsePage=0, browsePageSize=20, browseCat='all';
+function populateCatSelects(){
+  const sels=['browse-cat','fc-cat','quiz-cat','search-cat'];
+  sels.forEach(sid=>{
+    const sel=document.getElementById(sid);
+    if(!sel) return;
+    CATEGORIES.forEach(c=>{
+      const opt=document.createElement('option');
+      opt.value=c.id; opt.textContent=c.name+' ('+PHRASES_RAW[c.id].length+')';
+      sel.appendChild(opt);
+    });
+  });
+  // Build chips
+  const chips=document.getElementById('browse-chips');
+  [{id:'all',name:'All'},...CATEGORIES].forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='cat-chip'+(c.id==='all'?' active':'');
+    btn.textContent=c.id==='all'?'All ('+ALL_PHRASES.length+')':c.name;
+    btn.onclick=()=>{
+      document.querySelectorAll('.cat-chip').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('browse-cat').value=c.id;
+      browseCat=c.id; browsePage=0; renderBrowse();
+    };
+    chips.appendChild(btn);
+  });
+}
+function renderBrowse(){
+  browseCat=document.getElementById('browse-cat').value;
+  const pool = browseCat==='all'?ALL_PHRASES:ALL_PHRASES.filter(p=>p.cat===browseCat);
+  const totalPages = Math.ceil(pool.length/browsePageSize);
+  if(browsePage>=totalPages) browsePage=0;
+  const slice = pool.slice(browsePage*browsePageSize, (browsePage+1)*browsePageSize);
+  document.getElementById('browse-count').textContent=pool.length+' phrases';
+  const listEl=document.getElementById('browse-list');
+  listEl.innerHTML='';
+  slice.forEach(p=>{ listEl.appendChild(makePhraseCard(p)); });
+  // Pagination
+  const pagesEl=document.getElementById('browse-pages');
+  pagesEl.innerHTML='';
+  if(totalPages<=1) return;
+  for(let i=0;i<totalPages;i++){
+    const btn=document.createElement('button');
+    btn.className='page-btn'+(i===browsePage?' active':'');
+    btn.textContent=i+1;
+    btn.onclick=(()=>{ const p=i; return ()=>{browsePage=p;renderBrowse();window.scrollTo(0,0);}; })();
+    pagesEl.appendChild(btn);
+  }
+}
+function makePhraseCard(p, hl=''){
+  const div=document.createElement('div');
+  div.className='phrase-card';
+  const starred_=isStarred(p.en);
+  div.innerHTML=`<div class="texts">
+    <div class="phrase-en">${hl?hlText(p.en,hl):p.en}</div>
+    <div class="phrase-vi">${hl?hlText(p.vi,hl):p.vi}</div>
+    <div class="phrase-cat">${p.catName}</div>
+  </div>
+  <button class="audio-btn" title="Play English" onclick="speak('${esc(p.en)}','en')">🔊</button>
+  <button class="audio-btn" title="Play Vietnamese" onclick="speak('${esc(p.vi)}','vi')">🇻🇳</button>
+  <button class="star-btn${starred_?' starred':''}" onclick="toggleStarCard(this,'${esc(p.en)}')" title="${starred_?'Unstar':'Star'}">${starred_?'⭐':'☆'}</button>`;
+  return div;
+}
+function esc(s){ return s.replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function hlText(text, q){
+  const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return text.replace(re,'<span class="hl">$1</span>');
+}
+function toggleStarCard(btn, en){
+  toggleStar(en);
+  const s=isStarred(en);
+  btn.classList.toggle('starred',s);
+  btn.textContent=s?'⭐':'☆';
+  btn.title=s?'Unstar':'Star';
+  document.getElementById('hdr-count').textContent=ALL_PHRASES.length+' phrases · '+Object.keys(starred).length+' starred';
+}
+populateCatSelects();
+renderBrowse();
+
+// ─── FLASHCARD ────────────────────────────────────────────────────────────────
+let fcDeck=[], fcIdx=0, fcCorrect=0, fcTotal=0, fcFlipped=false;
+function initFC(){
+  const cat=document.getElementById('fc-cat').value;
+  fcDeck = cat==='all'?[...ALL_PHRASES]:ALL_PHRASES.filter(p=>p.cat===cat);
+  for(let i=fcDeck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[fcDeck[i],fcDeck[j]]=[fcDeck[j],fcDeck[i]];}
+  fcIdx=0; fcCorrect=0; fcTotal=0; fcFlipped=false;
+  renderFC2();
+}
+function renderFC2(){
+  if(fcIdx>=fcDeck.length){
+    document.getElementById('fc-q').textContent='✓ Done! '+fcCorrect+'/'+fcTotal;
+    document.getElementById('fc-prog').style.width='100%';
+    return;
+  }
+  const p=fcDeck[fcIdx];
+  const dir=document.getElementById('fc-dir').value;
+  const showEn=dir==='en'||(dir==='random'&&Math.random()>.5);
+  const card=document.getElementById('fc');
+  card.classList.remove('flipped'); fcFlipped=false;
+  document.getElementById('fc-prompt').textContent=showEn?'🇺🇸 English':'🇻🇳 Vietnamese';
+  document.getElementById('fc-q').textContent=showEn?p.en:p.vi;
+  document.getElementById('fc-cat-lbl').textContent=p.catName;
+  document.getElementById('fc-ans-label').textContent='Translation';
+  document.getElementById('fc-ans').textContent=showEn?p.vi:p.en;
+  document.getElementById('fc-audio-q').dataset.lang=showEn?'en':'vi';
+  document.getElementById('fc-audio-q').dataset.text=showEn?p.en:p.vi;
+  document.getElementById('fc-audio-a').dataset.lang=showEn?'vi':'en';
+  document.getElementById('fc-audio-a').dataset.text=showEn?p.vi:p.en;
+  const pct=fcDeck.length>0?(fcIdx/fcDeck.length*100):0;
+  document.getElementById('fc-prog').style.width=pct+'%';
+  document.getElementById('fc-score-txt').textContent=fcIdx+'/'+fcDeck.length+' | ✓ '+fcCorrect;
+}
+function flipFC(){const c=document.getElementById('fc');c.classList.toggle('flipped');fcFlipped=!fcFlipped;}
+function speakFC(isAnswer){
+  const key=isAnswer?'fc-audio-a':'fc-audio-q';
+  const btn=document.getElementById(key);
+  speak(btn.dataset.text,btn.dataset.lang);
+}
+function markFC(know){ if(know) fcCorrect++; fcTotal++; fcIdx++; renderFC2(); }
+function skipFC(){ fcIdx++; renderFC2(); }
+initFC();
+
+// ─── QUIZ ─────────────────────────────────────────────────────────────────────
+let quizDeck=[], quizIdx=0, qCorrect=0, qTotal=0, quizAnswered=false;
+function initQuiz(){
+  const cat=document.getElementById('quiz-cat').value;
+  quizDeck=cat==='all'?[...ALL_PHRASES]:ALL_PHRASES.filter(p=>p.cat===cat);
+  for(let i=quizDeck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[quizDeck[i],quizDeck[j]]=[quizDeck[j],quizDeck[i]];}
+  quizIdx=0; qCorrect=0; qTotal=0; quizAnswered=false;
+  document.getElementById('quiz-card').style.display='block';
+  document.getElementById('quiz-result').innerHTML='';
+  renderQuizQ();
+}
+function renderQuizQ(){
+  if(quizIdx>=quizDeck.length){
+    document.getElementById('quiz-card').style.display='none';
+    const pct=qTotal>0?Math.round(100*qCorrect/qTotal):0;
+    const cls=pct>=80?'feedback-good':pct>=60?'feedback-mid':'feedback-low';
+    document.getElementById('quiz-result').innerHTML='<div class="card" style="text-align:center;"><div style="font-size:1.5rem;font-weight:700;color:var(--'+(pct>=80?'green':pct>=60?'yellow':'red')+')">'+pct+'%</div><div style="margin-top:6px;">'+qCorrect+'/'+qTotal+' correct</div><button class="btn btn-blue" style="margin-top:12px;" onclick="initQuiz()">Try Again</button></div>';
+    quizStats.correct+=qCorrect; quizStats.total+=qTotal; W('qstats',quizStats);
+    return;
+  }
+  const p=quizDeck[quizIdx];
+  const dir=document.getElementById('quiz-dir').value;
+  document.getElementById('quiz-q').textContent=dir==='en'?p.en:p.vi;
+  document.getElementById('quiz-ctx').textContent='Translate to '+(dir==='en'?'Vietnamese':'English')+' — Category: '+p.catName;
+  const inp=document.getElementById('quiz-inp');
+  inp.value=''; inp.className='quiz-inp'; inp.disabled=false; inp.focus();
+  document.getElementById('quiz-feedback').textContent='';
+  quizAnswered=false;
+  const pct=quizDeck.length>0?(quizIdx/quizDeck.length*100):0;
+  document.getElementById('quiz-prog').style.width=pct+'%';
+  document.getElementById('quiz-score-txt').textContent=quizIdx+'/'+quizDeck.length+' | Score: '+qCorrect+'/'+qTotal;
+}
+function normalize(s){ return s.toLowerCase().trim().replace(/[.,!?;:'"]/g,'').replace(/\s+/,' '); }
+function fuzzyMatch(a,b){
+  const na=normalize(a), nb=normalize(b);
+  if(na===nb) return true;
+  // allow 1-char difference for short answers, 2 for longer
+  const maxDist = na.length<=5?1:2;
+  return levenshtein(na,nb)<=maxDist;
+}
+function levenshtein(a,b){
+  const dp=Array.from({length:a.length+1},(_,i)=>Array.from({length:b.length+1},(_,j)=>i===0?j:j===0?i:0));
+  for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[a.length][b.length];
+}
+function checkQuiz(){
+  if(quizAnswered) return;
+  const p=quizDeck[quizIdx];
+  const dir=document.getElementById('quiz-dir').value;
+  const correct=dir==='en'?p.vi:p.en;
+  const inp=document.getElementById('quiz-inp');
+  const val=inp.value;
+  if(!val.trim()){ document.getElementById('quiz-feedback').textContent='Type an answer first.'; return; }
+  quizAnswered=true;
+  inp.disabled=true;
+  const ok=fuzzyMatch(val,correct);
+  if(ok){ qCorrect++; inp.className='quiz-inp correct'; document.getElementById('quiz-feedback').innerHTML='<span style="color:var(--green);font-weight:700;">✓ Correct!</span>'; }
+  else{ inp.className='quiz-inp wrong'; document.getElementById('quiz-feedback').innerHTML='<span style="color:var(--red);font-weight:700;">✗ Answer: </span><span style="color:var(--yellow)">'+correct+'</span>'; speak(correct,dir==='en'?'vi':'en'); }
+  qTotal++;
+  setTimeout(()=>{ quizIdx++; renderQuizQ(); },1400);
+}
+function skipQuiz(){ quizIdx++; renderQuizQ(); }
+function showHint(){
+  const p=quizDeck[quizIdx];
+  const dir=document.getElementById('quiz-dir').value;
+  const ans=dir==='en'?p.vi:p.en;
+  document.getElementById('quiz-feedback').textContent='💡 Starts with: '+ans.slice(0,3)+'…';
+}
+
+// ─── STARRED ──────────────────────────────────────────────────────────────────
+function renderStarred(){
+  const keys=Object.keys(starred);
+  document.getElementById('star-count').textContent=keys.length;
+  document.getElementById('hdr-count').textContent=ALL_PHRASES.length+' phrases · '+keys.length+' starred';
+  const listEl=document.getElementById('starred-list');
+  listEl.innerHTML='';
+  const empty=document.getElementById('starred-empty');
+  if(keys.length===0){ empty.style.display='block'; return; }
+  empty.style.display='none';
+  const phrases=ALL_PHRASES.filter(p=>starred[p.en]);
+  phrases.forEach(p=>{ listEl.appendChild(makePhraseCard(p)); });
+}
+function exportStarred(){
+  const phrases=ALL_PHRASES.filter(p=>starred[p.en]);
+  if(phrases.length===0){ alert('No starred phrases to export.'); return; }
+  const lines=['English\tVietnamese\tCategory',...phrases.map(p=>p.en+'\t'+p.vi+'\t'+p.catName)];
+  const url='data:text/plain;charset=utf-8,'+encodeURIComponent(lines.join('\n'));
+  const a=document.createElement('a'); a.href=url; a.download='my-phrasebook.txt'; a.click();
+}
+function clearStarred(){
+  if(!confirm('Clear all starred phrases?')) return;
+  starred={}; W('starred',starred); renderStarred();
+}
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
+function runSearch(){
+  const q=document.getElementById('search-inp').value.trim();
+  const cat=document.getElementById('search-cat').value;
+  let pool=cat==='all'?ALL_PHRASES:ALL_PHRASES.filter(p=>p.cat===cat);
+  const resEl=document.getElementById('search-results');
+  const emptyEl=document.getElementById('search-empty');
+  if(!q){ resEl.innerHTML=''; emptyEl.style.display='none'; document.getElementById('search-count').textContent=''; return; }
+  const ql=q.toLowerCase();
+  const results=pool.filter(p=>p.en.toLowerCase().includes(ql)||p.vi.toLowerCase().includes(ql));
+  document.getElementById('search-count').textContent=results.length+' result'+(results.length!==1?'s':'');
+  resEl.innerHTML='';
+  if(results.length===0){ emptyEl.style.display='block'; return; }
+  emptyEl.style.display='none';
+  results.slice(0,50).forEach(p=>{ resEl.appendChild(makePhraseCard(p,q)); });
+}
+</script>
+</body>
+</html>

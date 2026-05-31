@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS Vocabulary Speed Typer</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0f1117;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  header{background:#1a1d27;border-bottom:1px solid #2d3148;padding:16px 24px;display:flex;align-items:center;gap:16px}
+  header h1{font-size:1.25rem;font-weight:700;color:#4f8ef7}
+  header span{font-size:.85rem;color:#94a3b8}
+  .tabs{display:flex;gap:4px;background:#1a1d27;border-bottom:1px solid #2d3148;padding:0 24px}
+  .tab{padding:14px 20px;cursor:pointer;font-size:.9rem;font-weight:500;color:#94a3b8;border-bottom:2px solid transparent;transition:all .2s}
+  .tab.active{color:#4f8ef7;border-bottom-color:#4f8ef7}
+  .tab:hover:not(.active){color:#e2e8f0}
+  .panel{display:none;padding:24px;max-width:900px;margin:0 auto}
+  .panel.active{display:block}
+
+  /* PLAY TAB */
+  .game-header{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+  .stat-box{background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:16px 20px;flex:1;min-width:100px;text-align:center}
+  .stat-box .val{font-size:1.8rem;font-weight:700;color:#4f8ef7}
+  .stat-box .lbl{font-size:.75rem;color:#94a3b8;margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+  .stat-box .val.green{color:#4ade80}
+  .stat-box .val.orange{color:#fb923c}
+  .term-card{background:#1a1d27;border:1px solid #2d3148;border-radius:16px;padding:40px 32px;text-align:center;margin-bottom:20px;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+  .term-display{font-size:2.5rem;font-weight:700;letter-spacing:.08em;color:#e2e8f0}
+  .term-category{font-size:.8rem;color:#94a3b8;background:#0f1117;padding:4px 12px;border-radius:20px}
+  .type-area{width:100%;margin-bottom:16px}
+  #typeInput{width:100%;background:#1a1d27;border:2px solid #2d3148;border-radius:10px;padding:14px 18px;font-size:1.2rem;color:#e2e8f0;outline:none;text-align:center;letter-spacing:.08em;transition:border-color .2s}
+  #typeInput:focus{border-color:#4f8ef7}
+  #typeInput.correct{border-color:#4ade80}
+  #typeInput.wrong{border-color:#f87171}
+  .feedback{height:28px;font-size:.9rem;text-align:center;margin-bottom:12px}
+  .feedback.ok{color:#4ade80}
+  .feedback.err{color:#f87171}
+  .progress-bar{background:#1a1d27;border-radius:99px;height:6px;overflow:hidden;margin-bottom:20px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#4f8ef7,#4ade80);border-radius:99px;transition:width 1s linear}
+  .btn{padding:12px 28px;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s}
+  .btn-primary{background:#4f8ef7;color:#fff}
+  .btn-primary:hover{background:#3b7de8}
+  .btn-secondary{background:#2d3148;color:#e2e8f0}
+  .btn-secondary:hover{background:#3a3f5c}
+  .game-over{background:#1a1d27;border:1px solid #2d3148;border-radius:16px;padding:32px;text-align:center}
+  .game-over h2{font-size:1.5rem;margin-bottom:8px;color:#4ade80}
+  .game-over .score-row{display:flex;justify-content:center;gap:32px;margin:20px 0;flex-wrap:wrap}
+  .game-over .score-item{text-align:center}
+  .game-over .score-item .v{font-size:2rem;font-weight:700;color:#4f8ef7}
+  .game-over .score-item .k{font-size:.8rem;color:#94a3b8}
+  .hidden{display:none!important}
+  .streak-badge{display:inline-flex;align-items:center;gap:6px;background:#1e293b;border:1px solid #fb923c40;border-radius:20px;padding:4px 14px;font-size:.85rem;color:#fb923c}
+
+  /* TERMS TAB */
+  .filter-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+  .filter-btn{padding:6px 14px;border-radius:20px;border:1px solid #2d3148;background:transparent;color:#94a3b8;cursor:pointer;font-size:.82rem;transition:all .2s}
+  .filter-btn.on{background:#4f8ef7;border-color:#4f8ef7;color:#fff}
+  .search-box{background:#1a1d27;border:1px solid #2d3148;border-radius:8px;padding:10px 16px;width:100%;font-size:.9rem;color:#e2e8f0;outline:none;margin-bottom:16px}
+  .search-box:focus{border-color:#4f8ef7}
+  .terms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .term-item{background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:16px}
+  .term-item .name{font-size:1rem;font-weight:600;color:#4f8ef7;margin-bottom:6px}
+  .term-item .cat{font-size:.72rem;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+  .term-item .def{font-size:.83rem;color:#94a3b8;line-height:1.5}
+  .terms-count{font-size:.85rem;color:#94a3b8;margin-bottom:12px}
+
+  /* LEADERBOARD */
+  .lb-table{width:100%;border-collapse:collapse}
+  .lb-table th{text-align:left;padding:12px 16px;color:#94a3b8;font-size:.82rem;font-weight:500;border-bottom:1px solid #2d3148;text-transform:uppercase;letter-spacing:.05em}
+  .lb-table td{padding:14px 16px;border-bottom:1px solid #1a1d27;font-size:.9rem}
+  .lb-table tr.gold td:first-child{color:#fbbf24}
+  .lb-table tr.silver td:first-child{color:#94a3b8}
+  .lb-table tr.bronze td:first-child{color:#b87333}
+  .rank-medal{font-size:1.1rem}
+  .wpm-val{color:#4f8ef7;font-weight:700}
+  .acc-val{color:#4ade80;font-weight:600}
+  .lb-empty{text-align:center;padding:60px;color:#94a3b8}
+
+  /* STATS TAB */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+  .stats-card{background:#1a1d27;border:1px solid #2d3148;border-radius:14px;padding:20px}
+  .stats-card .sv{font-size:2rem;font-weight:700;color:#4f8ef7}
+  .stats-card .sk{color:#94a3b8;font-size:.82rem;margin-top:6px}
+  .section-head{font-size:1rem;font-weight:600;margin-bottom:14px;color:#e2e8f0}
+  .missed-list{display:flex;flex-direction:column;gap:8px}
+  .missed-item{background:#1a1d27;border:1px solid #2d3148;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+  .missed-item .mw{color:#e2e8f0;font-size:.9rem}
+  .missed-item .mc{background:#f8717120;color:#f87171;font-size:.78rem;padding:3px 10px;border-radius:20px}
+  .no-data{text-align:center;padding:40px;color:#94a3b8}
+  .mastery-bar-wrap{background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:18px;margin-bottom:16px}
+  .mastery-bar-label{display:flex;justify-content:space-between;font-size:.82rem;color:#94a3b8;margin-bottom:8px}
+  .mastery-bar-label strong{color:#4ade80}
+  .mastery-bar-bg{background:#0f1117;border-radius:99px;height:10px;overflow:hidden}
+  .mastery-bar-fill{height:100%;background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:99px;transition:width .8s ease}
+  .weakest-item{background:#1a1d27;border:1px solid #2d3148;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .weakest-item .wt{color:#e2e8f0;font-size:.9rem}
+  .weakest-item .wr{background:#fb923c20;color:#fb923c;font-size:.78rem;padding:3px 10px;border-radius:20px}
+  .kstreak-badge{display:inline-flex;align-items:center;gap:8px;background:#7c3aed20;border:1px solid #7c3aed50;border-radius:12px;padding:14px 20px;font-size:1rem;color:#a78bfa;font-weight:600;margin-bottom:20px}
+
+  /* DECK + MODE SELECTOR */
+  .deck-row,.mode-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+  .deck-btn,.mode-btn{padding:8px 20px;border-radius:20px;border:1px solid #2d3148;background:transparent;color:#94a3b8;cursor:pointer;font-size:.85rem;font-weight:500;transition:all .2s}
+  .deck-btn.active{background:#4f8ef7;border-color:#4f8ef7;color:#fff}
+  .mode-btn.active{background:#7c3aed;border-color:#7c3aed;color:#fff}
+  .deck-btn:hover:not(.active),.mode-btn:hover:not(.active){border-color:#94a3b8;color:#e2e8f0}
+
+  /* KNOWLEDGE MODE */
+  #knowArea{margin-bottom:16px}
+  #knowInput{width:100%;background:#1a1d27;border:2px solid #2d3148;border-radius:10px;padding:12px 16px;font-size:1rem;color:#e2e8f0;outline:none;resize:vertical;min-height:90px;font-family:inherit;transition:border-color .2s}
+  #knowInput:focus{border-color:#7c3aed}
+  #knowInput:disabled{opacity:.6}
+  .know-hint{font-size:.78rem;color:#94a3b8;text-align:center;margin-bottom:8px}
+  .know-score{font-size:.88rem;text-align:center;margin:8px 0;font-weight:600;min-height:22px}
+  .know-score.ok{color:#4ade80}
+  .know-score.partial{color:#fb923c}
+  .know-score.err{color:#f87171}
+  #knowSubmitBtn{display:block;margin:8px auto 0;padding:10px 32px;background:#7c3aed;border:none;border-radius:8px;color:#fff;font-size:.92rem;font-weight:600;cursor:pointer;transition:background .2s}
+  #knowSubmitBtn:hover{background:#6d28d9}
+  .know-model-answer{margin-top:12px;background:#0f1117;border:1px solid #2d3148;border-radius:10px;padding:14px 16px}
+  .know-model-hdr{font-size:.7rem;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700}
+  .know-model-text{font-size:.87rem;color:#e2e8f0;line-height:1.6}
+  .know-mastery-btns{display:flex;gap:12px;justify-content:center;margin-top:14px}
+  .btn-got-it{padding:10px 26px;border:none;border-radius:8px;background:#4ade80;color:#000;font-weight:700;cursor:pointer;font-size:.9rem;transition:opacity .2s}
+  .btn-got-it:hover{opacity:.85}
+  .btn-review{padding:10px 26px;border:none;border-radius:8px;background:#f87171;color:#fff;font-weight:700;cursor:pointer;font-size:.9rem;transition:opacity .2s}
+  .btn-review:hover{opacity:.85}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CS Vocabulary Speed Typer</h1>
+  <span>100 AI Agents · #63</span>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('play')">PLAY</div>
+  <div class="tab" onclick="switchTab('terms')">TERMS</div>
+  <div class="tab" onclick="switchTab('leaderboard')">LEADERBOARD</div>
+  <div class="tab" onclick="switchTab('stats')">STATS</div>
+</div>
+
+<!-- PLAY -->
+<div id="tab-play" class="panel active">
+  <div id="gameReady">
+    <div style="text-align:center;padding:60px 20px">
+      <div style="font-size:3rem;margin-bottom:16px">⌨️</div>
+      <h2 style="font-size:1.5rem;margin-bottom:8px">CS Vocabulary Speed Typer</h2>
+      <p style="color:#94a3b8;margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto">Choose a deck and mode, then race the clock!</p>
+      <div class="mode-row" style="margin-bottom:18px">
+        <button class="mode-btn active" id="modeBtnSpeed" onclick="selectMode('speed',this)">⚡ Speed Mode</button>
+        <button class="mode-btn" id="modeBtnKnow" onclick="selectMode('knowledge',this)">🧠 Knowledge Mode</button>
+      </div>
+      <div class="deck-row">
+        <button class="deck-btn active" id="deckBtnCs" onclick="selectDeck('cs',this)">CS Terms (<span id="csCount">—</span>)</button>
+        <button class="deck-btn" id="deckBtnTttt" onclick="selectDeck('tttt',this)">TTTT 8th Grade (<span id="ttttCount">—</span>)</button>
+        <button class="deck-btn" id="deckBtnAll" onclick="selectDeck('all',this)">All (<span id="allCount">—</span>)</button>
+      </div>
+      <div style="margin-top:24px">
+        <button class="btn btn-primary" onclick="startGame()">Start Round</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="gameActive" class="hidden">
+    <div class="game-header">
+      <div class="stat-box"><div class="val" id="wpmVal">0</div><div class="lbl">WPM</div></div>
+      <div class="stat-box"><div class="val green" id="accVal">100%</div><div class="lbl">Accuracy</div></div>
+      <div class="stat-box"><div class="val orange" id="streakVal">0</div><div class="lbl">Streak</div></div>
+      <div class="stat-box"><div class="val" id="correctVal">0</div><div class="lbl">Correct</div></div>
+      <div class="stat-box"><div class="val" id="timerVal" style="color:#f87171">60</div><div class="lbl">Seconds</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="timerBar" style="width:100%"></div></div>
+    <div class="term-card">
+      <div class="term-category" id="termCategory">Category</div>
+      <div class="term-display" id="termDisplay">term</div>
+    </div>
+    <div class="type-area" id="typeArea">
+      <input id="typeInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Type the term above...">
+    </div>
+    <div id="knowArea" class="hidden">
+      <div class="know-hint">Define this term in your own words. Use keywords — then click Submit.</div>
+      <textarea id="knowInput" placeholder="Type your definition here…"></textarea>
+      <div class="know-score" id="knowScore"></div>
+      <button id="knowSubmitBtn" onclick="submitKnowledge()">Submit</button>
+      <!-- Model answer + mastery buttons (shown after submit) -->
+      <div id="knowModelAnswer" class="know-model-answer hidden">
+        <div class="know-model-hdr">Model Answer</div>
+        <div id="knowModelText" class="know-model-text"></div>
+      </div>
+      <div id="knowMasteryBtns" class="know-mastery-btns hidden">
+        <button class="btn-got-it" onclick="markMastery(true)">✓ Got It</button>
+        <button class="btn-review" onclick="markMastery(false)">↺ Needs Review</button>
+      </div>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div style="text-align:center">
+      <button class="btn btn-secondary" onclick="endGame()">End Round</button>
+    </div>
+  </div>
+
+  <div id="gameOver" class="hidden">
+    <div class="game-over">
+      <h2>Round Complete!</h2>
+      <p style="color:#94a3b8;margin-bottom:8px" id="newBestMsg"></p>
+      <div class="score-row">
+        <div class="score-item"><div class="v" id="finalWpm">0</div><div class="k">WPM</div></div>
+        <div class="score-item"><div class="v" id="finalAcc">0%</div><div class="k">Accuracy</div></div>
+        <div class="score-item"><div class="v" id="finalCorrect">0</div><div class="k">Correct</div></div>
+        <div class="score-item"><div class="v" id="finalBest">0</div><div class="k">Best Streak</div></div>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center">
+        <button class="btn btn-primary" onclick="startGame()">Play Again</button>
+        <button class="btn btn-secondary" onclick="showReady()">Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS -->
+<div id="tab-terms" class="panel">
+  <input class="search-box" id="termSearch" placeholder="Search terms..." oninput="renderTerms()">
+  <div class="filter-row" id="catFilters"></div>
+  <div class="terms-count" id="termsCount"></div>
+  <div class="terms-grid" id="termsGrid"></div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="tab-leaderboard" class="panel">
+  <h2 style="font-size:1.1rem;margin-bottom:20px;color:#e2e8f0">Personal Best Scores</h2>
+  <div id="lbContent"></div>
+</div>
+
+<!-- STATS -->
+<div id="tab-stats" class="panel">
+  <!-- Knowledge Mode stats -->
+  <div id="knowStatsSection" style="margin-bottom:28px">
+    <div class="section-head">🧠 Knowledge Mode</div>
+    <div id="kstreakBadge" class="kstreak-badge" style="margin-bottom:20px">🔥 Knowledge Streak: <strong id="kstreakVal">0</strong> in a row</div>
+    <div class="mastery-bar-wrap">
+      <div class="mastery-bar-label"><span>Mastered Terms</span><strong id="masteredPctTxt">0%</strong></div>
+      <div class="mastery-bar-bg"><div class="mastery-bar-fill" id="masteryBarFill" style="width:0%"></div></div>
+      <div style="font-size:.78rem;color:#94a3b8;margin-top:6px" id="masteredCountTxt">0 / 0 terms reviewed</div>
+    </div>
+    <div class="section-head" style="font-size:.88rem;margin-bottom:10px">Weakest 5 Terms (most Needs Review)</div>
+    <div id="weakestList"></div>
+  </div>
+  <!-- Speed Mode stats -->
+  <div class="section-head">⚡ Speed Mode</div>
+  <div class="stats-grid" id="statsGrid"></div>
+  <div class="section-head">Most Missed Terms</div>
+  <div id="missedList"></div>
+</div>
+
+<script>
+const TERMS = [
+  // Data Structures
+  {t:"array",c:"Data Structures",d:"A collection of elements stored at contiguous memory locations, accessed by index."},
+  {t:"linked list",c:"Data Structures",d:"A sequence of nodes where each node contains data and a pointer to the next node."},
+  {t:"stack",c:"Data Structures",d:"A LIFO (Last In, First Out) data structure with push and pop operations."},
+  {t:"queue",c:"Data Structures",d:"A FIFO (First In, First Out) data structure with enqueue and dequeue operations."},
+  {t:"binary tree",c:"Data Structures",d:"A tree where each node has at most two children: left and right."},
+  {t:"hash table",c:"Data Structures",d:"A data structure that maps keys to values using a hash function for O(1) average lookups."},
+  {t:"heap",c:"Data Structures",d:"A complete binary tree satisfying the heap property (max or min at root)."},
+  {t:"trie",c:"Data Structures",d:"A tree-like structure for storing strings, where each node represents a character prefix."},
+  {t:"graph",c:"Data Structures",d:"A set of vertices connected by edges; can be directed or undirected."},
+  {t:"deque",c:"Data Structures",d:"Double-ended queue allowing insertion and deletion at both ends."},
+  {t:"skip list",c:"Data Structures",d:"A probabilistic data structure with multiple layers of linked lists for fast search."},
+  {t:"red-black tree",c:"Data Structures",d:"A self-balancing BST where each node has an extra color bit ensuring O(log n) operations."},
+  {t:"AVL tree",c:"Data Structures",d:"A self-balancing BST where heights of two subtrees of any node differ by at most one."},
+  {t:"B-tree",c:"Data Structures",d:"A self-balancing tree optimized for disk storage with nodes having multiple keys and children."},
+  {t:"bloom filter",c:"Data Structures",d:"A probabilistic data structure that tests whether an element is a set member (false positives possible)."},
+  {t:"segment tree",c:"Data Structures",d:"A tree for storing intervals or segments, allowing efficient range queries and updates."},
+  {t:"disjoint set",c:"Data Structures",d:"A data structure tracking elements partitioned into non-overlapping subsets; supports union-find."},
+  // Algorithms
+  {t:"recursion",c:"Algorithms",d:"A method where a function calls itself to solve smaller instances of the same problem."},
+  {t:"dynamic programming",c:"Algorithms",d:"Optimization technique breaking problems into overlapping subproblems, storing solutions to avoid recomputation."},
+  {t:"binary search",c:"Algorithms",d:"Algorithm finding a target in a sorted array by repeatedly halving the search space; O(log n)."},
+  {t:"quicksort",c:"Algorithms",d:"Divide-and-conquer sort that partitions array around a pivot; average O(n log n)."},
+  {t:"mergesort",c:"Algorithms",d:"Stable divide-and-conquer sort that merges sorted halves; guaranteed O(n log n)."},
+  {t:"breadth first search",c:"Algorithms",d:"Graph traversal exploring all neighbors at the current depth before moving deeper; uses a queue."},
+  {t:"depth first search",c:"Algorithms",d:"Graph traversal going as deep as possible along each branch before backtracking; uses a stack."},
+  {t:"Dijkstra",c:"Algorithms",d:"Greedy algorithm finding shortest paths from a source vertex to all others in a weighted graph."},
+  {t:"memoization",c:"Algorithms",d:"Caching the results of expensive function calls to avoid redundant computation."},
+  {t:"backtracking",c:"Algorithms",d:"Algorithmic technique building candidates incrementally, abandoning those that fail constraints."},
+  {t:"greedy algorithm",c:"Algorithms",d:"Makes the locally optimal choice at each step hoping to find a global optimum."},
+  {t:"topological sort",c:"Algorithms",d:"Linear ordering of vertices in a DAG such that for every edge u→v, u appears before v."},
+  {t:"heapsort",c:"Algorithms",d:"In-place comparison sort using a binary heap; O(n log n) worst case."},
+  {t:"big O notation",c:"Algorithms",d:"Mathematical notation describing the upper bound of an algorithm's time or space complexity."},
+  {t:"two pointers",c:"Algorithms",d:"Technique using two indices moving through a data structure to solve problems efficiently."},
+  // Operating Systems
+  {t:"mutex",c:"OS",d:"Mutual exclusion lock ensuring only one thread accesses a critical section at a time."},
+  {t:"deadlock",c:"OS",d:"Situation where two or more processes wait forever for resources held by each other."},
+  {t:"semaphore",c:"OS",d:"Synchronization primitive using a counter to control access to shared resources."},
+  {t:"process",c:"OS",d:"An instance of a running program with its own memory space, resources, and state."},
+  {t:"thread",c:"OS",d:"The smallest unit of CPU execution within a process, sharing the process's memory."},
+  {t:"context switch",c:"OS",d:"OS saving state of current process and loading state of another to allow multitasking."},
+  {t:"virtual memory",c:"OS",d:"Memory management technique giving each process the illusion of having its own large address space."},
+  {t:"paging",c:"OS",d:"Memory management scheme dividing physical memory into fixed-size frames and logical memory into pages."},
+  {t:"scheduler",c:"OS",d:"OS component deciding which process or thread runs on the CPU at any given time."},
+  {t:"race condition",c:"OS",d:"A bug where system behavior depends on the sequence or timing of uncontrolled events."},
+  {t:"kernel",c:"OS",d:"Core of the OS managing hardware resources, process scheduling, and system calls."},
+  {t:"interrupt",c:"OS",d:"A signal to the CPU indicating that an event needs immediate attention, causing a context switch."},
+  {t:"cache coherence",c:"OS",d:"Consistency of shared data stored in multiple local caches in a multiprocessor system."},
+  {t:"memory leak",c:"OS",d:"A bug where a program fails to release memory it no longer needs, causing gradual memory exhaustion."},
+  // Networking
+  {t:"TCP",c:"Networking",d:"Transmission Control Protocol — reliable, connection-oriented protocol ensuring ordered packet delivery."},
+  {t:"UDP",c:"Networking",d:"User Datagram Protocol — fast, connectionless protocol with no delivery guarantees."},
+  {t:"HTTP",c:"Networking",d:"HyperText Transfer Protocol — application-layer protocol for transferring web resources."},
+  {t:"HTTPS",c:"Networking",d:"HTTP secured with TLS/SSL encryption for secure data transmission over the web."},
+  {t:"DNS",c:"Networking",d:"Domain Name System — translates human-readable domain names to IP addresses."},
+  {t:"IP address",c:"Networking",d:"Numerical label identifying a device on a network; IPv4 uses 32-bit, IPv6 uses 128-bit addresses."},
+  {t:"load balancer",c:"Networking",d:"Distributes incoming network traffic across multiple servers to ensure reliability and performance."},
+  {t:"firewall",c:"Networking",d:"Network security system monitoring and filtering incoming/outgoing traffic based on security rules."},
+  {t:"CDN",c:"Networking",d:"Content Delivery Network — geographically distributed servers delivering web content from locations closest to users."},
+  {t:"latency",c:"Networking",d:"Time delay between a request being sent and the response being received."},
+  {t:"bandwidth",c:"Networking",d:"Maximum rate of data transfer across a network connection, usually measured in bits per second."},
+  {t:"subnet",c:"Networking",d:"A logical subdivision of an IP network, grouping devices with the same network prefix."},
+  {t:"proxy",c:"Networking",d:"Intermediary server that forwards requests from clients to other servers, providing caching or filtering."},
+  {t:"WebSocket",c:"Networking",d:"Protocol providing full-duplex communication channels over a single TCP connection."},
+  // OOP
+  {t:"polymorphism",c:"OOP",d:"Ability of objects of different types to be treated as a common type through a shared interface."},
+  {t:"encapsulation",c:"OOP",d:"Bundling data and methods that operate on it into a single unit, hiding internal implementation."},
+  {t:"inheritance",c:"OOP",d:"Mechanism where a class acquires properties and behaviors from a parent class."},
+  {t:"abstraction",c:"OOP",d:"Hiding complex implementation details and showing only essential features to the user."},
+  {t:"interface",c:"OOP",d:"A contract specifying methods a class must implement without defining how they work."},
+  {t:"design pattern",c:"OOP",d:"A reusable solution template to a commonly occurring problem in software design."},
+  {t:"singleton",c:"OOP",d:"Design pattern ensuring a class has only one instance and providing global access to it."},
+  {t:"factory",c:"OOP",d:"Creational pattern where an interface creates objects without specifying their exact classes."},
+  {t:"observer",c:"OOP",d:"Behavioral pattern where objects subscribe to be notified when another object's state changes."},
+  {t:"dependency injection",c:"OOP",d:"Design technique where an object receives its dependencies from external sources rather than creating them."},
+  {t:"SOLID",c:"OOP",d:"Five design principles: Single responsibility, Open-closed, Liskov substitution, Interface segregation, Dependency inversion."},
+  {t:"coupling",c:"OOP",d:"The degree to which one module depends on another; low coupling is preferred for maintainability."},
+  {t:"cohesion",c:"OOP",d:"The degree to which elements within a module belong together; high cohesion is preferred."},
+  {t:"polymorphic dispatch",c:"OOP",d:"Runtime selection of which method implementation to invoke based on the actual object type."},
+  // Web
+  {t:"REST",c:"Web",d:"Representational State Transfer — architectural style for distributed systems using HTTP methods."},
+  {t:"GraphQL",c:"Web",d:"A query language for APIs allowing clients to request exactly the data they need."},
+  {t:"OAuth",c:"Web",d:"Open standard for access delegation, enabling third-party apps to access user data without passwords."},
+  {t:"JWT",c:"Web",d:"JSON Web Token — compact, self-contained token for transmitting information as a JSON object."},
+  {t:"CORS",c:"Web",d:"Cross-Origin Resource Sharing — mechanism allowing or restricting web app resources from different origins."},
+  {t:"cookies",c:"Web",d:"Small pieces of data stored by a browser, sent to the server with each request for session tracking."},
+  {t:"session",c:"Web",d:"A server-side mechanism storing user state across multiple HTTP requests."},
+  {t:"API",c:"Web",d:"Application Programming Interface — a set of protocols allowing communication between software components."},
+  {t:"microservices",c:"Web",d:"Architectural style structuring an application as a collection of small, independently deployable services."},
+  {t:"webhook",c:"Web",d:"HTTP callback triggered when a specified event occurs, pushing data from one service to another."},
+  {t:"SSO",c:"Web",d:"Single Sign-On — authentication scheme allowing users to log in once to access multiple systems."},
+  {t:"caching",c:"Web",d:"Storing copies of frequently accessed data in a faster storage layer to improve performance."},
+  {t:"rate limiting",c:"Web",d:"Controlling how many requests a client can make to an API within a given time window."},
+  {t:"middleware",c:"Web",d:"Software that acts as a bridge between the request/response cycle, processing data before it reaches handlers."},
+  // Database
+  {t:"SQL",c:"Database",d:"Structured Query Language — standard language for managing and querying relational databases."},
+  {t:"NoSQL",c:"Database",d:"Non-relational databases storing data in formats other than relational tables (documents, key-value, graphs)."},
+  {t:"ACID",c:"Database",d:"Atomicity, Consistency, Isolation, Durability — properties guaranteeing reliable database transactions."},
+  {t:"indexing",c:"Database",d:"Creating a data structure to speed up retrieval operations on database tables."},
+  {t:"transaction",c:"Database",d:"A sequence of database operations executed as a single logical unit; either all succeed or all fail."},
+  {t:"normalization",c:"Database",d:"Process of organizing a database to reduce redundancy and improve data integrity."},
+  {t:"sharding",c:"Database",d:"Horizontal database partitioning distributing data across multiple servers for scalability."},
+  {t:"replication",c:"Database",d:"Maintaining copies of data across multiple database servers for availability and fault tolerance."},
+  {t:"join",c:"Database",d:"SQL operation combining rows from two or more tables based on a related column."},
+  {t:"foreign key",c:"Database",d:"A column that references the primary key of another table, enforcing referential integrity."},
+  {t:"primary key",c:"Database",d:"A unique identifier for each record in a database table; cannot be null."},
+  {t:"ORM",c:"Database",d:"Object-Relational Mapper — tool converting data between incompatible type systems (objects and tables)."},
+  {t:"CAP theorem",c:"Database",d:"States a distributed system can only guarantee two of three: Consistency, Availability, Partition tolerance."},
+  {t:"eventual consistency",c:"Database",d:"A consistency model ensuring all replicas converge to the same value given enough time without updates."},
+  // Security
+  {t:"encryption",c:"Security",d:"Process of encoding data so only authorized parties can read it using a key."},
+  {t:"hashing",c:"Security",d:"One-way function mapping input data to a fixed-size digest; used for data integrity and passwords."},
+  {t:"XSS",c:"Security",d:"Cross-Site Scripting — attack injecting malicious scripts into web pages viewed by other users."},
+  {t:"SQL injection",c:"Security",d:"Attack inserting malicious SQL code into queries to manipulate databases."},
+  {t:"CSRF",c:"Security",d:"Cross-Site Request Forgery — attack tricking users into executing unwanted actions on a trusted site."},
+  {t:"TLS",c:"Security",d:"Transport Layer Security — cryptographic protocol providing secure communication over a network."},
+  {t:"authentication",c:"Security",d:"The process of verifying the identity of a user or system."},
+  {t:"authorization",c:"Security",d:"The process of determining what resources or actions an authenticated user is permitted to access."},
+  {t:"zero trust",c:"Security",d:"Security model assuming no user or device is trusted by default, requiring continuous verification."},
+  {t:"penetration testing",c:"Security",d:"Simulated cyberattack on a system to identify vulnerabilities before malicious actors do."},
+  {t:"buffer overflow",c:"Security",d:"Vulnerability where a program writes more data to a buffer than it can hold, overwriting adjacent memory."},
+  {t:"man in the middle",c:"Security",d:"Attack where an adversary secretly intercepts and possibly alters communication between two parties."},
+  {t:"public key",c:"Security",d:"In asymmetric cryptography, the key shared publicly for encryption or verifying digital signatures."},
+  {t:"private key",c:"Security",d:"In asymmetric cryptography, the secret key kept by the owner for decryption or signing."},
+  {t:"salt",c:"Security",d:"Random data added to a password before hashing to prevent rainbow table attacks."},
+  {t:"2FA",c:"Security",d:"Two-Factor Authentication — requires a second form of verification beyond a password."},
+  // Additional
+  {t:"kubernetes",c:"Web",d:"Open-source container orchestration system for automating deployment, scaling, and management."},
+  {t:"docker",c:"Web",d:"Platform for developing, shipping, and running applications in containers."},
+  {t:"CI/CD",c:"Web",d:"Continuous Integration/Continuous Deployment — automated pipelines for testing and deploying code."},
+  {t:"version control",c:"Web",d:"System tracking changes to source code over time; Git is the most widely used."},
+  {t:"compiler",c:"Algorithms",d:"Program translating high-level source code into lower-level machine code or bytecode."},
+  {t:"garbage collection",c:"OS",d:"Automatic memory management reclaiming memory occupied by objects no longer in use."},
+  {t:"monorepo",c:"Web",d:"A single repository containing multiple projects or packages, sharing code and tooling."},
+  {t:"event loop",c:"Web",d:"JavaScript runtime mechanism processing asynchronous callbacks from the event queue."},
+  {t:"promise",c:"Web",d:"An object representing the eventual completion or failure of an asynchronous operation."},
+  {t:"closure",c:"Algorithms",d:"A function that captures variables from its enclosing lexical scope even after that scope has exited."},
+  {t:"concurrency",c:"OS",d:"The ability of a system to handle multiple tasks by interleaving their execution."},
+  {t:"parallelism",c:"OS",d:"Simultaneously executing multiple computations, typically on multiple processor cores."},
+  {t:"idempotent",c:"Web",d:"An operation that produces the same result when applied multiple times as when applied once."},
+  {t:"throughput",c:"Networking",d:"The amount of data successfully transferred over a network in a given time period."},
+  {t:"containerization",c:"Web",d:"Packaging an application with its dependencies into a container for consistent deployment."}
+];
+
+// TTTT deck — 50 cards explained for 8th graders with real-world analogies
+const TTTT_TERMS = [
+  // Data Structures (14)
+  {t:"array",c:"DS",d:"Like seats in a theater — numbered in order so you can jump straight to any seat without walking past others.",keywords:["numbered","order","index","seat","jump","direct","row"]},
+  {t:"linked list",c:"DS",d:"Like a scavenger hunt — each clue tells you where to find the next one. You must follow the chain from the very start.",keywords:["chain","next","follow","node","pointer","clue","sequence"]},
+  {t:"stack",c:"DS",d:"Like a stack of pancakes — always add and remove from the top. The last pancake added is the first one you eat.",keywords:["top","last","first","LIFO","add","remove","pancake"]},
+  {t:"queue",c:"DS",d:"Like a lunch line — first person in line gets served first. Everyone waits their turn in order.",keywords:["line","first","FIFO","order","front","wait","served"]},
+  {t:"binary tree",c:"DS",d:"Like a family tree where each person can have at most two children. It branches left and right down from the top.",keywords:["tree","children","left","right","branch","root","two"]},
+  {t:"hash table",c:"DS",d:"Like a magic locker room — run your name through a formula and it tells you exactly which locker is yours. Super fast to look up.",keywords:["key","value","formula","locker","fast","lookup","hash"]},
+  {t:"heap",c:"DS",d:"Like a priority line — the most important item always rises to the top. A max-heap keeps the biggest value at the front.",keywords:["priority","top","biggest","smallest","max","min","important"]},
+  {t:"graph",c:"DS",d:"Like a map of cities connected by roads. Cities are called nodes and roads are called edges.",keywords:["node","edge","connection","map","city","road","network"]},
+  {t:"trie",c:"DS",d:"Like an autocomplete tree for words — each branch adds one more letter. Spell down the tree letter by letter to find a word.",keywords:["word","letter","prefix","autocomplete","spell","branch","string"]},
+  {t:"deque",c:"DS",d:"Like a bus with doors at both ends — you can get on or off from the front or the back at any time.",keywords:["both","front","back","end","double","insert","remove"]},
+  {t:"binary search tree",c:"DS",d:"A tree where smaller values always go left and bigger values always go right — keeps things sorted so you can find any item fast.",keywords:["left","right","smaller","bigger","sorted","fast","search"]},
+  {t:"bloom filter",c:"DS",d:"Like a club bouncer with a checklist — very space-efficient but occasionally lets a non-member in by mistake.",keywords:["space","false positive","membership","check","efficient","probable","filter"]},
+  {t:"segment tree",c:"DS",d:"Like a bracket chart for number ranges — helps you quickly find the sum or minimum across any stretch of a list.",keywords:["range","sum","minimum","query","interval","bracket","fast"]},
+  {t:"disjoint set",c:"DS",d:"Like sorting students into friend groups — each group has one leader. When two groups merge, one leader takes over both.",keywords:["group","leader","union","find","merge","connected","partition"]},
+  // Algorithms (11)
+  {t:"recursion",c:"Algorithms",d:"Like Russian nesting dolls — the function calls a smaller version of itself until it hits the tiniest doll that answers directly.",keywords:["smaller","itself","call","base","case","nest","function"]},
+  {t:"sorting",c:"Algorithms",d:"Like organizing your bookshelf — arranging a messy list into a specific order, smallest-to-largest or A-to-Z.",keywords:["order","arrange","list","compare","swap","sequence","organize"]},
+  {t:"binary search",c:"Algorithms",d:"Like guessing a number 1-100 by always guessing the middle. Each guess cuts the possibilities in half.",keywords:["middle","half","sorted","guess","split","range","fast"]},
+  {t:"bubble sort",c:"Algorithms",d:"Like pushing big bubbles up to the surface — repeatedly compare neighbors and swap if out of order until the largest values float to the end.",keywords:["bubble","swap","neighbor","compare","largest","end","float"]},
+  {t:"dynamic programming",c:"Algorithms",d:"Like keeping a cheat sheet — solve small sub-problems once, write down the answers, and reuse them to solve bigger problems without repeating work.",keywords:["cheat","subproblem","reuse","store","save","overlap","memo"]},
+  {t:"greedy algorithm",c:"Algorithms",d:"Like always eating the biggest slice of pizza available right now — grab whatever looks locally best at each step, hoping it leads to the best overall result.",keywords:["local","best","step","choice","optimal","now","each"]},
+  {t:"backtracking",c:"Algorithms",d:"Like solving a maze by trial and error — go down a path, and if you hit a dead end, back up and try a different direction.",keywords:["maze","back","undo","try","dead end","branch","explore"]},
+  {t:"depth first search",c:"Algorithms",d:"Like exploring a cave — go as deep as you can down one tunnel before coming back to explore the next branch.",keywords:["deep","tunnel","branch","stack","explore","back","recursive"]},
+  {t:"breadth first search",c:"Algorithms",d:"Like ripples spreading in a pond — explore everything one step away first, then two steps, then three, layer by layer.",keywords:["ripple","layer","level","queue","neighbor","wide","distance"]},
+  {t:"big O notation",c:"Algorithms",d:"A report card for algorithms — O(n) means work grows with n, O(n²) means it grows much faster. Lower is better.",keywords:["report","complexity","grow","time","space","n","worst"]},
+  {t:"algorithm",c:"Algorithms",d:"A step-by-step recipe for solving a problem — just like a cooking recipe tells you exactly what to do in what order.",keywords:["step","recipe","solve","instructions","order","problem","procedure"]},
+  // Programming concepts (9)
+  {t:"variable",c:"Programming",d:"Like a labeled box — stores one piece of information with a name so your program can use or change it later.",keywords:["box","store","name","value","hold","labeled","change"]},
+  {t:"loop",c:"Programming",d:"Like running laps around a track — repeat the same block of code over and over until a condition says stop.",keywords:["repeat","condition","over","block","iterate","while","for"]},
+  {t:"function",c:"Programming",d:"Like a reusable machine — give it some input, it does a specific job, and gives back an output. Call it any time you need it.",keywords:["reuse","input","output","call","return","block","machine"]},
+  {t:"conditional",c:"Programming",d:"Like an if-then decision — 'if it's raining, take an umbrella; otherwise, wear sunglasses.' Controls which code runs.",keywords:["if","else","decision","condition","branch","true","false"]},
+  {t:"class",c:"Programming",d:"A blueprint for creating objects — like a cookie cutter that shapes all your cookies the same way. Describes data and behavior.",keywords:["blueprint","object","template","cookie cutter","describe","create","mold"]},
+  {t:"object",c:"Programming",d:"Like a filled-in form from a blueprint — a specific thing with its own values, like 'myDog' which is a Dog with name=Rex and age=3.",keywords:["instance","blueprint","class","specific","values","properties","own"]},
+  {t:"inheritance",c:"Programming",d:"Like passing down family traits — a child class automatically gets all properties and abilities of its parent class, plus adds its own extras.",keywords:["parent","child","trait","extend","pass down","reuse","subclass"]},
+  {t:"boolean",c:"Programming",d:"The simplest value in computing — only two choices: true or false, yes or no, 1 or 0.",keywords:["true","false","binary","yes","no","two","simple"]},
+  {t:"integer",c:"Programming",d:"A whole number with no decimal point — like 5, -3, or 100. Computers store it differently than numbers with decimals.",keywords:["whole","number","decimal","positive","negative","type","int"]},
+  // Computer basics (8)
+  {t:"CPU",c:"Hardware",d:"The brain of the computer — reads and carries out instructions billions of times per second.",keywords:["brain","process","instruction","execute","core","speed","compute"]},
+  {t:"RAM",c:"Hardware",d:"Your computer's short-term memory — holds everything programs are actively using right now. Forgets everything when power off.",keywords:["short-term","memory","active","temporary","volatile","hold","fast"]},
+  {t:"operating system",c:"Software",d:"The manager software that runs everything else — gives apps access to hardware, manages files, and stops programs from crashing into each other.",keywords:["manager","hardware","file","process","app","manage","kernel"]},
+  {t:"compiler",c:"Software",d:"Like a translator — converts code written in a human-friendly language into binary instructions the CPU can actually run.",keywords:["translate","binary","source","code","machine","language","convert"]},
+  {t:"bug",c:"Software",d:"An error or mistake in code that makes it behave unexpectedly. Named after a real moth that got stuck in an early computer.",keywords:["error","mistake","unexpected","wrong","code","fix","problem"]},
+  {t:"version control",c:"Software",d:"Like a save history for your code — tracks every change, who made it, and lets you roll back to any past version at any time.",keywords:["history","save","change","track","rollback","git","commit"]},
+  {t:"debugging",c:"Software",d:"The detective work of finding and fixing bugs — reproducing the problem, reading error messages, and tracing exactly where things go wrong.",keywords:["find","fix","trace","error","problem","detective","test"]},
+  {t:"source code",c:"Software",d:"The actual text instructions a programmer writes — human-readable before being compiled or interpreted into something the machine runs.",keywords:["text","human","readable","write","program","instructions","code"]},
+  // General CS (8)
+  {t:"API",c:"General",d:"Like a menu at a restaurant — lists what services are available and tells you exactly how to order them, without showing you the kitchen.",keywords:["menu","interface","request","response","service","endpoint","connect"]},
+  {t:"database",c:"General",d:"Like a giant organized filing cabinet — stores large amounts of data permanently and lets you search, add, or update records quickly.",keywords:["store","data","search","record","query","table","permanent"]},
+  {t:"encryption",c:"General",d:"Like a secret code — scrambles data so only someone with the right key can read it. Protects passwords and messages online.",keywords:["secret","code","key","scramble","protect","secure","decode"]},
+  {t:"internet",c:"General",d:"A massive worldwide network connecting billions of devices that communicate using shared rules called protocols.",keywords:["network","worldwide","connect","device","protocol","global","web"]},
+  {t:"server",c:"General",d:"A computer that serves data to other computers — always on, waiting for requests, and sending back responses like a waiter at a restaurant.",keywords:["serve","request","response","host","always on","waiter","client"]},
+  {t:"protocol",c:"General",d:"A set of rules both sides agree to follow when communicating — like how a phone call has rules: say hello, take turns, say goodbye.",keywords:["rules","agree","communication","standard","format","exchange","both"]},
+  {t:"bandwidth",c:"General",d:"How wide the road is for data — high bandwidth means lots of data can travel at once, like a 10-lane highway vs a 1-lane road.",keywords:["width","road","data","speed","lane","capacity","transfer"]},
+  {t:"cache",c:"General",d:"A small super-fast storage spot that keeps copies of data you use a lot — so your computer doesn't need to fetch it from far away every time.",keywords:["fast","copy","nearby","reuse","store","temporary","quick"]},
+];
+
+const CATEGORIES = [...new Set(TERMS.map(t=>t.c))];
+const LS = 'typer63_';
+
+// Deck & mode state
+let currentDeck = 'cs';
+let gameMode = 'speed';
+let knowWaiting = false;
+let masteryStreak = 0;
+let kBestStreak = 0;
+
+function activeDeck(){
+  if(currentDeck==='tttt') return TTTT_TERMS;
+  if(currentDeck==='all') return [...TERMS, ...TTTT_TERMS];
+  return TERMS;
+}
+
+function selectDeck(id, btn){
+  currentDeck = id;
+  document.querySelectorAll('.deck-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function selectMode(mode, btn){
+  gameMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function initDeckCounts(){
+  document.getElementById('csCount').textContent = TERMS.length;
+  document.getElementById('ttttCount').textContent = TTTT_TERMS.length;
+  document.getElementById('allCount').textContent = TERMS.length + TTTT_TERMS.length;
+}
+
+function extractKeywords(def){
+  const stops = new Set(['their','there','where','which','other','about','these','those','being','using','after','before','every','often','given','first','second','third','while','since','makes','takes','gives','provides','allows','ensures','requires']);
+  return def.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w=>w.length>4&&!stops.has(w)).slice(0,6);
+}
+
+function getKeywords(term){ return term.keywords || extractKeywords(term.d); }
+
+// Knowledge Mode — mastery tracking
+function getMastery(){ return JSON.parse(localStorage.getItem(LS+'mastery')||'{}'); }
+function saveMastery(m){ localStorage.setItem(LS+'mastery',JSON.stringify(m)); }
+function getKStreak(){ return parseInt(localStorage.getItem(LS+'kStreak')||'0'); }
+function saveKStreak(n){ localStorage.setItem(LS+'kStreak',String(n)); }
+
+function submitKnowledge(){
+  if(knowWaiting) return;
+  const answer = document.getElementById('knowInput').value.toLowerCase();
+  const kws = getKeywords(currentTerm);
+  const matched = kws.filter(k=>answer.includes(k));
+  const pct = kws.length ? Math.round(matched.length/kws.length*100) : 50;
+  const correct = pct >= 50;
+
+  if(correct){
+    correctTerms++; currentStreak++;
+    if(currentStreak>bestStreak) bestStreak=currentStreak;
+  } else {
+    incorrectAttempts++; currentStreak=0;
+    const missed=getMissedLocal();
+    missed[currentTerm.t]=(missed[currentTerm.t]||0)+1;
+    missedMap=missed;
+  }
+  updateStats();
+
+  const scoreEl = document.getElementById('knowScore');
+  const missing = kws.filter(k=>!answer.includes(k));
+  if(correct){
+    scoreEl.textContent = `✓ ${pct}% match! Key ideas: ${matched.join(', ')}`;
+    scoreEl.className = 'know-score ok';
+  } else if(pct>=25){
+    scoreEl.textContent = `Partial ${pct}% — missed: ${missing.slice(0,3).join(', ')}`;
+    scoreEl.className = 'know-score partial';
+  } else {
+    scoreEl.textContent = `Key concepts missed: ${missing.slice(0,3).join(', ')}`;
+    scoreEl.className = 'know-score err';
+  }
+
+  // Show model answer
+  document.getElementById('knowModelText').textContent = currentTerm.d;
+  document.getElementById('knowModelAnswer').classList.remove('hidden');
+
+  // Hide submit, show mastery buttons
+  document.getElementById('knowSubmitBtn').classList.add('hidden');
+  document.getElementById('knowMasteryBtns').classList.remove('hidden');
+  document.getElementById('knowInput').disabled = true;
+  knowWaiting = true;
+}
+
+function markMastery(gotIt){
+  const mastery = getMastery();
+  if(!mastery[currentTerm.t]) mastery[currentTerm.t] = {m:0,r:0};
+  if(gotIt){
+    mastery[currentTerm.t].m++;
+    masteryStreak++;
+    if(masteryStreak>kBestStreak) kBestStreak=masteryStreak;
+    const best = getKStreak();
+    if(masteryStreak > best) saveKStreak(masteryStreak);
+  } else {
+    mastery[currentTerm.t].r++;
+    masteryStreak=0;
+  }
+  saveMastery(mastery);
+  nextKnowledgeTerm();
+}
+
+function nextKnowledgeTerm(){
+  knowWaiting = false;
+  document.getElementById('knowInput').value = '';
+  document.getElementById('knowInput').disabled = false;
+  document.getElementById('knowScore').textContent = '';
+  document.getElementById('knowModelAnswer').classList.add('hidden');
+  document.getElementById('knowMasteryBtns').classList.add('hidden');
+  document.getElementById('knowSubmitBtn').classList.remove('hidden');
+  nextTerm();
+  document.getElementById('knowInput').focus();
+}
+
+// Game state
+let gameTimer = null;
+let timeLeft = 60;
+let currentTerm = null;
+let typedChars = 0;
+let correctTerms = 0;
+let incorrectAttempts = 0;
+let currentStreak = 0;
+let bestStreak = 0;
+let termStartTime = null;
+let usedTerms = [];
+let missedMap = {};
+
+function getStats(){return JSON.parse(localStorage.getItem(LS+'stats')||'{}')}
+function saveStats(s){localStorage.setItem(LS+'stats',JSON.stringify(s))}
+function getLeaderboard(){return JSON.parse(localStorage.getItem(LS+'lb')||'[]')}
+function saveLeaderboard(lb){localStorage.setItem(LS+'lb',JSON.stringify(lb))}
+function getMissed(){return JSON.parse(localStorage.getItem(LS+'missed')||'{}')}
+function saveMissed(m){localStorage.setItem(LS+'missed',JSON.stringify(m))}
+
+function pickTerm(){
+  const deck = activeDeck();
+  let pool = deck;
+  if(currentStreak>=10) pool = deck.filter(t=>t.t.includes(' ')||t.t.length>10);
+  else if(currentStreak>=5) pool = deck.filter(t=>t.t.length>=6);
+  if(!pool.length) pool = deck;
+  const available = pool.filter(t=>!usedTerms.slice(-20).includes(t.t));
+  return available[Math.floor(Math.random()*available.length)]||pool[Math.floor(Math.random()*pool.length)];
+}
+
+function startGame(){
+  typedChars=0; correctTerms=0; incorrectAttempts=0;
+  currentStreak=0; bestStreak=0; timeLeft=60; usedTerms=[]; missedMap={};
+  knowWaiting=false; masteryStreak=0; kBestStreak=0;
+  document.getElementById('gameReady').classList.add('hidden');
+  document.getElementById('gameOver').classList.add('hidden');
+  document.getElementById('gameActive').classList.remove('hidden');
+  const isKnow = gameMode==='knowledge';
+  document.getElementById('typeArea').classList.toggle('hidden', isKnow);
+  document.getElementById('knowArea').classList.toggle('hidden', !isKnow);
+  document.getElementById('knowInput').value='';
+  document.getElementById('knowInput').disabled=false;
+  document.getElementById('knowScore').textContent='';
+  document.getElementById('knowSubmitBtn').classList.remove('hidden');
+  document.getElementById('knowModelAnswer').classList.add('hidden');
+  document.getElementById('knowMasteryBtns').classList.add('hidden');
+  updateStats();
+  nextTerm();
+  clearInterval(gameTimer);
+  gameTimer=setInterval(tick,1000);
+  if(isKnow) document.getElementById('knowInput').focus();
+  else document.getElementById('typeInput').focus();
+}
+
+function tick(){
+  timeLeft--;
+  document.getElementById('timerVal').textContent=timeLeft;
+  document.getElementById('timerBar').style.width=(timeLeft/60*100)+'%';
+  if(timeLeft<=0){clearInterval(gameTimer);endGame();}
+}
+
+function nextTerm(){
+  currentTerm=pickTerm();
+  usedTerms.push(currentTerm.t);
+  document.getElementById('termDisplay').textContent=currentTerm.t;
+  document.getElementById('termCategory').textContent=currentTerm.c;
+  document.getElementById('typeInput').value='';
+  document.getElementById('typeInput').className='';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  termStartTime=Date.now();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('typeInput').addEventListener('input',onType);
+  initDeckCounts();
+});
+
+function onType(e){
+  if(gameMode!=='speed') return;
+  const val=e.target.value.trim().toLowerCase();
+  const target=currentTerm.t.toLowerCase();
+  if(val===target){
+    correctTerms++; currentStreak++;
+    if(currentStreak>bestStreak) bestStreak=currentStreak;
+    const chars=target.length+1; typedChars+=chars;
+    e.target.classList.add('correct');
+    showFeedback('✓ Correct! +1','ok');
+    updateStats();
+    setTimeout(nextTerm,300);
+  } else if(target.startsWith(val)){
+    e.target.classList.remove('wrong'); e.target.classList.remove('correct');
+  } else {
+    e.target.classList.add('wrong');
+  }
+}
+
+document.addEventListener('keydown',function(e){
+  if(document.getElementById('gameActive').classList.contains('hidden')) return;
+  if(e.key==='Enter'){
+    if(gameMode==='knowledge'){
+      e.preventDefault();
+      if(knowWaiting) return;
+      submitKnowledge();
+      return;
+    }
+    const val=document.getElementById('typeInput').value.trim().toLowerCase();
+    if(val!==currentTerm.t.toLowerCase()){
+      incorrectAttempts++;
+      const missed=getMissedLocal();
+      missed[currentTerm.t]=(missed[currentTerm.t]||0)+1;
+      missedMap=missed; currentStreak=0;
+      document.getElementById('typeInput').classList.add('wrong');
+      showFeedback('✗ Try again or press Tab to skip','err');
+      updateStats();
+    }
+  }
+  if(e.key==='Tab'){
+    e.preventDefault();
+    if(!document.getElementById('gameActive').classList.contains('hidden')){
+      if(gameMode==='knowledge'){
+        const missed=getMissedLocal();
+        missed[currentTerm.t]=(missed[currentTerm.t]||0)+1;
+        missedMap=missed;
+        incorrectAttempts++; currentStreak=0; masteryStreak=0;
+        updateStats();
+        // Skip: show skipped message then advance
+        document.getElementById('knowInput').value='';
+        document.getElementById('knowInput').disabled=false;
+        document.getElementById('knowScore').textContent='Skipped: '+currentTerm.t;
+        document.getElementById('knowScore').className='know-score err';
+        document.getElementById('knowModelAnswer').classList.add('hidden');
+        document.getElementById('knowMasteryBtns').classList.add('hidden');
+        document.getElementById('knowSubmitBtn').classList.remove('hidden');
+        knowWaiting=false;
+        setTimeout(()=>{document.getElementById('knowScore').textContent='';nextTerm();document.getElementById('knowInput').focus();},700);
+        return;
+      }
+      const missed=getMissedLocal();
+      missed[currentTerm.t]=(missed[currentTerm.t]||0)+1;
+      missedMap=missed; incorrectAttempts++; currentStreak=0;
+      showFeedback('Skipped: '+currentTerm.t,'err');
+      updateStats();
+      setTimeout(nextTerm,400);
+    }
+  }
+});
+
+function getMissedLocal(){return Object.assign({},missedMap);}
+
+function showFeedback(msg,cls){
+  const el=document.getElementById('feedback');
+  el.textContent=msg; el.className='feedback '+cls;
+}
+
+function updateStats(){
+  const total=correctTerms+incorrectAttempts;
+  const acc=total===0?100:Math.round(correctTerms/total*100);
+  const elapsed=Math.max((60-timeLeft),1);
+  const wpm=Math.round(typedChars/5/(elapsed/60));
+  document.getElementById('wpmVal').textContent=wpm;
+  document.getElementById('accVal').textContent=acc+'%';
+  document.getElementById('streakVal').textContent=currentStreak;
+  document.getElementById('correctVal').textContent=correctTerms;
+}
+
+function endGame(){
+  clearInterval(gameTimer);
+  document.getElementById('gameActive').classList.add('hidden');
+  const total=correctTerms+incorrectAttempts;
+  const acc=total===0?100:Math.round(correctTerms/total*100);
+  const trueWpm=Math.round((typedChars/5)/((60-timeLeft)/60));
+
+  document.getElementById('finalWpm').textContent=trueWpm||0;
+  document.getElementById('finalAcc').textContent=acc+'%';
+  document.getElementById('finalCorrect').textContent=correctTerms;
+  document.getElementById('finalBest').textContent=bestStreak;
+
+  const lb=getLeaderboard();
+  lb.push({wpm:trueWpm,acc,correct:correctTerms,streak:bestStreak,date:new Date().toLocaleDateString()});
+  lb.sort((a,b)=>b.wpm-a.wpm); lb.splice(5);
+  const isNewBest=lb.length===1||(lb[0].wpm===trueWpm&&lb.filter(x=>x.wpm===trueWpm).length===1);
+  document.getElementById('newBestMsg').textContent=isNewBest&&lb.length>0&&lb[0].wpm===trueWpm?'New Personal Best!':'';
+  saveLeaderboard(lb);
+
+  const s=getStats();
+  s.games=(s.games||0)+1;
+  s.totalWpm=(s.totalWpm||0)+trueWpm;
+  s.totalAcc=(s.totalAcc||0)+acc;
+  s.bestStreak=Math.max(s.bestStreak||0,bestStreak);
+  saveStats(s);
+
+  const gm=getMissed();
+  Object.keys(missedMap).forEach(k=>{gm[k]=(gm[k]||0)+missedMap[k];});
+  saveMissed(gm);
+
+  document.getElementById('gameOver').classList.remove('hidden');
+}
+
+function showReady(){
+  document.getElementById('gameActive').classList.add('hidden');
+  document.getElementById('gameOver').classList.add('hidden');
+  document.getElementById('gameReady').classList.remove('hidden');
+}
+
+// TERMS TAB
+let activeFilters=new Set();
+function renderTerms(){
+  const q=document.getElementById('termSearch').value.toLowerCase();
+  let filtered=TERMS.filter(t=>
+    (activeFilters.size===0||activeFilters.has(t.c))&&
+    (t.t.toLowerCase().includes(q)||t.d.toLowerCase().includes(q))
+  );
+  document.getElementById('termsCount').textContent=filtered.length+' terms';
+  const grid=document.getElementById('termsGrid');
+  grid.innerHTML=filtered.map(t=>`
+    <div class="term-item">
+      <div class="name">${t.t}</div>
+      <div class="cat">${t.c}</div>
+      <div class="def">${t.d}</div>
+    </div>
+  `).join('');
+}
+
+function initTermsTab(){
+  const row=document.getElementById('catFilters');
+  row.innerHTML=CATEGORIES.map(c=>`<button class="filter-btn" onclick="toggleFilter('${c}',this)">${c}</button>`).join('');
+  renderTerms();
+}
+
+function toggleFilter(cat,btn){
+  if(activeFilters.has(cat)){activeFilters.delete(cat);btn.classList.remove('on');}
+  else{activeFilters.add(cat);btn.classList.add('on');}
+  renderTerms();
+}
+
+// LEADERBOARD
+function renderLeaderboard(){
+  const lb=getLeaderboard();
+  const el=document.getElementById('lbContent');
+  if(!lb.length){el.innerHTML='<div class="lb-empty">No scores yet. Play a round!</div>';return;}
+  const medals=['🥇','🥈','🥉','4','5'];
+  const rowClass=['gold','silver','bronze','',''];
+  el.innerHTML=`<table class="lb-table">
+    <thead><tr><th>Rank</th><th>WPM</th><th>Accuracy</th><th>Correct</th><th>Best Streak</th><th>Date</th></tr></thead>
+    <tbody>
+    ${lb.map((r,i)=>`<tr class="${rowClass[i]}">
+      <td><span class="rank-medal">${medals[i]}</span></td>
+      <td><span class="wpm-val">${r.wpm}</span></td>
+      <td><span class="acc-val">${r.acc}%</span></td>
+      <td>${r.correct}</td>
+      <td>${r.streak}</td>
+      <td style="color:#94a3b8;font-size:.82rem">${r.date}</td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+// STATS
+function renderStats(){
+  // Speed mode stats
+  const s=getStats();
+  const games=s.games||0;
+  const avgWpm=games?Math.round(s.totalWpm/games):0;
+  const avgAcc=games?Math.round(s.totalAcc/games):0;
+  const bStreak=s.bestStreak||0;
+
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stats-card"><div class="sv">${games}</div><div class="sk">Total Games</div></div>
+    <div class="stats-card"><div class="sv">${avgWpm}</div><div class="sk">Avg WPM</div></div>
+    <div class="stats-card"><div class="sv">${avgAcc}%</div><div class="sk">Avg Accuracy</div></div>
+    <div class="stats-card"><div class="sv">${bStreak}</div><div class="sk">Best Streak</div></div>
+  `;
+
+  const missed=getMissed();
+  const sortedMissed=Object.entries(missed).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const ml=document.getElementById('missedList');
+  if(!sortedMissed.length){
+    ml.innerHTML='<div class="no-data">No missed terms yet. Start playing!</div>';
+  } else {
+    ml.innerHTML='<div class="missed-list">'+sortedMissed.map(([w,c])=>
+      `<div class="missed-item"><span class="mw">${w}</span><span class="mc">missed ${c}x</span></div>`
+    ).join('')+'</div>';
+  }
+
+  // Knowledge Mode stats
+  const mastery = getMastery();
+  const allCount = TERMS.length + TTTT_TERMS.length;
+  const masteredKeys = Object.keys(mastery).filter(k=>mastery[k].m > mastery[k].r);
+  const masteredPct = allCount > 0 ? Math.round(masteredKeys.length/allCount*100) : 0;
+  document.getElementById('masteredPctTxt').textContent = masteredPct+'%';
+  document.getElementById('masteryBarFill').style.width = masteredPct+'%';
+  document.getElementById('masteredCountTxt').textContent = `${masteredKeys.length} / ${allCount} terms mastered`;
+
+  const kStreak = getKStreak();
+  document.getElementById('kstreakVal').textContent = kStreak;
+
+  const weakest = Object.entries(mastery)
+    .sort((a,b)=>b[1].r-a[1].r)
+    .filter(([,v])=>v.r>0)
+    .slice(0,5);
+  const wl = document.getElementById('weakestList');
+  if(!weakest.length){
+    wl.innerHTML='<div class="no-data">No review data yet. Play Knowledge Mode!</div>';
+  } else {
+    wl.innerHTML=weakest.map(([term,v])=>
+      `<div class="weakest-item"><span class="wt">${term}</span><span class="wr">needs review ${v.r}x</span></div>`
+    ).join('');
+  }
+}
+
+// TAB SWITCHING
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const names=['play','terms','leaderboard','stats'];
+    t.classList.toggle('active',names[i]===name);
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='terms'){initTermsTab();}
+  if(name==='leaderboard'){renderLeaderboard();}
+  if(name==='stats'){renderStats();}
+}
+
+// Init
+initDeckCounts();
+initTermsTab();
+</script>
+</body>
+</html>
