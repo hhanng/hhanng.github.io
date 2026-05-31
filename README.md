@@ -14,7 +14,7 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-██████████████████████████████████████████████████  123 / 100 🏆
+██████████████████████████████████████████████████  108 / 100 🏆
 ```
 
 **100 / 100 complete — Challenge done!** 🎉 — progress bar on the live site updates automatically 🎉
