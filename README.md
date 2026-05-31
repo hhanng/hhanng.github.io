@@ -14,7 +14,7 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 > *building one AI agent a day until i hit 100. wish me luck lol*
 
 ```
-██████████████████████████████████████████████████  117 / 100 🏆
+██████████████████████████████████████████████████  123 / 100 🏆
 ```
 
 **100 / 100 complete — Challenge done!** 🎉 — progress bar on the live site updates automatically 🎉
@@ -166,15 +166,21 @@ for founders, indie hackers, and anyone shipping something
 | [#102](https://hhanng.github.io/agent-102.html) | Vietnamese Teen School Navigator | 8-tab school guide in EN/VI for Vietnamese families — Registration, Classroom, Counselor/IEP, Grades + GPA calculator, AP & Honors, Clubs, College Prep 30-month timeline, Talking to Parents; 50-term glossary, flip cards, progress checklists |
 | [#103](https://hhanng.github.io/agent-103.html) | Full-Stack Project Scaffold Generator | 3-step wizard, 6 tech-stack presets (Next.js, Vite, T3, Django, NestJS, SvelteKit), generates file tree, package.json, .env.example, README.md, first 5 git commits, 30-day build plan; dark/light toggle |
 | [#104](https://hhanng.github.io/agent-104.html) | Mom's Everyday English Survival Kit | 10 life-situation tabs (Grocery, Doctor, Bank, DMV, Workplace, Phone, Landlord, School, Emergency, Small Talk) with EN/VI flip cards, full conversation scripts, text-to-speech audio, fill-in-blank quizzes, personal phrasebook |
+| [#105](./agent-105-cs-interview-question-bank/) | CS Interview Question Bank | 200 CS interview questions across DSA, System Design, and Behavioral with full answers and difficulty ratings |
+| [#106](./agent-106-ai-english-writing-coach/) | AI English Writing Coach | Essay feedback tool, grammar checker, vocabulary upgrader, and writing style analyzer for ESL learners |
+| [#107](./agent-107-startup-idea-validator/) | Startup Idea Validator | Validate startup ideas with market size estimation, competitor analysis, SWOT breakdown, and investor pitch scoring |
+| [#108](./agent-108-flashcard-srs-system/) | Flashcard System with SRS | Spaced repetition flashcard system with a FAANG DSA deck (80 cards) and ESL vocabulary deck (60 cards) |
+| [#109](./agent-109-vietnamese-american-family-planner/) | Vietnamese-American Family Planner | Family coordination tool for Vietnamese-American households — bilingual chores, shared budgets, and event calendar |
+| [#110](./agent-110-faang-behavioral-story-bank/) | FAANG Behavioral Story Bank | STAR story builder for 50 behavioral questions with company-specific customization for Google, Meta, Amazon, Apple, Netflix |
 | [#111](./agent-111-data-structures-visualizer/) | Data Structures Visualizer Suite | 8 animated visualizers (Array, Linked List, Stack, Queue, BST, Heap, Hash Table, Trie) with step-mode, speed control, Interview Notes, and Python code panels |
 | [#112](./agent-112-sat-act-prep-suite/) | SAT & ACT Full Prep Suite | 500 vocab words, 4 study modes, 20 reading passages, 100 math problems, 45-min timed practice test, and live progress dashboard |
 | [#113](./agent-113-bilingual-phrasebook/) | Vietnamese ↔ English Bilingual Phrasebook | 500+ phrases, 10 life categories, EN/VI audio playback, browse/flashcard/quiz/starred modes, fuzzy-match quiz |
 | [#114](./agent-114-pm-interview-simulator/) | FAANG Mock PM Interview Simulator | 120 questions, 6 interview types, company tracks, 5-dimension scoring rubric, model answers, session history |
 | [#115](./agent-115-immigration-life-guide/) | US Immigration & Life Guide EN/VI | visa types, green card, naturalization with all 100 USCIS civics Q&As, rights, emergency scripts EN/VI |
-| [#116](./agent-116-faang-patterns-trainer/) | Advanced FAANG Patterns Trainer | 20 coding patterns, 100 problems, animated diagrams, complexity analysis, spaced-repetition drill |
-| [#117](./agent-117-bilingual-math-tutor/) | Bilingual Math Tutor EN/VI | 6 math subjects, 170 problems with step-by-step EN/VI solutions, visual explanations, progress tracking |
-| [#118](./agent-118-networking-referral-tracker/) | FAANG Networking & Referral Tracker | contact tracker, outreach sequences, follow-up reminders, referral pipeline, network map visualization |
-| [#119](./agent-119-viet-teen-english-kit/) | Vietnamese Teen English Survival Kit | 10 real-life modules, 200+ bilingual scenarios, audio, quizzes, and cultural tips for Vietnamese teens |
+| [#116](./agent-116-advanced-patterns-trainer/) | Advanced FAANG Patterns Trainer | 20 coding patterns, 100 problems, animated diagrams, pattern identifier quiz, timed challenges |
+| [#117](./agent-117-bilingual-math-tutor/) | Bilingual Math Tutor EN/VI | 6 math subjects, 170 problems with step-by-step EN/VI solutions, visual explanations, interactive unit circle |
+| [#118](./agent-118-networking-referral-tracker/) | FAANG Networking & Referral Tracker | contact tracker, outreach sequences, referral pipeline, coffee chat prep, and network map visualization |
+| [#119](./agent-119-teen-english-survival-kit/) | Vietnamese Teen English Survival Kit | 10 modules, 200+ bilingual EN/VI scenarios, social survival guide for Vietnamese teens in US high school |
 | [#120](./agent-120-system-design-library/) | System Design Deep Dive Library | 30 systems with animated architecture diagrams, component breakdowns, trade-off analysis, interview guides |
 
 &nbsp;
@@ -230,4 +236,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-30 · 120 agents built · latest: #120 System Design Deep Dive Library: https://hhanng.github.io/agent-120-system-design-library/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-05-31 · 120 agents built · latest: #120 System Design Deep Dive Library: https://hhanng.github.io/agent-120-system-design-library/</sub>
