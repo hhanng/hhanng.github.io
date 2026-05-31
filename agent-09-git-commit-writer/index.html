@@ -1,594 +1,732 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dev Workflow Hub — Agent #09</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0d1117;--surface:#161b22;--card:#21262d;--border:#30363d;
-  --text:#e6edf3;--sub:#8b949e;--amber:#e3b341;--green:#3fb950;
-  --blue:#58a6ff;--red:#f85149;--purple:#bc8cff;
-  --mono:'Fira Code','Cascadia Code',Consolas,monospace
-}
-body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-header h1{font-size:1.05rem;font-weight:700;color:var(--amber)}
-header h1 span{color:var(--sub);font-weight:400;font-size:.82rem;margin-left:6px}
-.api-row{display:flex;align-items:center;gap:8px;margin-left:auto}
-.api-row label{font-size:.75rem;color:var(--sub)}
-.api-row input{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:.78rem;font-family:var(--mono);width:260px;outline:none}
-.api-row input:focus{border-color:var(--amber)}
-.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;gap:4px}
-.tab{padding:11px 18px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--sub);border-bottom:2px solid transparent;transition:.15s;white-space:nowrap}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--amber);border-bottom-color:var(--amber)}
-.page{display:none;padding:24px 20px;max-width:960px;margin:0 auto}
-.page.active{display:block}
-label.lbl{display:block;font-size:.78rem;font-weight:600;color:var(--sub);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
-select,input[type=text],input[type=date]{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:.88rem;outline:none;width:100%;transition:.15s}
-select:focus,input:focus{border-color:var(--blue)}
-textarea{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:.84rem;line-height:1.6;resize:vertical;outline:none;width:100%;transition:.15s}
-textarea:focus{border-color:var(--blue)}
-.btn{padding:9px 20px;border-radius:7px;border:none;cursor:pointer;font-size:.85rem;font-weight:700;transition:.15s}
-.btn-amber{background:#d97706;color:#fff}
-.btn-amber:hover{background:#b45309}
-.btn-blue{background:#1f6feb;color:#fff}
-.btn-blue:hover{background:#1158cc}
-.btn-sm{padding:5px 12px;font-size:.75rem;border-radius:5px;background:var(--card);color:var(--sub);border:1px solid var(--border);cursor:pointer}
-.btn-sm:hover{border-color:var(--blue);color:var(--blue)}
-.row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
-.col{flex:1;min-width:200px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px}
-.card-title{font-size:.82rem;font-weight:700;color:var(--amber);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.sec-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--sub);margin-bottom:8px}
-/* commit option cards */
-.option-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
-.option-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--sub);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
-.option-text{font-family:var(--mono);font-size:.92rem;color:var(--text);margin-bottom:8px;word-break:break-all}
-.char-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin-bottom:8px}
-.char-bar-fill{height:100%;border-radius:2px;transition:.3s}
-.char-count{font-size:.72rem;color:var(--sub)}
-.option-body{font-family:var(--mono);font-size:.82rem;color:var(--sub);margin-top:6px;line-height:1.5;white-space:pre-wrap}
-/* collapsible guide */
-.guide-toggle{cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:.85rem;font-weight:600;color:var(--sub);user-select:none;margin-top:4px}
-.guide-toggle:hover{color:var(--text)}
-.guide-body{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:14px;display:none}
-.guide-body.open{display:block}
-.guide-row{display:flex;gap:10px;margin-bottom:8px;font-size:.83rem}
-.guide-type{font-family:var(--mono);color:var(--amber);min-width:90px;font-weight:700}
-/* sprint output */
-.sprint-out{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;font-size:.88rem;line-height:1.8;white-space:pre-wrap;min-height:80px;color:var(--text)}
-.wc-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.72rem;font-weight:600;background:var(--surface);color:var(--sub);border:1px solid var(--border);margin-top:6px}
-/* history */
-.hist-list{display:flex;flex-direction:column;gap:6px}
-.hist-item{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:.15s}
-.hist-item:hover{border-color:var(--amber)}
-.hist-tag{font-size:.7rem;padding:1px 6px;border-radius:4px;background:var(--surface);color:var(--sub);flex-shrink:0}
-.hist-preview{font-size:.8rem;color:var(--sub);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.hist-time{font-size:.7rem;color:#484f58;flex-shrink:0}
-.pr-out{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:var(--mono);font-size:.82rem;line-height:1.7;white-space:pre-wrap;word-break:break-word}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.toggle-row{display:flex;align-items:center;gap:10px}
-.toggle-switch{position:relative;width:38px;height:21px;flex-shrink:0}
-.toggle-switch input{display:none}
-.t-slider{position:absolute;inset:0;background:var(--card);border:1px solid var(--border);border-radius:11px;cursor:pointer;transition:.2s}
-.t-slider::after{content:'';position:absolute;width:15px;height:15px;border-radius:50%;background:#aaa;top:2px;left:2px;transition:.2s}
-input:checked+.t-slider{background:var(--green);border-color:var(--green)}
-input:checked+.t-slider::after{transform:translateX(17px);background:#fff}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dev Workflow Suite — Commits · PRs · Changelog · Branches</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f0f0f; --card: #1a1a1a; --card2: #222; --border: #2e2e2e;
+      --accent: #f97316; --accent-dim: rgba(249,115,22,.12); --accent-border: rgba(249,115,22,.4);
+      --blue: #60a5fa; --blue-dim: rgba(96,165,250,.12);
+      --green: #4ade80; --green-dim: rgba(74,222,128,.12);
+      --purple: #a78bfa; --purple-dim: rgba(167,139,250,.12);
+      --red: #f87171; --text: #e5e5e5; --muted: #777; --radius: 10px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height: 100vh; padding: 20px 16px 48px; }
+    .container { max-width: 860px; margin: 0 auto; }
+
+    /* Header */
+    header { text-align: center; padding: 28px 0 18px; }
+    .badge { display: inline-block; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); border-radius: 20px; font-size: .7rem; font-weight: 700; padding: 3px 12px; margin-bottom: 14px; letter-spacing: .8px; text-transform: uppercase; }
+    header h1 { font-size: clamp(1.6rem,4vw,2.2rem); font-weight: 800; letter-spacing: -.5px; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--muted); margin-top: 8px; font-size: .9rem; }
+    .tool-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 14px; }
+    .pill { font-size: .72rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: all .2s; }
+    .pill[data-tab="commits"]  { --c:var(--accent); --d:var(--accent-dim); }
+    .pill[data-tab="pr"]       { --c:var(--blue);   --d:var(--blue-dim);   }
+    .pill[data-tab="changelog"]{ --c:var(--green);  --d:var(--green-dim);  }
+    .pill[data-tab="branch"]   { --c:var(--purple); --d:var(--purple-dim); }
+    .pill.active, .pill:hover  { color: var(--c); border-color: var(--c); background: var(--d); }
+
+    /* Card */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
+    .card-title { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 14px; font-weight: 700; }
+
+    /* API Key */
+    .api-row { display: flex; gap: 8px; align-items: center; }
+    .api-row input { flex: 1; background: var(--card2); border: 1px solid var(--border); border-radius: 7px; color: var(--text); padding: 9px 13px; font-size: .88rem; font-family: 'Courier New',monospace; outline: none; transition: border-color .2s; }
+    .api-row input:focus { border-color: var(--accent); }
+    .api-status { font-size: .72rem; padding: 5px 11px; border-radius: 20px; font-weight: 700; white-space: nowrap; }
+    .api-status.saved { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+    .api-status.empty { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    /* Tab Bar */
+    .tab-bar { display: flex; gap: 2px; background: var(--card2); border-radius: 10px; padding: 4px; margin-bottom: 14px; }
+    .tab-btn { flex: 1; padding: 9px 6px; border: none; border-radius: 7px; background: transparent; color: var(--muted); font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .2s; white-space: nowrap; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active-commits  { background: var(--accent-dim); color: var(--accent); }
+    .tab-btn.active-pr       { background: var(--blue-dim);   color: var(--blue);   }
+    .tab-btn.active-changelog{ background: var(--green-dim);  color: var(--green);  }
+    .tab-btn.active-branch   { background: var(--purple-dim); color: var(--purple); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Form */
+    textarea, .field select, .field input[type="text"] {
+      width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 7px;
+      color: var(--text); padding: 11px 13px; font-size: .92rem; font-family: inherit;
+      outline: none; transition: border-color .2s; line-height: 1.55;
+    }
+    textarea { resize: vertical; }
+    textarea::placeholder, .field input::placeholder { color: var(--muted); }
+    textarea:focus, .field select:focus, .field input:focus { border-color: var(--accent); }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: .72rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .field select { appearance: none; -webkit-appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23777'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width:520px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* Emoji bar */
+    .emoji-bar { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .emoji-btn { background: var(--card2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 9px; font-size: 1rem; cursor: pointer; transition: all .15s; line-height: 1; }
+    .emoji-btn:hover { background: var(--accent-dim); border-color: var(--accent); }
+
+    /* Generate button */
+    .btn-generate { width: 100%; border: none; border-radius: 8px; padding: 13px; font-size: .95rem; font-weight: 700; cursor: pointer; transition: opacity .2s, transform .1s; }
+    .btn-generate:active { transform: scale(.99); }
+    .btn-generate:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-commits  { background: var(--accent); color: #000; }
+    .btn-pr       { background: var(--blue);   color: #000; }
+    .btn-changelog{ background: var(--green);  color: #000; }
+    .btn-branch   { background: var(--purple); color: #000; }
+
+    /* Loading */
+    .loading { display: none; text-align: center; padding: 26px; color: var(--muted); font-size: .88rem; }
+    .spinner { width: 26px; height: 26px; border: 3px solid var(--border); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 10px; }
+    .spinner-commits  { border-top-color: var(--accent);  }
+    .spinner-pr       { border-top-color: var(--blue);    }
+    .spinner-changelog{ border-top-color: var(--green);   }
+    .spinner-branch   { border-top-color: var(--purple);  }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Error */
+    .error-box { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3); color: var(--red); border-radius: 8px; padding: 12px 14px; font-size: .85rem; display: none; margin-bottom: 12px; }
+
+    /* Results header */
+    .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .results-header h2 { font-size: .95rem; font-weight: 600; }
+    .results-count { font-size: .72rem; color: var(--muted); }
+
+    /* Commit cards */
+    .commit-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; cursor: pointer; transition: border-color .2s, background .2s; position: relative; }
+    .commit-card:hover { border-color: #3a3a3a; }
+    .commit-card.selected { border-color: var(--accent); background: var(--accent-dim); }
+    .commit-card.selected::after { content: '✓'; position: absolute; top: 12px; right: 13px; font-size: .72rem; color: var(--accent); font-weight: 800; background: var(--accent-dim); border: 1px solid var(--accent); padding: 1px 7px; border-radius: 10px; }
+    .commit-msg { font-family: 'Courier New',monospace; font-size: .93rem; line-height: 1.5; word-break: break-all; margin-bottom: 8px; }
+    .t-feat,.t-chore,.t-perf,.t-refactor,.t-test { color: var(--accent); font-weight: 700; }
+    .t-fix  { color: var(--red); font-weight: 700; }
+    .t-docs,.t-style { color: var(--blue); font-weight: 700; }
+    .t-scope { color: var(--blue); }
+    .t-desc { color: var(--text); }
+    .t-colon { color: var(--muted); }
+    .commit-expl { font-size: .78rem; color: var(--muted); line-height: 1.5; margin-bottom: 10px; padding: 7px 10px; background: rgba(255,255,255,.03); border-radius: 6px; border-left: 2px solid var(--border); }
+    .card-actions { display: flex; gap: 7px; }
+    .btn-copy { background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 12px; font-size: .78rem; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+    .btn-copy:hover { opacity: .8; }
+    .btn-copy.copied { color: var(--green); border-color: var(--green); }
+    .btn-use { background: var(--accent); color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-size: .78rem; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+    .btn-use:hover { opacity: .85; }
+
+    /* Git command panel */
+    .git-panel { background: #0a0a0a; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-top: 4px; }
+    .git-panel-label { font-size: .68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; font-weight: 700; }
+    .git-cmd-row { display: flex; align-items: center; gap: 8px; }
+    .git-cmd { flex: 1; font-family: 'Courier New',monospace; font-size: .85rem; color: var(--green); background: transparent; border: none; outline: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-copy-cmd { background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 5px 11px; font-size: .75rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: opacity .2s; }
+    .btn-copy-cmd.copied { color: var(--green); border-color: var(--green); }
+
+    /* PR / Changelog output */
+    .output-box { background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; position: relative; }
+    .output-copy-btn { position: absolute; top: 12px; right: 12px; background: var(--card); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 5px 11px; font-size: .72rem; font-weight: 700; cursor: pointer; transition: all .2s; }
+    .output-copy-btn:hover { color: var(--text); border-color: #555; }
+    .output-copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+    /* Markdown */
+    .md h1,.md h2,.md h3 { margin: 14px 0 6px; color: var(--text); }
+    .md h1 { font-size: 1.1rem; }
+    .md h2 { font-size: .98rem; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+    .md h3 { font-size: .9rem; }
+    .md p { margin: 6px 0; color: #ccc; font-size: .88rem; line-height: 1.6; }
+    .md ul,.md ol { margin: 6px 0 6px 18px; }
+    .md li { font-size: .88rem; color: #ccc; margin: 3px 0; line-height: 1.55; }
+    .md code { font-family: 'Courier New',monospace; font-size: .82rem; background: rgba(255,255,255,.07); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .md pre { background: rgba(255,255,255,.04); padding: 10px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
+    .md pre code { background: none; padding: 0; color: var(--green); }
+    .md strong { color: var(--text); }
+    .md hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+    /* Branch cards */
+    .branch-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; cursor: pointer; transition: border-color .2s; }
+    .branch-card:hover { border-color: #3a3a3a; }
+    .branch-card.selected { border-color: var(--purple); background: var(--purple-dim); }
+    .branch-name { font-family: 'Courier New',monospace; font-size: 1rem; color: var(--purple); font-weight: 700; margin-bottom: 6px; }
+    .branch-type-tag { display: inline-block; font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
+    .tag-feature { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+    .tag-fix     { background: rgba(248,113,113,.12); color: var(--red); border: 1px solid rgba(248,113,113,.3); }
+    .tag-hotfix  { background: rgba(248,113,113,.18); color: #ff5555; border: 1px solid rgba(248,113,113,.4); }
+    .tag-chore   { background: rgba(255,255,255,.05); color: var(--muted); border: 1px solid var(--border); }
+    .tag-release { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,.3); }
+    .branch-why { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+
+    /* History */
+    .history-list { display: flex; flex-direction: column; gap: 7px; max-height: 260px; overflow-y: auto; }
+    .history-item { display: flex; align-items: center; gap: 9px; background: var(--card2); border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; }
+    .h-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .h-dot.commits  { background: var(--accent);  }
+    .h-dot.pr       { background: var(--blue);    }
+    .h-dot.changelog{ background: var(--green);   }
+    .h-dot.branch   { background: var(--purple);  }
+    .h-msg { flex: 1; font-family: 'Courier New',monospace; font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .h-time { font-size: .7rem; color: var(--muted); white-space: nowrap; }
+    .h-copy { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: 3px 8px; font-size: .7rem; cursor: pointer; }
+    .h-copy:hover { color: var(--text); border-color: #555; }
+    .btn-clear { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 5px 11px; font-size: .75rem; cursor: pointer; }
+    .btn-clear:hover { color: var(--red); border-color: var(--red); }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    footer { text-align: center; padding: 24px 0 8px; font-size: .75rem; color: var(--muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
 </head>
 <body>
+<div class="container">
+
+<!-- Header -->
 <header>
-  <h1>⚙️ Dev Workflow Hub <span>Agent #09</span></h1>
-  <div class="api-row">
-    <label>Gemini API Key</label>
-    <input type="password" id="api-key" placeholder="AIza..." oninput="localStorage.setItem('ag09_key',this.value)">
+  <div class="badge">Agent #9 · 100 AI Agents Challenge</div>
+  <h1>Dev <span>Workflow</span> Suite</h1>
+  <p>Four tools real engineers use every day — powered by Gemini 2.0 Flash</p>
+  <div class="tool-pills">
+    <span class="pill active" data-tab="commits"   onclick="switchTab('commits',this)">✦ Commit Messages</span>
+    <span class="pill"        data-tab="pr"        onclick="switchTab('pr',this)">⬡ PR Description</span>
+    <span class="pill"        data-tab="changelog" onclick="switchTab('changelog',this)">◈ Changelog</span>
+    <span class="pill"        data-tab="branch"    onclick="switchTab('branch',this)">⌥ Branch Name</span>
   </div>
 </header>
 
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('commit',this)">✍️ Commit Writer</div>
-  <div class="tab" onclick="switchTab('pr',this)">📝 PR Description</div>
-  <div class="tab" onclick="switchTab('sprint',this)">📊 Sprint Summary</div>
-</div>
-
-<!-- ══════════════ TAB 1 — COMMIT WRITER ══════════════ -->
-<div class="page active" id="tab-commit">
-  <div style="margin-bottom:14px">
-    <label class="lbl">Describe Your Changes (plain English)</label>
-    <textarea id="commit-desc" rows="4" placeholder="Added JWT authentication. Users can now log in with email and password. Passwords are hashed with bcrypt. Created middleware to protect private routes."></textarea>
-  </div>
-  <div class="row">
-    <div class="col" style="max-width:220px">
-      <label class="lbl">Scope</label>
-      <input type="text" id="commit-scope" placeholder="auth, api, ui, db...">
-    </div>
-    <div class="col" style="max-width:180px">
-      <label class="lbl">Type</label>
-      <select id="commit-type">
-        <option>feat</option><option>fix</option><option>chore</option><option>docs</option>
-        <option>refactor</option><option>perf</option><option>test</option><option>ci</option>
-      </select>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;align-self:flex-end;padding-bottom:2px">
-      <label class="lbl" style="margin:0">Breaking Change</label>
-      <label class="toggle-switch"><input type="checkbox" id="commit-breaking"><span class="t-slider"></span></label>
-    </div>
-    <div style="align-self:flex-end">
-      <button class="btn btn-amber" id="commit-btn" onclick="generateCommit()">✨ Generate 3 Options</button>
-    </div>
-  </div>
-
-  <div id="commit-output" style="display:none">
-    <div class="sec-title" style="margin-bottom:10px">3 Commit Message Options</div>
-
-    <div class="option-card" id="opt-a">
-      <div class="option-label"><span>Option A — Short &amp; Direct <small style="opacity:.6">(target &lt;50 chars)</small></span></div>
-      <div class="option-text" id="opt-a-text"></div>
-      <div class="char-bar"><div class="char-bar-fill" id="opt-a-bar"></div></div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span class="char-count" id="opt-a-count"></span>
-        <button class="btn-sm" onclick="copyCommit('opt-a-text')">📋 Copy</button>
-      </div>
-    </div>
-
-    <div class="option-card" id="opt-b">
-      <div class="option-label"><span>Option B — Descriptive with Scope <small style="opacity:.6">(target &lt;72 chars)</small></span></div>
-      <div class="option-text" id="opt-b-text"></div>
-      <div class="char-bar"><div class="char-bar-fill" id="opt-b-bar"></div></div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span class="char-count" id="opt-b-count"></span>
-        <button class="btn-sm" onclick="copyCommit('opt-b-text')">📋 Copy</button>
-      </div>
-    </div>
-
-    <div class="option-card" id="opt-c">
-      <div class="option-label"><span>Option C — With Body <small style="opacity:.6">(subject + 2-line explanation)</small></span></div>
-      <div class="option-text" id="opt-c-subject"></div>
-      <div class="char-bar"><div class="char-bar-fill" id="opt-c-bar"></div></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span class="char-count" id="opt-c-count"></span>
-        <button class="btn-sm" onclick="copyCommit('opt-c-full')">📋 Copy Full</button>
-      </div>
-      <div class="option-body" id="opt-c-body"></div>
-      <pre id="opt-c-full" style="display:none"></pre>
-    </div>
-  </div>
-
-  <div class="guide-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('span').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
-    📖 Conventional Commits Guide <span>▼</span>
-  </div>
-  <div class="guide-body">
-    <div style="font-size:.82rem;color:var(--sub);margin-bottom:10px">Format: <code style="color:var(--amber);font-family:var(--mono)">type(scope)!: description</code> — the <code style="color:var(--red)">!</code> marks a breaking change.</div>
-    <div class="guide-row"><span class="guide-type">feat</span><span style="color:var(--sub)">A new feature for users</span></div>
-    <div class="guide-row"><span class="guide-type">fix</span><span style="color:var(--sub)">A bug fix</span></div>
-    <div class="guide-row"><span class="guide-type">chore</span><span style="color:var(--sub)">Maintenance, deps, tooling</span></div>
-    <div class="guide-row"><span class="guide-type">docs</span><span style="color:var(--sub)">Documentation only changes</span></div>
-    <div class="guide-row"><span class="guide-type">refactor</span><span style="color:var(--sub)">Code change, no feature or fix</span></div>
-    <div class="guide-row"><span class="guide-type">perf</span><span style="color:var(--sub)">Improves performance</span></div>
-    <div class="guide-row"><span class="guide-type">test</span><span style="color:var(--sub)">Adding or updating tests</span></div>
-    <div class="guide-row"><span class="guide-type">ci</span><span style="color:var(--sub)">CI/CD configuration changes</span></div>
-    <div class="guide-row"><span class="guide-type">BREAKING</span><span style="color:var(--red)">Add ! after type or BREAKING CHANGE: in footer</span></div>
-  </div>
-
-  <div class="card" style="margin-top:16px">
-    <div class="card-title">🕐 Commit History <span style="font-size:.72rem;color:var(--sub);font-weight:400;margin-left:auto">last 10 · click to reload</span></div>
-    <div class="hist-list" id="commit-history"></div>
-    <div id="commit-hist-empty" style="color:var(--sub);font-size:.82rem">No commits generated yet.</div>
+<!-- API Key -->
+<div class="card">
+  <div class="card-title">Gemini API Key</div>
+  <div class="api-row">
+    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" />
+    <span id="apiStatus" class="api-status empty">Not saved</span>
   </div>
 </div>
 
-<!-- ══════════════ TAB 2 — PR DESCRIPTION ══════════════ -->
-<div class="page" id="tab-pr">
-  <div class="row" style="margin-bottom:14px">
-    <div class="col">
-      <label class="lbl">PR Title</label>
-      <input type="text" id="pr-title" placeholder="Add JWT authentication middleware">
-    </div>
-    <div class="col" style="max-width:220px">
-      <label class="lbl">Ticket / Issue # (optional)</label>
-      <input type="text" id="pr-ticket" placeholder="PROJ-123 or #42">
-    </div>
-  </div>
-  <div style="margin-bottom:14px">
-    <label class="lbl">What Changed</label>
-    <textarea id="pr-changes" rows="5" placeholder="Describe the changes made in this PR..."></textarea>
-  </div>
-  <div class="row" style="align-items:flex-end">
-    <div class="col" style="max-width:200px">
-      <label class="lbl">PR Type</label>
-      <select id="pr-type">
-        <option>Feature</option><option>Bug Fix</option><option>Refactor</option>
-        <option>Performance</option><option>Documentation</option><option>Hotfix</option>
-      </select>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <label class="lbl" style="margin:0">Tone:</label>
-      <label class="toggle-switch"><input type="checkbox" id="pr-tone-toggle"><span class="t-slider"></span></label>
-      <span id="pr-tone-lbl" style="font-size:.82rem;color:var(--sub)">Technical</span>
-    </div>
-    <button class="btn btn-blue" id="pr-btn" onclick="generatePR()">📝 Generate PR Description</button>
-  </div>
-
-  <div id="pr-output" style="display:none;margin-top:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <span class="sec-title">Generated PR Body</span>
-      <button class="btn-sm" onclick="copyEl('pr-body')">📋 Copy PR Body</button>
-    </div>
-    <div class="pr-out" id="pr-body"></div>
-  </div>
-
-  <div class="card" style="margin-top:16px">
-    <div class="card-title">🕐 Recent PRs <span style="font-size:.72rem;color:var(--sub);font-weight:400;margin-left:auto">last 3 · click to reload</span></div>
-    <div class="hist-list" id="pr-history"></div>
-    <div id="pr-hist-empty" style="color:var(--sub);font-size:.82rem">No PRs generated yet.</div>
+<!-- Tab bar -->
+<div class="card" style="padding:6px 8px;">
+  <div class="tab-bar">
+    <button class="tab-btn active-commits" id="tab-commits"   onclick="switchTab('commits')">✦ Commits</button>
+    <button class="tab-btn"               id="tab-pr"        onclick="switchTab('pr')">⬡ PR Desc</button>
+    <button class="tab-btn"               id="tab-changelog" onclick="switchTab('changelog')">◈ Changelog</button>
+    <button class="tab-btn"               id="tab-branch"    onclick="switchTab('branch')">⌥ Branch</button>
   </div>
 </div>
 
-<!-- ══════════════ TAB 3 — SPRINT SUMMARY ══════════════ -->
-<div class="page" id="tab-sprint">
-  <div style="margin-bottom:14px">
-    <label class="lbl">Paste Sprint Commit Messages (one per line)</label>
-    <textarea id="sprint-commits" rows="9" placeholder="feat: add user login with JWT
-feat: add password reset via email
-fix: resolve 500 error on auth callback
-fix: handle null user in session middleware
-chore: update node to 20 LTS
-chore: upgrade prisma to 5.x
-docs: add API authentication guide
-refactor: simplify token validation
-perf: cache user sessions in Redis
-test: add auth middleware unit tests"></textarea>
+<!-- ═══ TAB 1 · COMMITS ═══ -->
+<div class="tab-panel active" id="panel-commits">
+  <div class="card">
+    <div class="card-title">What did you change?</div>
+    <textarea id="c-description" rows="3" placeholder="e.g. fixed the login button not working on mobile, added dark mode toggle..."></textarea>
   </div>
-  <div class="row" style="align-items:flex-end">
-    <div class="col" style="max-width:200px">
-      <label class="lbl">Team Name (optional)</label>
-      <input type="text" id="sprint-team" placeholder="Backend Team">
+  <div class="card">
+    <div class="card-title">Options</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Commit Style</label>
+        <select id="c-style">
+          <option value="Conventional Commits (feat/fix/docs...)">Conventional Commits</option>
+          <option value="Emoji Commits">Emoji Commits</option>
+          <option value="Simple &amp; Short">Simple &amp; Short</option>
+          <option value="Detailed with body">Detailed with Body</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Project Type</label>
+        <select id="c-project">
+          <option value="Web App">Web App</option>
+          <option value="Mobile App">Mobile App</option>
+          <option value="API / Backend">API / Backend</option>
+          <option value="CLI Tool">CLI Tool</option>
+          <option value="Library / Package">Library / Package</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Scope (optional)</label>
+        <input type="text" id="c-scope" placeholder="e.g. auth, navbar, api" />
+      </div>
     </div>
-    <div class="col" style="max-width:120px">
-      <label class="lbl">Sprint #</label>
-      <input type="text" id="sprint-num" placeholder="14">
-    </div>
-    <div class="col" style="max-width:160px">
-      <label class="lbl">Start Date</label>
-      <input type="date" id="sprint-start">
-    </div>
-    <div class="col" style="max-width:160px">
-      <label class="lbl">End Date</label>
-      <input type="date" id="sprint-end">
-    </div>
-    <div class="col" style="max-width:200px">
-      <label class="lbl">Format</label>
-      <select id="sprint-format">
-        <option value="slack">Slack Post (≤120 words)</option>
-        <option value="email">Email Update (≤350 words)</option>
-        <option value="jira">JIRA Comment (bullets only)</option>
-      </select>
+    <div id="c-emoji-section" style="display:none;margin-top:10px;">
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;">Quick emoji</div>
+      <div class="emoji-bar">
+        <button class="emoji-btn" onclick="prependEmoji('✨','c-description')">✨</button>
+        <button class="emoji-btn" onclick="prependEmoji('🐛','c-description')">🐛</button>
+        <button class="emoji-btn" onclick="prependEmoji('📝','c-description')">📝</button>
+        <button class="emoji-btn" onclick="prependEmoji('🔥','c-description')">🔥</button>
+        <button class="emoji-btn" onclick="prependEmoji('🚀','c-description')">🚀</button>
+        <button class="emoji-btn" onclick="prependEmoji('💄','c-description')">💄</button>
+        <button class="emoji-btn" onclick="prependEmoji('♻️','c-description')">♻️</button>
+        <button class="emoji-btn" onclick="prependEmoji('⚡','c-description')">⚡</button>
+        <button class="emoji-btn" onclick="prependEmoji('🎨','c-description')">🎨</button>
+        <button class="emoji-btn" onclick="prependEmoji('✅','c-description')">✅</button>
+      </div>
     </div>
   </div>
-  <div style="margin-bottom:14px">
-    <button class="btn btn-amber" id="sprint-btn" onclick="generateSprint()">📊 Generate Sprint Summary</button>
+  <div class="error-box" id="c-error"></div>
+  <button class="btn-generate btn-commits" id="c-gen-btn" onclick="genCommits()">✦ Generate Commit Messages</button>
+  <div class="loading" id="c-loading"><div class="spinner spinner-commits"></div>Asking Gemini for commit messages…</div>
+  <div id="c-results" style="display:none;margin-top:18px;">
+    <div class="results-header"><h2>Commit Variants</h2><span class="results-count">3 options</span></div>
+    <div id="c-cards"></div>
+    <div class="git-panel" id="c-git-panel" style="display:none;">
+      <div class="git-panel-label">Ready-to-run git command</div>
+      <div class="git-cmd-row">
+        <input type="text" class="git-cmd" id="c-git-cmd" readonly />
+        <button class="btn-copy-cmd" id="c-copy-cmd" onclick="copyCmdPanel('c-git-cmd','c-copy-cmd')">Copy</button>
+      </div>
+    </div>
   </div>
+</div>
 
-  <div id="sprint-output" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-      <span class="sec-title">Sprint Summary</span>
-      <button class="btn-sm" onclick="copyEl('sprint-out')">📋 Copy</button>
+<!-- ═══ TAB 2 · PR DESCRIPTION ═══ -->
+<div class="tab-panel" id="panel-pr">
+  <div class="card">
+    <div class="card-title">PR Info</div>
+    <div class="field">
+      <label>What does this PR do?</label>
+      <textarea id="pr-summary" rows="3" placeholder="e.g. Adds dark mode support across the whole app, persists preference in localStorage..."></textarea>
     </div>
-    <div class="sprint-out" id="sprint-out"></div>
-    <div id="sprint-wc" class="wc-badge"></div>
+    <div class="field">
+      <label>Commit messages (paste 1–10, one per line)</label>
+      <textarea id="pr-commits" rows="4" placeholder="feat(ui): add dark mode toggle&#10;fix(theme): persist theme in localStorage&#10;chore: update tailwind config for dark variant"></textarea>
+    </div>
   </div>
+  <div class="card">
+    <div class="card-title">Options</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>PR Type</label>
+        <select id="pr-type">
+          <option value="Feature">Feature</option>
+          <option value="Bug Fix">Bug Fix</option>
+          <option value="Refactor">Refactor</option>
+          <option value="Performance">Performance</option>
+          <option value="Hotfix">Hotfix</option>
+          <option value="Chore / Maintenance">Chore / Maintenance</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Team Style</label>
+        <select id="pr-style">
+          <option value="GitHub standard (Summary + Test plan)">GitHub Standard</option>
+          <option value="Jira-style (with ticket refs)">Jira-style</option>
+          <option value="Minimal (3-5 bullet points)">Minimal</option>
+          <option value="Detailed (background + motivation + implementation)">Detailed</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Breaking changes? (optional)</label>
+        <input type="text" id="pr-breaking" placeholder="e.g. renames ThemeProvider props" />
+      </div>
+    </div>
+  </div>
+  <div class="error-box" id="pr-error"></div>
+  <button class="btn-generate btn-pr" id="pr-gen-btn" onclick="genPR()">⬡ Generate PR Description</button>
+  <div class="loading" id="pr-loading"><div class="spinner spinner-pr"></div>Writing your PR description…</div>
+  <div id="pr-results" style="display:none;margin-top:18px;">
+    <div class="results-header"><h2>PR Description</h2><span class="results-count">ready to paste</span></div>
+    <div class="output-box">
+      <button class="output-copy-btn" id="pr-copy-btn" onclick="copyOutput('pr-raw','pr-copy-btn')">Copy</button>
+      <div class="md" id="pr-output"></div>
+      <input type="hidden" id="pr-raw" />
+    </div>
+  </div>
+</div>
 
-  <div class="card" style="margin-top:16px">
-    <div class="card-title">🕐 Recent Summaries <span style="font-size:.72rem;color:var(--sub);font-weight:400;margin-left:auto">last 5 · click to reload</span></div>
-    <div class="hist-list" id="sprint-history"></div>
-    <div id="sprint-hist-empty" style="color:var(--sub);font-size:.82rem">No summaries generated yet.</div>
+<!-- ═══ TAB 3 · CHANGELOG ═══ -->
+<div class="tab-panel" id="panel-changelog">
+  <div class="card">
+    <div class="card-title">Commits to Summarise</div>
+    <div class="field">
+      <label>Paste commit messages (one per line)</label>
+      <textarea id="cl-commits" rows="7" placeholder="feat(auth): add OAuth2 login with Google&#10;feat(ui): add dark mode toggle&#10;fix(api): handle 429 rate limit errors&#10;fix(mobile): fix login button tap target&#10;docs: update README with setup instructions&#10;chore: bump dependencies&#10;perf(images): lazy-load hero images"></textarea>
+    </div>
   </div>
+  <div class="card">
+    <div class="card-title">Options</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Version / Release</label>
+        <input type="text" id="cl-version" placeholder="e.g. v2.4.0" />
+      </div>
+      <div class="field">
+        <label>Format</label>
+        <select id="cl-format">
+          <option value="Keep a Changelog (keepachangelog.com standard)">Keep a Changelog</option>
+          <option value="GitHub Releases markdown">GitHub Releases</option>
+          <option value="JIRA-style with emoji categories">Jira + Emoji</option>
+          <option value="Minimal bullet list">Minimal</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Audience</label>
+        <select id="cl-audience">
+          <option value="developers (technical detail)">Developers</option>
+          <option value="end users (plain English, no jargon)">End Users</option>
+          <option value="both developers and end users">Both</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="error-box" id="cl-error"></div>
+  <button class="btn-generate btn-changelog" id="cl-gen-btn" onclick="genChangelog()">◈ Build Changelog</button>
+  <div class="loading" id="cl-loading"><div class="spinner spinner-changelog"></div>Building your changelog…</div>
+  <div id="cl-results" style="display:none;margin-top:18px;">
+    <div class="results-header"><h2>Changelog</h2><span class="results-count">ready to paste</span></div>
+    <div class="output-box">
+      <button class="output-copy-btn" id="cl-copy-btn" onclick="copyOutput('cl-raw','cl-copy-btn')">Copy</button>
+      <div class="md" id="cl-output"></div>
+      <input type="hidden" id="cl-raw" />
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TAB 4 · BRANCH NAMING ═══ -->
+<div class="tab-panel" id="panel-branch">
+  <div class="card">
+    <div class="card-title">What are you working on?</div>
+    <textarea id="br-description" rows="3" placeholder="e.g. add OAuth login with Google, fix memory leak in image processor, migrate users table to new schema..."></textarea>
+  </div>
+  <div class="card">
+    <div class="card-title">Options</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Work Type</label>
+        <select id="br-type">
+          <option value="feature">Feature</option>
+          <option value="bugfix">Bug Fix</option>
+          <option value="hotfix">Hotfix</option>
+          <option value="chore">Chore</option>
+          <option value="release">Release</option>
+          <option value="experiment">Experiment</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Convention</label>
+        <select id="br-convention">
+          <option value="GitHub Flow (feature/slug)">GitHub Flow</option>
+          <option value="GitFlow (feature/TICKET-slug)">GitFlow</option>
+          <option value="short-slug only">Short Slug</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Ticket ID (optional)</label>
+        <input type="text" id="br-ticket" placeholder="e.g. PROJ-123, GH-456" />
+      </div>
+    </div>
+  </div>
+  <div class="error-box" id="br-error"></div>
+  <button class="btn-generate btn-branch" id="br-gen-btn" onclick="genBranch()">⌥ Generate Branch Names</button>
+  <div class="loading" id="br-loading"><div class="spinner spinner-branch"></div>Generating branch names…</div>
+  <div id="br-results" style="display:none;margin-top:18px;">
+    <div class="results-header"><h2>Branch Names</h2><span class="results-count">3 options</span></div>
+    <div id="br-cards"></div>
+    <div class="git-panel" id="br-git-panel" style="display:none;">
+      <div class="git-panel-label">Ready-to-run git command</div>
+      <div class="git-cmd-row">
+        <input type="text" class="git-cmd" id="br-git-cmd" readonly />
+        <button class="btn-copy-cmd" id="br-copy-cmd" onclick="copyCmdPanel('br-git-cmd','br-copy-cmd')">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- History -->
+<div id="hist-section" style="display:none;margin-top:18px;">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="card-title" style="margin:0;">Recent Outputs</div>
+      <button class="btn-clear" onclick="clearHistory()">Clear</button>
+    </div>
+    <div class="history-list" id="hist-list"></div>
+  </div>
+</div>
+
+<footer>
+  Built with Gemini 2.0 Flash ·
+  <a href="https://hhanng.github.io" target="_blank">100 AI Agents Challenge</a>
+</footer>
 </div>
 
 <script>
-document.getElementById('api-key').value = localStorage.getItem('ag09_key') || '';
-document.getElementById('pr-tone-toggle').addEventListener('change', function(){
-  document.getElementById('pr-tone-lbl').textContent = this.checked ? 'Plain English' : 'Technical';
-});
-// Date defaults
-const today = new Date().toISOString().split('T')[0];
-const weekAgo = new Date(Date.now()-7*86400000).toISOString().split('T')[0];
-document.getElementById('sprint-end').value = today;
-document.getElementById('sprint-start').value = weekAgo;
+var currentTab='commits', currentCommits=[], selectedCommit=null, currentBranches=[], selectedBranch=null;
 
-function switchTab(name, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  btn.classList.add('active');
+(function init(){
+  var key=localStorage.getItem('gemini_api_key')||'';
+  if(key){$('apiKey').value=key;setApiStatus(true);}
+  $('apiKey').addEventListener('input',function(e){
+    var v=e.target.value.trim();
+    localStorage.setItem('gemini_api_key',v);
+    setApiStatus(!!v);
+  });
+  $('c-style').addEventListener('change',function(e){
+    $('c-emoji-section').style.display=e.target.value==='Emoji Commits'?'block':'none';
+  });
+  renderHistory();
+})();
+
+function $(id){return document.getElementById(id);}
+function setApiStatus(ok){
+  var el=$('apiStatus');
+  el.textContent=ok?'Saved ✓':'Not saved';
+  el.className='api-status '+(ok?'saved':'empty');
 }
 
-async function callGemini(prompt) {
-  const key = document.getElementById('api-key').value.trim();
-  if (!key) throw new Error('Enter your Gemini API key in the header.');
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
+function switchTab(tab,pillEl){
+  currentTab=tab;
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  $('panel-'+tab).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.className='tab-btn';});
+  $('tab-'+tab).classList.add('tab-btn','active-'+tab);
+  document.querySelectorAll('.pill').forEach(function(p){p.classList.remove('active');});
+  if(pillEl){pillEl.classList.add('active');}
+  else{var p=document.querySelector('.pill[data-tab="'+tab+'"]');if(p)p.classList.add('active');}
+}
+
+async function callGemini(prompt,temp){
+  var key=localStorage.getItem('gemini_api_key')||'';
+  if(!key)throw new Error('Please enter your Gemini API key.');
+  var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key,{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:temp||0.8,maxOutputTokens:2048}})
   });
-  if (!res.ok) throw new Error(`API error ${res.status}`);
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  if(!res.ok){var err=await res.json().catch(function(){return{};});throw new Error((err.error&&err.error.message)||'API error '+res.status);}
+  var data=await res.json();
+  return(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||'';
+}
+function parseJSON(raw){return JSON.parse(raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim());}
+
+/* ── COMMITS ── */
+async function genCommits(){
+  var desc=$('c-description').value.trim();
+  var style=$('c-style').value;
+  var project=$('c-project').value;
+  var scope=$('c-scope').value.trim();
+  hideError('c-error');
+  if(!desc){showError('c-error','Please describe what you changed.');return;}
+  setLoading('c',true);$('c-results').style.display='none';selectedCommit=null;
+  var prompt='Generate 3 git commit message variants for a '+project+' project.\n\nChange description: '+desc+'\nCommit style: '+style+'\n'+(scope?'Scope: '+scope:'')+'\n\nFor Conventional Commits use prefixes: feat, fix, docs, style, refactor, test, chore, perf.\nFor Emoji Commits prepend a relevant emoji before the type.\n\nRespond ONLY in this exact JSON (no markdown):\n{\n  "commits": [\n    { "message": "feat(auth): add mobile-responsive login button", "type": "feat", "explanation": "Why this format was chosen" },\n    { "message": "fix: resolve login button tap target on small screens", "type": "fix", "explanation": "More concise alternative" },\n    { "message": "fix(ui): improve login button accessibility on mobile devices", "type": "fix", "explanation": "More descriptive version" }\n  ]\n}';
+  try{
+    var raw=await callGemini(prompt,0.8);
+    var data=parseJSON(raw);
+    currentCommits=data.commits;
+    renderCommits(data.commits);
+    saveHistory(data.commits[0].message,'commits');
+  }catch(e){showError('c-error',e.message);}
+  finally{setLoading('c',false);}
 }
 
-function extractJSON(raw) {
-  const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
-  return m ? m[1].trim() : raw.trim();
-}
-
-function setLoading(btnId, on, label) {
-  const btn = document.getElementById(btnId);
-  if (!btn) return;
-  btn.disabled = on;
-  btn.innerHTML = on ? `<span class="spinner"></span>Generating...` : (label || btn.textContent);
-}
-
-// ── COMMIT WRITER ──
-async function generateCommit() {
-  const desc = document.getElementById('commit-desc').value.trim();
-  if (!desc) { alert('Describe your changes first.'); return; }
-  const type = document.getElementById('commit-type').value;
-  const scope = document.getElementById('commit-scope').value.trim();
-  const breaking = document.getElementById('commit-breaking').checked;
-  setLoading('commit-btn', true);
-  try {
-    const scopeStr = scope ? `(${scope})` : '';
-    const breakStr = breaking ? '!' : '';
-    const prompt = `You are a git expert writing conventional commit messages.
-
-Type: ${type}
-Scope: ${scope || 'none'}
-Breaking change: ${breaking}
-Description of changes: ${desc}
-
-Generate 3 commit message options. Format prefix as: ${type}${scopeStr}${breakStr}:
-Respond ONLY with JSON:
-{
-  "optionA": "short direct commit message under 50 chars, just the subject line",
-  "optionB": "descriptive commit message with scope context under 72 chars, just the subject line",
-  "optionCSubject": "subject line under 72 chars",
-  "optionCBody": "Two lines of explanation. First line: why this change was needed. Second line: what approach was taken."
-}`;
-    const raw = await callGemini(prompt);
-    const d = JSON.parse(extractJSON(raw));
-
-    function setOption(prefix, text, limit) {
-      document.getElementById(`opt-${prefix}-text`).textContent = text;
-      const len = text.length;
-      const pct = Math.min(100, (len/limit)*100);
-      const color = len <= limit*0.7 ? '#3fb950' : len <= limit ? '#e3b341' : '#f85149';
-      document.getElementById(`opt-${prefix}-bar`).style.cssText = `width:${pct}%;background:${color}`;
-      document.getElementById(`opt-${prefix}-count`).textContent = `${len} chars (limit: ${limit})`;
-    }
-    setOption('a', d.optionA || '', 50);
-    setOption('b', d.optionB || '', 72);
-    const cSubject = d.optionCSubject || '';
-    const cBody = d.optionCBody || '';
-    document.getElementById('opt-c-subject').textContent = cSubject;
-    document.getElementById('opt-c-body').textContent = cBody;
-    const cFull = `${cSubject}\n\n${cBody}`;
-    document.getElementById('opt-c-full').textContent = cFull;
-    const cLen = cSubject.length;
-    const cPct = Math.min(100,(cLen/72)*100);
-    const cColor = cLen <= 50 ? '#3fb950' : cLen <= 72 ? '#e3b341' : '#f85149';
-    document.getElementById('opt-c-bar').style.cssText = `width:${cPct}%;background:${cColor}`;
-    document.getElementById('opt-c-count').textContent = `${cLen} chars subject (limit: 72)`;
-
-    document.getElementById('commit-output').style.display = 'block';
-    saveCommitHist({type, scope, optA: d.optionA, optB: d.optionB, optC: cFull});
-    renderCommitHist();
-  } catch(e) { alert('Error: ' + e.message); }
-  setLoading('commit-btn', false, '✨ Generate 3 Options');
-}
-
-function copyCommit(id) {
-  const el = document.getElementById(id);
-  navigator.clipboard.writeText(el.textContent).then(() => {
-    const btn = event.target;
-    btn.textContent = '✅ Copied!';
-    setTimeout(() => btn.textContent = '📋 Copy', 1500);
+function renderCommits(commits){
+  var container=$('c-cards');container.innerHTML='';
+  commits.forEach(function(c,i){
+    var card=document.createElement('div');
+    card.className='commit-card';card.id='cc-'+i;
+    card.innerHTML='<div class="commit-msg">'+highlightCommit(c.message)+'</div><div class="commit-expl">'+esc(c.explanation||'')+'</div><div class="card-actions"><button class="btn-copy" id="cc-copy-'+i+'" onclick="copyText(\''+esc(c.message).replace(/'/g,"&#39;")+'\',\'cc-copy-'+i+'\')">Copy</button><button class="btn-use" onclick="selectCommit('+i+')">Use this one</button></div>';
+    card.addEventListener('click',function(e){if(e.target.tagName==='BUTTON')return;selectCommit(i);});
+    container.appendChild(card);
   });
+  $('c-results').style.display='block';
+  $('c-git-panel').style.display='none';
 }
 
-function saveCommitHist(entry) {
-  const hist = JSON.parse(localStorage.getItem('ag09_commit_hist') || '[]');
-  hist.unshift({...entry, ts: Date.now()});
-  localStorage.setItem('ag09_commit_hist', JSON.stringify(hist.slice(0,10)));
-}
-
-function renderCommitHist() {
-  const hist = JSON.parse(localStorage.getItem('ag09_commit_hist') || '[]');
-  const el = document.getElementById('commit-history');
-  const empty = document.getElementById('commit-hist-empty');
-  if (!hist.length) { el.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display = 'none';
-  el.innerHTML = hist.map((h,i) => `
-    <div class="hist-item" onclick="reloadCommit(${i})">
-      <span class="hist-tag">${escHtml(h.type)}${h.scope?`(${escHtml(h.scope)})`:''}:</span>
-      <span class="hist-preview">${escHtml(h.optA||'')}</span>
-      <span class="hist-time">${timeAgo(h.ts)}</span>
-    </div>`).join('');
-}
-
-function reloadCommit(idx) {
-  const hist = JSON.parse(localStorage.getItem('ag09_commit_hist') || '[]');
-  const h = hist[idx];
-  if (!h) return;
-  document.getElementById('commit-type').value = h.type || 'feat';
-  document.getElementById('commit-scope').value = h.scope || '';
-  if (h.optA) {
-    document.getElementById('opt-a-text').textContent = h.optA;
-    document.getElementById('opt-b-text').textContent = h.optB||'';
-    const parts = (h.optC||'').split('\n\n');
-    document.getElementById('opt-c-subject').textContent = parts[0]||'';
-    document.getElementById('opt-c-body').textContent = parts.slice(1).join('\n\n')||'';
-    document.getElementById('opt-c-full').textContent = h.optC||'';
-    document.getElementById('commit-output').style.display = 'block';
+function highlightCommit(msg){
+  var m=msg.match(/^(\S+?)(\(([^)]*)\))?(!)?(:\s*)(.*)$/);
+  if(m){
+    var t=esc(m[1]);
+    var cls=['fix'].includes(m[1])?'fix':['docs','style'].includes(m[1])?'docs':'feat';
+    var sc=m[3]?'<span class="t-scope">('+esc(m[3])+')</span>':'';
+    return'<span class="t-'+cls+'">'+t+'</span>'+sc+'<span class="t-colon">'+(m[4]||'')+(m[5]||'')+'</span><span class="t-desc">'+esc(m[6])+'</span>';
   }
+  return'<span class="t-desc">'+esc(msg)+'</span>';
 }
 
-// ── PR DESCRIPTION ──
-async function generatePR() {
-  const title = document.getElementById('pr-title').value.trim();
-  const changes = document.getElementById('pr-changes').value.trim();
-  const ticket = document.getElementById('pr-ticket').value.trim();
-  const type = document.getElementById('pr-type').value;
-  const plain = document.getElementById('pr-tone-toggle').checked;
-  if (!title || !changes) { alert('Fill in PR Title and What Changed.'); return; }
-  setLoading('pr-btn', true);
-  try {
-    const tone = plain ? 'plain, non-technical English' : 'technical GitHub PR style';
-    const prompt = `Generate a complete GitHub PR description in ${tone}.
-PR Title: ${title}
-Type: ${type}
-${ticket?`Ticket: ${ticket}`:''}
-Changes: ${changes}
-
-Respond ONLY with JSON:
-{
-  "summary": "2-3 sentence summary",
-  "changes": ["bullet 1","bullet 2","bullet 3","bullet 4"],
-  "testSteps": ["step 1","step 2","step 3"],
-  "checklist": {"testsAdded":false,"docsUpdated":false,"breakingChanges":false},
-  "breakingNotes": ""
-}`;
-    const raw = await callGemini(prompt);
-    const d = JSON.parse(extractJSON(raw));
-    const ticketLine = ticket ? `\n> Closes ${ticket}\n` : '';
-    const body = `## Summary\n${ticketLine}${d.summary}\n\n## Changes Made\n${(d.changes||[]).map(c=>`- ${c}`).join('\n')}\n\n## How to Test\n${(d.testSteps||[]).map((s,i)=>`${i+1}. ${s}`).join('\n')}\n\n## Screenshots\n\n<!-- Add screenshots here -->\n\n## Checklist\n- [${d.checklist?.testsAdded?'x':' '}] Tests added or updated\n- [${d.checklist?.docsUpdated?'x':' '}] Documentation updated\n- [${d.checklist?.breakingChanges?'x':' '}] Breaking changes documented${d.breakingNotes?`\n\n> ⚠️ **Breaking Change:** ${d.breakingNotes}`:''}`;
-    document.getElementById('pr-body').textContent = body;
-    document.getElementById('pr-output').style.display = 'block';
-    savePRHist({title, type, body});
-    renderPRHist();
-  } catch(e) { alert('Error: ' + e.message); }
-  setLoading('pr-btn', false, '📝 Generate PR Description');
+function selectCommit(i){
+  selectedCommit=i;
+  document.querySelectorAll('.commit-card').forEach(function(c,j){c.classList.toggle('selected',j===i);});
+  var msg=currentCommits[i]&&currentCommits[i].message||'';
+  $('c-git-cmd').value='git commit -m "'+msg.replace(/"/g,'\\"')+'"';
+  $('c-git-panel').style.display='block';
+  $('c-copy-cmd').textContent='Copy';$('c-copy-cmd').classList.remove('copied');
 }
 
-function savePRHist(entry) {
-  const hist = JSON.parse(localStorage.getItem('ag09_pr_hist') || '[]');
-  hist.unshift({...entry, ts: Date.now()});
-  localStorage.setItem('ag09_pr_hist', JSON.stringify(hist.slice(0,3)));
+/* ── PR ── */
+async function genPR(){
+  var summary=$('pr-summary').value.trim();
+  var commits=$('pr-commits').value.trim();
+  var type=$('pr-type').value;
+  var style=$('pr-style').value;
+  var breaking=$('pr-breaking').value.trim();
+  hideError('pr-error');
+  if(!summary&&!commits){showError('pr-error','Please describe the PR or paste some commits.');return;}
+  setLoading('pr',true);$('pr-results').style.display='none';
+  var prompt='Write a professional GitHub pull request description.\n\nPR Type: '+type+'\nFormat style: '+style+'\n'+(summary?'What this PR does: '+summary:'')+'\n'+(commits?'Commits included:\n'+commits:'')+'\n'+(breaking?'Breaking changes: '+breaking:'')+'\n\nWrite a complete PR description in markdown. Include:\n- A clear one-line title (as # heading)\n- ## Summary section with 3-5 bullet points\n- ## Changes section listing key changes\n- ## Test Plan section with checkboxes\n'+(breaking?'- ## Breaking Changes section\n':'')+'\nUse clear, professional developer language. Return only the markdown, no extra commentary.';
+  try{
+    var md=await callGemini(prompt,0.7);
+    $('pr-output').innerHTML=renderMarkdown(md);
+    $('pr-raw').value=md;
+    $('pr-results').style.display='block';
+    saveHistory(summary||commits.split('\n')[0]||'PR','pr');
+    $('pr-copy-btn').textContent='Copy';$('pr-copy-btn').classList.remove('copied');
+  }catch(e){showError('pr-error',e.message);}
+  finally{setLoading('pr',false);}
 }
 
-function renderPRHist() {
-  const hist = JSON.parse(localStorage.getItem('ag09_pr_hist') || '[]');
-  const el = document.getElementById('pr-history');
-  const empty = document.getElementById('pr-hist-empty');
-  if (!hist.length) { el.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display = 'none';
-  el.innerHTML = hist.map((h,i) => `
-    <div class="hist-item" onclick="reloadPR(${i})">
-      <span class="hist-tag">${escHtml(h.type)}</span>
-      <span class="hist-preview">${escHtml(h.title)}</span>
-      <span class="hist-time">${timeAgo(h.ts)}</span>
-    </div>`).join('');
+/* ── CHANGELOG ── */
+async function genChangelog(){
+  var commits=$('cl-commits').value.trim();
+  var version=$('cl-version').value.trim();
+  var format=$('cl-format').value;
+  var audience=$('cl-audience').value;
+  hideError('cl-error');
+  if(!commits){showError('cl-error','Paste at least one commit message.');return;}
+  setLoading('cl',true);$('cl-results').style.display='none';
+  var today=new Date().toISOString().split('T')[0];
+  var prompt='Generate a changelog from these git commits.\n\nCommits:\n'+commits+'\n\nVersion: '+(version||'Unreleased')+'\nDate: '+today+'\nFormat: '+format+'\nAudience: '+audience+'\n\nGroup commits into categories: ✨ Features (feat), 🐛 Bug Fixes (fix), 📝 Documentation (docs), ♻️ Refactoring (refactor), ⚡ Performance (perf), 🔧 Chores (chore/style/test).\n\nWrite clear, user-friendly descriptions. Return only the markdown changelog.';
+  try{
+    var md=await callGemini(prompt,0.6);
+    $('cl-output').innerHTML=renderMarkdown(md);
+    $('cl-raw').value=md;
+    $('cl-results').style.display='block';
+    saveHistory((version||'Unreleased')+' changelog','changelog');
+    $('cl-copy-btn').textContent='Copy';$('cl-copy-btn').classList.remove('copied');
+  }catch(e){showError('cl-error',e.message);}
+  finally{setLoading('cl',false);}
 }
 
-function reloadPR(idx) {
-  const hist = JSON.parse(localStorage.getItem('ag09_pr_hist') || '[]');
-  const h = hist[idx];
-  if (!h) return;
-  document.getElementById('pr-title').value = h.title||'';
-  document.getElementById('pr-body').textContent = h.body||'';
-  document.getElementById('pr-output').style.display = 'block';
+/* ── BRANCH ── */
+async function genBranch(){
+  var desc=$('br-description').value.trim();
+  var type=$('br-type').value;
+  var convention=$('br-convention').value;
+  var ticket=$('br-ticket').value.trim();
+  hideError('br-error');
+  if(!desc){showError('br-error','Describe what you are working on.');return;}
+  setLoading('br',true);$('br-results').style.display='none';selectedBranch=null;
+  var prompt='Generate 3 git branch name suggestions.\n\nWhat I\'m building: '+desc+'\nWork type: '+type+'\nNaming convention: '+convention+'\n'+(ticket?'Ticket ID: '+ticket:'')+'\n\nRules:\n- lowercase, hyphens only, no spaces or special chars\n- concise but descriptive (3-6 words)\n- follow the convention prefix: '+type+'/ prefix\n'+(ticket?'- include the ticket ID where natural':'')+'\n\nRespond ONLY in this exact JSON (no markdown):\n{\n  "branches": [\n    { "name": "feature/add-oauth-google-login", "type": "feature", "why": "Descriptive, follows convention" },\n    { "name": "feature/google-oauth-integration", "type": "feature", "why": "Shorter alternative" },\n    { "name": "feature/auth-google-oauth", "type": "feature", "why": "Scope-prefixed version" }\n  ]\n}';
+  try{
+    var raw=await callGemini(prompt,0.8);
+    var data=parseJSON(raw);
+    currentBranches=data.branches;
+    renderBranches(data.branches);
+    saveHistory(data.branches[0].name,'branch');
+  }catch(e){showError('br-error',e.message);}
+  finally{setLoading('br',false);}
 }
 
-// ── SPRINT SUMMARY ──
-async function generateSprint() {
-  const commits = document.getElementById('sprint-commits').value.trim();
-  if (!commits) { alert('Paste sprint commit messages first.'); return; }
-  const team = document.getElementById('sprint-team').value.trim();
-  const num = document.getElementById('sprint-num').value.trim();
-  const start = document.getElementById('sprint-start').value;
-  const end = document.getElementById('sprint-end').value;
-  const format = document.getElementById('sprint-format').value;
-  const fmtMap = {slack:'Slack post (max 120 words, casual tone, use emojis)',email:'professional email update (max 350 words)',jira:'JIRA comment (bullet points only, concise)'};
-  setLoading('sprint-btn', true);
-  try {
-    const prompt = `Generate a sprint summary as a ${fmtMap[format]}.
-
-${team?`Team: ${team}`:''}
-${num?`Sprint: ${num}`:''}
-${start&&end?`Date range: ${start} to ${end}`:''}
-
-Commit messages:
-${commits}
-
-Respond ONLY with JSON:
-{
-  "header": "Sprint ${num||'N'} Summary${team?` — ${team}`:''}${start&&end?` (${start} → ${end})`:''} ",
-  "shipped": ["feature 1", "feature 2"],
-  "fixed": ["bug fix 1", "bug fix 2"],
-  "inProgress": ["wip item 1"],
-  "nextSprint": "One sentence preview of what's coming next sprint."
-}`;
-    const raw = await callGemini(prompt);
-    const d = JSON.parse(extractJSON(raw));
-    let output = '';
-    if (format === 'slack') {
-      output = `*${d.header}*\n\n🚀 *Shipped:*\n${(d.shipped||[]).map(s=>`• ${s}`).join('\n')}\n\n🐛 *Fixed:*\n${(d.fixed||[]).map(s=>`• ${s}`).join('\n')}\n\n🔄 *In Progress:*\n${(d.inProgress||[]).map(s=>`• ${s}`).join('\n')}\n\n👀 *Next Sprint:* ${d.nextSprint||'TBD'}`;
-    } else if (format === 'email') {
-      output = `Subject: ${d.header}\n\nHi team,\n\nHere's a summary of our sprint work:\n\nWhat We Shipped:\n${(d.shipped||[]).map(s=>`- ${s}`).join('\n')}\n\nWhat We Fixed:\n${(d.fixed||[]).map(s=>`- ${s}`).join('\n')}\n\nStill In Progress:\n${(d.inProgress||[]).map(s=>`- ${s}`).join('\n')}\n\nNext Sprint Preview:\n${d.nextSprint||'TBD'}\n\nBest,\n${team||'The Team'}`;
-    } else {
-      output = `**${d.header}**\n\n**Shipped:**\n${(d.shipped||[]).map(s=>`- ${s}`).join('\n')}\n\n**Fixed:**\n${(d.fixed||[]).map(s=>`- ${s}`).join('\n')}\n\n**In Progress:**\n${(d.inProgress||[]).map(s=>`- ${s}`).join('\n')}\n\n**Next Sprint:** ${d.nextSprint||'TBD'}`;
-    }
-    const wc = output.split(/\s+/).filter(Boolean).length;
-    document.getElementById('sprint-out').textContent = output;
-    document.getElementById('sprint-wc').textContent = `${wc} words`;
-    document.getElementById('sprint-output').style.display = 'block';
-    saveSprintHist({header: d.header, format, output});
-    renderSprintHist();
-  } catch(e) { alert('Error: ' + e.message); }
-  setLoading('sprint-btn', false, '📊 Generate Sprint Summary');
+function renderBranches(branches){
+  var container=$('br-cards');container.innerHTML='';
+  branches.forEach(function(b,i){
+    var type=b.type||'feature';
+    var tagClass=['fix','bugfix'].includes(type)?'fix':type==='hotfix'?'hotfix':type==='chore'?'chore':type==='release'?'release':'feature';
+    var card=document.createElement('div');
+    card.className='branch-card';card.id='bc-'+i;
+    card.innerHTML='<div class="branch-name">'+esc(b.name)+'</div><span class="branch-type-tag tag-'+tagClass+'">'+esc(type)+'</span><div class="branch-why">'+esc(b.why||'')+'</div><div class="card-actions" style="margin-top:10px;"><button class="btn-copy" id="bc-copy-'+i+'" onclick="copyText(\''+esc(b.name).replace(/'/g,"&#39;")+'\',\'bc-copy-'+i+'\')">Copy name</button><button class="btn-use" style="background:var(--purple);" onclick="selectBranch('+i+')">Use this one</button></div>';
+    card.addEventListener('click',function(e){if(e.target.tagName==='BUTTON')return;selectBranch(i);});
+    container.appendChild(card);
+  });
+  $('br-results').style.display='block';
+  $('br-git-panel').style.display='none';
 }
 
-function saveSprintHist(entry) {
-  const hist = JSON.parse(localStorage.getItem('ag09_sprint_hist') || '[]');
-  hist.unshift({...entry, ts: Date.now()});
-  localStorage.setItem('ag09_sprint_hist', JSON.stringify(hist.slice(0,5)));
+function selectBranch(i){
+  selectedBranch=i;
+  document.querySelectorAll('.branch-card').forEach(function(c,j){c.classList.toggle('selected',j===i);});
+  $('br-git-cmd').value='git checkout -b '+currentBranches[i].name;
+  $('br-git-panel').style.display='block';
+  $('br-copy-cmd').textContent='Copy';$('br-copy-cmd').classList.remove('copied');
 }
 
-function renderSprintHist() {
-  const hist = JSON.parse(localStorage.getItem('ag09_sprint_hist') || '[]');
-  const el = document.getElementById('sprint-history');
-  const empty = document.getElementById('sprint-hist-empty');
-  if (!hist.length) { el.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display = 'none';
-  el.innerHTML = hist.map((h,i) => `
-    <div class="hist-item" onclick="reloadSprint(${i})">
-      <span class="hist-tag">${escHtml(h.format)}</span>
-      <span class="hist-preview">${escHtml(h.header||'')}</span>
-      <span class="hist-time">${timeAgo(h.ts)}</span>
-    </div>`).join('');
+/* ── Markdown renderer ── */
+function renderMarkdown(md){
+  var h=esc(md)
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/^- \[x\] (.+)$/gm,'<li>☑ $1</li>')
+    .replace(/^- \[ \] (.+)$/gm,'<li>☐ $1</li>')
+    .replace(/^[-*] (.+)$/gm,'<li>$1</li>')
+    .replace(/^\d+\. (.+)$/gm,'<li>$1</li>')
+    .replace(/^---$/gm,'<hr>')
+    .replace(/&gt;&gt; (.+)$/gm,'<blockquote>$1</blockquote>')
+    .replace(/(<li>.*?<\/li>\n?)+/g,function(m){return'<ul>'+m+'</ul>';});
+  return'<div class="md">'+h+'</div>';
 }
 
-function reloadSprint(idx) {
-  const hist = JSON.parse(localStorage.getItem('ag09_sprint_hist') || '[]');
-  const h = hist[idx];
-  if (!h) return;
-  document.getElementById('sprint-out').textContent = h.output||'';
-  document.getElementById('sprint-output').style.display = 'block';
+/* ── History ── */
+function saveHistory(text,type){
+  var h=JSON.parse(localStorage.getItem('dwf_history')||'[]');
+  h.unshift({text:text,type:type,ts:new Date().toISOString()});
+  h=h.slice(0,30);
+  localStorage.setItem('dwf_history',JSON.stringify(h));
+  renderHistory();
 }
+function renderHistory(){
+  var h=JSON.parse(localStorage.getItem('dwf_history')||'[]');
+  var seen=new Set();
+  var uniq=h.filter(function(x){if(seen.has(x.text))return false;seen.add(x.text);return true;}).slice(0,10);
+  var section=$('hist-section');var list=$('hist-list');
+  if(!uniq.length){section.style.display='none';return;}
+  section.style.display='block';
+  list._data=uniq;
+  list.innerHTML=uniq.map(function(x,i){
+    return'<div class="history-item"><span class="h-dot '+x.type+'"></span><span class="h-msg">'+esc(x.text)+'</span><span class="h-time">'+timeAgo(x.ts)+'</span><button class="h-copy" onclick="copyHistItem('+i+',this)">Copy</button></div>';
+  }).join('');
+}
+function copyHistItem(i,btn){
+  var data=$('hist-list')._data;
+  navigator.clipboard.writeText(data[i].text).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1600);});
+}
+function clearHistory(){localStorage.removeItem('dwf_history');renderHistory();}
+function timeAgo(iso){var m=Math.floor((Date.now()-new Date(iso))/60000);if(m<1)return'just now';if(m<60)return m+'m ago';var h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
 
-function copyEl(id) {
-  navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>{
-    event.target.textContent='✅ Copied!';
-    setTimeout(()=>event.target.textContent='📋 Copy',1500);
+/* ── Shared helpers ── */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function prependEmoji(e,id){var el=$(id);if(!el.value.trim().startsWith(e))el.value=e+' '+el.value.trim();}
+function setLoading(p,on){
+  $(p+'-loading').style.display=on?'block':'none';
+  var btn=$(p+'-gen-btn');btn.disabled=on;
+}
+function showError(id,msg){var el=$(id);el.textContent='⚠ '+msg;el.style.display='block';}
+function hideError(id){$(id).style.display='none';}
+function copyText(text,btnId){
+  navigator.clipboard.writeText(text).then(function(){
+    var btn=$(btnId);if(!btn)return;
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied');},1700);
+  });
+}
+function copyOutput(rawId,btnId){
+  var text=$(rawId).value;
+  navigator.clipboard.writeText(text).then(function(){
+    var btn=$(btnId);btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied');},1700);
+  });
+}
+function copyCmdPanel(inputId,btnId){
+  var text=$(inputId).value;
+  navigator.clipboard.writeText(text).then(function(){
+    var btn=$(btnId);btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied');},1700);
   });
 }
 
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function timeAgo(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
-
-renderCommitHist(); renderPRHist(); renderSprintHist();
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+    if(currentTab==='commits')genCommits();
+    else if(currentTab==='pr')genPR();
+    else if(currentTab==='changelog')genChangelog();
+    else if(currentTab==='branch')genBranch();
+  }
+});
 </script>
 </body>
 </html>
