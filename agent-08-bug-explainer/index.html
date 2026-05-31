@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bug Explainer — Fix Code Bugs in Plain English</title>
+  <title>Bug Explainer — Visual Debugger + Plain-English Fix</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -18,6 +18,7 @@
       --green: #22c55e;
       --red: #ef4444;
       --purple: #a855f7;
+      --cyan: #06b6d4;
       --text: #e5e7eb;
       --muted: #9ca3af;
       --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -33,11 +34,9 @@
     }
 
     /* ─── Header ─── */
-    header {
-      text-align: center;
-      margin-bottom: 36px;
-    }
-    header .badge {
+    header { text-align: center; margin-bottom: 36px; }
+    .header-badges { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .badge {
       display: inline-block;
       background: #1a1a1a;
       border: 1px solid var(--border);
@@ -46,210 +45,97 @@
       letter-spacing: 1px;
       padding: 4px 10px;
       border-radius: 20px;
-      margin-bottom: 12px;
       text-transform: uppercase;
     }
-    header h1 {
-      font-size: clamp(28px, 5vw, 42px);
-      font-weight: 800;
-      letter-spacing: -1px;
+    .badge-new {
+      background: rgba(6,182,212,0.12);
+      border-color: rgba(6,182,212,0.35);
+      color: var(--cyan);
+      font-weight: 700;
     }
+    header h1 { font-size: clamp(28px,5vw,42px); font-weight: 800; letter-spacing: -1px; }
     header h1 span { color: var(--amber); }
-    header p {
-      color: var(--muted);
-      margin-top: 8px;
-      font-size: 15px;
-    }
+    header p { color: var(--muted); margin-top: 8px; font-size: 15px; }
 
-    /* ─── Main container ─── */
+    /* ─── Layout ─── */
     .container { max-width: 960px; margin: 0 auto; }
 
     /* ─── API Key ─── */
     .api-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 16px;
-      margin-bottom: 24px;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 24px;
     }
-    .api-row label {
-      font-size: 13px;
-      color: var(--muted);
-      white-space: nowrap;
-      font-weight: 600;
-    }
+    .api-row label { font-size: 13px; color: var(--muted); white-space: nowrap; font-weight: 600; }
     .api-row input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      min-width: 0;
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: var(--mono); font-size: 13px; min-width: 0;
     }
     .api-row input::placeholder { color: #555; }
     .api-save-btn {
-      background: var(--amber);
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 14px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
+      background: var(--amber); color: #000; border: none; border-radius: 6px;
+      padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
+      transition: background 0.2s; white-space: nowrap;
     }
     .api-save-btn:hover { background: var(--amber-dim); }
-    .api-status {
-      font-size: 11px;
-      color: var(--green);
-      white-space: nowrap;
-      display: none;
-    }
+    .api-status { font-size: 11px; color: var(--green); white-space: nowrap; display: none; }
 
-    /* ─── Input panels ─── */
-    .panels {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    @media (max-width: 640px) {
-      .panels { grid-template-columns: 1fr; }
-    }
+    /* ─── Input Panels ─── */
+    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 640px) { .panels { grid-template-columns: 1fr; } }
 
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
     .panel-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      background: #1f1f1f;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      background: #1f1f1f; border-bottom: 1px solid var(--border);
     }
-    .panel-header .dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-    }
-    .dot-red { background: #ff5f57; }
-    .dot-yellow { background: #febc2e; }
-    .dot-green { background: #28c840; }
-    .panel-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      letter-spacing: 0.5px;
-      margin-left: 4px;
-    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ff5f57; } .dot-yellow { background: #febc2e; } .dot-green { background: #28c840; }
+    .panel-title { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; margin-left: 4px; }
     textarea {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      line-height: 1.6;
-      padding: 14px;
-      resize: vertical;
-      min-height: 180px;
+      width: 100%; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: var(--mono); font-size: 13px;
+      line-height: 1.6; padding: 14px; resize: vertical; min-height: 180px;
     }
     textarea::placeholder { color: #444; }
 
-    /* ─── Controls row ─── */
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 16px;
-      align-items: center;
-    }
-    .select-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      flex: 1;
-      min-width: 140px;
-    }
-    .select-wrap label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+    /* ─── Controls ─── */
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; align-items: flex-end; }
+    .select-wrap { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+    .select-wrap label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
     select {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 14px;
-      padding: 9px 12px;
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s;
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 14px; padding: 9px 12px; outline: none;
+      cursor: pointer; transition: border-color 0.2s;
     }
     select:focus { border-color: var(--amber); }
 
     /* ─── Explain button ─── */
     #explainBtn {
-      width: 100%;
-      background: var(--amber);
-      color: #000;
-      border: none;
-      border-radius: 10px;
-      padding: 15px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      letter-spacing: 0.3px;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      width: 100%; background: var(--amber); color: #000; border: none;
+      border-radius: 10px; padding: 15px; font-size: 16px; font-weight: 800;
+      cursor: pointer; letter-spacing: 0.3px; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
       margin-bottom: 24px;
     }
     #explainBtn:hover:not(:disabled) { background: var(--amber-dim); transform: translateY(-1px); }
     #explainBtn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-    /* ─── Spinner ─── */
     .spinner {
-      width: 18px; height: 18px;
-      border: 3px solid rgba(0,0,0,0.3);
-      border-top-color: #000;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: none;
+      width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.3);
+      border-top-color: #000; border-radius: 50%;
+      animation: spin 0.7s linear infinite; display: none;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ─── Results ─── */
     #results { display: none; }
-    .results-grid {
-      display: grid;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
+    .results-grid { display: grid; gap: 16px; margin-bottom: 24px; }
 
     .result-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      border-top: 3px solid transparent;
-      opacity: 0;
-      transform: translateY(16px);
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; border-top: 3px solid transparent;
+      opacity: 0; transform: translateY(16px);
       transition: opacity 0.4s ease, transform 0.4s ease;
     }
     .result-card.visible { opacity: 1; transform: translateY(0); }
@@ -258,326 +144,265 @@
     .card-blue  { border-top-color: var(--blue); }
     .card-green { border-top-color: var(--green); }
     .card-purple{ border-top-color: var(--purple); }
+    .card-cyan  { border-top-color: var(--cyan); }
 
-    .card-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
+    .card-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
     .label-amber { color: var(--amber); }
     .label-blue  { color: var(--blue); }
     .label-green { color: var(--green); }
     .label-purple{ color: var(--purple); }
+    .label-cyan  { color: var(--cyan); }
 
     /* Card 1 */
-    .one-liner {
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 1.4;
-      color: #fff;
-    }
+    .one-liner { font-size: 20px; font-weight: 700; line-height: 1.4; color: #fff; }
 
     /* Card 2 */
-    .why-text {
-      font-size: 15px;
-      line-height: 1.7;
-      color: var(--text);
-    }
+    .why-text { font-size: 15px; line-height: 1.7; color: var(--text); }
     .analogy-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(59,130,246,0.12);
-      border: 1px solid rgba(59,130,246,0.25);
-      color: var(--blue);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 20px;
-      margin-bottom: 8px;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25);
+      color: var(--blue); font-size: 11px; font-weight: 600;
+      padding: 3px 8px; border-radius: 20px; margin-bottom: 8px;
     }
 
-    /* Card 3 — Diff */
-    .fix-explanation {
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 14px;
-      line-height: 1.6;
-    }
+    /* Card 3 */
+    .fix-explanation { font-size: 14px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
     .diff-view {
-      background: #0a0a0a;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 14px;
-      font-family: var(--mono);
-      font-size: 13px;
+      background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; margin-bottom: 14px; font-family: var(--mono); font-size: 13px;
     }
-    .diff-header {
-      background: #141414;
-      padding: 6px 12px;
-      font-size: 11px;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      letter-spacing: 0.5px;
-    }
-    .diff-line {
-      display: flex;
-      align-items: flex-start;
-      padding: 4px 12px;
-      line-height: 1.6;
-    }
-    .diff-line.removed {
-      background: rgba(239,68,68,0.1);
-      border-left: 3px solid var(--red);
-    }
-    .diff-line.added {
-      background: rgba(34,197,94,0.1);
-      border-left: 3px solid var(--green);
-    }
-    .diff-sign {
-      width: 18px;
-      flex-shrink: 0;
-      font-weight: 700;
-      user-select: none;
-    }
+    .diff-header { background: #141414; padding: 6px 12px; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); letter-spacing: 0.5px; }
+    .diff-line { display: flex; align-items: flex-start; padding: 4px 12px; line-height: 1.6; }
+    .diff-line.removed { background: rgba(239,68,68,0.1); border-left: 3px solid var(--red); }
+    .diff-line.added   { background: rgba(34,197,94,0.1);  border-left: 3px solid var(--green); }
+    .diff-sign { width: 18px; flex-shrink: 0; font-weight: 700; user-select: none; }
     .diff-line.removed .diff-sign { color: var(--red); }
-    .diff-line.added .diff-sign { color: var(--green); }
-    .diff-code {
-      flex: 1;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
+    .diff-line.added   .diff-sign { color: var(--green); }
+    .diff-code { flex: 1; white-space: pre-wrap; word-break: break-all; }
     .diff-line.removed .diff-code { color: #fca5a5; }
-    .diff-line.added .diff-code { color: #86efac; }
+    .diff-line.added   .diff-code { color: #86efac; }
 
     .copy-btn {
-      background: rgba(34,197,94,0.15);
-      border: 1px solid rgba(34,197,94,0.3);
-      color: var(--green);
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3);
+      color: var(--green); border-radius: 8px; padding: 8px 16px; font-size: 13px;
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
     }
     .copy-btn:hover { background: rgba(34,197,94,0.25); }
     .copy-btn.copied { color: #fff; background: var(--green); border-color: var(--green); }
 
     /* Card 4 */
     .warning-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .warning-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 14px;
+    .warning-item { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.6; }
+    .warning-icon {
+      width: 22px; height: 22px; background: rgba(168,85,247,0.15);
+      border: 1px solid rgba(168,85,247,0.3); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 11px; color: var(--purple); font-weight: 700; margin-top: 1px;
+    }
+
+    /* ─── Card 5: Execution Trace ─── */
+    .trace-intro { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+
+    .trace-layout { display: grid; grid-template-columns: 1fr 220px; gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 640px) { .trace-layout { grid-template-columns: 1fr; } }
+
+    /* Code pane */
+    .trace-code-pane {
+      background: #0a0a0a; border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden; font-family: var(--mono); font-size: 13px;
+    }
+    .trace-code-header {
+      background: #141414; padding: 6px 12px; font-size: 11px;
+      color: var(--muted); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .trace-code-header .step-counter {
+      font-size: 11px; color: var(--cyan); font-weight: 700;
+    }
+    .trace-lines { padding: 6px 0; }
+    .trace-line {
+      display: flex; align-items: flex-start; padding: 3px 0;
+      transition: background 0.25s ease;
+      position: relative;
+    }
+    .trace-line.tl-past   { background: rgba(34,197,94,0.06); }
+    .trace-line.tl-current { background: rgba(245,158,11,0.15); }
+    .trace-line.tl-error  { background: rgba(239,68,68,0.15); animation: errorPulse 0.6s ease; }
+    .trace-line.tl-future { background: transparent; }
+    @keyframes errorPulse { 0%,100%{background:rgba(239,68,68,0.15)} 50%{background:rgba(239,68,68,0.35)} }
+
+    .tl-gutter {
+      width: 36px; flex-shrink: 0; text-align: right; padding-right: 12px;
+      font-size: 11px; color: #444; user-select: none; padding-top: 2px;
       line-height: 1.6;
     }
-    .warning-icon {
-      width: 22px; height: 22px;
-      background: rgba(168,85,247,0.15);
-      border: 1px solid rgba(168,85,247,0.3);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      font-size: 11px;
-      color: var(--purple);
-      font-weight: 700;
-      margin-top: 1px;
+    .trace-line.tl-current .tl-gutter { color: var(--amber); }
+    .trace-line.tl-error   .tl-gutter { color: var(--red); }
+    .trace-line.tl-past    .tl-gutter { color: #555; }
+
+    .tl-marker {
+      width: 18px; flex-shrink: 0; text-align: center;
+      font-size: 12px; line-height: 1.6; padding-top: 2px;
+    }
+    .trace-line.tl-current .tl-marker { color: var(--amber); }
+    .trace-line.tl-error   .tl-marker { color: var(--red); }
+    .trace-line.tl-past    .tl-marker { color: var(--green); font-size: 10px; }
+    .trace-line.tl-future  .tl-marker { color: transparent; }
+
+    .tl-code {
+      flex: 1; white-space: pre; padding-right: 12px; line-height: 1.6;
+      padding-top: 2px; overflow-x: auto;
+    }
+    .trace-line.tl-current .tl-code { color: #fde68a; }
+    .trace-line.tl-error   .tl-code { color: #fca5a5; }
+    .trace-line.tl-past    .tl-code { color: #6b7280; }
+    .trace-line.tl-future  .tl-code { color: #3d3d3d; }
+
+    /* Variable state pane */
+    .trace-vars-pane {
+      background: #0a0a0a; border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden; font-family: var(--mono);
+    }
+    .trace-vars-header {
+      background: #141414; padding: 6px 12px;
+      font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border);
+    }
+    .trace-vars-body { padding: 10px 12px; min-height: 80px; }
+    .var-row {
+      display: flex; align-items: flex-start; gap: 8px;
+      margin-bottom: 8px; font-size: 12px; line-height: 1.5;
+      animation: varSlideIn 0.25s ease;
+    }
+    @keyframes varSlideIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
+    .var-name { color: #93c5fd; font-weight: 600; white-space: nowrap; }
+    .var-equals { color: #555; }
+    .var-value { color: #fde68a; word-break: break-all; }
+    .var-new .var-name { color: var(--cyan); }
+    .var-new .var-value { color: #86efac; }
+    .no-vars { color: #444; font-size: 12px; font-style: italic; }
+
+    /* Step note */
+    .trace-note {
+      background: #111; border: 1px solid var(--border); border-left: 3px solid var(--cyan);
+      border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+      font-size: 13px; line-height: 1.6; color: var(--muted);
+      min-height: 44px; transition: all 0.25s;
+    }
+    .trace-note.is-error { border-left-color: var(--red); color: #fca5a5; background: rgba(239,68,68,0.05); }
+    .trace-note.is-ok    { border-left-color: var(--green); color: #86efac; background: rgba(34,197,94,0.04); }
+
+    /* Trace controls */
+    .trace-controls {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .trace-btn {
+      background: #222; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 13px; font-weight: 600; padding: 8px 14px;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .trace-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .trace-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .trace-btn.play-active { background: rgba(6,182,212,0.15); border-color: var(--cyan); color: var(--cyan); }
+    .trace-btn.play-active:hover { background: rgba(6,182,212,0.25); }
+
+    .trace-speed {
+      display: flex; align-items: center; gap: 6px;
+      margin-left: auto; font-size: 12px; color: var(--muted);
+    }
+    .trace-speed input[type=range] {
+      width: 80px; accent-color: var(--cyan); cursor: pointer;
+      background: transparent; border: none; padding: 0;
+    }
+
+    .trace-progress-bar {
+      width: 100%; background: var(--border); border-radius: 4px;
+      height: 3px; margin-bottom: 12px; overflow: hidden;
+    }
+    .trace-progress-fill {
+      height: 100%; background: var(--cyan);
+      transition: width 0.25s ease; border-radius: 4px;
     }
 
     /* ─── Follow-up ─── */
     #followupSection { margin-bottom: 24px; }
     #followupToggle {
-      width: 100%;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
+      width: 100%; background: transparent; border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px; color: var(--muted); font-size: 14px;
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;
     }
     #followupToggle:hover { border-color: var(--amber); color: var(--amber); }
-
     #followupChat { display: none; }
     .chat-messages {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 10px;
-      max-height: 300px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px; margin-bottom: 10px; max-height: 300px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 10px;
     }
-    .msg {
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 14px;
-      line-height: 1.6;
-      max-width: 85%;
-    }
-    .msg.user {
-      background: rgba(245,158,11,0.15);
-      border: 1px solid rgba(245,158,11,0.2);
-      color: var(--text);
-      align-self: flex-end;
-    }
-    .msg.ai {
-      background: #222;
-      border: 1px solid var(--border);
-      color: var(--text);
-      align-self: flex-start;
-    }
-    .chat-input-row {
-      display: flex;
-      gap: 8px;
-    }
+    .msg { padding: 10px 14px; border-radius: 8px; font-size: 14px; line-height: 1.6; max-width: 85%; }
+    .msg.user { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.2); color: var(--text); align-self: flex-end; }
+    .msg.ai   { background: #222; border: 1px solid var(--border); color: var(--text); align-self: flex-start; }
+    .chat-input-row { display: flex; gap: 8px; }
     #followupInput {
-      flex: 1;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
+      flex: 1; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; outline: none;
       transition: border-color 0.2s;
     }
     #followupInput:focus { border-color: var(--amber); }
     #followupInput::placeholder { color: #555; }
     #sendFollowup {
-      background: var(--amber);
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 18px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
+      background: var(--amber); color: #000; border: none; border-radius: 8px;
+      padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: background 0.2s; white-space: nowrap;
     }
     #sendFollowup:hover:not(:disabled) { background: var(--amber-dim); }
     #sendFollowup:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* ─── Bug History ─── */
-    #historySection {
-      border-top: 1px solid var(--border);
-      padding-top: 24px;
-      margin-top: 8px;
-    }
-    .history-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .history-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    #clearHistory {
-      background: transparent;
-      border: none;
-      color: #555;
-      font-size: 12px;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
+    /* ─── History ─── */
+    #historySection { border-top: 1px solid var(--border); padding-top: 24px; margin-top: 8px; }
+    .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .history-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    #clearHistory { background: transparent; border: none; color: #555; font-size: 12px; cursor: pointer; transition: color 0.2s; }
     #clearHistory:hover { color: var(--red); }
     .history-list { display: flex; flex-direction: column; gap: 8px; }
     .history-item {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; cursor: pointer; transition: border-color 0.2s;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
     }
     .history-item:hover { border-color: var(--amber); }
-    .history-item-info { flex: 1; min-width: 0; }
-    .history-item-summary {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .history-item-meta {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-    .history-badge {
-      background: #1f1f1f;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 20px;
-      white-space: nowrap;
-    }
+    .history-item-summary { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .history-badge { background: #1f1f1f; border: 1px solid var(--border); color: var(--muted); font-size: 11px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
     .no-history { color: var(--muted); font-size: 13px; text-align: center; padding: 20px; }
 
-    /* ─── Error toast ─── */
+    /* ─── Toast ─── */
     #toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
+      position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: #2a0a0a;
-      border: 1px solid var(--red);
-      color: #fca5a5;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 14px;
-      transition: transform 0.3s ease;
-      z-index: 999;
-      max-width: 90vw;
-      text-align: center;
+      background: #2a0a0a; border: 1px solid var(--red); color: #fca5a5;
+      padding: 12px 20px; border-radius: 10px; font-size: 14px;
+      transition: transform 0.3s ease; z-index: 999;
+      max-width: 90vw; text-align: center;
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* ─── Scrollbar ─── */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
   </style>
 </head>
 <body>
-
 <div class="container">
 
   <!-- Header -->
   <header>
-    <div class="badge">Agent #8 of 97 · 100 AI Agents Challenge</div>
+    <div class="header-badges">
+      <span class="badge">Agent #8 · 100 AI Agents</span>
+      <span class="badge badge-new">✦ Step-Through Debugger</span>
+    </div>
     <h1>Bug <span>Explainer</span></h1>
-    <p>Paste broken code &amp; an error — get a plain-English fix, tailored to your level.</p>
+    <p>Paste broken code + error → animated execution trace + plain-English fix, tailored to your level.</p>
   </header>
 
   <!-- API Key -->
@@ -588,22 +413,18 @@
     <span class="api-status" id="apiStatus">✓ Saved</span>
   </div>
 
-  <!-- Code + Error panels -->
+  <!-- Panels -->
   <div class="panels">
     <div class="panel">
       <div class="panel-header">
-        <span class="dot dot-red"></span>
-        <span class="dot dot-yellow"></span>
-        <span class="dot dot-green"></span>
+        <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
         <span class="panel-title">Your buggy code</span>
       </div>
       <textarea id="buggyCode" placeholder="# Paste your broken code here...&#10;&#10;def greet(name):&#10;    print('Hello, ' + name)&#10;&#10;greet()  # Forgot the argument!"></textarea>
     </div>
     <div class="panel">
       <div class="panel-header">
-        <span class="dot dot-red"></span>
-        <span class="dot dot-yellow"></span>
-        <span class="dot dot-green"></span>
+        <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
         <span class="panel-title">Error message / traceback</span>
       </div>
       <textarea id="errorMsg" placeholder="Paste the error or traceback here...&#10;&#10;TypeError: greet() missing 1 required positional&#10;argument: 'name'"></textarea>
@@ -642,23 +463,22 @@
 
   <!-- Results -->
   <div id="results">
-
     <div class="results-grid" id="cardsGrid">
 
-      <!-- Card 1: One-liner -->
+      <!-- Card 1 -->
       <div class="result-card card-amber" id="card1">
         <div class="card-label label-amber">⚡ The bug in one sentence</div>
         <div class="one-liner" id="oneLiner"></div>
       </div>
 
-      <!-- Card 2: Why it happens -->
+      <!-- Card 2 -->
       <div class="result-card card-blue" id="card2">
         <div class="card-label label-blue">🧠 Why this happens</div>
         <div id="analogyTag" class="analogy-tag" style="display:none;">💡 Real-world analogy</div>
         <div class="why-text" id="whyText"></div>
       </div>
 
-      <!-- Card 3: The fix -->
+      <!-- Card 3 -->
       <div class="result-card card-green" id="card3">
         <div class="card-label label-green">🔧 The fix</div>
         <div class="fix-explanation" id="fixExplanation"></div>
@@ -672,23 +492,63 @@
         </button>
       </div>
 
-      <!-- Card 4: Spot it next time -->
+      <!-- Card 4 -->
       <div class="result-card card-purple" id="card4">
         <div class="card-label label-purple">👁 How to spot this next time</div>
         <ul class="warning-list" id="warningList"></ul>
       </div>
 
-    </div>
+      <!-- Card 5: Execution Trace -->
+      <div class="result-card card-cyan" id="card5">
+        <div class="card-label label-cyan">🎬 Step-Through Execution Trace</div>
+        <div class="trace-intro" id="traceIntro">Watch your code execute line by line — see exactly where it breaks and what each variable holds at every step.</div>
+
+        <div class="trace-progress-bar"><div class="trace-progress-fill" id="traceProgressFill" style="width:0%"></div></div>
+
+        <div class="trace-layout">
+          <!-- Code pane -->
+          <div class="trace-code-pane">
+            <div class="trace-code-header">
+              <span id="traceFileName">code</span>
+              <span class="step-counter" id="traceStepCounter">Step 0 / 0</span>
+            </div>
+            <div class="trace-lines" id="traceLines"></div>
+          </div>
+          <!-- Vars pane -->
+          <div class="trace-vars-pane">
+            <div class="trace-vars-header">📦 Variable State</div>
+            <div class="trace-vars-body" id="traceVarsBody">
+              <div class="no-vars">Press Play to start</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step note -->
+        <div class="trace-note" id="traceNote">Press Play or Step → to begin the trace.</div>
+
+        <!-- Controls -->
+        <div class="trace-controls">
+          <button class="trace-btn" id="traceResetBtn"  onclick="traceReset()">⟪ Reset</button>
+          <button class="trace-btn" id="traceBackBtn"   onclick="traceStep(-1)">‹ Back</button>
+          <button class="trace-btn" id="tracePlayBtn"   onclick="traceTogglePlay()">▶ Play</button>
+          <button class="trace-btn" id="traceNextBtn"   onclick="traceStep(1)">Next ›</button>
+          <div class="trace-speed">
+            <span>Speed</span>
+            <input type="range" id="traceSpeedSlider" min="200" max="1600" value="800" step="200" oninput="updateSpeed(this.value)" />
+            <span id="traceSpeedLabel">1×</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.results-grid -->
 
     <!-- Follow-up -->
     <div id="followupSection">
-      <button id="followupToggle" onclick="toggleFollowup()">
-        💬 Ask a follow-up question
-      </button>
+      <button id="followupToggle" onclick="toggleFollowup()">💬 Ask a follow-up question</button>
       <div id="followupChat">
         <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-input-row">
-          <input type="text" id="followupInput" placeholder="e.g. Can you show me another example?" onkeydown="if(event.key==='Enter')sendFollowup()" />
+          <input type="text" id="followupInput" placeholder="e.g. Why does Python need the argument?" onkeydown="if(event.key==='Enter')sendFollowup()" />
           <button id="sendFollowup" onclick="sendFollowup()">Send</button>
         </div>
       </div>
@@ -704,52 +564,57 @@
     </div>
 
   </div><!-- /#results -->
-
-</div><!-- /.container -->
+</div>
 
 <div id="toast"></div>
 
 <script>
-  // ─── State ───────────────────────────────────────────────
-  let lastResult = null;
-  let lastContext = {};
-  let chatHistory = [];
+// ─── State ────────────────────────────────────────────────────
+let lastResult = null;
+let lastContext = {};
+let chatHistory = [];
 
-  // ─── Init ────────────────────────────────────────────────
-  window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('gemini_api_key');
-    if (saved) {
-      document.getElementById('apiKey').value = saved;
-      document.getElementById('apiStatus').style.display = 'inline';
-    }
-    renderHistory();
-  });
+// Trace state
+let traceSteps = [];
+let traceCurrentStep = -1;
+let tracePlayInterval = null;
+let traceSpeed = 800;
+let tracePrevVars = {};
 
-  // ─── API Key ─────────────────────────────────────────────
-  function saveApiKey() {
-    const key = document.getElementById('apiKey').value.trim();
-    if (!key) return showToast('Please enter an API key');
-    localStorage.setItem('gemini_api_key', key);
-    const s = document.getElementById('apiStatus');
-    s.style.display = 'inline';
-    s.textContent = '✓ Saved';
-    setTimeout(() => { s.style.display = 'none'; }, 2000);
+// ─── Init ─────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('gemini_api_key');
+  if (saved) {
+    document.getElementById('apiKey').value = saved;
+    document.getElementById('apiStatus').style.display = 'inline';
   }
+  renderHistory();
+});
 
-  // ─── Main explain ─────────────────────────────────────────
-  async function explainBug() {
-    const apiKey = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
-    const buggyCode = document.getElementById('buggyCode').value.trim();
-    const errorMsg = document.getElementById('errorMsg').value.trim();
-    const language = document.getElementById('language').value;
-    const experience = document.getElementById('experience').value;
+// ─── API Key ──────────────────────────────────────────────────
+function saveApiKey() {
+  const key = document.getElementById('apiKey').value.trim();
+  if (!key) return showToast('Please enter an API key');
+  localStorage.setItem('gemini_api_key', key);
+  const s = document.getElementById('apiStatus');
+  s.style.display = 'inline'; s.textContent = '✓ Saved';
+  setTimeout(() => s.style.display = 'none', 2000);
+}
 
-    if (!apiKey) return showToast('Please enter your Gemini API key first');
-    if (!buggyCode) return showToast('Please paste your buggy code');
+// ─── Main explain ─────────────────────────────────────────────
+async function explainBug() {
+  const apiKey = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
+  const buggyCode = document.getElementById('buggyCode').value.trim();
+  const errorMsg  = document.getElementById('errorMsg').value.trim();
+  const language  = document.getElementById('language').value;
+  const experience = document.getElementById('experience').value;
 
-    setLoading(true);
+  if (!apiKey)   return showToast('Please enter your Gemini API key first');
+  if (!buggyCode) return showToast('Please paste your buggy code');
 
-    const prompt = `I am a ${experience} programmer writing ${language}. My code has a bug.
+  setLoading(true);
+
+  const prompt = `I am a ${experience} programmer writing ${language}. My code has a bug.
 
 Buggy code:
 ${buggyCode}
@@ -757,7 +622,11 @@ ${buggyCode}
 Error message:
 ${errorMsg || '(no error message provided)'}
 
-Explain this bug to me at a ${experience} level. Use simple analogies if I am a beginner. Respond in this exact JSON format:
+Explain this bug to me at a ${experience} level. Use simple analogies if I am a beginner.
+
+Also provide a step-by-step execution trace of the buggy code — show each meaningful step the runtime takes, what variables hold at that point, and mark the exact step where the error occurs.
+
+Respond in this exact JSON format (no markdown, no extra text):
 {
   "oneLiner": "The bug in one sentence",
   "whyItHappens": "Explanation with analogy if beginner (3-4 sentences)",
@@ -767,278 +636,407 @@ Explain this bug to me at a ${experience} level. Use simple analogies if I am a 
     "newCode": "the fixed line(s)",
     "fullFixed": "full corrected code"
   },
-  "spotItNextTime": ["Warning sign 1", "Warning sign 2"]
+  "spotItNextTime": ["Warning sign 1", "Warning sign 2"],
+  "executionTrace": [
+    {
+      "lineNum": 1,
+      "code": "exact code text from the buggy code",
+      "vars": {"varName": "value"},
+      "status": "ok",
+      "note": "Short plain-English description of what happens at this step"
+    },
+    {
+      "lineNum": 5,
+      "code": "the line that causes the error",
+      "vars": {},
+      "status": "error",
+      "note": "Plain-English description of why this line crashes"
+    }
+  ]
 }
 
-Return only the JSON, no markdown.`;
+Rules for executionTrace:
+- Include 4-10 meaningful steps (skip blank lines and comments unless important)
+- "status" must be exactly "ok", "error", or "warning"
+- The last step with status "error" is where the bug lives
+- "vars" shows all variables that exist at that point (use string values)
+- "code" must be exact text from the buggy code (trim leading whitespace)
+- "lineNum" is the 1-based line number in the buggy code
+- Keep "note" under 15 words`;
 
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || 'API error');
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      }
+    );
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'API error');
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const json = extractJSON(rawText);
+    if (!json) throw new Error('Could not parse AI response as JSON');
 
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      const json = extractJSON(rawText);
-      if (!json) throw new Error('Could not parse AI response as JSON');
+    lastResult = json;
+    lastContext = { buggyCode, errorMsg, language, experience };
+    chatHistory = [];
 
-      lastResult = json;
-      lastContext = { buggyCode, errorMsg, language, experience };
-      chatHistory = [];
+    renderResults(json, experience, buggyCode);
+    saveToHistory(json, language, experience);
+    renderHistory();
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+}
 
-      renderResults(json, experience);
-      saveToHistory(json, language, experience);
-      renderHistory();
+// ─── Render all results ───────────────────────────────────────
+function renderResults(r, experience, buggyCode) {
+  // Card 1
+  document.getElementById('oneLiner').textContent = r.oneLiner || '';
 
-    } catch (err) {
-      showToast('Error: ' + err.message);
-    } finally {
-      setLoading(false);
+  // Card 2
+  const isBeginner = experience.includes('Beginner') || experience.includes('Learning');
+  document.getElementById('analogyTag').style.display = isBeginner ? 'inline-flex' : 'none';
+  document.getElementById('whyText').textContent = r.whyItHappens || '';
+
+  // Card 3
+  document.getElementById('fixExplanation').textContent = r.fix?.explanation || '';
+  renderDiff(r.fix?.oldCode || '', r.fix?.newCode || '');
+
+  // Card 4
+  const ul = document.getElementById('warningList');
+  ul.innerHTML = '';
+  (r.spotItNextTime || []).forEach((w, i) => {
+    const li = document.createElement('li');
+    li.className = 'warning-item';
+    li.innerHTML = `<div class="warning-icon">${i+1}</div><span>${escapeHtml(w)}</span>`;
+    ul.appendChild(li);
+  });
+
+  // Card 5: Execution Trace
+  buildTrace(r.executionTrace || [], buggyCode);
+
+  // Show + animate
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('followupChat').style.display = 'none';
+  document.getElementById('followupToggle').textContent = '💬 Ask a follow-up question';
+
+  ['card1','card2','card3','card4','card5'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.remove('visible');
+    setTimeout(() => el.classList.add('visible'), i * 110);
+  });
+
+  setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+}
+
+// ─── Diff view ────────────────────────────────────────────────
+function renderDiff(oldCode, newCode) {
+  const c = document.getElementById('diffLines');
+  c.innerHTML = '';
+  oldCode.split('\n').forEach(line => {
+    const d = document.createElement('div');
+    d.className = 'diff-line removed';
+    d.innerHTML = `<span class="diff-sign">-</span><span class="diff-code">${escapeHtml(line)}</span>`;
+    c.appendChild(d);
+  });
+  newCode.split('\n').forEach(line => {
+    const d = document.createElement('div');
+    d.className = 'diff-line added';
+    d.innerHTML = `<span class="diff-sign">+</span><span class="diff-code">${escapeHtml(line)}</span>`;
+    c.appendChild(d);
+  });
+}
+
+function copyFixed() {
+  const code = lastResult?.fix?.fullFixed || lastResult?.fix?.newCode || '';
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.classList.add('copied'); btn.textContent = '✓ Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy fixed code`;
+    }, 2000);
+  });
+}
+
+// ─── Execution Trace ──────────────────────────────────────────
+function buildTrace(steps, buggyCode) {
+  traceStop();
+  traceCurrentStep = -1;
+  tracePrevVars = {};
+
+  // Build full code line map
+  const codeLines = buggyCode.split('\n');
+
+  // If no trace data, create a minimal one from the code
+  if (!steps || steps.length === 0) {
+    steps = codeLines.map((line, i) => ({
+      lineNum: i + 1, code: line.trim() || '(blank)',
+      vars: {}, status: 'ok', note: 'Line ' + (i+1)
+    }));
+  }
+
+  traceSteps = steps;
+
+  // Render static code pane (all lines of the full code)
+  const linesContainer = document.getElementById('traceLines');
+  linesContainer.innerHTML = '';
+  codeLines.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'trace-line tl-future';
+    div.id = `tl-${i+1}`;
+    div.innerHTML =
+      `<span class="tl-gutter">${i+1}</span>` +
+      `<span class="tl-marker"> </span>` +
+      `<span class="tl-code">${escapeHtml(line || ' ')}</span>`;
+    linesContainer.appendChild(div);
+  });
+
+  // Reset UI
+  document.getElementById('traceStepCounter').textContent = `Step 0 / ${steps.length}`;
+  document.getElementById('traceProgressFill').style.width = '0%';
+  document.getElementById('traceNote').textContent = 'Press Play or Step › to begin the trace.';
+  document.getElementById('traceNote').className = 'trace-note';
+  document.getElementById('traceVarsBody').innerHTML = '<div class="no-vars">Press Play to start</div>';
+  document.getElementById('traceFileName').textContent =
+    lastContext.language === 'Python' ? 'main.py' :
+    lastContext.language === 'JavaScript' ? 'main.js' :
+    lastContext.language === 'TypeScript' ? 'main.ts' :
+    lastContext.language === 'Java' ? 'Main.java' :
+    lastContext.language === 'C++' ? 'main.cpp' : 'code';
+}
+
+function traceApplyStep(stepIdx) {
+  const step = traceSteps[stepIdx];
+  if (!step) return;
+
+  const total = traceSteps.length;
+  const codeLines = document.getElementById('traceLines').querySelectorAll('.trace-line');
+
+  // Reset all line states
+  codeLines.forEach((el, i) => {
+    const lineNum = i + 1;
+    const pastStep = traceSteps.slice(0, stepIdx).find(s => s.lineNum === lineNum);
+    const isCurrent = step.lineNum === lineNum;
+
+    el.querySelector('.tl-marker').textContent = ' ';
+
+    if (isCurrent) {
+      el.className = 'trace-line ' + (step.status === 'error' ? 'tl-error' : 'tl-current');
+      el.querySelector('.tl-marker').textContent = step.status === 'error' ? '✕' : '▶';
+      el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } else if (pastStep) {
+      el.className = 'trace-line tl-past';
+      el.querySelector('.tl-marker').textContent = '✓';
+    } else {
+      el.className = 'trace-line tl-future';
     }
-  }
+  });
 
-  // ─── Render results ───────────────────────────────────────
-  function renderResults(r, experience) {
-    // Card 1
-    document.getElementById('oneLiner').textContent = r.oneLiner || '';
+  // Step counter + progress
+  document.getElementById('traceStepCounter').textContent = `Step ${stepIdx+1} / ${total}`;
+  document.getElementById('traceProgressFill').style.width = `${((stepIdx+1)/total)*100}%`;
 
-    // Card 2
-    const isBeginner = experience.includes('Beginner') || experience.includes('Learning');
-    const analogyTag = document.getElementById('analogyTag');
-    analogyTag.style.display = isBeginner ? 'inline-flex' : 'none';
-    document.getElementById('whyText').textContent = r.whyItHappens || '';
+  // Note
+  const noteEl = document.getElementById('traceNote');
+  noteEl.textContent = step.note || '';
+  noteEl.className = 'trace-note' +
+    (step.status === 'error' ? ' is-error' : step.status === 'ok' ? ' is-ok' : '');
 
-    // Card 3
-    document.getElementById('fixExplanation').textContent = r.fix?.explanation || '';
-    renderDiff(r.fix?.oldCode || '', r.fix?.newCode || '');
-
-    // Card 4
-    const ul = document.getElementById('warningList');
-    ul.innerHTML = '';
-    (r.spotItNextTime || []).forEach((w, i) => {
-      const li = document.createElement('li');
-      li.className = 'warning-item';
-      li.innerHTML = `<div class="warning-icon">${i + 1}</div><span>${escapeHtml(w)}</span>`;
-      ul.appendChild(li);
-    });
-
-    // Show results
-    document.getElementById('results').style.display = 'block';
-    document.getElementById('followupChat').style.display = 'none';
-    document.getElementById('followupToggle').textContent = '💬 Ask a follow-up question';
-
-    // Animate cards
-    ['card1','card2','card3','card4'].forEach((id, i) => {
-      const el = document.getElementById(id);
-      el.classList.remove('visible');
-      setTimeout(() => el.classList.add('visible'), i * 100);
-    });
-
-    setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-  }
-
-  function renderDiff(oldCode, newCode) {
-    const container = document.getElementById('diffLines');
-    container.innerHTML = '';
-
-    const oldLines = oldCode.split('\n');
-    const newLines = newCode.split('\n');
-
-    oldLines.forEach(line => {
-      const d = document.createElement('div');
-      d.className = 'diff-line removed';
-      d.innerHTML = `<span class="diff-sign">-</span><span class="diff-code">${escapeHtml(line)}</span>`;
-      container.appendChild(d);
-    });
-    newLines.forEach(line => {
-      const d = document.createElement('div');
-      d.className = 'diff-line added';
-      d.innerHTML = `<span class="diff-sign">+</span><span class="diff-code">${escapeHtml(line)}</span>`;
-      container.appendChild(d);
+  // Variables
+  const varsBody = document.getElementById('traceVarsBody');
+  const currentVars = step.vars || {};
+  varsBody.innerHTML = '';
+  if (Object.keys(currentVars).length === 0) {
+    varsBody.innerHTML = '<div class="no-vars">No variables yet</div>';
+  } else {
+    Object.entries(currentVars).forEach(([k, v]) => {
+      const isNew = tracePrevVars[k] === undefined || tracePrevVars[k] !== String(v);
+      const row = document.createElement('div');
+      row.className = 'var-row' + (isNew ? ' var-new' : '');
+      row.innerHTML =
+        `<span class="var-name">${escapeHtml(k)}</span>` +
+        `<span class="var-equals"> = </span>` +
+        `<span class="var-value">${escapeHtml(String(v))}</span>`;
+      varsBody.appendChild(row);
     });
   }
+  tracePrevVars = { ...currentVars };
 
-  function copyFixed() {
-    const code = lastResult?.fix?.fullFixed || lastResult?.fix?.newCode || '';
-    if (!code) return;
-    navigator.clipboard.writeText(code).then(() => {
-      const btn = document.getElementById('copyBtn');
-      btn.classList.add('copied');
-      btn.textContent = '✓ Copied!';
-      setTimeout(() => {
-        btn.classList.remove('copied');
-        btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy fixed code`;
-      }, 2000);
+  traceCurrentStep = stepIdx;
+}
+
+function traceStep(dir) {
+  const next = traceCurrentStep + dir;
+  if (next < 0 || next >= traceSteps.length) {
+    if (next >= traceSteps.length) traceStop();
+    return;
+  }
+  traceApplyStep(next);
+}
+
+function traceTogglePlay() {
+  if (tracePlayInterval) {
+    traceStop();
+  } else {
+    const btn = document.getElementById('tracePlayBtn');
+    btn.textContent = '⏸ Pause'; btn.classList.add('play-active');
+    if (traceCurrentStep >= traceSteps.length - 1) traceReset(false);
+    tracePlayInterval = setInterval(() => {
+      const next = traceCurrentStep + 1;
+      if (next >= traceSteps.length) { traceStop(); return; }
+      traceApplyStep(next);
+    }, traceSpeed);
+  }
+}
+
+function traceStop() {
+  if (tracePlayInterval) { clearInterval(tracePlayInterval); tracePlayInterval = null; }
+  const btn = document.getElementById('tracePlayBtn');
+  if (btn) { btn.textContent = '▶ Play'; btn.classList.remove('play-active'); }
+}
+
+function traceReset(resetStep = true) {
+  traceStop();
+  if (resetStep) {
+    traceCurrentStep = -1;
+    tracePrevVars = {};
+    document.getElementById('traceProgressFill').style.width = '0%';
+    document.getElementById('traceStepCounter').textContent = `Step 0 / ${traceSteps.length}`;
+    document.getElementById('traceNote').textContent = 'Press Play or Step › to begin the trace.';
+    document.getElementById('traceNote').className = 'trace-note';
+    document.getElementById('traceVarsBody').innerHTML = '<div class="no-vars">Press Play to start</div>';
+    document.getElementById('traceLines').querySelectorAll('.trace-line').forEach(el => {
+      el.className = 'trace-line tl-future';
+      el.querySelector('.tl-marker').textContent = ' ';
     });
   }
+}
 
-  // ─── Follow-up chat ───────────────────────────────────────
-  function toggleFollowup() {
-    const chat = document.getElementById('followupChat');
-    const btn = document.getElementById('followupToggle');
-    const visible = chat.style.display !== 'none';
-    chat.style.display = visible ? 'none' : 'block';
-    btn.textContent = visible ? '💬 Ask a follow-up question' : '✕ Close follow-up';
-    if (!visible && document.getElementById('chatMessages').children.length === 0) {
-      addChatMsg('ai', `I've explained the bug in your ${lastContext.language} code. What would you like to know more about?`);
-    }
-  }
+function updateSpeed(val) {
+  traceSpeed = parseInt(val);
+  const labels = { 1600:'0.5×', 1200:'0.7×', 800:'1×', 600:'1.3×', 400:'1.7×', 200:'2×' };
+  document.getElementById('traceSpeedLabel').textContent = labels[val] || '1×';
+  if (tracePlayInterval) { traceStop(); traceTogglePlay(); }
+}
 
-  async function sendFollowup() {
-    const input = document.getElementById('followupInput');
-    const question = input.value.trim();
-    if (!question) return;
-    const apiKey = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
-    if (!apiKey) return showToast('API key required');
+// ─── Follow-up chat ───────────────────────────────────────────
+function toggleFollowup() {
+  const chat = document.getElementById('followupChat');
+  const btn  = document.getElementById('followupToggle');
+  const open = chat.style.display !== 'none';
+  chat.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '💬 Ask a follow-up question' : '✕ Close follow-up';
+  if (!open && document.getElementById('chatMessages').children.length === 0)
+    addChatMsg('ai', `I've explained the bug in your ${lastContext.language} code. What would you like to know more about?`);
+}
 
-    input.value = '';
-    addChatMsg('user', question);
-    document.getElementById('sendFollowup').disabled = true;
+async function sendFollowup() {
+  const input = document.getElementById('followupInput');
+  const q = input.value.trim();
+  if (!q) return;
+  const apiKey = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
+  if (!apiKey) return showToast('API key required');
+  input.value = '';
+  addChatMsg('user', q);
+  document.getElementById('sendFollowup').disabled = true;
 
-    chatHistory.push({ role: 'user', parts: [{ text: question }] });
-
-    const systemContext = `Context: The user is a ${lastContext.experience} programmer in ${lastContext.language}.
+  const ctx = `Context: The user is a ${lastContext.experience} programmer in ${lastContext.language}.
 Their bug was: ${lastResult?.oneLiner}.
 The fix was: ${lastResult?.fix?.explanation}
-Now answer their follow-up question clearly and concisely.`;
+The execution trace showed ${traceSteps.length} steps.
+Answer their follow-up clearly and concisely.`;
 
-    const messages = [
-      { role: 'user', parts: [{ text: systemContext + '\n\nUser follow-up: ' + question }] }
-    ];
-
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: messages })
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || 'API error');
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
-      addChatMsg('ai', reply);
-      chatHistory.push({ role: 'model', parts: [{ text: reply }] });
-    } catch (err) {
-      addChatMsg('ai', 'Error: ' + err.message);
-    } finally {
-      document.getElementById('sendFollowup').disabled = false;
-    }
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: ctx + '\n\nFollow-up: ' + q }] }] })
+      }
+    );
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'API error');
+    addChatMsg('ai', data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response');
+  } catch (err) {
+    addChatMsg('ai', 'Error: ' + err.message);
+  } finally {
+    document.getElementById('sendFollowup').disabled = false;
   }
+}
 
-  function addChatMsg(role, text) {
-    const container = document.getElementById('chatMessages');
+function addChatMsg(role, text) {
+  const c = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`; div.textContent = text;
+  c.appendChild(div); c.scrollTop = c.scrollHeight;
+}
+
+// ─── History ──────────────────────────────────────────────────
+function saveToHistory(result, language, experience) {
+  let h = getHistory();
+  h.unshift({ oneLiner: result.oneLiner, language, experience, ts: Date.now(),
+    result, code: lastContext.buggyCode, errorMsg: lastContext.errorMsg });
+  localStorage.setItem('bug_history', JSON.stringify(h.slice(0, 5)));
+}
+function getHistory() { try { return JSON.parse(localStorage.getItem('bug_history') || '[]'); } catch { return []; } }
+function clearHistory() { localStorage.removeItem('bug_history'); renderHistory(); }
+function renderHistory() {
+  const h = getHistory(), list = document.getElementById('historyList');
+  if (h.length === 0) { list.innerHTML = '<div class="no-history">No bugs explained yet</div>'; return; }
+  list.innerHTML = '';
+  h.forEach((item, i) => {
     const div = document.createElement('div');
-    div.className = `msg ${role}`;
-    div.textContent = text;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-  }
+    div.className = 'history-item';
+    div.innerHTML = `
+      <div class="history-item-info">
+        <div class="history-item-summary">${escapeHtml(item.oneLiner||'Bug '+(i+1))}</div>
+        <div class="history-item-meta">${timeAgo(item.ts)}</div>
+      </div>
+      <span class="history-badge">${escapeHtml(item.language)}</span>`;
+    div.onclick = () => {
+      document.getElementById('buggyCode').value = item.code || '';
+      document.getElementById('errorMsg').value  = item.errorMsg || '';
+      lastResult  = item.result;
+      lastContext = { buggyCode: item.code, errorMsg: item.errorMsg, language: item.language, experience: item.experience };
+      renderResults(item.result, item.experience, item.code || '');
+    };
+    list.appendChild(div);
+  });
+}
 
-  // ─── History ──────────────────────────────────────────────
-  function saveToHistory(result, language, experience) {
-    let history = getHistory();
-    history.unshift({
-      oneLiner: result.oneLiner,
-      language,
-      experience,
-      ts: Date.now(),
-      result,
-      code: lastContext.buggyCode,
-      errorMsg: lastContext.errorMsg
-    });
-    history = history.slice(0, 5);
-    localStorage.setItem('bug_history', JSON.stringify(history));
-  }
-
-  function getHistory() {
-    try { return JSON.parse(localStorage.getItem('bug_history') || '[]'); } catch { return []; }
-  }
-
-  function renderHistory() {
-    const history = getHistory();
-    const list = document.getElementById('historyList');
-    if (history.length === 0) {
-      list.innerHTML = '<div class="no-history">No bugs explained yet</div>';
-      return;
-    }
-    list.innerHTML = '';
-    history.forEach((item, i) => {
-      const div = document.createElement('div');
-      div.className = 'history-item';
-      const age = timeAgo(item.ts);
-      div.innerHTML = `
-        <div class="history-item-info">
-          <div class="history-item-summary">${escapeHtml(item.oneLiner || 'Bug ' + (i+1))}</div>
-          <div class="history-item-meta">${age}</div>
-        </div>
-        <span class="history-badge">${escapeHtml(item.language)}</span>`;
-      div.onclick = () => {
-        document.getElementById('buggyCode').value = item.code || '';
-        document.getElementById('errorMsg').value = item.errorMsg || '';
-        lastResult = item.result;
-        lastContext = { buggyCode: item.code, errorMsg: item.errorMsg, language: item.language, experience: item.experience };
-        renderResults(item.result, item.experience);
-      };
-      list.appendChild(div);
-    });
-  }
-
-  function clearHistory() {
-    localStorage.removeItem('bug_history');
-    renderHistory();
-  }
-
-  // ─── Helpers ──────────────────────────────────────────────
-  function setLoading(on) {
-    const btn = document.getElementById('explainBtn');
-    const spinner = document.getElementById('spinner');
-    const text = document.getElementById('btnText');
-    btn.disabled = on;
-    spinner.style.display = on ? 'block' : 'none';
-    text.textContent = on ? 'Analyzing bug...' : '🔍 Explain This Bug';
-  }
-
-  function extractJSON(text) {
-    // Try direct parse
-    try { return JSON.parse(text.trim()); } catch {}
-    // Try to find JSON block
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) { try { return JSON.parse(match[0]); } catch {} }
-    return null;
-  }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function timeAgo(ts) {
-    const secs = Math.floor((Date.now() - ts) / 1000);
-    if (secs < 60) return 'just now';
-    if (secs < 3600) return Math.floor(secs/60) + 'm ago';
-    if (secs < 86400) return Math.floor(secs/3600) + 'h ago';
-    return Math.floor(secs/86400) + 'd ago';
-  }
-
-  let toastTimer;
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
-  }
+// ─── Helpers ──────────────────────────────────────────────────
+function setLoading(on) {
+  document.getElementById('explainBtn').disabled = on;
+  document.getElementById('spinner').style.display = on ? 'block' : 'none';
+  document.getElementById('btnText').textContent = on ? 'Analyzing…' : '🔍 Explain This Bug';
+}
+function extractJSON(text) {
+  try { return JSON.parse(text.trim()); } catch {}
+  const m = text.match(/\{[\s\S]*\}/);
+  if (m) { try { return JSON.parse(m[0]); } catch {} }
+  return null;
+}
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function timeAgo(ts) {
+  const s = Math.floor((Date.now()-ts)/1000);
+  if (s<60) return 'just now'; if (s<3600) return Math.floor(s/60)+'m ago';
+  if (s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago';
+}
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
 </script>
 </body>
 </html>
