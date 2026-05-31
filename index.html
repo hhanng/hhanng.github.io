@@ -315,7 +315,7 @@
     </header>
 
     <!-- AI AGENTS -->
-    <div class="section-title-row">
+    <div id="agents-section" class="section-title-row">
       <h2 class="section-title">Vibe Code — All Agents</h2>
       <a href="https://kfamilyzone.github.io/hanhan-grader/" class="btn secondary" target="_blank">📊 Grader</a>
     </div>
@@ -1132,7 +1132,7 @@
         <div class="card-tag">#115 · Immigration / Life</div>
         <h3>US Immigration &amp; Life Guide EN/VI</h3>
         <p>8-section bilingual guide covering visa types, green card process, naturalization with all 100 USCIS civics Q&amp;As (quiz mode), government services, legal rights, emergency scripts in EN/VI, and community resources.</p>
-        <a href="./agent-115-immigration-life-guide/" class="btn primary" target="_blank">Launch</a>
+        <a href="./agent-115-us-immigration-guide/" class="btn primary" target="_blank">Launch</a>
       </div>
 
       <div class="card" data-placeholder="true">
@@ -1279,19 +1279,84 @@
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    (function () {
-      const grid  = document.getElementById("agents-grid");
-      const fill  = document.getElementById("progress-fill");
-      const label = document.getElementById("progress-label");
+    (function() {
+      const PER_PAGE = 51;
+      const grid = document.getElementById('agents-grid');
+      // Use .card — that's the actual class on every agent card in this file
+      const cards = Array.from(grid.querySelectorAll('.card'));
+      const total = cards.length;
+      const totalPages = Math.ceil(total / PER_PAGE);
+      let currentPage = 1;
 
-      const allCards   = grid.querySelectorAll(".card");
-      const total      = allCards.length;
-      const placeholders = grid.querySelectorAll(".card[data-placeholder='true']").length;
-      const built      = total - placeholders;
-      const pct        = total > 0 ? Math.round((built / total) * 100) : 0;
+      // Update progress bar — show total count, bar always full
+      const progFill  = document.getElementById('progress-fill');
+      const progLabel = document.getElementById('progress-label');
+      if (progFill)  progFill.style.width = '100%';
+      if (progLabel) progLabel.textContent = total + ' / ' + total + ' Agents Built';
 
-      fill.style.width  = pct + "%";
-      label.textContent = built + " / " + total + " Agents Built";
+      function showPage(page) {
+        currentPage = page;
+        const start = (page - 1) * PER_PAGE;
+        const end   = start + PER_PAGE;
+        cards.forEach(function(card, i) {
+          card.style.display = (i >= start && i < end) ? '' : 'none';
+        });
+        renderPagination();
+        document.getElementById('agents-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('page-info').textContent =
+          'Showing ' + (start + 1) + '–' + Math.min(end, total) + ' of ' + total + ' agents';
+      }
+
+      function renderPagination() {
+        var container = document.getElementById('pagination-controls');
+        var html = '';
+        html += '<button onclick="agentPage(' + (currentPage - 1) + ')" ' + (currentPage === 1 ? 'disabled' : '') + '>← Prev</button>';
+        for (var i = 1; i <= totalPages; i++) {
+          html += '<button onclick="agentPage(' + i + ')" class="' + (i === currentPage ? 'page-active' : '') + '">' + i + '</button>';
+        }
+        html += '<button onclick="agentPage(' + (currentPage + 1) + ')" ' + (currentPage === totalPages ? 'disabled' : '') + '>Next →</button>';
+        container.innerHTML = html;
+        document.getElementById('pagination-controls-bottom').innerHTML = html;
+      }
+
+      window.agentPage = function(n) {
+        if (n < 1 || n > totalPages) return;
+        showPage(n);
+      };
+
+      // Inject top controls + page-info above the grid
+      var controlsTop = document.createElement('div');
+      controlsTop.id = 'pagination-controls';
+      var pageInfo = document.createElement('div');
+      pageInfo.id = 'page-info';
+      pageInfo.style.cssText = 'text-align:center;font-size:13px;color:#888;margin:8px 0 16px;';
+      grid.parentNode.insertBefore(controlsTop, grid);
+      grid.parentNode.insertBefore(pageInfo, grid);
+
+      // Inject bottom controls after the grid
+      var controlsBottom = document.createElement('div');
+      controlsBottom.id = 'pagination-controls-bottom';
+      grid.parentNode.insertBefore(controlsBottom, grid.nextSibling);
+
+      // Pagination button styles
+      var style = document.createElement('style');
+      style.textContent =
+        '#pagination-controls, #pagination-controls-bottom {' +
+          'display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:16px 0;' +
+        '}' +
+        '#pagination-controls button, #pagination-controls-bottom button {' +
+          'min-width:38px;height:38px;padding:0 12px;border:1px solid #ddd;border-radius:8px;' +
+          'background:transparent;cursor:pointer;font-size:14px;transition:background 0.15s;' +
+        '}' +
+        '#pagination-controls button:hover:not(:disabled),' +
+        '#pagination-controls-bottom button:hover:not(:disabled){background:#f0f0f0;}' +
+        '#pagination-controls button.page-active,' +
+        '#pagination-controls-bottom button.page-active{background:#e08da0;border-color:#e08da0;color:#fff;}' +
+        '#pagination-controls button:disabled,' +
+        '#pagination-controls-bottom button:disabled{opacity:0.35;cursor:not-allowed;}';
+      document.head.appendChild(style);
+
+      showPage(1);
     })();
   </script>
 </body>
