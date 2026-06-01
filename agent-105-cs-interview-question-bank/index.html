@@ -6,23 +6,1219 @@
 <title>Agent #105 · CS Interview Question Bank</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px;max-width:520px;width:100%;text-align:center}
-.num{font-size:.8rem;font-weight:700;color:#38bdf8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-h1{font-size:1.6rem;font-weight:800;margin-bottom:12px;color:#f1f5f9}
-p{color:#94a3b8;font-size:.95rem;line-height:1.6;margin-bottom:24px}
-.badge{display:inline-block;background:#1d4ed8;color:#bfdbfe;font-size:.8rem;font-weight:700;padding:6px 16px;border-radius:99px;margin-bottom:28px}
-a.back{color:#38bdf8;text-decoration:none;font-size:.85rem;border:1px solid #334155;padding:8px 18px;border-radius:8px;display:inline-block;transition:background .15s}
-a.back:hover{background:#1e3a5f}
+:root{
+  --bg:#0f172a;--card:#1e293b;--border:#334155;
+  --accent:#38bdf8;--text:#e2e8f0;--muted:#94a3b8;--dim:#64748b;
+  --easy:#34d399;--med:#f59e0b;--hard:#f87171;
+}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:#1e293b;border-bottom:1px solid var(--border);padding:20px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:1.25rem;font-weight:800;color:#f1f5f9}
+header p{color:var(--muted);font-size:.85rem}
+.badge{background:#0ea5e9;color:#fff;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:99px;letter-spacing:.05em}
+.progress-wrap{background:#1e293b;border-bottom:1px solid var(--border);padding:12px 24px}
+.progress-label{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-bottom:6px}
+.progress-label span{color:var(--accent);font-weight:700}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:#1e293b}
+.tab{flex:1;padding:14px;text-align:center;font-size:.9rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.filters{display:flex;gap:10px;padding:16px 24px;flex-wrap:wrap;background:var(--bg);border-bottom:1px solid var(--border)}
+.filters input,.filters select{background:#1e293b;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:.85rem;outline:none}
+.filters input{flex:1;min-width:180px}
+.filters input:focus,.filters select:focus{border-color:var(--accent)}
+.filters select option{background:#1e293b}
+.count{color:var(--muted);font-size:.85rem;padding:8px 12px;display:flex;align-items:center}
+main{padding:20px 24px;max-width:900px;margin:0 auto}
+.pane{display:none}
+.pane.active{display:block}
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;transition:border-color .2s}
+.q-card.done-card{border-color:#334155;opacity:.6}
+.q-head{display:flex;align-items:center;gap:12px;padding:16px;cursor:pointer;user-select:none}
+.q-head:hover{background:rgba(56,189,248,.04)}
+.diff{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:99px;flex-shrink:0}
+.diff.Easy{background:rgba(52,211,153,.15);color:var(--easy)}
+.diff.Medium{background:rgba(245,158,11,.15);color:var(--med)}
+.diff.Hard{background:rgba(248,113,113,.15);color:var(--hard)}
+.topic-tag{font-size:.72rem;padding:3px 9px;border-radius:99px;background:rgba(99,102,241,.15);color:#a5b4fc;flex-shrink:0}
+.q-title{font-weight:600;font-size:.95rem;flex:1}
+.done-cb{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.chevron{color:var(--dim);font-size:.8rem;flex-shrink:0;transition:transform .2s}
+.q-card.open .chevron{transform:rotate(180deg)}
+.q-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border)}
+.q-card.open .q-body{display:block}
+.q-section{margin-top:14px}
+.q-section label{font-size:.72rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:6px}
+.q-section p{color:var(--muted);font-size:.88rem;line-height:1.65}
+pre{background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:.8rem;overflow-x:auto;line-height:1.6;color:#e2e8f0;margin-top:6px}
+.meta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+.meta-pill{font-size:.75rem;padding:4px 10px;border-radius:99px;background:rgba(56,189,248,.1);color:var(--accent)}
+.companies{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.co{font-size:.72rem;padding:3px 8px;border-radius:6px;background:#1e3a5f;color:#7dd3fc}
+.key-points{list-style:none;padding:0;margin-top:6px}
+.key-points li{font-size:.88rem;color:var(--muted);padding:4px 0 4px 18px;position:relative;line-height:1.5}
+.key-points li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+.star-block{background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:6px;font-size:.88rem;color:var(--muted);line-height:1.8}
+.star-block strong{color:var(--accent)}
+@media(max-width:600px){
+  header{padding:16px}.filters{padding:12px 16px}main{padding:16px}
+  .q-head{padding:12px;gap:8px}.q-title{font-size:.88rem}
+}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="num">Agent #105 · 100 AI Agents Challenge</div>
-  <h1>CS Interview Question Bank</h1>
-  <p>200 CS interview questions across DSA, System Design, and Behavioral with answers.</p>
-  <div class="badge">🚧 Coming Soon</div><br>
-  <a href="/" class="back">← Back to Portfolio</a>
+
+<header>
+  <div>
+    <div class="badge">#105 · AI Agents Challenge</div>
+    <h1 style="margin-top:6px">CS Interview Question Bank</h1>
+    <p>50 DSA · 30 System Design · 20 Behavioral — check off questions as you practice</p>
+  </div>
+  <a href="/" style="margin-left:auto;color:var(--accent);font-size:.85rem;text-decoration:none;border:1px solid var(--border);padding:8px 16px;border-radius:8px">← Portfolio</a>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span id="done-count">0 / 100 done</span>
+    <span id="done-pct">0%</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="fill" style="width:0%"></div></div>
 </div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('dsa',this)">💻 DSA <small style="opacity:.6">(50)</small></div>
+  <div class="tab" onclick="switchTab('sd',this)">🏗 System Design <small style="opacity:.6">(30)</small></div>
+  <div class="tab" onclick="switchTab('beh',this)">🧠 Behavioral <small style="opacity:.6">(20)</small></div>
+</div>
+
+<div class="filters" id="filters-dsa">
+  <input id="search-dsa" placeholder="Search DSA questions…" oninput="renderPane('dsa')">
+  <select id="diff-dsa" onchange="renderPane('dsa')">
+    <option value="">All Difficulties</option>
+    <option>Easy</option><option>Medium</option><option>Hard</option>
+  </select>
+  <select id="topic-dsa" onchange="renderPane('dsa')">
+    <option value="">All Topics</option>
+    <option>Arrays</option><option>Strings</option><option>Linked Lists</option>
+    <option>Trees</option><option>Graphs</option><option>DP</option>
+    <option>Heap</option><option>Binary Search</option>
+  </select>
+  <div class="count" id="count-dsa"></div>
+</div>
+
+<div class="filters" id="filters-sd" style="display:none">
+  <input id="search-sd" placeholder="Search System Design…" oninput="renderPane('sd')">
+  <select id="diff-sd" onchange="renderPane('sd')">
+    <option value="">All Difficulties</option>
+    <option>Medium</option><option>Hard</option>
+  </select>
+  <select id="cat-sd" onchange="renderPane('sd')">
+    <option value="">All Categories</option>
+    <option>Classic Systems</option><option>Components</option><option>Concepts</option>
+  </select>
+  <div class="count" id="count-sd"></div>
+</div>
+
+<div class="filters" id="filters-beh" style="display:none">
+  <input id="search-beh" placeholder="Search Behavioral…" oninput="renderPane('beh')">
+  <select id="cat-beh" onchange="renderPane('beh')">
+    <option value="">All Categories</option>
+    <option>Leadership</option><option>Conflict</option><option>Problem Solving</option><option>Growth</option>
+  </select>
+  <div class="count" id="count-beh"></div>
+</div>
+
+<main>
+  <div class="pane active" id="pane-dsa"></div>
+  <div class="pane" id="pane-sd"></div>
+  <div class="pane" id="pane-beh"></div>
+</main>
+
+<script>
+const DSA=[
+// ARRAYS
+{id:"d1",topic:"Arrays",title:"Two Sum",diff:"Easy",
+ q:"Given an integer array nums and a target, return indices of the two numbers that add up to target.",
+ hint:"Use a hash map: for each num, check if target−num already exists.",
+ ans:"Iterate once. Store each value → index in a map. If target−num is in the map, return both indices. O(n) time, O(n) space.",
+ sol:`def twoSum(nums, target):
+    seen = {}
+    for i, n in enumerate(nums):
+        if target - n in seen:
+            return [seen[target - n], i]
+        seen[n] = i`,
+ tc:"O(n)",sc:"O(n)",cos:["Google","Amazon","Meta","Apple","Microsoft"]},
+
+{id:"d2",topic:"Arrays",title:"Best Time to Buy and Sell Stock",diff:"Easy",
+ q:"Given prices[], find the max profit from one buy and one sell (buy before sell). Return 0 if no profit.",
+ hint:"Track the minimum price seen so far; at each step compute profit = price − min_price.",
+ ans:"Single pass: maintain min_price and max_profit. Update min_price = min(min_price, price), then max_profit = max(max_profit, price − min_price).",
+ sol:`def maxProfit(prices):
+    min_p, max_p = float('inf'), 0
+    for p in prices:
+        min_p = min(min_p, p)
+        max_p = max(max_p, p - min_p)
+    return max_p`,
+ tc:"O(n)",sc:"O(1)",cos:["Amazon","Google","Meta","Bloomberg"]},
+
+{id:"d3",topic:"Arrays",title:"Contains Duplicate",diff:"Easy",
+ q:"Return true if any value appears at least twice in nums, false if all are distinct.",
+ hint:"Add elements to a set. If you try to add a duplicate, return true.",
+ ans:"Use a set. For each number, if it's already in the set return True. Otherwise add it. If loop ends, return False.",
+ sol:`def containsDuplicate(nums):
+    seen = set()
+    for n in nums:
+        if n in seen: return True
+        seen.add(n)
+    return False`,
+ tc:"O(n)",sc:"O(n)",cos:["Amazon","Apple","Bloomberg"]},
+
+{id:"d4",topic:"Arrays",title:"Product of Array Except Self",diff:"Medium",
+ q:"Return an array where answer[i] = product of all elements except nums[i]. No division, O(n).",
+ hint:"Two passes: left prefix products then right suffix products accumulated into the result array.",
+ ans:"First pass: fill result[i] with product of everything to its left. Second pass: multiply in the product of everything to its right using a running 'suffix' variable.",
+ sol:`def productExceptSelf(nums):
+    n, res = len(nums), [1]*len(nums)
+    prefix = 1
+    for i in range(n):
+        res[i] = prefix; prefix *= nums[i]
+    suffix = 1
+    for i in range(n-1,-1,-1):
+        res[i] *= suffix; suffix *= nums[i]
+    return res`,
+ tc:"O(n)",sc:"O(1)",cos:["Amazon","Meta","Google","Microsoft"]},
+
+{id:"d5",topic:"Arrays",title:"Maximum Subarray",diff:"Medium",
+ q:"Find the subarray with the largest sum and return its sum. (Kadane's Algorithm)",
+ hint:"If adding the current element to your running sum makes it worse than starting fresh, start fresh.",
+ ans:"Kadane's: maintain cur and res. At each step cur = max(n, cur+n). res = max(res, cur). Single pass.",
+ sol:`def maxSubArray(nums):
+    cur = res = nums[0]
+    for n in nums[1:]:
+        cur = max(n, cur + n)
+        res = max(res, cur)
+    return res`,
+ tc:"O(n)",sc:"O(1)",cos:["Amazon","Google","Apple","Microsoft"]},
+
+{id:"d6",topic:"Arrays",title:"3Sum",diff:"Medium",
+ q:"Return all unique triplets [a,b,c] in nums such that a+b+c=0.",
+ hint:"Sort first. Fix one element, then use two pointers for the remaining pair.",
+ ans:"Sort. For each index i, use left=i+1 and right=n-1. If sum<0 advance left, if sum>0 retreat right, if 0 record and skip duplicates.",
+ sol:`def threeSum(nums):
+    nums.sort(); res = []
+    for i, a in enumerate(nums):
+        if i > 0 and a == nums[i-1]: continue
+        l, r = i+1, len(nums)-1
+        while l < r:
+            s = a + nums[l] + nums[r]
+            if s < 0: l += 1
+            elif s > 0: r -= 1
+            else:
+                res.append([a, nums[l], nums[r]]); l += 1
+                while l < r and nums[l] == nums[l-1]: l += 1
+    return res`,
+ tc:"O(n²)",sc:"O(1)",cos:["Google","Amazon","Meta","Uber"]},
+
+{id:"d7",topic:"Arrays",title:"Container With Most Water",diff:"Medium",
+ q:"Given heights[], find two lines that form a container holding the most water.",
+ hint:"Two pointers from both ends. Always move the shorter pointer inward.",
+ ans:"l=0, r=n-1. Area = min(h[l],h[r])*(r-l). Move shorter pointer. Repeat until they meet. Track max area.",
+ sol:`def maxArea(height):
+    l, r, res = 0, len(height)-1, 0
+    while l < r:
+        res = max(res, min(height[l], height[r]) * (r-l))
+        if height[l] < height[r]: l += 1
+        else: r -= 1
+    return res`,
+ tc:"O(n)",sc:"O(1)",cos:["Google","Amazon","Meta","Apple"]},
+
+{id:"d8",topic:"Arrays",title:"Search in Rotated Sorted Array",diff:"Medium",
+ q:"Search for target in a rotated sorted array with distinct values. Return index or -1.",
+ hint:"Modified binary search: figure out which half is sorted, then check if target falls in that half.",
+ ans:"At each mid, one half is always sorted. If left half sorted and target in [nums[l], nums[mid]), go left. Else go right. Symmetric for right half.",
+ sol:`def search(nums, target):
+    l, r = 0, len(nums)-1
+    while l <= r:
+        mid = (l+r)//2
+        if nums[mid] == target: return mid
+        if nums[l] <= nums[mid]:
+            if nums[l] <= target < nums[mid]: r = mid-1
+            else: l = mid+1
+        else:
+            if nums[mid] < target <= nums[r]: l = mid+1
+            else: r = mid-1
+    return -1`,
+ tc:"O(log n)",sc:"O(1)",cos:["Google","Amazon","Microsoft","Meta"]},
+
+{id:"d9",topic:"Arrays",title:"Maximum Product Subarray",diff:"Medium",
+ q:"Find the subarray with the largest product and return its value.",
+ hint:"Track both max and min at each step — a negative * negative = positive.",
+ ans:"At each element, the new max could come from: the element alone, max*element, or min*element (if both negative). Track both cur_max and cur_min.",
+ sol:`def maxProduct(nums):
+    res = max(nums)
+    cur_min = cur_max = 1
+    for n in nums:
+        if n == 0: cur_min = cur_max = 1; continue
+        tmp = cur_max * n
+        cur_max = max(n, tmp, cur_min * n)
+        cur_min = min(n, tmp, cur_min * n)
+        res = max(res, cur_max)
+    return res`,
+ tc:"O(n)",sc:"O(1)",cos:["Google","Amazon","Lyft"]},
+
+{id:"d10",topic:"Arrays",title:"Find Minimum in Rotated Sorted Array",diff:"Medium",
+ q:"Find the minimum element in a rotated sorted array in O(log n).",
+ hint:"Binary search: if nums[mid] > nums[r], the minimum is in the right half.",
+ ans:"If nums[mid] > nums[r] the rotation point is right of mid (l=mid+1). Else min is in left half including mid (r=mid). Stop when l==r.",
+ sol:`def findMin(nums):
+    l, r = 0, len(nums)-1
+    while l < r:
+        mid = (l+r)//2
+        if nums[mid] > nums[r]: l = mid+1
+        else: r = mid
+    return nums[l]`,
+ tc:"O(log n)",sc:"O(1)",cos:["Microsoft","Google","Amazon"]},
+
+// STRINGS
+{id:"d11",topic:"Strings",title:"Valid Anagram",diff:"Easy",
+ q:"Return true if t is an anagram of s (same characters, same frequency).",
+ hint:"Count character frequencies. Two strings are anagrams if their frequency maps match.",
+ ans:"Use Counter from collections. Counter(s) == Counter(t) returns True for anagrams. Or sort both strings.",
+ sol:`from collections import Counter
+def isAnagram(s, t):
+    return Counter(s) == Counter(t)`,
+ tc:"O(n)",sc:"O(1)",cos:["Google","Amazon","Meta"]},
+
+{id:"d12",topic:"Strings",title:"Valid Parentheses",diff:"Easy",
+ q:"Given a string of '(', ')', '{', '}', '[', ']', return true if brackets are valid.",
+ hint:"Use a stack. Push openers, pop and check when you see a closer.",
+ ans:"Push opening brackets onto stack. For each closing bracket, pop from stack and verify it matches. Valid if stack is empty at the end.",
+ sol:`def isValid(s):
+    stack, pairs = [], {')':'(',']':'[','}':'{'}
+    for c in s:
+        if c in pairs:
+            if not stack or stack[-1] != pairs[c]: return False
+            stack.pop()
+        else: stack.append(c)
+    return not stack`,
+ tc:"O(n)",sc:"O(n)",cos:["Google","Amazon","Meta","Bloomberg"]},
+
+{id:"d13",topic:"Strings",title:"Longest Substring Without Repeating Characters",diff:"Medium",
+ q:"Find the length of the longest substring without repeating characters.",
+ hint:"Sliding window with a set. Shrink left when a duplicate enters from the right.",
+ ans:"Sliding window [l,r] with a set of current characters. If s[r] is in set, remove s[l] and advance l. Track max window length.",
+ sol:`def lengthOfLongestSubstring(s):
+    seen, l, res = set(), 0, 0
+    for r, c in enumerate(s):
+        while c in seen:
+            seen.remove(s[l]); l += 1
+        seen.add(c)
+        res = max(res, r - l + 1)
+    return res`,
+ tc:"O(n)",sc:"O(min(n,m))",cos:["Amazon","Google","Bloomberg","Microsoft"]},
+
+{id:"d14",topic:"Strings",title:"Group Anagrams",diff:"Medium",
+ q:"Given an array of strings, group anagrams together and return all groups.",
+ hint:"Sorted characters of a word are the same for all its anagrams — use as dict key.",
+ ans:"For each word, sort its characters to get a canonical key. Group words sharing the same key using a defaultdict(list). Return groups.",
+ sol:`from collections import defaultdict
+def groupAnagrams(strs):
+    d = defaultdict(list)
+    for s in strs:
+        d[tuple(sorted(s))].append(s)
+    return list(d.values())`,
+ tc:"O(n·k·log k)",sc:"O(n·k)",cos:["Amazon","Google","Meta","Uber"]},
+
+{id:"d15",topic:"Strings",title:"Longest Palindromic Substring",diff:"Medium",
+ q:"Return the longest palindromic substring in s.",
+ hint:"Expand around each character as a center. Handle both odd and even length palindromes.",
+ ans:"For each index i, expand outward for odd-length (center=i) and even-length (center=i,i+1) palindromes. Track the longest.",
+ sol:`def longestPalindrome(s):
+    res = ""
+    def expand(l, r):
+        while l >= 0 and r < len(s) and s[l] == s[r]:
+            l -= 1; r += 1
+        return s[l+1:r]
+    for i in range(len(s)):
+        for p in [expand(i,i), expand(i,i+1)]:
+            if len(p) > len(res): res = p
+    return res`,
+ tc:"O(n²)",sc:"O(1)",cos:["Amazon","Microsoft","Google"]},
+
+{id:"d16",topic:"Strings",title:"Generate Parentheses",diff:"Medium",
+ q:"Given n, generate all combinations of n pairs of valid parentheses.",
+ hint:"Backtracking: add '(' if open count < n, add ')' if close < open.",
+ ans:"Recursive: build string character by character. Add '(' when open<n. Add ')' when close<open. Base case: string length == 2n.",
+ sol:`def generateParenthesis(n):
+    res = []
+    def bt(s, open, close):
+        if len(s) == 2*n: res.append(s); return
+        if open < n: bt(s+'(', open+1, close)
+        if close < open: bt(s+')', open, close+1)
+    bt("", 0, 0); return res`,
+ tc:"O(4ⁿ/√n)",sc:"O(n)",cos:["Google","Amazon","Meta"]},
+
+{id:"d17",topic:"Strings",title:"Minimum Window Substring",diff:"Hard",
+ q:"Find the minimum window in s which contains all characters of t.",
+ hint:"Sliding window: expand right until all chars covered, then shrink left to minimize window.",
+ ans:"Two frequency maps. Track 'formed' count. Expand right adding chars. When formed==required, record window then shrink left. Repeat.",
+ sol:`from collections import Counter
+def minWindow(s, t):
+    need, window = Counter(t), {}
+    formed, req = 0, len(need)
+    res = (float('inf'), 0, 0)
+    l = 0
+    for r, c in enumerate(s):
+        window[c] = window.get(c,0) + 1
+        if c in need and window[c] == need[c]: formed += 1
+        while formed == req:
+            if r-l+1 < res[0]: res = (r-l+1, l, r)
+            window[s[l]] -= 1
+            if s[l] in need and window[s[l]] < need[s[l]]: formed -= 1
+            l += 1
+    return "" if res[0]==float('inf') else s[res[1]:res[2]+1]`,
+ tc:"O(s+t)",sc:"O(s+t)",cos:["Google","Amazon","Meta","LinkedIn"]},
+
+{id:"d18",topic:"Strings",title:"Longest Repeating Character Replacement",diff:"Medium",
+ q:"You can replace at most k characters. Find the length of the longest substring with one repeated letter.",
+ hint:"Sliding window. Window is valid when (windowSize − maxFreqChar) ≤ k.",
+ ans:"Track char counts in window and max count. If (r−l+1)−maxCount > k, shrink left. Window size never shrinks below the max seen.",
+ sol:`def characterReplacement(s, k):
+    count, max_count, l, res = {}, 0, 0, 0
+    for r, c in enumerate(s):
+        count[c] = count.get(c, 0) + 1
+        max_count = max(max_count, count[c])
+        if (r - l + 1) - max_count > k:
+            count[s[l]] -= 1; l += 1
+        res = max(res, r - l + 1)
+    return res`,
+ tc:"O(n)",sc:"O(1)",cos:["Google","Uber"]},
+
+{id:"d19",topic:"Strings",title:"Count Palindromic Substrings",diff:"Medium",
+ q:"Count the number of palindromic substrings in s.",
+ hint:"Expand around each center. For n characters there are 2n−1 possible centers.",
+ ans:"For each center (single char = odd, between two chars = even), expand outward while characters match, counting each valid palindrome.",
+ sol:`def countSubstrings(s):
+    count = 0
+    for i in range(len(s)):
+        for l, r in [(i,i),(i,i+1)]:
+            while l >= 0 and r < len(s) and s[l] == s[r]:
+                count += 1; l -= 1; r += 1
+    return count`,
+ tc:"O(n²)",sc:"O(1)",cos:["Google","LinkedIn"]},
+
+{id:"d20",topic:"Strings",title:"Word Break",diff:"Medium",
+ q:"Given string s and wordDict, return true if s can be segmented into dictionary words.",
+ hint:"DP: dp[i] = can we partition s[:i]? For each i, check all j < i.",
+ ans:"dp[0]=True. For each i, check all j<i: if dp[j] and s[j:i] in wordDict, set dp[i]=True. Return dp[n].",
+ sol:`def wordBreak(s, wordDict):
+    words = set(wordDict)
+    dp = [False] * (len(s)+1); dp[0] = True
+    for i in range(1, len(s)+1):
+        for j in range(i):
+            if dp[j] and s[j:i] in words:
+                dp[i] = True; break
+    return dp[-1]`,
+ tc:"O(n²)",sc:"O(n)",cos:["Google","Amazon","Meta"]},
+
+// LINKED LISTS
+{id:"d21",topic:"Linked Lists",title:"Reverse Linked List",diff:"Easy",
+ q:"Reverse a singly linked list. Return the new head.",
+ hint:"Three pointers: prev, curr, next. Reverse each link one at a time.",
+ ans:"Iteratively: for each node, save next, point node.next to prev, then advance both. When curr is None, prev is the new head.",
+ sol:`def reverseList(head):
+    prev, curr = None, head
+    while curr:
+        nxt = curr.next
+        curr.next = prev
+        prev, curr = curr, nxt
+    return prev`,
+ tc:"O(n)",sc:"O(1)",cos:["Google","Amazon","Meta","Apple"]},
+
+{id:"d22",topic:"Linked Lists",title:"Merge Two Sorted Lists",diff:"Easy",
+ q:"Merge two sorted linked lists and return the sorted merged list.",
+ hint:"Use a dummy head node. Compare nodes and attach the smaller one.",
+ ans:"Dummy node approach: compare l1.val and l2.val, attach smaller node, advance that pointer. Append remaining non-null list at end.",
+ sol:`def mergeTwoLists(l1, l2):
+    dummy = cur = ListNode(0)
+    while l1 and l2:
+        if l1.val <= l2.val: cur.next = l1; l1 = l1.next
+        else: cur.next = l2; l2 = l2.next
+        cur = cur.next
+    cur.next = l1 or l2
+    return dummy.next`,
+ tc:"O(n+m)",sc:"O(1)",cos:["Google","Amazon","Meta"]},
+
+{id:"d23",topic:"Linked Lists",title:"Detect Cycle in Linked List",diff:"Easy",
+ q:"Return true if there is a cycle in the linked list.",
+ hint:"Floyd's tortoise and hare: slow moves 1 step, fast moves 2 steps.",
+ ans:"If there's a cycle, slow and fast will eventually meet. If fast reaches None, no cycle. O(1) space.",
+ sol:`def hasCycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow == fast: return True
+    return False`,
+ tc:"O(n)",sc:"O(1)",cos:["Amazon","Google","Microsoft"]},
+
+{id:"d24",topic:"Linked Lists",title:"Remove Nth Node From End",diff:"Medium",
+ q:"Remove the nth node from the end of the list and return its head.",
+ hint:"Two pointers: advance fast n+1 steps, then move both until fast is None.",
+ ans:"Dummy head makes edge cases clean. Move fast n+1 ahead. Move both until fast==None. slow.next is the node to delete.",
+ sol:`def removeNthFromEnd(head, n):
+    dummy = ListNode(0, head)
+    slow = fast = dummy
+    for _ in range(n+1): fast = fast.next
+    while fast:
+        slow = slow.next; fast = fast.next
+    slow.next = slow.next.next
+    return dummy.next`,
+ tc:"O(n)",sc:"O(1)",cos:["Google","Amazon","Meta"]},
+
+{id:"d25",topic:"Linked Lists",title:"Reorder List",diff:"Medium",
+ q:"Reorder L0→L1→…→Ln to L0→Ln→L1→Ln-1→L2→… in-place.",
+ hint:"Three steps: find middle, reverse second half, merge two halves.",
+ ans:"1) Find middle with slow/fast. 2) Reverse second half. 3) Merge alternately: one from first half, one from reversed second half.",
+ sol:`def reorderList(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next; fast = fast.next.next
+    prev, curr = None, slow.next; slow.next = None
+    while curr:
+        nxt = curr.next; curr.next = prev; prev, curr = curr, nxt
+    l1, l2 = head, prev
+    while l2:
+        l1.next, l2.next, l1, l2 = l2, l1.next, l1.next, l2.next`,
+ tc:"O(n)",sc:"O(1)",cos:["Google","Amazon","Meta"]},
+
+{id:"d26",topic:"Linked Lists",title:"LRU Cache",diff:"Medium",
+ q:"Design an LRU cache with get(key) and put(key,value) both in O(1).",
+ hint:"Hash map for O(1) lookup + doubly linked list for O(1) eviction.",
+ ans:"OrderedDict in Python provides both. move_to_end() on access, popitem(last=False) to evict LRU. Or implement with custom DLL + dict.",
+ sol:`from collections import OrderedDict
+class LRUCache:
+    def __init__(self, capacity):
+        self.cap = capacity; self.cache = OrderedDict()
+    def get(self, key):
+        if key not in self.cache: return -1
+        self.cache.move_to_end(key); return self.cache[key]
+    def put(self, key, value):
+        self.cache[key] = value; self.cache.move_to_end(key)
+        if len(self.cache) > self.cap: self.cache.popitem(last=False)`,
+ tc:"O(1)",sc:"O(n)",cos:["Amazon","Google","Meta","Uber"]},
+
+// TREES
+{id:"d27",topic:"Trees",title:"Invert Binary Tree",diff:"Easy",
+ q:"Invert (mirror) a binary tree. Return the root.",
+ hint:"Swap left and right children at every node, recursively.",
+ ans:"For each node, swap left and right children. Recurse on both. Return root.",
+ sol:`def invertTree(root):
+    if not root: return None
+    root.left, root.right = invertTree(root.right), invertTree(root.left)
+    return root`,
+ tc:"O(n)",sc:"O(h)",cos:["Google","Amazon"]},
+
+{id:"d28",topic:"Trees",title:"Maximum Depth of Binary Tree",diff:"Easy",
+ q:"Return the maximum depth (number of nodes along the longest root-to-leaf path).",
+ hint:"Depth = 1 + max(depth of left subtree, depth of right subtree).",
+ ans:"If root is None return 0. Otherwise return 1 + max(maxDepth(left), maxDepth(right)).",
+ sol:`def maxDepth(root):
+    if not root: return 0
+    return 1 + max(maxDepth(root.left), maxDepth(root.right))`,
+ tc:"O(n)",sc:"O(h)",cos:["LinkedIn","Google","Amazon"]},
+
+{id:"d29",topic:"Trees",title:"Validate Binary Search Tree",diff:"Medium",
+ q:"Determine if a binary tree is a valid BST.",
+ hint:"Pass valid min/max bounds down recursion. Each node must be strictly within its bounds.",
+ ans:"Recursively validate with range [lo, hi]. Left child: max bound = node.val. Right child: min bound = node.val. Invalid if out of range.",
+ sol:`def isValidBST(root, lo=float('-inf'), hi=float('inf')):
+    if not root: return True
+    if not (lo < root.val < hi): return False
+    return (isValidBST(root.left, lo, root.val) and
+            isValidBST(root.right, root.val, hi))`,
+ tc:"O(n)",sc:"O(h)",cos:["Amazon","Google","Meta"]},
+
+{id:"d30",topic:"Trees",title:"Binary Tree Level Order Traversal",diff:"Medium",
+ q:"Return the level-order (BFS) traversal of a binary tree as a list of lists.",
+ hint:"BFS with a queue. Process exactly len(queue) nodes per level.",
+ ans:"Use deque. For each level, record len(q) nodes in a list, add their children. Repeat until queue empty.",
+ sol:`from collections import deque
+def levelOrder(root):
+    if not root: return []
+    q, res = deque([root]), []
+    while q:
+        level = []
+        for _ in range(len(q)):
+            node = q.popleft()
+            level.append(node.val)
+            if node.left: q.append(node.left)
+            if node.right: q.append(node.right)
+        res.append(level)
+    return res`,
+ tc:"O(n)",sc:"O(n)",cos:["Amazon","Google","Meta"]},
+
+{id:"d31",topic:"Trees",title:"Binary Tree Right Side View",diff:"Medium",
+ q:"Return the values visible from the right side of the tree (one value per level).",
+ hint:"BFS level order — take the last element of each level.",
+ ans:"Level-order BFS. At each level, the last node in the batch is visible from the right. Collect res.append(queue[-1].val) before processing.",
+ sol:`from collections import deque
+def rightSideView(root):
+    if not root: return []
+    q, res = deque([root]), []
+    while q:
+        res.append(q[-1].val)
+        for _ in range(len(q)):
+            node = q.popleft()
+            if node.left: q.append(node.left)
+            if node.right: q.append(node.right)
+    return res`,
+ tc:"O(n)",sc:"O(n)",cos:["Amazon","Meta","Bloomberg"]},
+
+{id:"d32",topic:"Trees",title:"Lowest Common Ancestor of BST",diff:"Medium",
+ q:"Given a BST and two nodes p, q, find their lowest common ancestor.",
+ hint:"In a BST: if both p,q > root go right; if both < root go left; else root is LCA.",
+ ans:"Iterative: if both values less than root go left, both greater go right, else current root is the LCA.",
+ sol:`def lowestCommonAncestor(root, p, q):
+    while root:
+        if p.val < root.val and q.val < root.val:
+            root = root.left
+        elif p.val > root.val and q.val > root.val:
+            root = root.right
+        else:
+            return root`,
+ tc:"O(h)",sc:"O(1)",cos:["Google","Amazon","Meta"]},
+
+{id:"d33",topic:"Trees",title:"Kth Smallest Element in BST",diff:"Medium",
+ q:"Find the kth smallest element in a BST.",
+ hint:"In-order traversal (left→root→right) of a BST gives values in ascending order.",
+ ans:"Iterative in-order using a stack. Decrement k each time you visit a node. Return node.val when k hits 0.",
+ sol:`def kthSmallest(root, k):
+    stack, cur = [], root
+    while stack or cur:
+        while cur: stack.append(cur); cur = cur.left
+        cur = stack.pop(); k -= 1
+        if k == 0: return cur.val
+        cur = cur.right`,
+ tc:"O(H+k)",sc:"O(H)",cos:["Google","Amazon","Bloomberg"]},
+
+// GRAPHS
+{id:"d34",topic:"Graphs",title:"Number of Islands",diff:"Medium",
+ q:"Given a 2D grid of '1' (land) and '0' (water), count the number of islands.",
+ hint:"DFS from each unvisited land cell, marking all connected land as visited.",
+ ans:"For each '1' cell, increment count and DFS to mark all connected '1' cells as '0'. Continue scanning.",
+ sol:`def numIslands(grid):
+    count = 0
+    def dfs(r, c):
+        if r<0 or r>=len(grid) or c<0 or c>=len(grid[0]) or grid[r][c]!='1': return
+        grid[r][c]='0'
+        for dr,dc in [(1,0),(-1,0),(0,1),(0,-1)]: dfs(r+dr,c+dc)
+    for r in range(len(grid)):
+        for c in range(len(grid[0])):
+            if grid[r][c]=='1': count+=1; dfs(r,c)
+    return count`,
+ tc:"O(m·n)",sc:"O(m·n)",cos:["Google","Amazon","Meta","Bloomberg"]},
+
+{id:"d35",topic:"Graphs",title:"Clone Graph",diff:"Medium",
+ q:"Return a deep copy of an undirected graph given a reference to one node.",
+ hint:"BFS/DFS with a hash map: original node → cloned node to avoid revisiting.",
+ ans:"Map each original node to its clone. BFS: create clone if not in map, add to current clone's neighbors. Return cloned[node].",
+ sol:`def cloneGraph(node):
+    if not node: return None
+    cloned = {node: Node(node.val)}
+    from collections import deque
+    q = deque([node])
+    while q:
+        cur = q.popleft()
+        for nb in cur.neighbors:
+            if nb not in cloned:
+                cloned[nb] = Node(nb.val); q.append(nb)
+            cloned[cur].neighbors.append(cloned[nb])
+    return cloned[node]`,
+ tc:"O(V+E)",sc:"O(V)",cos:["Google","Amazon","Meta"]},
+
+{id:"d36",topic:"Graphs",title:"Course Schedule",diff:"Medium",
+ q:"Given numCourses and prerequisites, return true if you can finish all courses (no cycle).",
+ hint:"Detect cycle in directed graph using DFS with 3 states: unvisited, visiting, done.",
+ ans:"DFS states: 0=unvisited, 1=visiting, 2=done. If we reach a 'visiting' (1) node, there's a cycle. Return false.",
+ sol:`def canFinish(numCourses, prerequisites):
+    adj = [[] for _ in range(numCourses)]
+    for a, b in prerequisites: adj[b].append(a)
+    state = [0] * numCourses
+    def dfs(node):
+        if state[node] == 1: return False
+        if state[node] == 2: return True
+        state[node] = 1
+        if not all(dfs(nb) for nb in adj[node]): return False
+        state[node] = 2; return True
+    return all(dfs(i) for i in range(numCourses))`,
+ tc:"O(V+E)",sc:"O(V+E)",cos:["Google","Amazon","Meta"]},
+
+{id:"d37",topic:"Graphs",title:"Pacific Atlantic Water Flow",diff:"Medium",
+ q:"Find all cells that can flow water to both the Pacific (top/left edges) and Atlantic (bottom/right edges).",
+ hint:"Reverse BFS from each ocean's border cells uphill. Find intersection.",
+ ans:"BFS from all Pacific border cells marking reachable cells. Same for Atlantic. Return intersection of both sets.",
+ sol:`from collections import deque
+def pacificAtlantic(heights):
+    m, n = len(heights), len(heights[0])
+    def bfs(starts):
+        visited = set(starts)
+        q = deque(starts)
+        while q:
+            r, c = q.popleft()
+            for dr,dc in [(1,0),(-1,0),(0,1),(0,-1)]:
+                nr, nc = r+dr, c+dc
+                if 0<=nr<m and 0<=nc<n and (nr,nc) not in visited and heights[nr][nc]>=heights[r][c]:
+                    visited.add((nr,nc)); q.append((nr,nc))
+        return visited
+    pac = bfs([(0,c) for c in range(n)]+[(r,0) for r in range(m)])
+    atl = bfs([(m-1,c) for c in range(n)]+[(r,n-1) for r in range(m)])
+    return list(pac & atl)`,
+ tc:"O(m·n)",sc:"O(m·n)",cos:["Google","Uber"]},
+
+{id:"d38",topic:"Graphs",title:"Word Ladder",diff:"Hard",
+ q:"Given beginWord, endWord, wordList, find shortest transformation sequence length (change one letter at a time).",
+ hint:"BFS where each word is a node; neighbors differ by exactly one character.",
+ ans:"BFS from beginWord. For each word, try all single-char changes. If in wordList and unvisited, add to queue. Return level when endWord found.",
+ sol:`from collections import deque
+def ladderLength(beginWord, endWord, wordList):
+    words = set(wordList)
+    if endWord not in words: return 0
+    q, steps = deque([beginWord]), 1
+    while q:
+        for _ in range(len(q)):
+            word = q.popleft()
+            for i in range(len(word)):
+                for c in 'abcdefghijklmnopqrstuvwxyz':
+                    nw = word[:i]+c+word[i+1:]
+                    if nw == endWord: return steps+1
+                    if nw in words: words.remove(nw); q.append(nw)
+        steps += 1
+    return 0`,
+ tc:"O(M²·N)",sc:"O(M²·N)",cos:["Amazon","Google","Meta"]},
+
+// DP
+{id:"d39",topic:"DP",title:"Climbing Stairs",diff:"Easy",
+ q:"You can climb 1 or 2 steps. How many distinct ways to reach the top (n steps)?",
+ hint:"It's Fibonacci. ways(n) = ways(n-1) + ways(n-2).",
+ ans:"dp[i] = dp[i-1]+dp[i-2]. Only need last two values. Base: dp[1]=1, dp[2]=2.",
+ sol:`def climbStairs(n):
+    a, b = 1, 1
+    for _ in range(n-1): a, b = b, a+b
+    return b`,
+ tc:"O(n)",sc:"O(1)",cos:["Google","Amazon","Apple"]},
+
+{id:"d40",topic:"DP",title:"House Robber",diff:"Medium",
+ q:"Rob houses in a row. Adjacent houses trigger alarms. Maximize money stolen.",
+ hint:"dp[i] = max(dp[i-1], dp[i-2] + nums[i]). Track only two values.",
+ ans:"For each house, choose max of: skip it (prev1) or rob it (prev2+nums[i]). Update prev2=prev1, prev1=result.",
+ sol:`def rob(nums):
+    prev2, prev1 = 0, 0
+    for n in nums:
+        prev1, prev2 = max(prev1, prev2 + n), prev1
+    return prev1`,
+ tc:"O(n)",sc:"O(1)",cos:["Google","Amazon","Airbnb"]},
+
+{id:"d41",topic:"DP",title:"Coin Change",diff:"Medium",
+ q:"Given coins and amount, return minimum coins to make amount, or -1 if impossible.",
+ hint:"dp[i] = min coins for amount i. dp[0]=0, dp[i]=min(dp[i-c]+1) for each coin c≤i.",
+ ans:"Bottom-up: dp[0]=0, rest=infinity. For each amount i and each coin c, dp[i]=min(dp[i], dp[i-c]+1). Return dp[amount].",
+ sol:`def coinChange(coins, amount):
+    dp = [float('inf')] * (amount+1); dp[0] = 0
+    for i in range(1, amount+1):
+        for c in coins:
+            if c <= i: dp[i] = min(dp[i], dp[i-c]+1)
+    return dp[amount] if dp[amount] != float('inf') else -1`,
+ tc:"O(n·amount)",sc:"O(amount)",cos:["Google","Amazon","Meta"]},
+
+{id:"d42",topic:"DP",title:"Longest Increasing Subsequence",diff:"Medium",
+ q:"Return the length of the longest strictly increasing subsequence.",
+ hint:"O(n log n): maintain a 'tails' array using binary search (patience sorting).",
+ ans:"For each num, binary search for its position in tails. Replace or extend. Length of tails is the answer.",
+ sol:`import bisect
+def lengthOfLIS(nums):
+    tails = []
+    for n in nums:
+        pos = bisect.bisect_left(tails, n)
+        if pos == len(tails): tails.append(n)
+        else: tails[pos] = n
+    return len(tails)`,
+ tc:"O(n log n)",sc:"O(n)",cos:["Google","Amazon","Microsoft"]},
+
+{id:"d43",topic:"DP",title:"Unique Paths",diff:"Medium",
+ q:"Robot on m×n grid, moves only right or down. Count unique paths from top-left to bottom-right.",
+ hint:"dp[i][j] = dp[i-1][j] + dp[i][j-1]. Optimize to 1D rolling array.",
+ ans:"1D DP: row of 1s. For each row after first, dp[j] += dp[j-1]. Return dp[n-1].",
+ sol:`def uniquePaths(m, n):
+    row = [1] * n
+    for _ in range(m-1):
+        for j in range(1, n): row[j] += row[j-1]
+    return row[-1]`,
+ tc:"O(m·n)",sc:"O(n)",cos:["Google","Amazon","Microsoft"]},
+
+{id:"d44",topic:"DP",title:"Partition Equal Subset Sum",diff:"Medium",
+ q:"Can you partition an integer array into two subsets with equal sum?",
+ hint:"Find a subset summing to total/2. Use a boolean set of reachable sums.",
+ ans:"If total is odd, impossible. Use a set starting at {0}. For each num add it to all existing sums. Check if target in set.",
+ sol:`def canPartition(nums):
+    total = sum(nums)
+    if total % 2: return False
+    target, dp = total // 2, {0}
+    for n in nums:
+        dp = {s+n for s in dp} | dp
+        if target in dp: return True
+    return False`,
+ tc:"O(n·sum)",sc:"O(sum)",cos:["Apple","Amazon"]},
+
+{id:"d45",topic:"DP",title:"Jump Game",diff:"Medium",
+ q:"nums[i] is the max jump from position i. Can you reach the last index?",
+ hint:"Greedy: track max reachable index. If current index exceeds it, stuck.",
+ ans:"Maintain max_reach. For each i: if i>max_reach return False. Update max_reach=max(max_reach, i+nums[i]).",
+ sol:`def canJump(nums):
+    max_reach = 0
+    for i, jump in enumerate(nums):
+        if i > max_reach: return False
+        max_reach = max(max_reach, i + jump)
+    return True`,
+ tc:"O(n)",sc:"O(1)",cos:["Google","Amazon","Microsoft"]},
+
+// HEAP
+{id:"d46",topic:"Heap",title:"Top K Frequent Elements",diff:"Medium",
+ q:"Return the k most frequent elements in nums.",
+ hint:"Count frequencies, then use a heap or bucket sort to find top k.",
+ ans:"Counter for frequencies. heapq.nlargest(k, count.keys(), key=count.get) picks top k efficiently.",
+ sol:`from collections import Counter
+import heapq
+def topKFrequent(nums, k):
+    count = Counter(nums)
+    return heapq.nlargest(k, count.keys(), key=count.get)`,
+ tc:"O(n log k)",sc:"O(n)",cos:["Google","Amazon","Meta"]},
+
+{id:"d47",topic:"Heap",title:"Find Median from Data Stream",diff:"Hard",
+ q:"Design MedianFinder with addNum(int) in O(log n) and findMedian() in O(1).",
+ hint:"Two heaps: max-heap for lower half, min-heap for upper half. Keep balanced.",
+ ans:"Push to max-heap (lo), always move top to min-heap (hi), rebalance so lo is never smaller than hi.",
+ sol:`import heapq
+class MedianFinder:
+    def __init__(self): self.lo, self.hi = [], []
+    def addNum(self, num):
+        heapq.heappush(self.lo, -num)
+        heapq.heappush(self.hi, -heapq.heappop(self.lo))
+        if len(self.hi) > len(self.lo):
+            heapq.heappush(self.lo, -heapq.heappop(self.hi))
+    def findMedian(self):
+        if len(self.lo) > len(self.hi): return -self.lo[0]
+        return (-self.lo[0] + self.hi[0]) / 2`,
+ tc:"O(log n)",sc:"O(n)",cos:["Google","Amazon","Meta"]},
+
+{id:"d48",topic:"Heap",title:"K Closest Points to Origin",diff:"Medium",
+ q:"Return the k closest points to the origin from a list of points.",
+ hint:"Sort by distance² (no sqrt needed), or use a max-heap of size k.",
+ ans:"Max-heap of size k keyed on negative distance. Push each point; if heap size > k, pop the farthest.",
+ sol:`import heapq
+def kClosest(points, k):
+    heap = []
+    for x, y in points:
+        dist = -(x*x + y*y)
+        heapq.heappush(heap, (dist, x, y))
+        if len(heap) > k: heapq.heappop(heap)
+    return [[x,y] for _,x,y in heap]`,
+ tc:"O(n log k)",sc:"O(k)",cos:["Google","Amazon","Uber"]},
+
+// BINARY SEARCH
+{id:"d49",topic:"Binary Search",title:"Binary Search",diff:"Easy",
+ q:"Search for target in a sorted array of distinct integers. Return index or -1.",
+ hint:"Classic: l and r pointers, check mid, adjust based on comparison.",
+ ans:"While l≤r: mid=(l+r)//2. If match return mid. If too small l=mid+1. If too big r=mid-1. Return -1.",
+ sol:`def search(nums, target):
+    l, r = 0, len(nums)-1
+    while l <= r:
+        mid = (l+r)//2
+        if nums[mid] == target: return mid
+        elif nums[mid] < target: l = mid+1
+        else: r = mid-1
+    return -1`,
+ tc:"O(log n)",sc:"O(1)",cos:["Google","Amazon","Meta","Apple","Microsoft"]},
+
+{id:"d50",topic:"Binary Search",title:"Median of Two Sorted Arrays",diff:"Hard",
+ q:"Find the median of two sorted arrays in O(log(min(m,n))) time.",
+ hint:"Binary search on the partition of the shorter array. Ensure max_left ≤ min_right.",
+ ans:"Partition both arrays so left halves combined = right halves. Binary search on shorter array. Adjust partition when boundaries cross.",
+ sol:`def findMedianSortedArrays(nums1, nums2):
+    if len(nums1) > len(nums2): nums1, nums2 = nums2, nums1
+    m, n = len(nums1), len(nums2)
+    l, r = 0, m
+    while l <= r:
+        p1 = (l+r)//2; p2 = (m+n+1)//2 - p1
+        l1 = nums1[p1-1] if p1>0 else float('-inf')
+        r1 = nums1[p1] if p1<m else float('inf')
+        l2 = nums2[p2-1] if p2>0 else float('-inf')
+        r2 = nums2[p2] if p2<n else float('inf')
+        if l1<=r2 and l2<=r1:
+            if (m+n)%2: return max(l1,l2)
+            return (max(l1,l2)+min(r1,r2))/2
+        elif l1>r2: r = p1-1
+        else: l = p1+1`,
+ tc:"O(log min(m,n))",sc:"O(1)",cos:["Google","Amazon","Meta"]},
+];
+
+// SYSTEM DESIGN
+const SD=[
+{id:"s1",cat:"Classic Systems",title:"Design URL Shortener (TinyURL)",diff:"Medium",
+ q:"Design a URL shortening service. Support generating short URLs and redirecting to originals at scale.",
+ keyPoints:["Hash or encode a unique ID (base62) to 6-7 chars for short code","Store mapping: shortCode → longURL in key-value store (Redis/DynamoDB)","Counter (Snowflake ID) or random hash with collision check for ID generation","Cache hot codes in Redis; CDN for global low-latency redirects"],
+ ans:"POST /shorten → returns shortURL; GET /{code} → 301 redirect. DB stores (id, code, longURL, createdAt). Reads dominate → Redis cache. Shard DB by code hash for horizontal scale. Log clicks to Kafka for async analytics."},
+
+{id:"s2",cat:"Classic Systems",title:"Design Twitter / Social Feed",diff:"Hard",
+ q:"Design Twitter's home timeline showing tweets from followed users in reverse-chronological order.",
+ keyPoints:["Fan-out on write (push): on tweet, push to all followers' feed lists in Redis","Fan-out on read (pull): query followed users at read time — better for celebrities >1M followers","Hybrid: push for normal users, pull for high-follower accounts","Cassandra for tweet store (partitioned by userId+timestamp); Redis sorted sets for feeds"],
+ ans:"Tweet Service writes tweet to DB, fans out to follower feed lists in Redis (capped at ~800). Timeline Service reads Redis. Celebrities pulled separately and merged at read time. Kafka handles async fan-out. New tweet ID = Snowflake (sortable, unique)."},
+
+{id:"s3",cat:"Classic Systems",title:"Design Instagram",diff:"Hard",
+ q:"Design a photo-sharing app supporting uploads, feeds, follows, and likes at Instagram scale.",
+ keyPoints:["Photo upload: client → presigned S3 URL → CDN for global delivery","Feed: hybrid fan-out (push for regular, pull for celebs)","Metadata: Cassandra for photo/user data sharded by userId","Likes: Redis counter + async write to DB for durability"],
+ ans:"Upload flow: generate presigned S3 URL → client uploads → upload service writes metadata to Cassandra → Kafka fan-out for feeds. Feed: Redis sorted set per user (score=timestamp). CDN (CloudFront) serves photos. Search: Elasticsearch for hashtag/location queries."},
+
+{id:"s4",cat:"Classic Systems",title:"Design Netflix",diff:"Hard",
+ q:"Design a video streaming platform: upload, transcoding, and global streaming to millions.",
+ keyPoints:["Transcode video into multiple bitrates/resolutions using distributed workers","CDN / Open Connect for last-mile delivery close to users","Adaptive bitrate streaming (HLS/DASH): client switches quality by bandwidth","Microservices: metadata, recommendations, billing, sessions — all separate"],
+ ans:"Upload → S3 → transcoding workers (Spot EC2) output HLS/DASH chunks at multiple bitrates → S3 → CDN. Playback: manifest lists available qualities; player switches dynamically. Recommendations: offline ML pipeline (Spark) with near-real-time re-ranking."},
+
+{id:"s5",cat:"Classic Systems",title:"Design Uber / Lyft",diff:"Hard",
+ q:"Design a ride-sharing app with real-time driver matching, location tracking, and trip management.",
+ keyPoints:["Location service: drivers push GPS every 4s → stored in geospatial index (Redis GEO / PostGIS)","Matching: find nearby drivers by geohash or quadtree, rank by ETA","Trip state machine: requested → matched → in-progress → completed","WebSockets for real-time driver position updates pushed to rider"],
+ ans:"Driver app sends GPS to Location Service → Redis GEO. Matching Service queries nearest drivers → sends offer to best driver via push. Surge: demand/supply ratio computed per minute. Kafka decouples location writes from matching reads. Trip data in PostgreSQL."},
+
+{id:"s6",cat:"Classic Systems",title:"Design WhatsApp",diff:"Hard",
+ q:"Design real-time 1-1 and group messaging with delivery receipts and offline storage.",
+ keyPoints:["WebSocket for real-time delivery; offline messages queued in Redis","Message store: Cassandra (high write throughput) partitioned by conversationId","Delivery receipts: sent/delivered/read status pushed via WebSocket","Group messaging: fan-out to all members; limit group size for scalability"],
+ ans:"Client connects to Chat Server via WebSocket. Messages stored in Cassandra. Offline: queued in Redis, delivered on reconnect. Presence service tracks online/offline via heartbeats. Media: presigned S3 upload → CDN delivery. End-to-end encryption keys managed client-side."},
+
+{id:"s7",cat:"Classic Systems",title:"Design Google Docs (Collaborative Editing)",diff:"Hard",
+ q:"Design a real-time collaborative document editor with concurrent multi-user editing.",
+ keyPoints:["Operational Transformation (OT) or CRDTs resolve concurrent edit conflicts","WebSockets propagate changes to all collaborators in real time","Event sourcing: store document state as a sequence of operations (enables undo/history)","Presence service shows cursor positions of other users"],
+ ans:"Each keystroke = operation. Client sends op to server → server applies OT to reconcile concurrent ops → broadcasts to all clients. Snapshot + op log stored in DB. WebSocket gateway shards by documentId. Clients apply ops optimistically and correct on server response."},
+
+{id:"s8",cat:"Classic Systems",title:"Design Dropbox / Google Drive",diff:"Hard",
+ q:"Design a file storage service with cross-device sync, sharing, and versioning.",
+ keyPoints:["Chunked upload: split files into 4MB blocks, upload only changed chunks (delta sync)","Metadata service: file tree, chunk hashes, version history (PostgreSQL)","Block storage: S3 for chunks, deduplicated by content hash across users","Sync: long-poll or WebSocket to notify clients of remote changes"],
+ ans:"Client computes chunk hashes → metadata service returns which need uploading → client uploads new chunks to S3 → metadata updated → server notifies other devices. Sharing: share links in DB with access control. Conflict: last-writer-wins or conflict copy."},
+
+{id:"s9",cat:"Classic Systems",title:"Design a Rate Limiter",diff:"Medium",
+ q:"Design a rate limiter restricting clients to N requests per time window.",
+ keyPoints:["Token bucket: allows bursts; refill at constant rate","Sliding window log: exact but memory-heavy; sliding window counter is a practical approximation","Fixed window counter: simple but boundary spike problem","Distributed: Redis with Lua scripts for atomic check-and-increment across servers"],
+ ans:"Redis key 'rate:{userId}' with TTL=window. INCR returns current count; reject with 429 if >limit. Use Lua for atomicity. Sliding window: Redis sorted set of timestamps, count entries in last N seconds. Return Retry-After header on 429."},
+
+{id:"s10",cat:"Classic Systems",title:"Design a Notification System",diff:"Medium",
+ q:"Design push notifications across iOS, Android, email, and SMS at scale.",
+ keyPoints:["Decouple creation from delivery via Kafka queue partitioned by channel","Device token DB: userId → [deviceToken, platform, preferences]","Third-party: APNs (iOS), FCM (Android), SMTP (email), Twilio (SMS)","Retry with exponential backoff; dead-letter queue for persistent failures"],
+ ans:"Notification Service publishes events to Kafka by channel. Workers consume and call APNs/FCM/SMTP/Twilio. User preferences stored in DB (do-not-disturb, opt-outs). Rate limit per user. Track delivery status (sent/failed) in DB."},
+
+{id:"s11",cat:"Classic Systems",title:"Design Search Autocomplete",diff:"Medium",
+ q:"Design a type-ahead system returning top completions for a prefix in under 100ms.",
+ keyPoints:["Trie data structure for prefix lookup; cache top-k at each node","Popularity scores from aggregated query logs (updated hourly)","Cache hot prefixes in Redis; CDN for globally fast sub-50ms response","Shard trie by first character for horizontal scale"],
+ ans:"Offline: aggregate query logs → compute top-k queries per prefix → build trie. Online: prefix hits Redis cache first → fallback to trie service. Full trie sharded by first 2 chars. Update trie via batch job every hour. Score = frequency × recency decay."},
+
+{id:"s12",cat:"Classic Systems",title:"Design YouTube",diff:"Hard",
+ q:"Design a video platform for upload, storage, and global streaming.",
+ keyPoints:["Chunked multipart upload to S3; resumable for large files","Transcoding pipeline: distributed workers → multiple resolutions (360p→4K)","CDN caches popular videos at edge; dynamic adaptive bitrate (HLS/DASH)","Recommendations: collaborative filtering + real-time watch signals via Kafka"],
+ ans:"Upload: presigned S3 URL → chunks uploaded → completion triggers SQS job → workers transcode → store HLS chunks in S3 → CDN. Metadata (title, views, likes) in MySQL replicated globally. View count: Redis INCR → async flush to DB every 60s."},
+
+// COMPONENTS
+{id:"s13",cat:"Components",title:"Design a Key-Value Store",diff:"Hard",
+ q:"Design a distributed KV store (like DynamoDB) with get/put/delete operations.",
+ keyPoints:["Consistent hashing distributes keys; minimal reshuffling on node add/remove","Replication: write to N, quorum reads R, quorum writes W (N>R+W for strong consistency)","LSM-tree for write-optimized storage; SSTables compacted periodically","Gossip protocol for cluster state; vector clocks for conflict resolution"],
+ ans:"Keys → consistent hash ring → coordinator routes to N replicas. Quorum (N=3,W=2,R=2) balances consistency and availability. Conflict: last-write-wins or vector clocks. Anti-entropy via Merkle trees. Hinted handoff stores writes for temporarily unavailable nodes."},
+
+{id:"s14",cat:"Components",title:"Design a Message Queue (Kafka)",diff:"Hard",
+ q:"Design a distributed message queue with producers, consumers, durable storage, and replay.",
+ keyPoints:["Topics partitioned for parallelism; each partition = ordered, immutable append-only log","Offsets: consumers track position → free replay, at-least-once delivery guaranteed","Replication: leader + followers per partition; ISR ensures durability","Consumer groups: each partition consumed by one member → parallel processing"],
+ ans:"Producer appends to partition log (sequential disk I/O = fast). Broker replicates to N-1 followers. Consumer polls at its offset and commits. Retention policy (7 days) allows replay. ZooKeeper / KRaft manages controller election. Partition rebalancing on consumer join/leave."},
+
+{id:"s15",cat:"Components",title:"Design a Load Balancer",diff:"Medium",
+ q:"Design a load balancer distributing traffic across backend servers.",
+ keyPoints:["L4 (TCP/UDP) vs L7 (HTTP/HTTPS) — L7 enables path/host routing and TLS termination","Algorithms: round-robin, least connections, consistent hashing for sticky sessions","Health checks every 10s; 3 failures removes server from rotation","HA: active-passive LB pair with virtual IP (VRRP) for failover"],
+ ans:"L7 LB terminates TLS, parses HTTP, routes by host/path to backend pools. Consistent hashing for sticky sessions without central store. Rate limiting and WAF integrate at this layer. Horizontal scale: DNS round-robin across multiple LB instances."},
+
+{id:"s16",cat:"Components",title:"Design a Distributed Cache",diff:"Medium",
+ q:"Design a distributed caching layer for a high-read web application.",
+ keyPoints:["Consistent hashing across cache nodes; minimize key movement on scaling","Cache-aside pattern: app checks cache, on miss reads DB, writes to cache","Eviction: LRU most common; LFU for stable hot-key workloads","Replication for HA; TTL prevents stale data accumulation"],
+ ans:"Shard keys across Redis nodes via consistent hashing. Primary-replica per shard: reads from replica, writes to primary. Cache-aside: read-miss fills cache from DB. TTL on all keys. Monitor hit rate; if < 80% investigate key distribution or memory limits."},
+
+{id:"s17",cat:"Components",title:"Design a CDN",diff:"Medium",
+ q:"Design a content delivery network that caches and serves content close to users globally.",
+ keyPoints:["PoPs (Points of Presence) at edge locations worldwide","DNS-based routing: Anycast or GeoDNS directs user to nearest PoP","Cache hierarchy: edge → regional shield → origin; configurable TTL per resource","Invalidation: purge API, versioned URLs for immutable assets, surrogate keys"],
+ ans:"DNS resolves CDN hostname → nearest edge IP → edge serves cached content or fetches from origin. Cache key = URL + relevant Vary headers. Serve compressed (Brotli) and modern formats (WebP). Shield origin: one regional node fetches from origin on behalf of all edge nodes."},
+
+{id:"s18",cat:"Components",title:"Design an API Gateway",diff:"Medium",
+ q:"Design an API Gateway handling auth, rate limiting, routing, and observability for microservices.",
+ keyPoints:["Single entry point: TLS termination, JWT validation, rate limiting before backend","Path/header-based routing to backend microservices with circuit breakers","Request/response transformation for versioning (v1→v2 schema migration)","Observability: centralized logging, distributed tracing (OpenTelemetry), per-route metrics"],
+ ans:"Client → API Gateway (validates JWT, checks rate limit via Redis) → routes to microservice. Circuit breaker fails fast if backend unhealthy. BFF (Backend-for-Frontend) pattern: gateway aggregates responses. Async endpoints return 202+jobId; client polls or gets webhook."},
+
+{id:"s19",cat:"Components",title:"Design a Distributed ID Generator",diff:"Medium",
+ q:"Generate unique, roughly time-ordered 64-bit IDs at high throughput (Twitter Snowflake).",
+ keyPoints:["Snowflake: 41-bit timestamp + 10-bit machine ID + 12-bit sequence = 64 bits","Machine ID assigned via Zookeeper to avoid coordination per ID","Clock skew: if system clock goes back, wait until it catches up","UUID v4: random, no coordination, not sortable, 128 bits — simpler but bigger"],
+ ans:"Each node has unique machine ID (from Zookeeper). Combine with ms timestamp and per-ms counter. IDs sortable by time within a machine. At 4096 IDs/ms per machine, a cluster of 1024 machines generates 4B IDs/sec without coordination."},
+
+{id:"s20",cat:"Components",title:"Design a Search Engine Index",diff:"Hard",
+ q:"Design the indexing and retrieval pipeline for a web search engine at Google scale.",
+ keyPoints:["Inverted index: term → list of (docID, positions, TF-IDF score)","MapReduce builds index from billions of crawled pages","Shard by document or by term; document sharding simplifies updates","Ranking: BM25 + PageRank + learning-to-rank (ML features from click data)"],
+ ans:"Crawler → URL frontier → parser → tokenizer → MapReduce builds inverted index sharded across 1000s of machines. Query: scatter request to all shards → merge top-N → re-rank by ML model → return. Index rebuild: periodic batch job; incremental updates via separate real-time index merged at query time."},
+
+{id:"s21",cat:"Components",title:"Design a Web Crawler",diff:"Medium",
+ q:"Design a web crawler that fetches and indexes billions of web pages.",
+ keyPoints:["URL frontier: priority queue + visited set (Bloom filter for memory efficiency)","Politeness: respect robots.txt, rate limit per domain","DNS caching: bulk resolution; freshness TTL matters","Dedup: SimHash for near-duplicate content detection"],
+ ans:"Seed URLs → URL Frontier (priority queue by domain/importance) → Fetcher (rate-limited per domain) → HTML parser extracts links → Bloom filter dedup → new URLs back to Frontier. Content stored in distributed object store for indexing pipeline. Crawl ~1B pages/day with 1000 fetcher machines."},
+
+{id:"s22",cat:"Components",title:"Design a Metrics & Monitoring System",diff:"Medium",
+ q:"Design a system like Datadog that collects, stores, and queries time-series metrics.",
+ keyPoints:["Time-series DB: columnar storage optimized for time-range scans and aggregation","Data model: metric_name + labels (key-value tags) + timestamp + float value","Rollup: downsample old data (1s→1m→1h→1d) to save storage","Alerting: threshold or anomaly detection; PagerDuty/Slack for on-call"],
+ ans:"Agents push metrics via UDP/gRPC to collectors. Collectors batch-write to TSDB (InfluxDB/Prometheus/TimescaleDB). Read: PromQL queries with time range + label filters → aggregation engine. Rollup job compresses old data. Alert manager evaluates rules every 30s; routes to on-call."},
+
+// CONCEPTS
+{id:"s23",cat:"Concepts",title:"CAP Theorem & Consistency Models",diff:"Medium",
+ q:"Explain the CAP theorem and how systems choose between consistency and availability.",
+ keyPoints:["CAP: during a partition, choose Consistency (reject requests) or Availability (serve stale data)","CP: HBase, Zookeeper — prioritize consistency; AP: Cassandra, DynamoDB — prioritize availability","PACELC: even without partitions, tradeoff Latency vs Consistency","Tunable consistency: Cassandra's ANY/ONE/QUORUM/ALL lets you choose per operation"],
+ ans:"Partitions are inevitable, so you always choose C vs A under partition. Strong consistency requires coordination → latency. Eventual consistency allows replicas to diverge temporarily but converges over time. Most modern systems (DynamoDB, Cassandra) expose tunable consistency levels."},
+
+{id:"s24",cat:"Concepts",title:"SQL vs NoSQL — When to Use Each",diff:"Medium",
+ q:"Compare SQL and NoSQL databases. When should you choose one over the other?",
+ keyPoints:["SQL: ACID, rich queries, joins, schema enforcement — relational structured data","NoSQL: flexible schema, horizontal scale, high write throughput — KV/document/wide-column/graph","SQL sharding is complex; NoSQL built for horizontal scale from the start","Polyglot persistence: SQL for transactions, Redis for cache, Cassandra for time-series"],
+ ans:"Use SQL (PostgreSQL, MySQL) for complex queries, reporting, financial transactions, and data with many relationships. Use NoSQL for massive write throughput, flexible schema, or simple key-based access patterns. Most production systems use both: strong consistency where needed, eventual elsewhere."},
+
+{id:"s25",cat:"Concepts",title:"Consistent Hashing",diff:"Medium",
+ q:"Explain consistent hashing and how it minimizes key redistribution when nodes change.",
+ keyPoints:["Hash ring: both servers and keys hashed to circular space (0 to 2³²)","Key routes to first server clockwise — only K/N keys move when a node is added/removed","Virtual nodes (vnodes): 150+ positions per physical server for even load distribution","Used by: Cassandra, DynamoDB, Memcached, many load balancers"],
+ ans:"Classic modulo hashing reshuffles N/K keys on any change. Consistent hashing reshuffles only K/N. Virtual nodes smooth out load: removing one node distributes its keys to all others proportionally. Standard in any distributed storage system that needs elastic scaling."},
+
+{id:"s26",cat:"Concepts",title:"Database Sharding Strategies",diff:"Medium",
+ q:"Compare database sharding strategies and their tradeoffs.",
+ keyPoints:["Range sharding: easy range queries but hot spots if data is skewed","Hash sharding: uniform distribution but range queries must scatter to all shards","Directory sharding: lookup table maps key to shard — flexible but a single point of failure","Choose shard key: high cardinality, uniform distribution, matches common access patterns"],
+ ans:"Range: good for time-series (shard by date range). Hash: good for user data (shard by hash(userId)). Cross-shard joins are expensive — denormalize or handle at app layer. Rebalancing is painful; plan for 2× capacity. Start with replicas; shard only when throughput demands it."},
+
+{id:"s27",cat:"Concepts",title:"Event-Driven Architecture & CQRS",diff:"Hard",
+ q:"Explain event sourcing, event-driven architecture, and the CQRS pattern.",
+ keyPoints:["Event sourcing: store state as immutable sequence of events — supports replay and audit log","CQRS: separate write model (commands) from read model (queries) — scale each independently","Events on Kafka → consumers update multiple read projections (search index, cache, reporting DB)","Eventual consistency: read model may lag write model by milliseconds"],
+ ans:"Commands produce events. Events stored immutably in event store. Read-side projections consume events to build optimized query views (denormalized tables, Elasticsearch). Write-side handles validation and consistency. CQRS adds complexity but unlocks independent scaling of reads vs writes."},
+
+{id:"s28",cat:"Concepts",title:"Microservices vs Monolith",diff:"Medium",
+ q:"When should you use microservices vs a monolith?",
+ keyPoints:["Monolith: simple to build/test/deploy initially; scaling specific parts requires scaling the whole app","Microservices: independent deploy, scale, and tech stack; but distributed systems complexity","Split along bounded contexts (DDD), team ownership, or scaling requirements","Each service owns its data — no shared databases across service boundaries"],
+ ans:"Start with a modular monolith. Split when: services have different scaling needs (read-heavy feed vs write-heavy timeline), independent release cycles, or team ownership boundaries. Distributed tracing, service mesh (Istio), and API gateway add operational overhead — justify it before splitting."},
+
+{id:"s29",cat:"Concepts",title:"Database Indexing Deep Dive",diff:"Medium",
+ q:"Explain how database indexes work and when to create or avoid them.",
+ keyPoints:["B-tree index: balanced tree for range and equality queries — PostgreSQL/MySQL default","Composite index leftmost prefix rule: index(a,b,c) serves queries on a, a+b, a+b+c","Covering index: all queried columns in the index — avoids table lookup (index-only scan)","Index slows writes (maintain on insert/update/delete); avoid on low-cardinality columns"],
+ ans:"Create indexes on WHERE, JOIN, and ORDER BY columns with high cardinality. Covering indexes eliminate heap fetches. EXPLAIN shows if queries use indexes. Partial indexes (WHERE active=true) reduce size. Audit indexes regularly — unused ones waste write performance."},
+
+{id:"s30",cat:"Concepts",title:"Designing for High Availability",diff:"Hard",
+ q:"What are the key strategies to achieve 99.99% uptime (52 min downtime/year)?",
+ keyPoints:["Eliminate single points of failure: replicate every layer (DB, cache, LB, app servers)","Geographic redundancy: multi-region active-active or active-passive with fast failover","Circuit breakers, retries with jitter, timeouts — prevent cascading failures","Chaos engineering (Netflix Chaos Monkey): inject failures intentionally to find weaknesses"],
+ ans:"Every layer redundant with auto-healing (ASGs replace unhealthy instances). Health checks + load balancer route around failures. Blue-green or canary deployments enable sub-second rollback. SLOs → error budgets → alerting. Graceful degradation: if a non-critical service fails, return defaults, not 500s."},
+];
+
+// BEHAVIORAL
+const BEH=[
+{id:"b1",cat:"Leadership",title:"Leading a Project End to End",
+ q:"Describe a situation where you led a project from start to finish. How did you manage the team and deliver results?",
+ sample:`<strong>S:</strong> Our deployment process took 3 hours manually, causing 2–3 outages per sprint.<br><strong>T:</strong> As tech lead, I needed to redesign it without disrupting ongoing feature work.<br><strong>A:</strong> I proposed and built a CI/CD pipeline using GitHub Actions, wrote a migration plan, and piloted it on one service. I paired with each engineer to onboard them.<br><strong>R:</strong> Deployment time dropped from 3 hours to 12 minutes, zero deployment outages over the next quarter, and the team rolled it out to all 6 services independently.`},
+
+{id:"b2",cat:"Leadership",title:"Deciding With Incomplete Information",
+ q:"Describe a time when you had to make an important decision with incomplete information.",
+ sample:`<strong>S:</strong> A critical service was degraded 30 minutes before a major product launch with conflicting signals.<br><strong>T:</strong> I had to decide whether to roll back or push forward without full diagnostics.<br><strong>A:</strong> I established what we knew (elevated errors, not total failure), assembled on-call, set a 10-min decision window, and launched with feature flags to limit exposure while diagnosing.<br><strong>R:</strong> Launch succeeded. We identified a misconfigured cache within 20 minutes and patched without user-visible impact.`},
+
+{id:"b3",cat:"Leadership",title:"Influencing Without Authority",
+ q:"Tell me about a time you influenced a team or decision without having direct authority.",
+ sample:`<strong>S:</strong> An adjacent team's DB schema change would break our service's query patterns.<br><strong>T:</strong> I needed to change their approach without formal authority.<br><strong>A:</strong> I wrote a one-pager with performance benchmarks showing impact and proposed a backward-compatible alternative. I presented it in their planning meeting with data.<br><strong>R:</strong> They adopted my schema. We co-authored a cross-team schema change policy that prevented 3 similar issues the following quarter.`},
+
+{id:"b4",cat:"Leadership",title:"Mentoring a Struggling Team Member",
+ q:"Describe a time you helped a colleague who was struggling with their work or confidence.",
+ sample:`<strong>S:</strong> A junior engineer was missing deadlines and going quiet in code reviews — signs of being overwhelmed.<br><strong>T:</strong> I wanted to help without undermining their autonomy.<br><strong>A:</strong> I set up informal 1:1s, broke their large task into smaller milestones with daily check-ins, and publicly praised incremental progress in standups.<br><strong>R:</strong> Within 6 weeks they hit all milestones and led a small feature independently. They told me it was the most supported they'd felt at work.`},
+
+{id:"b5",cat:"Leadership",title:"Setting High Standards",
+ q:"Give an example of a time you raised the bar or set a high standard for your team.",
+ sample:`<strong>S:</strong> Our codebase had 20% test coverage and regressions were costing 2 days per sprint in bug fixes.<br><strong>T:</strong> I wanted to raise quality without slowing velocity.<br><strong>A:</strong> I proposed a coverage ratchet — no PR could lower coverage. Added CI enforcement, wrote a testing guide, ran lunch-and-learns on test patterns.<br><strong>R:</strong> Coverage hit 72% in 4 months, regressions dropped 80%, and the team reported higher confidence shipping features.`},
+
+{id:"b6",cat:"Leadership",title:"Ownership Beyond Your Scope",
+ q:"Describe a time you took ownership of something that wasn't strictly your responsibility.",
+ sample:`<strong>S:</strong> On-call rotation was burning people out — 2AM alerts for non-critical issues — but nobody owned fixing it.<br><strong>T:</strong> I decided to solve it even though I was mid-sprint on a feature.<br><strong>A:</strong> I audited the past month's alerts, muted 40% as noise, set severity tiers, and wrote runbooks for the 10 most common pages.<br><strong>R:</strong> P0 pages dropped 60%. My manager formalized this as a quarterly ops review process for the whole team.`},
+
+{id:"b7",cat:"Leadership",title:"Disagree and Commit",
+ q:"Tell me about a time you disagreed with a decision but committed to it. How did you handle it?",
+ sample:`<strong>S:</strong> Leadership chose to migrate from REST to GraphQL — I believed it was premature given our team's bandwidth.<br><strong>T:</strong> I needed to voice concern constructively without blocking progress.<br><strong>A:</strong> I wrote a risk memo with timeline estimates, proposed a phased rollout. When the decision stood, I aligned on success metrics and became one of the most active contributors to the migration.<br><strong>R:</strong> Succeeded (2 weeks late). My risk memo helped catch two integration issues early.`},
+
+{id:"b8",cat:"Leadership",title:"Earning Trust From Skeptical Stakeholders",
+ q:"Describe a time you had to earn the trust of a skeptical manager, stakeholder, or colleague.",
+ sample:`<strong>S:</strong> Joining a new team mid-project, the senior engineer was skeptical about my contributions given my unfamiliarity with the codebase.<br><strong>T:</strong> I needed to build credibility quickly without overstepping.<br><strong>A:</strong> I spent my first week reading code and writing "observations" docs. I surfaced two subtle bugs through careful reading and fixed them before touching feature work.<br><strong>R:</strong> The senior engineer specifically requested I review their next PR — trust earned through demonstrated diligence.`},
+
+{id:"b9",cat:"Conflict",title:"Disagreement With a Peer",
+ q:"Tell me about a significant disagreement with a colleague and how you resolved it.",
+ sample:`<strong>S:</strong> A peer and I disagreed on microservices vs monolith — discussions got heated in Slack.<br><strong>T:</strong> We needed a decision within a week to unblock planning.<br><strong>A:</strong> I suggested we each write a 1-pager, then define evaluation criteria first (deployment speed, team size, scale) before comparing approaches.<br><strong>R:</strong> We agreed on a modular monolith. The structured approach reduced emotion and the peer said it was the most productive technical debate they'd had.`},
+
+{id:"b10",cat:"Conflict",title:"Delivering Difficult Feedback",
+ q:"Describe a time you had to give tough feedback to a colleague or report.",
+ sample:`<strong>S:</strong> An engineer was making breaking API changes without notifying downstream teams, causing incidents.<br><strong>T:</strong> As informal tech lead I needed to address it directly but constructively.<br><strong>A:</strong> I requested a private 1:1, came with two specific examples, and framed feedback around impact ("this caused an incident for 3 teams") not character. We designed a breaking-change checklist together.<br><strong>R:</strong> Zero unannounced breaking changes in the following 6 months.`},
+
+{id:"b11",cat:"Conflict",title:"Navigating Cross-Team Conflict",
+ q:"Tell me about a time two teams were in conflict. How did you help resolve it?",
+ sample:`<strong>S:</strong> Backend and mobile teams had misaligned API contracts causing constant rework — each blaming the other.<br><strong>T:</strong> As the engineer spanning both teams I was uniquely positioned to mediate.<br><strong>A:</strong> I facilitated a joint meeting, mapped pain points, then proposed API-first development with OpenAPI specs agreed before implementation. Set up a shared design-review channel.<br><strong>R:</strong> API rework dropped 70% over two sprints. Two other team pairs adopted the pattern.`},
+
+{id:"b12",cat:"Conflict",title:"Handling Unfair Criticism",
+ q:"Describe a time you received criticism you felt was unfair. How did you respond?",
+ sample:`<strong>S:</strong> In a post-mortem, my service was blamed for an outage — but the root cause was a misconfigured alert threshold, not the code.<br><strong>T:</strong> I needed to correct the record without becoming defensive.<br><strong>A:</strong> After the meeting I sent a private note with the incident timeline and root-cause evidence, acknowledged where I could add better monitoring, and proposed a monitoring review process.<br><strong>R:</strong> Manager corrected the write-up, thanked me, and we implemented the monitoring review. A potentially adversarial moment became constructive.`},
+
+{id:"b13",cat:"Problem Solving",title:"Most Complex Technical Problem Solved",
+ q:"Tell me about the most complex technical problem you've faced and how you solved it.",
+ sample:`<strong>S:</strong> Our recommendation service returned stale data 30% of the time under high load — non-deterministic and unreproducible in staging.<br><strong>T:</strong> I needed to diagnose and fix a race condition in production without downtime.<br><strong>A:</strong> I added distributed tracing, built a shadow-traffic replay harness for staging, and identified a cache-invalidation race between two async workers. Fixed with a distributed lock and property-based tests.<br><strong>R:</strong> Staleness dropped from 30% to 0.02%. The replay harness became a standard debugging tool.`},
+
+{id:"b14",cat:"Problem Solving",title:"Delivering Under a Tight Deadline",
+ q:"Describe a time you had to deliver something critical under a very tight deadline.",
+ sample:`<strong>S:</strong> A compliance requirement gave us 2 weeks for audit logging — we estimated 6 weeks.<br><strong>T:</strong> I was tech lead and needed to deliver the MVP without breaking existing functionality.<br><strong>A:</strong> I scoped must-have (log writes) vs nice-to-have (log reads). Built a middleware interceptor for writes — saving 60% of the work. Parallelized read logging across the team.<br><strong>R:</strong> Delivered in 11 days. Finished read logging in the following sprint.`},
+
+{id:"b15",cat:"Problem Solving",title:"Proactively Preventing a Problem",
+ q:"Tell me about a time you identified a problem before it became critical and took initiative to fix it.",
+ sample:`<strong>S:</strong> During a code review I noticed an off-by-one in session token expiry that would cause simultaneous mass logout in 60 days.<br><strong>T:</strong> Nobody asked me to investigate — I could have just approved the PR.<br><strong>A:</strong> I wrote a detailed bug report, escalated to the team lead, submitted a patch with a regression test the same day.<br><strong>R:</strong> Avoided a coordinated logout for 200,000 users. Logged internally as a "prevented P0.""`},
+
+{id:"b16",cat:"Problem Solving",title:"Learning a New Technology Quickly",
+ q:"Describe a time you had to quickly learn an unfamiliar technology to complete a project.",
+ sample:`<strong>S:</strong> Our team adopted Kubernetes and I was assigned to migrate the first service in 3 weeks — with zero K8s experience.<br><strong>T:</strong> Learn enough to succeed and document learnings for the team.<br><strong>A:</strong> Mornings: structured learning (docs + KodeKloud labs). Afternoons: building in sandbox cluster. Ran two team knowledge-shares as I learned. Validated in staging, then migrated production with rollback plan ready.<br><strong>R:</strong> Migrated in 18 days. My K8s runbook became the team's onboarding doc.`},
+
+{id:"b17",cat:"Growth",title:"Biggest Professional Mistake",
+ q:"Tell me about your biggest professional mistake and what you learned from it.",
+ sample:`<strong>S:</strong> Early in my career I deleted a production database table thinking I was in staging.<br><strong>T:</strong> Recover data and prevent recurrence.<br><strong>A:</strong> Immediately escalated, helped restore from a 6-hour backup (minimal data loss), wrote a post-mortem, proposed environment namespacing so staging and production commands are visually distinct in all tooling.<br><strong>R:</strong> Namespacing adopted org-wide. I never operated on production again without a runbook and second pair of eyes.`},
+
+{id:"b18",cat:"Growth",title:"Working Through Ambiguity",
+ q:"Describe a time you had to work through a highly ambiguous problem or project.",
+ sample:`<strong>S:</strong> I received the directive "improve checkout service performance" — no metric targets, no constraints.<br><strong>T:</strong> I needed to define the problem before solving it.<br><strong>A:</strong> Instrumented with APM, ran load tests, found the top 3 bottlenecks by latency contribution. Proposed specific targets (p99 &lt; 200ms) to stakeholders and got alignment before writing any fix code.<br><strong>R:</strong> Reduced p99 from 850ms to 190ms over 6 weeks. Defining metrics upfront gave stakeholders visibility and prevented over-engineering.`},
+
+{id:"b19",cat:"Growth",title:"Receiving and Acting on Feedback",
+ q:"Tell me about a time constructive feedback led to meaningful personal growth.",
+ sample:`<strong>S:</strong> My manager told me my PRs were too large and hard to review — I initially dismissed this since the code was correct.<br><strong>T:</strong> I needed to genuinely understand the feedback, not just defend my approach.<br><strong>A:</strong> Asked for examples, talked to teammates — realized 2,000-line PRs caused 2–3 day review delays. Adopted PR size limits (&lt;400 lines) and stacked PRs for large features.<br><strong>R:</strong> Review turnaround dropped from 2 days to 4 hours. I later coached two junior engineers on the same practice.`},
+
+{id:"b20",cat:"Growth",title:"Adapting to Major Change",
+ q:"Describe a time you had to adapt to a major change at work. How did you handle it?",
+ sample:`<strong>S:</strong> Mid-project, leadership pivoted our team from B2C product to B2B API platform — completely different customers and success metrics.<br><strong>T:</strong> Adapt quickly and help the team re-focus without losing momentum.<br><strong>A:</strong> Requested product alignment session, re-mapped existing work to new context (most auth infrastructure was reusable), and conducted 5 customer interviews to shape the B2B roadmap — volunteering for work outside my scope.<br><strong>R:</strong> Shipped first B2B API endpoint 3 weeks after pivot with minimal waste. My interview summaries drove the next quarter's roadmap.`},
+];
+
+// ── APP LOGIC ──────────────────────────────────────────────────────────────────
+const STORE_KEY='cs105_done_v2';
+function getDone(){try{return new Set(JSON.parse(localStorage.getItem(STORE_KEY)||'[]'))}catch{return new Set()}}
+function saveDone(set){localStorage.setItem(STORE_KEY,JSON.stringify([...set]))}
+let done=getDone();
+const TOTAL=DSA.length+SD.length+BEH.length;
+
+function updateProgress(){
+  const n=done.size,pct=Math.round(n/TOTAL*100);
+  document.getElementById('done-count').textContent=`${n} / ${TOTAL} done`;
+  document.getElementById('done-pct').textContent=`${pct}%`;
+  document.getElementById('fill').style.width=pct+'%';
+}
+
+function switchTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pane-'+tab).classList.add('active');
+  ['dsa','sd','beh'].forEach(t=>{
+    document.getElementById('filters-'+t).style.display=t===tab?'flex':'none';
+  });
+  renderPane(tab);
+}
+
+function renderPane(tab){
+  if(tab==='dsa') renderDSA();
+  else if(tab==='sd') renderSD();
+  else renderBEH();
+}
+
+function toggleCard(id){
+  document.getElementById('card-'+id).classList.toggle('open');
+}
+
+function toggleDone(id,e){
+  e.stopPropagation();
+  if(done.has(id)) done.delete(id); else done.add(id);
+  saveDone(done);
+  document.getElementById('card-'+id).classList.toggle('done-card',done.has(id));
+  updateProgress();
+}
+
+const mkDiff=d=>`<span class="diff ${d}">${d}</span>`;
+const mkTag=t=>`<span class="topic-tag">${t}</span>`;
+
+function card(id,head,body){
+  const dc=done.has(id);
+  return `<div class="q-card${dc?' done-card':''}" id="card-${id}">
+    <div class="q-head" onclick="toggleCard('${id}')">
+      ${head}
+      <input type="checkbox" class="done-cb" ${dc?'checked':''} onclick="toggleDone('${id}',event)" title="Mark done">
+      <span class="chevron">▾</span>
+    </div>
+    <div class="q-body">${body}</div>
+  </div>`;
+}
+
+function renderDSA(){
+  const search=(document.getElementById('search-dsa').value||'').toLowerCase();
+  const diff=document.getElementById('diff-dsa').value;
+  const topic=document.getElementById('topic-dsa').value;
+  const list=DSA.filter(q=>{
+    if(diff&&q.diff!==diff)return false;
+    if(topic&&q.topic!==topic)return false;
+    if(search&&!(q.title.toLowerCase().includes(search)||q.q.toLowerCase().includes(search)))return false;
+    return true;
+  });
+  document.getElementById('count-dsa').textContent=`${list.length} questions`;
+  document.getElementById('pane-dsa').innerHTML=list.map(q=>card(q.id,
+    `${mkDiff(q.diff)}${mkTag(q.topic)}<span class="q-title">${q.title}</span>`,
+    `<div class="q-section"><label>Question</label><p>${q.q}</p></div>
+     <div class="q-section"><label>💡 Hint</label><p>${q.hint}</p></div>
+     <div class="q-section"><label>Answer</label><p>${q.ans}</p></div>
+     <div class="q-section"><label>Python Solution</label><pre>${q.sol}</pre></div>
+     <div class="meta-row"><span class="meta-pill">⏱ Time: ${q.tc}</span><span class="meta-pill">💾 Space: ${q.sc}</span></div>
+     <div class="companies">${q.cos.map(c=>`<span class="co">${c}</span>`).join('')}</div>`
+  )).join('');
+}
+
+function renderSD(){
+  const search=(document.getElementById('search-sd').value||'').toLowerCase();
+  const diff=document.getElementById('diff-sd').value;
+  const cat=document.getElementById('cat-sd').value;
+  const list=SD.filter(q=>{
+    if(diff&&q.diff!==diff)return false;
+    if(cat&&q.cat!==cat)return false;
+    if(search&&!(q.title.toLowerCase().includes(search)||q.q.toLowerCase().includes(search)))return false;
+    return true;
+  });
+  document.getElementById('count-sd').textContent=`${list.length} questions`;
+  document.getElementById('pane-sd').innerHTML=list.map(q=>card(q.id,
+    `${mkDiff(q.diff)}${mkTag(q.cat)}<span class="q-title">${q.title}</span>`,
+    `<div class="q-section"><label>Question</label><p>${q.q}</p></div>
+     <div class="q-section"><label>Key Points</label><ul class="key-points">${q.keyPoints.map(p=>`<li>${p}</li>`).join('')}</ul></div>
+     <div class="q-section"><label>Framework Answer</label><p>${q.ans}</p></div>`
+  )).join('');
+}
+
+function renderBEH(){
+  const search=(document.getElementById('search-beh').value||'').toLowerCase();
+  const cat=document.getElementById('cat-beh').value;
+  const list=BEH.filter(q=>{
+    if(cat&&q.cat!==cat)return false;
+    if(search&&!(q.title.toLowerCase().includes(search)||q.q.toLowerCase().includes(search)))return false;
+    return true;
+  });
+  document.getElementById('count-beh').textContent=`${list.length} questions`;
+  document.getElementById('pane-beh').innerHTML=list.map(q=>card(q.id,
+    `${mkTag(q.cat)}<span class="q-title">${q.title}</span>`,
+    `<div class="q-section"><label>Question</label><p>${q.q}</p></div>
+     <div class="q-section"><label>Sample STAR Answer</label><div class="star-block">${q.sample}</div></div>`
+  )).join('');
+}
+
+renderDSA();
+updateProgress();
+</script>
 </body>
 </html>

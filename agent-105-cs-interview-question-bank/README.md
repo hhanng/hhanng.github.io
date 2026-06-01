@@ -1,27 +1,28 @@
 # CS Interview Question Bank
-> Part of the [100+ AI Agents Portfolio](https://hhanng.github.io) by Han Han Nguyen
+
+> Agent #105 · [100 AI Agents Challenge](https://hhanng.github.io)
 
 ## 🔗 Live Demo
 [Open App](https://hhanng.github.io/agent-105-cs-interview-question-bank/)
 
-## 📋 Description
-200 CS interview questions across Data Structures & Algorithms, System Design, and Behavioral — with full answers and difficulty ratings.
-
 ## ✨ Features
-- 200 questions across DSA, System Design, and Behavioral
-- Difficulty ratings: Easy / Medium / Hard
-- Full answers with explanations
-- Topic filters and search
+- 50 DSA questions with Python solutions, hints, time/space complexity, and company tags
+- 30 System Design questions with key architectural points and framework answers
+- 20 Behavioral questions with full STAR sample answers
+- Filter by difficulty, category, and full-text search on each tab
+- Done tracking saved in localStorage with a progress bar (X / 100 done)
+
+## 🚀 Usage
+1. Open the [Live Demo](https://hhanng.github.io/agent-105-cs-interview-question-bank/)
+2. Pick a tab: DSA / System Design / Behavioral
+3. Filter by difficulty or topic, or search by keyword
+4. Click any card to expand the full answer + solution
+5. Check the box to mark questions done — progress persists across sessions
 
 ## 🛠 Tech Stack
-- HTML
-- CSS
-- JavaScript
-- localStorage
-
-## 📁 Part of
-This agent is #105 in a portfolio of 120+ AI-powered single-page apps.
-[View all agents →](https://hhanng.github.io)
+- Single-file HTML/CSS/JS (no build step, no dependencies)
+- All data inline — works offline
+- localStorage for progress persistence
 
 ---
 Built by [Han Han Nguyen](https://hhanng.github.io)
