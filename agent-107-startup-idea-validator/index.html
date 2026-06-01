@@ -6,23 +6,1168 @@
 <title>Agent #107 · Startup Idea Validator</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px;max-width:520px;width:100%;text-align:center}
-.num{font-size:.8rem;font-weight:700;color:#38bdf8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-h1{font-size:1.6rem;font-weight:800;margin-bottom:12px;color:#f1f5f9}
-p{color:#94a3b8;font-size:.95rem;line-height:1.6;margin-bottom:24px}
-.badge{display:inline-block;background:#1d4ed8;color:#bfdbfe;font-size:.8rem;font-weight:700;padding:6px 16px;border-radius:99px;margin-bottom:28px}
-a.back{color:#38bdf8;text-decoration:none;font-size:.85rem;border:1px solid #334155;padding:8px 18px;border-radius:8px;display:inline-block;transition:background .15s}
-a.back:hover{background:#1e3a5f}
+:root{
+  --bg:#f8fafc;--card:#fff;--border:#e2e8f0;
+  --accent:#6366f1;--accent2:#eef2ff;
+  --green:#10b981;--yellow:#f59e0b;--orange:#f97316;--red:#ef4444;
+  --text:#1e293b;--muted:#64748b;--dim:#94a3b8;
+}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:#fff;border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.1rem;font-weight:800}
+header p{color:var(--muted);font-size:.82rem}
+.hbadge{background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:99px}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{flex:1;min-width:120px;padding:13px 10px;text-align:center;font-size:.85rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+main{max-width:960px;margin:0 auto;padding:20px}
+.pane{display:none}.pane.active{display:block}
+
+/* forms */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:.8rem;font-weight:700;color:var(--muted)}
+.field input,.field textarea,.field select{background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:.88rem;color:var(--text);outline:none;width:100%;font-family:inherit}
+.field textarea{resize:vertical;min-height:80px}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+.field.full{grid-column:1/-1}
+
+/* buttons */
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.87}
+.btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.btn-sm{padding:6px 14px;font-size:.78rem}
+.btn-green{background:var(--green)}
+.btn-danger{background:var(--red)}
+
+/* section card */
+.scard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+.scard h2{font-size:.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.scard h3{font-size:.88rem;font-weight:700;margin-bottom:8px}
+
+/* score bar */
+.score-bar-wrap{height:10px;background:#f1f5f9;border-radius:5px;overflow:hidden;margin:8px 0}
+.score-bar-fill{height:100%;border-radius:5px;transition:width .6s ease}
+.score-num{font-size:1.5rem;font-weight:800}
+
+/* verdict */
+.verdict{border-radius:12px;padding:20px;margin-bottom:16px;text-align:center}
+.verdict .big{font-size:3rem;font-weight:800;line-height:1}
+.verdict .label{font-size:1rem;font-weight:700;margin-top:6px}
+.verdict .sub{font-size:.85rem;margin-top:6px;opacity:.85}
+
+/* toggles */
+.toggle-group{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.toggle-btn{padding:6px 14px;border-radius:99px;border:1px solid var(--border);font-size:.8rem;cursor:pointer;font-weight:600;background:#fff;color:var(--muted);transition:all .15s}
+.toggle-btn.selected-yes{background:#dcfce7;border-color:var(--green);color:#166534}
+.toggle-btn.selected-no{background:#fef2f2;border-color:var(--red);color:#991b1b}
+.toggle-btn.selected-ns{background:#fef9c3;border-color:var(--yellow);color:#92400e}
+.toggle-btn.selected-accent{background:var(--accent2);border-color:var(--accent);color:var(--accent)}
+
+/* market */
+.market-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .15s;margin-bottom:10px}
+.market-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(99,102,241,.1)}
+.market-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.market-name{font-weight:700;font-size:.95rem;flex:1}
+.market-detail{display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:12px}
+.market-card.open .market-detail{display:block}
+.market-card.open .chevron{transform:rotate(180deg)}
+.chevron{transition:transform .2s;color:var(--dim);font-size:.75rem}
+.hotbadge{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px}
+.hot{background:#fce7f3;color:#9d174d}.warm{background:#fef9c3;color:#92400e}
+.cool{background:#dbeafe;color:#1d4ed8}.exploding{background:#dcfce7;color:#166534}
+
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+@media(max-width:600px){.detail-grid{grid-template-columns:1fr}}
+.detail-section label{font-size:.7rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px}
+.detail-section ul{list-style:none;padding:0}
+.detail-section li{font-size:.82rem;color:var(--muted);padding:3px 0 3px 14px;position:relative;line-height:1.4}
+.detail-section li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+.detail-section li.red::before{color:var(--red)}
+.detail-section li.green-dot::before{color:var(--green)}
+
+/* Canvas map */
+.canvas-wrap{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
+canvas{display:block;margin:0 auto;cursor:crosshair;border:1px solid var(--border);border-radius:8px}
+
+/* SWOT */
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.swot-grid{grid-template-columns:1fr}}
+.swot-quad{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
+.swot-quad h3{font-size:.85rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.swot-items{min-height:60px;margin-bottom:10px}
+.swot-item{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:.82rem}
+.swot-item button{background:none;border:none;color:var(--red);cursor:pointer;font-size:.85rem;flex-shrink:0}
+.swot-input-row{display:flex;gap:6px}
+.swot-input-row input{flex:1;background:#fff;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:.82rem;outline:none}
+.suggestions{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.sugg{font-size:.75rem;padding:3px 9px;border-radius:99px;border:1px solid var(--border);cursor:pointer;background:#fff;color:var(--muted);transition:all .15s}
+.sugg:hover{border-color:var(--accent);color:var(--accent);background:var(--accent2)}
+
+/* Pitch */
+.pitch-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.pitch-grid{grid-template-columns:1fr}}
+.pitch-component{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
+.pitch-score-bar{height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden;margin:8px 0}
+.pitch-score-fill{height:100%;border-radius:4px;transition:width .5s}
+.checklist-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f8fafc;font-size:.85rem;cursor:pointer}
+.checklist-item input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.checklist-item.done{text-decoration:line-through;color:var(--dim)}
+.outline-slide{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
+.outline-slide .slide-num{font-size:.7rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
+.outline-slide h4{font-size:.88rem;font-weight:700;margin:3px 0 6px}
+.outline-slide li{font-size:.8rem;color:var(--muted);line-height:1.5}
+
+/* slider */
+input[type=range]{width:100%;accent-color:var(--accent)}
+.slider-labels{display:flex;justify-content:space-between;font-size:.72rem;color:var(--dim);margin-top:2px}
+
+.tag{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--accent2);color:var(--accent)}
+.action-item{background:var(--accent2);border:1px solid #c7d2fe;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:.85rem;color:#4338ca}
+.action-item::before{content:"→ "}
+.info-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="num">Agent #107 · 100 AI Agents Challenge</div>
-  <h1>Startup Idea Validator</h1>
-  <p>Validate startup ideas with market size, competitor analysis, SWOT, and pitch scoring.</p>
-  <div class="badge">🚧 Coming Soon</div><br>
-  <a href="/" class="back">← Back to Portfolio</a>
+
+<header>
+  <div>
+    <div class="hbadge">#107 · AI Agents</div>
+    <h1 style="margin-top:5px">🚀 Startup Idea Validator</h1>
+    <p>Score your idea · Research markets · Build your SWOT · Practice your pitch</p>
+  </div>
+  <a href="/" style="margin-left:auto;color:var(--accent);font-size:.82rem;text-decoration:none;border:1px solid var(--border);padding:7px 14px;border-radius:8px;background:#fff">← Portfolio</a>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('validator',this)">💡 Idea Validator</div>
+  <div class="tab" onclick="switchTab('market',this)">📊 Market Research</div>
+  <div class="tab" onclick="switchTab('swot',this)">⚖️ SWOT Builder</div>
+  <div class="tab" onclick="switchTab('pitch',this)">🎯 Pitch Scorer</div>
 </div>
+
+<main>
+
+<!-- TAB 1: IDEA VALIDATOR -->
+<div class="pane active" id="pane-validator">
+  <div class="scard">
+    <h2>📝 Your Startup</h2>
+    <div class="form-grid">
+      <div class="field"><label>Startup Name</label><input id="v-name" placeholder="e.g. EduLoop"></div>
+      <div class="field"><label>One-line Description</label><input id="v-desc" placeholder="e.g. AI-powered tutoring for Vietnamese students"></div>
+      <div class="field full"><label>Problem It Solves</label><textarea id="v-problem" placeholder="Describe the specific pain point your startup solves. Be as concrete as possible — mention who suffers, how often, and what it costs them."></textarea></div>
+      <div class="field"><label>Target Customer</label><input id="v-customer" placeholder="e.g. college students, small business owners"></div>
+      <div class="field"><label>Revenue Model</label>
+        <select id="v-revenue">
+          <option value="">Select…</option>
+          <option>Subscription</option><option>One-time purchase</option><option>Marketplace</option>
+          <option>Ads</option><option>Freemium</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Stage</label>
+        <select id="v-stage">
+          <option value="">Select…</option>
+          <option>Just an idea</option><option>Prototype</option><option>Early users</option><option>Revenue</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="scard">
+    <h2>🏆 Competition Check <span style="font-size:.75rem;font-weight:400;color:var(--muted)">(answer all 5 before validating)</span></h2>
+    <div id="comp-questions"></div>
+  </div>
+
+  <div class="scard">
+    <h2>👤 Founder Fit</h2>
+    <div id="founder-questions"></div>
+  </div>
+
+  <div class="scard">
+    <h2>⚡ Execution Risk</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px" id="exec-questions">
+      <div>
+        <div class="field"><label>Time to first revenue</label>
+          <input type="range" id="exec-time" min="0" max="4" value="2" oninput="updateExecLabels()">
+          <div class="slider-labels"><span>1 mo</span><span>3 mo</span><span>6 mo</span><span>1 yr</span><span>2+ yr</span></div>
+          <div id="exec-time-val" style="font-size:.82rem;color:var(--accent);margin-top:4px;font-weight:600"></div>
+        </div>
+      </div>
+      <div>
+        <div class="field"><label>MVP launch budget needed</label>
+          <input type="range" id="exec-money" min="0" max="3" value="1" oninput="updateExecLabels()">
+          <div class="slider-labels"><span>$0–1K</span><span>$1–10K</span><span>$10–100K</span><span>$100K+</span></div>
+          <div id="exec-money-val" style="font-size:.82rem;color:var(--accent);margin-top:4px;font-weight:600"></div>
+        </div>
+      </div>
+      <div style="grid-column:1/-1">
+        <div class="field"><label>Paying customers or letters of intent?</label>
+          <div class="toggle-group" id="exec-customers">
+            <button class="toggle-btn" onclick="selectToggle(this,'exec-customers','selected-yes')">Yes ✓</button>
+            <button class="toggle-btn" onclick="selectToggle(this,'exec-customers','selected-no')">Not yet</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" onclick="validateIdea()" style="width:100%;padding:13px;font-size:.95rem">🔍 Validate My Idea</button>
+  <div id="validation-report" style="margin-top:20px"></div>
+</div>
+
+<!-- TAB 2: MARKET RESEARCH -->
+<div class="pane" id="pane-market">
+  <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <input class="field" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:.88rem;outline:none" id="market-search" placeholder="Search markets…" oninput="renderMarkets()">
+    <select id="market-filter" onchange="renderMarkets()" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:.88rem;background:#fff;outline:none">
+      <option value="">All hotness</option><option>hot</option><option>warm</option><option>cool</option><option>exploding</option>
+    </select>
+  </div>
+  <div id="markets-list"></div>
+
+  <div class="scard" style="margin-top:20px">
+    <h2>🗺 Competitor Positioning Map</h2>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px">Add up to 5 competitors. Set their Price (0=low, 10=high) and Features (0=basic, 10=advanced). Click the canvas to place your startup (shown as ★).</p>
+    <div id="comp-map-inputs"></div>
+    <button class="btn btn-sm" onclick="addCompetitorRow()" style="margin:8px 0">+ Add Competitor</button>
+    <div class="canvas-wrap" style="margin-top:10px">
+      <canvas id="map-canvas" width="440" height="380"></canvas>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="exportMapSummary()" style="margin-top:10px">📋 Export Summary</button>
+    <div id="map-export" style="display:none;margin-top:10px;background:var(--bg);padding:12px;border-radius:8px;font-size:.82rem;white-space:pre-wrap;font-family:monospace"></div>
+  </div>
+</div>
+
+<!-- TAB 3: SWOT BUILDER -->
+<div class="pane" id="pane-swot">
+  <div class="swot-grid" id="swot-grid"></div>
+  <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+    <button class="btn" onclick="calcSwotScore()">📊 Calculate SWOT Score</button>
+    <button class="btn btn-outline" onclick="exportSwot()">📋 Export SWOT</button>
+    <button class="btn btn-outline btn-danger" onclick="clearSwot()">Clear All</button>
+  </div>
+  <div id="swot-result" style="margin-top:14px"></div>
+  <div id="swot-export" style="display:none;margin-top:14px;background:var(--bg);padding:16px;border-radius:10px;font-size:.82rem;white-space:pre-wrap;font-family:monospace"></div>
+</div>
+
+<!-- TAB 4: PITCH SCORER -->
+<div class="pane" id="pane-pitch">
+  <div class="pitch-grid" id="pitch-components"></div>
+  <button class="btn" onclick="scorePitch()" style="width:100%;padding:12px;margin:14px 0">🎯 Score My Pitch</button>
+  <div id="pitch-result" style="margin-bottom:20px"></div>
+
+  <div class="scard">
+    <h2>✅ Investor Readiness Checklist</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span id="checklist-progress" style="font-size:.85rem;color:var(--muted)"></span>
+      <button class="btn btn-outline btn-sm" onclick="clearChecklist()">Reset</button>
+    </div>
+    <div id="checklist-items"></div>
+  </div>
+
+  <div class="scard">
+    <h2>📑 Pitch Deck Outline Generator</h2>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px">Fill in the pitch components above, then generate a 10-slide outline.</p>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="generateDeckOutline()">✨ Generate Outline</button>
+      <button class="btn btn-outline" onclick="copyOutline()">📋 Copy</button>
+    </div>
+    <div id="deck-outline" style="margin-top:14px"></div>
+  </div>
+</div>
+
+</main>
+
+<div id="toast" style="position:fixed;bottom:20px;right:20px;background:#1e293b;color:#fff;padding:10px 18px;border-radius:8px;font-size:.82rem;display:none;z-index:9999">✓ Copied!</div>
+
+<script>
+// ── MARKET DATA ──────────────────────────────────────────────────────────────
+const MARKETS=[
+{id:"edtech",name:"EdTech",tam:"$350B",cagr:"16%",hotness:"hot",growth:"growing",
+ keywords:["education","learning","student","school","course","teach","tutor","training","academic","curriculum","classroom","study"],
+ players:["Coursera","Duolingo","Chegg","Khan Academy","2U"],
+ problems:["High cost of quality education","One-size-fits-all curriculum fails diverse learners","Lack of measurable learning outcomes"],
+ trends:["AI-powered personalization and adaptive learning","Micro-credentials replacing traditional degrees","B2B corporate upskilling platforms boom"],
+ investorWants:["Daily/monthly active user retention","Proven learning outcome metrics","Scalable content production strategy"],
+ winners:[{n:"Duolingo",w:"Gamification + free model drove viral growth to 500M users"},{n:"Coursera",w:"University partnerships created instant credibility and content at scale"},{n:"Masterclass",w:"Celebrity instructors made learning aspirational and premium"}],
+ redFlags:["High churn after novelty wears off","Difficult to prove ROI on learning","Competing against YouTube and free content"]},
+
+{id:"healthtech",name:"HealthTech",tam:"$500B",cagr:"18%",hotness:"hot",growth:"growing",
+ keywords:["health","medical","patient","doctor","hospital","wellness","fitness","clinic","therapy","mental","disease","care","pharmacy"],
+ players:["Teladoc","Hims & Hers","Noom","GoodRx","23andMe"],
+ problems:["Healthcare is fragmented and inaccessible","Mental health support is underfunded globally","Preventive care adoption is extremely low"],
+ trends:["Remote patient monitoring and telehealth","AI diagnostics and clinical decision support","Mental health apps entering mainstream"],
+ investorWants:["FDA/regulatory pathway clarity","Clinical evidence or peer-reviewed studies","HIPAA compliance and security posture"],
+ winners:[{n:"Teladoc",w:"First-mover in telehealth before COVID, then became essential"},{n:"GoodRx",w:"Transparent pricing in an opaque market created immediate trust"},{n:"Noom",w:"Behavioral psychology approach differentiated from pure diet apps"}],
+ redFlags:["Regulatory approval can take years","Liability and malpractice exposure","Difficulty changing provider behavior"]},
+
+{id:"fintech",name:"FinTech",tam:"$300B",cagr:"20%",hotness:"hot",growth:"growing",
+ keywords:["finance","payment","banking","invest","money","wallet","loan","credit","insurance","trading","transfer","budget","savings","mortgage"],
+ players:["Stripe","Robinhood","Chime","Affirm","Plaid"],
+ problems:["Traditional banks exclude 1.7B unbanked people","Hidden fees erode consumer trust","SMB access to credit remains difficult"],
+ trends:["Embedded finance in non-financial apps","BNPL (Buy Now Pay Later) expanding","Stablecoin and crypto payments maturing"],
+ investorWants:["Regulatory licenses and compliance framework","Unit economics: CAC vs LTV clarity","Banking partnerships or charter path"],
+ winners:[{n:"Stripe",w:"Developer-first API approach made payments frictionless for builders"},{n:"Chime",w:"Zero-fee banking targeted underserved millennials at massive scale"},{n:"Robinhood",w:"Zero-commission trading democratized investing for young adults"}],
+ redFlags:["Regulatory risk can shut you down overnight","Fraud and chargebacks destroy margins","Competing with banks that have unlimited capital"]},
+
+{id:"ecommerce",name:"eCommerce",tam:"$6T",cagr:"11%",hotness:"warm",growth:"stable",
+ keywords:["shop","store","buy","sell","retail","product","marketplace","delivery","logistics","inventory","merchant","consumer","purchase","ecommerce"],
+ players:["Amazon","Shopify","Etsy","eBay","Faire"],
+ problems:["Small sellers lack access to quality logistics","Product discovery is overwhelming for consumers","Returns management costs retailers 10-15% of revenue"],
+ trends:["Social commerce (TikTok Shop) accelerating","DTC brands cutting out middlemen","AI personalization driving conversion"],
+ investorWants:["GMV growth and take rate clarity","Supplier/merchant lock-in strategy","Path to profitability, not just growth"],
+ winners:[{n:"Shopify",w:"Empowering merchants with infrastructure, not competing with them"},{n:"Etsy",w:"Niche focus on handmade created defensible community flywheel"},{n:"Faire",w:"B2B wholesale marketplace with net 60 payment terms unlocked SMBs"}],
+ redFlags:["Amazon can copy any product vertical","Thin margins destroyed by logistics costs","CAC often exceeds LTV in competitive niches"]},
+
+{id:"saas",name:"SaaS / B2B Software",tam:"$700B",cagr:"18%",hotness:"hot",growth:"growing",
+ keywords:["software","saas","b2b","enterprise","business","tool","platform","workflow","automation","productivity","crm","erp","api","integration"],
+ players:["Salesforce","HubSpot","Notion","Airtable","Linear"],
+ problems:["Businesses waste 20+ hours/week on repetitive tasks","Data silos prevent cross-team visibility","SMBs can't afford enterprise software"],
+ trends:["AI copilots embedded in every workflow tool","Vertical SaaS for specific industries","PLG (Product-Led Growth) replacing sales-led"],
+ investorWants:["Net Revenue Retention >110%","Low churn (<2%/month)","ARR growth rate and CAC payback period"],
+ winners:[{n:"HubSpot",w:"Freemium + content marketing built trust before asking for payment"},{n:"Notion",w:"Bottom-up adoption within companies replaced top-down sales"},{n:"Figma",w:"Real-time collaboration was a 10x improvement over local design tools"}],
+ redFlags:["Long enterprise sales cycles kill early-stage startups","Feature parity with incumbents is hard to achieve","Free tier often attracts users who never convert"]},
+
+{id:"aitools",name:"AI Tools",tam:"$200B",cagr:"38%",hotness:"exploding",growth:"exploding",
+ keywords:["ai","artificial intelligence","machine learning","llm","gpt","automation","generative","model","neural","nlp","chatbot","agent","copilot","predict"],
+ players:["OpenAI","Anthropic","Midjourney","Hugging Face","Runway"],
+ problems:["Knowledge work is bottlenecked by manual, repetitive tasks","AI capabilities exist but aren't accessible to non-technical users","Quality control for AI outputs is unsolved"],
+ trends:["Agentic AI handling multi-step autonomous tasks","Multimodal AI (text+image+audio+video)","Vertical AI assistants for specific professions"],
+ investorWants:["Moat beyond API wrapper (proprietary data or workflow)","Evidence of 10x productivity gain","Clear persona and use case, not general AI"],
+ winners:[{n:"Cursor",w:"Deep IDE integration made AI coding feel native, not bolted on"},{n:"Midjourney",w:"Aesthetic quality + Discord community created a cult following"},{n:"Harvey",w:"Legal AI with elite law firm partnerships gave instant credibility"}],
+ redFlags:["OpenAI/Google can release a competing feature overnight","Thin margins when paying API costs","Hard to retain users when free alternatives emerge"]},
+
+{id:"gaming",name:"Gaming",tam:"$220B",cagr:"10%",hotness:"warm",growth:"growing",
+ keywords:["game","gaming","player","esports","mobile game","console","streaming","play","virtual","metaverse","nft game","play-to-earn"],
+ players:["Roblox","Epic Games","Unity","Discord","Twitch"],
+ problems:["Game discovery is broken — 95% of games never find their audience","Monetization alienates players (pay-to-win)","Creator tools are too complex for non-developers"],
+ trends:["UGC platforms (Roblox model) dominating youth","Cloud gaming removing hardware barriers","AI-generated game content and NPCs"],
+ investorWants:["DAU/MAU and session length metrics","ARPU (Average Revenue Per User)","Community retention and virality mechanics"],
+ winners:[{n:"Roblox",w:"UGC platform turned users into creators — infinite free content"},{n:"Among Us",w:"Social deduction mechanic was perfect for Twitch streaming virality"},{n:"Discord",w:"Bet on communities, not games — became the infrastructure for gaming"}],
+ redFlags:["Hit-driven business — most games fail","Extremely high CAC via ads","Platform risk: Apple/Google App Store control distribution"]},
+
+{id:"foodtech",name:"FoodTech",tam:"$250B",cagr:"12%",hotness:"warm",growth:"growing",
+ keywords:["food","restaurant","delivery","meal","cook","recipe","nutrition","farm","grocery","diet","beverage","snack","catering","kitchen"],
+ players:["DoorDash","Instacart","Impossible Foods","Sweetgreen","Oatly"],
+ problems:["Food delivery margins are negative for most restaurants","40% of food produced globally is wasted","Healthy eating is expensive and inconvenient"],
+ trends:["Ghost kitchens optimizing delivery economics","Alternative proteins scaling to mass market","AI meal planning and nutrition personalization"],
+ investorWants:["Unit economics at restaurant level","Reorder rates and subscription conversion","Path to positive gross margin on delivery"],
+ winners:[{n:"DoorDash",w:"Suburban focus while Uber Eats and GrubHub fought for cities"},{n:"Impossible Foods",w:"Restaurant B2B partnerships created mass awareness before retail"},{n:"Sweetgreen",w:"Premium positioning + app loyalty built cult brand in healthy QSR"}],
+ redFlags:["Razor-thin restaurant economics","Extreme logistics complexity","Customer loyalty is low — they order from wherever is cheapest"]},
+
+{id:"cleantech",name:"CleanTech",tam:"$1T",cagr:"22%",hotness:"hot",growth:"growing",
+ keywords:["clean","sustainability","solar","wind","energy","carbon","climate","green","renewable","electric","ev","battery","recycl","environment"],
+ players:["Tesla","Rivian","Sunrun","Bloom Energy","Northvolt"],
+ problems:["Grid-scale energy storage remains economically unviable","Decarbonizing heavy industry (steel, cement, shipping)","Carbon credit markets lack transparency and integrity"],
+ trends:["IRA (Inflation Reduction Act) unlocking billions in US incentives","Green hydrogen as industrial fuel replacement","Carbon capture going from R&D to commercial"],
+ investorWants:["Technology readiness level (TRL) and deployment timeline","Policy risk assessment (government dependency)","Offtake agreements or LOIs with buyers"],
+ winners:[{n:"Tesla",w:"Luxury EV first strategy funded mass-market transition"},{n:"Sunrun",w:"$0-down solar leasing removed upfront barrier to adoption"},{n:"Climeworks",w:"Direct air capture with long-term Microsoft/Google contracts for credibility"}],
+ redFlags:["Capital-intensive hardware requires huge runway","Technology risk remains high in many sectors","Policy changes can eliminate subsidies overnight"]},
+
+{id:"hrtech",name:"HR Tech",tam:"$30B",cagr:"11%",hotness:"warm",growth:"growing",
+ keywords:["hiring","recruit","hr","human resources","employee","talent","payroll","onboard","performance","workforce","team","people","manager","culture"],
+ players:["Workday","Greenhouse","Lattice","Rippling","Gusto"],
+ problems:["Hiring bias is pervasive and legally risky","Employee engagement has fallen post-pandemic","Small businesses can't afford HR professionals"],
+ trends:["AI resume screening and candidate matching","Skills-based hiring replacing degree requirements","HR analytics predicting churn before it happens"],
+ investorWants:["Seat-based or headcount pricing scalability","Integration with existing HR stacks (ATS, HRIS)","Evidence of measurable hiring quality improvement"],
+ winners:[{n:"Rippling",w:"All-in-one HR + IT + Finance unified data model — switching costs are enormous"},{n:"Gusto",w:"Delightful payroll UX for SMBs in a famously painful category"},{n:"Greenhouse",w:"Structured interviewing methodology + software became the standard"}],
+ redFlags:["HR buyers are risk-averse and change-resistant","Long implementation cycles burn startup runway","Competing with Workday/Oracle that have iron-clad enterprise contracts"]},
+
+{id:"legaltech",name:"LegalTech",tam:"$25B",cagr:"9%",hotness:"warm",growth:"growing",
+ keywords:["legal","law","contract","compliance","attorney","lawyer","regulation","court","ip","patent","dispute","litigation","paralegal"],
+ players:["Clio","LegalZoom","DocuSign","Ironclad","Harvey"],
+ problems:["Legal services are unaffordable for 80% of people and SMBs","Contract review is slow and expensive","Regulatory compliance is overwhelming for startups"],
+ trends:["AI contract review cutting review time by 80%","Legal ops rising inside corporations","Self-serve legal tools empowering non-lawyers"],
+ investorWants:["Unauthorized practice of law risk mitigation","Clear pricing model vs hourly billing","Bar association and regulatory compliance stance"],
+ winners:[{n:"Clio",w:"Cloud-first practice management before lawyers trusted the cloud"},{n:"Harvey",w:"Partnership with A&O Shearman gave immediate enterprise credibility"},{n:"Ironclad",w:"Workflow layer on top of contracts unlocked entire legal ops category"}],
+ redFlags:["UPL (unauthorized practice of law) regulatory risk","Lawyers are notoriously resistant to new tools","Liability for AI errors in legal advice is untested"]},
+
+{id:"cybersecurity",name:"CyberSecurity",tam:"$200B",cagr:"13%",hotness:"hot",growth:"growing",
+ keywords:["security","cyber","hacker","breach","data","privacy","vpn","firewall","threat","malware","zero trust","soc","siem","identity","access"],
+ players:["Crowdstrike","Palo Alto Networks","Okta","SentinelOne","Wiz"],
+ problems:["Average breach detection time is 207 days","Identity is the new perimeter but MFA adoption is low","Security teams are overwhelmed by alert fatigue"],
+ trends:["Zero Trust architecture replacing VPN-based security","AI-powered threat detection and response","Security consolidation — fewer vendors with more coverage"],
+ investorWants:["ARR and NDR from enterprise customers","SOC2/ISO27001 compliance as baseline","Clear differentiation from existing SIEM/EDR tools"],
+ winners:[{n:"Wiz",w:"Agentless cloud security scanning reached $100M ARR in 18 months"},{n:"Crowdstrike",w:"Cloud-native EDR was a generation ahead of legacy AV players"},{n:"1Password",w:"Consumer love + B2B team plans created a massive bottom-up enterprise play"}],
+ redFlags:["Enterprise sales cycles of 6-18 months kill early startups","Procurement involves CISO, legal, and IT — very slow","One major breach of your own product is existential"]},
+
+{id:"proptech",name:"PropTech",tam:"$18B",cagr:"10%",hotness:"warm",growth:"growing",
+ keywords:["real estate","property","rent","landlord","tenant","apartment","home","house","mortgage","lease","commercial","office","listing","broker"],
+ players:["Zillow","Opendoor","Roofstock","VTS","Buildout"],
+ problems:["Renting is opaque — hidden fees, unclear processes","Commercial real estate data is fragmented","Property management is manual and error-prone"],
+ trends:["AI-powered property valuation and underwriting","Short-term rental market normalization post-Airbnb boom","Proptech for commercial real estate modernization"],
+ investorWants:["Take rate on transaction value","Repeat usage or subscription component","Data network effects (more listings = better product)"],
+ winners:[{n:"Zillow",w:"Data aggregation and consumer brand made it the default home search"},{n:"Opendoor",w:"Instant offer model removed friction from home selling entirely"},{n:"Roofstock",w:"SFR (single-family rental) investing platform unlocked a new asset class"}],
+ redFlags:["Real estate is cyclical — rising rates killed many proptech models","High regulatory complexity by state/country","Transaction fees are under pressure as commissions decline"]},
+
+{id:"mentalhealth",name:"Mental Health",tam:"$80B",cagr:"17%",hotness:"hot",growth:"growing",
+ keywords:["mental health","anxiety","depression","therapy","meditation","mindfulness","stress","sleep","wellbeing","burnout","counseling","psychiatry","CBT"],
+ players:["BetterHelp","Calm","Headspace","Spring Health","Cerebral"],
+ problems:["Therapist shortage — 150M Americans can't access mental healthcare","Stigma prevents ~60% of people from seeking help","Employee mental health crises cost companies $1T/year globally"],
+ trends:["Employer-sponsored mental health benefits booming","AI therapy tools filling access gap","Crisis intervention moving into text and app formats"],
+ investorWants:["Clinical outcomes data (PHQ-9 scores, retention)","B2B employer sales channel for scale","Therapist supply chain and quality control"],
+ winners:[{n:"BetterHelp",w:"Massive digital marketing spend on podcasts built brand awareness"},{n:"Spring Health",w:"Precision mental healthcare with employer sales proved clinical ROI"},{n:"Calm",w:"Consumer subscription model with B2B pivot to employer wellness"}],
+ redFlags:["FTC scrutiny of mental health app marketing claims","High churn when users feel better (success = attrition)","Liability for clinical advice and crisis situations"]},
+
+{id:"traveltech",name:"TravelTech",tam:"$800B",cagr:"9%",hotness:"warm",growth:"recovering",
+ keywords:["travel","flight","hotel","booking","trip","vacation","tourism","airline","resort","accommodation","itinerary","airport","visa","passport"],
+ players:["Airbnb","Booking.com","Hopper","TripAdvisor","Kayak"],
+ problems:["Travel planning is fragmented across 10+ tools and websites","Price transparency is poor — best deal requires 30+ minutes of research","Business travel expense management is painful"],
+ trends:["'Workcation' and bleisure travel normalizing remote work travel","AI travel agents planning entire trips conversationally","Sustainable travel certification and carbon offsetting"],
+ investorWants:["Take rate on booking volume","Repeat booking rate and loyalty metrics","Supplier relationship depth (airlines, hotels, activities)"],
+ winners:[{n:"Airbnb",w:"Host supply created demand that hotels couldn't match for experience travelers"},{n:"Hopper",w:"Price prediction AI created a 'wait to book' behavior that locked users in"},{n:"Remote Year",w:"Long-term travel community product for location-independent workers"}],
+ redFlags:["COVID showed how quickly the industry collapses","Extremely competitive on price — margins thin","Seasonal revenue makes unit economics hard to model"]},
+
+{id:"biotech",name:"BioTech",tam:"$800B",cagr:"14%",hotness:"hot",growth:"growing",
+ keywords:["biotech","biology","drug","pharmaceutical","genomics","dna","rna","protein","clinical trial","fda","therapy","vaccine","diagnostic","gene"],
+ players:["Moderna","BioNTech","23andMe","Illumina","Recursion"],
+ problems:["Drug development takes 12 years and $2.6B on average","Rare diseases have no approved treatments","Diagnostic errors affect 12M Americans annually"],
+ trends:["mRNA platform expanding from vaccines to cancer treatment","AI drug discovery compressing the discovery phase","Liquid biopsy enabling earlier cancer detection"],
+ investorWants:["IND filing and clinical trial timeline","IP portfolio and freedom to operate","Platform play vs. single asset risk"],
+ winners:[{n:"Moderna",w:"mRNA platform investment before COVID made them pandemic-ready"},{n:"Recursion",w:"AI drug discovery platform attracted pharma partnerships for data"},{n:"Guardant Health",w:"Liquid biopsy for cancer detection created a new diagnostic category"}],
+ redFlags:["Clinical trial failure rates >90% for Phase II","FDA approval risk is binary and slow","Pharma partnership negotiations can take years"]},
+
+{id:"logtech",name:"Logistics & Supply Chain",tam:"$12T",cagr:"8%",hotness:"warm",growth:"stable",
+ keywords:["logistics","supply chain","shipping","warehouse","freight","trucking","last mile","delivery","inventory","fleet","3pl","distribution","port"],
+ players:["Flexport","project44","Turvo","Stord","FreightWaves"],
+ problems:["Supply chain visibility remains opaque to most companies","Last-mile delivery costs rising as e-commerce grows","Driver shortage threatens trucking capacity"],
+ trends:["Real-time freight visibility becoming table stakes","Autonomous trucking pilots on major corridors","Nearshoring driving demand for new supply chain configurations"],
+ investorWants:["GMV growth and take rate","Integration depth with ERPs and TMS systems","Network effects from freight data"],
+ winners:[{n:"Flexport",w:"Full-stack digital freight forwarding made complexity disappear for shippers"},{n:"project44",w:"Real-time visibility network with carrier integrations created data moat"},{n:"Stord",w:"Warehousing-as-a-service for e-commerce brands without capex"}],
+ redFlags:["Capital intensive — trucks, warehouses, and working capital burn cash","Relationships and contracts drive freight, not software alone","Incumbent logistics companies are acquiring tech fast"]},
+
+{id:"agritech",name:"AgriTech",tam:"$22B",cagr:"12%",hotness:"warm",growth:"growing",
+ keywords:["agriculture","farm","crop","harvest","soil","farmer","food production","livestock","irrigation","precision agriculture","drone","seeds"],
+ players:["Climate Corporation","Indigo Agriculture","FBN","Bowery Farming","Plenty"],
+ problems:["Crop yield variability costs farmers billions annually","Chemical overuse degrades soil long-term","Smallholder farmers lack access to capital and markets"],
+ trends:["Precision agriculture using drone and satellite data","Vertical farming improving unit economics","Carbon farming creating new revenue streams for farmers"],
+ investorWants:["Per-acre economics and farmer ROI evidence","Channel to reach farmers (distribution is hard)","Regulatory approval for new inputs or crop varieties"],
+ winners:[{n:"Climate Corporation",w:"Weather data + agronomic models created the precision agriculture category"},{n:"FBN (Farmer's Business Network)",w:"Cooperative buying model created trust and cost savings simultaneously"},{n:"Indigo Agriculture",w:"Microbiome science + carbon credit marketplace diversified revenue"}],
+ redFlags:["Farmers are extremely price-sensitive and skeptical of tech","Sales cycles follow crop cycles — very slow","Regulatory approval for new biologicals or bioengineered crops is slow"]},
+
+{id:"autotech",name:"AutoTech",tam:"$600B",cagr:"15%",hotness:"hot",growth:"growing",
+ keywords:["automotive","car","vehicle","electric vehicle","ev","autonomous","self-driving","fleet","mobility","rideshare","parking","insurance","telematics"],
+ players:["Tesla","Waymo","Rivian","Mobileye","Aurora"],
+ problems:["EV charging infrastructure is insufficient","Insurance pricing for EVs and AVs is broken","Fleet management still done on spreadsheets at most companies"],
+ trends:["Software-defined vehicles creating recurring revenue for OEMs","Autonomous trucking entering commercial deployment","V2G (vehicle-to-grid) energy management emerging"],
+ investorWants:["Safety record and regulatory clarity for AV plays","Hardware + software margin split clarity","OEM partnership or direct channel to fleet buyers"],
+ winners:[{n:"Tesla",w:"Vertical integration across battery, software, and manufacturing"},{n:"Mobileye",w:"ADAS chipset became standard in 100M+ vehicles before AV era"},{n:"Samsara",w:"Fleet telematics with IoT won by going broad across SMB and enterprise"}],
+ redFlags:["Hardware development is slow and capital-intensive","OEM sales cycles can take 3-5 years to convert","Autonomous vehicle timelines have been consistently wrong"]},
+
+{id:"instech",name:"InsurTech",tam:"$10B",cagr:"14%",hotness:"warm",growth:"growing",
+ keywords:["insurance","insure","premium","policy","underwrite","claim","liability","coverage","risk","actuary","broker","reinsurance"],
+ players:["Lemonade","Root","Oscar","Hippo","Pie Insurance"],
+ problems:["Claims processing takes weeks but costs can be measured in hours","SMB insurance is dramatically underpriced or inaccessible","Health insurance confusion costs Americans billions in wrong plan choices"],
+ trends:["Usage-based insurance (UBI) powered by telematics","Embedded insurance at point-of-sale","AI claims automation cutting processing time from weeks to minutes"],
+ investorWants:["Loss ratio below 80% (premium vs claims)","Regulatory licenses in target states","Reinsurance partner relationships"],
+ winners:[{n:"Lemonade",w:"Behavioral economics + instant claims created a trust-first brand"},{n:"Root",w:"Telematics-based pricing rewarded safe drivers with fair premiums"},{n:"Oscar Health",w:"Consumer-grade UX in health insurance built a loyalty differentiator"}],
+ redFlags:["Catastrophic events can cause instant insolvency","Regulatory approval needed state-by-state","Adverse selection: bad risk pools destroy the loss ratio"]},
+
+{id:"sportstech",name:"SportsTech",tam:"$40B",cagr:"13%",hotness:"warm",growth:"growing",
+ keywords:["sports","athlete","fitness","performance","training","team","stadium","fan","esports","coaching","injury","nutrition","analytics","wearable"],
+ players:["Whoop","Catapult","Hudl","DraftKings","Sportradar"],
+ problems:["Amateur athletes lack access to professional coaching insights","Sports injury prevention remains reactive, not predictive","Fan engagement drops outside live game moments"],
+ trends:["Wearable biometric sensors entering consumer sports","Sports betting legalization creating new engagement models","AI coaching and video analysis democratizing elite training"],
+ investorWants:["Team or league partnerships for distribution","Hardware + subscription economics proof","Data exclusivity or rights agreements"],
+ winners:[{n:"Whoop",w:"Subscription model for hardware created $30/month recurring revenue per device"},{n:"Hudl",w:"Video analysis for high school coaches — underserved segment with clear ROI"},{n:"DraftKings",w:"First-mover in daily fantasy built database before legal sports betting"}],
+ redFlags:["Seasonality creates revenue volatility","League and team partnerships take years to close","Hardware quality is binary — one defect destroys brand trust"]},
+
+{id:"ar_vr",name:"AR / VR",tam:"$30B",cagr:"25%",hotness:"warm",growth:"growing",
+ keywords:["ar","vr","augmented reality","virtual reality","metaverse","immersive","headset","spatial","3d","mixed reality","xr","haptic"],
+ players:["Meta (Quest)","Apple (Vision Pro)","Niantic","Snap","Magic Leap"],
+ problems:["Enterprise training still uses low-fidelity 2D videos","Remote collaboration lacks spatial context","Education lacks immersive, experiential learning environments"],
+ trends:["Apple Vision Pro setting new spatial computing UX standards","Enterprise AR for manufacturing and field service scaling","AI-generated 3D environments enabling rapid content creation"],
+ investorWants:["Content pipeline strategy (who creates the experiences)","Hardware independence (works on multiple headsets)","Enterprise sales channel or consumer distribution plan"],
+ winners:[{n:"Niantic",w:"Pokemon Go proved mobile AR could reach mass consumer scale"},{n:"Matterport",w:"3D real estate scanning created B2B use case before consumer VR matured"},{n:"Scope AR",w:"Remote assistance for industrial field workers with clear ROI"}],
+ redFlags:["Platform risk — headset makers control distribution entirely","High development costs for quality XR experiences","Consumer adoption slower than every analyst predicted"]},
+
+{id:"web3",name:"Web3 / Crypto",tam:"$50B",cagr:"volatile",hotness:"cool",growth:"volatile",
+ keywords:["blockchain","crypto","web3","nft","defi","dao","token","ethereum","bitcoin","wallet","smart contract","decentral","layer2","stablecoin"],
+ players:["Coinbase","OpenSea","Uniswap","Alchemy","Paradigm"],
+ problems:["DeFi is too complex for mainstream users","NFT market collapsed — trust in digital ownership eroded","Blockchain scalability still limits real-world applications"],
+ trends:["Layer 2 rollups making Ethereum transactions cheap and fast","Tokenization of real-world assets (RWA) emerging","Consumer crypto via fiat on-ramps normalizing"],
+ investorWants:["Token economics that don't require price appreciation to function","Regulatory clarity strategy (especially US)","Sustainable revenue without token inflation"],
+ winners:[{n:"Coinbase",w:"Regulated, trusted exchange in a trust-deficient space"},{n:"Alchemy",w:"Infrastructure provider benefits from all chains — picks and shovels"},{n:"Stripe (Crypto)",w:"Stablecoin payments added to existing Stripe infrastructure quietly"}],
+ redFlags:["Regulatory crackdown can shut down product overnight","Bear markets eliminate 90% of users","Speculative users don't build lasting habits"]},
+
+{id:"pettech",name:"PetTech",tam:"$5B",cagr:"16%",hotness:"warm",growth:"growing",
+ keywords:["pet","dog","cat","animal","vet","grooming","pet food","adoption","paw","collar","training","pet insurance","shelter"],
+ players:["Chewy","Rover","Petco","Pawp","Fi"],
+ problems:["Veterinary care costs are rising faster than inflation","Pet owners can't detect early signs of pet illness","Finding trustworthy pet sitters is stressful and opaque"],
+ trends:["Pet humanization driving premium food and healthcare spend","Telehealth for pets (Pawp, Dutch) growing rapidly","GPS smart collars becoming standard for dog owners"],
+ investorWants:["Repeat purchase rate (subscription food, supplies)","Vet partnership or licensing model clarity","Average order value and LTV vs CAC"],
+ winners:[{n:"Chewy",w:"Auto-ship subscription for pet food created massive LTV"},{n:"Rover",w:"Two-sided marketplace with trust signals (reviews, background checks)"},{n:"Fi",w:"Premium GPS collar subscription created recurring hardware + SaaS revenue"}],
+ redFlags:["Pet owners are price-sensitive when economy turns","Vet telemedicine has licensing complexity by state","Market is dominated by Chewy and Amazon on price"]},
+
+{id:"mediatech",name:"MediaTech",tam:"$400B",cagr:"7%",hotness:"cool",growth:"stable",
+ keywords:["media","content","video","podcast","streaming","news","publishing","creator","social media","influencer","newsletter","audio","journalism","advertising"],
+ players:["Substack","Spotify","YouTube","Patreon","Beehiiv"],
+ problems:["Creator monetization is 100% dependent on platform algorithms","News publishers have seen ad revenue fall 80% in a decade","Long-form video discovery is broken on most platforms"],
+ trends:["Creator economy moving to direct fan monetization","Podcast advertising growing as audio matures","AI content production lowering cost floors"],
+ investorWants:["Creator retention and platform switching costs","Revenue per creator and revenue share model","Data moat from audience behavior"],
+ winners:[{n:"Substack",w:"Writer ownership of audience email list solved the algorithm dependency"},{n:"Patreon",w:"Membership model created predictable recurring revenue for creators"},{n:"Beehiiv",w:"Newsletter infrastructure for media companies with monetization tools built in"}],
+ redFlags:["Platform dependency — YouTube/Spotify can change terms anytime","Content moderation costs scale with growth","Creator burnout = product abandonment"]},
+
+{id:"spacetech",name:"SpaceTech",tam:"$500B",cagr:"11%",hotness:"hot",growth:"emerging",
+ keywords:["space","satellite","rocket","orbit","launch","aerospace","defense","earth observation","deep space","constellation","cubesat","starlink","nasa"],
+ players:["SpaceX","Planet Labs","Rocket Lab","Satellogic","Spire Global"],
+ problems:["Earth observation data is expensive and infrequent","Launch costs remain too high for commercial payloads","In-space manufacturing and servicing lack infrastructure"],
+ trends:["Starlink creating commercial satellite internet demand","Earth observation analytics going real-time","In-space servicing startups for satellite life extension"],
+ investorWants:["Government contract pipeline (DoD, NASA anchor customers)","Launch provider relationships","Regulatory slot/spectrum rights secured"],
+ winners:[{n:"Planet Labs",w:"Highest revisit rate for Earth imaging created analytics moat"},{n:"Rocket Lab",w:"Small satellite launcher for a market SpaceX ignored"},{n:"Spire Global",w:"Weather and maritime data constellation with multi-year government contracts"}],
+ redFlags:["Launch failures are public and catastrophic","Government procurement cycles are 3-5 years","SpaceX competes in every segment and cross-subsidizes"]},
+
+{id:"govtech",name:"GovTech",tam:"$400B",cagr:"10%",hotness:"warm",growth:"growing",
+ keywords:["government","public sector","city","municipality","state","federal","civic","policy","voting","regulation","permit","license","tax","public service"],
+ players:["Tyler Technologies","Palantir (Gov)","Socrata","SeamlessDocs","Accela"],
+ problems:["Government services require in-person visits for digital-native tasks","Procurement takes 18 months and kills startups","Voter registration and civic participation are historically low"],
+ trends:["Federal and state digital service mandates accelerating","AI for benefits eligibility and fraud detection","Participatory budgeting and civic tech growing"],
+ investorWants:["Long-term government contracts (5-10 year renewals)","Reference customers across multiple agencies","FedRAMP or StateRAMP compliance"],
+ winners:[{n:"Tyler Technologies",w:"Patient government sales created dominant lock-in across 40 states"},{n:"Palantir",w:"DoD and CIA contracts created unassailable reference credibility"},{n:"Code for America",w:"Nonprofit proving government digital transformation could work"}],
+ redFlags:["Sales cycles of 12-24 months destroy startup runway","Political change can cancel contracts overnight","Procurement rules heavily favor incumbents"]},
+
+{id:"fashiontech",name:"FashionTech",tam:"$50B",cagr:"11%",hotness:"warm",growth:"growing",
+ keywords:["fashion","clothing","apparel","style","brand","designer","retail","wardrobe","resale","thrift","sustainable fashion","luxury","outfit"],
+ players:["Stitch Fix","ThredUp","Rent the Runway","Depop","The RealReal"],
+ problems:["Returns cost fashion retailers $100B annually","Sustainable fashion is expensive and inaccessible","Personal styling is only available to wealthy consumers"],
+ trends:["AI-powered personal styling and fit prediction","Resale market growing 3x faster than new retail","3D virtual try-on reducing return rates"],
+ investorWants:["Return rate below 25%","Inventory turn rate for resale models","LTV and repeat purchase cadence"],
+ winners:[{n:"Depop",w:"Gen Z resale community created social-first shopping experience"},{n:"The RealReal",w:"Authentication of luxury resale unlocked a new market for brands"},{n:"Stitch Fix",w:"Subscription styling box created habitual repurchase and data flywheel"}],
+ redFlags:["Inventory risk can be devastating for resale models","Return rates in fashion are 30-40% online","Trend cycles mean today's hot item is tomorrow's clearance"]},
+
+{id:"retailtech",name:"RetailTech",tam:"$25B",cagr:"12%",hotness:"warm",growth:"growing",
+ keywords:["retail","store","pos","point of sale","omnichannel","inventory","loyalty","checkout","merchandising","shelf","in-store","brick and mortar"],
+ players:["Square","Toast","Lightspeed","Nuvei","Faire"],
+ problems:["Brick-and-mortar retailers have no first-party data on customers","Inventory shrinkage costs retail $100B annually","Checkout friction drives 30% cart abandonment in-store"],
+ trends:["Unified commerce connecting online and offline data","Computer vision for automated checkout (Amazon Go model)","AI-powered inventory replenishment reducing overstock"],
+ investorWants:["Per-location economics and activation timeline","Integration with major POS systems","Retention and expansion revenue from existing retailers"],
+ winners:[{n:"Square",w:"Beautiful hardware + simple pricing disrupted incumbent POS complexity"},{n:"Toast",w:"Restaurant-specific POS with deep vertical workflows won foodservice"},{n:"Faire",w:"Wholesale marketplace with net 60 terms unlocked independent retailer buying"}],
+ redFlags:["Hardware-dependent business has support costs at scale","Retail consolidation reduces the number of potential customers","Competition from banks offering POS as a free add-on"]},
+];
+
+// SWOT suggestions
+const SWOT_SUGG = {
+  Strengths:["Unique technology advantage","Strong founder domain expertise","Existing customer relationships","Low cost to acquire early customers","Patent or IP protection","First mover advantage in niche","Strong community or brand"],
+  Weaknesses:["No revenue yet","Small or incomplete team","Limited runway (<12 months)","No technical co-founder","Unproven business model","High customer acquisition cost","Dependent on one platform"],
+  Opportunities:["Rapidly growing target market","Favorable regulatory tailwinds","Underserved niche with real pain","Strategic partnership opportunities","International expansion potential","Rising customer pain point","Key competitor recently failed or pivoted"],
+  Threats:["Big tech entering the space","Regulatory risk or policy change","Market saturation risk","Economic downturn sensitivity","High churn risk from fickle users","Easy to copy without patent protection","Platform dependency (App Store, Google, AWS)"],
+};
+
+// Competition questions
+const COMP_QS = [
+  {q:"Do you know your top 3 competitors?", yes:4, ns:2, no:1, tip:{yes:"✓ Market awareness is strong.", no:"⚠ Research your competition before building. You may be solving an already-solved problem."}},
+  {q:"Is your solution 10x better or cheaper than alternatives?", yes:4, ns:2, no:0, tip:{yes:"✓ A 10x improvement is the minimum bar for changing user behavior.", no:"⚠ Without a 10x edge, users won't switch. What's your unfair advantage?"}},
+  {q:"Do you have a unique distribution advantage?", yes:4, ns:2, no:1, tip:{yes:"✓ Distribution moat is often more important than product.", no:"⚠ Think about how you'll reach customers differently than competitors."}},
+  {q:"Is this market currently underserved?", yes:4, ns:2, no:0, tip:{yes:"✓ Underserved markets mean less competition and more forgiving users.", no:"⚠ In crowded markets, you need a very specific niche to start."}},
+  {q:"Could a big tech company copy this in 6 months?", yes:0, ns:2, no:4, tip:{yes:"⚠ If yes, your moat is thin. Focus on defensibility — data, network effects, switching costs.", no:"✓ You have some structural protection from big tech replication."}},
+];
+
+// Founder questions
+const FOUNDER_QS = [
+  {q:"Domain expertise in this space?", opts:["Yes — I've worked here","Somewhat — adjacent","No — new to it"], scores:[5,3,1]},
+  {q:"Can you get your first 10 users without spending money?", opts:["Yes — I know them","Maybe","Not really"], scores:[5,3,1]},
+  {q:"Time commitment level?", opts:["Full-time","Part-time","Weekends only"], scores:[5,3,2]},
+  {q:"Technical co-founder or technical yourself?", opts:["Yes, technical","Learning to code","No, need co-founder"], scores:[5,3,1]},
+];
+
+// Exec sliders
+const EXEC_TIME_LABELS=["1 month","3 months","6 months","1 year","2+ years"];
+const EXEC_MONEY_LABELS=["$0–1K","$1K–10K","$10K–100K","$100K+"];
+const EXEC_TIME_SCORES=[8,6,4,2,0];
+const EXEC_MONEY_SCORES=[8,6,4,2];
+
+// Pitch components
+const PITCH_COMPS = [
+  {id:"problem",label:"1. The Problem",placeholder:"What specific pain exists? Who experiences it? How often and how costly?",
+   tips:["Numbers quantify the pain (e.g. '2 hours wasted daily')","Customer quotes add credibility","Specificity beats generality"]},
+  {id:"solution",label:"2. The Solution",placeholder:"What did you build? How does it solve the problem?",
+   tips:["'We do X for Y using Z' structure","Differentiate from existing solutions","Keep it simple — one clear idea"]},
+  {id:"whynow",label:"3. Why Now",placeholder:"What changed recently that makes this the right moment?",
+   tips:["Technology shift, regulatory change, or market event","COVID / AI / remote work as enabling forces","Founder insight that others missed"]},
+  {id:"bizmodel",label:"4. Business Model",placeholder:"How do you make money? Pricing? Revenue streams?",
+   tips:["Specific pricing ($X/month per seat)","Unit economics: CAC and LTV estimates","Comparable companies with proven models"]},
+  {id:"traction",label:"5. Traction",placeholder:"Users, revenue, growth rate, pilot customers, LOIs, waitlist…",
+   tips:["Any number beats no number","Growth rate matters more than absolute numbers","Quality logos over quantity of users"]},
+  {id:"ask",label:"6. The Ask",placeholder:"How much are you raising? What will you use it for?",
+   tips:["Specific dollar amount ($500K seed)","Clear use of funds breakdown (40% engineering, 30% marketing…)","Milestone this round achieves (18 months runway to X)"]},
+];
+
+// Investor checklist
+const INVESTOR_CHECKLIST=[
+  "Can explain the idea in one sentence",
+  "Know your TAM / SAM / SOM",
+  "Have talked to 10+ potential customers",
+  "Built an MVP or prototype",
+  "Have at least 1 paying customer",
+  "Know your unit economics (CAC, LTV)",
+  "Have an 18+ month runway plan",
+  "Know your top 3 competitors",
+  "Have a clear go-to-market strategy",
+  "Know why you are the right team",
+  "Have a LinkedIn with relevant experience",
+  "Can explain your moat / defensibility",
+  "Know which VCs invest in your space",
+  "Have a demo or deck ready to share",
+  "Know your current burn rate",
+  "Have advisors or mentors in the space",
+  "Know your 3 key metrics to track",
+  "Have a 12-month product roadmap",
+  "Understand your regulatory environment",
+  "Have a clear exit strategy in mind",
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let compAnswers={}, founderAnswers={}, swotData={Strengths:[],Weaknesses:[],Opportunities:[],Threats:[]};
+let checklistState=JSON.parse(localStorage.getItem('startup107_checklist')||'{}');
+let mapCompetitors=[], myX=220, myY=190;
+let lastReport=JSON.parse(localStorage.getItem('startup107_report')||'null');
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init(){
+  renderCompQuestions();
+  renderFounderQuestions();
+  updateExecLabels();
+  renderMarkets();
+  renderSwotGrid();
+  renderPitchComponents();
+  renderChecklist();
+  initCanvas();
+  if(lastReport) document.getElementById('validation-report').innerHTML=lastReport;
+}
+
+function switchTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pane-'+tab).classList.add('active');
+}
+
+// ── TAB 1: VALIDATOR ─────────────────────────────────────────────────────────
+function renderCompQuestions(){
+  document.getElementById('comp-questions').innerHTML=COMP_QS.map((q,i)=>`
+    <div style="margin-bottom:14px">
+      <div style="font-size:.85rem;font-weight:600;margin-bottom:5px">${i+1}. ${q.q}</div>
+      <div class="toggle-group" id="cq-${i}">
+        <button class="toggle-btn" onclick="selectComp(${i},'yes',this)">Yes</button>
+        <button class="toggle-btn" onclick="selectComp(${i},'ns',this)">Not Sure</button>
+        <button class="toggle-btn" onclick="selectComp(${i},'no',this)">No</button>
+      </div>
+    </div>`).join('');
+}
+
+function selectComp(i,val,btn){
+  compAnswers[i]=val;
+  document.querySelectorAll(`#cq-${i} .toggle-btn`).forEach(b=>b.className='toggle-btn');
+  btn.classList.add(val==='yes'?'selected-yes':val==='no'?'selected-no':'selected-ns');
+}
+
+function renderFounderQuestions(){
+  document.getElementById('founder-questions').innerHTML=FOUNDER_QS.map((q,i)=>`
+    <div style="margin-bottom:14px">
+      <div style="font-size:.85rem;font-weight:600;margin-bottom:5px">${q.q}</div>
+      <div class="toggle-group" id="fq-${i}">
+        ${q.opts.map((o,j)=>`<button class="toggle-btn" onclick="selectFounder(${i},${j},this)">${o}</button>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function selectFounder(i,j,btn){
+  founderAnswers[i]=j;
+  document.querySelectorAll(`#fq-${i} .toggle-btn`).forEach(b=>b.className='toggle-btn');
+  btn.classList.add('selected-accent');
+}
+
+function selectToggle(btn,groupId,cls){
+  document.querySelectorAll(`#${groupId} .toggle-btn`).forEach(b=>b.className='toggle-btn');
+  btn.classList.add(cls);
+}
+
+function updateExecLabels(){
+  const t=parseInt(document.getElementById('exec-time').value);
+  const m=parseInt(document.getElementById('exec-money').value);
+  document.getElementById('exec-time-val').textContent=EXEC_TIME_LABELS[t];
+  document.getElementById('exec-money-val').textContent=EXEC_MONEY_LABELS[m];
+}
+
+function validateIdea(){
+  const name=document.getElementById('v-name').value.trim();
+  const desc=document.getElementById('v-desc').value.trim();
+  const problem=document.getElementById('v-problem').value.trim();
+  const customer=document.getElementById('v-customer').value.trim();
+  const revenue=document.getElementById('v-revenue').value;
+  const stage=document.getElementById('v-stage').value;
+
+  if(!problem){alert('Please describe the problem your startup solves.');return;}
+
+  // ── SECTION 1: Problem Clarity (0-20) ────────────────────────────────────
+  let s1=0, s1fb='', s1tip='';
+  const wordCount=problem.split(/\s+/).filter(Boolean).length;
+  const specKeywords=['specifically','every day','every week','costs','waste','hours','minutes','dollars','percent','struggle','fail','can\'t','unable','frustrat'];
+  const specHits=specKeywords.filter(k=>problem.toLowerCase().includes(k)).length;
+  s1 += Math.min(10, Math.floor(wordCount/5)); // up to 10pts for length
+  s1 += Math.min(6, specHits*2); // up to 6pts for specificity words
+  s1 += customer ? 4 : 0; // 4pts for defined customer
+  s1=Math.min(20,s1);
+  s1fb=wordCount<30?`Your problem statement is brief (${wordCount} words). `:`Problem is well-described (${wordCount} words). `;
+  s1fb+=specHits>2?`Good use of specific language.`:`Add specific numbers (cost, frequency, time lost) to sharpen it.`;
+  s1tip=s1<15?'Tip: Add a real customer quote or a specific stat: "X% of Y spend Z hours/week on this problem."':'Great problem clarity.';
+
+  // ── SECTION 2: Market Potential (0-20) ────────────────────────────────────
+  let s2=0, matchedMarket=null, s2fb='';
+  const allWords=(desc+' '+problem+' '+customer).toLowerCase();
+  let bestScore=0;
+  MARKETS.forEach(m=>{
+    const hits=m.keywords.filter(k=>allWords.includes(k)).length;
+    if(hits>bestScore){bestScore=hits;matchedMarket=m;}
+  });
+  if(matchedMarket){
+    s2 += matchedMarket.hotness==='exploding'?20:matchedMarket.hotness==='hot'?16:matchedMarket.hotness==='warm'?12:8;
+    s2fb=`Matched market: <strong>${matchedMarket.name}</strong> — TAM ${matchedMarket.tam}, growing at ${matchedMarket.cagr} CAGR.`;
+  } else {
+    s2=10; s2fb='Could not precisely match a market category. TAM unclear — research your specific market size.';
+  }
+  s2=Math.min(20,s2);
+
+  // ── SECTION 3: Competition (0-20) ────────────────────────────────────────
+  let s3=0, s3lines=[];
+  COMP_QS.forEach((q,i)=>{
+    const ans=compAnswers[i]||'ns';
+    s3+=q[ans];
+    s3lines.push(`${q.tip[ans]||q.tip.ns||''}`);
+  });
+  s3=Math.min(20,s3);
+
+  // ── SECTION 4: Founder Fit (0-20) ────────────────────────────────────────
+  let s4=0;
+  FOUNDER_QS.forEach((q,i)=>{
+    const j=founderAnswers[i]!==undefined?founderAnswers[i]:1;
+    s4+=q.scores[j];
+  });
+  s4=Math.min(20,s4);
+
+  // ── SECTION 5: Execution Risk (0-20) ─────────────────────────────────────
+  const execTime=parseInt(document.getElementById('exec-time').value);
+  const execMoney=parseInt(document.getElementById('exec-money').value);
+  const hasCusts=document.querySelector('#exec-customers .selected-yes');
+  let s5=EXEC_TIME_SCORES[execTime]+EXEC_MONEY_SCORES[execMoney]+(hasCusts?4:0);
+  s5=Math.min(20,s5);
+
+  // ── TOTAL ─────────────────────────────────────────────────────────────────
+  const total=s1+s2+s3+s4+s5;
+  const color=total>=80?'#10b981':total>=60?'#f59e0b':total>=40?'#f97316':'#ef4444';
+  const verdict=total>=80?'Strong idea — worth building 🚀':total>=60?'Promising — needs more validation 🔍':total>=40?'Risky — major gaps to address ⚠':' Needs fundamental rethinking 🔄';
+
+  // Action items for weak sections
+  const sections=[{n:"Problem Clarity",s:s1},{n:"Market Potential",s:s2},{n:"Competition",s:s3},{n:"Founder Fit",s:s4},{n:"Execution Risk",s:s5}];
+  const weakest=sections.sort((a,b)=>a.s-b.s).slice(0,3);
+  const actionMap={
+    "Problem Clarity":"Talk to 5 customers this week. Get a specific quote and a number you can use in your pitch.",
+    "Market Potential":"Research your TAM using industry reports or bottoms-up math (# of potential customers × price).",
+    "Competition":"Map your top 3 competitors. For each, write 1 thing they do poorly that you'll do better.",
+    "Founder Fit":"Identify a co-founder or advisor with the domain expertise or technical skill you're missing.",
+    "Execution Risk":"Reduce your time-to-revenue by launching an MVP you can sell today, even if imperfect.",
+  };
+
+  function bar(score,max,col){
+    return `<div class="score-bar-wrap"><div class="score-bar-fill" style="width:${score/max*100}%;background:${col}"></div></div>`;
+  }
+
+  const html=`
+    <div class="verdict" style="background:${color}18;border:2px solid ${color}">
+      <div class="big" style="color:${color}">${total}</div>
+      <div class="label" style="color:${color}">${verdict}</div>
+      <div class="sub">Based on ${name||'your startup'}</div>
+    </div>
+
+    <div class="scard">
+      <h2>📊 Score Breakdown</h2>
+      ${[{n:"Problem Clarity",s:s1,fb:s1fb,tip:s1tip},{n:"Market Potential",s:s2,fb:s2fb},{n:"Competition Check",s:s3,fb:s3lines.filter(Boolean).join(' ')},{n:"Founder Fit",s:s4,fb:`Score reflects your domain expertise, network, commitment, and technical ability.`},{n:"Execution Risk",s:s5,fb:`Time to revenue: ${EXEC_TIME_LABELS[execTime]}. Budget: ${EXEC_MONEY_LABELS[execMoney]}. Early customers: ${hasCusts?'Yes ✓':'Not yet'}.`}].map((sec,i)=>`
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong style="font-size:.88rem">${sec.n}</strong>
+            <span class="score-num" style="font-size:1.1rem;color:${sec.s>=16?'#10b981':sec.s>=10?'#f59e0b':'#ef4444'}">${sec.s}/20</span>
+          </div>
+          ${bar(sec.s,20,sec.s>=16?'#10b981':sec.s>=10?'#f59e0b':'#ef4444')}
+          <div style="font-size:.8rem;color:var(--muted);margin-top:4px">${sec.fb}</div>
+          ${sec.tip?`<div style="font-size:.78rem;color:var(--accent);margin-top:3px">${sec.tip}</div>`:''}
+        </div>`).join('')}
+    </div>
+
+    ${matchedMarket?`<div class="scard">
+      <h2>🏪 Matched Market: ${matchedMarket.name}</h2>
+      <div class="info-row">
+        <span class="tag">TAM: ${matchedMarket.tam}</span>
+        <span class="tag">CAGR: ${matchedMarket.cagr}</span>
+        <span class="hotbadge ${matchedMarket.hotness}">${matchedMarket.hotness}</span>
+        <span class="tag">${matchedMarket.growth}</span>
+      </div>
+      <div style="font-size:.82rem;color:var(--muted)"><strong>Investor focus:</strong> ${matchedMarket.investorWants[0]}</div>
+    </div>`:''}
+
+    <div class="scard">
+      <h2>🎯 Top 3 Action Items</h2>
+      ${weakest.map(w=>`<div class="action-item"><strong>[${w.n}]</strong> ${actionMap[w.n]}</div>`).join('')}
+    </div>`;
+
+  document.getElementById('validation-report').innerHTML=html;
+  localStorage.setItem('startup107_report',html);
+}
+
+// ── TAB 2: MARKET RESEARCH ────────────────────────────────────────────────────
+function renderMarkets(){
+  const q=(document.getElementById('market-search').value||'').toLowerCase();
+  const hf=document.getElementById('market-filter').value;
+  const list=MARKETS.filter(m=>(!q||(m.name.toLowerCase().includes(q)||m.keywords.some(k=>k.includes(q))))&&(!hf||m.hotness===hf));
+  document.getElementById('markets-list').innerHTML=list.map(m=>`
+    <div class="market-card" id="mc-${m.id}" onclick="toggleMarket('${m.id}')">
+      <div class="market-header">
+        <span class="market-name">${m.name}</span>
+        <span class="tag">TAM: ${m.tam}</span>
+        <span class="tag">CAGR: ${m.cagr}</span>
+        <span class="hotbadge ${m.hotness}">${m.hotness}</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="market-detail">
+        <div class="detail-grid">
+          <div class="detail-section"><label>Key Players</label><ul>${m.players.map(p=>`<li>${p}</li>`).join('')}</ul></div>
+          <div class="detail-section"><label>Top Problems</label><ul>${m.problems.map(p=>`<li>${p}</li>`).join('')}</ul></div>
+          <div class="detail-section"><label>Key Trends</label><ul>${m.trends.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+          <div class="detail-section"><label>What Investors Want</label><ul>${m.investorWants.map(i=>`<li class="green-dot">${i}</li>`).join('')}</ul></div>
+          <div class="detail-section"><label>Successful Startups</label><ul>${m.winners.map(w=>`<li><strong>${w.n}:</strong> ${w.w}</li>`).join('')}</ul></div>
+          <div class="detail-section"><label>Red Flags</label><ul>${m.redFlags.map(r=>`<li class="red">${r}</li>`).join('')}</ul></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleMarket(id){
+  const card=document.getElementById('mc-'+id);
+  card.classList.toggle('open');
+}
+
+// ── CANVAS COMPETITOR MAP ─────────────────────────────────────────────────────
+let compRowCount=0;
+function initCanvas(){
+  const canvas=document.getElementById('map-canvas');
+  canvas.addEventListener('click',e=>{
+    const r=canvas.getBoundingClientRect();
+    myX=e.clientX-r.left;myY=e.clientY-r.top;
+    drawMap();
+  });
+  drawMap();
+}
+
+function addCompetitorRow(){
+  if(compRowCount>=5) return;
+  const div=document.createElement('div');
+  div.style.cssText='display:grid;grid-template-columns:1fr 120px 120px auto;gap:8px;margin-bottom:8px;align-items:center';
+  div.id='cmp-row-'+compRowCount;
+  div.innerHTML=`
+    <input placeholder="Competitor name" style="border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:.82rem;outline:none" oninput="drawMap()">
+    <div><div style="font-size:.72rem;color:var(--muted);margin-bottom:2px">Price (0=low)</div><input type="range" min="0" max="10" value="5" oninput="drawMap()"></div>
+    <div><div style="font-size:.72rem;color:var(--muted);margin-bottom:2px">Features (0=basic)</div><input type="range" min="0" max="10" value="5" oninput="drawMap()"></div>
+    <button onclick="removeCompRow(${compRowCount})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem">✕</button>`;
+  document.getElementById('comp-map-inputs').appendChild(div);
+  compRowCount++;drawMap();
+}
+
+function removeCompRow(id){
+  const el=document.getElementById('cmp-row-'+id);
+  if(el) el.remove();drawMap();
+}
+
+function drawMap(){
+  const canvas=document.getElementById('map-canvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  const PAD=40;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,W,H);
+
+  // Grid lines
+  ctx.strokeStyle='#e2e8f0';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(W/2,PAD);ctx.lineTo(W/2,H-PAD);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(PAD,H/2);ctx.lineTo(W-PAD,H/2);ctx.stroke();
+
+  // Axis labels
+  ctx.font='bold 11px system-ui';ctx.fillStyle='#94a3b8';ctx.textAlign='center';
+  ctx.fillText('LOW PRICE',PAD+30,H/2+14);
+  ctx.fillText('HIGH PRICE',W-PAD-30,H/2+14);
+  ctx.save();ctx.translate(PAD-12,H/2);ctx.rotate(-Math.PI/2);ctx.fillText('BASIC',0,0);ctx.restore();
+  ctx.save();ctx.translate(PAD-12,H/2-60);ctx.rotate(-Math.PI/2);ctx.fillText('ADVANCED',0,0);ctx.restore();
+
+  // Quadrant labels
+  ctx.font='10px system-ui';ctx.fillStyle='#cbd5e1';
+  ctx.fillText('Value Players',W*0.25,PAD+16);
+  ctx.fillText('Premium Leaders',W*0.75,PAD+16);
+  ctx.fillText('Budget Basic',W*0.25,H-PAD-6);
+  ctx.fillText('Niche Players',W*0.75,H-PAD-6);
+
+  const colors=['#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6'];
+
+  // Competitors
+  const rows=document.querySelectorAll('[id^="cmp-row-"]');
+  mapCompetitors=[];
+  rows.forEach((row,i)=>{
+    const inputs=row.querySelectorAll('input');
+    const name=inputs[0].value.trim()||`Competitor ${i+1}`;
+    const price=parseInt(inputs[1].value);
+    const feat=parseInt(inputs[2].value);
+    const x=PAD+(price/10)*(W-2*PAD);
+    const y=(H-PAD)-(feat/10)*(H-2*PAD);
+    mapCompetitors.push({name,price,feat,x,y,color:colors[i%colors.length]});
+    ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fillStyle=colors[i%colors.length];ctx.fill();
+    ctx.fillStyle='#1e293b';ctx.font='bold 11px system-ui';ctx.textAlign='left';
+    ctx.fillText(name,x+12,y+4);
+  });
+
+  // My startup (star)
+  ctx.font='22px system-ui';ctx.textAlign='center';
+  ctx.fillText('★',myX,myY+8);
+  ctx.font='bold 11px system-ui';ctx.fillStyle=colors[0];
+  ctx.fillText('YOUR STARTUP',myX,myY+22);
+}
+
+function exportMapSummary(){
+  let txt='COMPETITOR POSITIONING MAP\n'+'='.repeat(30)+'\n\n';
+  txt+='Axis: X = Price (0=Low → 10=High), Y = Features (0=Basic → 10=Advanced)\n\n';
+  mapCompetitors.forEach(c=>{
+    txt+=`${c.name}: Price=${c.price}/10, Features=${c.feat}/10\n`;
+  });
+  txt+=`\nYour Startup position: (${Math.round((myX-40)/360*10)}/10 Price, ${Math.round((380-myY-40)/300*10)}/10 Features)\n`;
+  const el=document.getElementById('map-export');
+  el.textContent=txt;el.style.display='block';
+  navigator.clipboard.writeText(txt).catch(()=>{});showToast();
+}
+
+// ── TAB 3: SWOT ───────────────────────────────────────────────────────────────
+const SWOT_ICONS={Strengths:'💪',Weaknesses:'⚠️',Opportunities:'🌱',Threats:'🔥'};
+const SWOT_COLORS={Strengths:'#dcfce7',Weaknesses:'#fef2f2',Opportunities:'#dbeafe',Threats:'#fef9c3'};
+
+function renderSwotGrid(){
+  const quads=['Strengths','Weaknesses','Opportunities','Threats'];
+  document.getElementById('swot-grid').innerHTML=quads.map(q=>`
+    <div class="swot-quad" style="border-top:3px solid ${SWOT_COLORS[q]}">
+      <h3>${SWOT_ICONS[q]} ${q}</h3>
+      <div class="swot-items" id="swot-items-${q}"></div>
+      <div class="swot-input-row">
+        <input id="swot-input-${q}" placeholder="Add item…" onkeydown="if(event.key==='Enter')addSwotItem('${q}')">
+        <button class="btn btn-sm" onclick="addSwotItem('${q}')">Add</button>
+      </div>
+      <div class="suggestions">
+        ${(SWOT_SUGG[q]||[]).map(s=>`<span class="sugg" onclick="quickAdd('${q}','${s.replace(/'/g,"\\'")}' )">${s}</span>`).join('')}
+      </div>
+    </div>`).join('');
+  // Restore saved data
+  Object.entries(swotData).forEach(([q,items])=>items.forEach(item=>renderSwotItem(q,item)));
+}
+
+function addSwotItem(quad){
+  const input=document.getElementById('swot-input-'+quad);
+  const text=input.value.trim();
+  if(!text||swotData[quad].length>=5) return;
+  swotData[quad].push(text);
+  renderSwotItem(quad,text);
+  input.value='';
+}
+
+function quickAdd(quad,text){
+  if(swotData[quad].includes(text)||swotData[quad].length>=5) return;
+  swotData[quad].push(text);
+  renderSwotItem(quad,text);
+}
+
+function renderSwotItem(quad,text){
+  const div=document.createElement('div');
+  div.className='swot-item';
+  div.innerHTML=`<span style="flex:1">${text}</span><button onclick="removeSwotItem('${quad}',this,'${text.replace(/'/g,"\\'")}' )">✕</button>`;
+  document.getElementById('swot-items-'+quad).appendChild(div);
+}
+
+function removeSwotItem(quad,btn,text){
+  swotData[quad]=swotData[quad].filter(i=>i!==text);
+  btn.closest('.swot-item').remove();
+}
+
+function clearSwot(){
+  if(!confirm('Clear all SWOT items?')) return;
+  swotData={Strengths:[],Weaknesses:[],Opportunities:[],Threats:[]};
+  renderSwotGrid();
+}
+
+function calcSwotScore(){
+  const s=swotData.Strengths.length,w=swotData.Weaknesses.length;
+  const o=swotData.Opportunities.length,t=swotData.Threats.length;
+  const total=s+w+o+t;
+  const filled=Math.round(total/20*100);
+  const soScore=(s+o)-((w+t)/2);
+  const swMsg=s>w?`Your strengths (${s}) outweigh weaknesses (${w}) ✓`:`Your weaknesses (${w}) outweigh strengths (${s}) — address these first.`;
+  const otMsg=o>t?`Opportunities (${o}) outweigh threats (${t}) ✓`:`Threats (${t}) outweigh opportunities (${o}) — build defenses.`;
+  document.getElementById('swot-result').innerHTML=`
+    <div class="scard">
+      <h2>📊 SWOT Analysis Score</h2>
+      <div class="info-row">
+        <span class="tag">${total}/20 items filled</span>
+        <span class="tag" style="background:${soScore>0?'#dcfce7':'#fef2f2'};color:${soScore>0?'#166534':'#991b1b'}">${soScore>0?`+${soScore} favorable`:`${soScore} challenging`}</span>
+      </div>
+      <div style="font-size:.85rem;margin-bottom:6px">● ${swMsg}</div>
+      <div style="font-size:.85rem">● ${otMsg}</div>
+      ${total<8?`<div class="action-item" style="margin-top:10px">Add more items — a strong SWOT has 4-5 items per quadrant.</div>`:''}
+    </div>`;
+}
+
+function exportSwot(){
+  const quads=['Strengths','Weaknesses','Opportunities','Threats'];
+  let txt='SWOT ANALYSIS\n'+'='.repeat(30)+'\n\n';
+  quads.forEach(q=>{
+    txt+=`${q.toUpperCase()}\n`;
+    swotData[q].forEach(item=>`• ${item}`).forEach(l=>txt+=l+'\n');
+    txt+='\n';
+  });
+  const el=document.getElementById('swot-export');
+  el.textContent=txt;el.style.display='block';
+  navigator.clipboard.writeText(txt).catch(()=>{});showToast();
+}
+
+// ── TAB 4: PITCH ──────────────────────────────────────────────────────────────
+function renderPitchComponents(){
+  document.getElementById('pitch-components').innerHTML=PITCH_COMPS.map(c=>`
+    <div class="pitch-component">
+      <div style="font-weight:700;font-size:.85rem;margin-bottom:6px">${c.label}</div>
+      <textarea id="pitch-${c.id}" placeholder="${c.placeholder}" style="width:100%;height:90px;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:.82rem;resize:vertical;outline:none;font-family:inherit"></textarea>
+      <div class="pitch-score-bar"><div class="pitch-score-fill" id="pbar-${c.id}" style="width:0%;background:var(--accent)"></div></div>
+      <div style="font-size:.72rem;color:var(--dim)">${c.tips.join(' · ')}</div>
+    </div>`).join('');
+}
+
+function scorePitchComponent(text,id){
+  if(!text||text.length<10) return 0;
+  const words=text.split(/\s+/).filter(Boolean).length;
+  let score=Math.min(4,Math.floor(words/15)); // word count up to 4
+  const numRe=/\d+[%$KMBkmbillion]?/g;
+  score+=Math.min(3,(text.match(numRe)||[]).length); // numbers
+  const kwMap={
+    problem:['pain','problem','struggle','challenge','cost','waste','spend','frustrat'],
+    solution:['we','our','platform','app','tool','service','helps','enables','automates'],
+    whynow:['now','recent','trend','shift','rise','covid','ai','remote','regulation','change'],
+    bizmodel:['per','month','year','seat','subscription','margin','cac','ltv','revenue','price'],
+    traction:['user','customer','revenue','growth','waitlist','pilot','sign','percent','week','month'],
+    ask:['raise','seek','funding','seed','pre-seed','use','hire','marketing','product','runway'],
+  };
+  const kws=kwMap[id]||[];
+  score+=Math.min(3,kws.filter(k=>text.toLowerCase().includes(k)).length);
+  return Math.min(10,score);
+}
+
+function scorePitch(){
+  let total=0;
+  PITCH_COMPS.forEach(c=>{
+    const text=document.getElementById('pitch-'+c.id).value;
+    const s=scorePitchComponent(text,c.id);
+    total+=s;
+    const pct=s/10*100;
+    const bar=document.getElementById('pbar-'+c.id);
+    bar.style.width=pct+'%';
+    bar.style.background=s>=7?'#10b981':s>=4?'#f59e0b':'#ef4444';
+  });
+  const grade=total>=50?'A':total>=40?'B':total>=30?'C':total>=20?'D':'F';
+  const gradeColor=total>=50?'#10b981':total>=40?'#6366f1':total>=30?'#f59e0b':'#ef4444';
+  document.getElementById('pitch-result').innerHTML=`
+    <div class="scard">
+      <div style="display:flex;align-items:center;gap:20px">
+        <div style="font-size:3rem;font-weight:800;color:${gradeColor}">${grade}</div>
+        <div>
+          <div style="font-weight:700">Pitch Score: ${total}/60</div>
+          <div style="font-size:.82rem;color:var(--muted)">${total>=50?'Investor-ready pitch 🎉':total>=40?'Strong pitch — polish the weak sections':total>=30?'Decent start — add specifics and numbers':'Needs significant development — add data and be specific'}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// Checklist
+function renderChecklist(){
+  document.getElementById('checklist-items').innerHTML=INVESTOR_CHECKLIST.map((item,i)=>`
+    <div class="checklist-item${checklistState[i]?' done':''}" onclick="toggleCheck(${i})">
+      <input type="checkbox" ${checklistState[i]?'checked':''} onclick="toggleCheck(${i},event)">
+      <span>${item}</span>
+    </div>`).join('');
+  updateChecklistProgress();
+}
+
+function toggleCheck(i,e){
+  if(e) e.stopPropagation();
+  checklistState[i]=!checklistState[i];
+  localStorage.setItem('startup107_checklist',JSON.stringify(checklistState));
+  renderChecklist();
+}
+
+function clearChecklist(){
+  checklistState={};
+  localStorage.setItem('startup107_checklist','{}');
+  renderChecklist();
+}
+
+function updateChecklistProgress(){
+  const done=Object.values(checklistState).filter(Boolean).length;
+  const pct=Math.round(done/INVESTOR_CHECKLIST.length*100);
+  document.getElementById('checklist-progress').textContent=`${done}/${INVESTOR_CHECKLIST.length} items complete — ${pct}% investor-ready`;
+}
+
+function generateDeckOutline(){
+  const prob=document.getElementById('pitch-problem').value||'[Describe the problem]';
+  const sol=document.getElementById('pitch-solution').value||'[Describe your solution]';
+  const when=document.getElementById('pitch-whynow').value||'[Why this moment]';
+  const biz=document.getElementById('pitch-bizmodel').value||'[Business model details]';
+  const trac=document.getElementById('pitch-traction').value||'[Your traction metrics]';
+  const ask=document.getElementById('pitch-ask').value||'[Your funding ask]';
+  const name=document.getElementById('v-name').value||'Your Startup';
+  const desc=document.getElementById('v-desc').value||'One-line description';
+
+  const extract=(text,n)=>text.split(/[.!?\n]/).filter(s=>s.trim().length>10).slice(0,n).map(s=>`<li>${s.trim()}</li>`).join('')||`<li>${text.substring(0,100)}</li>`;
+
+  const slides=[
+    {num:1,title:"Cover",bullets:`<li>${name} — ${desc}</li><li>Presented by [Your Name], [Your Title]</li><li>[Your Email] · [Website]</li>`},
+    {num:2,title:"The Problem",bullets:extract(prob,3)},
+    {num:3,title:"Our Solution",bullets:extract(sol,3)},
+    {num:4,title:"Market Size",bullets:`<li>TAM: [Total addressable market]</li><li>SAM: [Serviceable addressable market]</li><li>SOM: [Your realistic 3-year target]</li>`},
+    {num:5,title:"Product",bullets:`<li>Core feature: [Primary value proposition]</li><li>How it works: [3-step user journey]</li><li>Demo: [Link or screenshot]</li>`},
+    {num:6,title:"Business Model",bullets:extract(biz,3)},
+    {num:7,title:"Traction",bullets:extract(trac,3)},
+    {num:8,title:"Team",bullets:`<li>[Founder]: [Background + relevant experience]</li><li>[Co-founder]: [Background + relevant experience]</li><li>Advisors: [Key advisor names]</li>`},
+    {num:9,title:"The Ask",bullets:extract(ask,3)},
+    {num:10,title:"Vision",bullets:`<li>In 3 years: [Where you will be]</li><li>In 10 years: [Category leader vision]</li><li>Why we will win: [Your unfair advantage]</li>`},
+  ];
+
+  document.getElementById('deck-outline').innerHTML=slides.map(s=>`
+    <div class="outline-slide">
+      <div class="slide-num">Slide ${s.num}</div>
+      <h4>${s.title}</h4>
+      <ul style="padding-left:16px">${s.bullets}</ul>
+    </div>`).join('');
+}
+
+function copyOutline(){
+  const outline=document.getElementById('deck-outline');
+  if(!outline.innerHTML){generateDeckOutline();}
+  const text=[...outline.querySelectorAll('.outline-slide')].map(s=>{
+    const num=s.querySelector('.slide-num').textContent;
+    const title=s.querySelector('h4').textContent;
+    const bullets=[...s.querySelectorAll('li')].map(l=>`  • ${l.textContent}`).join('\n');
+    return `${num}: ${title}\n${bullets}`;
+  }).join('\n\n');
+  navigator.clipboard.writeText(text).catch(()=>{});showToast();
+}
+
+function showToast(){
+  const t=document.getElementById('toast');
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',1500);
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+init();
+</script>
 </body>
 </html>
