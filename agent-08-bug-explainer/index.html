@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bug Explainer — Visual Debugger + Plain-English Fix</title>
+  <title>Bug Explainer — Free Visual Debugger for Students</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --bg: #0f0f0f;
       --card: #1a1a1a;
-      --card2: #222;
       --border: #2a2a2a;
       --amber: #f59e0b;
       --amber-dim: #d97706;
@@ -19,113 +18,65 @@
       --red: #ef4444;
       --purple: #a855f7;
       --cyan: #06b6d4;
+      --orange: #fb923c;
       --text: #e5e7eb;
       --muted: #9ca3af;
       --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
       --mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
     }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font);
-      min-height: 100vh;
-      padding: 24px 16px 60px;
-    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; padding: 24px 16px 60px; }
 
     /* ─── Header ─── */
     header { text-align: center; margin-bottom: 36px; }
     .header-badges { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .badge {
-      display: inline-block;
-      background: #1a1a1a;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 11px;
-      letter-spacing: 1px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      text-transform: uppercase;
-    }
-    .badge-new {
-      background: rgba(6,182,212,0.12);
-      border-color: rgba(6,182,212,0.35);
-      color: var(--cyan);
-      font-weight: 700;
-    }
+    .badge { display: inline-block; background: #1a1a1a; border: 1px solid var(--border); color: var(--muted); font-size: 11px; letter-spacing: 1px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+    .badge-free { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.35); color: var(--green); font-weight: 700; }
+    .badge-new  { background: rgba(6,182,212,0.12);  border-color: rgba(6,182,212,0.35);  color: var(--cyan);  font-weight: 700; }
     header h1 { font-size: clamp(28px,5vw,42px); font-weight: 800; letter-spacing: -1px; }
     header h1 span { color: var(--amber); }
     header p { color: var(--muted); margin-top: 8px; font-size: 15px; }
 
-    /* ─── Layout ─── */
     .container { max-width: 960px; margin: 0 auto; }
 
-    /* ─── API Key ─── */
-    .api-row {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 12px 16px; margin-bottom: 24px;
-    }
-    .api-row label { font-size: 13px; color: var(--muted); white-space: nowrap; font-weight: 600; }
-    .api-row input {
-      flex: 1; background: transparent; border: none; outline: none;
-      color: var(--text); font-family: var(--mono); font-size: 13px; min-width: 0;
-    }
-    .api-row input::placeholder { color: #555; }
-    .api-save-btn {
-      background: var(--amber); color: #000; border: none; border-radius: 6px;
-      padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
-      transition: background 0.2s; white-space: nowrap;
-    }
-    .api-save-btn:hover { background: var(--amber-dim); }
-    .api-status { font-size: 11px; color: var(--green); white-space: nowrap; display: none; }
-
-    /* ─── Input Panels ─── */
+    /* ─── Input panels ─── */
     .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
     @media (max-width: 640px) { .panels { grid-template-columns: 1fr; } }
 
     .panel { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-    .panel-header {
-      display: flex; align-items: center; gap: 8px; padding: 10px 14px;
-      background: #1f1f1f; border-bottom: 1px solid var(--border);
-    }
+    .panel-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #1f1f1f; border-bottom: 1px solid var(--border); }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-red { background: #ff5f57; } .dot-yellow { background: #febc2e; } .dot-green { background: #28c840; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
     .panel-title { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; margin-left: 4px; }
-    textarea {
-      width: 100%; background: transparent; border: none; outline: none;
-      color: var(--text); font-family: var(--mono); font-size: 13px;
-      line-height: 1.6; padding: 14px; resize: vertical; min-height: 180px;
-    }
+    textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: var(--mono); font-size: 13px; line-height: 1.6; padding: 14px; resize: vertical; min-height: 180px; }
     textarea::placeholder { color: #444; }
 
     /* ─── Controls ─── */
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; align-items: flex-end; }
-    .select-wrap { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+    .select-wrap { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 160px; }
+    .select-label-row { display: flex; align-items: center; gap: 8px; }
     .select-wrap label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    select {
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-      color: var(--text); font-size: 14px; padding: 9px 12px; outline: none;
-      cursor: pointer; transition: border-color 0.2s;
-    }
+    select { background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; padding: 9px 12px; outline: none; cursor: pointer; transition: border-color 0.2s; width: 100%; }
     select:focus { border-color: var(--amber); }
+
+    #langDetectedBadge {
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+      background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
+      color: var(--green); display: none; white-space: nowrap; letter-spacing: 0.3px;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:scale(0.9)} to{opacity:1;transform:scale(1)} }
 
     /* ─── Explain button ─── */
     #explainBtn {
-      width: 100%; background: var(--amber); color: #000; border: none;
-      border-radius: 10px; padding: 15px; font-size: 16px; font-weight: 800;
-      cursor: pointer; letter-spacing: 0.3px; transition: all 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      margin-bottom: 24px;
+      width: 100%; background: var(--amber); color: #000; border: none; border-radius: 10px;
+      padding: 15px; font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: 0.3px;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px;
     }
     #explainBtn:hover:not(:disabled) { background: var(--amber-dim); transform: translateY(-1px); }
     #explainBtn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-    .spinner {
-      width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.3);
-      border-top-color: #000; border-radius: 50%;
-      animation: spin 0.7s linear infinite; display: none;
-    }
+    .spinner { width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ─── Results ─── */
@@ -140,37 +91,31 @@
     }
     .result-card.visible { opacity: 1; transform: translateY(0); }
 
-    .card-amber { border-top-color: var(--amber); }
-    .card-blue  { border-top-color: var(--blue); }
-    .card-green { border-top-color: var(--green); }
-    .card-purple{ border-top-color: var(--purple); }
-    .card-cyan  { border-top-color: var(--cyan); }
+    .card-amber  { border-top-color: var(--amber); }
+    .card-blue   { border-top-color: var(--blue); }
+    .card-green  { border-top-color: var(--green); }
+    .card-purple { border-top-color: var(--purple); }
+    .card-cyan   { border-top-color: var(--cyan); }
+    .card-orange { border-top-color: var(--orange); }
 
     .card-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
-    .label-amber { color: var(--amber); }
-    .label-blue  { color: var(--blue); }
-    .label-green { color: var(--green); }
-    .label-purple{ color: var(--purple); }
-    .label-cyan  { color: var(--cyan); }
+    .label-amber  { color: var(--amber); }
+    .label-blue   { color: var(--blue); }
+    .label-green  { color: var(--green); }
+    .label-purple { color: var(--purple); }
+    .label-cyan   { color: var(--cyan); }
+    .label-orange { color: var(--orange); }
 
     /* Card 1 */
     .one-liner { font-size: 20px; font-weight: 700; line-height: 1.4; color: #fff; }
 
     /* Card 2 */
     .why-text { font-size: 15px; line-height: 1.7; color: var(--text); }
-    .analogy-tag {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25);
-      color: var(--blue); font-size: 11px; font-weight: 600;
-      padding: 3px 8px; border-radius: 20px; margin-bottom: 8px;
-    }
+    .analogy-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25); color: var(--blue); font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; margin-bottom: 8px; }
 
     /* Card 3 */
     .fix-explanation { font-size: 14px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
-    .diff-view {
-      background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px;
-      overflow: hidden; margin-bottom: 14px; font-family: var(--mono); font-size: 13px;
-    }
+    .diff-view { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 14px; font-family: var(--mono); font-size: 13px; }
     .diff-header { background: #141414; padding: 6px 12px; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); letter-spacing: 0.5px; }
     .diff-line { display: flex; align-items: flex-start; padding: 4px 12px; line-height: 1.6; }
     .diff-line.removed { background: rgba(239,68,68,0.1); border-left: 3px solid var(--red); }
@@ -181,180 +126,93 @@
     .diff-code { flex: 1; white-space: pre-wrap; word-break: break-all; }
     .diff-line.removed .diff-code { color: #fca5a5; }
     .diff-line.added   .diff-code { color: #86efac; }
-
-    .copy-btn {
-      background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3);
-      color: var(--green); border-radius: 8px; padding: 8px 16px; font-size: 13px;
-      font-weight: 600; cursor: pointer; transition: all 0.2s;
-      display: flex; align-items: center; gap: 6px;
-    }
+    .copy-btn { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: var(--green); border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
     .copy-btn:hover { background: rgba(34,197,94,0.25); }
     .copy-btn.copied { color: #fff; background: var(--green); border-color: var(--green); }
 
     /* Card 4 */
     .warning-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
     .warning-item { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.6; }
-    .warning-icon {
-      width: 22px; height: 22px; background: rgba(168,85,247,0.15);
-      border: 1px solid rgba(168,85,247,0.3); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; font-size: 11px; color: var(--purple); font-weight: 700; margin-top: 1px;
-    }
+    .warning-icon { width: 22px; height: 22px; background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; color: var(--purple); font-weight: 700; margin-top: 1px; }
 
     /* ─── Card 5: Execution Trace ─── */
-    .trace-intro { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
-
     .trace-layout { display: grid; grid-template-columns: 1fr 220px; gap: 12px; margin-bottom: 16px; }
     @media (max-width: 640px) { .trace-layout { grid-template-columns: 1fr; } }
-
-    /* Code pane */
-    .trace-code-pane {
-      background: #0a0a0a; border: 1px solid var(--border);
-      border-radius: 8px; overflow: hidden; font-family: var(--mono); font-size: 13px;
-    }
-    .trace-code-header {
-      background: #141414; padding: 6px 12px; font-size: 11px;
-      color: var(--muted); border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .trace-code-header .step-counter {
-      font-size: 11px; color: var(--cyan); font-weight: 700;
-    }
+    .trace-code-pane { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; font-family: var(--mono); font-size: 13px; }
+    .trace-code-header { background: #141414; padding: 6px 12px; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .step-counter { font-size: 11px; color: var(--cyan); font-weight: 700; }
     .trace-lines { padding: 6px 0; }
-    .trace-line {
-      display: flex; align-items: flex-start; padding: 3px 0;
-      transition: background 0.25s ease;
-      position: relative;
-    }
-    .trace-line.tl-past   { background: rgba(34,197,94,0.06); }
-    .trace-line.tl-current { background: rgba(245,158,11,0.15); }
-    .trace-line.tl-error  { background: rgba(239,68,68,0.15); animation: errorPulse 0.6s ease; }
-    .trace-line.tl-future { background: transparent; }
+    .trace-line { display: flex; align-items: flex-start; padding: 3px 0; transition: background 0.25s ease; }
+    .tl-past    { background: rgba(34,197,94,0.06); }
+    .tl-current { background: rgba(245,158,11,0.15); }
+    .tl-error   { background: rgba(239,68,68,0.15); animation: errorPulse 0.6s ease; }
+    .tl-future  { background: transparent; }
     @keyframes errorPulse { 0%,100%{background:rgba(239,68,68,0.15)} 50%{background:rgba(239,68,68,0.35)} }
-
-    .tl-gutter {
-      width: 36px; flex-shrink: 0; text-align: right; padding-right: 12px;
-      font-size: 11px; color: #444; user-select: none; padding-top: 2px;
-      line-height: 1.6;
-    }
-    .trace-line.tl-current .tl-gutter { color: var(--amber); }
-    .trace-line.tl-error   .tl-gutter { color: var(--red); }
-    .trace-line.tl-past    .tl-gutter { color: #555; }
-
-    .tl-marker {
-      width: 18px; flex-shrink: 0; text-align: center;
-      font-size: 12px; line-height: 1.6; padding-top: 2px;
-    }
-    .trace-line.tl-current .tl-marker { color: var(--amber); }
-    .trace-line.tl-error   .tl-marker { color: var(--red); }
-    .trace-line.tl-past    .tl-marker { color: var(--green); font-size: 10px; }
-    .trace-line.tl-future  .tl-marker { color: transparent; }
-
-    .tl-code {
-      flex: 1; white-space: pre; padding-right: 12px; line-height: 1.6;
-      padding-top: 2px; overflow-x: auto;
-    }
-    .trace-line.tl-current .tl-code { color: #fde68a; }
-    .trace-line.tl-error   .tl-code { color: #fca5a5; }
-    .trace-line.tl-past    .tl-code { color: #6b7280; }
-    .trace-line.tl-future  .tl-code { color: #3d3d3d; }
-
-    /* Variable state pane */
-    .trace-vars-pane {
-      background: #0a0a0a; border: 1px solid var(--border);
-      border-radius: 8px; overflow: hidden; font-family: var(--mono);
-    }
-    .trace-vars-header {
-      background: #141414; padding: 6px 12px;
-      font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border);
-    }
+    .tl-gutter { width: 36px; flex-shrink: 0; text-align: right; padding-right: 12px; font-size: 11px; color: #444; user-select: none; padding-top: 2px; line-height: 1.6; }
+    .tl-current .tl-gutter { color: var(--amber); }
+    .tl-error   .tl-gutter { color: var(--red); }
+    .tl-past    .tl-gutter { color: #555; }
+    .tl-marker { width: 18px; flex-shrink: 0; text-align: center; font-size: 12px; line-height: 1.6; padding-top: 2px; }
+    .tl-current .tl-marker { color: var(--amber); }
+    .tl-error   .tl-marker { color: var(--red); }
+    .tl-past    .tl-marker { color: var(--green); font-size: 10px; }
+    .tl-future  .tl-marker { color: transparent; }
+    .tl-code { flex: 1; white-space: pre; padding-right: 12px; line-height: 1.6; padding-top: 2px; overflow-x: auto; }
+    .tl-current .tl-code { color: #fde68a; }
+    .tl-error   .tl-code { color: #fca5a5; }
+    .tl-past    .tl-code { color: #6b7280; }
+    .tl-future  .tl-code { color: #3d3d3d; }
+    .trace-vars-pane { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; font-family: var(--mono); }
+    .trace-vars-header { background: #141414; padding: 6px 12px; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); }
     .trace-vars-body { padding: 10px 12px; min-height: 80px; }
-    .var-row {
-      display: flex; align-items: flex-start; gap: 8px;
-      margin-bottom: 8px; font-size: 12px; line-height: 1.5;
-      animation: varSlideIn 0.25s ease;
-    }
-    @keyframes varSlideIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
+    .var-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 12px; line-height: 1.5; animation: varSlide 0.25s ease; }
+    @keyframes varSlide { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
     .var-name { color: #93c5fd; font-weight: 600; white-space: nowrap; }
-    .var-equals { color: #555; }
-    .var-value { color: #fde68a; word-break: break-all; }
+    .var-eq   { color: #555; }
+    .var-val  { color: #fde68a; word-break: break-all; }
     .var-new .var-name { color: var(--cyan); }
-    .var-new .var-value { color: #86efac; }
+    .var-new .var-val  { color: #86efac; }
     .no-vars { color: #444; font-size: 12px; font-style: italic; }
-
-    /* Step note */
-    .trace-note {
-      background: #111; border: 1px solid var(--border); border-left: 3px solid var(--cyan);
-      border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
-      font-size: 13px; line-height: 1.6; color: var(--muted);
-      min-height: 44px; transition: all 0.25s;
-    }
+    .trace-note { background: #111; border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; line-height: 1.6; color: var(--muted); min-height: 44px; transition: all 0.25s; }
     .trace-note.is-error { border-left-color: var(--red); color: #fca5a5; background: rgba(239,68,68,0.05); }
     .trace-note.is-ok    { border-left-color: var(--green); color: #86efac; background: rgba(34,197,94,0.04); }
-
-    /* Trace controls */
-    .trace-controls {
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    }
-    .trace-btn {
-      background: #222; border: 1px solid var(--border); border-radius: 8px;
-      color: var(--text); font-size: 13px; font-weight: 600; padding: 8px 14px;
-      cursor: pointer; transition: all 0.2s; white-space: nowrap;
-    }
+    .trace-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .trace-btn { background: #222; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; font-weight: 600; padding: 8px 14px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
     .trace-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-    .trace-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .trace-btn.play-active { background: rgba(6,182,212,0.15); border-color: var(--cyan); color: var(--cyan); }
-    .trace-btn.play-active:hover { background: rgba(6,182,212,0.25); }
+    .trace-speed { display: flex; align-items: center; gap: 6px; margin-left: auto; font-size: 12px; color: var(--muted); }
+    .trace-speed input[type=range] { width: 80px; accent-color: var(--cyan); cursor: pointer; background: transparent; border: none; padding: 0; }
+    .trace-progress-bar { width: 100%; background: var(--border); border-radius: 4px; height: 3px; margin-bottom: 12px; overflow: hidden; }
+    .trace-progress-fill { height: 100%; background: var(--cyan); transition: width 0.25s ease; border-radius: 4px; }
 
-    .trace-speed {
-      display: flex; align-items: center; gap: 6px;
-      margin-left: auto; font-size: 12px; color: var(--muted);
-    }
-    .trace-speed input[type=range] {
-      width: 80px; accent-color: var(--cyan); cursor: pointer;
-      background: transparent; border: none; padding: 0;
-    }
-
-    .trace-progress-bar {
-      width: 100%; background: var(--border); border-radius: 4px;
-      height: 3px; margin-bottom: 12px; overflow: hidden;
-    }
-    .trace-progress-fill {
-      height: 100%; background: var(--cyan);
-      transition: width 0.25s ease; border-radius: 4px;
-    }
+    /* ─── Card 6: Study Resources ─── */
+    .study-intro { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+    .study-topics { display: flex; flex-direction: column; gap: 14px; }
+    .study-topic-card { background: #111; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; animation: fadeIn 0.3s ease; }
+    .study-topic-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .study-topic-why   { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+    .study-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .study-link { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid; transition: all 0.2s; white-space: nowrap; }
+    .study-link:hover { transform: translateY(-1px); opacity: 0.85; }
+    .link-yt  { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.3);  color: #fca5a5; }
+    .link-so  { background: rgba(251,146,60,0.12); border-color: rgba(251,146,60,0.3); color: #fdba74; }
+    .link-gg  { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.3); color: #93c5fd; }
+    .link-doc { background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.3); color: #d8b4fe; }
 
     /* ─── Follow-up ─── */
     #followupSection { margin-bottom: 24px; }
-    #followupToggle {
-      width: 100%; background: transparent; border: 1px solid var(--border);
-      border-radius: 10px; padding: 12px; color: var(--muted); font-size: 14px;
-      font-weight: 600; cursor: pointer; transition: all 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;
-    }
+    #followupToggle { width: 100%; background: transparent; border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
     #followupToggle:hover { border-color: var(--amber); color: var(--amber); }
     #followupChat { display: none; }
-    .chat-messages {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 14px; margin-bottom: 10px; max-height: 300px; overflow-y: auto;
-      display: flex; flex-direction: column; gap: 10px;
-    }
+    .chat-messages { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
     .msg { padding: 10px 14px; border-radius: 8px; font-size: 14px; line-height: 1.6; max-width: 85%; }
     .msg.user { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.2); color: var(--text); align-self: flex-end; }
     .msg.ai   { background: #222; border: 1px solid var(--border); color: var(--text); align-self: flex-start; }
     .chat-input-row { display: flex; gap: 8px; }
-    #followupInput {
-      flex: 1; background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; outline: none;
-      transition: border-color 0.2s;
-    }
+    #followupInput { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; }
     #followupInput:focus { border-color: var(--amber); }
     #followupInput::placeholder { color: #555; }
-    #sendFollowup {
-      background: var(--amber); color: #000; border: none; border-radius: 8px;
-      padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer;
-      transition: background 0.2s; white-space: nowrap;
-    }
+    #sendFollowup { background: var(--amber); color: #000; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
     #sendFollowup:hover:not(:disabled) { background: var(--amber-dim); }
     #sendFollowup:disabled { opacity: 0.6; cursor: not-allowed; }
 
@@ -365,26 +223,16 @@
     #clearHistory { background: transparent; border: none; color: #555; font-size: 12px; cursor: pointer; transition: color 0.2s; }
     #clearHistory:hover { color: var(--red); }
     .history-list { display: flex; flex-direction: column; gap: 8px; }
-    .history-item {
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-      padding: 10px 14px; cursor: pointer; transition: border-color 0.2s;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    }
+    .history-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; cursor: pointer; transition: border-color 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .history-item:hover { border-color: var(--amber); }
+    .history-item-info { flex: 1; min-width: 0; }
     .history-item-summary { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .history-item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .history-badge { background: #1f1f1f; border: 1px solid var(--border); color: var(--muted); font-size: 11px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
     .no-history { color: var(--muted); font-size: 13px; text-align: center; padding: 20px; }
 
     /* ─── Toast ─── */
-    #toast {
-      position: fixed; bottom: 24px; left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: #2a0a0a; border: 1px solid var(--red); color: #fca5a5;
-      padding: 12px 20px; border-radius: 10px; font-size: 14px;
-      transition: transform 0.3s ease; z-index: 999;
-      max-width: 90vw; text-align: center;
-    }
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #2a0a0a; border: 1px solid var(--red); color: #fca5a5; padding: 12px 20px; border-radius: 10px; font-size: 14px; transition: transform 0.3s ease; z-index: 999; max-width: 90vw; text-align: center; }
     #toast.show { transform: translateX(-50%) translateY(0); }
 
     ::-webkit-scrollbar { width: 6px; }
@@ -395,36 +243,28 @@
 <body>
 <div class="container">
 
-  <!-- Header -->
   <header>
     <div class="header-badges">
       <span class="badge">Agent #8 · 100 AI Agents</span>
+      <span class="badge badge-free">✦ No API Key Needed</span>
       <span class="badge badge-new">✦ Step-Through Debugger</span>
     </div>
     <h1>Bug <span>Explainer</span></h1>
-    <p>Paste broken code + error → animated execution trace + plain-English fix, tailored to your level.</p>
+    <p>Paste broken code + error → animated execution trace, plain-English fix &amp; study links. Free for students.</p>
   </header>
 
-  <!-- API Key -->
-  <div class="api-row">
-    <label>🔑 Gemini API Key</label>
-    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" />
-    <button class="api-save-btn" onclick="saveApiKey()">Save</button>
-    <span class="api-status" id="apiStatus">✓ Saved</span>
-  </div>
-
-  <!-- Panels -->
+  <!-- Input panels -->
   <div class="panels">
     <div class="panel">
       <div class="panel-header">
-        <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
         <span class="panel-title">Your buggy code</span>
       </div>
-      <textarea id="buggyCode" placeholder="# Paste your broken code here...&#10;&#10;def greet(name):&#10;    print('Hello, ' + name)&#10;&#10;greet()  # Forgot the argument!"></textarea>
+      <textarea id="buggyCode" oninput="onCodeInput()" placeholder="# Paste your broken code here...&#10;&#10;def greet(name):&#10;    print('Hello, ' + name)&#10;&#10;greet()  # Forgot the argument!"></textarea>
     </div>
     <div class="panel">
       <div class="panel-header">
-        <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
         <span class="panel-title">Error message / traceback</span>
       </div>
       <textarea id="errorMsg" placeholder="Paste the error or traceback here...&#10;&#10;TypeError: greet() missing 1 required positional&#10;argument: 'name'"></textarea>
@@ -434,13 +274,19 @@
   <!-- Controls -->
   <div class="controls">
     <div class="select-wrap">
-      <label>Language</label>
+      <div class="select-label-row">
+        <label>Language</label>
+        <span id="langDetectedBadge">✓ Auto-detected</span>
+      </div>
       <select id="language">
         <option>Python</option>
         <option>JavaScript</option>
+        <option>TypeScript</option>
         <option>Java</option>
         <option>C++</option>
-        <option>TypeScript</option>
+        <option>C</option>
+        <option>Go</option>
+        <option>Rust</option>
         <option>Other</option>
       </select>
     </div>
@@ -455,7 +301,6 @@
     </div>
   </div>
 
-  <!-- Explain button -->
   <button id="explainBtn" onclick="explainBug()">
     <div class="spinner" id="spinner"></div>
     <span id="btnText">🔍 Explain This Bug</span>
@@ -463,7 +308,7 @@
 
   <!-- Results -->
   <div id="results">
-    <div class="results-grid" id="cardsGrid">
+    <div class="results-grid">
 
       <!-- Card 1 -->
       <div class="result-card card-amber" id="card1">
@@ -501,12 +346,9 @@
       <!-- Card 5: Execution Trace -->
       <div class="result-card card-cyan" id="card5">
         <div class="card-label label-cyan">🎬 Step-Through Execution Trace</div>
-        <div class="trace-intro" id="traceIntro">Watch your code execute line by line — see exactly where it breaks and what each variable holds at every step.</div>
-
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">Watch your code run line by line — see exactly where it breaks and what each variable holds at every step.</p>
         <div class="trace-progress-bar"><div class="trace-progress-fill" id="traceProgressFill" style="width:0%"></div></div>
-
         <div class="trace-layout">
-          <!-- Code pane -->
           <div class="trace-code-pane">
             <div class="trace-code-header">
               <span id="traceFileName">code</span>
@@ -514,41 +356,41 @@
             </div>
             <div class="trace-lines" id="traceLines"></div>
           </div>
-          <!-- Vars pane -->
           <div class="trace-vars-pane">
             <div class="trace-vars-header">📦 Variable State</div>
-            <div class="trace-vars-body" id="traceVarsBody">
-              <div class="no-vars">Press Play to start</div>
-            </div>
+            <div class="trace-vars-body" id="traceVarsBody"><div class="no-vars">Press Play to start</div></div>
           </div>
         </div>
-
-        <!-- Step note -->
-        <div class="trace-note" id="traceNote">Press Play or Step → to begin the trace.</div>
-
-        <!-- Controls -->
+        <div class="trace-note" id="traceNote">Press Play or Step › to begin the trace.</div>
         <div class="trace-controls">
-          <button class="trace-btn" id="traceResetBtn"  onclick="traceReset()">⟪ Reset</button>
-          <button class="trace-btn" id="traceBackBtn"   onclick="traceStep(-1)">‹ Back</button>
-          <button class="trace-btn" id="tracePlayBtn"   onclick="traceTogglePlay()">▶ Play</button>
-          <button class="trace-btn" id="traceNextBtn"   onclick="traceStep(1)">Next ›</button>
+          <button class="trace-btn" onclick="traceReset()">⟪ Reset</button>
+          <button class="trace-btn" onclick="traceStep(-1)">‹ Back</button>
+          <button class="trace-btn" id="tracePlayBtn" onclick="traceTogglePlay()">▶ Play</button>
+          <button class="trace-btn" onclick="traceStep(1)">Next ›</button>
           <div class="trace-speed">
             <span>Speed</span>
-            <input type="range" id="traceSpeedSlider" min="200" max="1600" value="800" step="200" oninput="updateSpeed(this.value)" />
+            <input type="range" min="200" max="1600" value="800" step="200" oninput="updateSpeed(this.value)" />
             <span id="traceSpeedLabel">1×</span>
           </div>
         </div>
       </div>
 
-    </div><!-- /.results-grid -->
+      <!-- Card 6: Study Resources -->
+      <div class="result-card card-orange" id="card6">
+        <div class="card-label label-orange">📚 Study This Topic</div>
+        <p class="study-intro">Resources to actually understand the concept behind this bug — not just fix it today.</p>
+        <div class="study-topics" id="studyTopics"></div>
+      </div>
 
-    <!-- Follow-up -->
+    </div>
+
+    <!-- Follow-up chat -->
     <div id="followupSection">
       <button id="followupToggle" onclick="toggleFollowup()">💬 Ask a follow-up question</button>
       <div id="followupChat">
         <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-input-row">
-          <input type="text" id="followupInput" placeholder="e.g. Why does Python need the argument?" onkeydown="if(event.key==='Enter')sendFollowup()" />
+          <input type="text" id="followupInput" placeholder="e.g. Why does Python need arguments?" onkeydown="if(event.key==='Enter')sendFollowup()" />
           <button id="sendFollowup" onclick="sendFollowup()">Send</button>
         </div>
       </div>
@@ -562,124 +404,154 @@
       </div>
       <div class="history-list" id="historyList"></div>
     </div>
-
-  </div><!-- /#results -->
+  </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
 // ─── State ────────────────────────────────────────────────────
-let lastResult = null;
-let lastContext = {};
-let chatHistory = [];
+let lastResult = null, lastContext = {}, chatHistory = [];
+let traceSteps = [], traceCurrentStep = -1, tracePlayInterval = null, traceSpeed = 800, tracePrevVars = {};
+let detectTimer = null;
 
-// Trace state
-let traceSteps = [];
-let traceCurrentStep = -1;
-let tracePlayInterval = null;
-let traceSpeed = 800;
-let tracePrevVars = {};
+window.addEventListener('DOMContentLoaded', renderHistory);
 
-// ─── Init ─────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('gemini_api_key');
-  if (saved) {
-    document.getElementById('apiKey').value = saved;
-    document.getElementById('apiStatus').style.display = 'inline';
+// ─── Language Auto-Detection ──────────────────────────────────
+const LANG_PATTERNS = [
+  { lang: 'Python',     re: /def\s+\w+\s*\(|^\s*import\s+\w|^\s*from\s+\w+\s+import|print\s*\(|if\s+__name__|^\s*#\s*\w/m },
+  { lang: 'TypeScript', re: /:\s*(string|number|boolean|any|void|never)\b|interface\s+\w+\s*\{|<[A-Z]\w+>|as\s+[A-Z]/ },
+  { lang: 'JavaScript', re: /console\.(log|error|warn)\s*\(|const\s+\w|let\s+\w|=>\s*[\{\(]|require\s*\(|module\.exports/ },
+  { lang: 'Java',       re: /public\s+(static\s+)?void|System\.(out|err)\.|import\s+java\.|new\s+[A-Z]\w+\s*\(/ },
+  { lang: 'C++',        re: /#include\s*<(iostream|vector|string|algorithm)|cout\s*<<|std::|int\s+main\s*\(/ },
+  { lang: 'C',          re: /#include\s*<(stdio|stdlib|string)\.h>|printf\s*\(|scanf\s*\(|malloc\s*\(/ },
+  { lang: 'Go',         re: /func\s+\w+\s*\(|package\s+main\b|fmt\.(Print|Println|Scanf)|:=/ },
+  { lang: 'Rust',       re: /fn\s+\w+\s*\(|let\s+mut\s+\w|println!\s*\(|use\s+std::/ },
+];
+
+function detectLanguage(code) {
+  for (const { lang, re } of LANG_PATTERNS) if (re.test(code)) return lang;
+  return null;
+}
+
+function onCodeInput() {
+  clearTimeout(detectTimer);
+  detectTimer = setTimeout(() => {
+    const code = document.getElementById('buggyCode').value;
+    const detected = detectLanguage(code);
+    const badge = document.getElementById('langDetectedBadge');
+    const sel = document.getElementById('language');
+    if (detected) {
+      badge.textContent = `✓ Detected: ${detected}`;
+      badge.style.display = 'inline-block';
+      if ([...sel.options].some(o => o.value === detected)) sel.value = detected;
+    } else {
+      badge.style.display = 'none';
+    }
+  }, 400);
+}
+
+// ─── Free AI (Pollinations.ai — no API key) ───────────────────
+async function callAI(userPrompt, wantJson = true) {
+  const body = {
+    model: 'openai-large',
+    messages: [
+      { role: 'system', content: 'You are a helpful coding tutor for college students. Always respond with valid JSON when asked, no markdown.' },
+      { role: 'user',   content: userPrompt }
+    ]
+  };
+  if (wantJson) body.response_format = { type: 'json_object' };
+
+  const res = await fetch('https://text.pollinations.ai/openai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '');
+    throw new Error(`AI service error (${res.status})${txt ? ': ' + txt.slice(0, 100) : ''}`);
   }
-  renderHistory();
-});
-
-// ─── API Key ──────────────────────────────────────────────────
-function saveApiKey() {
-  const key = document.getElementById('apiKey').value.trim();
-  if (!key) return showToast('Please enter an API key');
-  localStorage.setItem('gemini_api_key', key);
-  const s = document.getElementById('apiStatus');
-  s.style.display = 'inline'; s.textContent = '✓ Saved';
-  setTimeout(() => s.style.display = 'none', 2000);
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || '';
 }
 
 // ─── Main explain ─────────────────────────────────────────────
 async function explainBug() {
-  const apiKey = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
-  const buggyCode = document.getElementById('buggyCode').value.trim();
-  const errorMsg  = document.getElementById('errorMsg').value.trim();
-  const language  = document.getElementById('language').value;
+  const buggyCode  = document.getElementById('buggyCode').value.trim();
+  const errorMsg   = document.getElementById('errorMsg').value.trim();
+  const language   = document.getElementById('language').value;
   const experience = document.getElementById('experience').value;
 
-  if (!apiKey)   return showToast('Please enter your Gemini API key first');
-  if (!buggyCode) return showToast('Please paste your buggy code');
+  if (!buggyCode) return showToast('Paste your buggy code first!');
 
   setLoading(true);
+
+  const usesAnalogy = experience.includes('Beginner') || experience.includes('Learning');
 
   const prompt = `I am a ${experience} programmer writing ${language}. My code has a bug.
 
 Buggy code:
+\`\`\`
 ${buggyCode}
+\`\`\`
 
-Error message:
-${errorMsg || '(no error message provided)'}
+Error message: ${errorMsg || '(none provided)'}
 
-Explain this bug to me at a ${experience} level. Use simple analogies if I am a beginner.
+Tasks:
+1. Explain the bug at a ${experience} level.${usesAnalogy ? ' Use a simple real-world analogy.' : ''}
+2. Provide a step-by-step execution trace of the buggy code.
+3. Suggest 2 study topics with search queries for YouTube, Stack Overflow, and Google.
 
-Also provide a step-by-step execution trace of the buggy code — show each meaningful step the runtime takes, what variables hold at that point, and mark the exact step where the error occurs.
-
-Respond in this exact JSON format (no markdown, no extra text):
+Return ONLY this JSON object (no markdown fences, no extra keys):
 {
-  "oneLiner": "The bug in one sentence",
-  "whyItHappens": "Explanation with analogy if beginner (3-4 sentences)",
+  "oneLiner": "The bug in one clear sentence",
+  "whyItHappens": "${usesAnalogy ? '3-4 sentences with a simple real-world analogy that a student can picture' : '3-4 sentences explaining the technical cause'}",
   "fix": {
-    "explanation": "What to change and why",
-    "oldCode": "the broken line(s)",
-    "newCode": "the fixed line(s)",
-    "fullFixed": "full corrected code"
+    "explanation": "2-3 sentences: what to change and why",
+    "oldCode": "only the broken line(s), trimmed",
+    "newCode": "only the fixed line(s), trimmed",
+    "fullFixed": "the complete corrected code"
   },
-  "spotItNextTime": ["Warning sign 1", "Warning sign 2"],
+  "spotItNextTime": [
+    "Warning sign 1 — keep under 12 words",
+    "Warning sign 2 — keep under 12 words"
+  ],
   "executionTrace": [
     {
       "lineNum": 1,
-      "code": "exact code text from the buggy code",
-      "vars": {"varName": "value"},
-      "status": "ok",
-      "note": "Short plain-English description of what happens at this step"
-    },
-    {
-      "lineNum": 5,
-      "code": "the line that causes the error",
+      "code": "exact trimmed line from buggy code",
       "vars": {},
-      "status": "error",
-      "note": "Plain-English description of why this line crashes"
+      "status": "ok",
+      "note": "what happens here in plain English, max 15 words"
+    }
+  ],
+  "studyTopics": [
+    {
+      "topic": "Short topic name, e.g. Python Function Arguments",
+      "why": "One sentence: why this concept caused the bug",
+      "yt": "youtube search query 5-8 words",
+      "so": "stack overflow search 4-6 words",
+      "gg": "google search 5-8 words",
+      "docUrl": "official docs URL or empty string"
     }
   ]
 }
 
-Rules for executionTrace:
-- Include 4-10 meaningful steps (skip blank lines and comments unless important)
-- "status" must be exactly "ok", "error", or "warning"
-- The last step with status "error" is where the bug lives
-- "vars" shows all variables that exist at that point (use string values)
-- "code" must be exact text from the buggy code (trim leading whitespace)
-- "lineNum" is the 1-based line number in the buggy code
-- Keep "note" under 15 words`;
+executionTrace rules:
+- 4-10 steps, skip blank lines
+- status: "ok", "error", or "warning"
+- The crash step must have status "error"
+- vars: all variables at this point as string values
+- lineNum: 1-based line number in the buggy code
+
+studyTopics: exactly 2 items, beginner-friendly search queries.`;
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'API error');
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const json = extractJSON(rawText);
-    if (!json) throw new Error('Could not parse AI response as JSON');
+    const raw  = await callAI(prompt, true);
+    const json = extractJSON(raw);
+    if (!json) throw new Error('Could not parse AI response — please try again');
 
-    lastResult = json;
+    lastResult  = json;
     lastContext = { buggyCode, errorMsg, language, experience };
     chatHistory = [];
 
@@ -693,350 +565,202 @@ Rules for executionTrace:
   }
 }
 
-// ─── Render all results ───────────────────────────────────────
+// ─── Render all ───────────────────────────────────────────────
 function renderResults(r, experience, buggyCode) {
-  // Card 1
   document.getElementById('oneLiner').textContent = r.oneLiner || '';
 
-  // Card 2
   const isBeginner = experience.includes('Beginner') || experience.includes('Learning');
   document.getElementById('analogyTag').style.display = isBeginner ? 'inline-flex' : 'none';
   document.getElementById('whyText').textContent = r.whyItHappens || '';
 
-  // Card 3
   document.getElementById('fixExplanation').textContent = r.fix?.explanation || '';
   renderDiff(r.fix?.oldCode || '', r.fix?.newCode || '');
 
-  // Card 4
-  const ul = document.getElementById('warningList');
-  ul.innerHTML = '';
+  const ul = document.getElementById('warningList'); ul.innerHTML = '';
   (r.spotItNextTime || []).forEach((w, i) => {
-    const li = document.createElement('li');
-    li.className = 'warning-item';
-    li.innerHTML = `<div class="warning-icon">${i+1}</div><span>${escapeHtml(w)}</span>`;
+    const li = document.createElement('li'); li.className = 'warning-item';
+    li.innerHTML = `<div class="warning-icon">${i+1}</div><span>${esc(w)}</span>`;
     ul.appendChild(li);
   });
 
-  // Card 5: Execution Trace
   buildTrace(r.executionTrace || [], buggyCode);
+  renderStudyTopics(r.studyTopics || [], lastContext.language);
 
-  // Show + animate
   document.getElementById('results').style.display = 'block';
   document.getElementById('followupChat').style.display = 'none';
   document.getElementById('followupToggle').textContent = '💬 Ask a follow-up question';
 
-  ['card1','card2','card3','card4','card5'].forEach((id, i) => {
+  ['card1','card2','card3','card4','card5','card6'].forEach((id, i) => {
     const el = document.getElementById(id);
     el.classList.remove('visible');
-    setTimeout(() => el.classList.add('visible'), i * 110);
+    setTimeout(() => el.classList.add('visible'), i * 100);
   });
-
-  setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  setTimeout(() => document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' }), 60);
 }
 
-// ─── Diff view ────────────────────────────────────────────────
 function renderDiff(oldCode, newCode) {
-  const c = document.getElementById('diffLines');
-  c.innerHTML = '';
-  oldCode.split('\n').forEach(line => {
-    const d = document.createElement('div');
-    d.className = 'diff-line removed';
-    d.innerHTML = `<span class="diff-sign">-</span><span class="diff-code">${escapeHtml(line)}</span>`;
-    c.appendChild(d);
-  });
-  newCode.split('\n').forEach(line => {
-    const d = document.createElement('div');
-    d.className = 'diff-line added';
-    d.innerHTML = `<span class="diff-sign">+</span><span class="diff-code">${escapeHtml(line)}</span>`;
-    c.appendChild(d);
-  });
+  const c = document.getElementById('diffLines'); c.innerHTML = '';
+  oldCode.split('\n').forEach(line => { const d=document.createElement('div'); d.className='diff-line removed'; d.innerHTML=`<span class="diff-sign">-</span><span class="diff-code">${esc(line)}</span>`; c.appendChild(d); });
+  newCode.split('\n').forEach(line => { const d=document.createElement('div'); d.className='diff-line added';   d.innerHTML=`<span class="diff-sign">+</span><span class="diff-code">${esc(line)}</span>`; c.appendChild(d); });
 }
 
 function copyFixed() {
-  const code = lastResult?.fix?.fullFixed || lastResult?.fix?.newCode || '';
-  if (!code) return;
+  const code = lastResult?.fix?.fullFixed || lastResult?.fix?.newCode || ''; if (!code) return;
   navigator.clipboard.writeText(code).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.classList.add('copied'); btn.textContent = '✓ Copied!';
-    setTimeout(() => {
-      btn.classList.remove('copied');
-      btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy fixed code`;
-    }, 2000);
+    const btn = document.getElementById('copyBtn'); btn.classList.add('copied'); btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy fixed code`; }, 2000);
   });
 }
 
-// ─── Execution Trace ──────────────────────────────────────────
-function buildTrace(steps, buggyCode) {
-  traceStop();
-  traceCurrentStep = -1;
-  tracePrevVars = {};
+// ─── Study Resources ─────────────────────────────────────────
+const LANG_DOCS = {
+  Python:'https://docs.python.org/3/', JavaScript:'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
+  TypeScript:'https://www.typescriptlang.org/docs/', Java:'https://docs.oracle.com/javase/tutorial/',
+  'C++':'https://cppreference.com', C:'https://en.cppreference.com/w/c',
+  Go:'https://go.dev/doc/', Rust:'https://doc.rust-lang.org/book/'
+};
 
-  // Build full code line map
-  const codeLines = buggyCode.split('\n');
-
-  // If no trace data, create a minimal one from the code
-  if (!steps || steps.length === 0) {
-    steps = codeLines.map((line, i) => ({
-      lineNum: i + 1, code: line.trim() || '(blank)',
-      vars: {}, status: 'ok', note: 'Line ' + (i+1)
-    }));
-  }
-
-  traceSteps = steps;
-
-  // Render static code pane (all lines of the full code)
-  const linesContainer = document.getElementById('traceLines');
-  linesContainer.innerHTML = '';
-  codeLines.forEach((line, i) => {
-    const div = document.createElement('div');
-    div.className = 'trace-line tl-future';
-    div.id = `tl-${i+1}`;
-    div.innerHTML =
-      `<span class="tl-gutter">${i+1}</span>` +
-      `<span class="tl-marker"> </span>` +
-      `<span class="tl-code">${escapeHtml(line || ' ')}</span>`;
-    linesContainer.appendChild(div);
+function renderStudyTopics(topics, lang) {
+  const c = document.getElementById('studyTopics'); c.innerHTML = '';
+  if (!topics.length) { c.innerHTML = '<div class="no-vars" style="color:var(--muted);font-size:13px">No study topics available.</div>'; return; }
+  topics.forEach(t => {
+    const ytUrl  = `https://www.youtube.com/results?search_query=${encodeURIComponent(t.yt   || t.topic)}`;
+    const soUrl  = `https://stackoverflow.com/search?q=${encodeURIComponent(t.so    || t.topic)}`;
+    const ggUrl  = `https://www.google.com/search?q=${encodeURIComponent(t.gg      || t.topic)}`;
+    const docUrl = (t.docUrl && t.docUrl.startsWith('http')) ? t.docUrl : (LANG_DOCS[lang] || '');
+    const card = document.createElement('div'); card.className = 'study-topic-card';
+    card.innerHTML = `
+      <div class="study-topic-title">${esc(t.topic)}</div>
+      <div class="study-topic-why">${esc(t.why || '')}</div>
+      <div class="study-links">
+        <a class="study-link link-yt" href="${ytUrl}" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.75 15.5V8.5l6.25 3.5-6.25 3.5z"/></svg>
+          YouTube
+        </a>
+        <a class="study-link link-so" href="${soUrl}" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.7 19.4v-5.1h1.7v6.8H2.9v-6.8h1.7v5.1zm-12.1-1.7h10.3v-1.7H5.6zm.3-3.8 10.1 2.1.4-1.6-10.2-2.1zm1.1-3.9 9.3 4.4.8-1.6L7.1 8.4zm2.4-3.6 7.8 7.2 1.1-1.2-7.8-7.2zM13.9 0l-1.2 1.1 6 6.6 1.2-1.1z"/></svg>
+          Stack Overflow
+        </a>
+        <a class="study-link link-gg" href="${ggUrl}" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Google
+        </a>
+        ${docUrl ? `<a class="study-link link-doc" href="${docUrl}" target="_blank" rel="noopener">📖 Official Docs</a>` : ''}
+      </div>`;
+    c.appendChild(card);
   });
+}
 
-  // Reset UI
+// ─── Execution Trace ─────────────────────────────────────────
+function buildTrace(steps, buggyCode) {
+  traceStop(); traceCurrentStep = -1; tracePrevVars = {};
+  const lines = buggyCode.split('\n');
+  if (!steps.length) steps = lines.map((l,i) => ({lineNum:i+1,code:l.trim()||'(blank)',vars:{},status:'ok',note:'Line '+(i+1)}));
+  traceSteps = steps;
+  const lc = document.getElementById('traceLines'); lc.innerHTML = '';
+  lines.forEach((line, i) => {
+    const div = document.createElement('div'); div.className = 'trace-line tl-future'; div.id = `tl-${i+1}`;
+    div.innerHTML = `<span class="tl-gutter">${i+1}</span><span class="tl-marker"> </span><span class="tl-code">${esc(line||' ')}</span>`;
+    lc.appendChild(div);
+  });
   document.getElementById('traceStepCounter').textContent = `Step 0 / ${steps.length}`;
   document.getElementById('traceProgressFill').style.width = '0%';
   document.getElementById('traceNote').textContent = 'Press Play or Step › to begin the trace.';
   document.getElementById('traceNote').className = 'trace-note';
   document.getElementById('traceVarsBody').innerHTML = '<div class="no-vars">Press Play to start</div>';
-  document.getElementById('traceFileName').textContent =
-    lastContext.language === 'Python' ? 'main.py' :
-    lastContext.language === 'JavaScript' ? 'main.js' :
-    lastContext.language === 'TypeScript' ? 'main.ts' :
-    lastContext.language === 'Java' ? 'Main.java' :
-    lastContext.language === 'C++' ? 'main.cpp' : 'code';
+  const fn = {Python:'main.py',JavaScript:'main.js',TypeScript:'main.ts',Java:'Main.java','C++':'main.cpp',C:'main.c',Go:'main.go',Rust:'main.rs'};
+  document.getElementById('traceFileName').textContent = fn[lastContext.language] || 'code';
 }
 
-function traceApplyStep(stepIdx) {
-  const step = traceSteps[stepIdx];
-  if (!step) return;
-
-  const total = traceSteps.length;
-  const codeLines = document.getElementById('traceLines').querySelectorAll('.trace-line');
-
-  // Reset all line states
-  codeLines.forEach((el, i) => {
-    const lineNum = i + 1;
-    const pastStep = traceSteps.slice(0, stepIdx).find(s => s.lineNum === lineNum);
-    const isCurrent = step.lineNum === lineNum;
-
+function traceApplyStep(idx) {
+  const step = traceSteps[idx]; if (!step) return;
+  document.getElementById('traceLines').querySelectorAll('.trace-line').forEach((el, i) => {
+    const ln = i+1, isCur = step.lineNum===ln, wasPast = traceSteps.slice(0,idx).find(s=>s.lineNum===ln);
     el.querySelector('.tl-marker').textContent = ' ';
-
-    if (isCurrent) {
-      el.className = 'trace-line ' + (step.status === 'error' ? 'tl-error' : 'tl-current');
-      el.querySelector('.tl-marker').textContent = step.status === 'error' ? '✕' : '▶';
-      el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    } else if (pastStep) {
-      el.className = 'trace-line tl-past';
-      el.querySelector('.tl-marker').textContent = '✓';
-    } else {
-      el.className = 'trace-line tl-future';
-    }
+    if (isCur) {
+      el.className = 'trace-line '+(step.status==='error'?'tl-error':'tl-current');
+      el.querySelector('.tl-marker').textContent = step.status==='error'?'✕':'▶';
+      el.scrollIntoView({block:'nearest',behavior:'smooth'});
+    } else if (wasPast) { el.className='trace-line tl-past'; el.querySelector('.tl-marker').textContent='✓'; }
+    else { el.className='trace-line tl-future'; }
   });
-
-  // Step counter + progress
-  document.getElementById('traceStepCounter').textContent = `Step ${stepIdx+1} / ${total}`;
-  document.getElementById('traceProgressFill').style.width = `${((stepIdx+1)/total)*100}%`;
-
-  // Note
-  const noteEl = document.getElementById('traceNote');
-  noteEl.textContent = step.note || '';
-  noteEl.className = 'trace-note' +
-    (step.status === 'error' ? ' is-error' : step.status === 'ok' ? ' is-ok' : '');
-
-  // Variables
-  const varsBody = document.getElementById('traceVarsBody');
-  const currentVars = step.vars || {};
-  varsBody.innerHTML = '';
-  if (Object.keys(currentVars).length === 0) {
-    varsBody.innerHTML = '<div class="no-vars">No variables yet</div>';
-  } else {
-    Object.entries(currentVars).forEach(([k, v]) => {
-      const isNew = tracePrevVars[k] === undefined || tracePrevVars[k] !== String(v);
-      const row = document.createElement('div');
-      row.className = 'var-row' + (isNew ? ' var-new' : '');
-      row.innerHTML =
-        `<span class="var-name">${escapeHtml(k)}</span>` +
-        `<span class="var-equals"> = </span>` +
-        `<span class="var-value">${escapeHtml(String(v))}</span>`;
-      varsBody.appendChild(row);
-    });
-  }
-  tracePrevVars = { ...currentVars };
-
-  traceCurrentStep = stepIdx;
+  document.getElementById('traceStepCounter').textContent = `Step ${idx+1} / ${traceSteps.length}`;
+  document.getElementById('traceProgressFill').style.width = `${((idx+1)/traceSteps.length)*100}%`;
+  const note = document.getElementById('traceNote');
+  note.textContent = step.note||''; note.className = 'trace-note'+(step.status==='error'?' is-error':step.status==='ok'?' is-ok':'');
+  const vb = document.getElementById('traceVarsBody'), cv = step.vars||{};
+  vb.innerHTML = '';
+  if (!Object.keys(cv).length) vb.innerHTML = '<div class="no-vars">No variables yet</div>';
+  else Object.entries(cv).forEach(([k,v]) => {
+    const isNew = tracePrevVars[k]===undefined||tracePrevVars[k]!==String(v);
+    const r = document.createElement('div'); r.className='var-row'+(isNew?' var-new':'');
+    r.innerHTML=`<span class="var-name">${esc(k)}</span><span class="var-eq"> = </span><span class="var-val">${esc(String(v))}</span>`;
+    vb.appendChild(r);
+  });
+  tracePrevVars={...cv}; traceCurrentStep=idx;
 }
 
-function traceStep(dir) {
-  const next = traceCurrentStep + dir;
-  if (next < 0 || next >= traceSteps.length) {
-    if (next >= traceSteps.length) traceStop();
-    return;
-  }
-  traceApplyStep(next);
-}
-
+function traceStep(dir) { const n=traceCurrentStep+dir; if(n<0||n>=traceSteps.length){if(n>=traceSteps.length)traceStop();return;} traceApplyStep(n); }
 function traceTogglePlay() {
-  if (tracePlayInterval) {
-    traceStop();
-  } else {
-    const btn = document.getElementById('tracePlayBtn');
-    btn.textContent = '⏸ Pause'; btn.classList.add('play-active');
-    if (traceCurrentStep >= traceSteps.length - 1) traceReset(false);
-    tracePlayInterval = setInterval(() => {
-      const next = traceCurrentStep + 1;
-      if (next >= traceSteps.length) { traceStop(); return; }
-      traceApplyStep(next);
-    }, traceSpeed);
-  }
+  if (tracePlayInterval) { traceStop(); return; }
+  const btn=document.getElementById('tracePlayBtn'); btn.textContent='⏸ Pause'; btn.classList.add('play-active');
+  if (traceCurrentStep>=traceSteps.length-1) traceReset(false);
+  tracePlayInterval = setInterval(()=>{ const n=traceCurrentStep+1; if(n>=traceSteps.length){traceStop();return;} traceApplyStep(n); }, traceSpeed);
 }
-
-function traceStop() {
-  if (tracePlayInterval) { clearInterval(tracePlayInterval); tracePlayInterval = null; }
-  const btn = document.getElementById('tracePlayBtn');
-  if (btn) { btn.textContent = '▶ Play'; btn.classList.remove('play-active'); }
+function traceStop(){ if(tracePlayInterval){clearInterval(tracePlayInterval);tracePlayInterval=null;} const b=document.getElementById('tracePlayBtn'); if(b){b.textContent='▶ Play';b.classList.remove('play-active');} }
+function traceReset(full=true){
+  traceStop(); if(!full)return;
+  traceCurrentStep=-1; tracePrevVars={};
+  document.getElementById('traceProgressFill').style.width='0%';
+  document.getElementById('traceStepCounter').textContent=`Step 0 / ${traceSteps.length}`;
+  document.getElementById('traceNote').textContent='Press Play or Step › to begin the trace.';
+  document.getElementById('traceNote').className='trace-note';
+  document.getElementById('traceVarsBody').innerHTML='<div class="no-vars">Press Play to start</div>';
+  document.getElementById('traceLines').querySelectorAll('.trace-line').forEach(el=>{el.className='trace-line tl-future';el.querySelector('.tl-marker').textContent=' ';});
 }
-
-function traceReset(resetStep = true) {
-  traceStop();
-  if (resetStep) {
-    traceCurrentStep = -1;
-    tracePrevVars = {};
-    document.getElementById('traceProgressFill').style.width = '0%';
-    document.getElementById('traceStepCounter').textContent = `Step 0 / ${traceSteps.length}`;
-    document.getElementById('traceNote').textContent = 'Press Play or Step › to begin the trace.';
-    document.getElementById('traceNote').className = 'trace-note';
-    document.getElementById('traceVarsBody').innerHTML = '<div class="no-vars">Press Play to start</div>';
-    document.getElementById('traceLines').querySelectorAll('.trace-line').forEach(el => {
-      el.className = 'trace-line tl-future';
-      el.querySelector('.tl-marker').textContent = ' ';
-    });
-  }
-}
-
-function updateSpeed(val) {
-  traceSpeed = parseInt(val);
-  const labels = { 1600:'0.5×', 1200:'0.7×', 800:'1×', 600:'1.3×', 400:'1.7×', 200:'2×' };
-  document.getElementById('traceSpeedLabel').textContent = labels[val] || '1×';
-  if (tracePlayInterval) { traceStop(); traceTogglePlay(); }
-}
+function updateSpeed(v){ traceSpeed=parseInt(v); const lb={1600:'0.5×',1200:'0.7×',800:'1×',600:'1.3×',400:'1.7×',200:'2×'}; document.getElementById('traceSpeedLabel').textContent=lb[v]||'1×'; if(tracePlayInterval){traceStop();traceTogglePlay();} }
 
 // ─── Follow-up chat ───────────────────────────────────────────
-function toggleFollowup() {
-  const chat = document.getElementById('followupChat');
-  const btn  = document.getElementById('followupToggle');
-  const open = chat.style.display !== 'none';
-  chat.style.display = open ? 'none' : 'block';
-  btn.textContent = open ? '💬 Ask a follow-up question' : '✕ Close follow-up';
-  if (!open && document.getElementById('chatMessages').children.length === 0)
-    addChatMsg('ai', `I've explained the bug in your ${lastContext.language} code. What would you like to know more about?`);
+function toggleFollowup(){
+  const c=document.getElementById('followupChat'),b=document.getElementById('followupToggle');
+  const o=c.style.display!=='none'; c.style.display=o?'none':'block';
+  b.textContent=o?'💬 Ask a follow-up question':'✕ Close follow-up';
+  if(!o&&!document.getElementById('chatMessages').children.length)
+    addChatMsg('ai',`I explained the ${lastContext.language} bug. What would you like to understand better?`);
 }
-
-async function sendFollowup() {
-  const input = document.getElementById('followupInput');
-  const q = input.value.trim();
-  if (!q) return;
-  const apiKey = (document.getElementById('apiKey').value || localStorage.getItem('gemini_api_key') || '').trim();
-  if (!apiKey) return showToast('API key required');
-  input.value = '';
-  addChatMsg('user', q);
-  document.getElementById('sendFollowup').disabled = true;
-
-  const ctx = `Context: The user is a ${lastContext.experience} programmer in ${lastContext.language}.
-Their bug was: ${lastResult?.oneLiner}.
-The fix was: ${lastResult?.fix?.explanation}
-The execution trace showed ${traceSteps.length} steps.
-Answer their follow-up clearly and concisely.`;
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: ctx + '\n\nFollow-up: ' + q }] }] })
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'API error');
-    addChatMsg('ai', data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response');
-  } catch (err) {
-    addChatMsg('ai', 'Error: ' + err.message);
-  } finally {
-    document.getElementById('sendFollowup').disabled = false;
-  }
+async function sendFollowup(){
+  const inp=document.getElementById('followupInput'),q=inp.value.trim(); if(!q)return;
+  inp.value=''; addChatMsg('user',q); document.getElementById('sendFollowup').disabled=true;
+  const ctx=`Context: ${lastContext.experience} ${lastContext.language} student. Bug: "${lastResult?.oneLiner}". Fix: ${lastResult?.fix?.explanation}. Answer clearly and briefly.`;
+  try { const reply=await callAI(ctx+'\n\nFollow-up: '+q,false); addChatMsg('ai',reply); }
+  catch(e){ addChatMsg('ai','Error: '+e.message); }
+  finally{ document.getElementById('sendFollowup').disabled=false; }
 }
-
-function addChatMsg(role, text) {
-  const c = document.getElementById('chatMessages');
-  const div = document.createElement('div');
-  div.className = `msg ${role}`; div.textContent = text;
-  c.appendChild(div); c.scrollTop = c.scrollHeight;
-}
+function addChatMsg(r,t){const c=document.getElementById('chatMessages');const d=document.createElement('div');d.className=`msg ${r}`;d.textContent=t;c.appendChild(d);c.scrollTop=c.scrollHeight;}
 
 // ─── History ──────────────────────────────────────────────────
-function saveToHistory(result, language, experience) {
-  let h = getHistory();
-  h.unshift({ oneLiner: result.oneLiner, language, experience, ts: Date.now(),
-    result, code: lastContext.buggyCode, errorMsg: lastContext.errorMsg });
-  localStorage.setItem('bug_history', JSON.stringify(h.slice(0, 5)));
-}
-function getHistory() { try { return JSON.parse(localStorage.getItem('bug_history') || '[]'); } catch { return []; } }
-function clearHistory() { localStorage.removeItem('bug_history'); renderHistory(); }
-function renderHistory() {
-  const h = getHistory(), list = document.getElementById('historyList');
-  if (h.length === 0) { list.innerHTML = '<div class="no-history">No bugs explained yet</div>'; return; }
-  list.innerHTML = '';
-  h.forEach((item, i) => {
-    const div = document.createElement('div');
-    div.className = 'history-item';
-    div.innerHTML = `
-      <div class="history-item-info">
-        <div class="history-item-summary">${escapeHtml(item.oneLiner||'Bug '+(i+1))}</div>
-        <div class="history-item-meta">${timeAgo(item.ts)}</div>
-      </div>
-      <span class="history-badge">${escapeHtml(item.language)}</span>`;
-    div.onclick = () => {
-      document.getElementById('buggyCode').value = item.code || '';
-      document.getElementById('errorMsg').value  = item.errorMsg || '';
-      lastResult  = item.result;
-      lastContext = { buggyCode: item.code, errorMsg: item.errorMsg, language: item.language, experience: item.experience };
-      renderResults(item.result, item.experience, item.code || '');
-    };
-    list.appendChild(div);
+function saveToHistory(result,lang,exp){let h=getHistory();h.unshift({oneLiner:result.oneLiner,language:lang,experience:exp,ts:Date.now(),result,code:lastContext.buggyCode,errorMsg:lastContext.errorMsg});localStorage.setItem('bug_history',JSON.stringify(h.slice(0,5)));}
+function getHistory(){try{return JSON.parse(localStorage.getItem('bug_history')||'[]');}catch{return[];}}
+function clearHistory(){localStorage.removeItem('bug_history');renderHistory();}
+function renderHistory(){
+  const h=getHistory(),list=document.getElementById('historyList');
+  if(!h.length){list.innerHTML='<div class="no-history">No bugs explained yet</div>';return;}
+  list.innerHTML='';
+  h.forEach((item,i)=>{
+    const d=document.createElement('div');d.className='history-item';
+    d.innerHTML=`<div class="history-item-info"><div class="history-item-summary">${esc(item.oneLiner||'Bug '+(i+1))}</div><div class="history-item-meta">${timeAgo(item.ts)}</div></div><span class="history-badge">${esc(item.language)}</span>`;
+    d.onclick=()=>{document.getElementById('buggyCode').value=item.code||'';document.getElementById('errorMsg').value=item.errorMsg||'';lastResult=item.result;lastContext={buggyCode:item.code,errorMsg:item.errorMsg,language:item.language,experience:item.experience};renderResults(item.result,item.experience,item.code||'');};
+    list.appendChild(d);
   });
 }
 
 // ─── Helpers ──────────────────────────────────────────────────
-function setLoading(on) {
-  document.getElementById('explainBtn').disabled = on;
-  document.getElementById('spinner').style.display = on ? 'block' : 'none';
-  document.getElementById('btnText').textContent = on ? 'Analyzing…' : '🔍 Explain This Bug';
-}
-function extractJSON(text) {
-  try { return JSON.parse(text.trim()); } catch {}
-  const m = text.match(/\{[\s\S]*\}/);
-  if (m) { try { return JSON.parse(m[0]); } catch {} }
-  return null;
-}
-function escapeHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function timeAgo(ts) {
-  const s = Math.floor((Date.now()-ts)/1000);
-  if (s<60) return 'just now'; if (s<3600) return Math.floor(s/60)+'m ago';
-  if (s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago';
-}
+function setLoading(on){document.getElementById('explainBtn').disabled=on;document.getElementById('spinner').style.display=on?'block':'none';document.getElementById('btnText').textContent=on?'Analyzing…':'🔍 Explain This Bug';}
+function extractJSON(text){try{return JSON.parse(text.trim());}catch{}const m=text.match(/\{[\s\S]*\}/);if(m){try{return JSON.parse(m[0]);}catch{}}return null;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function timeAgo(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
 let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3500);}
 </script>
 </body>
 </html>
