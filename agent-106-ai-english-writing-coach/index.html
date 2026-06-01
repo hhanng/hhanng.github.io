@@ -6,23 +6,931 @@
 <title>Agent #106 · AI English Writing Coach</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px;max-width:520px;width:100%;text-align:center}
-.num{font-size:.8rem;font-weight:700;color:#38bdf8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-h1{font-size:1.6rem;font-weight:800;margin-bottom:12px;color:#f1f5f9}
-p{color:#94a3b8;font-size:.95rem;line-height:1.6;margin-bottom:24px}
-.badge{display:inline-block;background:#1d4ed8;color:#bfdbfe;font-size:.8rem;font-weight:700;padding:6px 16px;border-radius:99px;margin-bottom:28px}
-a.back{color:#38bdf8;text-decoration:none;font-size:.85rem;border:1px solid #334155;padding:8px 18px;border-radius:8px;display:inline-block;transition:background .15s}
-a.back:hover{background:#1e3a5f}
+:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--accent:#3b82f6;--accent2:#eff6ff;--text:#1e293b;--muted:#64748b;--green:#22c55e;--red:#ef4444;--yellow:#f59e0b}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:#fff;border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.1rem;font-weight:800;color:var(--text)}
+header p{color:var(--muted);font-size:.82rem}
+.badge{background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:99px}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:13px 8px;text-align:center;font-size:.88rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+main{max-width:1100px;margin:0 auto;padding:20px}
+.pane{display:none}.pane.active{display:block}
+
+/* Essay Coach */
+.essay-layout{display:grid;grid-template-columns:1fr 260px;gap:16px}
+@media(max-width:700px){.essay-layout{grid-template-columns:1fr}}
+textarea{width:100%;height:280px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.93rem;line-height:1.65;resize:vertical;outline:none;color:var(--text)}
+textarea:focus{border-color:var(--accent)}
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.88}
+.btn-sm{padding:6px 14px;font-size:.8rem}
+.btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.results-box{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:14px}
+.score-ring{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.ring-num{font-size:2.4rem;font-weight:800;color:var(--accent)}
+.ring-label{font-size:.8rem;color:var(--muted)}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--bg);border-radius:8px;padding:10px;text-align:center}
+.stat .val{font-size:1.3rem;font-weight:700;color:var(--text)}
+.stat .lab{font-size:.72rem;color:var(--muted);margin-top:2px}
+.issue{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.issue.ok{background:#f0fdf4;border-color:#bbf7d0}
+.issue h4{font-size:.82rem;font-weight:700;margin-bottom:4px}
+.issue p{font-size:.8rem;color:var(--muted);line-height:1.5}
+.chip{display:inline-block;background:#dbeafe;color:#1d4ed8;font-size:.72rem;padding:2px 8px;border-radius:99px;margin:2px}
+
+/* Sidebar prompts */
+.sidebar-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
+.sidebar-card h3{font-size:.85rem;font-weight:700;margin-bottom:10px}
+.prompt-item{padding:7px 10px;border-radius:7px;font-size:.8rem;cursor:pointer;line-height:1.4;border:1px solid transparent;margin-bottom:4px;transition:all .15s}
+.prompt-item:hover{background:var(--accent2);border-color:#bfdbfe}
+.level-label{font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:99px;margin-bottom:6px;display:inline-block}
+.lvl-beg{background:#dcfce7;color:#166534}
+.lvl-int{background:#fef9c3;color:#854d0e}
+.lvl-adv{background:#fce7f3;color:#9d174d}
+
+/* Grammar */
+.search-bar{width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:.88rem;outline:none;margin-bottom:14px}
+.search-bar:focus{border-color:var(--accent)}
+.grammar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.rule-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
+.rule-card h3{font-size:.88rem;font-weight:700;margin-bottom:6px;color:var(--accent)}
+.rule-card .expl{font-size:.82rem;color:var(--muted);margin-bottom:8px;line-height:1.5}
+.rule-card .vi{font-size:.78rem;color:#7c3aed;background:#f5f3ff;padding:5px 8px;border-radius:6px;margin-bottom:8px;line-height:1.4}
+.ex-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ex{font-size:.78rem;padding:5px 8px;border-radius:6px;line-height:1.4}
+.ex.wrong{background:#fef2f2;color:#991b1b}
+.ex.right{background:#f0fdf4;color:#166534}
+.ex span{font-weight:700;display:block;font-size:.68rem;margin-bottom:2px;opacity:.7}
+
+/* Quiz */
+.quiz-wrap{max-width:640px;margin:0 auto}
+.quiz-q{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px}
+.quiz-q h3{font-size:.92rem;font-weight:600;margin-bottom:12px;line-height:1.5}
+.quiz-opts{display:grid;gap:7px}
+.qopt{padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:.85rem;cursor:pointer;transition:all .15s;background:#fff}
+.qopt:hover{border-color:var(--accent);background:var(--accent2)}
+.qopt.correct{background:#f0fdf4;border-color:var(--green);color:#166534;font-weight:600}
+.qopt.wrong{background:#fef2f2;border-color:var(--red);color:#991b1b}
+.quiz-score{text-align:center;padding:24px;background:#fff;border:1px solid var(--border);border-radius:10px}
+.quiz-score .big{font-size:2.5rem;font-weight:800;color:var(--accent)}
+
+/* Vocab */
+.vocab-controls{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.vocab-controls select{background:#fff;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:.85rem;outline:none}
+.vocab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.word-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .15s}
+.word-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(59,130,246,.1)}
+.word-card .word{font-weight:700;font-size:.95rem;color:var(--text)}
+.word-card .def{font-size:.78rem;color:var(--muted);margin-top:3px;line-height:1.4}
+.word-card .lv{font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:99px;margin-top:6px;display:inline-block}
+.lv-b1{background:#dcfce7;color:#166534}.lv-b2{background:#dbeafe;color:#1d4ed8}.lv-c1{background:#fce7f3;color:#9d174d}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
+.modal{background:#fff;border-radius:14px;padding:24px;max-width:460px;width:100%;position:relative}
+.modal h2{font-size:1.2rem;font-weight:800;margin-bottom:4px}
+.modal .m-def{font-size:.9rem;color:var(--muted);margin-bottom:8px;line-height:1.5}
+.modal .m-vi{background:#f5f3ff;color:#6d28d9;padding:8px 12px;border-radius:8px;font-size:.85rem;margin-bottom:8px}
+.modal .m-ex{background:var(--bg);padding:8px 12px;border-radius:8px;font-size:.85rem;color:var(--muted);font-style:italic;margin-bottom:8px;line-height:1.5}
+.modal .m-syn{font-size:.82rem;color:var(--muted)}
+.modal .m-syn strong{color:var(--text)}
+.close-btn{position:absolute;top:14px;right:14px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted)}
+
+/* Flashcard */
+.fc-wrap{max-width:500px;margin:20px auto 0}
+.fc{background:#fff;border:1px solid var(--border);border-radius:14px;padding:32px;text-align:center;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.fc .fc-word{font-size:2rem;font-weight:800;margin-bottom:8px}
+.fc .fc-hint{font-size:.82rem;color:var(--muted)}
+.fc .fc-ans{font-size:.95rem;color:var(--muted);line-height:1.6;margin-top:14px}
+.fc-btns{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.btn-green{background:var(--green);color:#fff}.btn-red{background:var(--red);color:#fff}
+.fc-progress{text-align:center;font-size:.82rem;color:var(--muted);margin-bottom:10px}
+
+/* Phrases */
+.phrase-section{margin-bottom:18px}
+.phrase-section h3{font-size:.88rem;font-weight:700;color:var(--accent);margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:6px}
+.phrase-list{display:flex;flex-wrap:wrap;gap:7px}
+.phrase-pill{background:#fff;border:1px solid var(--border);border-radius:99px;padding:6px 14px;font-size:.8rem;cursor:pointer;transition:all .15s}
+.phrase-pill:hover{background:var(--accent2);border-color:var(--accent);color:var(--accent)}
+.phrase-pill.copied{background:var(--green);color:#fff;border-color:var(--green)}
+
+.section-title{font-size:1rem;font-weight:700;margin-bottom:14px;color:var(--text)}
+.tab-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab-btn{padding:7px 16px;border-radius:99px;border:1px solid var(--border);background:#fff;font-size:.82rem;cursor:pointer;font-weight:600;color:var(--muted);transition:all .15s}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="num">Agent #106 · 100 AI Agents Challenge</div>
-  <h1>AI English Writing Coach</h1>
-  <p>Essay feedback tool, grammar checker, vocabulary upgrader, and writing style analyzer.</p>
-  <div class="badge">🚧 Coming Soon</div><br>
-  <a href="/" class="back">← Back to Portfolio</a>
+
+<header>
+  <div>
+    <div class="badge">#106 · AI Agents</div>
+    <h1 style="margin-top:5px">AI English Writing Coach</h1>
+    <p>Essay analyzer · Grammar guide with Vietnamese · 200 vocab words · Flashcards</p>
+  </div>
+  <a href="/" style="margin-left:auto;color:var(--accent);font-size:.82rem;text-decoration:none;border:1px solid var(--border);padding:7px 14px;border-radius:8px;background:#fff">← Portfolio</a>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('essay',this)">✍️ Essay Coach</div>
+  <div class="tab" onclick="switchTab('grammar',this)">📖 Grammar Guide</div>
+  <div class="tab" onclick="switchTab('vocab',this)">📚 Vocabulary</div>
 </div>
+
+<main>
+
+<!-- TAB 1: ESSAY COACH -->
+<div class="pane active" id="pane-essay">
+  <div class="essay-layout">
+    <div>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:8px">Paste your writing below and click Analyze to get instant feedback.</p>
+      <textarea id="essay-input" placeholder="Type or paste your essay here…"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn" onclick="analyzeEssay()">🔍 Analyze Writing</button>
+        <button class="btn btn-outline" onclick="clearEssay()">Clear</button>
+      </div>
+      <div id="essay-results" style="display:none"></div>
+    </div>
+    <div>
+      <div class="sidebar-card">
+        <h3>💡 Writing Prompts</h3>
+        <div id="prompts-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: GRAMMAR -->
+<div class="pane" id="pane-grammar">
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="showGrammarSection('rules',this)">Rules (30)</button>
+    <button class="tab-btn" onclick="showGrammarSection('quiz',this)">Quiz (30 Qs)</button>
+  </div>
+  <div id="grammar-rules-section">
+    <input class="search-bar" id="grammar-search" placeholder="Search grammar rules…" oninput="renderGrammar()">
+    <div class="grammar-grid" id="grammar-grid"></div>
+  </div>
+  <div id="grammar-quiz-section" style="display:none">
+    <div class="quiz-wrap" id="quiz-container"></div>
+  </div>
+</div>
+
+<!-- TAB 3: VOCAB -->
+<div class="pane" id="pane-vocab">
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="showVocabSection('browse',this)">Browse</button>
+    <button class="tab-btn" onclick="showVocabSection('flashcard',this)">Flashcards</button>
+    <button class="tab-btn" onclick="showVocabSection('phrases',this)">Essay Phrases</button>
+  </div>
+
+  <div id="vocab-browse-section">
+    <div class="vocab-controls">
+      <input class="search-bar" id="vocab-search" placeholder="Search words…" oninput="renderVocab()" style="flex:1;margin:0">
+      <select id="vocab-level" onchange="renderVocab()">
+        <option value="">All Levels</option>
+        <option>B1</option><option>B2</option><option>C1</option>
+      </select>
+    </div>
+    <div class="section-title" id="vocab-count"></div>
+    <div class="vocab-grid" id="vocab-grid"></div>
+  </div>
+
+  <div id="vocab-flashcard-section" style="display:none">
+    <div class="fc-progress" id="fc-progress"></div>
+    <div class="fc" id="flashcard"></div>
+    <div class="fc-btns" id="fc-btns"></div>
+    <div style="text-align:center;margin-top:10px">
+      <button class="btn btn-outline btn-sm" onclick="resetFlashcards()">🔄 Restart</button>
+    </div>
+  </div>
+
+  <div id="vocab-phrases-section" style="display:none">
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">Click any phrase to copy it to your clipboard.</p>
+    <div id="phrases-container"></div>
+  </div>
+</div>
+
+</main>
+
+<!-- Word Modal -->
+<div class="modal-overlay" id="word-modal" style="display:none" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <button class="close-btn" onclick="document.getElementById('word-modal').style.display='none'">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<div id="copy-toast" style="position:fixed;bottom:20px;right:20px;background:#1e293b;color:#fff;padding:10px 18px;border-radius:8px;font-size:.82rem;display:none;z-index:9999">✓ Copied!</div>
+
+<script>
+// ── ESSAY COACH DATA ──────────────────────────────────────────────────────────
+const OVERUSED = {
+  very:     ["extremely","remarkably","exceptionally"],
+  good:     ["excellent","outstanding","beneficial"],
+  bad:      ["harmful","detrimental","problematic"],
+  thing:    ["aspect","element","factor"],
+  get:      ["obtain","acquire","achieve"],
+  nice:     ["pleasant","wonderful","impressive"],
+  big:      ["significant","substantial","considerable"],
+  small:    ["minimal","limited","negligible"],
+};
+
+const PROMPTS = [
+  {level:"Beginner",text:"Describe your favorite food and explain why you love it."},
+  {level:"Beginner",text:"Write about your daily routine from morning to night."},
+  {level:"Beginner",text:"Describe your hometown. What makes it special?"},
+  {level:"Beginner",text:"Write about your favorite hobby and how it makes you feel."},
+  {level:"Beginner",text:"Describe a person you admire and explain why."},
+  {level:"Beginner",text:"Write about your best childhood memory."},
+  {level:"Beginner",text:"What is your dream job? Describe a typical day."},
+  {level:"Intermediate",text:"Discuss the advantages and disadvantages of social media."},
+  {level:"Intermediate",text:"Should students wear school uniforms? Argue your position."},
+  {level:"Intermediate",text:"Describe a challenge you overcame and what you learned from it."},
+  {level:"Intermediate",text:"How has technology changed the way people communicate?"},
+  {level:"Intermediate",text:"Write about an important cultural tradition in your country."},
+  {level:"Intermediate",text:"Should everyone learn a second language? Give reasons."},
+  {level:"Intermediate",text:"Describe a place you dream of visiting and explain why."},
+  {level:"Advanced",text:"Analyze the impact of artificial intelligence on employment."},
+  {level:"Advanced",text:"To what extent does education determine a person's success in life?"},
+  {level:"Advanced",text:"Discuss whether economic growth inevitably leads to environmental damage."},
+  {level:"Advanced",text:"How can governments best address rising income inequality?"},
+  {level:"Advanced",text:"Evaluate the role of social media in modern political movements."},
+  {level:"Advanced",text:"Is globalization more beneficial or harmful for developing countries?"},
+];
+
+function renderPrompts(){
+  const levels = ["Beginner","Intermediate","Advanced"];
+  const colors = {Beginner:"lvl-beg",Intermediate:"lvl-int",Advanced:"lvl-adv"};
+  let html = "";
+  for(const lv of levels){
+    html += `<div class="level-label ${colors[lv]}">${lv}</div>`;
+    PROMPTS.filter(p=>p.level===lv).forEach(p=>{
+      html += `<div class="prompt-item" onclick="loadPrompt(this)">${p.text}</div>`;
+    });
+  }
+  document.getElementById("prompts-list").innerHTML = html;
+}
+
+function loadPrompt(el){
+  document.getElementById("essay-input").value = el.textContent;
+  document.getElementById("essay-results").style.display = "none";
+}
+function clearEssay(){
+  document.getElementById("essay-input").value = "";
+  document.getElementById("essay-results").style.display = "none";
+}
+
+function analyzeEssay(){
+  const text = document.getElementById("essay-input").value.trim();
+  if(!text || text.length < 10){ alert("Please enter some text first."); return; }
+
+  const words = text.split(/\s+/).filter(Boolean);
+  const sentences = text.split(/[.!?]+/).map(s=>s.trim()).filter(s=>s.length>3);
+  const wordCount = words.length;
+  const sentCount = sentences.length || 1;
+  const avgLen = Math.round(wordCount / sentCount);
+
+  // Overused word counts
+  const lower = text.toLowerCase();
+  const overused = [];
+  for(const [word, subs] of Object.entries(OVERUSED)){
+    const re = new RegExp(`\\b${word}\\b`,"gi");
+    const matches = (text.match(re)||[]).length;
+    if(matches > 0) overused.push({word, count:matches, subs});
+  }
+
+  // Long sentences
+  const longSents = sentences.filter(s=>s.split(/\s+/).length > 25);
+
+  // Passive voice (simple: was/were/been/is/are/been + past participle ending -ed/-en)
+  const passiveRe = /\b(is|are|was|were|been|be)\s+\w+(ed|en)\b/gi;
+  const passiveCount = (text.match(passiveRe)||[]).length;
+  const passiveRate = Math.round(passiveCount / sentCount * 100);
+
+  // Score
+  let score = 100;
+  score -= Math.min(20, overused.reduce((a,o)=>a+o.count,0) * 2);
+  score -= Math.min(15, longSents.length * 4);
+  if(passiveRate > 30) score -= 10;
+  if(wordCount < 50) score -= 15;
+  if(avgLen >= 12 && avgLen <= 22) score += 5;
+  score = Math.max(0, Math.min(100, score));
+
+  const scoreColor = score >= 75 ? "var(--green)" : score >= 50 ? "var(--yellow)" : "var(--red)";
+  const scoreTip = score >= 75 ? "Strong writing!" : score >= 50 ? "Good start — keep improving." : "Needs work — see issues below.";
+
+  let html = `<div class="results-box">
+    <div class="score-ring">
+      <div class="ring-num" style="color:${scoreColor}">${score}</div>
+      <div><div style="font-size:1rem;font-weight:700">Writing Score</div><div class="ring-label">${scoreTip}</div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="val">${wordCount}</div><div class="lab">Words</div></div>
+      <div class="stat"><div class="val">${sentCount}</div><div class="lab">Sentences</div></div>
+      <div class="stat"><div class="val">${avgLen}</div><div class="lab">Avg words/sentence</div></div>
+    </div>`;
+
+  if(overused.length === 0){
+    html += `<div class="issue ok"><h4>✓ No overused words found</h4><p>Great job varying your vocabulary!</p></div>`;
+  } else {
+    overused.forEach(o=>{
+      html += `<div class="issue"><h4>⚠ "${o.word}" used ${o.count}× — try these instead:</h4><p>${o.subs.map(s=>`<span class="chip">${s}</span>`).join("")}</p></div>`;
+    });
+  }
+
+  if(longSents.length === 0){
+    html += `<div class="issue ok"><h4>✓ Sentence length looks good</h4><p>All sentences are under 25 words — clear and readable.</p></div>`;
+  } else {
+    html += `<div class="issue"><h4>⚠ ${longSents.length} long sentence${longSents.length>1?"s":""} detected (&gt;25 words)</h4><p>Try splitting these for clarity. Long sentences are harder to read.</p></div>`;
+  }
+
+  if(passiveRate > 30){
+    html += `<div class="issue"><h4>⚠ High passive voice usage (~${passiveRate}% of sentences)</h4><p>Use active voice where possible. E.g. "The team built the app" instead of "The app was built by the team."</p></div>`;
+  } else {
+    html += `<div class="issue ok"><h4>✓ Passive voice is balanced (${passiveRate}%)</h4><p>Active voice is dominant — good for engaging writing.</p></div>`;
+  }
+
+  html += `</div>`;
+  const res = document.getElementById("essay-results");
+  res.innerHTML = html;
+  res.style.display = "block";
+}
+
+// ── GRAMMAR DATA ──────────────────────────────────────────────────────────────
+const GRAMMAR = [
+  {name:"Articles: A / An",
+   expl:"Use 'a' before consonant sounds, 'an' before vowel sounds. Use 'the' for specific or previously mentioned nouns.",
+   vi:"Dùng 'a' trước âm phụ âm, 'an' trước âm nguyên âm. Dùng 'the' cho danh từ xác định.",
+   wrong:"I have a umbrella. She is the teacher.",wrong2:"an umbrella, a/the teacher depends on context",
+   right:"I have an umbrella. She is a teacher (first mention)."},
+  {name:"Subject-Verb Agreement",
+   expl:"A singular subject takes a singular verb; a plural subject takes a plural verb.",
+   vi:"Chủ ngữ số ít đi với động từ số ít; chủ ngữ số nhiều đi với động từ số nhiều.",
+   wrong:"She don't like coffee. They was happy.",
+   right:"She doesn't like coffee. They were happy."},
+  {name:"Present Simple vs Continuous",
+   expl:"Present simple for habits and facts. Present continuous (am/is/are + -ing) for actions happening now.",
+   vi:"Hiện tại đơn cho thói quen, sự thật. Hiện tại tiếp diễn cho hành động đang xảy ra.",
+   wrong:"I am usually eat breakfast at 7. She studies right now.",
+   right:"I usually eat breakfast at 7. She is studying right now."},
+  {name:"Past Simple vs Past Perfect",
+   expl:"Past simple for a single past event. Past perfect (had + past participle) for an event completed before another past event.",
+   vi:"Quá khứ đơn cho sự kiện quá khứ. Quá khứ hoàn thành cho sự kiện xảy ra trước một sự kiện quá khứ khác.",
+   wrong:"When she arrived, he already left.",
+   right:"When she arrived, he had already left."},
+  {name:"Present Perfect vs Past Simple",
+   expl:"Past simple for finished events with a specific time. Present perfect (have/has + past participle) for recent events or experiences with no specific time.",
+   vi:"Quá khứ đơn cho sự kiện có thời gian cụ thể. Hiện tại hoàn thành cho sự kiện không có thời gian cụ thể.",
+   wrong:"I have seen that movie yesterday.",
+   right:"I saw that movie yesterday. / I have seen that movie (before, at some point)."},
+  {name:"Future: Will vs Going To",
+   expl:"'Will' for spontaneous decisions and predictions. 'Going to' for plans already decided.",
+   vi:"'Will' cho quyết định tức thời và dự đoán. 'Going to' cho kế hoạch đã được quyết định.",
+   wrong:"I going to help you. Look at those clouds — it will rain.",
+   right:"I'm going to help you (planned). It's going to rain (evidence)."},
+  {name:"Modal Verbs",
+   expl:"Modals (can, could, should, must, may, might) never take -s or -ed. They are always followed by the base verb.",
+   vi:"Động từ khuyết thiếu không thêm -s hay -ed. Luôn đi kèm động từ nguyên mẫu không 'to'.",
+   wrong:"She musts go. He can to swim. They shoulds try.",
+   right:"She must go. He can swim. They should try."},
+  {name:"Conditional Type 1 (Real)",
+   expl:"If + present simple, will + base verb. For real or likely future situations.",
+   vi:"If + hiện tại đơn, will + động từ. Dùng cho tình huống có thể xảy ra trong tương lai.",
+   wrong:"If it will rain, I will stay home.",
+   right:"If it rains, I will stay home."},
+  {name:"Conditional Type 2 (Unreal)",
+   expl:"If + past simple, would + base verb. For hypothetical or imaginary present/future situations.",
+   vi:"If + quá khứ đơn, would + động từ. Dùng cho tình huống giả định, không có thật.",
+   wrong:"If I am rich, I would travel the world.",
+   right:"If I were rich, I would travel the world."},
+  {name:"Conditional Type 3 (Past Unreal)",
+   expl:"If + past perfect, would have + past participle. For hypothetical situations in the past.",
+   vi:"If + quá khứ hoàn thành, would have + phân từ quá khứ. Dùng cho tình huống giả định trong quá khứ.",
+   wrong:"If she studied harder, she would have passed.",
+   right:"If she had studied harder, she would have passed."},
+  {name:"Passive Voice",
+   expl:"Passive: subject + be + past participle (+ by agent). Use when the action is more important than who did it.",
+   vi:"Câu bị động: chủ ngữ + be + động từ phân từ 2. Dùng khi hành động quan trọng hơn người thực hiện.",
+   wrong:"The report was wrote by John.",
+   right:"The report was written by John."},
+  {name:"Gerunds vs Infinitives",
+   expl:"Some verbs take gerund (-ing): enjoy, avoid, finish, mind. Others take infinitive (to + verb): want, decide, plan, hope.",
+   vi:"Một số động từ đi với danh động từ (-ing): enjoy, avoid. Một số khác đi với to + động từ: want, decide.",
+   wrong:"She enjoys to read. He decided reading a book.",
+   right:"She enjoys reading. He decided to read a book."},
+  {name:"Countable vs Uncountable Nouns",
+   expl:"Countable nouns have plural forms (book→books). Uncountable nouns do not (water, information, advice). Use 'much' with uncountable, 'many' with countable.",
+   vi:"Danh từ đếm được có dạng số nhiều. Danh từ không đếm được không có dạng số nhiều.",
+   wrong:"She gave me many informations. I need an advice.",
+   right:"She gave me a lot of information. I need some advice."},
+  {name:"Irregular Plurals",
+   expl:"Common irregular plurals: child→children, man→men, woman→women, tooth→teeth, foot→feet, mouse→mice, person→people.",
+   vi:"Số nhiều bất quy tắc: child→children, man→men, woman→women, tooth→teeth, foot→feet.",
+   wrong:"There are three childs in the room. The womans left.",
+   right:"There are three children in the room. The women left."},
+  {name:"Comparatives & Superlatives",
+   expl:"Short adjectives: add -er/-est (fast→faster→fastest). Long adjectives: use more/most (interesting→more interesting→most interesting).",
+   vi:"Tính từ ngắn: thêm -er/-est. Tính từ dài: dùng more/most.",
+   wrong:"She is more tall than me. This is the most fast car.",
+   right:"She is taller than me. This is the fastest car."},
+  {name:"Question Formation",
+   expl:"Questions use auxiliary verbs (do/does/did/is/are/was/were/have/has). Subject and auxiliary invert. Don't add 'do' after question words + be.",
+   vi:"Câu hỏi cần đảo ngữ trợ động từ và chủ ngữ. Không thêm 'do' sau động từ 'be' trong câu hỏi.",
+   wrong:"Where you are going? What he does?",
+   right:"Where are you going? What does he do?"},
+  {name:"Reported Speech",
+   expl:"In reported speech, tenses usually shift back: present→past, will→would, can→could. Pronouns and time expressions also change.",
+   vi:"Câu tường thuật: thì của động từ thường lùi về quá khứ. Đại từ và trạng từ thời gian cũng thay đổi.",
+   wrong:'She said "I am tired." → She said she is tired.',
+   right:'She said "I am tired." → She said she was tired.'},
+  {name:"Relative Clauses",
+   expl:"Use 'who' for people, 'which' for things, 'that' for both (in defining clauses). 'Whom' is used as the object form of 'who'.",
+   vi:"Dùng 'who' cho người, 'which' cho vật, 'that' cho cả hai trong mệnh đề xác định.",
+   wrong:"The man which helped me is kind. The book who I read was great.",
+   right:"The man who helped me is kind. The book that I read was great."},
+  {name:"Prepositions of Time",
+   expl:"At: specific times (at 5pm, at noon). On: days/dates (on Monday, on July 4th). In: months/years/seasons (in July, in 2024, in summer).",
+   vi:"At: thời điểm cụ thể. On: ngày cụ thể. In: tháng, năm, mùa.",
+   wrong:"I was born in July 4th. She works at Monday.",
+   right:"I was born on July 4th. She works on Monday."},
+  {name:"Prepositions of Place",
+   expl:"At: specific location (at the bank). On: surface (on the table, on the wall). In: enclosed space (in the room, in the box).",
+   vi:"At: địa điểm cụ thể. On: bề mặt. In: không gian bao quanh.",
+   wrong:"The book is in the table. She is at the bed.",
+   right:"The book is on the table. She is in bed / at the bank."},
+  {name:"Adjective Order",
+   expl:"When multiple adjectives are used: Opinion → Size → Age → Shape → Color → Origin → Material → Purpose + Noun.",
+   vi:"Thứ tự tính từ: Ý kiến → Kích thước → Tuổi → Hình dạng → Màu sắc → Nguồn gốc → Chất liệu.",
+   wrong:"A red big old car. A French lovely small table.",
+   right:"A big old red car. A lovely small French table."},
+  {name:"Adverb Placement",
+   expl:"Frequency adverbs (always, often, never, usually) go before the main verb but after the verb 'be'.",
+   vi:"Trạng từ tần suất (always, often, never) đứng trước động từ chính nhưng sau động từ 'be'.",
+   wrong:"She goes always to school early. He always is late.",
+   right:"She always goes to school early. He is always late."},
+  {name:"Too vs Very vs Enough",
+   expl:"'Very' intensifies (very tired = extremely tired). 'Too' means excessively (too tired = can't do something). 'Enough' means sufficient (old enough).",
+   vi:"'Very' tăng mức độ. 'Too' có nghĩa quá mức (gây vấn đề). 'Enough' đủ để làm gì.",
+   wrong:"It's too very hot. She's not enough tall to reach.",
+   right:"It's very hot. It's too hot (to go outside). She's not tall enough to reach."},
+  {name:"Make vs Do",
+   expl:"'Make' is used for creating/producing (make a cake, make a decision, make a mistake). 'Do' is used for tasks/activities (do homework, do business, do exercise).",
+   vi:"'Make' dùng cho việc tạo ra thứ gì đó. 'Do' dùng cho các hoạt động và công việc.",
+   wrong:"She did a big mistake. He makes his homework.",
+   right:"She made a big mistake. He does his homework."},
+  {name:"Say vs Tell",
+   expl:"'Tell' must be followed by an object (a person): tell someone. 'Say' does not require an object: say something.",
+   vi:"'Tell' phải đi kèm tân ngữ (người nghe). 'Say' không cần tân ngữ.",
+   wrong:"She said me to stop. He told that he was tired.",
+   right:"She told me to stop. He said (that) he was tired."},
+  {name:"Since vs For",
+   expl:"'Since' is used with a specific point in time (since 2020, since Monday). 'For' is used with a duration (for two years, for a week).",
+   vi:"'Since' dùng với thời điểm cụ thể. 'For' dùng với khoảng thời gian.",
+   wrong:"I have lived here since five years. She's been working for Monday.",
+   right:"I have lived here for five years. She's been working since Monday."},
+  {name:"Despite vs Although",
+   expl:"'Despite / In spite of' is followed by a noun or gerund. 'Although / Even though' is followed by a clause (subject + verb).",
+   vi:"'Despite / In spite of' đi kèm danh từ hoặc danh động từ. 'Although' đi kèm mệnh đề.",
+   wrong:"Despite she was tired, she finished. Although the rain, we went out.",
+   right:"Despite being tired, she finished. Although it rained, we went out."},
+  {name:"Missing Subject (ESL: Vietnamese)",
+   expl:"In English, every sentence needs a subject — you cannot drop it. Vietnamese allows subjectless sentences, but English does not.",
+   vi:"Tiếng Anh bắt buộc phải có chủ ngữ trong mỗi câu. Không được bỏ chủ ngữ như trong tiếng Việt.",
+   wrong:"Is raining outside. Was very difficult.",
+   right:"It is raining outside. It was very difficult."},
+  {name:"Double Negatives",
+   expl:"English uses only one negative per clause. Two negatives create a positive meaning. Use 'any' instead of 'no' after a negative verb.",
+   vi:"Tiếng Anh chỉ dùng một phủ định trong một mệnh đề. Hai phủ định tạo thành khẳng định.",
+   wrong:"I don't have no money. She didn't say nothing.",
+   right:"I don't have any money. She didn't say anything."},
+  {name:"'The' with Proper Nouns",
+   expl:"Use 'the' with rivers, mountain ranges, oceans, deserts, and country groups (the Amazon, the Alps, the Pacific, the Sahara, the UK). Not with cities or countries (not 'the Vietnam').",
+   vi:"Dùng 'the' với sông, dãy núi, đại dương, sa mạc và nhóm quốc gia. Không dùng với tên thành phố hoặc quốc gia đơn lẻ.",
+   wrong:"I live in the Vietnam. She swam in Pacific.",
+   right:"I live in Vietnam. She swam in the Pacific."},
+];
+
+// Quiz questions
+const QUIZ = [
+  {q:"Choose the correct sentence:",opts:["I have an umbrella.","I have a umbrella.","I have the umbrella always.","She is a honest person."],ans:0},
+  {q:"Which is correct?",opts:["She don't like coffee.","She doesn't likes coffee.","She doesn't like coffee.","She not like coffee."],ans:2},
+  {q:"Fill in: 'She __ her homework right now.'",opts:["does","is doing","do","did"],ans:1},
+  {q:"Which sentence uses Past Perfect correctly?",opts:["When I arrived, he already left.","When I arrived, he had already left.","When I arrived, he has already left.","When I arrived, he was already leaving."],ans:1},
+  {q:"Choose the correct sentence:",opts:["I have seen him yesterday.","I saw him yesterday.","I have saw him yesterday.","I did see him yesterday always."],ans:1},
+  {q:"Which is the correct use of 'going to'?",opts:["Look out — it will rain!","Look out — it's going to rain!","Look out — it going to rain!","Look out — it was going to rain!"],ans:1},
+  {q:"Choose the correct modal verb sentence:",opts:["She musts go now.","She can to swim well.","They should try harder.","He might to come."],ans:2},
+  {q:"Which Type 1 conditional is correct?",opts:["If it will rain, I stay home.","If it rains, I will stay home.","If it rains, I stayed home.","If it rained, I will stay home."],ans:1},
+  {q:"Which Type 2 conditional is correct?",opts:["If I am rich, I would travel.","If I were rich, I would travel.","If I was rich, I will travel.","If I would be rich, I travel."],ans:1},
+  {q:"Which Type 3 conditional is correct?",opts:["If she studied harder, she would have passed.","If she had studied harder, she would have passed.","If she had studied harder, she will have passed.","If she studies harder, she would have passed."],ans:1},
+  {q:"Choose the correct passive sentence:",opts:["The letter was wrote by Anna.","The letter was write by Anna.","The letter was written by Anna.","The letter were written by Anna."],ans:2},
+  {q:"Which sentence is correct?",opts:["She enjoys to read novels.","She enjoys reading novels.","She enjoys read novels.","She enjoy reading novels."],ans:1},
+  {q:"Choose the correct sentence:",opts:["She gave me many informations.","She gave me an advice.","She gave me a lot of advice.","She gave me some advices."],ans:2},
+  {q:"Which plural is correct?",opts:["Three childs played outside.","Three childrens played outside.","Three children played outside.","Three child played outside."],ans:2},
+  {q:"Choose the correct comparative:",opts:["She is more tall than me.","She is tallest than me.","She is taller than me.","She is taller then me."],ans:2},
+  {q:"Which question is correctly formed?",opts:["Where you are going?","Where are you going?","Where do you going?","Where you going?"],ans:1},
+  {q:"Which reported speech is correct? Original: 'I am tired.'",opts:["She said she is tired.","She said she was tired.","She said she be tired.","She told she was tired."],ans:1},
+  {q:"Choose the correct relative clause:",opts:["The man which helped me is kind.","The man who helped me is kind.","The man whom is kind helped me.","The man that he helped me is kind."],ans:1},
+  {q:"Choose the correct preposition of time:",opts:["I was born in July 4th.","I was born at July 4th.","I was born on July 4th.","I was born on July."],ans:2},
+  {q:"Which is correct?",opts:["The book is in the table.","The book is at the table.","The book is on the table.","The book is above the table always."],ans:2},
+  {q:"Which adjective order is correct?",opts:["A red big old car.","A big red old car.","A big old red car.","An old big red car."],ans:2},
+  {q:"Choose the correct adverb placement:",opts:["She goes always to school early.","She always is late.","He is always late.","She always goes to school never."],ans:2},
+  {q:"Which is correct?",opts:["It's too very hot today.","She's not enough tall.","It's too hot to go outside.","She's enough tall to reach."],ans:2},
+  {q:"Choose the correct 'make' or 'do' sentence:",opts:["She did a big mistake.","He makes his homework.","She made a big mistake.","He did a decision."],ans:2},
+  {q:"Which sentence uses 'tell' or 'say' correctly?",opts:["She said me to stop.","He told that he was tired.","He said that he was tired.","She told to stop."],ans:2},
+  {q:"Choose the correct 'since' or 'for':",opts:["I've lived here since five years.","I've worked here for Monday.","I've lived here for five years.","I've been tired since two hours."],ans:2},
+  {q:"Which sentence uses 'despite' or 'although' correctly?",opts:["Despite she was tired, she finished.","Although the rain, we went.","Despite being tired, she finished.","Although of the rain, we went."],ans:2},
+  {q:"Choose the correct sentence (subject rule):",opts:["Is raining outside.","Was very difficult today.","It is raining outside.","Raining now."],ans:2},
+  {q:"Which avoids a double negative correctly?",opts:["I don't have no money.","She didn't say nothing.","I don't have any money.","He doesn't know nobody."],ans:2},
+  {q:"Choose the correct use of 'the':",opts:["I live in the Vietnam.","She swam in Pacific.","He climbed the Alps last summer.","They visited the Paris."],ans:2},
+];
+
+// ── VOCABULARY DATA ───────────────────────────────────────────────────────────
+const VOCAB = [
+// B1 (80 words)
+{w:"achieve",lv:"B1",en:"To successfully reach a goal through effort.",vi:"Đạt được (mục tiêu) nhờ nỗ lực.",ex:"She worked hard to achieve her dream of becoming a doctor.",syn:["accomplish","attain"]},
+{w:"adapt",lv:"B1",en:"To change in order to fit a new situation.",vi:"Thích nghi với hoàn cảnh mới.",ex:"It took him a few weeks to adapt to his new school.",syn:["adjust","acclimate"]},
+{w:"analyze",lv:"B1",en:"To examine something carefully and in detail.",vi:"Phân tích kỹ lưỡng.",ex:"The students were asked to analyze the poem's meaning.",syn:["examine","study"]},
+{w:"approach",lv:"B1",en:"A method or way of doing something.",vi:"Phương pháp, cách tiếp cận.",ex:"The teacher used a creative approach to explain the concept.",syn:["method","strategy"]},
+{w:"argue",lv:"B1",en:"To give reasons or evidence to support a point of view.",vi:"Lập luận, tranh luận.",ex:"She argued that the new policy would harm students.",syn:["claim","contend"]},
+{w:"assess",lv:"B1",en:"To evaluate or judge the quality or importance of something.",vi:"Đánh giá, nhận xét.",ex:"Teachers assess students at the end of each term.",syn:["evaluate","judge"]},
+{w:"assume",lv:"B1",en:"To accept something as true without proof.",vi:"Giả định, cho rằng (chưa có bằng chứng).",ex:"Don't assume you know the answer without reading the question.",syn:["presume","suppose"]},
+{w:"attitude",lv:"B1",en:"A way of thinking or feeling about something.",vi:"Thái độ, quan điểm.",ex:"Her positive attitude helped the team stay motivated.",syn:["outlook","mindset"]},
+{w:"benefit",lv:"B1",en:"An advantage or something that helps you.",vi:"Lợi ích, điều có lợi.",ex:"Regular exercise has many health benefits.",syn:["advantage","gain"]},
+{w:"capable",lv:"B1",en:"Having the ability or skill to do something.",vi:"Có khả năng, có năng lực.",ex:"She is capable of managing the whole project alone.",syn:["able","competent"]},
+{w:"challenge",lv:"B1",en:"Something difficult that requires effort to overcome.",vi:"Thử thách, khó khăn.",ex:"Learning a new language is a great challenge.",syn:["obstacle","difficulty"]},
+{w:"combine",lv:"B1",en:"To join two or more things together.",vi:"Kết hợp, ghép lại.",ex:"You can combine exercise and fun by playing sports.",syn:["merge","blend"]},
+{w:"complex",lv:"B1",en:"Made of many different parts; difficult to understand.",vi:"Phức tạp, có nhiều thành phần.",ex:"The issue of climate change is very complex.",syn:["complicated","intricate"]},
+{w:"conclude",lv:"B1",en:"To reach a decision or opinion after thinking.",vi:"Kết luận, đi đến kết luận.",ex:"After studying the data, he concluded that the theory was wrong.",syn:["determine","deduce"]},
+{w:"confident",lv:"B1",en:"Feeling sure about yourself and your abilities.",vi:"Tự tin.",ex:"She felt confident before her presentation.",syn:["assured","self-assured"]},
+{w:"consider",lv:"B1",en:"To think carefully about something.",vi:"Cân nhắc, xem xét.",ex:"Please consider all your options before deciding.",syn:["contemplate","weigh"]},
+{w:"contribute",lv:"B1",en:"To give or add something to help achieve a result.",vi:"Đóng góp.",ex:"Everyone can contribute to making the school better.",syn:["donate","add"]},
+{w:"create",lv:"B1",en:"To make or produce something new.",vi:"Tạo ra, sáng tạo.",ex:"The artist created a beautiful painting.",syn:["produce","generate"]},
+{w:"current",lv:"B1",en:"Happening or existing now.",vi:"Hiện tại, hiện nay.",ex:"What is the current situation in the city?",syn:["present","existing"]},
+{w:"define",lv:"B1",en:"To explain the meaning of a word or idea clearly.",vi:"Định nghĩa, giải thích rõ ràng.",ex:"Can you define the word 'democracy'?",syn:["explain","clarify"]},
+{w:"demonstrate",lv:"B1",en:"To show clearly how something works or is done.",vi:"Chứng minh, trình bày.",ex:"She demonstrated how to use the new software.",syn:["show","illustrate"]},
+{w:"depend",lv:"B1",en:"To rely on someone or something for support.",vi:"Phụ thuộc vào.",ex:"The outcome depends on how hard you work.",syn:["rely","hinge"]},
+{w:"describe",lv:"B1",en:"To say what something or someone is like.",vi:"Mô tả, diễn đạt.",ex:"Describe your ideal holiday in a few sentences.",syn:["depict","portray"]},
+{w:"develop",lv:"B1",en:"To grow or make something grow more advanced.",vi:"Phát triển.",ex:"Children develop language skills rapidly in their early years.",syn:["grow","advance"]},
+{w:"effective",lv:"B1",en:"Working well and producing the desired result.",vi:"Hiệu quả.",ex:"This is an effective method for learning vocabulary.",syn:["successful","efficient"]},
+{w:"environment",lv:"B1",en:"The natural world around us; also one's surroundings.",vi:"Môi trường.",ex:"We must protect the environment for future generations.",syn:["surroundings","ecosystem"]},
+{w:"establish",lv:"B1",en:"To set up or create something that will last.",vi:"Thành lập, thiết lập.",ex:"The school was established in 1985.",syn:["found","set up"]},
+{w:"evaluate",lv:"B1",en:"To judge the value or quality of something carefully.",vi:"Đánh giá, xem xét giá trị.",ex:"The committee will evaluate all the applications.",syn:["assess","appraise"]},
+{w:"examine",lv:"B1",en:"To look at or consider something carefully.",vi:"Xem xét, kiểm tra.",ex:"The doctor examined the patient thoroughly.",syn:["inspect","investigate"]},
+{w:"expand",lv:"B1",en:"To make or become larger or more extended.",vi:"Mở rộng.",ex:"The company plans to expand into new markets.",syn:["grow","extend"]},
+{w:"factor",lv:"B1",en:"Something that contributes to a result.",vi:"Yếu tố.",ex:"Price is an important factor when buying a product.",syn:["element","aspect"]},
+{w:"feature",lv:"B1",en:"An important or interesting quality of something.",vi:"Đặc điểm, tính năng.",ex:"The new phone has many exciting features.",syn:["characteristic","quality"]},
+{w:"focus",lv:"B1",en:"To concentrate attention on something.",vi:"Tập trung vào.",ex:"Try to focus on one task at a time.",syn:["concentrate","center"]},
+{w:"generate",lv:"B1",en:"To produce or create something.",vi:"Tạo ra, sinh ra.",ex:"Solar panels generate clean electricity.",syn:["produce","create"]},
+{w:"identify",lv:"B1",en:"To recognize and name something or someone.",vi:"Xác định, nhận dạng.",ex:"Can you identify the main problem in this text?",syn:["recognize","pinpoint"]},
+{w:"improve",lv:"B1",en:"To become or make something better.",vi:"Cải thiện, tiến bộ.",ex:"She improved her English by reading every day.",syn:["enhance","advance"]},
+{w:"indicate",lv:"B1",en:"To show or point out something.",vi:"Chỉ ra, cho thấy.",ex:"The results indicate that the treatment works.",syn:["show","suggest"]},
+{w:"influence",lv:"B1",en:"The power to affect others' thoughts or actions.",vi:"Ảnh hưởng.",ex:"Music can have a strong influence on our mood.",syn:["impact","effect"]},
+{w:"involve",lv:"B1",en:"To include something as a necessary part.",vi:"Liên quan đến, bao gồm.",ex:"The project involves a lot of research.",syn:["include","entail"]},
+{w:"issue",lv:"B1",en:"An important topic or problem for discussion.",vi:"Vấn đề (quan trọng).",ex:"Climate change is a major global issue.",syn:["problem","matter"]},
+{w:"maintain",lv:"B1",en:"To keep something in the same condition.",vi:"Duy trì.",ex:"It's important to maintain a healthy lifestyle.",syn:["keep","preserve"]},
+{w:"manage",lv:"B1",en:"To be in charge of; or to succeed in doing something difficult.",vi:"Quản lý; xoay sở làm được.",ex:"She manages a team of ten people.",syn:["handle","oversee"]},
+{w:"method",lv:"B1",en:"A way of doing something, especially an organized one.",vi:"Phương pháp.",ex:"What method do you use to study for exams?",syn:["approach","technique"]},
+{w:"obtain",lv:"B1",en:"To get or acquire something.",vi:"Đạt được, thu được.",ex:"You need a passport to obtain a visa.",syn:["get","acquire"]},
+{w:"occur",lv:"B1",en:"To happen, especially unexpectedly.",vi:"Xảy ra.",ex:"The accident occurred on a busy road.",syn:["happen","take place"]},
+{w:"option",lv:"B1",en:"A choice you can make.",vi:"Lựa chọn.",ex:"You have two options: stay or leave.",syn:["choice","alternative"]},
+{w:"policy",lv:"B1",en:"A plan of action adopted by an organization or government.",vi:"Chính sách.",ex:"The government introduced a new education policy.",syn:["plan","rule"]},
+{w:"process",lv:"B1",en:"A series of actions taken to achieve a result.",vi:"Quá trình, quy trình.",ex:"The application process takes about two weeks.",syn:["procedure","system"]},
+{w:"provide",lv:"B1",en:"To give or supply something that is needed.",vi:"Cung cấp.",ex:"The school provides free meals for students.",syn:["supply","offer"]},
+{w:"reduce",lv:"B1",en:"To make something smaller or less in amount.",vi:"Giảm.",ex:"We must reduce our use of plastic.",syn:["decrease","lower"]},
+{w:"require",lv:"B1",en:"To need something; to make something necessary.",vi:"Yêu cầu, cần thiết.",ex:"This job requires excellent communication skills.",syn:["need","demand"]},
+{w:"result",lv:"B1",en:"The effect or outcome of an action.",vi:"Kết quả.",ex:"Hard work leads to positive results.",syn:["outcome","effect"]},
+{w:"role",lv:"B1",en:"The function or part someone plays in a situation.",vi:"Vai trò.",ex:"Parents play an important role in education.",syn:["function","part"]},
+{w:"significant",lv:"B1",en:"Important or large enough to be noticed.",vi:"Đáng kể, quan trọng.",ex:"There has been a significant improvement in her scores.",syn:["notable","considerable"]},
+{w:"similar",lv:"B1",en:"Almost the same but not exactly.",vi:"Tương tự.",ex:"These two paintings are similar in style.",syn:["alike","comparable"]},
+{w:"society",lv:"B1",en:"People living together in an organized community.",vi:"Xã hội.",ex:"Education benefits the whole of society.",syn:["community","civilization"]},
+{w:"specific",lv:"B1",en:"Clearly defined or identified; exact.",vi:"Cụ thể, rõ ràng.",ex:"Can you give me a specific example?",syn:["particular","exact"]},
+{w:"suggest",lv:"B1",en:"To put forward an idea for consideration.",vi:"Đề xuất, gợi ý.",ex:"I suggest we meet on Thursday.",syn:["propose","recommend"]},
+{w:"support",lv:"B1",en:"To help or give assistance to someone or something.",vi:"Ủng hộ, hỗ trợ.",ex:"Her family supported her decision to study abroad.",syn:["assist","back"]},
+{w:"system",lv:"B1",en:"A set of connected things working together.",vi:"Hệ thống.",ex:"The education system varies from country to country.",syn:["structure","framework"]},
+{w:"tend",lv:"B1",en:"To be likely to behave in a certain way.",vi:"Có xu hướng.",ex:"Young children tend to learn languages quickly.",syn:["incline","be likely"]},
+{w:"unique",lv:"B1",en:"Being the only one of its kind.",vi:"Độc đáo, duy nhất.",ex:"Every person's fingerprint is unique.",syn:["distinctive","singular"]},
+{w:"various",lv:"B1",en:"Several different kinds of something.",vi:"Nhiều loại khác nhau.",ex:"There are various ways to solve this problem.",syn:["diverse","several"]},
+{w:"view",lv:"B1",en:"An opinion or way of thinking about something.",vi:"Quan điểm.",ex:"In my view, education is the most important investment.",syn:["opinion","perspective"]},
+{w:"aware",lv:"B1",en:"Knowing that something exists or is happening.",vi:"Nhận thức được, biết.",ex:"Are you aware of the risks?",syn:["conscious","informed"]},
+{w:"available",lv:"B1",en:"Ready to be used or obtainable.",vi:"Có sẵn, có thể tiếp cận.",ex:"The report is available online.",syn:["accessible","obtainable"]},
+{w:"annual",lv:"B1",en:"Happening once every year.",vi:"Hàng năm.",ex:"The company holds its annual meeting in June.",syn:["yearly","once-a-year"]},
+{w:"brief",lv:"B1",en:"Short in time or length.",vi:"Ngắn gọn.",ex:"Please give a brief summary of the story.",syn:["short","concise"]},
+{w:"certain",lv:"B1",en:"Sure; known without doubt.",vi:"Chắc chắn.",ex:"I am certain she will pass the exam.",syn:["sure","definite"]},
+{w:"convince",lv:"B1",en:"To make someone believe something is true.",vi:"Thuyết phục.",ex:"He tried to convince her to join the team.",syn:["persuade","win over"]},
+{w:"consist",lv:"B1",en:"To be made up of particular parts.",vi:"Bao gồm, cấu thành.",ex:"The team consists of ten members.",syn:["comprise","be made up of"]},
+{w:"evident",lv:"B1",en:"Clearly seen or understood; obvious.",vi:"Rõ ràng, hiển nhiên.",ex:"It is evident that she has worked very hard.",syn:["obvious","clear"]},
+{w:"global",lv:"B1",en:"Relating to the whole world.",vi:"Toàn cầu.",ex:"Climate change is a global problem.",syn:["worldwide","international"]},
+{w:"interpret",lv:"B1",en:"To explain or understand the meaning of something.",vi:"Giải thích, diễn giải.",ex:"Different people may interpret the poem differently.",syn:["explain","understand"]},
+{w:"justify",lv:"B1",en:"To show that a decision or action was right.",vi:"Biện minh, chứng minh sự hợp lý.",ex:"Can you justify why you chose that method?",syn:["defend","validate"]},
+{w:"measure",lv:"B1",en:"To find the size, amount, or degree of something.",vi:"Đo lường.",ex:"How do you measure success?",syn:["quantify","gauge"]},
+{w:"apparent",lv:"B1",en:"Clearly seen or understood; seeming to be true.",vi:"Rõ ràng; có vẻ như.",ex:"It was apparent that he had not studied.",syn:["obvious","clear"]},
+{w:"approximately",lv:"B1",en:"Close to a number or amount but not exact.",vi:"Xấp xỉ, khoảng.",ex:"The journey takes approximately two hours.",syn:["about","roughly"]},
+{w:"eliminate",lv:"B1",en:"To completely remove or get rid of something.",vi:"Loại bỏ hoàn toàn.",ex:"We need to eliminate all errors before submitting.",syn:["remove","eradicate"]},
+{w:"emphasize",lv:"B1",en:"To give special importance or attention to something.",vi:"Nhấn mạnh.",ex:"She emphasized the importance of regular revision.",syn:["stress","highlight"]},
+{w:"inform",lv:"B1",en:"To tell someone about something.",vi:"Thông báo, cho biết.",ex:"Please inform me when the results are ready.",syn:["notify","tell"]},
+
+// B2 (80 words)
+{w:"accumulate",lv:"B2",en:"To gather or collect something over time.",vi:"Tích lũy theo thời gian.",ex:"She accumulated a great deal of experience over ten years.",syn:["gather","amass"]},
+{w:"acknowledge",lv:"B2",en:"To recognize or admit that something exists or is true.",vi:"Thừa nhận, công nhận.",ex:"He acknowledged his mistake and apologized.",syn:["admit","recognize"]},
+{w:"adequate",lv:"B2",en:"Enough or satisfactory for a particular purpose.",vi:"Đủ, thỏa đáng.",ex:"The resources provided were not adequate for the project.",syn:["sufficient","satisfactory"]},
+{w:"advocate",lv:"B2",en:"To publicly support or recommend something.",vi:"Ủng hộ, bênh vực công khai.",ex:"She advocates for better mental health services.",syn:["support","champion"]},
+{w:"allocate",lv:"B2",en:"To set aside resources or tasks for a specific purpose.",vi:"Phân bổ, phân chia.",ex:"The government allocated more funds to education.",syn:["assign","distribute"]},
+{w:"ambiguous",lv:"B2",en:"Having more than one possible meaning; unclear.",vi:"Mơ hồ, có nhiều nghĩa.",ex:"The instructions were so ambiguous that nobody knew what to do.",syn:["unclear","vague"]},
+{w:"anticipate",lv:"B2",en:"To expect or prepare for something before it happens.",vi:"Dự đoán, mong đợi trước.",ex:"We didn't anticipate how difficult the task would be.",syn:["expect","foresee"]},
+{w:"arbitrary",lv:"B2",en:"Based on personal choice rather than any reason or system.",vi:"Tùy tiện, không có lý do rõ ràng.",ex:"The decision seemed completely arbitrary.",syn:["random","capricious"]},
+{w:"attain",lv:"B2",en:"To succeed in achieving something after effort.",vi:"Đạt được (sau nhiều nỗ lực).",ex:"She worked for years to attain her professional goals.",syn:["achieve","reach"]},
+{w:"clarify",lv:"B2",en:"To make something easier to understand by explaining it.",vi:"Làm rõ, giải thích.",ex:"Could you clarify what you mean by that?",syn:["explain","clear up"]},
+{w:"collaborate",lv:"B2",en:"To work together with others toward a shared goal.",vi:"Hợp tác cùng nhau.",ex:"The two schools collaborated on a science project.",syn:["cooperate","partner"]},
+{w:"comprehensive",lv:"B2",en:"Including everything that is necessary; thorough.",vi:"Toàn diện, đầy đủ.",ex:"The report provides a comprehensive overview of the situation.",syn:["thorough","complete"]},
+{w:"contradict",lv:"B2",en:"To say the opposite of what someone else has said.",vi:"Mâu thuẫn, phản bác.",ex:"The new evidence contradicts his earlier statement.",syn:["deny","oppose"]},
+{w:"controversial",lv:"B2",en:"Causing public disagreement or debate.",vi:"Gây tranh cãi.",ex:"The new law is highly controversial.",syn:["debatable","contentious"]},
+{w:"coordinate",lv:"B2",en:"To organize different activities so they work together well.",vi:"Phối hợp, điều phối.",ex:"She coordinates all the volunteers at the event.",syn:["organize","manage"]},
+{w:"crucial",lv:"B2",en:"Extremely important; decisive.",vi:"Cực kỳ quan trọng, then chốt.",ex:"Good communication is crucial in any relationship.",syn:["vital","essential"]},
+{w:"derive",lv:"B2",en:"To obtain something from a source.",vi:"Lấy ra từ, bắt nguồn từ.",ex:"Many English words are derived from Latin.",syn:["obtain","come from"]},
+{w:"despite",lv:"B2",en:"Without being affected by; in spite of.",vi:"Mặc dù, bất chấp.",ex:"Despite the rain, we continued our walk.",syn:["in spite of","regardless of"]},
+{w:"diminish",lv:"B2",en:"To become or make something smaller or less.",vi:"Giảm sút, suy giảm.",ex:"His enthusiasm did not diminish over time.",syn:["decrease","reduce"]},
+{w:"distribute",lv:"B2",en:"To give or share something among a number of people.",vi:"Phân phối, phân chia.",ex:"Volunteers distributed food to the flood victims.",syn:["hand out","spread"]},
+{w:"dominate",lv:"B2",en:"To have the most power or influence in a situation.",vi:"Thống trị, chiếm ưu thế.",ex:"Technology dominates modern life.",syn:["control","prevail"]},
+{w:"elaborate",lv:"B2",en:"To add more detail or information to an explanation.",vi:"Giải thích chi tiết hơn, mở rộng.",ex:"Could you elaborate on your last point?",syn:["expand","detail"]},
+{w:"emerge",lv:"B2",en:"To come out from a hidden or enclosed place; to become known.",vi:"Nổi lên, xuất hiện.",ex:"A clear pattern began to emerge from the data.",syn:["appear","arise"]},
+{w:"enhance",lv:"B2",en:"To improve the quality, value, or extent of something.",vi:"Nâng cao, tăng cường.",ex:"Regular practice can enhance your writing skills.",syn:["improve","boost"]},
+{w:"estimate",lv:"B2",en:"To form an approximate idea of value or size.",vi:"Ước tính, đánh giá sơ bộ.",ex:"They estimated the project would cost $10,000.",syn:["approximate","calculate"]},
+{w:"extensive",lv:"B2",en:"Covering a large area or range; thorough.",vi:"Rộng rãi, phong phú, đầy đủ.",ex:"The book contains extensive research on the topic.",syn:["broad","wide-ranging"]},
+{w:"facilitate",lv:"B2",en:"To make an action or process easier.",vi:"Tạo điều kiện thuận lợi, hỗ trợ.",ex:"Technology can facilitate communication across distances.",syn:["ease","enable"]},
+{w:"formulate",lv:"B2",en:"To create or express something precisely.",vi:"Xây dựng, đặt ra (kế hoạch/lý thuyết).",ex:"They formulated a new plan to address the crisis.",syn:["devise","develop"]},
+{w:"fundamental",lv:"B2",en:"Of central importance; forming the basis.",vi:"Cơ bản, nền tảng.",ex:"Trust is fundamental to any good relationship.",syn:["basic","essential"]},
+{w:"guarantee",lv:"B2",en:"To promise that something will happen or be done.",vi:"Đảm bảo, cam kết.",ex:"I can guarantee that this product is of high quality.",syn:["promise","assure"]},
+{w:"hypothesis",lv:"B2",en:"An idea suggested as a starting point for investigation.",vi:"Giả thuyết.",ex:"Scientists tested the hypothesis through experiments.",syn:["theory","assumption"]},
+{w:"implement",lv:"B2",en:"To put a plan or decision into action.",vi:"Thực hiện, triển khai.",ex:"The school implemented a new grading system.",syn:["execute","carry out"]},
+{w:"incorporate",lv:"B2",en:"To include something as part of a whole.",vi:"Kết hợp, đưa vào.",ex:"Try to incorporate more vegetables into your diet.",syn:["include","integrate"]},
+{w:"inevitable",lv:"B2",en:"Certain to happen; impossible to avoid.",vi:"Không thể tránh khỏi.",ex:"Change is inevitable in any growing organization.",syn:["unavoidable","certain"]},
+{w:"investigate",lv:"B2",en:"To carry out research or inquiry into something.",vi:"Điều tra, nghiên cứu.",ex:"Police are investigating the cause of the accident.",syn:["examine","probe"]},
+{w:"minimize",lv:"B2",en:"To reduce something to the smallest possible level.",vi:"Giảm thiểu tối đa.",ex:"We should minimize waste to protect the environment.",syn:["reduce","limit"]},
+{w:"nevertheless",lv:"B2",en:"In spite of that; despite what has just been said.",vi:"Tuy nhiên, dù vậy.",ex:"The task was hard; nevertheless, she completed it.",syn:["however","nonetheless"]},
+{w:"opposition",lv:"B2",en:"Resistance or conflict against something.",vi:"Sự phản đối.",ex:"There was strong opposition to the new law.",syn:["resistance","objection"]},
+{w:"perspective",lv:"B2",en:"A particular way of thinking about something.",vi:"Quan điểm, góc nhìn.",ex:"Studying abroad gave her a new perspective on life.",syn:["viewpoint","outlook"]},
+{w:"plausible",lv:"B2",en:"Seeming reasonable or probable.",vi:"Có vẻ hợp lý, đáng tin.",ex:"His explanation sounded plausible.",syn:["believable","credible"]},
+{w:"precise",lv:"B2",en:"Exact and accurate, with no room for error.",vi:"Chính xác, tỉ mỉ.",ex:"Please give a precise answer, not a general one.",syn:["exact","accurate"]},
+{w:"prevalent",lv:"B2",en:"Widespread or common in a particular area or time.",vi:"Phổ biến, thường gặp.",ex:"Smartphone use is prevalent among young people.",syn:["common","widespread"]},
+{w:"principle",lv:"B2",en:"A fundamental truth or rule that guides behavior.",vi:"Nguyên tắc, quy tắc nền tảng.",ex:"Honesty is a core principle she lives by.",syn:["rule","standard"]},
+{w:"propose",lv:"B2",en:"To suggest a plan or idea for consideration.",vi:"Đề xuất (kế hoạch, ý tưởng).",ex:"She proposed a new solution to the problem.",syn:["suggest","recommend"]},
+{w:"reluctant",lv:"B2",en:"Unwilling to do something; not keen.",vi:"Miễn cưỡng, không muốn.",ex:"He was reluctant to admit that he was wrong.",syn:["unwilling","hesitant"]},
+{w:"restrict",lv:"B2",en:"To limit the extent or availability of something.",vi:"Hạn chế, giới hạn.",ex:"Access to the building is restricted to staff only.",syn:["limit","confine"]},
+{w:"revise",lv:"B2",en:"To look over and improve something; to reconsider.",vi:"Sửa đổi, ôn tập.",ex:"She revised her essay three times before submitting it.",syn:["edit","review"]},
+{w:"simultaneously",lv:"B2",en:"At the same time.",vi:"Đồng thời.",ex:"The event was broadcast simultaneously in 30 countries.",syn:["concurrently","at once"]},
+{w:"sophisticated",lv:"B2",en:"Developed to a high degree of complexity; refined.",vi:"Tinh vi, phức tạp và tinh tế.",ex:"The technology used is highly sophisticated.",syn:["advanced","complex"]},
+{w:"sufficient",lv:"B2",en:"As much as is needed; enough.",vi:"Đủ, vừa đủ.",ex:"Is there sufficient time to complete the task?",syn:["enough","adequate"]},
+{w:"summarize",lv:"B2",en:"To give a brief account of the main points.",vi:"Tóm tắt.",ex:"Can you summarize the main points of the lecture?",syn:["recap","condense"]},
+{w:"supplement",lv:"B2",en:"To add something extra to make it more complete.",vi:"Bổ sung, thêm vào.",ex:"She took vitamins to supplement her diet.",syn:["add to","complement"]},
+{w:"sustain",lv:"B2",en:"To keep something going over a period of time.",vi:"Duy trì, giữ vững.",ex:"It's hard to sustain motivation throughout a long project.",syn:["maintain","keep up"]},
+{w:"terminology",lv:"B2",en:"Technical words or expressions used in a field.",vi:"Thuật ngữ chuyên ngành.",ex:"Medical terminology can be confusing for patients.",syn:["jargon","vocabulary"]},
+{w:"transition",lv:"B2",en:"A change from one state or condition to another.",vi:"Sự chuyển đổi, bước chuyển.",ex:"The transition from school to university can be challenging.",syn:["change","shift"]},
+{w:"ultimate",lv:"B2",en:"Final or most extreme; the best of its kind.",vi:"Cuối cùng; tối thượng.",ex:"His ultimate goal is to become a published author.",syn:["final","greatest"]},
+{w:"whereas",lv:"B2",en:"In contrast to the fact that; while on the contrary.",vi:"Trong khi đó (đối lập).",ex:"She enjoys hiking, whereas her brother prefers reading.",syn:["while","but"]},
+{w:"compile",lv:"B2",en:"To collect and put together information from different sources.",vi:"Biên soạn, tổng hợp.",ex:"She compiled a list of useful resources for students.",syn:["gather","assemble"]},
+{w:"concentrate",lv:"B2",en:"To focus your attention or effort on something.",vi:"Tập trung.",ex:"It's difficult to concentrate in a noisy room.",syn:["focus","center"]},
+{w:"confirm",lv:"B2",en:"To make something definite or prove it is true.",vi:"Xác nhận.",ex:"Please confirm your attendance by Friday.",syn:["verify","establish"]},
+{w:"confront",lv:"B2",en:"To face or deal with a difficult situation directly.",vi:"Đối mặt, đương đầu.",ex:"She had to confront her fear of public speaking.",syn:["face","tackle"]},
+{w:"consequence",lv:"B2",en:"A result or effect of an action or decision.",vi:"Hậu quả, kết quả.",ex:"Poor planning can have serious consequences.",syn:["result","outcome"]},
+{w:"considerable",lv:"B2",en:"Large in size, amount, or extent.",vi:"Đáng kể, khá lớn.",ex:"She has considerable experience in this field.",syn:["significant","substantial"]},
+{w:"consistent",lv:"B2",en:"Always behaving or performing in the same way.",vi:"Nhất quán, đều đặn.",ex:"Consistent effort leads to long-term improvement.",syn:["steady","uniform"]},
+{w:"obtain",lv:"B2",en:"To get or acquire, especially with effort.",vi:"Đạt được, thu được (thường với nỗ lực).",ex:"Students must obtain a passing grade to advance.",syn:["acquire","secure"]},
+{w:"aspect",lv:"B2",en:"One particular part or feature of a situation.",vi:"Khía cạnh.",ex:"Consider every aspect of the problem before deciding.",syn:["element","dimension"]},
+{w:"authority",lv:"B2",en:"The power or right to give orders and make decisions.",vi:"Quyền hạn, thẩm quyền.",ex:"The manager has the authority to hire new staff.",syn:["power","control"]},
+{w:"endeavor",lv:"B2",en:"To try hard to do or achieve something.",vi:"Cố gắng, nỗ lực.",ex:"She endeavored to complete the report on time.",syn:["strive","attempt"]},
+{w:"implicit",lv:"B2",en:"Suggested or understood without being directly stated.",vi:"Ngụ ý, ẩn (không nói rõ).",ex:"There was an implicit understanding that he would take over.",syn:["implied","unspoken"]},
+{w:"profound",lv:"B2",en:"Very great or intense; showing deep knowledge.",vi:"Sâu sắc, thâm thúy.",ex:"Her illness had a profound effect on her family.",syn:["deep","significant"]},
+
+// C1 (40 words)
+{w:"ambivalent",lv:"C1",en:"Having mixed or contradictory feelings about something.",vi:"Có cảm xúc lẫn lộn, không nhất quán.",ex:"She felt ambivalent about leaving her hometown.",syn:["conflicted","uncertain"]},
+{w:"analogous",lv:"C1",en:"Similar in certain respects; comparable.",vi:"Tương tự, có thể so sánh.",ex:"Learning to drive is analogous to learning to ride a bike.",syn:["comparable","parallel"]},
+{w:"articulate",lv:"C1",en:"Able to express ideas clearly and effectively.",vi:"Diễn đạt rõ ràng, mạch lạc.",ex:"She is very articulate when presenting her ideas.",syn:["eloquent","expressive"]},
+{w:"assimilate",lv:"C1",en:"To absorb and integrate new ideas or people into a group.",vi:"Đồng hóa, tiếp thu và hòa nhập.",ex:"It takes time to assimilate into a new culture.",syn:["absorb","integrate"]},
+{w:"axiom",lv:"C1",en:"A statement accepted as obviously true without proof.",vi:"Tiên đề, điều hiển nhiên được chấp nhận.",ex:"'Actions speak louder than words' is a well-known axiom.",syn:["principle","maxim"]},
+{w:"coherent",lv:"C1",en:"Logical and consistent; clearly expressed.",vi:"Mạch lạc, nhất quán và rõ ràng.",ex:"She presented a coherent argument in her essay.",syn:["logical","consistent"]},
+{w:"conceptualize",lv:"C1",en:"To form a concept or idea about something.",vi:"Khái niệm hóa, hình thành ý tưởng.",ex:"It was difficult to conceptualize the scale of the project.",syn:["imagine","envision"]},
+{w:"conducive",lv:"C1",en:"Making a certain situation or outcome likely or possible.",vi:"Thuận lợi cho, tạo điều kiện cho.",ex:"A quiet environment is conducive to studying.",syn:["favorable","beneficial"]},
+{w:"conjecture",lv:"C1",en:"An opinion formed without proof; to guess.",vi:"Suy đoán không có bằng chứng.",ex:"His theory was based on conjecture rather than evidence.",syn:["speculation","guess"]},
+{w:"contentious",lv:"C1",en:"Causing or likely to cause argument.",vi:"Gây tranh cãi, dễ gây bất đồng.",ex:"The issue of immigration is highly contentious.",syn:["controversial","disputed"]},
+{w:"convoluted",lv:"C1",en:"Very complex and difficult to follow.",vi:"Rối rắm, phức tạp khó hiểu.",ex:"The instructions were so convoluted that no one understood them.",syn:["complicated","intricate"]},
+{w:"cultivate",lv:"C1",en:"To try to develop a skill, feeling, or relationship.",vi:"Vun đắp, phát triển (kỹ năng, mối quan hệ).",ex:"She cultivated strong relationships with her colleagues.",syn:["develop","nurture"]},
+{w:"daunting",lv:"C1",en:"Making you feel nervous and less confident.",vi:"Đáng sợ, nản lòng.",ex:"Starting a new job can feel daunting at first.",syn:["intimidating","overwhelming"]},
+{w:"discrepancy",lv:"C1",en:"A difference between things that should be the same.",vi:"Sự mâu thuẫn, không khớp giữa hai thứ.",ex:"There was a discrepancy between the two reports.",syn:["inconsistency","difference"]},
+{w:"eloquent",lv:"C1",en:"Well-expressed and persuasive in speech or writing.",vi:"Hùng hồn, diễn đạt lưu loát và thuyết phục.",ex:"He gave an eloquent speech at the graduation ceremony.",syn:["articulate","fluent"]},
+{w:"empirical",lv:"C1",en:"Based on observation and experiment, not theory.",vi:"Dựa trên thực nghiệm, thực tiễn.",ex:"The study used empirical evidence to support its claims.",syn:["observational","evidence-based"]},
+{w:"elusive",lv:"C1",en:"Difficult to find, catch, or achieve.",vi:"Khó nắm bắt, khó đạt được.",ex:"Success can be elusive if you don't stay persistent.",syn:["fleeting","hard to grasp"]},
+{w:"exacerbate",lv:"C1",en:"To make a problem or situation worse.",vi:"Làm trầm trọng thêm.",ex:"Stress can exacerbate health problems.",syn:["worsen","aggravate"]},
+{w:"exemplify",lv:"C1",en:"To be or give a typical example of something.",vi:"Minh họa, là ví dụ điển hình.",ex:"Her work exemplifies dedication and creativity.",syn:["illustrate","typify"]},
+{w:"extrapolate",lv:"C1",en:"To estimate future trends based on known data.",vi:"Ngoại suy, dự đoán từ dữ liệu đã biết.",ex:"From the current trends, we can extrapolate future growth.",syn:["infer","project"]},
+{w:"formidable",lv:"C1",en:"Inspiring fear or respect through being impressively large or capable.",vi:"Đáng sợ, khó địch.",ex:"She faced a formidable challenge but succeeded.",syn:["daunting","impressive"]},
+{w:"holistic",lv:"C1",en:"Considering the whole rather than just individual parts.",vi:"Toàn diện, xem xét tổng thể.",ex:"A holistic approach to health includes mind, body, and spirit.",syn:["comprehensive","integrated"]},
+{w:"inherent",lv:"C1",en:"Existing as a natural or permanent quality.",vi:"Vốn có, bản chất.",ex:"There are inherent risks in any new business venture.",syn:["intrinsic","innate"]},
+{w:"innate",lv:"C1",en:"A quality you are born with rather than one you learn.",vi:"Bẩm sinh, tự nhiên.",ex:"Some people seem to have an innate talent for music.",syn:["inborn","natural"]},
+{w:"meticulous",lv:"C1",en:"Very careful and precise about details.",vi:"Tỉ mỉ, cẩn thận từng chi tiết.",ex:"She was meticulous in her research, double-checking every fact.",syn:["thorough","precise"]},
+{w:"nuanced",lv:"C1",en:"Showing subtle distinctions; not simple.",vi:"Tinh tế, có nhiều sắc thái.",ex:"His analysis of the poem was nuanced and insightful.",syn:["subtle","complex"]},
+{w:"paradox",lv:"C1",en:"A statement that seems contradictory but may be true.",vi:"Nghịch lý.",ex:"'The more you know, the more you realize you don't know' is a paradox.",syn:["contradiction","irony"]},
+{w:"perpetuate",lv:"C1",en:"To cause something to continue indefinitely.",vi:"Duy trì mãi mãi, kéo dài.",ex:"Stereotypes can perpetuate inequality in society.",syn:["maintain","sustain"]},
+{w:"pragmatic",lv:"C1",en:"Dealing with things sensibly and practically.",vi:"Thực dụng, thiết thực.",ex:"We need a pragmatic solution, not just theories.",syn:["practical","realistic"]},
+{w:"premise",lv:"C1",en:"A statement used as the basis for an argument.",vi:"Tiền đề, cơ sở lập luận.",ex:"Her argument was based on a flawed premise.",syn:["assumption","basis"]},
+{w:"reconcile",lv:"C1",en:"To restore friendly relations; to make compatible.",vi:"Hòa giải; điều hòa (hai ý kiến trái ngược).",ex:"It is hard to reconcile his public statements with his private actions.",syn:["resolve","harmonize"]},
+{w:"rhetoric",lv:"C1",en:"Persuasive language, sometimes without substance.",vi:"Hùng biện; ngôn từ thuyết phục (đôi khi rỗng tuếch).",ex:"Politicians often rely on rhetoric rather than facts.",syn:["oratory","persuasion"]},
+{w:"scrutinize",lv:"C1",en:"To examine something very carefully and critically.",vi:"Xem xét kỹ lưỡng, soi xét.",ex:"Journalists scrutinized the government's new policy.",syn:["examine","inspect"]},
+{w:"substantiate",lv:"C1",en:"To provide evidence to prove or support a claim.",vi:"Chứng minh, cung cấp bằng chứng.",ex:"Can you substantiate your claim with data?",syn:["prove","verify"]},
+{w:"tenacious",lv:"C1",en:"Persisting despite difficulty; not giving up.",vi:"Kiên trì, bền bỉ không từ bỏ.",ex:"She was tenacious in her pursuit of justice.",syn:["persistent","determined"]},
+{w:"theoretical",lv:"C1",en:"Based on theory rather than practice or experience.",vi:"Lý thuyết, mang tính học thuật.",ex:"His knowledge of surgery was mainly theoretical.",syn:["academic","abstract"]},
+{w:"ubiquitous",lv:"C1",en:"Present or seeming to appear everywhere.",vi:"Hiện diện khắp nơi, phổ biến khắp nơi.",ex:"Smartphones have become ubiquitous in modern life.",syn:["omnipresent","universal"]},
+{w:"abstract",lv:"C1",en:"Relating to ideas rather than physical things; hard to define.",vi:"Trừu tượng.",ex:"Love is an abstract concept that is hard to define.",syn:["conceptual","theoretical"]},
+{w:"corroborate",lv:"C1",en:"To confirm or support with evidence.",vi:"Xác nhận, làm sáng tỏ bằng bằng chứng.",ex:"The witness's statement corroborated his alibi.",syn:["confirm","verify"]},
+{w:"dichotomy",lv:"C1",en:"A division between two opposite or contrasting things.",vi:"Sự đối lập nhị phân, sự phân đôi.",ex:"The novel explores the dichotomy between good and evil.",syn:["contrast","division"]},
+{w:"mitigate",lv:"C1",en:"To make something less severe or serious.",vi:"Giảm nhẹ, làm bớt nghiêm trọng.",ex:"Early action can mitigate the effects of climate change.",syn:["reduce","lessen"]},
+];
+
+// 50 Essay Phrases
+const PHRASES = {
+  "Adding Ideas":["Furthermore, …","Moreover, …","In addition to this, …","Additionally, …","Not only that, but …","What is more, …","Besides this, …","Equally important is …","Similarly, …","To add to this, …"],
+  "Contrasting":["However, …","Nevertheless, …","On the other hand, …","In contrast, …","Despite this, …","Although … ,","Even though … ,","Yet, …","Conversely, …","Notwithstanding this, …"],
+  "Giving Examples":["For example, …","For instance, …","To illustrate this, …","Such as …","In particular, …","Specifically, …","A case in point is …","This is evident in …","As shown by …","Namely, …"],
+  "Concluding":["In conclusion, …","To summarize, …","In summary, …","Therefore, …","Thus, …","Consequently, …","As a result, …","To conclude, …","Overall, …","In short, …"],
+  "Emphasis":["Undoubtedly, …","It is worth noting that …","Above all, …","Most importantly, …","Indeed, …","Particularly, …","Notably, …","Significantly, …","Without doubt, …","It is clear that …"],
+};
+
+// ── APP LOGIC ──────────────────────────────────────────────────────────────────
+function switchTab(tab, el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pane-'+tab).classList.add('active');
+  if(tab==='grammar') renderGrammar();
+  if(tab==='vocab') renderVocab();
+}
+
+// Grammar
+let grammarSection='rules';
+function showGrammarSection(sec,el){
+  grammarSection=sec;
+  document.querySelectorAll('#pane-grammar .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('grammar-rules-section').style.display=sec==='rules'?'':'none';
+  document.getElementById('grammar-quiz-section').style.display=sec==='quiz'?'':'none';
+  if(sec==='quiz') renderQuiz();
+}
+
+function renderGrammar(){
+  const search=(document.getElementById('grammar-search').value||'').toLowerCase();
+  const list=GRAMMAR.filter(r=>!search||(r.name.toLowerCase().includes(search)||r.expl.toLowerCase().includes(search)));
+  document.getElementById('grammar-grid').innerHTML=list.map(r=>`
+    <div class="rule-card">
+      <h3>${r.name}</h3>
+      <div class="expl">${r.expl}</div>
+      <div class="vi">🇻🇳 ${r.vi}</div>
+      <div class="ex-row">
+        <div class="ex wrong"><span>✗ Wrong</span>${r.wrong}</div>
+        <div class="ex right"><span>✓ Correct</span>${r.right}</div>
+      </div>
+    </div>`).join('');
+}
+
+// Quiz
+let quizAnswers={}, quizDone=false;
+function renderQuiz(){
+  quizAnswers={}; quizDone=false;
+  document.getElementById('quiz-container').innerHTML=
+    QUIZ.map((q,i)=>`
+      <div class="quiz-q" id="qq-${i}">
+        <h3>${i+1}. ${q.q}</h3>
+        <div class="quiz-opts">
+          ${q.opts.map((o,j)=>`<div class="qopt" onclick="answerQuiz(${i},${j},${q.ans})">${o}</div>`).join('')}
+        </div>
+      </div>`).join('')+
+    `<div style="text-align:center;margin-top:16px">
+      <button class="btn" onclick="submitQuiz()">Submit Quiz</button>
+      <button class="btn btn-outline" style="margin-left:8px" onclick="renderQuiz()">Restart</button>
+    </div>`;
+}
+function answerQuiz(qi,chosen,correct){
+  if(quizAnswers[qi]!==undefined) return;
+  quizAnswers[qi]=chosen;
+  const opts=document.querySelectorAll(`#qq-${qi} .qopt`);
+  opts[correct].classList.add('correct');
+  if(chosen!==correct) opts[chosen].classList.add('wrong');
+}
+function submitQuiz(){
+  const score=QUIZ.filter((_,i)=>quizAnswers[i]===QUIZ[i].ans).length;
+  const pct=Math.round(score/QUIZ.length*100);
+  const tip=pct>=80?"Excellent! 🎉":pct>=60?"Good job — keep practicing!":"Keep studying the rules and try again.";
+  document.getElementById('quiz-container').innerHTML=`
+    <div class="quiz-score">
+      <div class="big">${score} / ${QUIZ.length}</div>
+      <div style="font-size:1rem;margin:8px 0">${pct}% — ${tip}</div>
+      <button class="btn" style="margin-top:12px" onclick="renderQuiz()">Try Again</button>
+    </div>`;
+}
+
+// Vocabulary
+let fcQueue=[], fcIndex=0, fcRevealed=false;
+function renderVocab(){
+  const search=(document.getElementById('vocab-search').value||'').toLowerCase();
+  const lv=document.getElementById('vocab-level').value;
+  const list=VOCAB.filter(v=>(!lv||v.lv===lv)&&(!search||(v.w.toLowerCase().includes(search)||v.en.toLowerCase().includes(search)||v.vi.toLowerCase().includes(search))));
+  document.getElementById('vocab-count').textContent=`${list.length} words`;
+  document.getElementById('vocab-grid').innerHTML=list.map(v=>`
+    <div class="word-card" onclick="openWordModal('${v.w}')">
+      <div class="word">${v.w}</div>
+      <div class="def">${v.en.substring(0,60)}…</div>
+      <span class="lv lv-${v.lv.toLowerCase()}">${v.lv}</span>
+    </div>`).join('');
+}
+
+function openWordModal(word){
+  const v=VOCAB.find(x=>x.w===word); if(!v) return;
+  document.getElementById('modal-body').innerHTML=`
+    <span class="lv lv-${v.lv.toLowerCase()}" style="margin-bottom:10px;display:inline-block">${v.lv}</span>
+    <h2>${v.w}</h2>
+    <div class="m-def">${v.en}</div>
+    <div class="m-vi">🇻🇳 ${v.vi}</div>
+    <div class="m-ex">"${v.ex}"</div>
+    <div class="m-syn"><strong>Synonyms:</strong> ${v.syn.join(', ')}</div>`;
+  document.getElementById('word-modal').style.display='flex';
+}
+function closeModal(e){if(e.target.id==='word-modal') document.getElementById('word-modal').style.display='none';}
+
+let vocabSection='browse';
+function showVocabSection(sec,el){
+  vocabSection=sec;
+  document.querySelectorAll('#pane-vocab .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  ['browse','flashcard','phrases'].forEach(s=>{
+    document.getElementById('vocab-'+s+'-section').style.display=s===sec?'':'none';
+  });
+  if(sec==='flashcard') initFlashcards();
+  if(sec==='phrases') renderPhrases();
+  if(sec==='browse') renderVocab();
+}
+
+function initFlashcards(){
+  fcQueue=[...VOCAB].sort(()=>Math.random()-.5);
+  fcIndex=0; fcRevealed=false;
+  showFlashcard();
+}
+function resetFlashcards(){ initFlashcards(); }
+function showFlashcard(){
+  if(fcIndex>=fcQueue.length){
+    document.getElementById('flashcard').innerHTML=`<div class="fc-word">🎉 Done!</div><div class="fc-hint">You reviewed all ${fcQueue.length} cards.</div>`;
+    document.getElementById('fc-btns').innerHTML='';
+    document.getElementById('fc-progress').textContent='Complete!';
+    return;
+  }
+  const v=fcQueue[fcIndex];
+  fcRevealed=false;
+  document.getElementById('fc-progress').textContent=`Card ${fcIndex+1} of ${fcQueue.length}`;
+  document.getElementById('flashcard').innerHTML=`
+    <div class="fc-word">${v.w}</div>
+    <span class="lv lv-${v.lv.toLowerCase()}">${v.lv}</span>
+    <div class="fc-hint" style="margin-top:12px">Click Reveal to see the definition</div>`;
+  document.getElementById('fc-btns').innerHTML=`<button class="btn" onclick="revealCard()">👁 Reveal</button>`;
+}
+function revealCard(){
+  if(fcRevealed) return;
+  fcRevealed=true;
+  const v=fcQueue[fcIndex];
+  document.getElementById('flashcard').innerHTML=`
+    <div class="fc-word">${v.w}</div>
+    <span class="lv lv-${v.lv.toLowerCase()}">${v.lv}</span>
+    <div class="fc-ans">${v.en}<br><em style="color:#7c3aed">🇻🇳 ${v.vi}</em><br><br><span style="font-style:italic">"${v.ex}"</span></div>`;
+  document.getElementById('fc-btns').innerHTML=`
+    <button class="btn btn-green" onclick="markCard('easy')">✓ Easy</button>
+    <button class="btn btn-red" onclick="markCard('hard')">✗ Hard</button>`;
+}
+function markCard(result){
+  if(result==='hard') fcQueue.push(fcQueue[fcIndex]);
+  fcIndex++;
+  showFlashcard();
+}
+
+function renderPhrases(){
+  document.getElementById('phrases-container').innerHTML=Object.entries(PHRASES).map(([cat,phrases])=>`
+    <div class="phrase-section">
+      <h3>${cat}</h3>
+      <div class="phrase-list">${phrases.map(p=>`<span class="phrase-pill" onclick="copyPhrase(this,'${p.replace(/'/g,"\\'")}' )">${p}</span>`).join('')}</div>
+    </div>`).join('');
+}
+function copyPhrase(el,text){
+  navigator.clipboard.writeText(text).catch(()=>{});
+  el.classList.add('copied');
+  const toast=document.getElementById('copy-toast');
+  toast.style.display='block';
+  setTimeout(()=>{el.classList.remove('copied');toast.style.display='none';},1500);
+}
+
+// Init
+renderPrompts();
+renderGrammar();
+renderVocab();
+renderPhrases();
+</script>
 </body>
 </html>
