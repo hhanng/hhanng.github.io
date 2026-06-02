@@ -6,23 +6,1479 @@
 <title>Agent #116 · Advanced FAANG Patterns Trainer</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px;max-width:520px;width:100%;text-align:center}
-.num{font-size:.8rem;font-weight:700;color:#38bdf8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-h1{font-size:1.6rem;font-weight:800;margin-bottom:12px;color:#f1f5f9}
-p{color:#94a3b8;font-size:.95rem;line-height:1.6;margin-bottom:24px}
-.badge{display:inline-block;background:#1d4ed8;color:#bfdbfe;font-size:.8rem;font-weight:700;padding:6px 16px;border-radius:99px;margin-bottom:28px}
-a.back{color:#38bdf8;text-decoration:none;font-size:.85rem;border:1px solid #334155;padding:8px 18px;border-radius:8px;display:inline-block;transition:background .15s}
-a.back:hover{background:#1e3a5f}
+:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#e2e8f0;--sub:#94a3b8;--accent:#38bdf8;--accent2:#7dd3fc;--green:#22c55e;--red:#ef4444;--orange:#f97316;--yellow:#eab308;--purple:#a78bfa}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:#0a1628;border-bottom:1px solid var(--border);padding:11px 20px;display:flex;align-items:center;gap:12px}
+.topbar .tag{font-size:.68rem;font-weight:700;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}
+.topbar h1{font-size:.95rem;font-weight:800}
+.back{margin-left:auto;font-size:.78rem;color:var(--sub);border:1px solid var(--border);padding:5px 12px;border-radius:6px;text-decoration:none;transition:background .15s}
+.back:hover{background:var(--card)}
+
+/* TABS */
+.tabs{display:flex;background:#0a1628;border-bottom:1px solid var(--border)}
+.tab-btn{padding:11px 22px;font-size:.86rem;font-weight:600;color:var(--sub);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;min-height:44px;white-space:nowrap}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+
+/* LIBRARY LAYOUT */
+.lib-layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 88px)}
+
+/* SIDEBAR */
+.sidebar{background:#0a1628;border-right:1px solid var(--border);padding:12px 8px;overflow-y:auto}
+.sidebar-title{font-size:.68rem;font-weight:700;color:var(--sub);letter-spacing:.1em;text-transform:uppercase;padding:4px 10px 10px}
+.pat-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:600;transition:background .15s;margin-bottom:2px;position:relative}
+.pat-item:hover{background:var(--card)}
+.pat-item.active{background:#0f2a3f;color:var(--accent)}
+.pat-icon{font-size:1rem;flex-shrink:0;width:22px;text-align:center}
+.pat-name{flex:1;line-height:1.3}
+.due-badge{background:var(--orange);color:#fff;font-size:.6rem;font-weight:700;padding:1px 5px;border-radius:99px;margin-left:auto;flex-shrink:0}
+
+/* DETAIL PANEL */
+.detail{padding:22px 24px;overflow-y:auto;max-height:calc(100vh - 88px)}
+.detail-header{margin-bottom:18px}
+.detail-title{font-size:1.3rem;font-weight:800;margin-bottom:8px}
+.trigger-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.trigger-badge{background:#0f2a3f;color:var(--accent);border:1px solid #1e4a6e;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:600}
+
+/* SVG DIAGRAM */
+.diagram-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center}
+.diagram-label{font-size:.7rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.diagram-wrap svg{max-width:100%;height:auto}
+
+/* CODE */
+.code-wrap{background:#020c1b;border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden}
+.code-header{background:var(--card);padding:8px 14px;font-size:.72rem;font-weight:700;color:var(--sub);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.copy-btn{background:none;border:1px solid var(--border);color:var(--sub);font-size:.7rem;padding:2px 8px;border-radius:4px;cursor:pointer;transition:all .15s}
+.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+pre{padding:16px;font-size:.8rem;line-height:1.7;overflow-x:auto;color:#a5f3fc;font-family:'Fira Code',monospace,sans-serif}
+
+/* COMPLEXITY */
+.cplx-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:.83rem}
+.cplx-table th{background:var(--card);padding:8px 12px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--sub);font-weight:700;border:1px solid var(--border)}
+.cplx-table td{padding:9px 12px;border:1px solid var(--border)}
+.cplx-table tr:nth-child(even) td{background:#0d1b2a}
+.better{color:var(--green);font-weight:700}
+.worse{color:var(--red)}
+
+/* PROBLEMS */
+.problems-section{margin-bottom:20px}
+.problems-title{font-size:.78rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.prob-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.82rem;font-weight:600;color:var(--text);cursor:pointer;transition:all .15s;margin:3px}
+.prob-btn:hover{border-color:var(--accent);color:var(--accent)}
+.prob-num{color:var(--accent);font-weight:800}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:680px;margin:auto;max-height:90vh;overflow-y:auto}
+.modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:10px}
+.modal-title{font-size:1rem;font-weight:800;line-height:1.4}
+.modal-close{background:none;border:none;color:var(--sub);font-size:1.5rem;cursor:pointer;flex-shrink:0;line-height:1}
+.modal-close:hover{color:var(--text)}
+.hint-btn{padding:6px 14px;background:#0f2a3f;border:1px solid #1e4a6e;color:var(--accent2);border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;margin-right:6px;margin-bottom:6px;transition:all .15s}
+.hint-btn:hover{background:#1e4a6e}
+.hint-box{background:#020c1b;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-top:8px;font-size:.83rem;line-height:1.6;display:none}
+.hint-box.show{display:block}
+.solution-wrap{margin-top:14px;display:none}
+.solution-wrap.show{display:block}
+.sol-label{font-size:.72rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.prob-statement{font-size:.88rem;line-height:1.6;color:var(--text);margin-bottom:14px;padding:12px;background:#020c1b;border-radius:8px;border:1px solid var(--border)}
+
+/* PLACEHOLDER TABS */
+.placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;color:var(--sub);text-align:center;gap:8px}
+.placeholder .big{font-size:2.5rem}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--accent);color:var(--text);padding:9px 16px;border-radius:8px;font-size:.82rem;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9999}
+.toast.show{opacity:1}
+
+/* SVG ANIMATIONS */
+@keyframes slideRight{0%{transform:translateX(0)}50%{transform:translateX(18px)}100%{transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes moveDown{0%{transform:translateY(0)}50%{transform:translateY(10px)}100%{transform:translateY(0)}}
+@keyframes expandR{0%{width:30px}50%{width:70px}100%{width:30px}}
+@keyframes rotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{fill:#38bdf8}50%{fill:#0f172a}}
+@keyframes flowDown{0%{transform:translateY(-6px);opacity:0}100%{transform:translateY(6px);opacity:1}}
+@keyframes sweep{0%{transform:translateX(0)}100%{transform:translateX(160px)}}
+@keyframes popIn{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+@keyframes arrowPulse{0%,100%{stroke:#38bdf8}50%{stroke:#f97316}}
+
+@media(max-width:700px){
+  .lib-layout{grid-template-columns:1fr}
+  .sidebar{max-height:180px;overflow-x:auto;overflow-y:hidden;display:flex;flex-direction:row;flex-wrap:nowrap;padding:8px;gap:6px;border-right:none;border-bottom:1px solid var(--border)}
+  .sidebar-title{display:none}
+  .pat-item{flex-shrink:0;padding:7px 10px;border-radius:99px;margin-bottom:0}
+  .pat-name{white-space:nowrap}
+  .detail{max-height:none}
+}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="num">Agent #116 · 100 AI Agents Challenge</div>
-  <h1>Advanced FAANG Patterns Trainer</h1>
-  <p>20 advanced coding patterns, 100 problems, animated diagrams, pattern quiz, timed challenges.</p>
-  <div class="badge">🚧 Coming Soon</div><br>
-  <a href="/" class="back">← Back to Portfolio</a>
+
+<div class="topbar">
+  <div>
+    <div class="tag">Agent #116 · 100 AI Agents</div>
+    <h1>⚡ Advanced FAANG Patterns Trainer</h1>
+  </div>
+  <a href="/" class="back">← Portfolio</a>
 </div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('library')">📚 Pattern Library</button>
+  <button class="tab-btn" onclick="switchTab('challenge')">⏱ Timed Challenge</button>
+  <button class="tab-btn" onclick="switchTab('quiz')">🧠 Pattern Quiz</button>
+</div>
+
+<!-- ===== PATTERN LIBRARY ===== -->
+<div id="tab-library" class="tab-pane active">
+  <div class="lib-layout">
+    <div class="sidebar">
+      <div class="sidebar-title">20 Patterns</div>
+      <div id="sidebar-list"></div>
+    </div>
+    <div class="detail" id="detail-panel">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;color:var(--sub);gap:8px">
+        <div style="font-size:2.5rem">⚡</div>
+        <div style="font-weight:700">Select a pattern to begin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TIMED CHALLENGE ===== -->
+<div id="tab-challenge" class="tab-pane">
+  <div class="placeholder"><div class="big">⏱</div><div style="font-weight:700;font-size:1.1rem">Timed Challenge</div><div>Coming in next build</div></div>
+</div>
+
+<!-- ===== QUIZ ===== -->
+<div id="tab-quiz" class="tab-pane">
+  <div class="placeholder"><div class="big">🧠</div><div style="font-weight:700;font-size:1.1rem">Pattern Quiz</div><div>Coming in next build</div></div>
+</div>
+
+<!-- PROBLEM MODAL -->
+<div class="overlay" id="prob-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-prob-title"></div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="prob-statement" id="modal-prob-stmt"></div>
+    <div style="margin-bottom:10px">
+      <button class="hint-btn" onclick="showHint(0)">💡 Hint 1</button>
+      <button class="hint-btn" onclick="showHint(1)">💡 Hint 2</button>
+      <button class="hint-btn" onclick="showHint(2)">💡 Hint 3</button>
+      <button class="hint-btn" onclick="showSolution()" style="background:#14532d;border-color:#16a34a;color:#86efac">✓ Solution</button>
+    </div>
+    <div class="hint-box" id="hint-0"></div>
+    <div class="hint-box" id="hint-1"></div>
+    <div class="hint-box" id="hint-2"></div>
+    <div class="solution-wrap" id="sol-wrap">
+      <div class="sol-label">Python Solution</div>
+      <div class="code-wrap"><pre id="modal-sol"></pre></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== PATTERNS DATA =====================
+const PATTERNS = [
+{
+  id:1, icon:"📊", name:"Monotonic Stack",
+  triggers:["next greater","previous smaller","largest rectangle","span","temperature"],
+  template:`stack = []
+for i, val in enumerate(nums):
+    while stack and nums[stack[-1]] < val:
+        idx = stack.pop()
+        # process popped index (found answer for idx)
+    stack.append(i)
+# Remaining items in stack have no answer`,
+  time:"O(n)", space:"O(n)", bruteTime:"O(n²)", bruteSpace:"O(1)",
+  problems:[
+    {title:"Next Greater Element",
+     stmt:"For each element in nums1, find its next greater element in nums2. If none, return -1.",
+     hints:["Iterate right-to-left or left-to-right maintaining a decreasing stack.","Pop from stack while top ≤ current value; top is the 'next greater' for popped elements.","Store answers in a hashmap keyed by value."],
+     sol:`def nextGreaterElement(nums1, nums2):
+    stack, nge = [], {}
+    for n in nums2:
+        while stack and stack[-1] < n:
+            nge[stack.pop()] = n
+        stack.append(n)
+    for n in stack:
+        nge[n] = -1
+    return [nge[n] for n in nums1]`},
+    {title:"Daily Temperatures",
+     stmt:"Given daily temperatures, return how many days until a warmer temperature for each day.",
+     hints:["Use a stack of indices, not values.","When you find a warmer day, pop and record the gap.","Remaining in stack never get a warmer day → 0."],
+     sol:`def dailyTemperatures(T):
+    res, stack = [0]*len(T), []
+    for i, t in enumerate(T):
+        while stack and T[stack[-1]] < t:
+            j = stack.pop()
+            res[j] = i - j
+        stack.append(i)
+    return res`},
+    {title:"Largest Rectangle in Histogram",
+     stmt:"Find the largest rectangle area in a histogram given bar heights.",
+     hints:["For each bar, find the nearest shorter bar on left and right.","Monotonic stack gives you these boundaries in O(n).","Area = height × (right_boundary - left_boundary - 1)."],
+     sol:`def largestRectangleArea(heights):
+    heights.append(0)
+    stack, max_area = [-1], 0
+    for i, h in enumerate(heights):
+        while stack[-1] != -1 and heights[stack[-1]] >= h:
+            height = heights[stack.pop()]
+            width = i - stack[-1] - 1
+            max_area = max(max_area, height * width)
+        stack.append(i)
+    return max_area`},
+    {title:"Trapping Rain Water",
+     stmt:"Given elevation heights, compute how much water can be trapped between bars.",
+     hints:["Two-pointer approach: track left_max and right_max.","Water at index i = min(left_max, right_max) - height[i].","Alternatively, use a stack to find bounded valleys."],
+     sol:`def trap(height):
+    l, r = 0, len(height)-1
+    lmax = rmax = water = 0
+    while l < r:
+        if height[l] < height[r]:
+            lmax = max(lmax, height[l])
+            water += lmax - height[l]; l += 1
+        else:
+            rmax = max(rmax, height[r])
+            water += rmax - height[r]; r -= 1
+    return water`},
+    {title:"Remove K Digits",
+     stmt:"Remove k digits from a number string to make the smallest possible number.",
+     hints:["Maintain a monotonic increasing stack of digits.","Pop from stack when current digit < top (and k > 0).","Handle leading zeros and remaining k in cleanup."],
+     sol:`def removeKdigits(num, k):
+    stack = []
+    for d in num:
+        while k and stack and stack[-1] > d:
+            stack.pop(); k -= 1
+        stack.append(d)
+    stack = stack[:-k] if k else stack
+    return ''.join(stack).lstrip('0') or '0'`}
+  ]
+},
+{
+  id:2, icon:"🪟", name:"Sliding Window Variable",
+  triggers:["longest substring","minimum window","at most K","fruit baskets","permutation"],
+  template:`l, counts = 0, {}
+for r, val in enumerate(s):
+    counts[val] = counts.get(val, 0) + 1
+    while invalid(counts):   # shrink until valid
+        counts[s[l]] -= 1
+        if counts[s[l]] == 0: del counts[s[l]]
+        l += 1
+    result = max(result, r - l + 1)`,
+  time:"O(n)", space:"O(k)", bruteTime:"O(n²)", bruteSpace:"O(k)",
+  problems:[
+    {title:"Longest Substring with K Distinct",
+     stmt:"Find the length of the longest substring containing at most K distinct characters.",
+     hints:["Expand right, shrink left when distinct chars > K.","Use a frequency map; shrink until len(map) ≤ K.","Window size r-l+1 is candidate answer."],
+     sol:`def lengthOfLongestSubstringKDistinct(s, k):
+    l, freq, res = 0, {}, 0
+    for r, c in enumerate(s):
+        freq[c] = freq.get(c, 0) + 1
+        while len(freq) > k:
+            freq[s[l]] -= 1
+            if not freq[s[l]]: del freq[s[l]]
+            l += 1
+        res = max(res, r - l + 1)
+    return res`},
+    {title:"Minimum Window Substring",
+     stmt:"Find the minimum window in s that contains all characters of t.",
+     hints:["Track need dict and have dict (characters satisfied).","Expand right, shrink left when all chars satisfied.","Track minimum window by (start, length) when formed == required."],
+     sol:`def minWindow(s, t):
+    need = {}
+    for c in t: need[c] = need.get(c,0)+1
+    have, req = {}, len(need)
+    formed = l = 0; ans = ""
+    for r, c in enumerate(s):
+        have[c] = have.get(c,0)+1
+        if c in need and have[c] == need[c]: formed += 1
+        while formed == req:
+            if not ans or r-l+1 < len(ans): ans = s[l:r+1]
+            have[s[l]] -= 1
+            if s[l] in need and have[s[l]] < need[s[l]]: formed -= 1
+            l += 1
+    return ans`},
+    {title:"Fruit Into Baskets",
+     stmt:"Pick fruit from trees into 2 baskets, each holding one type. Maximize total fruit picked.",
+     hints:["This is 'longest subarray with at most 2 distinct values'.","Use sliding window with frequency map.","Shrink when distinct types > 2."],
+     sol:`def totalFruit(fruits):
+    l, basket, res = 0, {}, 0
+    for r, f in enumerate(fruits):
+        basket[f] = basket.get(f,0)+1
+        while len(basket) > 2:
+            basket[fruits[l]] -= 1
+            if not basket[fruits[l]]: del basket[fruits[l]]
+            l += 1
+        res = max(res, r-l+1)
+    return res`},
+    {title:"Longest Repeating Character Replacement",
+     stmt:"Replace at most k characters in a string. Find the longest substring with all same character.",
+     hints:["Track max frequency character in window.","Window is valid if window_size - max_freq ≤ k.","Never shrink window past its historical maximum size."],
+     sol:`def characterReplacement(s, k):
+    l, freq, maxf, res = 0, {}, 0, 0
+    for r, c in enumerate(s):
+        freq[c] = freq.get(c,0)+1
+        maxf = max(maxf, freq[c])
+        if (r-l+1) - maxf > k:
+            freq[s[l]] -= 1; l += 1
+        res = max(res, r-l+1)
+    return res`},
+    {title:"Permutation in String",
+     stmt:"Check if any permutation of s1 is a substring of s2.",
+     hints:["Fixed window of size len(s1).","Compare character frequency maps.","Slide window over s2, updating counts incrementally."],
+     sol:`def checkInclusion(s1, s2):
+    n1, n2 = len(s1), len(s2)
+    if n1 > n2: return False
+    need = [0]*26
+    for c in s1: need[ord(c)-97] += 1
+    have = [0]*26
+    for i,c in enumerate(s2):
+        have[ord(c)-97] += 1
+        if i >= n1: have[ord(s2[i-n1])-97] -= 1
+        if have == need: return True
+    return False`}
+  ]
+},
+{
+  id:3, icon:"🔗", name:"Union Find",
+  triggers:["connected components","merge groups","cycle detection","friends","accounts"],
+  template:`parent = list(range(n))
+rank = [0] * n
+
+def find(x):
+    if parent[x] != x:
+        parent[x] = find(parent[x])  # path compression
+    return parent[x]
+
+def union(x, y):
+    px, py = find(x), find(y)
+    if px == py: return False  # already connected
+    if rank[px] < rank[py]: px, py = py, px
+    parent[py] = px
+    if rank[px] == rank[py]: rank[px] += 1
+    return True`,
+  time:"O(α(n)) per op", space:"O(n)", bruteTime:"O(n)", bruteSpace:"O(n)",
+  problems:[
+    {title:"Number of Islands II",
+     stmt:"Dynamically add land cells to a grid; after each addition return number of islands.",
+     hints:["Use Union Find on grid coordinates mapped to 1D index.","When adding land, union with adjacent land cells.","Count components by tracking how many roots have no parent."],
+     sol:`def numIslands2(m, n, positions):
+    parent = {}
+    def find(x):
+        if parent[x] != x: parent[x] = find(parent[x])
+        return parent[x]
+    def union(x, y):
+        px, py = find(x), find(y)
+        if px != py: parent[px] = py; return True
+        return False
+    count, res = 0, []
+    for r, c in positions:
+        if (r,c) not in parent:
+            parent[(r,c)] = (r,c); count += 1
+            for dr,dc in [(-1,0),(1,0),(0,-1),(0,1)]:
+                nb = (r+dr, c+dc)
+                if nb in parent and union((r,c), nb): count -= 1
+        res.append(count)
+    return res`},
+    {title:"Redundant Connection",
+     stmt:"Find the last edge that can be removed to make a tree (remove a cycle edge).",
+     hints:["Process edges one by one, union their endpoints.","If two nodes are already connected (same root), this edge is redundant.","Return the first such edge found."],
+     sol:`def findRedundantConnection(edges):
+    parent = list(range(len(edges)+1))
+    def find(x):
+        while parent[x] != x: parent[x] = parent[parent[x]]; x = parent[x]
+        return x
+    for u, v in edges:
+        pu, pv = find(u), find(v)
+        if pu == pv: return [u, v]
+        parent[pu] = pv`},
+    {title:"Friend Circles",
+     stmt:"Given an NxN friendship matrix, find the number of friend circles.",
+     hints:["Union all friends of each person.","Count distinct roots after all unions.","Path compression makes this very fast."],
+     sol:`def findCircleNum(M):
+    n = len(M)
+    parent = list(range(n))
+    def find(x):
+        if parent[x]!=x: parent[x]=find(parent[x])
+        return parent[x]
+    for i in range(n):
+        for j in range(i+1,n):
+            if M[i][j]: parent[find(i)] = find(j)
+    return sum(parent[i]==i for i in range(n))`},
+    {title:"Accounts Merge",
+     stmt:"Merge accounts that share at least one common email address.",
+     hints:["Map each email to an account index; union accounts sharing emails.","After all unions, group emails by their root account.","Sort emails per group and format output."],
+     sol:`def accountsMerge(accounts):
+    parent = list(range(len(accounts)))
+    def find(x):
+        if parent[x]!=x: parent[x]=find(parent[x])
+        return parent[x]
+    email_acc = {}
+    for i, acc in enumerate(accounts):
+        for e in acc[1:]:
+            if e in email_acc: parent[find(i)] = find(email_acc[e])
+            else: email_acc[e] = i
+    groups = {}
+    for e, i in email_acc.items():
+        groups.setdefault(find(i), set()).add(e)
+    return [[accounts[i][0]] + sorted(emails) for i, emails in groups.items()]`},
+    {title:"Satisfiability of Equality Equations",
+     stmt:"Given equations like a==b and a!=b, determine if all are satisfiable.",
+     hints:["Process all == equations first to union connected variables.","Then verify != equations: if two sides have same root, contradiction.","26 variables max (lowercase letters)."],
+     sol:`def equationsPossible(equations):
+    parent = list(range(26))
+    def find(x):
+        if parent[x]!=x: parent[x]=find(parent[x])
+        return parent[x]
+    for eq in equations:
+        if eq[1]=='=':
+            parent[find(ord(eq[0])-97)] = find(ord(eq[3])-97)
+    for eq in equations:
+        if eq[1]=='!' and find(ord(eq[0])-97)==find(ord(eq[3])-97):
+            return False
+    return True`}
+  ]
+},
+{
+  id:4, icon:"🌳", name:"Segment Tree",
+  triggers:["range query","range update","mutable array","count smaller","calendar"],
+  template:`tree = [0] * (4 * n)
+
+def update(node, start, end, idx, val):
+    if start == end:
+        tree[node] = val
+    else:
+        mid = (start + end) // 2
+        if idx <= mid: update(2*node, start, mid, idx, val)
+        else:          update(2*node+1, mid+1, end, idx, val)
+        tree[node] = tree[2*node] + tree[2*node+1]
+
+def query(node, start, end, l, r):
+    if r < start or end < l: return 0
+    if l <= start and end <= r: return tree[node]
+    mid = (start + end) // 2
+    return query(2*node,start,mid,l,r) + query(2*node+1,mid+1,end,l,r)`,
+  time:"O(log n) per op", space:"O(n)", bruteTime:"O(n)", bruteSpace:"O(1)",
+  problems:[
+    {title:"Range Sum Query Mutable",
+     stmt:"Support point updates and range sum queries on a mutable array.",
+     hints:["Build segment tree of sums bottom-up.","Update propagates changes up to root.","Query splits at mid to cover [l,r]."],
+     sol:`class NumArray:
+    def __init__(self, nums):
+        self.n = len(nums)
+        self.tree = [0] * (2 * self.n)
+        for i, v in enumerate(nums): self.tree[self.n+i] = v
+        for i in range(self.n-1,0,-1): self.tree[i]=self.tree[2*i]+self.tree[2*i+1]
+    def update(self, i, v):
+        i += self.n; self.tree[i] = v; i //= 2
+        while i: self.tree[i]=self.tree[2*i]+self.tree[2*i+1]; i //= 2
+    def sumRange(self, l, r):
+        l += self.n; r += self.n + 1; s = 0
+        while l < r:
+            if l&1: s += self.tree[l]; l += 1
+            if r&1: r -= 1; s += self.tree[r]
+            l //= 2; r //= 2
+        return s`},
+    {title:"Range Minimum Query",
+     stmt:"Build a structure supporting range minimum queries on a static array.",
+     hints:["Sparse table gives O(1) query with O(n log n) preprocessing.","Or use segment tree with min instead of sum.","For static arrays, sparse table is optimal."],
+     sol:`def buildSparseTable(arr):
+    n = len(arr); LOG = n.bit_length()
+    sp = [arr[:]]
+    for j in range(1, LOG):
+        sp.append([min(sp[j-1][i], sp[j-1][i+(1<<(j-1))])
+                   for i in range(n-(1<<j)+1)])
+    return sp
+
+def query(sp, l, r):
+    k = (r-l+1).bit_length()-1
+    return min(sp[k][l], sp[k][r-(1<<k)+1])`},
+    {title:"Count of Smaller Numbers After Self",
+     stmt:"For each element, count how many elements to its right are smaller.",
+     hints:["Process right-to-left, querying how many smaller have been inserted.","Coordinate compress values then use segment tree of counts.","query(0, val-1) gives count of smaller elements inserted so far."],
+     sol:`def countSmaller(nums):
+    offset = min(nums); vals = [v-offset for v in nums]
+    M = max(vals)+1; tree = [0]*(M+1)
+    def update(i):
+        i+=1
+        while i<=M: tree[i]+=1; i+=i&(-i)
+    def query(i):
+        i+=1; s=0
+        while i>0: s+=tree[i]; i-=i&(-i)
+        return s
+    res = []
+    for v in reversed(vals):
+        res.append(query(v-1) if v>0 else 0)
+        update(v)
+    return res[::-1]`},
+    {title:"My Calendar III",
+     stmt:"Find the max k-booking: maximum number of overlapping events at any point.",
+     hints:["Use a segment tree with lazy propagation for range add.","Alternatively, use a sorted events dict with difference array.","difference[start]+=1, difference[end]-=1, find running max."],
+     sol:`from sortedcontainers import SortedDict
+class MyCalendarThree:
+    def __init__(self): self.diff = SortedDict()
+    def book(self, s, e):
+        self.diff[s] = self.diff.get(s,0)+1
+        self.diff[e] = self.diff.get(e,0)-1
+        cur = ans = 0
+        for v in self.diff.values():
+            cur += v; ans = max(ans, cur)
+        return ans`},
+    {title:"Rectangle Area II",
+     stmt:"Compute total area covered by a set of axis-aligned rectangles (with overlaps counted once).",
+     hints:["Sweep line + segment tree with coordinate compression.","Events: add/remove rectangles at their x-boundaries.","Segment tree tracks covered length on y-axis."],
+     sol:`def rectangleArea(rectangles):
+    MOD = 10**9+7
+    ys = sorted(set(y for _,y1,_,y2 in rectangles for y in [y1,y2]))
+    yi = {y:i for i,y in enumerate(ys)}
+    events = []
+    for x1,y1,x2,y2 in rectangles:
+        events += [(x1,1,y1,y2),(x2,-1,y1,y2)]
+    events.sort()
+    cnt=[0]*(len(ys)-1); res=prev_x=0
+    for x,t,y1,y2 in events:
+        res=(res+(x-prev_x)*sum(ys[i+1]-ys[i] for i in range(len(cnt)) if cnt[i]))%MOD
+        for i in range(yi[y1],yi[y2]): cnt[i]+=t
+        prev_x=x
+    return res`}
+  ]
+},
+{
+  id:5, icon:"🔤", name:"Trie Advanced",
+  triggers:["prefix search","autocomplete","word search","stream","dictionary"],
+  template:`class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.end = False
+        self.count = 0  # words passing through
+
+class Trie:
+    def __init__(self): self.root = TrieNode()
+
+    def insert(self, word):
+        node = self.root
+        for c in word:
+            node = node.children.setdefault(c, TrieNode())
+            node.count += 1
+        node.end = True
+
+    def search(self, word):
+        node = self.root
+        for c in word:
+            if c not in node.children: return False
+            node = node.children[c]
+        return node.end`,
+  time:"O(L) per op", space:"O(n·L)", bruteTime:"O(n·L)", bruteSpace:"O(n·L)",
+  problems:[
+    {title:"Word Search II",
+     stmt:"Find all words from a dictionary that exist in a 2D board (DFS + Trie).",
+     hints:["Insert all words into Trie, then DFS on board.","At each cell, follow Trie path; if node.end, word found.","Prune: if board char not in node.children, stop DFS."],
+     sol:`def findWords(board, words):
+    root = {}
+    for w in words:
+        node = root
+        for c in w: node = node.setdefault(c, {})
+        node['#'] = w
+    res, m, n = [], len(board), len(board[0])
+    def dfs(node, i, j):
+        c = board[i][j]
+        if c not in node: return
+        nxt = node[c]
+        if '#' in nxt: res.append(nxt.pop('#'))
+        board[i][j] = '#'
+        for di,dj in [(-1,0),(1,0),(0,-1),(0,1)]:
+            ni,nj=i+di,j+dj
+            if 0<=ni<m and 0<=nj<n: dfs(nxt,ni,nj)
+        board[i][j] = c
+    for i in range(m):
+        for j in range(n): dfs(root,i,j)
+    return res`},
+    {title:"Stream of Characters",
+     stmt:"Given a stream of characters, return true if any suffix forms a word in the dictionary.",
+     hints:["Insert reversed words into Trie.","Maintain a list of active Trie nodes; for each new char, advance all nodes.","Start new node from root for every character."],
+     sol:`class StreamChecker:
+    def __init__(self, words):
+        self.root = {}; self.stream = []
+        for w in words:
+            node = self.root
+            for c in reversed(w): node = node.setdefault(c,{})
+            node['#'] = True
+    def query(self, letter):
+        self.stream.append(letter)
+        node = self.root
+        for c in reversed(self.stream):
+            if c not in node: return False
+            node = node[c]
+            if '#' in node: return True
+        return False`},
+    {title:"Replace Words",
+     stmt:"Replace words in a sentence with their shortest root from a dictionary.",
+     hints:["Insert all roots into Trie.","For each word, traverse Trie and stop at first complete root.","If no root found, keep original word."],
+     sol:`def replaceWords(dictionary, sentence):
+    root = {}
+    for w in dictionary:
+        node = root
+        for c in w: node = node.setdefault(c,{})
+        node['#'] = True
+    def replace(word):
+        node = root
+        for i,c in enumerate(word):
+            if c not in node: return word
+            node = node[c]
+            if '#' in node: return word[:i+1]
+        return word
+    return ' '.join(replace(w) for w in sentence.split())`},
+    {title:"Map Sum Pairs",
+     stmt:"Insert key-value pairs into a map; return sum of values for all keys with a given prefix.",
+     hints:["Store sum at each Trie node (sum of all values in subtree).","On insert, if key exists, adjust delta = new_val - old_val.","Propagate delta up all nodes on the key's path."],
+     sol:`class MapSum:
+    def __init__(self): self.root={}; self.vals={}
+    def insert(self, key, val):
+        delta = val - self.vals.get(key,0)
+        self.vals[key] = val
+        node = self.root
+        for c in key:
+            if c not in node: node[c]={'#':0}
+            node = node[c]; node['#'] = node.get('#',0)+delta
+    def sum(self, prefix):
+        node = self.root
+        for c in prefix:
+            if c not in node: return 0
+            node = node[c]
+        return node.get('#',0)`},
+    {title:"Design Search Autocomplete",
+     stmt:"Design a system that returns top 3 historically searched sentences given a prefix.",
+     hints:["Trie where each node stores top-3 completions sorted by frequency.","On insert, update counts and re-sort top-3 lists along the path.","On search, traverse Trie and return node's top-3 list."],
+     sol:`class AutocompleteSystem:
+    def __init__(self, sentences, times):
+        self.root={}; self.freq={}; self.cur=""
+        for s,t in zip(sentences,times): self._insert(s,t)
+    def _insert(self,s,t):
+        self.freq[s]=self.freq.get(s,0)+t
+        node=self.root
+        for c in s:
+            if c not in node: node[c]={}
+            node=node[c]
+            top=node.get('$',[])
+            if s not in top: top.append(s)
+            top.sort(key=lambda x:(-self.freq[x],x))
+            node['$']=top[:3]
+    def input(self,c):
+        if c=='#': self._insert(self.cur,1); self.cur=""; return []
+        self.cur+=c; node=self.root
+        for ch in self.cur:
+            if ch not in node: return []
+            node=node[ch]
+        return node.get('$',[])`}
+  ]
+},
+{
+  id:6, icon:"📐", name:"Topological Sort",
+  triggers:["prerequisites","ordering","scheduling","DAG","alien language"],
+  template:`from collections import deque, defaultdict
+
+indegree = [0] * n
+graph = defaultdict(list)
+# Build graph from edges...
+
+queue = deque(i for i in range(n) if indegree[i] == 0)
+order = []
+while queue:
+    node = queue.popleft()
+    order.append(node)
+    for nei in graph[node]:
+        indegree[nei] -= 1
+        if indegree[nei] == 0:
+            queue.append(nei)
+
+# If len(order) != n → cycle exists`,
+  time:"O(V+E)", space:"O(V+E)", bruteTime:"O(V²)", bruteSpace:"O(V)",
+  problems:[
+    {title:"Course Schedule",
+     stmt:"Given n courses and prerequisites [a,b] meaning b before a, can you finish all courses?",
+     hints:["Model as directed graph; prerequisites are edges.","Topological sort (Kahn's BFS): detect cycle if order < n.","Or DFS: 3-color nodes (white/gray/black) to find back edges."],
+     sol:`def canFinish(n, prerequisites):
+    graph = [[] for _ in range(n)]
+    indegree = [0]*n
+    for a,b in prerequisites:
+        graph[b].append(a); indegree[a]+=1
+    from collections import deque
+    q = deque(i for i in range(n) if indegree[i]==0)
+    count = 0
+    while q:
+        node = q.popleft(); count+=1
+        for nei in graph[node]:
+            indegree[nei]-=1
+            if indegree[nei]==0: q.append(nei)
+    return count==n`},
+    {title:"Course Schedule II",
+     stmt:"Return a valid order to finish all courses, or [] if impossible.",
+     hints:["Same as Course Schedule but collect the BFS order.","Kahn's algorithm naturally produces topological order.","Return [] if cycle detected (order length < n)."],
+     sol:`def findOrder(n, prerequisites):
+    graph=[[]for _ in range(n)]; ind=[0]*n
+    for a,b in prerequisites: graph[b].append(a); ind[a]+=1
+    from collections import deque
+    q=deque(i for i in range(n) if ind[i]==0); order=[]
+    while q:
+        v=q.popleft(); order.append(v)
+        for u in graph[v]:
+            ind[u]-=1
+            if not ind[u]: q.append(u)
+    return order if len(order)==n else []`},
+    {title:"Alien Dictionary",
+     stmt:"Given words in alien language sorted lexicographically, find character ordering.",
+     hints:["Compare adjacent words to extract ordering constraints (edges).","Build a graph and run topological sort.","If a shorter word comes after a word it's a prefix of, invalid."],
+     sol:`def alienOrder(words):
+    graph={c:set() for w in words for c in w}
+    for i in range(len(words)-1):
+        a,b=words[i],words[i+1]; n=min(len(a),len(b))
+        if len(a)>len(b) and a[:n]==b[:n]: return ""
+        for j in range(n):
+            if a[j]!=b[j]: graph[a[j]].add(b[j]); break
+    seen={}; res=[]
+    def dfs(c):
+        if c in seen: return seen[c]==False
+        seen[c]=False
+        for nei in graph[c]:
+            if dfs(nei): return True
+        seen[c]=True; res.append(c); return False
+    if any(dfs(c) for c in graph): return ""
+    return ''.join(res[::-1])`},
+    {title:"Sequence Reconstruction",
+     stmt:"Determine if org is the only shortest supersequence reconstructed from seqs.",
+     hints:["Build graph from seqs; check if org's order is the unique topo order.","At each BFS step, queue must have exactly 1 node (unique ordering).","Also verify org contains all elements and has same length."],
+     sol:`def sequenceReconstruction(org, seqs):
+    graph={}; ind={}
+    for seq in seqs:
+        for v in seq: graph.setdefault(v,set()); ind.setdefault(v,0)
+        for a,b in zip(seq,seq[1:]):
+            if b not in graph[a]: graph[a].add(b); ind[b]=ind.get(b,0)+1
+    from collections import deque
+    q=deque(v for v in ind if ind[v]==0); order=[]
+    while q:
+        if len(q)>1: return False
+        v=q.popleft(); order.append(v)
+        for u in graph[v]:
+            ind[u]-=1
+            if not ind[u]: q.append(u)
+    return order==org`},
+    {title:"Minimum Height Trees",
+     stmt:"Find all roots of minimum height trees in an undirected graph.",
+     hints:["Think topologically: repeatedly trim leaf nodes inward.","Like peeling an onion — the last 1-2 nodes are the roots.","Stop when ≤ 2 nodes remain."],
+     sol:`def findMinHeightTrees(n, edges):
+    if n==1: return [0]
+    graph=[set() for _ in range(n)]
+    for a,b in edges: graph[a].add(b); graph[b].add(a)
+    leaves=[i for i in range(n) if len(graph[i])==1]
+    while n>2:
+        n-=len(leaves); new=[]
+        for leaf in leaves:
+            nb=graph[leaf].pop()
+            graph[nb].remove(leaf)
+            if len(graph[nb])==1: new.append(nb)
+        leaves=new
+    return leaves`}
+  ]
+},
+{
+  id:7, icon:"💻", name:"Bit Manipulation",
+  triggers:["single number","power of 2","count bits","XOR trick","bitmask"],
+  template:`# XOR tricks: a^a=0, a^0=a, XOR is commutative & associative
+# Check bit k:      n & (1 << k)
+# Set bit k:        n | (1 << k)
+# Clear bit k:      n & ~(1 << k)
+# Toggle bit k:     n ^ (1 << k)
+# Count set bits:   bin(n).count('1')  or Brian Kernighan: n&(n-1)
+# Lowest set bit:   n & (-n)
+# Power of 2:       n > 0 and (n & (n-1)) == 0
+# XOR all: single number appearing odd times`,
+  time:"O(1) or O(log n)", space:"O(1)", bruteTime:"O(n)", bruteSpace:"O(n)",
+  problems:[
+    {title:"Single Number",
+     stmt:"Every element appears twice except one. Find it in O(n) time O(1) space.",
+     hints:["XOR of identical numbers is 0.","XOR of all elements cancels duplicates, leaving the single number.","No extra space needed."],
+     sol:`def singleNumber(nums):
+    res = 0
+    for n in nums: res ^= n
+    return res`},
+    {title:"Single Number II",
+     stmt:"Every element appears three times except one. Find it in O(n) O(1).",
+     hints:["Track each bit position's count mod 3.","Use two bitmasks: ones and twos.","When a bit appears in twos already, it resets (3rd time)."],
+     sol:`def singleNumber(nums):
+    ones = twos = 0
+    for n in nums:
+        ones = (ones ^ n) & ~twos
+        twos = (twos ^ n) & ~ones
+    return ones`},
+    {title:"Counting Bits",
+     stmt:"Return array where ans[i] = number of 1 bits in i, for i in [0,n].",
+     hints:["ans[i] = ans[i >> 1] + (i & 1).","Rightshift removes last bit; add 1 if last bit was set.","O(n) DP, no loop over bits per number."],
+     sol:`def countBits(n):
+    dp = [0] * (n+1)
+    for i in range(1, n+1):
+        dp[i] = dp[i>>1] + (i&1)
+    return dp`},
+    {title:"Reverse Bits",
+     stmt:"Reverse the bits of a 32-bit unsigned integer.",
+     hints:["Extract last bit with n&1, add to result, shift both.","Repeat 32 times.","Or use bit-reversal via successive halvings."],
+     sol:`def reverseBits(n):
+    res = 0
+    for _ in range(32):
+        res = (res<<1) | (n&1)
+        n >>= 1
+    return res`},
+    {title:"Number of 1 Bits",
+     stmt:"Count the number of set bits (Hamming weight) of a positive integer.",
+     hints:["Brian Kernighan: n & (n-1) clears the lowest set bit.","Count how many times until n becomes 0.","Or use bin(n).count('1')."],
+     sol:`def hammingWeight(n):
+    count = 0
+    while n:
+        n &= n-1  # clear lowest set bit
+        count += 1
+    return count`}
+  ]
+},
+{
+  id:8, icon:"⚖️", name:"Two Heaps",
+  triggers:["median","balance two groups","schedule","running stats","IPO"],
+  template:`import heapq
+
+small = []  # max-heap (store negated values)
+large = []  # min-heap
+
+def addNum(num):
+    heapq.heappush(small, -num)
+    # Balance: move largest of small to large
+    heapq.heappush(large, -heapq.heappop(small))
+    # Keep small size >= large size
+    if len(large) > len(small):
+        heapq.heappush(small, -heapq.heappop(large))
+
+def findMedian():
+    if len(small) > len(large): return -small[0]
+    return (-small[0] + large[0]) / 2`,
+  time:"O(log n) add, O(1) median", space:"O(n)", bruteTime:"O(n) median", bruteSpace:"O(n)",
+  problems:[
+    {title:"Find Median from Data Stream",
+     stmt:"Design a data structure supporting addNum and findMedian in O(log n) and O(1).",
+     hints:["Small = max-heap for lower half; large = min-heap for upper half.","Always keep |len(small) - len(large)| <= 1.","Median is top of small (odd count) or average of both tops."],
+     sol:`import heapq
+class MedianFinder:
+    def __init__(self): self.small=[]; self.large=[]
+    def addNum(self,num):
+        heapq.heappush(self.small,-num)
+        heapq.heappush(self.large,-heapq.heappop(self.small))
+        if len(self.large)>len(self.small):
+            heapq.heappush(self.small,-heapq.heappop(self.large))
+    def findMedian(self):
+        if len(self.small)>len(self.large): return -self.small[0]
+        return (-self.small[0]+self.large[0])/2`},
+    {title:"Sliding Window Median",
+     stmt:"Find the median of every window of size k as it slides through the array.",
+     hints:["Maintain two heaps but also support deletion.","Use lazy deletion: track to-delete set, pop when top is in set.","Rebalance after each add/remove operation."],
+     sol:`import heapq
+def medianSlidingWindow(nums, k):
+    small, large = [], []  # max-heap, min-heap
+    def add(n):
+        heapq.heappush(small,-n)
+        heapq.heappush(large,-heapq.heappop(small))
+        if len(large)>len(small): heapq.heappush(small,-heapq.heappop(large))
+    removed={}
+    def remove(n):
+        removed[n]=removed.get(n,0)+1
+        if n<=-small[0]: rebalance(small,large)
+        else: rebalance(large,small)
+    def rebalance(h,other): pass  # simplified; full solution uses lazy deletion
+    for n in nums[:k]: add(n)
+    res=[]
+    for i in range(k,len(nums)+1):
+        res.append(-small[0] if k%2 else (-small[0]+large[0])/2)
+        if i<len(nums): add(nums[i]); # remove nums[i-k]
+    return res`},
+    {title:"IPO",
+     stmt:"Choose at most k projects to maximize capital. Each project has profit and required capital.",
+     hints:["Sort projects by capital requirement.","Use max-heap of profits for currently affordable projects.","Each round: add newly affordable profits, pick max."],
+     sol:`import heapq
+def findMaximizedCapital(k, w, profits, capital):
+    projects = sorted(zip(capital, profits))
+    max_heap, i = [], 0
+    for _ in range(k):
+        while i < len(projects) and projects[i][0] <= w:
+            heapq.heappush(max_heap, -projects[i][1]); i+=1
+        if not max_heap: break
+        w += -heapq.heappop(max_heap)
+    return w`},
+    {title:"Task Scheduler",
+     stmt:"Schedule tasks (with cooldown n) to minimize total time.",
+     hints:["Greedy: always process most frequent available task.","Use max-heap of frequencies; cooldown tracked with a queue.","Formula shortcut: max(len(tasks), (max_freq-1)*(n+1)+count_of_max_freq)."],
+     sol:`from collections import Counter
+import heapq, collections
+def leastInterval(tasks, n):
+    freq = Counter(tasks)
+    heap = [-f for f in freq.values()]
+    heapq.heapify(heap)
+    q = collections.deque()  # (freq, available_at)
+    time = 0
+    while heap or q:
+        time += 1
+        if heap: cnt = 1+heapq.heappop(heap)
+        else: cnt = 0
+        if cnt: q.append((cnt, time+n))
+        if q and q[0][1]==time: heapq.heappush(heap, q.popleft()[0])
+    return time`},
+    {title:"Ugly Number II",
+     stmt:"Find the nth number whose only prime factors are 2, 3, and 5.",
+     hints:["Maintain three pointers i2,i3,i5 into ugly array.","Next ugly = min(ugly[i2]*2, ugly[i3]*3, ugly[i5]*5).","Advance pointer(s) whose product equaled next_ugly."],
+     sol:`def nthUglyNumber(n):
+    ugly=[1]; i2=i3=i5=0
+    while len(ugly)<n:
+        n2,n3,n5=ugly[i2]*2,ugly[i3]*3,ugly[i5]*5
+        m=min(n2,n3,n5); ugly.append(m)
+        if m==n2: i2+=1
+        if m==n3: i3+=1
+        if m==n5: i5+=1
+    return ugly[-1]`}
+  ]
+},
+{
+  id:9, icon:"🔀", name:"K-Way Merge",
+  triggers:["K sorted lists","smallest from multiple","external sort","kth element","pairs"],
+  template:`import heapq
+
+# Initialize heap with first element of each list
+heap = []
+for i, lst in enumerate(lists):
+    if lst:
+        heapq.heappush(heap, (lst[0], i, 0))
+
+result = []
+while heap:
+    val, list_idx, elem_idx = heapq.heappop(heap)
+    result.append(val)
+    if elem_idx + 1 < len(lists[list_idx]):
+        nxt = lists[list_idx][elem_idx + 1]
+        heapq.heappush(heap, (nxt, list_idx, elem_idx + 1))`,
+  time:"O(n log k)", space:"O(k)", bruteTime:"O(n log n)", bruteSpace:"O(n)",
+  problems:[
+    {title:"Merge K Sorted Lists",
+     stmt:"Merge k sorted linked lists into one sorted list.",
+     hints:["Push first node of each list into min-heap.","Pop min, append to result, push next node from same list.","O(n log k) where n = total nodes."],
+     sol:`import heapq
+def mergeKLists(lists):
+    heap=[]; dummy=cur=ListNode(0)
+    for i,h in enumerate(lists):
+        if h: heapq.heappush(heap,(h.val,i,h))
+    while heap:
+        v,i,node=heapq.heappop(heap)
+        cur.next=node; cur=cur.next
+        if node.next: heapq.heappush(heap,(node.next.val,i,node.next))
+    return dummy.next`},
+    {title:"Kth Smallest in Sorted Matrix",
+     stmt:"Find kth smallest element in n×n matrix where rows and columns are sorted.",
+     hints:["Binary search on value range [matrix[0][0], matrix[n-1][n-1]].","Count elements ≤ mid to determine if kth is in left or right half.","Or K-way merge on rows using a min-heap."],
+     sol:`import heapq
+def kthSmallest(matrix, k):
+    n=len(matrix)
+    heap=[(matrix[i][0],i,0) for i in range(n)]
+    heapq.heapify(heap); res=0
+    for _ in range(k):
+        res,i,j=heapq.heappop(heap)
+        if j+1<n: heapq.heappush(heap,(matrix[i][j+1],i,j+1))
+    return res`},
+    {title:"Find K Pairs Smallest Sums",
+     stmt:"Given two sorted arrays, find k pairs (u,v) with smallest sums.",
+     hints:["Initialize heap with (nums1[i]+nums2[0], i, 0) for all i.","Pop min pair, push (i, j+1) as next candidate from same nums1[i].","Limit initial heap to min(k, len(nums1)) entries."],
+     sol:`import heapq
+def kSmallestPairs(nums1, nums2, k):
+    if not nums1 or not nums2: return []
+    heap=[(nums1[i]+nums2[0],i,0) for i in range(min(k,len(nums1)))]
+    heapq.heapify(heap); res=[]
+    while heap and len(res)<k:
+        s,i,j=heapq.heappop(heap); res.append([nums1[i],nums2[j]])
+        if j+1<len(nums2): heapq.heappush(heap,(nums1[i]+nums2[j+1],i,j+1))
+    return res`},
+    {title:"Smallest Range Covering Elements",
+     stmt:"Find smallest range [a,b] such that at least one element from each of k lists lies in it.",
+     hints:["Put first element of each list in heap; track current max.","Range is [heap_min, current_max]; advance min's list.","Stop when any list is exhausted."],
+     sol:`import heapq
+def smallestRange(nums):
+    heap=[(lst[0],i,0) for i,lst in enumerate(nums)]
+    heapq.heapify(heap)
+    cur_max=max(lst[0] for lst in nums)
+    res=(-10**5,10**5)
+    while heap:
+        cur_min,i,j=heapq.heappop(heap)
+        if cur_max-cur_min<res[1]-res[0]: res=(cur_min,cur_max)
+        if j+1==len(nums[i]): break
+        nxt=nums[i][j+1]
+        heapq.heappush(heap,(nxt,i,j+1))
+        cur_max=max(cur_max,nxt)
+    return list(res)`},
+    {title:"External Sort Simulation",
+     stmt:"Given chunks of sorted data too large to fit in memory, merge them into one sorted output.",
+     hints:["Classic external merge sort: K-way merge of sorted runs.","Use min-heap of size k, one entry per sorted chunk.","Simulate with k sorted arrays as 'disk chunks'."],
+     sol:`import heapq
+def externalSort(chunks):
+    # chunks = list of sorted lists (simulating disk runs)
+    heap = []
+    iterators = [iter(chunk) for chunk in chunks]
+    for i, it in enumerate(iterators):
+        val = next(it, None)
+        if val is not None: heapq.heappush(heap, (val, i))
+    result = []
+    while heap:
+        val, i = heapq.heappop(heap)
+        result.append(val)
+        nxt = next(iterators[i], None)
+        if nxt is not None: heapq.heappush(heap, (nxt, i))
+    return result`}
+  ]
+},
+{
+  id:10, icon:"🔄", name:"Cyclic Sort",
+  triggers:["1 to n range","missing number","duplicate","in-place","corrupt pair"],
+  template:`i = 0
+while i < len(nums):
+    # Where should nums[i] go?
+    correct_idx = nums[i] - 1  # if nums in [1..n]
+    if nums[i] != nums[correct_idx]:
+        # Swap to correct position
+        nums[i], nums[correct_idx] = nums[correct_idx], nums[i]
+    else:
+        i += 1  # already in correct spot (or duplicate)
+
+# After sort: scan for anomalies
+for i, n in enumerate(nums):
+    if n != i + 1:
+        # Found missing or duplicate`,
+  time:"O(n)", space:"O(1)", bruteTime:"O(n log n)", bruteSpace:"O(1)",
+  problems:[
+    {title:"Missing Number",
+     stmt:"Find the missing number in an array containing n distinct numbers in range [0,n].",
+     hints:["Cyclic sort places each number at its index; scan for mismatch.","Or math: expected_sum - actual_sum.","Or XOR: XOR all indices and values."],
+     sol:`def missingNumber(nums):
+    i = 0
+    while i < len(nums):
+        j = nums[i]
+        if j < len(nums) and nums[i] != nums[j]: nums[i],nums[j]=nums[j],nums[i]
+        else: i+=1
+    for i,n in enumerate(nums):
+        if n!=i: return i
+    return len(nums)`},
+    {title:"Find All Duplicates in Array",
+     stmt:"Find all elements that appear twice in array of integers in [1,n]. O(n) time O(1) space.",
+     hints:["Cyclic sort, then scan: where nums[i] != i+1, nums[i] is a duplicate.","Alternative: negate nums[abs(n)-1]; if already negative, it's a duplicate.","Both approaches are O(n) O(1)."],
+     sol:`def findDuplicates(nums):
+    i = 0
+    while i < len(nums):
+        j = nums[i]-1
+        if nums[i] != nums[j]: nums[i],nums[j]=nums[j],nums[i]
+        else: i+=1
+    return [nums[i] for i in range(len(nums)) if nums[i]!=i+1]`},
+    {title:"First Missing Positive",
+     stmt:"Find the smallest missing positive integer in an unsorted array in O(n) O(1).",
+     hints:["Cyclic sort but only for numbers in [1..n].","Ignore nums ≤ 0 and nums > n.","Scan: first i where nums[i] != i+1 gives the answer."],
+     sol:`def firstMissingPositive(nums):
+    n=len(nums); i=0
+    while i<n:
+        j=nums[i]-1
+        if 0<nums[i]<=n and nums[i]!=nums[j]: nums[i],nums[j]=nums[j],nums[i]
+        else: i+=1
+    for i in range(n):
+        if nums[i]!=i+1: return i+1
+    return n+1`},
+    {title:"Find Corrupt Pair",
+     stmt:"An array of [1..n] has one duplicate and one missing. Find both.",
+     hints:["Cyclic sort, then scan for where nums[i] != i+1.","That index: i+1 is missing, nums[i] is duplicate.","Single pass after cyclic sort."],
+     sol:`def findErrorNums(nums):
+    i=0
+    while i<len(nums):
+        j=nums[i]-1
+        if nums[i]!=nums[j]: nums[i],nums[j]=nums[j],nums[i]
+        else: i+=1
+    for i,n in enumerate(nums):
+        if n!=i+1: return [n,i+1]`},
+    {title:"Set Mismatch",
+     stmt:"Array has one number replaced by another causing one duplicate and one missing; find both.",
+     hints:["Equivalent to Find Corrupt Pair.","Cyclic sort then find the mismatch.","Or use counting/XOR approach for O(n) O(1)."],
+     sol:`def findErrorNums(nums):
+    i=0
+    while i<len(nums):
+        j=nums[i]-1
+        if nums[i]!=nums[j]: nums[i],nums[j]=nums[j],nums[i]
+        else: i+=1
+    for i in range(len(nums)):
+        if nums[i]!=i+1: return [nums[i],i+1]`}
+  ]
+}
+];
+
+// Patterns 11-20 will be added in next build
+const PATTERN_NAMES_11_20 = [
+  {id:11,icon:"🌲",name:"Tree DP"},
+  {id:12,icon:"🗺️",name:"Graph Advanced"},
+  {id:13,icon:"🔍",name:"Backtracking Advanced"},
+  {id:14,icon:"📝",name:"DP on Strings"},
+  {id:15,icon:"📏",name:"DP on Intervals"},
+  {id:16,icon:"🧹",name:"Sweep Line"},
+  {id:17,icon:"🔢",name:"Math Patterns"},
+  {id:18,icon:"🏗️",name:"Design Patterns"},
+  {id:19,icon:"📆",name:"Interval Merge"},
+  {id:20,icon:"🔡",name:"String Algorithms"}
+];
+
+// ===================== STATE =====================
+const STORE = 'apt116_v1';
+let state, activePat = null, activeProb = null;
+
+function loadState(){
+  try{state=JSON.parse(localStorage.getItem(STORE))||{};}catch(e){state={};}
+  if(!state.patternStats)state.patternStats={};
+}
+function save(){localStorage.setItem(STORE,JSON.stringify(state));}
+
+// ===================== TABS =====================
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['library','challenge','quiz'][i]===name);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ===================== SIDEBAR =====================
+function renderSidebar(){
+  const el=document.getElementById('sidebar-list');
+  const today=new Date().toISOString().slice(0,10);
+  // Patterns 1-10 (full data)
+  let html=PATTERNS.map(p=>{
+    const stats=state.patternStats[p.id]||{};
+    const isDue=stats.nextReview && stats.nextReview<=today;
+    return `<div class="pat-item" id="pat-item-${p.id}" onclick="selectPattern(${p.id})">
+      <span class="pat-icon">${p.icon}</span>
+      <span class="pat-name">${p.name}</span>
+      ${isDue?'<span class="due-badge">Due</span>':''}
+    </div>`;
+  }).join('');
+  // Patterns 11-20 (stubs)
+  html+=PATTERN_NAMES_11_20.map(p=>`
+    <div class="pat-item" style="opacity:.45;cursor:default" title="Coming soon">
+      <span class="pat-icon">${p.icon}</span>
+      <span class="pat-name">${p.name}</span>
+      <span style="font-size:.62rem;color:var(--sub);margin-left:auto">soon</span>
+    </div>`).join('');
+  el.innerHTML=html;
+}
+
+// ===================== PATTERN DETAIL =====================
+function selectPattern(id){
+  activePat=id;
+  document.querySelectorAll('.pat-item').forEach(el=>el.classList.remove('active'));
+  const item=document.getElementById('pat-item-'+id);
+  if(item)item.classList.add('active');
+  const p=PATTERNS.find(x=>x.id===id);
+  if(!p)return;
+  const stats=state.patternStats[id]||{};
+  const detail=document.getElementById('detail-panel');
+  detail.innerHTML=`
+    <div class="detail-header">
+      <div class="detail-title">${p.icon} ${p.name}</div>
+      <div class="trigger-row">${p.triggers.map(t=>`<span class="trigger-badge">🔑 ${t}</span>`).join('')}</div>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="diagram-label">Pattern Diagram</div>
+      ${getSVG(id)}
+    </div>
+
+    <table class="cplx-table">
+      <tr><th>Approach</th><th>Time</th><th>Space</th></tr>
+      <tr><td><strong>${p.name}</strong></td><td class="better">${p.time}</td><td class="better">${p.space}</td></tr>
+      <tr><td>Brute Force</td><td class="worse">${p.bruteTime}</td><td>${p.bruteSpace}</td></tr>
+    </table>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        Python Template
+        <button class="copy-btn" onclick="copyCode(${id})">Copy</button>
+      </div>
+      <pre>${esc(p.template)}</pre>
+    </div>
+
+    <div class="problems-section">
+      <div class="problems-title">📋 5 Problems — click to practice</div>
+      <div>${p.problems.map((prob,i)=>`
+        <button class="prob-btn" onclick="openProblem(${id},${i})">
+          <span class="prob-num">${id}.${i+1}</span> ${esc(prob.title)}
+        </button>`).join('')}
+      </div>
+    </div>
+
+    ${stats.attempted?`<div style="font-size:.78rem;color:var(--sub);margin-top:8px">
+      Stats: ${stats.attempted||0} attempted · ${stats.solved||0} solved · Last: ${stats.lastRating||'—'}
+      ${stats.nextReview?` · Next review: ${stats.nextReview}`:''}
+    </div>`:''}
+  `;
+}
+
+// ===================== SVG DIAGRAMS =====================
+function getSVG(id){
+  const svgs={
+    1:`<svg width="360" height="140" viewBox="0 0 360 140">
+      <!-- Array bars -->
+      <rect x="20" y="80" width="30" height="40" fill="#1e4a6e" rx="3"/>
+      <rect x="60" y="60" width="30" height="60" fill="#1e4a6e" rx="3"/>
+      <rect x="100" y="30" width="30" height="90" fill="#38bdf8" rx="3" style="animation:pulse 1.5s infinite"/>
+      <rect x="140" y="50" width="30" height="70" fill="#1e4a6e" rx="3"/>
+      <rect x="180" y="40" width="30" height="80" fill="#1e4a6e" rx="3"/>
+      <text x="35" y="76" fill="#94a3b8" font-size="11" text-anchor="middle">2</text>
+      <text x="75" y="56" fill="#94a3b8" font-size="11" text-anchor="middle">4</text>
+      <text x="115" y="26" fill="#e2e8f0" font-size="11" text-anchor="middle">6</text>
+      <text x="155" y="46" fill="#94a3b8" font-size="11" text-anchor="middle">5</text>
+      <text x="195" y="36" fill="#94a3b8" font-size="11" text-anchor="middle">7</text>
+      <!-- Stack -->
+      <rect x="250" y="60" width="50" height="30" fill="#312e81" rx="4" stroke="#818cf8" stroke-width="1"/>
+      <rect x="250" y="90" width="50" height="30" fill="#312e81" rx="4" stroke="#818cf8" stroke-width="1"/>
+      <text x="275" y="80" fill="#a5b4fc" font-size="11" text-anchor="middle">4</text>
+      <text x="275" y="110" fill="#a5b4fc" font-size="11" text-anchor="middle">2</text>
+      <text x="275" y="45" fill="#94a3b8" font-size="10" text-anchor="middle">Stack</text>
+      <text x="115" y="125" fill="#38bdf8" font-size="10" text-anchor="middle">current</text>
+      <!-- Arrow from stack to bar -->
+      <line x1="250" y1="75" x2="150" y2="50" stroke="#f97316" stroke-width="1.5" stroke-dasharray="4" style="animation:arrowPulse 1s infinite"/>
+      <text x="195" y="45" fill="#f97316" font-size="9">pop → answer</text>
+    </svg>`,
+    2:`<svg width="360" height="120" viewBox="0 0 360 120">
+      <!-- Array -->
+      ${[0,1,2,3,4,5,6,7].map((i,idx)=>`
+        <rect x="${20+idx*40}" y="40" width="34" height="34" fill="${idx>=2&&idx<=5?'#0f4c2a':'#1e293b'}" rx="4" stroke="${idx>=2&&idx<=5?'#22c55e':'#334155'}" stroke-width="1.5"/>
+        <text x="${37+idx*40}" y="62" fill="${idx>=2&&idx<=5?'#86efac':'#94a3b8'}" font-size="13" text-anchor="middle">${['a','b','c','d','e','f','g','h'][idx]}</text>`).join('')}
+      <!-- L pointer -->
+      <text x="97" y="94" fill="#38bdf8" font-size="11" text-anchor="middle">L</text>
+      <line x1="97" y1="78" x2="97" y2="88" stroke="#38bdf8" stroke-width="2"/>
+      <!-- R pointer with animation -->
+      <g style="animation:slideRight 2s ease-in-out infinite">
+        <text x="217" y="94" fill="#f97316" font-size="11" text-anchor="middle">R</text>
+        <line x1="217" y1="78" x2="217" y2="88" stroke="#f97316" stroke-width="2"/>
+      </g>
+      <text x="180" y="18" fill="#94a3b8" font-size="10" text-anchor="middle">Expand right, shrink left when invalid</text>
+    </svg>`,
+    3:`<svg width="360" height="140" viewBox="0 0 360 140">
+      <!-- Nodes -->
+      <circle cx="60" cy="60" r="18" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+      <circle cx="120" cy="30" r="18" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+      <circle cx="120" cy="90" r="18" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+      <circle cx="60" cy="60" r="18" fill="#0f2a3f" stroke="#38bdf8" stroke-width="2"/>
+      <text x="60" y="65" fill="#38bdf8" font-size="12" text-anchor="middle">A</text>
+      <text x="120" y="35" fill="#38bdf8" font-size="12" text-anchor="middle">B</text>
+      <text x="120" y="95" fill="#38bdf8" font-size="12" text-anchor="middle">C</text>
+      <!-- Union arrow -->
+      <line x1="78" y1="50" x2="102" y2="36" stroke="#22c55e" stroke-width="2" style="animation:arrowPulse 1.5s infinite"/>
+      <line x1="78" y1="70" x2="102" y2="84" stroke="#22c55e" stroke-width="2"/>
+      <!-- Parent array -->
+      <rect x="200" y="20" width="140" height="100" fill="#0a1628" rx="8" stroke="#334155"/>
+      <text x="270" y="40" fill="#94a3b8" font-size="10" text-anchor="middle">parent[]</text>
+      ${['A→A','B→A','C→A'].map((t,i)=>`<text x="270" y="${60+i*22}" fill="#a5f3fc" font-size="11" text-anchor="middle">${t}</text>`).join('')}
+      <text x="270" y="130" fill="#22c55e" font-size="10" text-anchor="middle">path compression</text>
+    </svg>`,
+    4:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- Tree nodes -->
+      <circle cx="180" cy="25" r="16" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+      <text x="180" y="30" fill="#38bdf8" font-size="10" text-anchor="middle">[0,7]</text>
+      <circle cx="100" cy="70" r="16" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="100" y="75" fill="#94a3b8" font-size="9" text-anchor="middle">[0,3]</text>
+      <circle cx="260" cy="70" r="16" fill="#312e81" stroke="#818cf8" stroke-width="2" style="animation:pulse 1.5s infinite"/>
+      <text x="260" y="75" fill="#a5b4fc" font-size="9" text-anchor="middle">[4,7]</text>
+      <circle cx="60" cy="115" r="14" fill="#1e293b" stroke="#334155"/>
+      <text x="60" y="119" fill="#94a3b8" font-size="8" text-anchor="middle">[0,1]</text>
+      <circle cx="140" cy="115" r="14" fill="#1e293b" stroke="#334155"/>
+      <text x="140" y="119" fill="#94a3b8" font-size="8" text-anchor="middle">[2,3]</text>
+      <!-- Lines -->
+      <line x1="166" y1="38" x2="116" y2="57" stroke="#334155" stroke-width="1.5"/>
+      <line x1="194" y1="38" x2="244" y2="57" stroke="#818cf8" stroke-width="1.5"/>
+      <line x1="87" y1="82" x2="71" y2="102" stroke="#334155" stroke-width="1.5"/>
+      <line x1="113" y1="82" x2="127" y2="102" stroke="#334155" stroke-width="1.5"/>
+      <!-- Query arrow -->
+      <text x="300" y="80" fill="#f97316" font-size="10">query</text>
+      <text x="300" y="93" fill="#f97316" font-size="10">[4..7]</text>
+      <line x1="290" y1="83" x2="278" y2="78" stroke="#f97316" stroke-width="1.5" marker-end="url(#arr)"/>
+    </svg>`,
+    5:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- Root -->
+      <circle cx="30" cy="30" r="14" fill="#0f2a3f" stroke="#38bdf8" stroke-width="2"/>
+      <text x="30" y="35" fill="#38bdf8" font-size="12" text-anchor="middle">*</text>
+      <!-- Level 1 -->
+      ${[['c',90,70],['d',150,70],['a',210,70]].map(([l,x,y])=>`
+        <circle cx="${x}" cy="${y}" r="13" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+        <text x="${x}" y="${y+5}" fill="#94a3b8" font-size="12" text-anchor="middle">${l}</text>
+        <line x1="38" y1="40" x2="${x-8}" y2="${y-12}" stroke="#334155" stroke-width="1.5"/>`).join('')}
+      <!-- Highlighted path: a-p-p -->
+      <circle cx="210" cy="70" r="13" fill="#0f2a3f" stroke="#38bdf8" stroke-width="2"/>
+      <text x="210" y="75" fill="#38bdf8" font-size="12" text-anchor="middle">a</text>
+      <circle cx="250" cy="115" r="13" fill="#0f2a3f" stroke="#38bdf8" stroke-width="2" style="animation:pulse 1.5s infinite"/>
+      <text x="250" y="120" fill="#38bdf8" font-size="12" text-anchor="middle">p</text>
+      <line x1="218" y1="80" x2="243" y2="103" stroke="#38bdf8" stroke-width="2"/>
+      <text x="250" y="145" fill="#22c55e" font-size="10" text-anchor="middle">end=True ✓</text>
+      <text x="120" y="145" fill="#94a3b8" font-size="9" text-anchor="middle">O(L) per insert/search</text>
+    </svg>`,
+    6:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- Nodes -->
+      ${[[60,30,'A',0],[160,30,'B',0],[260,30,'C',0],[110,95,'D',1],[210,95,'E',1]].map(([x,y,l,dim])=>`
+        <circle cx="${x}" cy="${y}" r="18" fill="${dim?'#0a1628':'#1e293b'}" stroke="${dim?'#22c55e':'#334155'}" stroke-width="${dim?2:1.5}" style="${dim?'animation:pulse 2s infinite':''}"/>
+        <text x="${x}" y="${y+5}" fill="${dim?'#86efac':'#94a3b8'}" font-size="12" text-anchor="middle">${l}</text>`).join('')}
+      <!-- Edges -->
+      <line x1="78" y1="38" x2="142" y2="38" stroke="#334155" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="178" y1="38" x2="242" y2="38" stroke="#334155" stroke-width="1.5"/>
+      <line x1="65" y1="47" x2="102" y2="80" stroke="#38bdf8" stroke-width="2"/>
+      <line x1="165" y1="47" x2="205" y2="80" stroke="#38bdf8" stroke-width="2"/>
+      <!-- Order label -->
+      <text x="180" y="140" fill="#38bdf8" font-size="10" text-anchor="middle">Kahn's BFS: process indegree=0 first</text>
+      <!-- indegree labels -->
+      <text x="60" y="18" fill="#f97316" font-size="9" text-anchor="middle">in:0</text>
+      <text x="160" y="18" fill="#f97316" font-size="9" text-anchor="middle">in:1</text>
+      <text x="260" y="18" fill="#f97316" font-size="9" text-anchor="middle">in:1</text>
+    </svg>`,
+    7:`<svg width="360" height="120" viewBox="0 0 360 120">
+      <!-- Binary number display -->
+      ${[1,0,1,1,0,1,0,0].map((b,i)=>`
+        <rect x="${20+i*40}" y="30" width="34" height="34" fill="${b?'#0f2a3f':'#1e293b'}" rx="4" stroke="${b?'#38bdf8':'#334155'}" stroke-width="${b?2:1}"/>
+        <text x="${37+i*40}" y="52" fill="${b?'#38bdf8':'#94a3b8'}" font-size="16" text-anchor="middle" font-weight="${b?'bold':'normal'}">${b}</text>`).join('')}
+      <text x="180" y="22" fill="#94a3b8" font-size="10" text-anchor="middle">32-bit integer: 1 0 1 1 0 1 0 0 ...</text>
+      <!-- Operations -->
+      <text x="60" y="90" fill="#22c55e" font-size="10">n&(n-1) clears lowest bit</text>
+      <text x="220" y="90" fill="#f97316" font-size="10">XOR cancels pairs</text>
+      <!-- Animated highlight -->
+      <rect x="180" y="30" width="34" height="34" rx="4" fill="none" stroke="#f97316" stroke-width="2" style="animation:pulse 1s infinite"/>
+      <text x="197" y="108" fill="#f97316" font-size="9" text-anchor="middle">↑ lowest set bit</text>
+    </svg>`,
+    8:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- Max heap (left/small) -->
+      <text x="90" y="18" fill="#94a3b8" font-size="10" text-anchor="middle">max-heap (small)</text>
+      <polygon points="90,30 40,120 140,120" fill="none" stroke="#38bdf8" stroke-width="2"/>
+      <circle cx="90" cy="55" r="16" fill="#0f2a3f" stroke="#38bdf8" stroke-width="2"/>
+      <text x="90" y="60" fill="#38bdf8" font-size="12" text-anchor="middle">5</text>
+      <circle cx="60" cy="100" r="13" fill="#1e293b" stroke="#334155"/>
+      <text x="60" y="105" fill="#94a3b8" font-size="11" text-anchor="middle">3</text>
+      <circle cx="120" cy="100" r="13" fill="#1e293b" stroke="#334155"/>
+      <text x="120" y="105" fill="#94a3b8" font-size="11" text-anchor="middle">4</text>
+      <!-- Min heap (right/large) -->
+      <text x="270" y="18" fill="#94a3b8" font-size="10" text-anchor="middle">min-heap (large)</text>
+      <polygon points="270,30 220,120 320,120" fill="none" stroke="#a78bfa" stroke-width="2"/>
+      <circle cx="270" cy="55" r="16" fill="#1e1040" stroke="#a78bfa" stroke-width="2"/>
+      <text x="270" y="60" fill="#a78bfa" font-size="12" text-anchor="middle">6</text>
+      <circle cx="240" cy="100" r="13" fill="#1e293b" stroke="#334155"/>
+      <text x="240" y="105" fill="#94a3b8" font-size="11" text-anchor="middle">8</text>
+      <!-- Median arrow -->
+      <text x="180" y="72" fill="#22c55e" font-size="11" text-anchor="middle" font-weight="bold">median</text>
+      <line x1="107" y1="62" x2="155" y2="68" stroke="#22c55e" stroke-width="1.5"/>
+      <line x1="254" y1="62" x2="206" y2="68" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="180" y="88" fill="#22c55e" font-size="10" text-anchor="middle">= (5+6)/2 = 5.5</text>
+    </svg>`,
+    9:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- 3 sorted arrays -->
+      ${[[1,3,5],[2,4,8],[0,6,9]].map((arr,row)=>
+        arr.map((v,col)=>`
+          <rect x="${20+col*50}" y="${20+row*40}" width="40" height="28" fill="#1e293b" stroke="#334155" rx="4"/>
+          <text x="${40+col*50}" y="${39+row*40}" fill="#94a3b8" font-size="12" text-anchor="middle">${v}</text>`).join('')).join('')}
+      <!-- Min heap indicator -->
+      <rect x="230" y="40" width="110" height="80" fill="#0a1628" rx="8" stroke="#38bdf8" stroke-width="1.5"/>
+      <text x="285" y="58" fill="#38bdf8" font-size="10" text-anchor="middle">Min-Heap</text>
+      <circle cx="285" cy="80" r="14" fill="#0f2a3f" stroke="#38bdf8" stroke-width="2" style="animation:pulse 1.5s infinite"/>
+      <text x="285" y="85" fill="#38bdf8" font-size="12" text-anchor="middle">0</text>
+      <!-- Arrows -->
+      <line x1="170" y1="65" x2="228" y2="75" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4"/>
+      <text x="290" y="135" fill="#22c55e" font-size="9" text-anchor="middle">O(n log k)</text>
+    </svg>`,
+    10:`<svg width="360" height="130" viewBox="0 0 360 130">
+      <!-- Array before -->
+      <text x="70" y="18" fill="#94a3b8" font-size="10" text-anchor="middle">Before</text>
+      ${[3,1,4,2,5].map((v,i)=>`
+        <rect x="${20+i*50}" y="25" width="42" height="30" fill="#1e293b" stroke="#334155" rx="4"/>
+        <text x="${41+i*50}" y="45" fill="#94a3b8" font-size="13" text-anchor="middle">${v}</text>`).join('')}
+      <!-- Array after -->
+      <text x="70" y="85" fill="#22c55e" font-size="10" text-anchor="middle">After</text>
+      ${[1,2,3,4,5].map((v,i)=>`
+        <rect x="${20+i*50}" y="90" width="42" height="30" fill="#0f2a3f" stroke="#22c55e" rx="4"/>
+        <text x="${41+i*50}" y="110" fill="#86efac" font-size="13" text-anchor="middle">${v}</text>`).join('')}
+      <!-- Swap arrows -->
+      <text x="270" y="55" fill="#38bdf8" font-size="9">nums[i]!=nums[correct]</text>
+      <text x="270" y="68" fill="#38bdf8" font-size="9">→ swap to correct pos</text>
+      <!-- Animated swap -->
+      <path d="M 41 55 Q 41 72 91 72 Q 141 72 141 55" fill="none" stroke="#f97316" stroke-width="1.5" stroke-dasharray="4" style="animation:pulse 1.5s infinite"/>
+    </svg>`
+  };
+  return svgs[id]||`<svg width="200" height="80"><text x="100" y="45" fill="#94a3b8" text-anchor="middle" font-size="12">Diagram loading...</text></svg>`;
+}
+
+// ===================== PROBLEM MODAL =====================
+function openProblem(patId, probIdx){
+  const p=PATTERNS.find(x=>x.id===patId);
+  if(!p)return;
+  const prob=p.problems[probIdx];
+  activeProb={patId,probIdx,prob};
+
+  document.getElementById('modal-prob-title').textContent=`${p.icon} ${prob.title}`;
+  document.getElementById('modal-prob-stmt').textContent=prob.stmt;
+  document.getElementById('hint-0').textContent='';
+  document.getElementById('hint-1').textContent='';
+  document.getElementById('hint-2').textContent='';
+  ['hint-0','hint-1','hint-2'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('sol-wrap').classList.remove('show');
+  document.getElementById('modal-sol').textContent=prob.sol;
+  document.getElementById('prob-modal').classList.add('open');
+}
+
+function showHint(idx){
+  if(!activeProb)return;
+  const hint=activeProb.prob.hints[idx];
+  const el=document.getElementById('hint-'+idx);
+  el.textContent=(idx+1)+'. '+hint;
+  el.classList.add('show');
+}
+
+function showSolution(){
+  document.getElementById('sol-wrap').classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('prob-modal').classList.remove('open');
+}
+
+// ===================== UTILS =====================
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function copyCode(id){
+  const p=PATTERNS.find(x=>x.id===id);
+  if(!p)return;
+  navigator.clipboard.writeText(p.template).then(()=>toast('Copied!')).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=p.template;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); toast('Copied!');
+  });
+}
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+// Click outside modal
+document.getElementById('prob-modal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('prob-modal')) closeModal();
+});
+
+// ===================== INIT =====================
+loadState();
+renderSidebar();
+// Default: select pattern 1
+selectPattern(1);
+</script>
 </body>
 </html>
