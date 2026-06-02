@@ -3,26 +3,960 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Agent #108 · Flashcard System with SRS</title>
+<title>Agent #108 · Flashcard SRS System</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px;max-width:520px;width:100%;text-align:center}
-.num{font-size:.8rem;font-weight:700;color:#38bdf8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-h1{font-size:1.6rem;font-weight:800;margin-bottom:12px;color:#f1f5f9}
-p{color:#94a3b8;font-size:.95rem;line-height:1.6;margin-bottom:24px}
-.badge{display:inline-block;background:#1d4ed8;color:#bfdbfe;font-size:.8rem;font-weight:700;padding:6px 16px;border-radius:99px;margin-bottom:28px}
-a.back{color:#38bdf8;text-decoration:none;font-size:.85rem;border:1px solid #334155;padding:8px 18px;border-radius:8px;display:inline-block;transition:background .15s}
-a.back:hover{background:#1e3a5f}
+:root{--bg:#0f172a;--card:#1e293b;--card2:#0f1e35;--border:#334155;--accent:#6366f1;--accent2:#818cf8;--text:#e2e8f0;--sub:#94a3b8;--red:#ef4444;--orange:#f97316;--blue:#3b82f6;--green:#22c55e;--yellow:#eab308}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--accent2);text-decoration:none}
+
+/* NAV */
+.topbar{background:#0a1628;border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:16px}
+.topbar .logo{font-size:.75rem;font-weight:700;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase}
+.topbar h1{font-size:1rem;font-weight:700;color:var(--text)}
+.topbar .back-link{margin-left:auto;font-size:.8rem;color:var(--sub);border:1px solid var(--border);padding:5px 12px;border-radius:6px;transition:background .15s}
+.topbar .back-link:hover{background:var(--card)}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:#0a1628}
+.tab-btn{padding:12px 28px;font-size:.9rem;font-weight:600;color:var(--sub);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tab-pane{display:none;padding:28px 24px;max-width:900px;margin:0 auto}
+.tab-pane.active{display:block}
+
+/* CARDS / UI */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.panel+.panel{margin-top:16px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+label{font-size:.85rem;color:var(--sub);font-weight:600}
+select,input,textarea{background:#0f172a;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 12px;font-size:.9rem;font-family:inherit}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px;width:100%}
+.btn{padding:9px 20px;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-sm{padding:5px 12px;font-size:.8rem}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--sub)}
+.btn-ghost:hover{background:var(--card);color:var(--text)}
+.btn-danger{background:#7f1d1d;color:#fca5a5}
+.btn-danger:hover{background:#991b1b}
+h2{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:16px}
+h3{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:8px}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.75rem;font-weight:700}
+.badge-purple{background:#312e81;color:var(--accent2)}
+.badge-blue{background:#1e3a5f;color:#93c5fd}
+.badge-green{background:#14532d;color:#86efac}
+.badge-gray{background:#1e293b;color:var(--sub)}
+.badge-orange{background:#431407;color:#fdba74}
+.due-count{font-size:.95rem;color:var(--sub);margin:10px 0}
+.due-count span{color:var(--accent2);font-weight:700;font-size:1.1rem}
+
+/* PROGRESS BAR */
+.progress-wrap{background:#0f172a;border-radius:99px;height:8px;margin:8px 0}
+.progress-fill{height:8px;border-radius:99px;background:var(--accent);transition:width .3s}
+
+/* STUDY SESSION */
+#study-session{display:none}
+#study-idle{display:block}
+.scene{perspective:1000px;width:100%;max-width:580px;margin:0 auto}
+.flipper{width:100%;min-height:260px;position:relative;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer}
+.flipper.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;width:100%;min-height:260px;backface-visibility:hidden;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;text-align:center}
+.card-front{background:var(--card);border:2px solid var(--border)}
+.card-back{background:#1a1040;border:2px solid var(--accent);transform:rotateY(180deg)}
+.card-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:14px}
+.card-text{font-size:1.25rem;font-weight:600;color:var(--text);line-height:1.5}
+.card-hint{font-size:.82rem;color:var(--sub);margin-top:10px;font-style:italic}
+.rating-row{display:flex;gap:10px;margin-top:20px;justify-content:center;flex-wrap:wrap}
+.r-btn{flex:1;min-width:90px;max-width:130px;padding:14px 10px;border:none;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;transition:transform .1s,filter .15s;line-height:1.3}
+.r-btn:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.r-btn.again{background:#7f1d1d;color:#fca5a5}
+.r-btn.hard{background:#431407;color:#fdba74}
+.r-btn.good{background:#1e3a5f;color:#93c5fd}
+.r-btn.easy{background:#14532d;color:#86efac}
+.r-btn .r-label{font-size:1rem;display:block}
+.r-btn .r-interval{font-size:.73rem;display:block;opacity:.8;margin-top:2px}
+.show-ans-btn{display:block;margin:18px auto 0;padding:12px 36px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .15s}
+.show-ans-btn:hover{background:var(--accent2)}
+.session-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+.session-meta{font-size:.82rem;color:var(--sub)}
+#session-progress-text{font-size:.85rem;color:var(--accent2);font-weight:600}
+
+/* SESSION SUMMARY */
+.summary-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;max-width:480px;margin:32px auto 0}
+.summary-box h2{font-size:1.4rem;margin-bottom:8px}
+.summary-stats{display:flex;gap:24px;justify-content:center;margin:20px 0;flex-wrap:wrap}
+.stat-pill{background:#0f172a;border-radius:10px;padding:12px 20px;min-width:100px}
+.stat-pill .sv{font-size:1.6rem;font-weight:800;color:var(--accent2)}
+.stat-pill .sl{font-size:.75rem;color:var(--sub);margin-top:2px}
+
+/* DECKS TAB */
+.deck-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.deck-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.deck-title{font-size:1rem;font-weight:700}
+.deck-meta{font-size:.8rem;color:var(--sub);margin-top:4px}
+.deck-bar{display:flex;height:6px;border-radius:99px;overflow:hidden;margin-top:10px;gap:1px}
+.db-new{background:#6366f1}
+.db-learn{background:#f97316}
+.db-review{background:#3b82f6}
+.db-master{background:#22c55e}
+.deck-bar-legend{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap}
+.dbl-item{font-size:.73rem;color:var(--sub);display:flex;align-items:center;gap:4px}
+.dbl-dot{width:8px;height:8px;border-radius:50%}
+
+/* CARD LIST */
+.card-list{margin-top:16px;display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto}
+.cl-item{background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:flex-start;gap:10px}
+.cl-item .cl-front{flex:1;font-size:.85rem;color:var(--text);font-weight:500}
+.cl-item .cl-back{flex:1;font-size:.8rem;color:var(--sub)}
+.cl-actions{display:flex;gap:6px;flex-shrink:0}
+.edit-form{display:none;background:#0a1628;border:1px solid var(--accent);border-radius:8px;padding:14px;margin-top:8px}
+.add-card-form{background:#0a1628;border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:22px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.stat-card .sv{font-size:1.8rem;font-weight:800;color:var(--accent2)}
+.stat-card .sl{font-size:.78rem;color:var(--sub);margin-top:4px}
+.heatmap{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:12px 0}
+.hm-day{height:26px;border-radius:4px;background:#1e293b;position:relative;cursor:default}
+.hm-day:hover::after{content:attr(data-tip);position:absolute;bottom:130%;left:50%;transform:translateX(-50%);background:#0f172a;color:var(--text);font-size:.72rem;padding:3px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;border:1px solid var(--border)}
+.hm-0{background:#1e293b}
+.hm-1{background:#312e81}
+.hm-2{background:#4338ca}
+.hm-3{background:#6366f1}
+.hm-4{background:#a5b4fc}
+.deck-stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+.bar-chart{margin-top:10px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.8rem}
+.bar-label{width:70px;color:var(--sub);text-align:right;flex-shrink:0}
+.bar-track{flex:1;background:#0f172a;border-radius:99px;height:14px;overflow:hidden}
+.bar-fill{height:14px;border-radius:99px;transition:width .4s}
+.bar-val{width:40px;color:var(--text);font-weight:600;text-align:right}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;border:1px solid var(--accent);color:var(--text);padding:10px 18px;border-radius:8px;font-size:.85rem;opacity:0;transition:opacity .25s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .tab-btn{padding:10px 14px;font-size:.82rem}
+  .card-text{font-size:1.05rem}
+  .r-btn{min-width:70px;padding:11px 6px}
+  .form-row{grid-template-columns:1fr}
+  .topbar h1{font-size:.9rem}
+}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="num">Agent #108 · 100 AI Agents Challenge</div>
-  <h1>Flashcard System with SRS</h1>
-  <p>Spaced repetition flashcard system with FAANG DSA deck (80 cards) and ESL vocab (60 cards).</p>
-  <div class="badge">🚧 Coming Soon</div><br>
-  <a href="/" class="back">← Back to Portfolio</a>
+
+<div class="topbar">
+  <div>
+    <div class="logo">Agent #108 · 100 AI Agents Challenge</div>
+    <h1>Flashcard SRS System</h1>
+  </div>
+  <a href="/" class="back-link">← Portfolio</a>
 </div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('study')">📖 Study</button>
+  <button class="tab-btn" onclick="switchTab('decks')">🗂️ Decks</button>
+  <button class="tab-btn" onclick="switchTab('stats')">📊 Stats</button>
+</div>
+
+<!-- =================== STUDY TAB =================== -->
+<div id="tab-study" class="tab-pane active">
+
+  <div id="study-idle">
+    <div class="panel">
+      <h2>Start a Study Session</h2>
+      <div class="row" style="gap:12px;margin-bottom:14px">
+        <div style="flex:1;min-width:180px">
+          <label>Select Deck</label><br>
+          <select id="study-deck-sel" onchange="updateDueCount()" style="width:100%;margin-top:6px">
+            <option value="dsa">FAANG DSA (80 cards)</option>
+            <option value="esl">ESL Vocabulary (60 cards)</option>
+            <option value="custom">Custom Deck</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <label>Mode</label><br>
+          <select id="study-mode" onchange="updateDueCount()" style="width:100%;margin-top:6px">
+            <option value="due">Due Cards</option>
+            <option value="new">New Cards (10/day max)</option>
+            <option value="all">All Cards</option>
+          </select>
+        </div>
+      </div>
+      <div class="due-count" id="due-count-label">Loading…</div>
+      <div class="progress-wrap" style="max-width:300px"><div class="progress-fill" id="due-progress" style="width:0%"></div></div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="startSession()">▶ Start Session</button>
+      </div>
+    </div>
+
+    <div id="study-summary" style="display:none">
+      <div class="summary-box">
+        <div style="font-size:2rem;margin-bottom:8px">🎉</div>
+        <h2>Session Complete!</h2>
+        <p style="color:var(--sub);font-size:.9rem;margin-top:6px" id="sum-deck-label"></p>
+        <div class="summary-stats">
+          <div class="stat-pill"><div class="sv" id="sum-reviewed">0</div><div class="sl">Reviewed</div></div>
+          <div class="stat-pill"><div class="sv" id="sum-correct">0</div><div class="sl">Correct</div></div>
+          <div class="stat-pill"><div class="sv" id="sum-pct">0%</div><div class="sl">Accuracy</div></div>
+        </div>
+        <button class="btn btn-primary" onclick="hideSummary()">Study Again</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="study-session" style="display:none">
+    <div class="session-hdr">
+      <div>
+        <div style="font-size:.8rem;color:var(--sub)" id="session-deck-name"></div>
+        <div id="session-progress-text">Card 0 / 0</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="endSession()">End Session</button>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="session-progress-bar" style="width:0%"></div></div>
+
+    <div class="scene" style="margin-top:24px">
+      <div class="flipper" id="flipper">
+        <div class="card-face card-front">
+          <div class="card-label">Front</div>
+          <div class="card-text" id="card-front-text"></div>
+          <div class="card-hint" id="card-front-hint"></div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-label">Answer</div>
+          <div class="card-text" id="card-back-text" style="font-size:1rem"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="show-ans-wrap" style="text-align:center;margin-top:18px">
+      <button class="show-ans-btn" onclick="showAnswer()">Show Answer</button>
+    </div>
+    <div id="rating-wrap" style="display:none">
+      <div class="rating-row">
+        <button class="r-btn again" onclick="rateCard(0)"><span class="r-label">😵 Again</span><span class="r-interval">Today</span></button>
+        <button class="r-btn hard" onclick="rateCard(1)"><span class="r-label">😓 Hard</span><span class="r-interval">1 day</span></button>
+        <button class="r-btn good" onclick="rateCard(2)"><span class="r-label">😊 Good</span><span class="r-interval">3 days</span></button>
+        <button class="r-btn easy" onclick="rateCard(3)"><span class="r-label">🚀 Easy</span><span class="r-interval">7 days</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== DECKS TAB =================== -->
+<div id="tab-decks" class="tab-pane">
+  <div id="deck-dsa" class="deck-card">
+    <div class="deck-header">
+      <div>
+        <div class="deck-title">⚡ FAANG DSA</div>
+        <div class="deck-meta" id="dsa-deck-meta"></div>
+      </div>
+      <span class="badge badge-blue">80 cards</span>
+    </div>
+    <div class="deck-bar" id="dsa-deck-bar"></div>
+    <div class="deck-bar-legend">
+      <div class="dbl-item"><div class="dbl-dot" style="background:#6366f1"></div>New</div>
+      <div class="dbl-item"><div class="dbl-dot" style="background:#f97316"></div>Learning</div>
+      <div class="dbl-item"><div class="dbl-dot" style="background:#3b82f6"></div>Review</div>
+      <div class="dbl-item"><div class="dbl-dot" style="background:#22c55e"></div>Mastered</div>
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn btn-ghost btn-sm" onclick="toggleCardList('dsa')">View Cards ▾</button>
+    </div>
+    <div class="card-list" id="dsa-card-list" style="display:none"></div>
+  </div>
+
+  <div id="deck-esl" class="deck-card">
+    <div class="deck-header">
+      <div>
+        <div class="deck-title">🌏 ESL Vocabulary</div>
+        <div class="deck-meta" id="esl-deck-meta"></div>
+      </div>
+      <span class="badge badge-green">60 cards</span>
+    </div>
+    <div class="deck-bar" id="esl-deck-bar"></div>
+    <div class="deck-bar-legend">
+      <div class="dbl-item"><div class="dbl-dot" style="background:#6366f1"></div>New</div>
+      <div class="dbl-item"><div class="dbl-dot" style="background:#f97316"></div>Learning</div>
+      <div class="dbl-item"><div class="dbl-dot" style="background:#3b82f6"></div>Review</div>
+      <div class="dbl-item"><div class="dbl-dot" style="background:#22c55e"></div>Mastered</div>
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn btn-ghost btn-sm" onclick="toggleCardList('esl')">View Cards ▾</button>
+    </div>
+    <div class="card-list" id="esl-card-list" style="display:none"></div>
+  </div>
+
+  <div id="deck-custom" class="deck-card">
+    <div class="deck-header">
+      <div>
+        <div class="deck-title">✏️ Custom Deck</div>
+        <div class="deck-meta" id="custom-deck-meta"></div>
+      </div>
+      <span class="badge badge-purple" id="custom-badge">0 cards</span>
+    </div>
+    <div class="deck-bar" id="custom-deck-bar"></div>
+    <div class="deck-bar-legend">
+      <div class="dbl-item"><div class="dbl-dot" style="background:#6366f1"></div>New</div>
+      <div class="dbl-item"><div class="dbl-dot" style="background:#f97316"></div>Learning</div>
+      <div class="dbl-item"><div class="dbl-dot" style="background:#3b82f6"></div>Review</div>
+      <div class="dbl-item"><div class="dbl-dot" style="background:#22c55e"></div>Mastered</div>
+    </div>
+
+    <div class="add-card-form">
+      <h3 style="margin-bottom:12px">➕ Add New Card</h3>
+      <div class="form-row">
+        <div>
+          <label>Front (Question / Word)</label>
+          <textarea id="new-front" placeholder="Front side..." rows="3" style="margin-top:6px"></textarea>
+        </div>
+        <div>
+          <label>Back (Answer / Definition)</label>
+          <textarea id="new-back" placeholder="Back side..." rows="3" style="margin-top:6px"></textarea>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addCustomCard()">Add Card</button>
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn btn-ghost btn-sm" onclick="toggleCardList('custom')">View Cards ▾</button>
+    </div>
+    <div class="card-list" id="custom-card-list" style="display:none"></div>
+  </div>
+</div>
+
+<!-- =================== STATS TAB =================== -->
+<div id="tab-stats" class="tab-pane">
+  <h2>Global Stats</h2>
+  <div class="stats-grid" id="global-stats-grid"></div>
+
+  <div class="panel" style="margin-bottom:22px">
+    <h3>30-Day Study Heatmap</h3>
+    <p style="font-size:.78rem;color:var(--sub);margin-bottom:10px">Cards reviewed per day</p>
+    <div class="heatmap" id="heatmap"></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:.72rem;color:var(--sub)">
+      Less
+      <div style="width:14px;height:14px;border-radius:3px;background:#1e293b"></div>
+      <div style="width:14px;height:14px;border-radius:3px;background:#312e81"></div>
+      <div style="width:14px;height:14px;border-radius:3px;background:#4338ca"></div>
+      <div style="width:14px;height:14px;border-radius:3px;background:#6366f1"></div>
+      <div style="width:14px;height:14px;border-radius:3px;background:#a5b4fc"></div>
+      More
+    </div>
+  </div>
+
+  <h2>Per-Deck Breakdown</h2>
+  <div id="deck-stats"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== DATA =====================
+const DSA_CARDS = [
+  {f:"Two Sum",b:"Hash map: store complement. O(n) time O(n) space"},
+  {f:"Best Time to Buy/Sell Stock",b:"Track min price, max profit. O(n) O(1)"},
+  {f:"Contains Duplicate",b:"Hash set. O(n) O(n)"},
+  {f:"Product of Array Except Self",b:"Left/right prefix products. O(n) O(1)"},
+  {f:"Maximum Subarray",b:"Kadane's algorithm. O(n) O(1)"},
+  {f:"Maximum Product Subarray",b:"Track max and min. O(n) O(1)"},
+  {f:"Find Min in Rotated Sorted Array",b:"Binary search on pivot. O(log n) O(1)"},
+  {f:"Search in Rotated Sorted Array",b:"Binary search with conditions. O(log n) O(1)"},
+  {f:"3Sum",b:"Sort + two pointers. O(n²) O(1)"},
+  {f:"Container With Most Water",b:"Two pointers from ends. O(n) O(1)"},
+  {f:"Valid Anagram",b:"Character frequency map. O(n) O(1)"},
+  {f:"Valid Palindrome",b:"Two pointers skip non-alphanumeric. O(n) O(1)"},
+  {f:"Longest Substring Without Repeating Characters",b:"Sliding window + set. O(n) O(n)"},
+  {f:"Minimum Window Substring",b:"Sliding window + freq map. O(n) O(n)"},
+  {f:"Valid Parentheses",b:"Stack, match closing brackets. O(n) O(n)"},
+  {f:"Generate Parentheses",b:"Backtracking with open/close count. O(4^n/√n)"},
+  {f:"Longest Palindromic Substring",b:"Expand around center. O(n²) O(1)"},
+  {f:"Reverse Linked List",b:"Iterative with prev/curr. O(n) O(1)"},
+  {f:"Merge Two Sorted Lists",b:"Compare heads, build new list. O(n+m) O(1)"},
+  {f:"Reorder List",b:"Find middle, reverse second half, merge. O(n) O(1)"},
+  {f:"Remove Nth Node From End",b:"Two pointers gap of n. O(n) O(1)"},
+  {f:"Linked List Cycle",b:"Floyd's fast/slow pointers. O(n) O(1)"},
+  {f:"LRU Cache",b:"HashMap + doubly linked list. O(1) all ops"},
+  {f:"Invert Binary Tree",b:"Swap children recursively. O(n) O(h)"},
+  {f:"Maximum Depth Binary Tree",b:"DFS recursion. O(n) O(h)"},
+  {f:"Diameter of Binary Tree",b:"Max left+right height per node. O(n) O(h)"},
+  {f:"Balanced Binary Tree",b:"Check height diff ≤ 1. O(n) O(h)"},
+  {f:"Same Tree",b:"Compare nodes recursively. O(n) O(h)"},
+  {f:"Subtree of Another Tree",b:"Serialize or recursive check. O(m*n)"},
+  {f:"Lowest Common Ancestor BST",b:"Traverse based on values. O(h) O(1)"},
+  {f:"Level Order Traversal",b:"BFS with queue. O(n) O(n)"},
+  {f:"Binary Tree Right Side View",b:"BFS take last node per level. O(n) O(n)"},
+  {f:"Validate BST",b:"DFS with min/max bounds. O(n) O(h)"},
+  {f:"Kth Smallest in BST",b:"Inorder traversal stop at k. O(n) O(h)"},
+  {f:"Number of Islands",b:"DFS/BFS mark visited. O(m*n) O(m*n)"},
+  {f:"Clone Graph",b:"BFS + hashmap old→new. O(n) O(n)"},
+  {f:"Pacific Atlantic Water Flow",b:"BFS from both coasts. O(m*n)"},
+  {f:"Course Schedule",b:"Topological sort, detect cycle. O(V+E)"},
+  {f:"Course Schedule II",b:"Topo sort return order. O(V+E)"},
+  {f:"Word Ladder",b:"BFS level by level. O(n * word_len)"},
+  {f:"Climbing Stairs",b:"DP: dp[i] = dp[i-1] + dp[i-2]. O(n) O(1)"},
+  {f:"House Robber",b:"dp[i] = max(dp[i-1], dp[i-2]+nums[i]). O(n) O(1)"},
+  {f:"House Robber II",b:"Run robber twice (skip first/last). O(n) O(1)"},
+  {f:"Coin Change",b:"DP bottom-up, dp[amount]. O(n*amount)"},
+  {f:"Longest Increasing Subsequence",b:"DP or patience sorting. O(n log n)"},
+  {f:"Word Break",b:"DP with word set lookup. O(n²) O(n)"},
+  {f:"Unique Paths",b:"DP grid. O(m*n) or math O(1)"},
+  {f:"Jump Game",b:"Greedy max reach. O(n) O(1)"},
+  {f:"Jump Game II",b:"Greedy count jumps. O(n) O(1)"},
+  {f:"Partition Equal Subset Sum",b:"0/1 knapsack DP. O(n*sum)"},
+  {f:"Kth Largest Element",b:"QuickSelect O(n) or Heap O(n log k)"},
+  {f:"Top K Frequent Elements",b:"Bucket sort or heap. O(n)"},
+  {f:"Find Median from Data Stream",b:"Two heaps (max+min). O(log n)"},
+  {f:"Merge K Sorted Lists",b:"Min heap of heads. O(n log k)"},
+  {f:"Binary Search",b:"lo=0 hi=n-1 while lo≤hi mid=(lo+hi)//2. O(log n)"},
+  {f:"Search a 2D Matrix",b:"Binary search on flattened. O(log(m*n))"},
+  {f:"Koko Eating Bananas",b:"Binary search on speed. O(n log max)"},
+  {f:"Median of Two Sorted Arrays",b:"Binary search on partition. O(log(min(m,n)))"},
+  {f:"Subsets",b:"Backtrack include/exclude each. O(2^n)"},
+  {f:"Combination Sum",b:"Backtrack with remaining target. O(2^n)"},
+  {f:"Permutations",b:"Backtrack swap elements. O(n!)"},
+  {f:"Word Search",b:"DFS with visited marking. O(m*n*4^L)"},
+  {f:"Palindrome Partitioning",b:"Backtrack + isPalin check. O(2^n)"},
+  {f:"N-Queens",b:"Backtrack with col/diag sets. O(n!)"},
+  {f:"Trapping Rain Water",b:"Two pointers or stack. O(n) O(1)"},
+  {f:"Largest Rectangle in Histogram",b:"Monotonic stack. O(n) O(n)"},
+  {f:"Sliding Window Maximum",b:"Deque monotonic. O(n) O(k)"},
+  {f:"Minimum Window Substring (variant)",b:"Sliding window freq map. O(n) O(n)"},
+  {f:"Longest Consecutive Sequence",b:"Hash set, check sequence start. O(n)"},
+  {f:"Insert Interval",b:"Linear scan merge. O(n) O(n)"},
+  {f:"Merge Intervals",b:"Sort by start, merge overlaps. O(n log n)"},
+  {f:"Non-overlapping Intervals",b:"Greedy end time sort. O(n log n)"},
+  {f:"Design Twitter",b:"Heap + hashmap of tweets. O(n log k)"},
+  {f:"LFU Cache",b:"Two hashmaps + min freq. O(1) all ops"},
+  {f:"Serialize/Deserialize Binary Tree",b:"BFS or preorder. O(n)"},
+  {f:"Alien Dictionary",b:"Topological sort on char graph. O(n)"},
+  {f:"Regular Expression Matching",b:"DP 2D table. O(m*n)"},
+  {f:"Wildcard Matching",b:"DP similar to regex. O(m*n)"},
+  {f:"Edit Distance",b:"DP Levenshtein. O(m*n)"},
+  {f:"Burst Balloons",b:"DP interval. O(n³)"}
+];
+
+const ESL_CARDS = [
+  {f:"Abundant\n\"There is abundant evidence.\"",b:"Dồi dào, phong phú. Stress: a-BUN-dant"},
+  {f:"Acknowledge\n\"I acknowledge my mistake.\"",b:"Thừa nhận. Stress: ak-NOL-ij"},
+  {f:"Ambiguous\n\"The instructions were ambiguous.\"",b:"Mơ hồ, không rõ ràng. Stress: am-BIG-yoo-us"},
+  {f:"Analyze\n\"Let's analyze the data.\"",b:"Phân tích. Stress: AN-a-lize"},
+  {f:"Anticipate\n\"I anticipate problems.\"",b:"Dự đoán, mong đợi. Stress: an-TIS-i-pate"},
+  {f:"Articulate\n\"She articulated her point clearly.\"",b:"Diễn đạt rõ ràng. Stress: ar-TIK-yoo-late"},
+  {f:"Assert\n\"He asserted his rights.\"",b:"Khẳng định. Stress: a-SERT"},
+  {f:"Assess\n\"We need to assess the risk.\"",b:"Đánh giá. Stress: a-SES"},
+  {f:"Collaborate\n\"Let's collaborate on this project.\"",b:"Hợp tác. Stress: ko-LAB-o-rate"},
+  {f:"Comprehend\n\"I don't comprehend the question.\"",b:"Hiểu, nắm bắt. Stress: kom-pre-HEND"},
+  {f:"Controversial\n\"This is a controversial topic.\"",b:"Gây tranh cãi. Stress: kon-tro-VER-shul"},
+  {f:"Crucial\n\"Sleep is crucial for health.\"",b:"Rất quan trọng. Stress: KROO-shul"},
+  {f:"Deduce\n\"We can deduce the answer.\"",b:"Suy luận. Stress: de-DYOOS"},
+  {f:"Demonstrate\n\"Please demonstrate the steps.\"",b:"Chứng minh, trình bày. Stress: DEM-on-strate"},
+  {f:"Diverse\n\"Our team is diverse.\"",b:"Đa dạng. Stress: di-VERS"},
+  {f:"Elaborate\n\"Can you elaborate on that?\"",b:"Giải thích chi tiết. Stress: i-LAB-o-rate"},
+  {f:"Emphasize\n\"I want to emphasize this point.\"",b:"Nhấn mạnh. Stress: EM-fa-size"},
+  {f:"Evaluate\n\"Please evaluate my work.\"",b:"Đánh giá. Stress: i-VAL-yoo-ate"},
+  {f:"Evident\n\"It is evident that she is smart.\"",b:"Rõ ràng. Stress: EV-i-dent"},
+  {f:"Facilitate\n\"Technology facilitates learning.\"",b:"Tạo điều kiện. Stress: fa-SIL-i-tate"},
+  {f:"Generate\n\"This will generate income.\"",b:"Tạo ra. Stress: JEN-e-rate"},
+  {f:"Identify\n\"Can you identify the problem?\"",b:"Xác định. Stress: i-DEN-ti-fy"},
+  {f:"Implement\n\"We will implement the plan.\"",b:"Thực hiện. Stress: IM-ple-ment"},
+  {f:"Imply\n\"What does this data imply?\"",b:"Ám chỉ, ngụ ý. Stress: im-PLY"},
+  {f:"Indicate\n\"The results indicate success.\"",b:"Chỉ ra. Stress: IN-di-kate"},
+  {f:"Interpret\n\"How do you interpret this?\"",b:"Giải thích, diễn giải. Stress: in-TER-prit"},
+  {f:"Investigate\n\"Police will investigate.\"",b:"Điều tra. Stress: in-VES-ti-gate"},
+  {f:"Justify\n\"Can you justify your decision?\"",b:"Biện minh, lý giải. Stress: JUS-ti-fy"},
+  {f:"Maintain\n\"Maintain a healthy lifestyle.\"",b:"Duy trì. Stress: main-TANE"},
+  {f:"Modify\n\"Please modify your approach.\"",b:"Chỉnh sửa. Stress: MOD-i-fy"},
+  {f:"Obtain\n\"How did you obtain this?\"",b:"Đạt được, có được. Stress: ob-TANE"},
+  {f:"Perceive\n\"How do you perceive this issue?\"",b:"Nhận thức, cảm nhận. Stress: per-SEEV"},
+  {f:"Perspective\n\"Consider her perspective.\"",b:"Quan điểm. Stress: per-SPEK-tiv"},
+  {f:"Predict\n\"Can you predict the outcome?\"",b:"Dự đoán. Stress: pre-DIKT"},
+  {f:"Promote\n\"This promotes healthy habits.\"",b:"Thúc đẩy. Stress: pro-MOTE"},
+  {f:"Relevant\n\"Is this relevant to the topic?\"",b:"Liên quan. Stress: REL-e-vant"},
+  {f:"Resolve\n\"We must resolve this conflict.\"",b:"Giải quyết. Stress: re-ZOLV"},
+  {f:"Reveal\n\"The data reveals a pattern.\"",b:"Tiết lộ, cho thấy. Stress: re-VEEL"},
+  {f:"Significant\n\"This is a significant discovery.\"",b:"Đáng kể, quan trọng. Stress: sig-NIF-i-kant"},
+  {f:"Specific\n\"Be specific about your goals.\"",b:"Cụ thể. Stress: spe-SIF-ik"},
+  {f:"Structure\n\"Structure your essay clearly.\"",b:"Cấu trúc. Stress: STRUK-cher"},
+  {f:"Summarize\n\"Please summarize the chapter.\"",b:"Tóm tắt. Stress: SUM-a-rize"},
+  {f:"Sustain\n\"Can we sustain this growth?\"",b:"Duy trì lâu dài. Stress: sus-TANE"},
+  {f:"Transform\n\"Education transforms lives.\"",b:"Biến đổi. Stress: trans-FORM"},
+  {f:"Advocate\n\"She advocates for equality.\"",b:"Ủng hộ, vận động. Stress: AD-vo-kate"},
+  {f:"Contradict\n\"Don't contradict yourself.\"",b:"Mâu thuẫn. Stress: kon-tra-DIKT"},
+  {f:"Contribute\n\"Everyone can contribute.\"",b:"Đóng góp. Stress: kon-TRIB-yoot"},
+  {f:"Derive\n\"We derive power from the sun.\"",b:"Lấy từ, xuất phát từ. Stress: de-RYV"},
+  {f:"Emerge\n\"A solution will emerge.\"",b:"Xuất hiện, nổi lên. Stress: i-MERJ"},
+  {f:"Ensure\n\"Please ensure quality.\"",b:"Đảm bảo. Stress: en-SHOOR"},
+  {f:"Establish\n\"We need to establish trust.\"",b:"Thiết lập. Stress: i-STAB-lish"},
+  {f:"Expand\n\"We plan to expand globally.\"",b:"Mở rộng. Stress: ik-SPAND"},
+  {f:"Expose\n\"Don't expose personal data.\"",b:"Tiết lộ, phơi bày. Stress: ik-SPOZE"},
+  {f:"Formulate\n\"Formulate a clear plan.\"",b:"Xây dựng, đặt ra. Stress: FOR-myoo-late"},
+  {f:"Influence\n\"Friends influence your choices.\"",b:"Ảnh hưởng. Stress: IN-floo-ens"},
+  {f:"Integrate\n\"Integrate feedback into your work.\"",b:"Tích hợp. Stress: IN-te-grate"},
+  {f:"Minimize\n\"Minimize distractions.\"",b:"Giảm thiểu. Stress: MIN-i-mize"},
+  {f:"Obtain (variant)\n\"Obtain the necessary permits.\"",b:"Đạt được, có được. Stress: ob-TANE"},
+  {f:"Reinforce\n\"Practice reinforces learning.\"",b:"Củng cố. Stress: ree-in-FORS"},
+  {f:"Vary\n\"Results vary by person.\"",b:"Thay đổi, khác nhau. Stress: VAIR-ee"}
+];
+
+// ===================== STATE =====================
+const STORE_KEY = 'fc108_v2';
+let state;
+
+function loadState() {
+  try { state = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { state = {}; }
+  if (!state.cardStates) state.cardStates = {};
+  if (!state.customCards) state.customCards = [];
+  if (!state.dailyNew) state.dailyNew = {};
+  if (!state.reviewLog) state.reviewLog = {}; // {YYYY-MM-DD: count}
+  if (!state.streak) state.streak = {current:0, longest:0, lastDate:null};
+}
+
+function saveState() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function getCardState(id) {
+  if (!state.cardStates[id]) {
+    state.cardStates[id] = {nextReview:0, interval:0, reviewCount:0, correctCount:0};
+  }
+  return state.cardStates[id];
+}
+
+function allCards(deckId) {
+  if (deckId === 'dsa') return DSA_CARDS.map((c,i)=>({id:`dsa_${i}`,deckId:'dsa',front:c.f,back:c.b}));
+  if (deckId === 'esl') return ESL_CARDS.map((c,i)=>({id:`esl_${i}`,deckId:'esl',front:c.f,back:c.b}));
+  if (deckId === 'custom') return state.customCards.map(c=>({...c,deckId:'custom'}));
+  return [];
+}
+
+function dueCards(deckId) {
+  const now = Date.now();
+  return allCards(deckId).filter(c => {
+    const cs = getCardState(c.id);
+    return cs.reviewCount > 0 && cs.nextReview <= now;
+  });
+}
+
+function newCards(deckId) {
+  return allCards(deckId).filter(c => getCardState(c.id).reviewCount === 0);
+}
+
+function todayNewCount(deckId) {
+  const key = `${deckId}_${todayStr()}`;
+  return state.dailyNew[key] || 0;
+}
+
+function incTodayNew(deckId) {
+  const key = `${deckId}_${todayStr()}`;
+  state.dailyNew[key] = (state.dailyNew[key] || 0) + 1;
+}
+
+function cardStatus(id) {
+  const cs = getCardState(id);
+  if (cs.reviewCount === 0) return 'new';
+  if (cs.reviewCount < 3) return 'learning';
+  if (cs.interval <= 14) return 'review';
+  return 'mastered';
+}
+
+// ===================== SRS =====================
+const INTERVALS = [0, 1, 3, 7]; // Again, Hard, Good, Easy (days)
+
+function applyRating(cardId, rating, isAgain) {
+  const cs = getCardState(cardId);
+  cs.reviewCount++;
+  if (rating >= 2) cs.correctCount++; // Good or Easy = correct
+
+  if (rating === 0) {
+    // Again: re-queue, don't update nextReview to future
+    cs.interval = 0;
+    cs.nextReview = Date.now(); // still "today"
+  } else {
+    const days = INTERVALS[rating];
+    cs.interval = days;
+    cs.nextReview = Date.now() + days * 86400000;
+  }
+
+  // Log review
+  const d = todayStr();
+  state.reviewLog[d] = (state.reviewLog[d] || 0) + 1;
+  updateStreak();
+  saveState();
+}
+
+function updateStreak() {
+  const today = todayStr();
+  const s = state.streak;
+  if (s.lastDate === today) return; // already updated today
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+  if (s.lastDate === yesterday) {
+    s.current++;
+  } else {
+    s.current = 1;
+  }
+  if (s.current > s.longest) s.longest = s.current;
+  s.lastDate = today;
+}
+
+// ===================== SESSION =====================
+let session = null;
+
+function updateDueCount() {
+  const deckId = document.getElementById('study-deck-sel').value;
+  const mode = document.getElementById('study-mode').value;
+  let cards = [], label = '';
+  if (mode === 'due') {
+    cards = dueCards(deckId);
+    label = `<span>${cards.length}</span> cards due today`;
+  } else if (mode === 'new') {
+    const remaining = Math.max(0, 10 - todayNewCount(deckId));
+    cards = newCards(deckId).slice(0, remaining);
+    label = `<span>${cards.length}</span> new cards available (${todayNewCount(deckId)}/10 studied today)`;
+  } else {
+    cards = allCards(deckId);
+    label = `<span>${cards.length}</span> total cards in deck`;
+  }
+  document.getElementById('due-count-label').innerHTML = label;
+  const total = allCards(deckId).length || 1;
+  const pct = mode === 'due' ? (cards.length / total * 100) : (mode === 'new' ? (cards.length / 10 * 100) : 100);
+  document.getElementById('due-progress').style.width = pct + '%';
+}
+
+function startSession() {
+  const deckId = document.getElementById('study-deck-sel').value;
+  const mode = document.getElementById('study-mode').value;
+  let cards = [];
+  if (mode === 'due') cards = dueCards(deckId);
+  else if (mode === 'new') { const rem = Math.max(0, 10 - todayNewCount(deckId)); cards = newCards(deckId).slice(0, rem); }
+  else cards = allCards(deckId);
+
+  if (!cards.length) { showToast('No cards to study! 🎉'); return; }
+
+  // shuffle
+  cards = cards.sort(() => Math.random() - 0.5);
+
+  session = {
+    deckId, mode,
+    queue: [...cards],
+    againQueue: [],
+    idx: 0,
+    total: cards.length,
+    reviewed: 0,
+    correct: 0,
+    done: false
+  };
+
+  document.getElementById('study-idle').style.display = 'none';
+  document.getElementById('study-summary').style.display = 'none';
+  document.getElementById('study-session').style.display = 'block';
+  document.getElementById('session-deck-name').textContent =
+    deckId === 'dsa' ? 'FAANG DSA' : deckId === 'esl' ? 'ESL Vocabulary' : 'Custom Deck';
+
+  showCard();
+}
+
+function showCard() {
+  if (!session) return;
+  // merge again queue when main exhausted
+  const allQ = [...session.queue];
+  if (session.idx >= allQ.length) {
+    if (session.againQueue.length) {
+      session.queue = [...session.againQueue];
+      session.againQueue = [];
+      session.idx = 0;
+    } else {
+      finishSession(); return;
+    }
+  }
+  const card = session.queue[session.idx];
+  document.getElementById('card-front-text').textContent = card.front;
+  document.getElementById('card-back-text').textContent = card.back;
+  document.getElementById('card-front-hint').textContent = '';
+
+  const flipper = document.getElementById('flipper');
+  flipper.classList.remove('flipped');
+  document.getElementById('show-ans-wrap').style.display = 'block';
+  document.getElementById('rating-wrap').style.display = 'none';
+
+  const done = session.reviewed;
+  const total = session.total;
+  document.getElementById('session-progress-text').textContent = `Card ${done + 1} / ${total}`;
+  document.getElementById('session-progress-bar').style.width = (done / total * 100) + '%';
+}
+
+function showAnswer() {
+  document.getElementById('flipper').classList.add('flipped');
+  document.getElementById('show-ans-wrap').style.display = 'none';
+  document.getElementById('rating-wrap').style.display = 'block';
+}
+
+function rateCard(rating) {
+  if (!session) return;
+  const card = session.queue[session.idx];
+
+  if (rating === 0) {
+    // Again: push to end of session
+    session.againQueue.push(card);
+    session.total++;
+  } else {
+    session.reviewed++;
+    if (rating >= 2) session.correct++;
+    if (session.mode === 'new' && getCardState(card.id).reviewCount === 0) incTodayNew(session.deckId);
+  }
+
+  applyRating(card.id, rating);
+  session.idx++;
+  showCard();
+}
+
+function finishSession() {
+  document.getElementById('study-session').style.display = 'none';
+  document.getElementById('study-idle').style.display = 'block';
+  document.getElementById('study-summary').style.display = 'block';
+
+  const pct = session.reviewed ? Math.round(session.correct / session.reviewed * 100) : 0;
+  document.getElementById('sum-reviewed').textContent = session.reviewed;
+  document.getElementById('sum-correct').textContent = session.correct;
+  document.getElementById('sum-pct').textContent = pct + '%';
+  document.getElementById('sum-deck-label').textContent =
+    (session.deckId === 'dsa' ? 'FAANG DSA' : session.deckId === 'esl' ? 'ESL Vocabulary' : 'Custom Deck') + ' deck';
+
+  session = null;
+  updateDueCount();
+  renderDecks();
+  renderStats();
+}
+
+function endSession() {
+  if (!confirm('End session early?')) return;
+  if (session) { session.reviewed = session.reviewed || 0; finishSession(); }
+}
+
+function hideSummary() {
+  document.getElementById('study-summary').style.display = 'none';
+}
+
+// ===================== DECKS =====================
+function toggleCardList(deckId) {
+  const el = document.getElementById(`${deckId}-card-list`);
+  if (el.style.display === 'none') {
+    el.style.display = 'flex';
+    renderCardList(deckId);
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function renderCardList(deckId) {
+  const el = document.getElementById(`${deckId}-card-list`);
+  const cards = allCards(deckId);
+  if (!cards.length) { el.innerHTML = '<div style="color:var(--sub);font-size:.85rem;padding:10px">No cards yet.</div>'; return; }
+  el.innerHTML = cards.map((c,i) => {
+    const status = cardStatus(c.id);
+    const statusColors = {new:'badge-purple',learning:'badge-orange',review:'badge-blue',mastered:'badge-green'};
+    const isCustom = deckId === 'custom';
+    return `<div class="cl-item" id="cl-${c.id}">
+      <div style="flex:1">
+        <div class="cl-front">${escHtml(c.front)}</div>
+        <div class="cl-back" style="margin-top:4px">${escHtml(c.back)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+        <span class="badge ${statusColors[status]}">${status}</span>
+        ${isCustom ? `<div class="cl-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editCustom('${c.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCustom('${c.id}')">🗑</button>
+        </div>` : ''}
+      </div>
+    </div>
+    ${isCustom ? `<div class="edit-form" id="ef-${c.id}">
+      <div class="form-row">
+        <div><label>Front</label><textarea id="ef-front-${c.id}" rows="2" style="margin-top:4px">${escHtml(c.front)}</textarea></div>
+        <div><label>Back</label><textarea id="ef-back-${c.id}" rows="2" style="margin-top:4px">${escHtml(c.back)}</textarea></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="saveEdit('${c.id}')">Save</button>
+      <button class="btn btn-ghost btn-sm" onclick="cancelEdit('${c.id}')" style="margin-left:6px">Cancel</button>
+    </div>` : ''}`;
+  }).join('');
+}
+
+function editCustom(id) {
+  document.querySelectorAll('.edit-form').forEach(el => el.style.display='none');
+  document.getElementById(`ef-${id}`).style.display = 'block';
+}
+function cancelEdit(id) { document.getElementById(`ef-${id}`).style.display='none'; }
+function saveEdit(id) {
+  const front = document.getElementById(`ef-front-${id}`).value.trim();
+  const back = document.getElementById(`ef-back-${id}`).value.trim();
+  if (!front || !back) { showToast('Fill both fields'); return; }
+  const card = state.customCards.find(c=>c.id===id);
+  if (card) { card.front = front; card.back = back; saveState(); renderCardList('custom'); renderDecks(); }
+  document.getElementById(`ef-${id}`).style.display='none';
+}
+function deleteCustom(id) {
+  if (!confirm('Delete this card?')) return;
+  state.customCards = state.customCards.filter(c=>c.id!==id);
+  delete state.cardStates[id];
+  saveState(); renderCardList('custom'); renderDecks(); renderStats();
+}
+function addCustomCard() {
+  const front = document.getElementById('new-front').value.trim();
+  const back = document.getElementById('new-back').value.trim();
+  if (!front || !back) { showToast('Please fill both front and back'); return; }
+  const card = {id:'custom_'+Date.now(), front, back};
+  state.customCards.push(card);
+  saveState();
+  document.getElementById('new-front').value = '';
+  document.getElementById('new-back').value = '';
+  renderDecks();
+  const list = document.getElementById('custom-card-list');
+  if (list.style.display !== 'none') renderCardList('custom');
+  showToast('Card added! ✅');
+}
+
+function deckStats(deckId) {
+  const cards = allCards(deckId);
+  let nw=0,lr=0,rv=0,ms=0;
+  cards.forEach(c=>{
+    const s = cardStatus(c.id);
+    if(s==='new') nw++;
+    else if(s==='learning') lr++;
+    else if(s==='review') rv++;
+    else ms++;
+  });
+  return {total:cards.length,nw,lr,rv,ms};
+}
+
+function renderDeckBar(deckId) {
+  const {total,nw,lr,rv,ms} = deckStats(deckId);
+  const el = document.getElementById(`${deckId}-deck-bar`);
+  if (!total) { el.innerHTML=''; return; }
+  const pct = v => (v/total*100).toFixed(1)+'%';
+  el.innerHTML = `<div class="db-new" style="width:${pct(nw)}"></div>
+    <div class="db-learn" style="width:${pct(lr)}"></div>
+    <div class="db-review" style="width:${pct(rv)}"></div>
+    <div class="db-master" style="width:${pct(ms)}"></div>`;
+  const due = dueCards(deckId).length;
+  document.getElementById(`${deckId}-deck-meta`).textContent = `${due} due · ${total} total`;
+}
+
+function renderDecks() {
+  renderDeckBar('dsa'); renderDeckBar('esl'); renderDeckBar('custom');
+  document.getElementById('custom-badge').textContent = state.customCards.length + ' cards';
+  const cm = document.getElementById('custom-deck-meta');
+  const due = dueCards('custom').length;
+  cm.textContent = `${due} due · ${state.customCards.length} total`;
+}
+
+// ===================== STATS =====================
+function renderStats() {
+  // Global
+  const decks = ['dsa','esl','custom'];
+  let totalCards=0, totalReviews=0, totalCorrect=0;
+  decks.forEach(d => {
+    const cards = allCards(d);
+    totalCards += cards.length;
+    cards.forEach(c => {
+      const cs = getCardState(c.id);
+      totalReviews += cs.reviewCount;
+      totalCorrect += cs.correctCount;
+    });
+  });
+  const retention = totalReviews ? Math.round(totalCorrect/totalReviews*100) : 0;
+  const bestDay = Object.entries(state.reviewLog).sort((a,b)=>b[1]-a[1])[0];
+
+  document.getElementById('global-stats-grid').innerHTML = [
+    {v:totalCards,l:'Total Cards'},
+    {v:totalReviews,l:'Total Reviews'},
+    {v:retention+'%',l:'Retention Rate'},
+    {v:state.streak.current,l:'Current Streak 🔥'},
+    {v:state.streak.longest,l:'Longest Streak'},
+    {v:bestDay ? bestDay[1] : 0,l:'Best Day'}
+  ].map(s=>`<div class="stat-card"><div class="sv">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
+
+  // Heatmap
+  const hm = document.getElementById('heatmap');
+  const days = [];
+  for (let i=29;i>=0;i--) {
+    const d = new Date(Date.now()-i*86400000).toISOString().slice(0,10);
+    const cnt = state.reviewLog[d] || 0;
+    const cls = cnt===0?'hm-0':cnt<=5?'hm-1':cnt<=15?'hm-2':cnt<=30?'hm-3':'hm-4';
+    days.push(`<div class="hm-day ${cls}" data-tip="${d}: ${cnt} reviews"></div>`);
+  }
+  hm.innerHTML = days.join('');
+
+  // Per-deck
+  const ds = document.getElementById('deck-stats');
+  const deckNames = {dsa:'⚡ FAANG DSA',esl:'🌏 ESL Vocabulary',custom:'✏️ Custom Deck'};
+  ds.innerHTML = decks.map(d => {
+    const cards = allCards(d);
+    const {total,nw,lr,rv,ms} = deckStats(d);
+    let rev=0,cor=0;
+    cards.forEach(c=>{const cs=getCardState(c.id);rev+=cs.reviewCount;cor+=cs.correctCount;});
+    const ret = rev ? Math.round(cor/rev*100) : 0;
+    const barRow = (label,val,color) => {
+      const w = total ? Math.round(val/total*100) : 0;
+      return `<div class="bar-row">
+        <div class="bar-label">${label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${color}"></div></div>
+        <div class="bar-val">${val}</div>
+      </div>`;
+    };
+    return `<div class="deck-stat">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3>${deckNames[d]}</h3>
+        <span class="badge badge-gray">${ret}% retention</span>
+      </div>
+      <div class="bar-chart">
+        ${barRow('New',nw,'#6366f1')}
+        ${barRow('Learning',lr,'#f97316')}
+        ${barRow('Review',rv,'#3b82f6')}
+        ${barRow('Mastered',ms,'#22c55e')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== TAB SWITCHING =====================
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', ['study','decks','stats'][i]===name);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p=>{p.classList.remove('active')});
+  document.getElementById(`tab-${name}`).classList.add('active');
+  if (name==='decks') renderDecks();
+  if (name==='stats') renderStats();
+}
+
+// ===================== UTILS =====================
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ===================== INIT =====================
+loadState();
+updateDueCount();
+renderDecks();
+
+document.getElementById('study-deck-sel').addEventListener('change', updateDueCount);
+document.getElementById('study-mode').addEventListener('change', updateDueCount);
+</script>
 </body>
 </html>
