@@ -1118,21 +1118,870 @@ for i, n in enumerate(nums):
     for i in range(len(nums)):
         if nums[i]!=i+1: return [nums[i],i+1]`}
   ]
-}
-];
+},
+{
+  id:11, icon:"🌲", name:"Tree DP",
+  triggers:["diameter","max path sum","subtree result","distribute coins","univalue path"],
+  template:`def dfs(node):
+    if not node: return 0
+    left = dfs(node.left)
+    right = dfs(node.right)
+    # Update global answer using both sides
+    ans[0] = max(ans[0], left + right + node.val)
+    # Return to parent (one side only — can't fork up)
+    return max(left, right) + node.val
 
-// Patterns 11-20 will be added in next build
-const PATTERN_NAMES_11_20 = [
-  {id:11,icon:"🌲",name:"Tree DP"},
-  {id:12,icon:"🗺️",name:"Graph Advanced"},
-  {id:13,icon:"🔍",name:"Backtracking Advanced"},
-  {id:14,icon:"📝",name:"DP on Strings"},
-  {id:15,icon:"📏",name:"DP on Intervals"},
-  {id:16,icon:"🧹",name:"Sweep Line"},
-  {id:17,icon:"🔢",name:"Math Patterns"},
-  {id:18,icon:"🏗️",name:"Design Patterns"},
-  {id:19,icon:"📆",name:"Interval Merge"},
-  {id:20,icon:"🔡",name:"String Algorithms"}
+ans = [float('-inf')]
+dfs(root)`,
+  time:"O(n)", space:"O(h)", bruteTime:"O(n²)", bruteSpace:"O(n)",
+  problems:[
+    {title:"Diameter of Binary Tree",
+     stmt:"Find the length of the longest path between any two nodes in a binary tree. The path may not pass through the root.",
+     hints:["For each node, the diameter through it = left_depth + right_depth.","Use DFS returning depth; update a global max at each node.","Answer may not pass through root — track it in a list/closure."],
+     sol:`def diameterOfBinaryTree(root):
+    ans = [0]
+    def dfs(node):
+        if not node: return 0
+        l, r = dfs(node.left), dfs(node.right)
+        ans[0] = max(ans[0], l + r)
+        return max(l, r) + 1
+    dfs(root)
+    return ans[0]`},
+    {title:"Binary Tree Maximum Path Sum",
+     stmt:"Find the maximum sum path in a binary tree where a path can start and end at any node.",
+     hints:["At each node, best path through it = max(left,0) + max(right,0) + node.val.","Only include a child gain if it's positive (prune negatives).","Return max(left,right)+val to parent — cannot fork upward."],
+     sol:`def maxPathSum(root):
+    ans = [float('-inf')]
+    def dfs(node):
+        if not node: return 0
+        l = max(dfs(node.left), 0)
+        r = max(dfs(node.right), 0)
+        ans[0] = max(ans[0], l + r + node.val)
+        return max(l, r) + node.val
+    dfs(root)
+    return ans[0]`},
+    {title:"House Robber III",
+     stmt:"Rob houses in a binary tree; adjacent parent-child nodes cannot both be robbed. Maximize total loot.",
+     hints:["Each node returns two values: (rob_this_node, skip_this_node).","rob = node.val + skip_left + skip_right.","skip = max(rob_left,skip_left) + max(rob_right,skip_right)."],
+     sol:`def rob(root):
+    def dfs(node):
+        if not node: return (0, 0)
+        lr, ls = dfs(node.left)
+        rr, rs = dfs(node.right)
+        return (node.val + ls + rs, max(lr,ls) + max(rr,rs))
+    return max(dfs(root))`},
+    {title:"Distribute Coins in Binary Tree",
+     stmt:"Each node has some coins; move coins so every node has exactly 1. Return the minimum number of moves.",
+     hints:["Each subtree's excess/deficit must flow through its root edge.","Total moves = sum of |excess| across all edges.","DFS returns net excess = (coins in subtree) - (nodes in subtree)."],
+     sol:`def distributeCoins(root):
+    moves = [0]
+    def dfs(node):
+        if not node: return 0
+        l, r = dfs(node.left), dfs(node.right)
+        moves[0] += abs(l) + abs(r)
+        return node.val + l + r - 1
+    dfs(root)
+    return moves[0]`},
+    {title:"Longest Univalue Path",
+     stmt:"Find the longest path in a binary tree where all nodes have the same value. The path can pass through a node's two children.",
+     hints:["DFS returns the longest arm of same-value path going downward from a node.","left_arm = left_result+1 if left child has same value, else 0.","Update global with left_arm+right_arm; return max arm to parent."],
+     sol:`def longestUnivaluePath(root):
+    ans = [0]
+    def dfs(node):
+        if not node: return 0
+        l, r = dfs(node.left), dfs(node.right)
+        la = (l+1) if node.left and node.left.val==node.val else 0
+        ra = (r+1) if node.right and node.right.val==node.val else 0
+        ans[0] = max(ans[0], la+ra)
+        return max(la, ra)
+    dfs(root)
+    return ans[0]`}
+  ]
+},
+{
+  id:12, icon:"🗺️", name:"Graph Advanced",
+  triggers:["shortest path","critical edge","minimum cost","network delay","probability"],
+  template:`import heapq
+# Dijkstra — O((V+E) log V)
+dist = [float('inf')] * n
+dist[src] = 0
+heap = [(0, src)]
+while heap:
+    d, u = heapq.heappop(heap)
+    if d > dist[u]: continue  # stale entry
+    for v, w in graph[u]:
+        if dist[u] + w < dist[v]:
+            dist[v] = dist[u] + w
+            heapq.heappush(heap, (dist[v], v))`,
+  time:"O((V+E) log V)", space:"O(V+E)", bruteTime:"O(V²)", bruteSpace:"O(V)",
+  problems:[
+    {title:"Network Delay Time",
+     stmt:"Given a directed weighted graph, find how long it takes for a signal to reach all n nodes from source k. Return -1 if any node is unreachable.",
+     hints:["Run Dijkstra from source k to find all shortest distances.","The answer is the maximum of all shortest distances.","If any node still has distance infinity, return -1."],
+     sol:`import heapq
+def networkDelayTime(times, n, k):
+    g=[[] for _ in range(n+1)]
+    for u,v,w in times: g[u].append((v,w))
+    dist=[float('inf')]*(n+1); dist[k]=0
+    heap=[(0,k)]
+    while heap:
+        d,u=heapq.heappop(heap)
+        if d>dist[u]: continue
+        for v,w in g[u]:
+            if dist[u]+w<dist[v]: dist[v]=dist[u]+w; heapq.heappush(heap,(dist[v],v))
+    ans=max(dist[1:])
+    return ans if ans<float('inf') else -1`},
+    {title:"Path With Minimum Effort",
+     stmt:"Find a path from top-left to bottom-right in a grid that minimizes the maximum absolute difference between adjacent cells on the path.",
+     hints:["Modified Dijkstra: dist[i][j] = min max-effort to reach cell (i,j).","Priority queue holds (effort, row, col).","Effort to move u→v = max(current_effort, abs(heights[u]-heights[v]))."],
+     sol:`import heapq
+def minimumEffortPath(heights):
+    m,n=len(heights),len(heights[0])
+    dist=[[float('inf')]*n for _ in range(m)]; dist[0][0]=0
+    heap=[(0,0,0)]
+    while heap:
+        e,r,c=heapq.heappop(heap)
+        if r==m-1 and c==n-1: return e
+        if e>dist[r][c]: continue
+        for dr,dc in [(-1,0),(1,0),(0,-1),(0,1)]:
+            nr,nc=r+dr,c+dc
+            if 0<=nr<m and 0<=nc<n:
+                ne=max(e,abs(heights[nr][nc]-heights[r][c]))
+                if ne<dist[nr][nc]: dist[nr][nc]=ne; heapq.heappush(heap,(ne,nr,nc))
+    return 0`},
+    {title:"Cheapest Flights Within K Stops",
+     stmt:"Find the cheapest flight from src to dst with at most k intermediate stops.",
+     hints:["Modified Dijkstra with state (cost, node, stops_remaining).","Skip a node if stops_remaining == 0 and it's not the destination.","Bellman-Ford with k+1 relaxation rounds also works cleanly."],
+     sol:`import heapq
+def findCheapestPrice(n, flights, src, dst, k):
+    g=[[] for _ in range(n)]
+    for u,v,w in flights: g[u].append((v,w))
+    dist=[float('inf')]*n; dist[src]=0
+    heap=[(0,src,k+1)]
+    while heap:
+        cost,u,stops=heapq.heappop(heap)
+        if u==dst: return cost
+        if stops==0: continue
+        for v,w in g[u]:
+            nc=cost+w
+            if nc<dist[v]: dist[v]=nc; heapq.heappush(heap,(nc,v,stops-1))
+    return -1`},
+    {title:"Path with Maximum Probability",
+     stmt:"Find the path from start to end with the maximum probability of success, where each edge has a probability between 0 and 1.",
+     hints:["Dijkstra but maximize probability (negate for Python min-heap).","Start with prob[start]=1.0; update neighbors if new path is more probable.","Stop early if destination is popped from heap."],
+     sol:`import heapq
+def maxProbability(n, edges, prob, start, end):
+    g=[[] for _ in range(n)]
+    for (u,v),p in zip(edges,prob): g[u].append((v,p)); g[v].append((u,p))
+    pr=[0.0]*n; pr[start]=1.0
+    heap=[(-1.0,start)]
+    while heap:
+        p,u=heapq.heappop(heap); p=-p
+        if u==end: return p
+        if p<pr[u]: continue
+        for v,ep in g[u]:
+            np2=p*ep
+            if np2>pr[v]: pr[v]=np2; heapq.heappush(heap,(-np2,v))
+    return 0.0`},
+    {title:"Find Critical and Pseudo-Critical Edges",
+     stmt:"In a weighted undirected graph, find all critical edges (removal increases MST weight) and pseudo-critical edges (can appear in some MST).",
+     hints:["Compute baseline MST weight with Kruskal's algorithm.","Critical: skip edge i — if new MST weight > baseline, it's critical.","Pseudo-critical: force edge i in MST — if weight equals baseline, it's pseudo-critical."],
+     sol:`def findCriticalAndPseudoCriticalEdges(n, edges):
+    edges=[(w,u,v,i) for i,(u,v,w) in enumerate(edges)]
+    edges.sort()
+    def mst(skip=-1,must=-1):
+        p=list(range(n))
+        def find(x):
+            while p[x]!=x: p[x]=p[p[x]]; x=p[x]
+            return x
+        w=cnt=0
+        if must>=0:
+            _,u,v,_=edges[must]; p[find(u)]=find(v); w+=edges[must][0]; cnt+=1
+        for i,(wt,u,v,_) in enumerate(edges):
+            if i==skip: continue
+            pu,pv=find(u),find(v)
+            if pu!=pv: p[pu]=pv; w+=wt; cnt+=1
+        return w if cnt==n-1 else float('inf')
+    base=mst(); crit=[]; pseudo=[]
+    for i in range(len(edges)):
+        if mst(skip=i)>base: crit.append(edges[i][3])
+        elif mst(must=i)==base: pseudo.append(edges[i][3])
+    return [crit,pseudo]`}
+  ]
+},
+{
+  id:13, icon:"🔍", name:"Backtracking Advanced",
+  triggers:["N-Queens","Sudoku","all combinations","partition","regex"],
+  template:`def backtrack(start, path):
+    if is_solution(path):
+        result.append(path[:])
+        return
+    for choice in get_choices(start):
+        if is_valid(choice, path):
+            path.append(choice)       # make choice
+            backtrack(start+1, path)  # recurse
+            path.pop()                # undo choice
+
+result = []
+backtrack(0, [])`,
+  time:"O(n!) worst case", space:"O(n) stack", bruteTime:"O(n!)", bruteSpace:"O(n!)",
+  problems:[
+    {title:"N-Queens",
+     stmt:"Place n queens on an n×n chessboard so no two queens attack each other. Return all distinct board configurations.",
+     hints:["Track sets: cols, diag1=(r-c), diag2=(r+c) for O(1) attack detection.","Place exactly one queen per row, backtracking when no column is safe.","When all n rows are filled, snapshot the board and add to results."],
+     sol:`def solveNQueens(n):
+    cols=set(); d1=set(); d2=set()
+    board=[['.']*n for _ in range(n)]; res=[]
+    def bt(r):
+        if r==n: res.append([''.join(row) for row in board]); return
+        for c in range(n):
+            if c in cols or r-c in d1 or r+c in d2: continue
+            cols.add(c); d1.add(r-c); d2.add(r+c); board[r][c]='Q'
+            bt(r+1)
+            cols.remove(c); d1.remove(r-c); d2.remove(r+c); board[r][c]='.'
+    bt(0); return res`},
+    {title:"Solve Sudoku",
+     stmt:"Fill a 9×9 Sudoku board so every row, column, and 3×3 box contains 1-9 exactly once.",
+     hints:["Find first empty cell; try digits 1-9 checking row, col, box validity.","Box index = 3*(r//3) + c//3 for O(1) lookup.","Backtrack if no digit is valid; return True when board is completely filled."],
+     sol:`def solveSudoku(board):
+    def valid(r,c,d):
+        if d in board[r]: return False
+        if any(board[i][c]==d for i in range(9)): return False
+        br,bc=3*(r//3),3*(c//3)
+        return not any(board[br+i][bc+j]==d for i in range(3) for j in range(3))
+    def bt():
+        for r in range(9):
+            for c in range(9):
+                if board[r][c]=='.':
+                    for d in '123456789':
+                        if valid(r,c,d):
+                            board[r][c]=d
+                            if bt(): return True
+                            board[r][c]='.'
+                    return False
+        return True
+    bt()`},
+    {title:"Palindrome Partitioning",
+     stmt:"Partition string s so that every substring in the partition is a palindrome. Return all possible partitions.",
+     hints:["Backtrack: at each start try all substrings s[start:end+1].","Precompute palindrome dp table: dp[i][j] = (s[i]==s[j]) and dp[i+1][j-1].","Only recurse from end+1 when current substring is a palindrome."],
+     sol:`def partition(s):
+    n=len(s); res=[]
+    dp=[[False]*n for _ in range(n)]
+    for i in range(n):
+        for j in range(i+1): dp[j][i]=(s[j]==s[i]) and (i-j<2 or dp[j+1][i-1])
+    def bt(start,path):
+        if start==n: res.append(path[:]); return
+        for end in range(start,n):
+            if dp[start][end]: path.append(s[start:end+1]); bt(end+1,path); path.pop()
+    bt(0,[]); return res`},
+    {title:"Word Break II",
+     stmt:"Given string s and a word dictionary, return all sentences formed by splitting s into valid dictionary words.",
+     hints:["Backtrack with memoization: for each start index try all dictionary words as prefix.","Memo maps start_index to list of sentences from that position onward.","Build full sentences by concatenating current word with recursively built suffixes."],
+     sol:`def wordBreak(s, wordDict):
+    words=set(wordDict); memo={}
+    def bt(i):
+        if i in memo: return memo[i]
+        if i==len(s): return ['']
+        res=[]
+        for j in range(i+1,len(s)+1):
+            w=s[i:j]
+            if w in words:
+                for rest in bt(j):
+                    res.append(w+(' '+rest if rest else ''))
+        memo[i]=res; return res
+    return bt(0)`},
+    {title:"Regular Expression Matching",
+     stmt:"Implement regex matching supporting '.' (any single char) and '*' (zero or more of preceding element).",
+     hints:["DP: dp[i][j] = true if s[:i] matches p[:j].","'*' case: dp[i][j] = dp[i][j-2] (zero occurrences) OR (p[j-2] matches s[i-1] and dp[i-1][j]).","'.' or char match: dp[i][j] = dp[i-1][j-1]."],
+     sol:`def isMatch(s, p):
+    m,n=len(s),len(p)
+    dp=[[False]*(n+1) for _ in range(m+1)]; dp[0][0]=True
+    for j in range(2,n+1):
+        if p[j-1]=='*': dp[0][j]=dp[0][j-2]
+    for i in range(1,m+1):
+        for j in range(1,n+1):
+            if p[j-1]=='*':
+                dp[i][j]=dp[i][j-2]
+                if p[j-2] in (s[i-1],'.'): dp[i][j]|=dp[i-1][j]
+            elif p[j-1] in (s[i-1],'.'): dp[i][j]=dp[i-1][j-1]
+    return dp[m][n]`}
+  ]
+},
+{
+  id:14, icon:"📝", name:"DP on Strings",
+  triggers:["two strings","match","subsequence","edit distance","interleave"],
+  template:`# dp[i][j] = answer for s1[:i] and s2[:j]
+m, n = len(s1), len(s2)
+dp = [[0]*(n+1) for _ in range(m+1)]
+# Base cases
+for i in range(m+1): dp[i][0] = i   # delete all of s1
+for j in range(n+1): dp[0][j] = j   # insert all of s2
+
+for i in range(1, m+1):
+    for j in range(1, n+1):
+        if s1[i-1] == s2[j-1]:
+            dp[i][j] = dp[i-1][j-1]
+        else:
+            dp[i][j] = 1 + min(dp[i-1][j],     # delete
+                                dp[i][j-1],     # insert
+                                dp[i-1][j-1])   # replace`,
+  time:"O(m·n)", space:"O(m·n)", bruteTime:"O(3^(m+n))", bruteSpace:"O(m+n)",
+  problems:[
+    {title:"Edit Distance",
+     stmt:"Find the minimum number of operations (insert, delete, replace) to convert word1 into word2.",
+     hints:["dp[i][j] = min edits to convert word1[:i] to word2[:j].","If chars match: dp[i][j] = dp[i-1][j-1] (free).","Else: 1 + min(replace=dp[i-1][j-1], delete=dp[i-1][j], insert=dp[i][j-1])."],
+     sol:`def minDistance(word1, word2):
+    m,n=len(word1),len(word2)
+    dp=[[0]*(n+1) for _ in range(m+1)]
+    for i in range(m+1): dp[i][0]=i
+    for j in range(n+1): dp[0][j]=j
+    for i in range(1,m+1):
+        for j in range(1,n+1):
+            if word1[i-1]==word2[j-1]: dp[i][j]=dp[i-1][j-1]
+            else: dp[i][j]=1+min(dp[i-1][j-1],dp[i-1][j],dp[i][j-1])
+    return dp[m][n]`},
+    {title:"Longest Common Subsequence",
+     stmt:"Find the length of the longest common subsequence of two strings (characters need not be contiguous).",
+     hints:["dp[i][j] = LCS length of text1[:i] and text2[:j].","If chars match: dp[i][j] = dp[i-1][j-1]+1.","Else: max(dp[i-1][j], dp[i][j-1])."],
+     sol:`def longestCommonSubsequence(text1, text2):
+    m,n=len(text1),len(text2)
+    dp=[[0]*(n+1) for _ in range(m+1)]
+    for i in range(1,m+1):
+        for j in range(1,n+1):
+            if text1[i-1]==text2[j-1]: dp[i][j]=dp[i-1][j-1]+1
+            else: dp[i][j]=max(dp[i-1][j],dp[i][j-1])
+    return dp[m][n]`},
+    {title:"Interleaving String",
+     stmt:"Given s1, s2, s3, determine if s3 is formed by interleaving the characters of s1 and s2 while preserving their relative order.",
+     hints:["dp[i][j] = can s3[:i+j] be formed from s1[:i] interleaved with s2[:j].","Transition: dp[i-1][j] if s1[i-1]==s3[i+j-1] OR dp[i][j-1] if s2[j-1]==s3[i+j-1].","Base: dp[0][0]=True; fill first row and column checking character by character."],
+     sol:`def isInterleave(s1, s2, s3):
+    m,n=len(s1),len(s2)
+    if m+n!=len(s3): return False
+    dp=[[False]*(n+1) for _ in range(m+1)]; dp[0][0]=True
+    for i in range(1,m+1): dp[i][0]=dp[i-1][0] and s1[i-1]==s3[i-1]
+    for j in range(1,n+1): dp[0][j]=dp[0][j-1] and s2[j-1]==s3[j-1]
+    for i in range(1,m+1):
+        for j in range(1,n+1):
+            dp[i][j]=(dp[i-1][j] and s1[i-1]==s3[i+j-1]) or (dp[i][j-1] and s2[j-1]==s3[i+j-1])
+    return dp[m][n]`},
+    {title:"Distinct Subsequences",
+     stmt:"Count the number of distinct subsequences of string s that equal string t.",
+     hints:["dp[i][j] = number of ways s[:i] contains t[:j] as a subsequence.","If s[i-1]==t[j-1]: dp[i][j] = dp[i-1][j-1] + dp[i-1][j] (match or skip s[i-1]).","Else: dp[i][j] = dp[i-1][j] (skip s[i-1])."],
+     sol:`def numDistinct(s, t):
+    m,n=len(s),len(t)
+    dp=[[0]*(n+1) for _ in range(m+1)]
+    for i in range(m+1): dp[i][0]=1
+    for i in range(1,m+1):
+        for j in range(1,n+1):
+            dp[i][j]=dp[i-1][j]
+            if s[i-1]==t[j-1]: dp[i][j]+=dp[i-1][j-1]
+    return dp[m][n]`},
+    {title:"Shortest Common Supersequence",
+     stmt:"Find the shortest string that has both str1 and str2 as subsequences.",
+     hints:["SCS length = len(s1)+len(s2) - LCS(s1,s2).","Reconstruct by tracing the LCS dp table backward from (m,n).","Chars that match → include once; otherwise include the char from whichever direction had larger LCS."],
+     sol:`def shortestCommonSupersequence(s1, s2):
+    m,n=len(s1),len(s2)
+    dp=[[0]*(n+1) for _ in range(m+1)]
+    for i in range(1,m+1):
+        for j in range(1,n+1):
+            if s1[i-1]==s2[j-1]: dp[i][j]=dp[i-1][j-1]+1
+            else: dp[i][j]=max(dp[i-1][j],dp[i][j-1])
+    i,j=m,n; res=[]
+    while i and j:
+        if s1[i-1]==s2[j-1]: res.append(s1[i-1]); i-=1; j-=1
+        elif dp[i-1][j]>dp[i][j-1]: res.append(s1[i-1]); i-=1
+        else: res.append(s2[j-1]); j-=1
+    res.extend(reversed(s1[:i])); res.extend(reversed(s2[:j]))
+    return ''.join(reversed(res))`}
+  ]
+},
+{
+  id:15, icon:"📏", name:"DP on Intervals",
+  triggers:["burst balloons","remove boxes","matrix chain","game theory","cut stick"],
+  template:`# Interval DP: dp[i][j] = optimal answer for subarray [i..j]
+n = len(arr)
+dp = [[0]*n for _ in range(n)]
+
+# Fill by increasing interval length
+for length in range(2, n+1):
+    for i in range(n - length + 1):
+        j = i + length - 1
+        for k in range(i, j):
+            dp[i][j] = max(dp[i][j],
+                dp[i][k] + dp[k+1][j] + cost(i, k, j))`,
+  time:"O(n³)", space:"O(n²)", bruteTime:"O(2ⁿ)", bruteSpace:"O(2ⁿ)",
+  problems:[
+    {title:"Burst Balloons",
+     stmt:"Burst all balloons to maximize coins. Bursting balloon i gives nums[left]*nums[i]*nums[right] where left and right are its current neighbors.",
+     hints:["Think in reverse: which balloon to burst LAST in range (i,j).","dp[i][j] = max coins from balloons strictly between indices i and j.","For k as last balloon: dp[i][j] = max(dp[i][k]+dp[k][j]+nums[i]*nums[k]*nums[j])."],
+     sol:`def maxCoins(nums):
+    nums=[1]+nums+[1]; n=len(nums)
+    dp=[[0]*n for _ in range(n)]
+    for length in range(2,n):
+        for i in range(n-length):
+            j=i+length
+            for k in range(i+1,j):
+                dp[i][j]=max(dp[i][j],nums[i]*nums[k]*nums[j]+dp[i][k]+dp[k][j])
+    return dp[0][n-1]`},
+    {title:"Strange Printer",
+     stmt:"A printer prints consecutive same characters in one turn. Find the minimum turns to print string s.",
+     hints:["dp[i][j] = min turns for s[i..j].","Base: dp[i][i]=1.","If s[k]==s[j] for some k in [i,j): merging saves one turn: dp[i][k]+(dp[k+1][j-1] if exists else 0)."],
+     sol:`def strangePrinter(s):
+    n=len(s)
+    dp=[[0]*n for _ in range(n)]
+    for i in range(n-1,-1,-1):
+        dp[i][i]=1
+        for j in range(i+1,n):
+            dp[i][j]=dp[i][j-1]+1
+            for k in range(i,j):
+                if s[k]==s[j]:
+                    val=dp[i][k]+(dp[k+1][j-1] if k+1<=j-1 else 0)
+                    dp[i][j]=min(dp[i][j],val)
+    return dp[0][n-1]`},
+    {title:"Remove Boxes",
+     stmt:"Remove boxes to maximize points. Removing k consecutive same-color boxes earns k² points.",
+     hints:["dp[i][j][k] = max points for boxes[i..j] with k extra same-color boxes attached before i.","Extend runs by finding matching boxes further right.","If boxes[m]==boxes[i]: try dp[i+1][m-1][0]+dp[m][j][k+1]."],
+     sol:`def removeBoxes(boxes):
+    from functools import lru_cache
+    @lru_cache(maxsize=None)
+    def dp(i,j,k):
+        if i>j: return 0
+        while i<j and boxes[i+1]==boxes[i]: i+=1; k+=1
+        res=(k+1)**2+dp(i+1,j,0)
+        for m in range(i+1,j+1):
+            if boxes[m]==boxes[i]:
+                res=max(res,dp(i+1,m-1,0)+dp(m,j,k+1))
+        return res
+    return dp(0,len(boxes)-1,0)`},
+    {title:"Minimum Cost Tree from Leaf Values",
+     stmt:"Given leaf values, build a binary tree that minimizes the sum of non-leaf node values, where each non-leaf equals the product of max-leaf values in its subtrees.",
+     hints:["Interval DP: dp[i][j] = min cost using leaves[i..j] as all leaves.","Split at every k: cost = dp[i][k]+dp[k+1][j]+max(leaves[i..k])*max(leaves[k+1..j]).","Precompute max_leaf[i][j] for O(1) range max lookups."],
+     sol:`def mctFromLeafValues(arr):
+    n=len(arr)
+    dp=[[0]*n for _ in range(n)]
+    mx=[[0]*n for _ in range(n)]
+    for i in range(n):
+        mx[i][i]=arr[i]
+        for j in range(i+1,n): mx[i][j]=max(mx[i][j-1],arr[j])
+    for length in range(2,n+1):
+        for i in range(n-length+1):
+            j=i+length-1; dp[i][j]=float('inf')
+            for k in range(i,j):
+                dp[i][j]=min(dp[i][j],dp[i][k]+dp[k+1][j]+mx[i][k]*mx[k+1][j])
+    return dp[0][n-1]`},
+    {title:"Stone Game",
+     stmt:"Two players alternately pick stones from either end of a row and play optimally. Does the first player always win?",
+     hints:["Mathematical proof: first player can always guarantee at least half — always return True.","For the actual score difference: dp[i][j] = max advantage current player has over opponent on piles[i..j].","dp[i][j] = max(piles[i]-dp[i+1][j], piles[j]-dp[i][j-1])."],
+     sol:`def stoneGame(piles): return True  # First player always wins
+
+# Score-difference approach:
+def stoneGameDiff(piles):
+    n=len(piles); dp=piles[:]
+    for length in range(2,n+1):
+        new=[]
+        for i in range(n-length+1):
+            j=i+length-1
+            new.append(max(piles[i]-dp[i+1] if i+1<=j else piles[i],
+                           piles[j]-dp[i] if i<=j-1 else piles[j]))
+        dp=new
+    return dp[0]>=0`}
+  ]
+},
+{
+  id:16, icon:"🧹", name:"Sweep Line",
+  triggers:["meeting rooms","overlapping events","employee free time","schedule","timeline"],
+  template:`events = []
+for start, end in intervals:
+    events.append((start, +1))  # interval opens
+    events.append((end,   -1))  # interval closes
+events.sort()  # sort by time
+
+count = max_count = 0
+for time, delta in events:
+    count += delta
+    max_count = max(max_count, count)`,
+  time:"O(n log n)", space:"O(n)", bruteTime:"O(n²)", bruteSpace:"O(1)",
+  problems:[
+    {title:"Meeting Rooms II",
+     stmt:"Given meeting time intervals, find the minimum number of conference rooms required.",
+     hints:["Min-heap: sort meetings by start time; heap tracks end times of active meetings.","If heap top ≤ new start, reuse that room (replace); else push new room.","Final heap size = minimum rooms needed."],
+     sol:`import heapq
+def minMeetingRooms(intervals):
+    intervals.sort()
+    heap=[]
+    for s,e in intervals:
+        if heap and heap[0]<=s: heapq.heapreplace(heap,e)
+        else: heapq.heappush(heap,e)
+    return len(heap)`},
+    {title:"Employee Free Time",
+     stmt:"Given schedules for all employees, find all finite intervals when every employee is free simultaneously.",
+     hints:["Flatten all intervals from all employees and sort by start time.","Track running max_end; a gap between max_end and next interval's start is free time.","Collect all such gap intervals."],
+     sol:`def employeeFreeTime(schedule):
+    intervals=sorted([iv for emp in schedule for iv in emp],key=lambda x:x.start)
+    res=[]; end=intervals[0].end
+    for iv in intervals[1:]:
+        if iv.start>end: res.append(Interval(end,iv.start))
+        end=max(end,iv.end)
+    return res`},
+    {title:"My Calendar I",
+     stmt:"Design a calendar that books events and returns false if a new event overlaps any existing booking.",
+     hints:["Store booked intervals in a sorted list.","Binary search for insertion position; check left and right neighbors for overlap.","Overlap condition: new_start < existing_end AND existing_start < new_end."],
+     sol:`from sortedcontainers import SortedList
+class MyCalendar:
+    def __init__(self): self.cal=SortedList()
+    def book(self,s,e):
+        i=self.cal.bisect_left((s,e))
+        if i<len(self.cal) and self.cal[i][0]<e: return False
+        if i>0 and self.cal[i-1][1]>s: return False
+        self.cal.add((s,e)); return True`},
+    {title:"The Skyline Problem",
+     stmt:"Given buildings [left, right, height], compute the skyline as key points [x, height] where the skyline profile changes.",
+     hints:["Events: building start → add -height to heap; building end → lazy-delete height from heap.","At each x-coordinate event, if max height changes, record a key point.","Use a heap with lazy deletion: skip heights whose buildings have ended."],
+     sol:`import heapq
+def getSkyline(buildings):
+    events=[]
+    for l,r,h in buildings: events+=[(l,-h,r),(r,0,0)]
+    events.sort(); res=[]; heap=[(0,float('inf'))]
+    for x,neg_h,r in events:
+        if neg_h: heapq.heappush(heap,(neg_h,r))
+        while heap[0][1]<=x: heapq.heappop(heap)
+        cur=-heap[0][0]
+        if not res or res[-1][1]!=cur: res.append([x,cur])
+    return res`},
+    {title:"Car Pooling",
+     stmt:"Given trips (numPassengers, from, to) and vehicle capacity, determine if all passengers can be transported.",
+     hints:["Create sweep line events: +passengers at 'from', -passengers at 'to'.","Sort all events by position.","Return false if running passenger count ever exceeds capacity."],
+     sol:`def carPooling(trips, capacity):
+    events=[]
+    for n,f,t in trips: events+=[(f,n),(t,-n)]
+    events.sort(); cur=0
+    for _,delta in events:
+        cur+=delta
+        if cur>capacity: return False
+    return True`}
+  ]
+},
+{
+  id:17, icon:"🔢", name:"Math Patterns",
+  triggers:["digit manipulation","Roman numeral","happy number","Excel column","base convert"],
+  template:`# Common math tricks
+# Digit extraction:  while n: d = n % 10; n //= 10
+# GCD / LCM:        math.gcd(a,b)  |  a*b//math.gcd(a,b)
+# Fast power:       pow(base, exp, mod)   # O(log exp)
+# Perfect square:   int(n**0.5)**2 == n
+# Sieve of primes:  sieve of Eratosthenes
+# Reverse digits:   int(str(abs(n))[::-1])
+# Base conversion:  while n: res.append(n%base); n//=base`,
+  time:"O(log n) typical", space:"O(1)", bruteTime:"O(n)", bruteSpace:"O(n)",
+  problems:[
+    {title:"Integer to Roman",
+     stmt:"Convert an integer (1–3999) to its Roman numeral representation.",
+     hints:["Use greedy: repeatedly subtract the largest possible value.","Hardcode all 13 symbol-value pairs including subtractive forms (IV=4, IX=9, XL=40, ...).","Append the symbol each time its value is subtracted from n."],
+     sol:`def intToRoman(num):
+    vals=[(1000,'M'),(900,'CM'),(500,'D'),(400,'CD'),
+          (100,'C'),(90,'XC'),(50,'L'),(40,'XL'),
+          (10,'X'),(9,'IX'),(5,'V'),(4,'IV'),(1,'I')]
+    res=''
+    for v,s in vals:
+        while num>=v: res+=s; num-=v
+    return res`},
+    {title:"Happy Number",
+     stmt:"Determine if n is a happy number: repeatedly replace n with the sum of squares of its digits until it reaches 1 or cycles.",
+     hints:["Use Floyd's cycle detection (slow/fast pointers) or a seen set.","Next number: sum(int(d)**2 for d in str(n)).","All unhappy numbers eventually cycle through 4."],
+     sol:`def isHappy(n):
+    def nxt(n): return sum(int(d)**2 for d in str(n))
+    slow=fast=n
+    while True:
+        slow=nxt(slow); fast=nxt(nxt(fast))
+        if slow==fast: return slow==1`},
+    {title:"Excel Sheet Column Number",
+     stmt:"Convert an Excel column title (e.g. 'AB') to its corresponding column number.",
+     hints:["Think base-26: A=1, B=2, ..., Z=26.","Iterate left to right: result = result*26 + (char - 'A' + 1).","Similar to parsing a base-26 number string."],
+     sol:`def titleToNumber(columnTitle):
+    res=0
+    for c in columnTitle:
+        res=res*26+(ord(c)-ord('A')+1)
+    return res`},
+    {title:"Pow(x, n)",
+     stmt:"Implement pow(x, n) efficiently, handling negative exponents.",
+     hints:["Fast exponentiation: pow(x,n) = pow(x,n//2)² [× x if n is odd].","Handle negative n: return 1/pow(x,-n).","O(log n) — halve the exponent each step."],
+     sol:`def myPow(x, n):
+    if n<0: x,n=1/x,-n
+    def fast(x,n):
+        if n==0: return 1
+        half=fast(x,n//2)
+        return half*half if n%2==0 else half*half*x
+    return fast(x,n)`},
+    {title:"Reverse Integer",
+     stmt:"Reverse the digits of a 32-bit signed integer. Return 0 if the reversed number overflows.",
+     hints:["Pop digits with mod 10 and build result multiplying by 10 each step.","Check overflow bounds before finalizing: must fit in [-2³¹, 2³¹-1].","Track sign separately; work with absolute value."],
+     sol:`def reverse(x):
+    sign=1 if x>=0 else -1; x=abs(x); res=0
+    while x: res=res*10+x%10; x//=10
+    res*=sign
+    return res if -(2**31)<=res<=2**31-1 else 0`}
+  ]
+},
+{
+  id:18, icon:"🏗️", name:"Design Patterns",
+  triggers:["O(1) cache","LRU","LFU","serialize tree","file system"],
+  template:`# LRU Cache — OrderedDict gives O(1) get/put/evict
+from collections import OrderedDict
+class LRUCache:
+    def __init__(self, capacity):
+        self.cap = capacity
+        self.cache = OrderedDict()
+    def get(self, key):
+        if key not in self.cache: return -1
+        self.cache.move_to_end(key)   # mark recently used
+        return self.cache[key]
+    def put(self, key, value):
+        if key in self.cache: self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.cap:
+            self.cache.popitem(last=False)  # evict LRU`,
+  time:"O(1) get/put", space:"O(capacity)", bruteTime:"O(n)", bruteSpace:"O(n)",
+  problems:[
+    {title:"LRU Cache",
+     stmt:"Design a cache with O(1) get and put that evicts the least recently used item when over capacity.",
+     hints:["OrderedDict maintains insertion order with O(1) move_to_end.","On every get and put, move key to end (most recently used).","On eviction, popitem(last=False) removes the LRU (front) entry."],
+     sol:`from collections import OrderedDict
+class LRUCache:
+    def __init__(self,cap): self.cap=cap; self.cache=OrderedDict()
+    def get(self,key):
+        if key not in self.cache: return -1
+        self.cache.move_to_end(key); return self.cache[key]
+    def put(self,key,val):
+        if key in self.cache: self.cache.move_to_end(key)
+        self.cache[key]=val
+        if len(self.cache)>self.cap: self.cache.popitem(last=False)`},
+    {title:"LFU Cache",
+     stmt:"Design a cache that evicts the least frequently used item; on ties, evict the least recently used.",
+     hints:["Track key→freq map and freq→OrderedDict(keys) map.","On access, increment frequency; move key from old freq bucket to new one.","Track min_freq; reset to 1 whenever a brand new key is inserted."],
+     sol:`from collections import defaultdict, OrderedDict
+class LFUCache:
+    def __init__(self,cap):
+        self.cap=cap; self.min_f=0; self.kf={}; self.fk=defaultdict(OrderedDict); self.kv={}
+    def _touch(self,k):
+        f=self.kf[k]; self.kf[k]+=1; del self.fk[f][k]
+        if not self.fk[f] and f==self.min_f: self.min_f+=1
+        self.fk[f+1][k]=None
+    def get(self,k):
+        if k not in self.kv: return -1
+        self._touch(k); return self.kv[k]
+    def put(self,k,v):
+        if not self.cap: return
+        if k in self.kv: self._touch(k); self.kv[k]=v; return
+        if len(self.kv)==self.cap:
+            evict,_=self.fk[self.min_f].popitem(last=False)
+            del self.kv[evict]; del self.kf[evict]
+        self.kv[k]=v; self.kf[k]=1; self.fk[1][k]=None; self.min_f=1`},
+    {title:"Serialize and Deserialize Binary Tree",
+     stmt:"Design an algorithm to serialize a binary tree to a string and deserialize it back to the original structure.",
+     hints:["Preorder DFS with null markers: root,left,right; 'null' for missing nodes.","Serialize is straightforward recursion.","Deserialize: split on commas, use an iterator, build recursively consuming values."],
+     sol:`class Codec:
+    def serialize(self,root):
+        if not root: return 'null'
+        return str(root.val)+','+self.serialize(root.left)+','+self.serialize(root.right)
+    def deserialize(self,data):
+        vals=iter(data.split(','))
+        def build():
+            v=next(vals)
+            if v=='null': return None
+            node=TreeNode(int(v))
+            node.left=build(); node.right=build()
+            return node
+        return build()`},
+    {title:"All O'one Data Structure",
+     stmt:"Design a structure with O(1) inc, dec, getMaxKey, and getMinKey operations for string counts.",
+     hints:["Doubly linked list of frequency buckets + hashmap key→bucket enables O(1) all operations.","Each bucket is a set of keys at that frequency.","On inc/dec, move key to adjacent frequency bucket; update min_freq pointer accordingly."],
+     sol:`from collections import defaultdict, OrderedDict
+class AllOne:
+    def __init__(self): self.freq={}; self.fk=defaultdict(OrderedDict)
+    def inc(self,k):
+        f=self.freq.get(k,0)
+        if f: del self.fk[f][k]
+        self.freq[k]=f+1; self.fk[f+1][k]=None
+    def dec(self,k):
+        f=self.freq[k]; del self.fk[f][k]
+        if f==1: del self.freq[k]
+        else: self.freq[k]=f-1; self.fk[f-1][k]=None
+    def getMaxKey(self): return next(iter(max(self.fk.items())[1])) if self.fk else ''
+    def getMinKey(self): return next(iter(min(self.fk.items())[1])) if self.fk else ''`},
+    {title:"Design In-Memory File System",
+     stmt:"Implement ls, mkdir, addContentToFile, and readContentFromFile for an in-memory file system.",
+     hints:["Use a Trie where each node has children (subdirectories) and optional content string (file).","ls: if path points to a file return [filename]; else return sorted list of child names.","Navigate by splitting the path on '/'."],
+     sol:`class FileSystem:
+    def __init__(self): self.root={'c':{},'f':''}
+    def _nav(self,path):
+        node=self.root
+        for p in path.split('/'):
+            if p: node=node['c'].setdefault(p,{'c':{},'f':''})
+        return node
+    def ls(self,path):
+        node=self._nav(path)
+        if node['f']: return [path.split('/')[-1]]
+        return sorted(node['c'].keys())
+    def mkdir(self,path): self._nav(path)
+    def addContentToFile(self,path,content): self._nav(path)['f']+=content
+    def readContentFromFile(self,path): return self._nav(path)['f']`}
+  ]
+},
+{
+  id:19, icon:"📆", name:"Interval Merge",
+  triggers:["merge overlapping","insert interval","non-overlapping","arrows","calendar"],
+  template:`intervals.sort(key=lambda x: x[0])
+merged = [intervals[0]]
+
+for start, end in intervals[1:]:
+    if start <= merged[-1][1]:
+        # Overlapping — extend the last interval
+        merged[-1][1] = max(merged[-1][1], end)
+    else:
+        # Gap — start a new interval
+        merged.append([start, end])`,
+  time:"O(n log n)", space:"O(n)", bruteTime:"O(n²)", bruteSpace:"O(n)",
+  problems:[
+    {title:"Merge Intervals",
+     stmt:"Given a collection of intervals, merge all overlapping intervals and return the merged list.",
+     hints:["Sort by start time.","If current interval's start ≤ last merged end: extend last interval's end.","Otherwise, the gap is real — append as a new interval."],
+     sol:`def merge(intervals):
+    intervals.sort(key=lambda x:x[0])
+    merged=[intervals[0]]
+    for s,e in intervals[1:]:
+        if s<=merged[-1][1]: merged[-1][1]=max(merged[-1][1],e)
+        else: merged.append([s,e])
+    return merged`},
+    {title:"Insert Interval",
+     stmt:"Insert a new interval into a sorted non-overlapping list, merging with any overlapping intervals.",
+     hints:["First, collect all intervals ending before new interval starts (no overlap before).","Merge all intervals that overlap with new interval by extending its boundaries.","Finally, append all remaining intervals after the merged zone."],
+     sol:`def insert(intervals, new):
+    res=[]; i=0; n=len(intervals)
+    while i<n and intervals[i][1]<new[0]: res.append(intervals[i]); i+=1
+    while i<n and intervals[i][0]<=new[1]:
+        new[0]=min(new[0],intervals[i][0]); new[1]=max(new[1],intervals[i][1]); i+=1
+    res.append(new); res.extend(intervals[i:]); return res`},
+    {title:"Non-overlapping Intervals",
+     stmt:"Find the minimum number of intervals to remove to make all remaining intervals non-overlapping.",
+     hints:["Greedy: sort by end time.","Always keep the interval that ends earliest (it conflicts with fewest future intervals).","Count any interval whose start < end of last kept interval as a removal."],
+     sol:`def eraseOverlapIntervals(intervals):
+    intervals.sort(key=lambda x:x[1])
+    count=0; end=float('-inf')
+    for s,e in intervals:
+        if s>=end: end=e
+        else: count+=1
+    return count`},
+    {title:"Minimum Arrows to Burst Balloons",
+     stmt:"Balloons span horizontal segments on a wall. Find the minimum number of vertical arrows needed to burst all balloons.",
+     hints:["Sort balloons by their end position (rightmost point).","Shoot at the end of the first balloon; all overlapping balloons are also burst.","Count a new arrow only when a balloon starts after the last arrow position."],
+     sol:`def findMinArrowShots(points):
+    points.sort(key=lambda x:x[1])
+    arrows=1; end=points[0][1]
+    for s,e in points[1:]:
+        if s>end: arrows+=1; end=e
+    return arrows`},
+    {title:"Meeting Rooms",
+     stmt:"Given a list of meeting time intervals, determine if a person could attend all meetings without any overlap.",
+     hints:["Sort all meetings by start time.","For each consecutive pair, check if the second starts before the first ends.","Return false immediately if any overlap is detected."],
+     sol:`def canAttendMeetings(intervals):
+    intervals.sort(key=lambda x:x[0])
+    for i in range(1,len(intervals)):
+        if intervals[i][0]<intervals[i-1][1]: return False
+    return True`}
+  ]
+},
+{
+  id:20, icon:"🔡", name:"String Algorithms",
+  triggers:["KMP","rolling hash","Z-algorithm","Manacher palindrome","pattern match"],
+  template:`# KMP — O(n+m) pattern search
+def kmp_fail(pattern):
+    m=len(pattern); fail=[0]*m; j=0
+    for i in range(1,m):
+        while j>0 and pattern[i]!=pattern[j]: j=fail[j-1]
+        if pattern[i]==pattern[j]: j+=1
+        fail[i]=j
+    return fail
+
+def kmp_search(text, pattern):
+    fail=kmp_fail(pattern); j=0; results=[]
+    for i,c in enumerate(text):
+        while j>0 and c!=pattern[j]: j=fail[j-1]
+        if c==pattern[j]: j+=1
+        if j==len(pattern): results.append(i-j+1); j=fail[j-1]
+    return results`,
+  time:"O(n+m)", space:"O(m)", bruteTime:"O(n·m)", bruteSpace:"O(1)",
+  problems:[
+    {title:"Implement strStr (KMP)",
+     stmt:"Find the first occurrence index of needle in haystack using KMP. Return -1 if needle is not present.",
+     hints:["Precompute the failure (partial match) function for needle in O(m).","failure[i] = length of longest proper prefix of needle[:i+1] that is also a suffix.","During search, use the failure function to avoid redundant character comparisons."],
+     sol:`def strStr(haystack, needle):
+    if not needle: return 0
+    m=len(needle); fail=[0]*m; j=0
+    for i in range(1,m):
+        while j and needle[i]!=needle[j]: j=fail[j-1]
+        if needle[i]==needle[j]: j+=1
+        fail[i]=j
+    j=0
+    for i,c in enumerate(haystack):
+        while j and c!=needle[j]: j=fail[j-1]
+        if c==needle[j]: j+=1
+        if j==m: return i-m+1
+    return -1`},
+    {title:"Longest Palindromic Substring",
+     stmt:"Find the longest palindromic substring in a string s.",
+     hints:["Expand around center: O(n²) time, O(1) space.","There are 2n-1 centers (n single chars + n-1 gaps between chars).","For each center, expand outward while characters match; track the longest."],
+     sol:`def longestPalindrome(s):
+    res=''; n=len(s)
+    def expand(l,r):
+        while l>=0 and r<n and s[l]==s[r]: l-=1; r+=1
+        return s[l+1:r]
+    for i in range(n):
+        p1=expand(i,i); p2=expand(i,i+1)
+        res=max(res,p1,p2,key=len)
+    return res`},
+    {title:"Repeated String Match",
+     stmt:"Find the minimum number of times string a must be repeated such that b is a substring of the result.",
+     hints:["Repeat a until its length >= len(b); that's the minimum necessary.","Check once, then check with one extra repetition to cover cross-boundary matches.","Return reps, reps+1, or -1 if b can never be a substring."],
+     sol:`def repeatedStringMatch(a, b):
+    reps=1; s=a
+    while len(s)<len(b): s+=a; reps+=1
+    if b in s: return reps
+    if b in s+a: return reps+1
+    return -1`},
+    {title:"Find All Anagrams in a String",
+     stmt:"Find all starting indices of anagram substrings of pattern p within string s.",
+     hints:["Fixed-size sliding window of length len(p).","Compare character frequency arrays (size 26 for lowercase letters).","Slide the window: add right char, remove leftmost char, compare arrays."],
+     sol:`def findAnagrams(s, p):
+    if len(p)>len(s): return []
+    pc=[0]*26; sc=[0]*26; res=[]
+    for c in p: pc[ord(c)-97]+=1
+    for i,c in enumerate(s):
+        sc[ord(c)-97]+=1
+        if i>=len(p): sc[ord(s[i-len(p)])-97]-=1
+        if sc==pc: res.append(i-len(p)+1)
+    return res`},
+    {title:"Longest Duplicate Substring",
+     stmt:"Find the longest substring that appears at least twice in string s.",
+     hints:["Binary search on length L + Rabin-Karp rolling hash for duplicate detection.","For each candidate L, hash all substrings of that length; a repeated hash = candidate answer.","Binary search: if duplicate found at length L try longer, else try shorter."],
+     sol:`def longestDupSubstring(s):
+    n=len(s); MOD=2**61-1; BASE=31
+    def check(L):
+        h=0; pw=pow(BASE,L,MOD)
+        for c in s[:L]: h=(h*BASE+ord(c))%MOD
+        seen={h}
+        for i in range(1,n-L+1):
+            h=(h*BASE-ord(s[i-1])*pw+ord(s[i+L-1]))%MOD
+            if h in seen: return i
+            seen.add(h)
+        return -1
+    lo,hi=1,n-1; start=0
+    while lo<=hi:
+        mid=(lo+hi)//2; idx=check(mid)
+        if idx>=0: start=idx; lo=mid+1
+        else: hi=mid-1
+    return s[start:start+lo-1]`}
+  ]
+}
 ];
 
 // ===================== STATE =====================
@@ -1158,8 +2007,7 @@ function switchTab(name){
 function renderSidebar(){
   const el=document.getElementById('sidebar-list');
   const today=new Date().toISOString().slice(0,10);
-  // Patterns 1-10 (full data)
-  let html=PATTERNS.map(p=>{
+  const html=PATTERNS.map(p=>{
     const stats=state.patternStats[p.id]||{};
     const isDue=stats.nextReview && stats.nextReview<=today;
     return `<div class="pat-item" id="pat-item-${p.id}" onclick="selectPattern(${p.id})">
@@ -1168,13 +2016,6 @@ function renderSidebar(){
       ${isDue?'<span class="due-badge">Due</span>':''}
     </div>`;
   }).join('');
-  // Patterns 11-20 (stubs)
-  html+=PATTERN_NAMES_11_20.map(p=>`
-    <div class="pat-item" style="opacity:.45;cursor:default" title="Coming soon">
-      <span class="pat-icon">${p.icon}</span>
-      <span class="pat-name">${p.name}</span>
-      <span style="font-size:.62rem;color:var(--sub);margin-left:auto">soon</span>
-    </div>`).join('');
   el.innerHTML=html;
 }
 
@@ -1395,6 +2236,198 @@ function getSVG(id){
       <!-- Arrows -->
       <line x1="170" y1="65" x2="228" y2="75" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4"/>
       <text x="290" y="135" fill="#22c55e" font-size="9" text-anchor="middle">O(n log k)</text>
+    </svg>`,
+    11:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- Tree with values bubbling up -->
+      <circle cx="180" cy="20" r="16" fill="#0f2a3f" stroke="#38bdf8" stroke-width="2"/>
+      <text x="180" y="25" fill="#38bdf8" font-size="10" text-anchor="middle">root</text>
+      <circle cx="100" cy="72" r="14" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="100" y="77" fill="#94a3b8" font-size="10" text-anchor="middle">left</text>
+      <circle cx="260" cy="72" r="14" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="260" y="77" fill="#94a3b8" font-size="10" text-anchor="middle">right</text>
+      <line x1="167" y1="32" x2="113" y2="60" stroke="#334155" stroke-width="1.5"/>
+      <line x1="193" y1="32" x2="247" y2="60" stroke="#334155" stroke-width="1.5"/>
+      <!-- Arrows showing values flowing up -->
+      <line x1="110" y1="58" x2="168" y2="30" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4" style="animation:arrowPulse 1.5s infinite"/>
+      <line x1="250" y1="58" x2="192" y2="30" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4" style="animation:arrowPulse 1.5s infinite"/>
+      <!-- Formula box -->
+      <rect x="60" y="105" width="240" height="36" fill="#0a1628" rx="6" stroke="#334155"/>
+      <text x="180" y="119" fill="#a5f3fc" font-size="10" text-anchor="middle">ans = max(ans, left + right + val)</text>
+      <text x="180" y="133" fill="#94a3b8" font-size="9" text-anchor="middle">return max(left, right) + val  ← to parent</text>
+    </svg>`,
+    12:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- Nodes with distances -->
+      ${[[60,40,'A','0'],[180,30,'B','∞'],[300,40,'C','∞'],[120,110,'D','∞'],[240,110,'E','∞']].map(([x,y,l,d],i)=>`
+        <circle cx="${x}" cy="${y}" r="18" fill="${i===0?'#0f2a3f':'#1e293b'}" stroke="${i===0?'#38bdf8':'#334155'}" stroke-width="${i===0?2:1.5}" style="${i===0?'animation:pulse 2s infinite':''}"/>
+        <text x="${x}" y="${y-4}" fill="${i===0?'#38bdf8':'#94a3b8'}" font-size="10" text-anchor="middle">${l}</text>
+        <text x="${x}" y="${y+8}" fill="${i===0?'#22c55e':'#ef4444'}" font-size="9" text-anchor="middle">d=${d}</text>`).join('')}
+      <!-- Edges with weights -->
+      <line x1="78" y1="46" x2="162" y2="36" stroke="#334155" stroke-width="1.5"/>
+      <text x="118" y="36" fill="#f97316" font-size="9" text-anchor="middle">4</text>
+      <line x1="198" y1="44" x2="282" y2="44" stroke="#334155" stroke-width="1.5"/>
+      <text x="240" y="38" fill="#f97316" font-size="9" text-anchor="middle">2</text>
+      <line x1="70" y1="56" x2="112" y2="96" stroke="#334155" stroke-width="1.5"/>
+      <line x1="180" y1="48" x2="180" y2="96" stroke="#38bdf8" stroke-width="2" style="animation:arrowPulse 1.5s infinite"/>
+      <text x="193" y="75" fill="#38bdf8" font-size="9">relax</text>
+      <!-- Min-heap indicator -->
+      <rect x="270" y="100" width="80" height="40" fill="#0a1628" rx="4" stroke="#a78bfa"/>
+      <text x="310" y="115" fill="#a78bfa" font-size="9" text-anchor="middle">min-heap</text>
+      <text x="310" y="130" fill="#a5b4fc" font-size="9" text-anchor="middle">(dist, node)</text>
+    </svg>`,
+    13:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- Decision tree -->
+      <circle cx="180" cy="18" r="14" fill="#0f2a3f" stroke="#38bdf8" stroke-width="2"/>
+      <text x="180" y="23" fill="#38bdf8" font-size="9" text-anchor="middle">start</text>
+      <!-- Level 1 -->
+      <circle cx="90" cy="60" r="12" fill="#1e293b" stroke="#334155"/>
+      <text x="90" y="65" fill="#94a3b8" font-size="9" text-anchor="middle">A</text>
+      <circle cx="180" cy="60" r="12" fill="#1e293b" stroke="#334155"/>
+      <text x="180" y="65" fill="#94a3b8" font-size="9" text-anchor="middle">B</text>
+      <circle cx="270" cy="60" r="12" fill="#1e293b" stroke="#334155"/>
+      <text x="270" y="65" fill="#94a3b8" font-size="9" text-anchor="middle">C</text>
+      <!-- Level 2 (partial) -->
+      <circle cx="55" cy="108" r="11" fill="#0f4c2a" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="55" y="113" fill="#86efac" font-size="8" text-anchor="middle">✓</text>
+      <circle cx="125" cy="108" r="11" fill="#4a1942" stroke="#ef4444" stroke-width="1.5"/>
+      <text x="125" y="113" fill="#fca5a5" font-size="8" text-anchor="middle">✗</text>
+      <circle cx="215" cy="108" r="11" fill="#0f4c2a" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="215" y="113" fill="#86efac" font-size="8" text-anchor="middle">✓</text>
+      <!-- Edges -->
+      <line x1="168" y1="30" x2="100" y2="50" stroke="#334155" stroke-width="1.2"/>
+      <line x1="180" y1="32" x2="180" y2="48" stroke="#334155" stroke-width="1.2"/>
+      <line x1="192" y1="30" x2="260" y2="50" stroke="#334155" stroke-width="1.2"/>
+      <line x1="82" y1="70" x2="62" y2="98" stroke="#334155" stroke-width="1.2"/>
+      <line x1="98" y1="70" x2="118" y2="98" stroke="#334155" stroke-width="1.2"/>
+      <line x1="180" y1="72" x2="208" y2="98" stroke="#334155" stroke-width="1.2"/>
+      <!-- Backtrack arrow -->
+      <path d="M 130 108 Q 155 85 170 72" fill="none" stroke="#f97316" stroke-width="1.5" stroke-dasharray="4" style="animation:arrowPulse 1.5s infinite"/>
+      <text x="158" y="82" fill="#f97316" font-size="8">backtrack</text>
+      <text x="180" y="142" fill="#94a3b8" font-size="9" text-anchor="middle">choose → explore → unchoose</text>
+    </svg>`,
+    14:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- DP table grid -->
+      <text x="30" y="18" fill="#94a3b8" font-size="9">s1 \\ s2</text>
+      ${['','h','o','r','s','e'].map((c,j)=>`<text x="${60+j*40}" y="18" fill="#38bdf8" font-size="11" text-anchor="middle" font-weight="bold">${c}</text>`).join('')}
+      ${['','r','o','s'].map((c,i)=>`<text x="30" y="${38+i*34}" fill="#38bdf8" font-size="11" text-anchor="middle" font-weight="bold">${c}</text>`).join('')}
+      <!-- Cells -->
+      ${[0,1,2,3].map(i=>[0,1,2,3,4,5].map(j=>{
+        const val=[[0,1,2,3,4,5],[1,1,2,3,4,5],[2,2,1,2,3,4],[3,3,2,1,2,3]][i][j];
+        const hi=i===3&&j===5;
+        return `<rect x="${42+j*40}" y="${22+i*34}" width="36" height="28" fill="${hi?'#0f2a3f':'#1e293b'}" rx="3" stroke="${hi?'#38bdf8':'#334155'}" stroke-width="${hi?2:1}"/>
+        <text x="${60+j*40}" y="${40+i*34}" fill="${hi?'#38bdf8':'#94a3b8'}" font-size="12" text-anchor="middle" font-weight="${hi?'bold':'normal'}">${val}</text>`;}).join('')).join('')}
+      <!-- Diagonal arrow hint -->
+      <path d="M 100 130 L 100 138 L 336 138" fill="none" stroke="#f97316" stroke-width="1.5"/>
+      <text x="218" y="148" fill="#f97316" font-size="9" text-anchor="middle">edit distance[rope→horse] = 3</text>
+    </svg>`,
+    15:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- Interval brackets -->
+      <text x="180" y="16" fill="#94a3b8" font-size="10" text-anchor="middle">Interval DP — dp[i][j] = optimal for [i..j]</text>
+      <!-- Array elements -->
+      ${[3,1,4,1,5,9].map((v,i)=>`
+        <rect x="${20+i*52}" y="28" width="44" height="30" fill="#1e293b" stroke="#334155" rx="4"/>
+        <text x="${42+i*52}" y="48" fill="#94a3b8" font-size="14" text-anchor="middle">${v}</text>`).join('')}
+      <!-- Interval brackets for subproblems -->
+      <path d="M 20 62 L 20 70 L 176 70 L 176 62" fill="none" stroke="#38bdf8" stroke-width="1.5"/>
+      <text x="98" y="82" fill="#38bdf8" font-size="9" text-anchor="middle">dp[0][2]</text>
+      <path d="M 176 62 L 176 90 L 332 90 L 332 62" fill="none" stroke="#a78bfa" stroke-width="1.5" style="animation:pulse 2s infinite"/>
+      <text x="254" y="102" fill="#a78bfa" font-size="9" text-anchor="middle">dp[3][5]</text>
+      <!-- Full span -->
+      <path d="M 20 110 L 20 120 L 332 120 L 332 110" fill="none" stroke="#f97316" stroke-width="2"/>
+      <text x="176" y="135" fill="#f97316" font-size="10" text-anchor="middle">dp[0][5] = dp[0][k] + dp[k+1][5] + cost</text>
+      <!-- Split marker -->
+      <line x1="176" y1="24" x2="176" y2="108" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4"/>
+      <text x="176" y="148" fill="#22c55e" font-size="9" text-anchor="middle">try all splits k</text>
+    </svg>`,
+    16:`<svg width="360" height="130" viewBox="0 0 360 130">
+      <!-- Timeline -->
+      <line x1="20" y1="65" x2="340" y2="65" stroke="#334155" stroke-width="2"/>
+      <!-- Intervals -->
+      ${[[30,130,'#0f4c2a','#22c55e','Mtg 1'],[70,180,'#0f2a3f','#38bdf8','Mtg 2'],[150,260,'#1e1040','#a78bfa','Mtg 3'],[200,320,'#4a1942','#f97316','Mtg 4']].map(([s,e,bg,stroke,label],i)=>`
+        <rect x="${s}" y="${45+i%2*16}" width="${e-s}" height="14" fill="${bg}" rx="3" stroke="${stroke}" stroke-width="1.5" style="${i===1?'animation:pulse 1.5s infinite':''}"/>
+        <text x="${(s+e)/2}" y="${55+i%2*16}" fill="${stroke}" font-size="8" text-anchor="middle">${label}</text>`).join('')}
+      <!-- Sweep line -->
+      <line x1="180" y1="25" x2="180" y2="105" stroke="#f97316" stroke-width="2" stroke-dasharray="4" style="animation:slideRight 3s linear infinite"/>
+      <text x="180" y="118" fill="#f97316" font-size="9" text-anchor="middle">sweep →</text>
+      <!-- Room count -->
+      <text x="290" y="22" fill="#22c55e" font-size="10" text-anchor="middle">max overlap</text>
+      <text x="290" y="35" fill="#22c55e" font-size="18" text-anchor="middle" font-weight="bold">2</text>
+    </svg>`,
+    17:`<svg width="360" height="130" viewBox="0 0 360 130">
+      <!-- Number display -->
+      <rect x="20" y="25" width="150" height="40" fill="#1e293b" rx="6" stroke="#334155"/>
+      <text x="95" y="38" fill="#94a3b8" font-size="9" text-anchor="middle">Input</text>
+      <text x="95" y="57" fill="#e2e8f0" font-size="20" text-anchor="middle" font-weight="bold">1994</text>
+      <!-- Arrow -->
+      <text x="195" y="50" fill="#38bdf8" font-size="18" text-anchor="middle">→</text>
+      <!-- Roman output -->
+      <rect x="215" y="25" width="130" height="40" fill="#0f2a3f" rx="6" stroke="#38bdf8" stroke-width="1.5"/>
+      <text x="280" y="38" fill="#38bdf8" font-size="9" text-anchor="middle">Roman</text>
+      <text x="280" y="57" fill="#38bdf8" font-size="16" text-anchor="middle" font-weight="bold">MCMXCIV</text>
+      <!-- Digit extraction -->
+      <text x="95" y="90" fill="#94a3b8" font-size="9" text-anchor="middle">digit = n % 10; n //= 10</text>
+      ${[4,9,9,1].map((d,i)=>`
+        <rect x="${20+i*42}" y="98" width="36" height="22" fill="#1e293b" rx="3" stroke="${i===0?'#f97316':'#334155'}" stroke-width="${i===0?2:1}"/>
+        <text x="${38+i*42}" y="113" fill="${i===0?'#f97316':'#94a3b8'}" font-size="12" text-anchor="middle">${d}</text>`).join('')}
+      <text x="210" y="112" fill="#94a3b8" font-size="9">← digits</text>
+      <text x="280" y="112" fill="#22c55e" font-size="9" text-anchor="middle">mod 10 each step</text>
+    </svg>`,
+    18:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- Hash map boxes -->
+      <text x="100" y="18" fill="#94a3b8" font-size="10" text-anchor="middle">HashMap (O(1) lookup)</text>
+      ${[['key1','A'],['key2','B'],['key3','C']].map(([k,v],i)=>`
+        <rect x="20" y="${28+i*32}" width="60" height="26" fill="#1e293b" rx="3" stroke="#334155"/>
+        <text x="50" y="${45+i*32}" fill="#94a3b8" font-size="10" text-anchor="middle">${k}</text>
+        <line x1="80" y1="${41+i*32}" x2="110" y2="${41+i*32}" stroke="#38bdf8" stroke-width="1.5"/>
+        <rect x="110" y="${28+i*32}" width="60" height="26" fill="${i===1?'#0f2a3f':'#1e293b'}" rx="3" stroke="${i===1?'#38bdf8':'#334155'}" stroke-width="${i===1?2:1}"/>
+        <text x="140" y="${45+i*32}" fill="${i===1?'#38bdf8':'#94a3b8'}" font-size="10" text-anchor="middle">${v}</text>`).join('')}
+      <!-- Doubly linked list -->
+      <text x="280" y="18" fill="#94a3b8" font-size="10" text-anchor="middle">LRU Order</text>
+      ${['MRU','...','LRU'].map((l,i)=>`
+        <rect x="220" y="${28+i*36}" width="120" height="28" fill="${i===0?'#0f2a3f':i===2?'#4a1942':'#1e293b'}" rx="4" stroke="${i===0?'#38bdf8':i===2?'#ef4444':'#334155'}" stroke-width="${i===0||i===2?2:1}"/>
+        <text x="280" y="${47+i*36}" fill="${i===0?'#38bdf8':i===2?'#fca5a5':'#94a3b8'}" font-size="10" text-anchor="middle">${l}</text>
+        ${i<2?`<line x1="280" y1="${56+i*36}" x2="280" y2="${64+i*36}" stroke="#334155" stroke-width="1.5"/>`:''}
+      `).join('')}
+      <text x="280" y="140" fill="#ef4444" font-size="9" text-anchor="middle">evict LRU when full</text>
+    </svg>`,
+    19:`<svg width="360" height="140" viewBox="0 0 360 140">
+      <!-- Before merge -->
+      <text x="100" y="16" fill="#94a3b8" font-size="10" text-anchor="middle">Before</text>
+      ${[[20,80],[60,120],[100,150],[130,160]].map(([s,e],i)=>`
+        <rect x="${s}" y="${24+i*14}" width="${e-s}" height="10" fill="#1e293b" rx="2" stroke="#ef4444" stroke-width="1"/>
+        `).join('')}
+      <!-- Arrow -->
+      <text x="200" y="55" fill="#38bdf8" font-size="22" text-anchor="middle">→</text>
+      <!-- After merge -->
+      <text x="285" y="16" fill="#94a3b8" font-size="10" text-anchor="middle">After merge</text>
+      <rect x="220" y="28" width="130" height="10" fill="#0f4c2a" rx="2" stroke="#22c55e" stroke-width="2" style="animation:pulse 2s infinite"/>
+      <text x="285" y="55" fill="#22c55e" font-size="10" text-anchor="middle">[20, 160]</text>
+      <!-- Condition -->
+      <rect x="20" y="92" width="320" height="36" fill="#0a1628" rx="6" stroke="#334155"/>
+      <text x="180" y="107" fill="#a5f3fc" font-size="10" text-anchor="middle">if start ≤ last_end: merge (extend last_end)</text>
+      <text x="180" y="121" fill="#94a3b8" font-size="9" text-anchor="middle">else: gap — append new interval</text>
+    </svg>`,
+    20:`<svg width="360" height="150" viewBox="0 0 360 150">
+      <!-- Text + pattern -->
+      <text x="20" y="18" fill="#94a3b8" font-size="10">text:</text>
+      ${['A','B','A','B','C','A','B','A','B'].map((c,i)=>`
+        <rect x="${50+i*30}" y="6" width="26" height="22" fill="${[2,3,4].includes(i)?'#0f2a3f':'#1e293b'}" rx="3" stroke="${[2,3,4].includes(i)?'#38bdf8':'#334155'}" stroke-width="${[2,3,4].includes(i)?2:1}"/>
+        <text x="${63+i*30}" y="22" fill="${[2,3,4].includes(i)?'#38bdf8':'#94a3b8'}" font-size="11" text-anchor="middle">${c}</text>`).join('')}
+      <text x="20" y="52" fill="#94a3b8" font-size="10">pattern:</text>
+      ${['A','B','C'].map((c,i)=>`
+        <rect x="${110+i*30}" y="40" width="26" height="22" fill="#14532d" rx="3" stroke="#22c55e" stroke-width="1.5"/>
+        <text x="${123+i*30}" y="56" fill="#86efac" font-size="11" text-anchor="middle">${c}</text>`).join('')}
+      <!-- Failure function -->
+      <text x="20" y="82" fill="#94a3b8" font-size="9">KMP fail[]:</text>
+      ${['A','B','C','A','B'].map((c,i)=>`
+        <rect x="${90+i*40}" y="70" width="36" height="22" fill="#1e293b" rx="3" stroke="#334155"/>
+        <text x="${108+i*40}" y="82" fill="#94a3b8" font-size="10" text-anchor="middle">${c}</text>
+        <text x="${108+i*40}" y="96" fill="#a78bfa" font-size="10" text-anchor="middle">${[0,0,0,1,2][i]}</text>`).join('')}
+      <text x="20" y="95" fill="#94a3b8" font-size="9">fail[]:</text>
+      <!-- Match arrow -->
+      <line x1="110" y1="100" x2="110" y2="112" stroke="#22c55e" stroke-width="1.5"/>
+      <line x1="110" y1="112" x2="200" y2="112" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="155" y="125" fill="#22c55e" font-size="9" text-anchor="middle">skip via fail[j-1] on mismatch</text>
+      <text x="180" y="142" fill="#94a3b8" font-size="9" text-anchor="middle">O(n+m) — never re-scan matched characters</text>
     </svg>`,
     10:`<svg width="360" height="130" viewBox="0 0 360 130">
       <!-- Array before -->
