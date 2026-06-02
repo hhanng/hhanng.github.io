@@ -6,23 +6,1298 @@
 <title>Agent #109 · Vietnamese-American Family Planner</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px;max-width:520px;width:100%;text-align:center}
-.num{font-size:.8rem;font-weight:700;color:#38bdf8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-h1{font-size:1.6rem;font-weight:800;margin-bottom:12px;color:#f1f5f9}
-p{color:#94a3b8;font-size:.95rem;line-height:1.6;margin-bottom:24px}
-.badge{display:inline-block;background:#1d4ed8;color:#bfdbfe;font-size:.8rem;font-weight:700;padding:6px 16px;border-radius:99px;margin-bottom:28px}
-a.back{color:#38bdf8;text-decoration:none;font-size:.85rem;border:1px solid #334155;padding:8px 18px;border-radius:8px;display:inline-block;transition:background .15s}
-a.back:hover{background:#1e3a5f}
+:root{
+  --bg:#f8fafc;--white:#fff;--border:#e2e8f0;--text:#1e293b;--sub:#64748b;
+  --accent:#f97316;--accent-d:#ea6f0a;--accent-light:#fff7ed;
+  --green:#10b981;--green-light:#ecfdf5;--red:#ef4444;
+  --blue:#3b82f6;--yellow:#eab308;--pink:#ec4899;--purple:#8b5cf6;
+  --gray:#6b7280;--gold:#d97706
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--accent);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.topbar-left{flex:1}
+.topbar .agent-tag{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
+.topbar h1{font-size:1rem;font-weight:800;margin-top:1px}
+.topbar .vi-subtitle{font-size:.78rem;opacity:.82}
+.back-link{font-size:.78rem;color:#fff;border:1px solid rgba(255,255,255,.5);padding:6px 12px;border-radius:6px;text-decoration:none;white-space:nowrap;transition:background .15s}
+.back-link:hover{background:rgba(255,255,255,.2)}
+
+/* TABS */
+.tabs{display:flex;background:#fff;border-bottom:2px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab-btn{padding:12px 14px;font-size:.82rem;font-weight:600;color:var(--sub);border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;min-height:44px;line-height:1.2}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tab-pane{display:none;padding:16px;max-width:980px;margin:0 auto}
+.tab-pane.active{display:block}
+
+/* SECTIONS */
+.section{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+.sec-title{font-size:.9rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sec-title .vi{font-weight:500;color:var(--sub);font-size:.8rem}
+.sec-title .flag{font-size:1rem}
+
+/* FORM ELEMENTS */
+label{font-size:.8rem;font-weight:600;color:var(--sub);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:.88rem;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:56px}
+.fld{margin-bottom:10px}
+.row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.row>.fld{flex:1;min-width:130px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:10px 16px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;min-height:44px;line-height:1}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-d)}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#059669}
+.btn-ghost{background:#fff;border:1px solid var(--border);color:var(--sub)}.btn-ghost:hover{background:var(--bg)}
+.btn-danger{background:#fef2f2;color:var(--red);border:1px solid #fecaca}.btn-danger:hover{background:#fee2e2}
+.btn-sm{padding:6px 11px;font-size:.78rem;min-height:34px}
+.btn-icon{padding:8px;min-height:36px;min-width:36px;border-radius:8px}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:700}
+.b-orange{background:#fff7ed;color:var(--accent)}
+.b-green{background:#ecfdf5;color:var(--green)}
+.b-red{background:#fef2f2;color:var(--red)}
+.b-blue{background:#eff6ff;color:var(--blue)}
+.b-gray{background:#f1f5f9;color:var(--gray)}
+.b-pink{background:#fdf2f8;color:var(--pink)}
+.b-purple{background:#f5f3ff;color:var(--purple)}
+.b-gold{background:#fefce8;color:var(--gold)}
+
+/* PROGRESS */
+.progress-wrap{background:#f1f5f9;border-radius:99px;height:10px;margin:5px 0}
+.progress-fill{height:10px;border-radius:99px;transition:width .4s}
+.pg{background:var(--green)}.py{background:var(--yellow)}.pr{background:var(--red)}
+
+/* AVATAR */
+.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;color:#fff;flex-shrink:0}
+.av-sm{width:26px;height:26px;font-size:.7rem}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:460px;margin:auto}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-hdr h3{font-size:.95rem;font-weight:700}
+.modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--sub);line-height:1}
+.modal-close:hover{color:var(--text)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:#1e293b;color:#fff;padding:10px 16px;border-radius:8px;font-size:.82rem;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9999;max-width:280px}
+.toast.show{opacity:1}
+
+/* ===================== CHORES ===================== */
+.member-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.member-chip{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:5px 11px;font-size:.82rem}
+.mc-name{font-weight:600}.mc-role{color:var(--sub);font-size:.73rem}
+.mc-del{background:none;border:none;cursor:pointer;color:var(--sub);font-size:.85rem;padding:0 2px;margin-left:2px}
+.mc-del:hover{color:var(--red)}
+
+.chore-list{display:flex;flex-direction:column;gap:8px}
+.chore-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:10px}
+.chore-info{flex:1;min-width:0}
+.chore-en{font-weight:600;font-size:.88rem}
+.chore-vi{font-size:.75rem;color:var(--sub)}
+.chore-meta{font-size:.72rem;color:var(--sub);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.done-btn{width:38px;height:38px;border-radius:50%;border:2px solid var(--border);background:#fff;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.done-btn.done{background:var(--green);border-color:var(--green);color:#fff}
+
+.lb-item{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.lb-item:last-child{border:none}
+.lb-rank{font-size:1rem;width:26px;text-align:center;flex-shrink:0}
+.lb-pts{margin-left:auto;font-weight:700;font-size:.9rem;color:var(--accent)}
+
+/* WHEEL */
+.wheel-wrap{text-align:center;padding:16px 0}
+.wheel{width:190px;height:190px;border-radius:50%;border:6px solid var(--accent);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-size:.82rem;font-weight:700;background:radial-gradient(circle,#fff7ed,#fff);position:relative}
+.wheel.spin{animation:wspin 2s cubic-bezier(.17,.67,.35,1) forwards}
+@keyframes wspin{0%{transform:rotate(0)}100%{transform:rotate(1440deg)}}
+.wheel-txt{color:var(--text);line-height:1.4}
+.wheel-result{font-size:.82rem;color:var(--sub);min-height:36px;margin-top:8px}
+
+/* ===================== BUDGET ===================== */
+.cat-row{padding:9px 0;border-bottom:1px solid var(--border)}
+.cat-row:last-child{border:none}
+.cat-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+.cat-label{font-size:.86rem;font-weight:600}
+.cat-vi{font-size:.73rem;color:var(--sub)}
+.cat-nums{font-size:.76rem;color:var(--sub)}
+.exp-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:7px;margin-bottom:5px;font-size:.8rem}
+.exp-date{color:var(--sub);width:56px;flex-shrink:0;font-size:.74rem}
+.exp-note{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--sub)}
+.exp-amt{font-weight:700;flex-shrink:0}
+.tip-card{display:flex;gap:9px;padding:9px;background:var(--accent-light);border-radius:8px;margin-bottom:6px}
+.tip-num{font-weight:700;color:var(--accent);flex-shrink:0;font-size:.85rem}
+.tip-en{font-size:.82rem;font-weight:600}
+.tip-vi{font-size:.76rem;color:var(--sub);margin-top:2px}
+
+/* ===================== CALENDAR ===================== */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-month-label{font-size:1rem;font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dn{font-size:.68rem;font-weight:700;color:var(--sub);text-align:center;padding:4px 0;text-transform:uppercase}
+.cal-cell{min-height:58px;border:1px solid var(--border);border-radius:6px;padding:4px;cursor:pointer;background:#fff;transition:background .12s;position:relative}
+.cal-cell:hover{background:#fff7ed}
+.cal-cell.other-m{background:var(--bg);opacity:.55;cursor:default}
+.cal-cell.today{border-color:var(--accent);border-width:2px}
+.cal-cell.today .cal-date-num{color:var(--accent);font-weight:800}
+.cal-date-num{font-size:.7rem;font-weight:600;margin-bottom:2px}
+.cal-evt{font-size:.6rem;padding:1px 3px;border-radius:2px;color:#fff;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.up-item{padding:8px 10px;background:var(--bg);border-radius:8px;margin-bottom:6px;font-size:.8rem;border-left:3px solid var(--accent)}
+.up-date{font-size:.7rem;color:var(--sub);margin-bottom:1px}
+.up-title{font-weight:600}
+.reminder-badge{background:#fef9c3;color:#92400e;border-radius:4px;font-size:.68rem;padding:1px 5px;font-weight:600;margin-left:4px}
+
+/* ===================== HUB ===================== */
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px}
+.note-card{border-radius:10px;padding:13px;font-size:.84rem;line-height:1.5;position:relative;min-height:96px;word-break:break-word}
+.n-yellow{background:#fef9c3}.n-pink{background:#fce7f3}.n-blue{background:#dbeafe}.n-green{background:#dcfce7}
+.note-by{font-size:.7rem;color:var(--sub);margin-top:8px}
+.note-del{position:absolute;top:7px;right:8px;background:none;border:none;cursor:pointer;font-size:.88rem;opacity:.4;line-height:1}
+.note-del:hover{opacity:1}
+.contact-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.contact-row:last-child{border:none}
+.c-names{flex:1}.c-en{font-size:.86rem;font-weight:600}.c-vi{font-size:.74rem;color:var(--sub)}
+.c-rel{font-size:.72rem;color:var(--sub)}
+.c-phone{font-weight:700;color:var(--accent);font-size:.88rem;flex-shrink:0}
+.phrase-card{display:flex;align-items:flex-start;gap:8px;padding:9px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:5px;cursor:pointer;transition:background .15s}
+.phrase-card:hover{background:#fff7ed}
+.phrase-card:hover .pcopy{opacity:1}
+.p-num{font-size:.7rem;font-weight:700;color:var(--sub);width:18px;flex-shrink:0;padding-top:2px}
+.p-en{font-size:.86rem;font-weight:600}
+.p-vi{font-size:.78rem;color:var(--sub);margin-top:2px}
+.pcopy{opacity:0;font-size:.75rem;color:var(--accent);flex-shrink:0;padding-top:2px;transition:opacity .2s;white-space:nowrap}
+.goal-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px;margin-bottom:8px}
+.goal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px}
+.goal-en{font-weight:600;font-size:.88rem}
+.goal-vi{font-size:.76rem;color:var(--sub)}
+.goal-date{font-size:.72rem;color:var(--sub);white-space:nowrap}
+.goal-done-card{opacity:.55}
+.goal-done-card .goal-en{text-decoration:line-through}
+input[type=range]{-webkit-appearance:none;height:6px;border-radius:99px;background:var(--border);outline:none;padding:0;border:none;width:100%}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer}
+
+@media(max-width:600px){
+  .grid2{grid-template-columns:1fr}
+  .cal-cell{min-height:42px}
+  .cal-evt{display:none}
+  .tab-btn{font-size:.76rem;padding:10px 10px}
+  .notes-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="num">Agent #109 · 100 AI Agents Challenge</div>
-  <h1>Vietnamese-American Family Planner</h1>
-  <p>Family coordination tool for Vietnamese-American households — bilingual, chores, budgets.</p>
-  <div class="badge">🚧 Coming Soon</div><br>
-  <a href="/" class="back">← Back to Portfolio</a>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="agent-tag">Agent #109 · 100 AI Agents Challenge</div>
+    <h1>🏠 Vietnamese-American Family Planner</h1>
+    <div class="vi-subtitle">🇻🇳 Kế hoạch gia đình Việt-Mỹ</div>
+  </div>
+  <a href="/" class="back-link">← Portfolio</a>
 </div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('chores')">🧹 Chores<br><span style="font-size:.7rem;font-weight:500;opacity:.7">Việc nhà</span></button>
+  <button class="tab-btn" onclick="switchTab('budget')">💰 Budget<br><span style="font-size:.7rem;font-weight:500;opacity:.7">Ngân sách</span></button>
+  <button class="tab-btn" onclick="switchTab('calendar')">📅 Calendar<br><span style="font-size:.7rem;font-weight:500;opacity:.7">Lịch</span></button>
+  <button class="tab-btn" onclick="switchTab('hub')">👨‍👩‍👧 Family<br><span style="font-size:.7rem;font-weight:500;opacity:.7">Gia đình</span></button>
+</div>
+
+<!-- ==================== CHORES TAB ==================== -->
+<div id="tab-chores" class="tab-pane active">
+
+  <!-- Members -->
+  <div class="section">
+    <div class="sec-title">👥 Family Members <span class="flag">🇻🇳</span> <span class="vi">Thành viên gia đình</span>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="openModal('modal-member')">+ Add / Thêm</button>
+    </div>
+    <div class="member-chips" id="member-chips">
+      <span style="color:var(--sub);font-size:.82rem">No members yet. Add your family! / Chưa có thành viên.</span>
+    </div>
+  </div>
+
+  <!-- Add Chore -->
+  <div class="section">
+    <div class="sec-title">➕ Assign Chore <span class="vi">Phân công việc nhà</span></div>
+    <div class="grid2" style="margin-bottom:10px">
+      <div class="fld">
+        <label>Chore Template / Loại việc</label>
+        <select id="chore-template-sel" onchange="choreTemplateChange()">
+          <option value="">— Custom —</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label>Assign to / Giao cho</label>
+        <select id="chore-assign-sel"><option value="">Select member</option></select>
+      </div>
+    </div>
+    <div class="grid2" style="margin-bottom:10px" id="chore-custom-row" style="display:none">
+      <div class="fld">
+        <label>Name EN</label>
+        <input id="chore-en" type="text" placeholder="e.g. Wash dishes">
+      </div>
+      <div class="fld">
+        <label>🇻🇳 Tên VI</label>
+        <input id="chore-vi" type="text" placeholder="VD: Rửa bát">
+      </div>
+    </div>
+    <div class="row" style="margin-bottom:10px">
+      <div class="fld">
+        <label>Frequency / Tần suất</label>
+        <select id="chore-freq">
+          <option value="daily">Daily / Hàng ngày</option>
+          <option value="weekly">Weekly / Hàng tuần</option>
+          <option value="monthly">Monthly / Hàng tháng</option>
+        </select>
+      </div>
+      <div style="flex:0;padding-bottom:1px">
+        <button class="btn btn-primary" onclick="addChore()">✓ Add Chore</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chore List + Leaderboard -->
+  <div class="grid2" style="align-items:start">
+    <div>
+      <div class="section">
+        <div class="sec-title">📋 Today's Chores <span class="vi">Việc hôm nay</span></div>
+        <div class="chore-list" id="chore-list">
+          <div style="color:var(--sub);font-size:.84rem;text-align:center;padding:20px 0">No chores yet.<br>Chưa có việc nhà nào.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section">
+        <div class="sec-title">🏆 Weekly Leaderboard <span class="vi">Bảng xếp hạng tuần</span></div>
+        <div id="leaderboard">
+          <div style="color:var(--sub);font-size:.82rem">No data yet.</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="sec-title">🎡 Chore Wheel <span class="vi">Vòng quay việc nhà</span></div>
+        <div class="wheel-wrap">
+          <div class="wheel" id="wheel"><div class="wheel-txt" id="wheel-txt">Spin to assign!</div></div>
+          <button class="btn btn-primary" onclick="spinWheel()" id="spin-btn">🎡 Spin! / Quay!</button>
+          <div class="wheel-result" id="wheel-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== BUDGET TAB ==================== -->
+<div id="tab-budget" class="tab-pane">
+
+  <!-- Income -->
+  <div class="section">
+    <div class="sec-title">💵 Monthly Income <span class="vi">Thu nhập hàng tháng</span></div>
+    <div class="row">
+      <div class="fld">
+        <label>Monthly Income (USD) / Thu nhập tháng ($)</label>
+        <input type="number" id="budget-income" placeholder="e.g. 5000" min="0" onchange="saveBudget()">
+      </div>
+      <div style="flex:0;padding-bottom:1px">
+        <button class="btn btn-green" onclick="saveBudget()">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="section">
+    <div class="sec-title">📊 Budget Categories <span class="vi">Hạng mục ngân sách</span></div>
+    <div id="cat-budget-list"></div>
+    <div style="margin-top:10px">
+      <button class="btn btn-ghost btn-sm" onclick="saveCatBudgets()">💾 Save Budgets / Lưu ngân sách</button>
+    </div>
+  </div>
+
+  <!-- Add Expense -->
+  <div class="section">
+    <div class="sec-title">➕ Add Expense <span class="vi">Thêm chi tiêu</span></div>
+    <div class="grid2">
+      <div class="fld">
+        <label>Date / Ngày</label>
+        <input type="date" id="exp-date">
+      </div>
+      <div class="fld">
+        <label>Category / Hạng mục</label>
+        <select id="exp-cat"></select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="fld">
+        <label>Amount ($) / Số tiền</label>
+        <input type="number" id="exp-amt" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="fld">
+        <label>Note / Ghi chú</label>
+        <input type="text" id="exp-note" placeholder="Optional note...">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addExpense()">+ Add Expense / Thêm</button>
+  </div>
+
+  <!-- Category Progress -->
+  <div class="section">
+    <div class="sec-title" id="budget-summary-title">📈 This Month's Spending <span class="vi">Chi tiêu tháng này</span></div>
+    <div id="cat-progress-list"></div>
+  </div>
+
+  <!-- Expense List -->
+  <div class="section">
+    <div class="sec-title">🧾 Expenses <span class="vi">Danh sách chi tiêu</span>
+      <select id="exp-filter-cat" onchange="renderExpenseList()" style="margin-left:auto;width:auto;font-size:.78rem;padding:4px 8px">
+        <option value="">All / Tất cả</option>
+      </select>
+    </div>
+    <div id="expense-list" style="max-height:320px;overflow-y:auto"></div>
+  </div>
+
+  <!-- Tips -->
+  <div class="section">
+    <div class="sec-title">💡 Money-Saving Tips <span class="flag">🇻🇳</span> <span class="vi">Mẹo tiết kiệm</span></div>
+    <div id="budget-tips"></div>
+  </div>
+</div>
+
+<!-- ==================== CALENDAR TAB ==================== -->
+<div id="tab-calendar" class="tab-pane">
+  <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+    <div style="flex:2;min-width:280px">
+      <div class="section">
+        <div class="cal-nav">
+          <button class="btn btn-ghost btn-icon" onclick="calPrev()">◀</button>
+          <div class="cal-month-label" id="cal-month-label"></div>
+          <button class="btn btn-ghost btn-icon" onclick="calNext()">▶</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <!-- Legend -->
+      <div class="section" style="padding:10px 14px">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:.75rem">
+          <span><span style="display:inline-block;width:10px;height:10px;background:#3b82f6;border-radius:2px;margin-right:3px"></span>School/Trường học</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:2px;margin-right:3px"></span>Doctor/Bác sĩ</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#6b7280;border-radius:2px;margin-right:3px"></span>Work/Công việc</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#10b981;border-radius:2px;margin-right:3px"></span>Family/Gia đình</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#d97706;border-radius:2px;margin-right:3px"></span>🇻🇳 Vietnamese Holiday</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#ec4899;border-radius:2px;margin-right:3px"></span>Birthday/Sinh nhật</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#8b5cf6;border-radius:2px;margin-right:3px"></span>Other/Khác</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#f97316;border-radius:2px;margin-right:3px"></span>US Holiday</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:220px">
+      <div class="section">
+        <div class="sec-title">📌 Upcoming 7 Days <span class="vi">7 ngày tới</span></div>
+        <div id="upcoming-events"><div style="color:var(--sub);font-size:.82rem">No events.</div></div>
+      </div>
+      <div class="section">
+        <div class="sec-title">⏰ Reminders <span class="vi">Nhắc nhở</span></div>
+        <div id="reminders"><div style="color:var(--sub);font-size:.82rem">No reminders.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FAMILY HUB TAB ==================== -->
+<div id="tab-hub" class="tab-pane">
+
+  <!-- Noticeboard -->
+  <div class="section">
+    <div class="sec-title">📌 Family Noticeboard <span class="vi">Bảng thông báo gia đình</span></div>
+    <div class="row" style="margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <textarea id="note-text" placeholder="Write a note in English or Vietnamese... / Ghi chú bằng tiếng Anh hoặc tiếng Việt..." style="flex:2;min-width:200px;min-height:50px" rows="2"></textarea>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+        <select id="note-author" style="width:140px"><option value="">Posted by...</option></select>
+        <select id="note-color" style="width:140px">
+          <option value="yellow">🟡 Yellow</option>
+          <option value="pink">🩷 Pink</option>
+          <option value="blue">🔵 Blue</option>
+          <option value="green">🟢 Green</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="addNote()">📌 Post Note</button>
+      </div>
+    </div>
+    <div class="notes-grid" id="notes-grid">
+      <div style="color:var(--sub);font-size:.82rem">No notes yet. Post the first one!</div>
+    </div>
+  </div>
+
+  <!-- Emergency Contacts -->
+  <div class="section">
+    <div class="sec-title">🚨 Emergency Contacts <span class="vi">Số điện thoại khẩn cấp</span>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="openModal('modal-contact')">+ Add</button>
+    </div>
+    <div id="contact-list"></div>
+  </div>
+
+  <!-- School Phrases -->
+  <div class="section">
+    <div class="sec-title">🏫 School Phrase Helper <span class="vi">Câu giao tiếp ở trường</span>
+      <span style="margin-left:auto;font-size:.73rem;color:var(--sub)">Click to copy English / Nhấn để sao chép</span>
+    </div>
+    <div id="phrase-list"></div>
+  </div>
+
+  <!-- Family Goals -->
+  <div class="section">
+    <div class="sec-title">🎯 Family Goals <span class="vi">Mục tiêu gia đình</span>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="openModal('modal-goal')">+ Add Goal</button>
+    </div>
+    <div id="goal-list"><div style="color:var(--sub);font-size:.82rem">No goals yet.</div></div>
+  </div>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Add Member -->
+<div class="overlay" id="modal-member">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>👥 Add Family Member / Thêm thành viên</h3>
+      <button class="modal-close" onclick="closeModal('modal-member')">×</button>
+    </div>
+    <div class="fld"><label>Name / Tên</label><input id="m-name" type="text" placeholder="e.g. Bố, Mẹ, Nam..."></div>
+    <div class="fld">
+      <label>Role / Vai trò</label>
+      <select id="m-role">
+        <option value="Bố/Dad">Bố / Dad</option>
+        <option value="Mẹ/Mom">Mẹ / Mom</option>
+        <option value="Con trai/Son">Con trai / Son</option>
+        <option value="Con gái/Daughter">Con gái / Daughter</option>
+        <option value="Ông/Grandpa">Ông / Grandpa</option>
+        <option value="Bà/Grandma">Bà / Grandma</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>Avatar Color / Màu avatar</label>
+      <select id="m-color">
+        <option value="#f97316">🟠 Orange</option>
+        <option value="#3b82f6">🔵 Blue</option>
+        <option value="#10b981">🟢 Green</option>
+        <option value="#ec4899">🩷 Pink</option>
+        <option value="#8b5cf6">🟣 Purple</option>
+        <option value="#eab308">🟡 Yellow</option>
+        <option value="#ef4444">🔴 Red</option>
+        <option value="#14b8a6">🩵 Teal</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="addMember()">✓ Add / Thêm</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-member')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Event -->
+<div class="overlay" id="modal-event">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>📅 Add Event / Thêm sự kiện</h3>
+      <button class="modal-close" onclick="closeModal('modal-event')">×</button>
+    </div>
+    <div class="fld"><label>Date / Ngày</label><input type="date" id="ev-date"></div>
+    <div class="fld"><label>Title / Tiêu đề (EN or VI)</label><input type="text" id="ev-title" placeholder="e.g. Doctor appointment / Khám bác sĩ"></div>
+    <div class="fld"><label>Time / Giờ (optional)</label><input type="time" id="ev-time"></div>
+    <div class="fld">
+      <label>Type / Loại</label>
+      <select id="ev-type">
+        <option value="school">School / Trường học</option>
+        <option value="doctor">Doctor / Bác sĩ</option>
+        <option value="work">Work / Công việc</option>
+        <option value="family">Family / Gia đình</option>
+        <option value="birthday">Birthday / Sinh nhật</option>
+        <option value="other">Other / Khác</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>For / Cho ai</label>
+      <select id="ev-member"><option value="">Whole family / Cả nhà</option></select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="addEvent()">✓ Add Event</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-event')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Contact -->
+<div class="overlay" id="modal-contact">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>📞 Add Contact / Thêm liên hệ</h3>
+      <button class="modal-close" onclick="closeModal('modal-contact')">×</button>
+    </div>
+    <div class="fld"><label>Name EN</label><input id="c-en" type="text" placeholder="e.g. Family Doctor"></div>
+    <div class="fld"><label>🇻🇳 Tên VI</label><input id="c-vi" type="text" placeholder="VD: Bác sĩ gia đình"></div>
+    <div class="fld"><label>Phone / Điện thoại</label><input id="c-phone" type="text" placeholder="(555) 000-0000"></div>
+    <div class="fld"><label>Relationship / Quan hệ</label><input id="c-rel" type="text" placeholder="e.g. Doctor, School, Neighbor..."></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="addContact()">✓ Add</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-contact')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Goal -->
+<div class="overlay" id="modal-goal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>🎯 Add Family Goal / Thêm mục tiêu</h3>
+      <button class="modal-close" onclick="closeModal('modal-goal')">×</button>
+    </div>
+    <div class="fld"><label>Goal (EN)</label><input id="g-en" type="text" placeholder="e.g. Save for vacation"></div>
+    <div class="fld"><label>🇻🇳 Mục tiêu (VI)</label><input id="g-vi" type="text" placeholder="VD: Tiết kiệm để đi du lịch"></div>
+    <div class="fld"><label>Target Date / Ngày mục tiêu</label><input type="date" id="g-date"></div>
+    <div class="fld"><label>Starting Progress / Tiến độ ban đầu (%)</label><input type="number" id="g-progress" value="0" min="0" max="100"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="addGoal()">✓ Add Goal</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-goal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== STATIC DATA =====================
+const CHORE_TEMPLATES = [
+  {en:"Wash dishes",vi:"Rửa bát"},{en:"Cook dinner",vi:"Nấu cơm"},
+  {en:"Sweep floor",vi:"Quét nhà"},{en:"Mop floor",vi:"Lau nhà"},
+  {en:"Take out trash",vi:"Đổ rác"},{en:"Do laundry",vi:"Giặt quần áo"},
+  {en:"Fold clothes",vi:"Gấp quần áo"},{en:"Vacuum",vi:"Hút bụi"},
+  {en:"Clean bathroom",vi:"Dọn nhà vệ sinh"},{en:"Wipe counters",vi:"Lau bàn bếp"},
+  {en:"Feed pets",vi:"Cho thú cưng ăn"},{en:"Water plants",vi:"Tưới cây"},
+  {en:"Grocery shopping",vi:"Đi chợ"},{en:"Pack lunch",vi:"Chuẩn bị hộp cơm"},
+  {en:"Help with homework",vi:"Giúp làm bài tập"},{en:"Set the table",vi:"Dọn bàn ăn"},
+  {en:"Clear the table",vi:"Dọn sau khi ăn"},{en:"Take out recycling",vi:"Đổ đồ tái chế"},
+  {en:"Clean windows",vi:"Lau cửa kính"},{en:"Organize bedroom",vi:"Dọn phòng ngủ"},
+  {en:"Walk the dog",vi:"Dắt chó đi dạo"},{en:"Check mail",vi:"Lấy thư"},
+  {en:"Pay bills",vi:"Trả hóa đơn"},{en:"Drive kids to school",vi:"Đưa con đi học"},
+  {en:"Pick up kids",vi:"Đón con"},{en:"Buy medicine",vi:"Mua thuốc"},
+  {en:"Fix things around house",vi:"Sửa đồ trong nhà"},{en:"Call relatives",vi:"Gọi điện cho người thân"},
+  {en:"Prepare offerings",vi:"Chuẩn bị lễ"},{en:"Help elderly",vi:"Chăm sóc người lớn tuổi"}
+];
+
+const BUDGET_CATS = [
+  {id:"housing",en:"Housing",vi:"Nhà ở"},
+  {id:"food",en:"Food",vi:"Ăn uống"},
+  {id:"transport",en:"Transportation",vi:"Đi lại"},
+  {id:"utilities",en:"Utilities",vi:"Tiện ích"},
+  {id:"education",en:"Children Education",vi:"Học phí"},
+  {id:"health",en:"Healthcare",vi:"Y tế"},
+  {id:"clothing",en:"Clothing",vi:"Quần áo"},
+  {id:"entertainment",en:"Entertainment",vi:"Giải trí"},
+  {id:"savings",en:"Savings",vi:"Tiết kiệm"},
+  {id:"remittance",en:"Remittance to Vietnam",vi:"Gửi tiền về VN"},
+  {id:"phone",en:"Phone",vi:"Điện thoại"},
+  {id:"other",en:"Other",vi:"Khác"}
+];
+
+const BUDGET_TIPS = [
+  {en:"Buy vegetables at Asian grocery stores — 30–50% cheaper",vi:"Mua rau củ ở chợ Á — rẻ hơn 30–50%"},
+  {en:"Cook at home 5 days a week to save ~$400/month",vi:"Nấu ăn ở nhà 5 ngày để tiết kiệm khoảng $400/tháng"},
+  {en:"Use apps like GasBuddy to find the cheapest gas nearby",vi:"Dùng ứng dụng GasBuddy để tìm xăng rẻ nhất gần nhà"},
+  {en:"Check if your kids qualify for free/reduced lunch at school",vi:"Kiểm tra xem con có đủ điều kiện ăn trưa miễn phí ở trường không"},
+  {en:"Send money to Vietnam via Wise or Remitly — lower fees",vi:"Gửi tiền về Việt Nam qua Wise hoặc Remitly — phí thấp hơn"},
+  {en:"Use the library for free books, movies, and internet",vi:"Dùng thư viện để đọc sách, xem phim và dùng internet miễn phí"},
+  {en:"Apply for SNAP benefits if your income qualifies",vi:"Nộp đơn hưởng trợ cấp SNAP nếu thu nhập đủ điều kiện"},
+  {en:"Buy kids' clothes at Goodwill or ThredUp to save big",vi:"Mua quần áo trẻ em ở Goodwill hoặc ThredUp để tiết kiệm"},
+  {en:"Set up automatic savings transfer on payday",vi:"Tự động chuyển tiết kiệm ngay trong ngày nhận lương"},
+  {en:"Compare insurance rates every year — rates can drop 20%+",vi:"So sánh giá bảo hiểm mỗi năm — có thể giảm hơn 20%"}
+];
+
+const EVENT_TYPES = {
+  school:{label:"School / Trường học",color:"#3b82f6"},
+  doctor:{label:"Doctor / Bác sĩ",color:"#ef4444"},
+  work:{label:"Work / Công việc",color:"#6b7280"},
+  family:{label:"Family / Gia đình",color:"#10b981"},
+  vn_holiday:{label:"🇻🇳 Vietnamese Holiday",color:"#d97706"},
+  birthday:{label:"Birthday / Sinh nhật",color:"#ec4899"},
+  us_holiday:{label:"US Holiday",color:"#f97316"},
+  other:{label:"Other / Khác",color:"#8b5cf6"}
+};
+
+const SCHOOL_PHRASES = [
+  {en:"My child is sick today.",vi:"Con tôi bị bệnh hôm nay."},
+  {en:"I need to speak with the teacher.",vi:"Tôi cần gặp giáo viên."},
+  {en:"My child will be late.",vi:"Con tôi sẽ đến muộn."},
+  {en:"Can I see my child's grades?",vi:"Tôi có thể xem điểm của con không?"},
+  {en:"My child needs extra help.",vi:"Con tôi cần được giúp đỡ thêm."},
+  {en:"Is there a translator available?",vi:"Có phiên dịch viên không?"},
+  {en:"I don't understand this form.",vi:"Tôi không hiểu mẫu đơn này."},
+  {en:"When is the parent-teacher conference?",vi:"Khi nào có họp phụ huynh?"},
+  {en:"My child is being bullied.",vi:"Con tôi đang bị bắt nạt."},
+  {en:"What does my child need to bring tomorrow?",vi:"Ngày mai con cần mang gì?"},
+  {en:"My child has a food allergy.",vi:"Con tôi bị dị ứng thức ăn."},
+  {en:"How do I sign up for school lunch?",vi:"Làm thế nào để đăng ký ăn trưa ở trường?"},
+  {en:"What time does school start and end?",vi:"Trường bắt đầu và kết thúc lúc mấy giờ?"},
+  {en:"Where do I pick up my child?",vi:"Tôi đón con ở đâu?"},
+  {en:"My child forgot their homework at home.",vi:"Con tôi quên bài tập ở nhà."},
+  {en:"Can my child retake the test?",vi:"Con tôi có thể thi lại không?"},
+  {en:"I need to update the emergency contact.",vi:"Tôi cần cập nhật liên hệ khẩn cấp."},
+  {en:"My child will be absent next week.",vi:"Con tôi sẽ vắng mặt tuần tới."},
+  {en:"Does the school have an ESL program?",vi:"Trường có chương trình ESL không?"},
+  {en:"My child needs an IEP meeting.",vi:"Con tôi cần cuộc họp IEP."}
+];
+
+const PRESET_CONTACTS = [
+  {id:"p1",nameEN:"Police",nameVI:"Cảnh sát",phone:"911",rel:"Emergency"},
+  {id:"p2",nameEN:"Fire Department",nameVI:"Cứu hỏa",phone:"911",rel:"Emergency"},
+  {id:"p3",nameEN:"Ambulance",nameVI:"Xe cứu thương",phone:"911",rel:"Emergency"},
+  {id:"p4",nameEN:"Poison Control",nameVI:"Trung tâm chống độc",phone:"1-800-222-1222",rel:"Emergency"},
+  {id:"p5",nameEN:"Non-emergency Police",nameVI:"Cảnh sát (không khẩn cấp)",phone:"311",rel:"Non-Emergency"}
+];
+
+// US Holidays helper
+function nthWeekday(year, month, n, weekday) {
+  // n=1..5, weekday=0(Sun)..6(Sat)
+  let d = new Date(year, month, 1), count = 0;
+  while(true) {
+    if(d.getDay() === weekday) { count++; if(count === n) return d.getDate(); }
+    d.setDate(d.getDate()+1);
+  }
+}
+function lastWeekday(year, month, weekday) {
+  let d = new Date(year, month+1, 0);
+  while(d.getDay() !== weekday) d.setDate(d.getDate()-1);
+  return d.getDate();
+}
+
+function getHolidays(year) {
+  const hols = [];
+  // US Holidays
+  hols.push({date:`${year}-01-01`,title:"New Year's Day",type:"us_holiday"});
+  hols.push({date:`${year}-${pad(1+1)}-${pad(nthWeekday(year,0,3,1))}`,title:"MLK Day",type:"us_holiday"});
+  hols.push({date:`${year}-02-14`,title:"Valentine's Day ❤️",type:"us_holiday"});
+  hols.push({date:`${year}-${pad(2+1)}-${pad(nthWeekday(year,1,3,1))}`,title:"Presidents' Day",type:"us_holiday"});
+  hols.push({date:`${year}-${pad(4+1)}-${pad(lastWeekday(year,4,1))}`,title:"Memorial Day",type:"us_holiday"});
+  hols.push({date:`${year}-07-04`,title:"Independence Day 🎆",type:"us_holiday"});
+  hols.push({date:`${year}-${pad(8+1)}-${pad(nthWeekday(year,8,1,1))}`,title:"Labor Day",type:"us_holiday"});
+  hols.push({date:`${year}-10-31`,title:"Halloween 🎃",type:"us_holiday"});
+  hols.push({date:`${year}-${pad(10+1)}-${pad(nthWeekday(year,10,4,4))}`,title:"Thanksgiving 🦃",type:"us_holiday"});
+  hols.push({date:`${year}-12-25`,title:"Christmas 🎄",type:"us_holiday"});
+  // Vietnamese Holidays (fixed Gregorian approximate for Tet; others fixed)
+  // Tết ~Jan 29 2025, use Jan 29 for 2025, otherwise approximate
+  const tet = year === 2025 ? `${year}-01-29` : year === 2026 ? `${year}-02-17` : `${year}-02-06`;
+  hols.push({date:tet,title:"🇻🇳 Tết Nguyên Đán",type:"vn_holiday"});
+  hols.push({date:`${year}-04-07`,title:"🇻🇳 Giỗ Tổ Hùng Vương",type:"vn_holiday"});
+  hols.push({date:`${year}-04-30`,title:"🇻🇳 Ngày 30/4 Thống Nhất",type:"vn_holiday"});
+  hols.push({date:`${year}-05-01`,title:"🇻🇳 Ngày 1/5 Quốc tế LĐ",type:"vn_holiday"});
+  hols.push({date:`${year}-09-02`,title:"🇻🇳 Ngày Quốc Khánh VN",type:"vn_holiday"});
+  return hols;
+}
+
+function pad(n){return String(n).padStart(2,'0')}
+
+// ===================== STATE =====================
+const STORE = 'fam109_v1';
+let state;
+
+function loadState() {
+  try { state = JSON.parse(localStorage.getItem(STORE)) || {}; } catch(e){state={};}
+  if (!state.members) state.members = [];
+  if (!state.chores) state.chores = [];
+  if (!state.choreLog) state.choreLog = {}; // {choreId_YYYY-MM-DD: true}
+  if (!state.budget) state.budget = {income:0, cats:{}, expenses:[]};
+  if (!state.budget.cats) state.budget.cats = {};
+  if (!state.budget.expenses) state.budget.expenses = [];
+  if (!state.events) state.events = [];
+  if (!state.notes) state.notes = [];
+  if (!state.contacts) state.contacts = [];
+  if (!state.goals) state.goals = [];
+}
+
+function save() { localStorage.setItem(STORE,JSON.stringify(state)); }
+
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+// ===================== TABS =====================
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['chores','budget','calendar','hub'][i]===name);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='chores') renderChores();
+  if(name==='budget') renderBudget();
+  if(name==='calendar') renderCalendar();
+  if(name==='hub') renderHub();
+}
+
+// ===================== MODAL =====================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); });
+});
+
+// ===================== TOAST =====================
+function toast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ===================== MEMBERS =====================
+function addMember() {
+  if(state.members.length >= 6) { toast('Max 6 members / Tối đa 6 thành viên'); return; }
+  const name=document.getElementById('m-name').value.trim();
+  if(!name) { toast('Enter a name / Nhập tên'); return; }
+  state.members.push({
+    id:uid(), name,
+    role:document.getElementById('m-role').value,
+    color:document.getElementById('m-color').value
+  });
+  save(); closeModal('modal-member');
+  document.getElementById('m-name').value='';
+  renderChores(); renderMemberSelects();
+}
+
+function deleteMember(id) {
+  if(!confirm('Remove this member?')) return;
+  state.members = state.members.filter(m=>m.id!==id);
+  state.chores = state.chores.filter(c=>c.assignedTo!==id);
+  save(); renderChores(); renderMemberSelects();
+}
+
+function renderMemberChips() {
+  const el=document.getElementById('member-chips');
+  if(!state.members.length) {
+    el.innerHTML='<span style="color:var(--sub);font-size:.82rem">No members yet. / Chưa có thành viên.</span>'; return;
+  }
+  el.innerHTML=state.members.map(m=>`
+    <div class="member-chip">
+      <div class="av av-sm" style="background:${m.color}">${m.name[0]}</div>
+      <span class="mc-name">${esc(m.name)}</span>
+      <span class="mc-role">${esc(m.role)}</span>
+      <button class="mc-del" onclick="deleteMember('${m.id}')" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+function renderMemberSelects() {
+  const opts = state.members.map(m=>`<option value="${m.id}">${esc(m.name)} (${esc(m.role)})</option>`).join('');
+  ['chore-assign-sel','ev-member','note-author'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) {
+      const blank = id==='ev-member' ? '<option value="">Whole family / Cả nhà</option>'
+                  : id==='note-author' ? '<option value="">Posted by...</option>'
+                  : '<option value="">Select member</option>';
+      el.innerHTML = blank + opts;
+    }
+  });
+}
+
+// ===================== CHORES =====================
+function populateChoreTemplates() {
+  const sel=document.getElementById('chore-template-sel');
+  sel.innerHTML='<option value="">— Custom / Tùy chỉnh —</option>'
+    + CHORE_TEMPLATES.map((t,i)=>`<option value="${i}">${t.en} / ${t.vi}</option>`).join('');
+}
+
+function choreTemplateChange() {
+  const val=document.getElementById('chore-template-sel').value;
+  const row=document.getElementById('chore-custom-row');
+  row.style.display = val==='' ? 'grid' : 'none';
+  if(val!=='') {
+    const t=CHORE_TEMPLATES[+val];
+    document.getElementById('chore-en').value=t.en;
+    document.getElementById('chore-vi').value=t.vi;
+  }
+}
+
+function addChore() {
+  const assignedTo=document.getElementById('chore-assign-sel').value;
+  if(!assignedTo) { toast('Select a family member / Chọn thành viên'); return; }
+  const tplVal=document.getElementById('chore-template-sel').value;
+  let nameEN, nameVI;
+  if(tplVal!=='') { const t=CHORE_TEMPLATES[+tplVal]; nameEN=t.en; nameVI=t.vi; }
+  else {
+    nameEN=document.getElementById('chore-en').value.trim();
+    nameVI=document.getElementById('chore-vi').value.trim();
+  }
+  if(!nameEN) { toast('Enter chore name / Nhập tên việc nhà'); return; }
+  state.chores.push({id:uid(),nameEN,nameVI:nameVI||nameEN,assignedTo,freq:document.getElementById('chore-freq').value});
+  save(); renderChores(); toast('Chore added! / Đã thêm việc nhà ✅');
+}
+
+function toggleDone(choreId) {
+  const key=choreId+'_'+todayStr();
+  if(state.choreLog[key]) delete state.choreLog[key];
+  else state.choreLog[key]=true;
+  save(); renderChores();
+}
+
+function deleteChore(id) {
+  state.chores=state.chores.filter(c=>c.id!==id); save(); renderChores();
+}
+
+function isDone(choreId) { return !!state.choreLog[choreId+'_'+todayStr()]; }
+
+function getMember(id) { return state.members.find(m=>m.id===id)||{name:'?',color:'#999',role:''}; }
+
+function renderChoreList() {
+  const el=document.getElementById('chore-list');
+  if(!state.chores.length) {
+    el.innerHTML='<div style="color:var(--sub);font-size:.84rem;text-align:center;padding:16px">No chores yet.<br>Chưa có việc nhà.</div>'; return;
+  }
+  el.innerHTML=state.chores.map(c=>{
+    const m=getMember(c.assignedTo);
+    const done=isDone(c.id);
+    const freqLabel={daily:'Daily/Hàng ngày',weekly:'Weekly/Hàng tuần',monthly:'Monthly/Hàng tháng'}[c.freq]||c.freq;
+    return `<div class="chore-card">
+      <button class="done-btn ${done?'done':''}" onclick="toggleDone('${c.id}')" title="Toggle done">${done?'✓':''}</button>
+      <div class="av av-sm" style="background:${m.color}">${m.name[0]}</div>
+      <div class="chore-info">
+        <div class="chore-en" style="${done?'text-decoration:line-through;opacity:.6':''}">${esc(c.nameEN)}</div>
+        <div class="chore-vi">🇻🇳 ${esc(c.nameVI)}</div>
+        <div class="chore-meta">
+          <span>${esc(m.name)}</span>
+          <span class="badge b-gray">${freqLabel}</span>
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm btn-icon" onclick="deleteChore('${c.id}')" title="Delete">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+function renderLeaderboard() {
+  const el=document.getElementById('leaderboard');
+  if(!state.members.length) { el.innerHTML='<div style="color:var(--sub);font-size:.82rem">Add members first.</div>'; return; }
+  // Count points: correct done logs for this week (Mon–Sun)
+  const now=new Date();
+  const dayOfWeek=(now.getDay()+6)%7; // Mon=0
+  const weekDates=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(now); d.setDate(now.getDate()-dayOfWeek+i);
+    weekDates.push(d.toISOString().slice(0,10));
+  }
+  const pts={};
+  state.members.forEach(m=>pts[m.id]=0);
+  state.chores.forEach(c=>{
+    weekDates.forEach(d=>{
+      if(state.choreLog[c.id+'_'+d]) pts[c.assignedTo]=(pts[c.assignedTo]||0)+1;
+    });
+  });
+  const sorted=state.members.slice().sort((a,b)=>(pts[b.id]||0)-(pts[a.id]||0));
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML=sorted.map((m,i)=>`
+    <div class="lb-item">
+      <span class="lb-rank">${medals[i]||'  '+(i+1)}</span>
+      <div class="av av-sm" style="background:${m.color}">${m.name[0]}</div>
+      <span style="font-size:.85rem;font-weight:600">${esc(m.name)}</span>
+      <span class="lb-pts">${pts[m.id]||0} pts</span>
+    </div>`).join('');
+}
+
+function spinWheel() {
+  if(!state.members.length||!state.chores.length) { toast('Add members and chores first!'); return; }
+  const w=document.getElementById('wheel');
+  const result=document.getElementById('wheel-result');
+  const btn=document.getElementById('spin-btn');
+  btn.disabled=true;
+  w.classList.remove('spin'); void w.offsetWidth; w.classList.add('spin');
+  document.getElementById('wheel-txt').textContent='Spinning... 🎡';
+  result.textContent='';
+  setTimeout(()=>{
+    const chore=state.chores[Math.floor(Math.random()*state.chores.length)];
+    const member=state.members[Math.floor(Math.random()*state.members.length)];
+    document.getElementById('wheel-txt').textContent=chore.nameEN;
+    result.innerHTML=`<strong>${esc(member.name)}</strong> → ${esc(chore.nameEN)}<br><span style="font-size:.75rem;color:var(--sub)">${esc(member.name)} → ${esc(chore.nameVI)}</span>`;
+    btn.disabled=false;
+  }, 2100);
+}
+
+function renderChores() {
+  renderMemberChips(); renderMemberSelects(); renderChoreList(); renderLeaderboard();
+}
+
+// ===================== BUDGET =====================
+function saveBudget() {
+  state.budget.income=parseFloat(document.getElementById('budget-income').value)||0;
+  save(); renderBudgetProgress(); toast('Saved! / Đã lưu ✅');
+}
+
+function saveCatBudgets() {
+  BUDGET_CATS.forEach(c=>{
+    const el=document.getElementById('cat-input-'+c.id);
+    if(el) state.budget.cats[c.id]=parseFloat(el.value)||0;
+  });
+  save(); renderBudgetProgress(); toast('Budgets saved! / Đã lưu ✅');
+}
+
+function addExpense() {
+  const date=document.getElementById('exp-date').value;
+  const cat=document.getElementById('exp-cat').value;
+  const amt=parseFloat(document.getElementById('exp-amt').value);
+  if(!date||!cat||!amt||amt<=0) { toast('Fill all fields / Điền đầy đủ thông tin'); return; }
+  state.budget.expenses.push({id:uid(),date,cat,amount:amt,note:document.getElementById('exp-note').value.trim()});
+  save(); renderBudgetProgress(); renderExpenseList();
+  document.getElementById('exp-amt').value=''; document.getElementById('exp-note').value='';
+  toast('Expense added! / Đã thêm ✅');
+}
+
+function deleteExpense(id) {
+  state.budget.expenses=state.budget.expenses.filter(e=>e.id!==id);
+  save(); renderBudgetProgress(); renderExpenseList();
+}
+
+function thisMonthStr() { return new Date().toISOString().slice(0,7); }
+
+function spentInCat(catId) {
+  const m=thisMonthStr();
+  return state.budget.expenses.filter(e=>e.cat===catId && e.date.startsWith(m)).reduce((s,e)=>s+e.amount,0);
+}
+
+function renderCatBudgetInputs() {
+  const el=document.getElementById('cat-budget-list');
+  el.innerHTML=BUDGET_CATS.map(c=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-size:.86rem;font-weight:600">${c.en}</div>
+        <div style="font-size:.74rem;color:var(--sub)">🇻🇳 ${c.vi}</div>
+      </div>
+      <div style="width:130px">
+        <input id="cat-input-${c.id}" type="number" min="0" placeholder="$0" value="${state.budget.cats[c.id]||''}" style="width:100%;padding:6px 8px;font-size:.84rem">
+      </div>
+    </div>`).join('');
+}
+
+function renderExpCatSelect() {
+  const opts=BUDGET_CATS.map(c=>`<option value="${c.id}">${c.en} / ${c.vi}</option>`).join('');
+  ['exp-cat','exp-filter-cat'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) {
+      const blank = id==='exp-filter-cat' ? '<option value="">All / Tất cả</option>' : '';
+      el.innerHTML=blank+opts;
+    }
+  });
+}
+
+function renderBudgetProgress() {
+  const el=document.getElementById('cat-progress-list');
+  const income=state.budget.income;
+  const totalBudget=BUDGET_CATS.reduce((s,c)=>s+(state.budget.cats[c.id]||0),0);
+  const totalSpent=BUDGET_CATS.reduce((s,c)=>s+spentInCat(c.id),0);
+  let html=`<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:10px;padding:8px 10px;background:var(--bg);border-radius:8px">
+    <span>Income / Thu nhập: <strong>$${income.toLocaleString()}</strong></span>
+    <span>Budgeted: <strong>$${totalBudget.toLocaleString()}</strong></span>
+    <span>Spent: <strong style="color:${totalSpent>totalBudget?'var(--red)':'var(--green)'}">$${totalSpent.toFixed(2)}</strong></span>
+  </div>`;
+  html+=BUDGET_CATS.map(c=>{
+    const budget=state.budget.cats[c.id]||0;
+    const spent=spentInCat(c.id);
+    const pct=budget>0?Math.min(Math.round(spent/budget*100),100):0;
+    const cls=pct<80?'pg':pct<100?'py':'pr';
+    return `<div class="cat-row">
+      <div class="cat-top">
+        <div><span class="cat-label">${c.en}</span> <span class="cat-vi">🇻🇳 ${c.vi}</span></div>
+        <div class="cat-nums">$${spent.toFixed(2)} / $${budget.toFixed(2)} (${pct}%)</div>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+  el.innerHTML=html;
+}
+
+function renderExpenseList() {
+  const el=document.getElementById('expense-list');
+  const filterCat=document.getElementById('exp-filter-cat').value;
+  let exps=[...state.budget.expenses].filter(e=>e.date.startsWith(thisMonthStr()));
+  if(filterCat) exps=exps.filter(e=>e.cat===filterCat);
+  exps.sort((a,b)=>b.date.localeCompare(a.date));
+  if(!exps.length) { el.innerHTML='<div style="color:var(--sub);font-size:.82rem;text-align:center;padding:16px">No expenses this month.</div>'; return; }
+  const catMap=Object.fromEntries(BUDGET_CATS.map(c=>[c.id,c]));
+  el.innerHTML=exps.map(e=>{
+    const cat=catMap[e.cat]||{en:e.cat,vi:''};
+    return `<div class="exp-item">
+      <span class="exp-date">${e.date.slice(5)}</span>
+      <span class="badge b-orange">${cat.en}</span>
+      <span class="exp-note">${esc(e.note||'—')}</span>
+      <span class="exp-amt">$${e.amount.toFixed(2)}</span>
+      <button class="btn btn-danger btn-sm btn-icon" onclick="deleteExpense('${e.id}')" style="padding:4px 7px">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+function renderBudgetTips() {
+  document.getElementById('budget-tips').innerHTML=BUDGET_TIPS.map((t,i)=>`
+    <div class="tip-card">
+      <div class="tip-num">${i+1}</div>
+      <div><div class="tip-en">${t.en}</div><div class="tip-vi">🇻🇳 ${t.vi}</div></div>
+    </div>`).join('');
+}
+
+function renderBudget() {
+  document.getElementById('budget-income').value=state.budget.income||'';
+  renderCatBudgetInputs(); renderExpCatSelect(); renderBudgetProgress();
+  renderExpenseList(); renderBudgetTips();
+}
+
+// ===================== CALENDAR =====================
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
+
+function getEventsForDate(dateStr) {
+  const holidays=getHolidays(calYear);
+  const hols=holidays.filter(h=>h.date===dateStr);
+  const user=state.events.filter(e=>e.date===dateStr);
+  return [...hols,...user];
+}
+
+function renderCalendar() {
+  const mn=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent=`${mn[calMonth]} ${calYear}`;
+  const grid=document.getElementById('cal-grid');
+  const today=todayStr();
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const prevDays=new Date(calYear,calMonth,0).getDate();
+
+  let html=DAY_NAMES.map(d=>`<div class="cal-dn">${d}</div>`).join('');
+
+  // Prev month filler
+  for(let i=firstDay-1;i>=0;i--) {
+    const d=prevDays-i;
+    html+=`<div class="cal-cell other-m"><div class="cal-date-num">${d}</div></div>`;
+  }
+
+  // This month
+  for(let d=1;d<=daysInMonth;d++) {
+    const dateStr=`${calYear}-${pad(calMonth+1)}-${pad(d)}`;
+    const isToday=dateStr===today;
+    const evs=getEventsForDate(dateStr).slice(0,3);
+    const evHtml=evs.map(e=>{
+      const color=(EVENT_TYPES[e.type]||EVENT_TYPES.other).color;
+      const short=e.title.slice(0,14)+(e.title.length>14?'…':'');
+      return `<div class="cal-evt" style="background:${color}" title="${esc(e.title)}">${esc(short)}</div>`;
+    }).join('');
+    html+=`<div class="cal-cell${isToday?' today':''}" onclick="openAddEvent('${dateStr}')">
+      <div class="cal-date-num">${d}</div>${evHtml}</div>`;
+  }
+
+  // Next month filler
+  const totalCells=firstDay+daysInMonth;
+  const remainder=totalCells%7===0?0:7-totalCells%7;
+  for(let i=1;i<=remainder;i++) {
+    html+=`<div class="cal-cell other-m"><div class="cal-date-num">${i}</div></div>`;
+  }
+
+  grid.innerHTML=html;
+  renderUpcoming(); renderReminders();
+}
+
+function openAddEvent(date) {
+  document.getElementById('ev-date').value=date;
+  document.getElementById('ev-title').value='';
+  document.getElementById('ev-time').value='';
+  populateEvMemberSelect();
+  openModal('modal-event');
+}
+
+function populateEvMemberSelect() {
+  const opts=state.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
+  document.getElementById('ev-member').innerHTML='<option value="">Whole family / Cả nhà</option>'+opts;
+}
+
+function addEvent() {
+  const title=document.getElementById('ev-title').value.trim();
+  const date=document.getElementById('ev-date').value;
+  if(!title||!date) { toast('Fill title and date / Điền tiêu đề và ngày'); return; }
+  state.events.push({id:uid(),date,title,time:document.getElementById('ev-time').value,
+    type:document.getElementById('ev-type').value,memberId:document.getElementById('ev-member').value});
+  save(); closeModal('modal-event'); renderCalendar(); toast('Event added! ✅');
+}
+
+function renderUpcoming() {
+  const el=document.getElementById('upcoming-events');
+  const upcoming=[];
+  for(let i=0;i<=7;i++) {
+    const d=new Date(); d.setDate(d.getDate()+i);
+    const ds=d.toISOString().slice(0,10);
+    getEventsForDate(ds).forEach(e=>upcoming.push({...e,ds}));
+  }
+  upcoming.sort((a,b)=>a.ds.localeCompare(b.ds)||(a.time||'').localeCompare(b.time||''));
+  if(!upcoming.length) { el.innerHTML='<div style="color:var(--sub);font-size:.82rem">No events in next 7 days.</div>'; return; }
+  el.innerHTML=upcoming.map(e=>{
+    const color=(EVENT_TYPES[e.type]||EVENT_TYPES.other).color;
+    const tm=e.time?` · ${e.time}`:'';
+    return `<div class="up-item" style="border-left-color:${color}">
+      <div class="up-date">${e.ds}${tm}</div>
+      <div class="up-title">${esc(e.title)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderReminders() {
+  const el=document.getElementById('reminders');
+  const tomorrow=new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  const tds=tomorrow.toISOString().slice(0,10);
+  const rem=state.events.filter(e=>e.date===tds && (e.type==='doctor'||e.type==='school'));
+  if(!rem.length) { el.innerHTML='<div style="color:var(--sub);font-size:.82rem">No reminders.</div>'; return; }
+  el.innerHTML=rem.map(e=>`
+    <div class="up-item" style="border-left-color:#eab308;background:#fefce8">
+      <div class="up-date">⏰ Tomorrow · ${e.time||'all day'}</div>
+      <div class="up-title">${esc(e.title)} <span class="reminder-badge">REMINDER</span></div>
+    </div>`).join('');
+}
+
+// ===================== HUB =====================
+function addNote() {
+  if(state.notes.length>=20) { toast('Max 20 notes / Tối đa 20 ghi chú'); return; }
+  const text=document.getElementById('note-text').value.trim();
+  if(!text) { toast('Write something! / Viết gì đó!'); return; }
+  const authorId=document.getElementById('note-author').value;
+  const author=authorId ? (getMember(authorId).name) : 'Anonymous';
+  state.notes.unshift({id:uid(),text,color:document.getElementById('note-color').value,by:author,ts:new Date().toLocaleString()});
+  save(); document.getElementById('note-text').value=''; renderNotes();
+}
+
+function deleteNote(id) {
+  state.notes=state.notes.filter(n=>n.id!==id); save(); renderNotes();
+}
+
+function renderNotes() {
+  const el=document.getElementById('notes-grid');
+  if(!state.notes.length) { el.innerHTML='<div style="color:var(--sub);font-size:.82rem">No notes yet. Post the first one!</div>'; return; }
+  el.innerHTML=state.notes.map(n=>`
+    <div class="note-card n-${n.color}">
+      <button class="note-del" onclick="deleteNote('${n.id}')">✕</button>
+      <div>${esc(n.text).replace(/\n/g,'<br>')}</div>
+      <div class="note-by">— ${esc(n.by)} · ${esc(n.ts)}</div>
+    </div>`).join('');
+}
+
+function addContact() {
+  const nameEN=document.getElementById('c-en').value.trim();
+  const phone=document.getElementById('c-phone').value.trim();
+  if(!nameEN||!phone) { toast('Fill name and phone / Điền tên và số điện thoại'); return; }
+  state.contacts.push({id:uid(),nameEN,nameVI:document.getElementById('c-vi').value.trim(),phone,rel:document.getElementById('c-rel').value.trim()});
+  save(); closeModal('modal-contact');
+  ['c-en','c-vi','c-phone','c-rel'].forEach(id=>document.getElementById(id).value='');
+  renderContacts(); toast('Contact added! ✅');
+}
+
+function deleteContact(id) {
+  state.contacts=state.contacts.filter(c=>c.id!==id); save(); renderContacts();
+}
+
+function renderContacts() {
+  const el=document.getElementById('contact-list');
+  const all=[...PRESET_CONTACTS,...state.contacts];
+  el.innerHTML=all.map(c=>`
+    <div class="contact-row">
+      <div class="c-names">
+        <div class="c-en">${esc(c.nameEN)}</div>
+        <div class="c-vi">🇻🇳 ${esc(c.nameVI||c.nameEN)}</div>
+        ${c.rel?`<div class="c-rel">${esc(c.rel)}</div>`:''}
+      </div>
+      <a href="tel:${c.phone}" class="c-phone">${esc(c.phone)}</a>
+      ${!c.id.startsWith('p')?`<button class="btn btn-danger btn-sm btn-icon" onclick="deleteContact('${c.id}')">🗑</button>`:''}
+    </div>`).join('');
+}
+
+function renderPhrases() {
+  document.getElementById('phrase-list').innerHTML=SCHOOL_PHRASES.map((p,i)=>`
+    <div class="phrase-card" onclick="copyPhrase(${i})">
+      <span class="p-num">${i+1}</span>
+      <div style="flex:1">
+        <div class="p-en">${esc(p.en)}</div>
+        <div class="p-vi">🇻🇳 ${esc(p.vi)}</div>
+      </div>
+      <span class="pcopy">📋 Copy</span>
+    </div>`).join('');
+}
+
+function copyPhrase(i) {
+  navigator.clipboard.writeText(SCHOOL_PHRASES[i].en).then(()=>toast('Copied to clipboard! ✅')).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=SCHOOL_PHRASES[i].en;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    toast('Copied! ✅');
+  });
+}
+
+function addGoal() {
+  if(state.goals.length>=10) { toast('Max 10 goals / Tối đa 10 mục tiêu'); return; }
+  const en=document.getElementById('g-en').value.trim();
+  if(!en) { toast('Enter a goal / Nhập mục tiêu'); return; }
+  state.goals.push({id:uid(),titleEN:en,titleVI:document.getElementById('g-vi').value.trim(),
+    targetDate:document.getElementById('g-date').value,
+    progress:Math.min(100,Math.max(0,parseInt(document.getElementById('g-progress').value)||0)),
+    done:false});
+  save(); closeModal('modal-goal');
+  ['g-en','g-vi','g-date'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('g-progress').value='0';
+  renderGoals(); toast('Goal added! ✅');
+}
+
+function updateGoalProgress(id, val) {
+  const g=state.goals.find(g=>g.id===id); if(g) { g.progress=+val; save(); }
+}
+
+function markGoalDone(id) {
+  const g=state.goals.find(g=>g.id===id); if(g) { g.done=!g.done; g.progress=g.done?100:g.progress; save(); renderGoals(); }
+}
+
+function deleteGoal(id) {
+  state.goals=state.goals.filter(g=>g.id!==id); save(); renderGoals();
+}
+
+function renderGoals() {
+  const el=document.getElementById('goal-list');
+  if(!state.goals.length) { el.innerHTML='<div style="color:var(--sub);font-size:.82rem">No goals yet. / Chưa có mục tiêu.</div>'; return; }
+  el.innerHTML=state.goals.map(g=>`
+    <div class="goal-card ${g.done?'goal-done-card':''}">
+      <div class="goal-hdr">
+        <div>
+          <div class="goal-en">${g.done?'✅ ':''}${esc(g.titleEN)}</div>
+          ${g.titleVI?`<div class="goal-vi">🇻🇳 ${esc(g.titleVI)}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+          ${g.targetDate?`<span class="goal-date">🗓 ${g.targetDate}</span>`:''}
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="markGoalDone('${g.id}')" title="${g.done?'Undo':'Mark done'}">${g.done?'↩':'✓'}</button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteGoal('${g.id}')">🗑</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <input type="range" min="0" max="100" value="${g.progress}" style="flex:1"
+          oninput="updateGoalProgress('${g.id}',this.value);document.getElementById('gp-${g.id}').textContent=this.value+'%'"
+          onchange="save();renderGoals()">
+        <span id="gp-${g.id}" style="font-size:.8rem;font-weight:700;color:var(--accent);width:36px;text-align:right">${g.progress}%</span>
+      </div>
+      <div class="progress-wrap" style="margin-top:4px"><div class="progress-fill pg" style="width:${g.progress}%"></div></div>
+    </div>`).join('');
+}
+
+function renderHub() {
+  renderNotes(); renderContacts(); renderPhrases(); renderGoals(); renderMemberSelects();
+}
+
+// ===================== UTILS =====================
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===================== INIT =====================
+loadState();
+populateChoreTemplates();
+choreTemplateChange();
+
+// Set today's date as default for expense
+document.getElementById('exp-date').value=todayStr();
+
+renderChores();
+renderMemberSelects();
+</script>
 </body>
 </html>
