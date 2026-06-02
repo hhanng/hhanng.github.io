@@ -6,23 +6,1280 @@
 <title>Agent #110 · FAANG Behavioral Story Bank</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px;max-width:520px;width:100%;text-align:center}
-.num{font-size:.8rem;font-weight:700;color:#38bdf8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-h1{font-size:1.6rem;font-weight:800;margin-bottom:12px;color:#f1f5f9}
-p{color:#94a3b8;font-size:.95rem;line-height:1.6;margin-bottom:24px}
-.badge{display:inline-block;background:#1d4ed8;color:#bfdbfe;font-size:.8rem;font-weight:700;padding:6px 16px;border-radius:99px;margin-bottom:28px}
-a.back{color:#38bdf8;text-decoration:none;font-size:.85rem;border:1px solid #334155;padding:8px 18px;border-radius:8px;display:inline-block;transition:background .15s}
-a.back:hover{background:#1e3a5f}
+:root{
+  --bg:#0f172a;--card:#1e293b;--card2:#0f1e35;--border:#334155;
+  --text:#e2e8f0;--sub:#94a3b8;--accent:#6366f1;--accent2:#818cf8;
+  --green:#22c55e;--red:#ef4444;--orange:#f97316;--yellow:#eab308;
+  --google:#4285f4;--meta:#1877f2;--amazon:#ff9900;--apple:#9ca3af;--netflix:#e50914;--ms:#00b4d8
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--accent2);text-decoration:none}
+
+/* TOPBAR */
+.topbar{background:#0a1628;border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px}
+.topbar .agent-tag{font-size:.68rem;font-weight:700;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase}
+.topbar h1{font-size:1rem;font-weight:800}
+.topbar .back{margin-left:auto;font-size:.78rem;color:var(--sub);border:1px solid var(--border);padding:5px 12px;border-radius:6px;transition:background .15s}
+.topbar .back:hover{background:var(--card)}
+
+/* TABS */
+.tabs{display:flex;background:#0a1628;border-bottom:1px solid var(--border);overflow-x:auto}
+.tab-btn{padding:12px 22px;font-size:.88rem;font-weight:600;color:var(--sub);border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;min-height:44px}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tab-pane{display:none;padding:20px 16px;max-width:1100px;margin:0 auto}
+.tab-pane.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.card+.card{margin-top:14px}
+.card-title{font-size:.9rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-title .sub{font-size:.75rem;font-weight:500;color:var(--sub)}
+
+/* FORMS */
+label{font-size:.8rem;font-weight:600;color:var(--sub);display:block;margin-bottom:5px}
+input,select,textarea{width:100%;padding:9px 12px;background:#0f172a;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem;font-family:inherit;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;line-height:1.55}
+.fld{margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:9px 16px;border:none;border-radius:8px;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .15s;min-height:40px;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
+.btn-green{background:#166534;color:#86efac;border:1px solid #16a34a}.btn-green:hover{background:#14532d}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--sub)}.btn-ghost:hover{background:var(--card);color:var(--text)}
+.btn-danger{background:#450a0a;color:#fca5a5;border:1px solid #7f1d1d}.btn-danger:hover{background:#7f1d1d}
+.btn-sm{padding:5px 11px;font-size:.78rem;min-height:32px}
+.btn-icon{padding:7px;min-height:34px;min-width:34px}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:700;margin:1px}
+.b-purple{background:#312e81;color:var(--accent2)}
+.b-blue{background:#1e3a5f;color:#93c5fd}
+.b-green{background:#14532d;color:#86efac}
+.b-red{background:#450a0a;color:#fca5a5}
+.b-orange{background:#431407;color:#fdba74}
+.b-gray{background:#1e293b;color:var(--sub)}
+.b-yellow{background:#422006;color:#fde68a}
+.b-teal{background:#134e4a;color:#5eead4}
+/* Company badges */
+.cg{background:#1a3a6e;color:#93c5fd}.cm{background:#1e2a5e;color:#a5b4fc}
+.ca{background:#431407;color:#fdba74}.cap{background:#1e293b;color:var(--sub)}
+.cn{background:#450a0a;color:#fca5a5}.cms{background:#134e4a;color:#5eead4}
+
+/* STAR FORM */
+.star-field{background:#0a1628;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;position:relative}
+.star-label{font-size:.8rem;font-weight:700;color:var(--accent2);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.star-label .letter{background:var(--accent);color:#fff;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;flex-shrink:0}
+.star-hints{font-size:.73rem;color:var(--sub);margin-bottom:7px;line-height:1.6}
+.star-hints span{display:block}
+.star-hints span::before{content:"→ "}
+.wc-bar-wrap{margin-top:6px;height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+.wc-bar{height:4px;border-radius:99px;transition:width .3s,background .3s}
+.wc-info{font-size:.7rem;color:var(--sub);margin-top:4px;display:flex;justify-content:space-between}
+
+/* SIDEBAR LAYOUT */
+.builder-layout{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
+.story-sidebar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;position:sticky;top:14px}
+.story-item{padding:9px 10px;background:#0a1628;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:6px;font-size:.8rem;transition:border-color .15s}
+.story-item:hover{border-color:var(--accent)}
+.story-item.active{border-color:var(--accent);background:#0f172a}
+.story-q{font-weight:600;color:var(--text);line-height:1.4;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.story-meta{color:var(--sub);font-size:.72rem}
+
+/* COMPANY TIPS */
+.company-tips{background:#0a1628;border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:12px;display:none}
+.company-tips.open{display:block}
+.tip-bullet{font-size:.82rem;color:var(--sub);padding:3px 0;line-height:1.5}
+.tip-bullet::before{content:"✦ ";color:var(--accent2)}
+
+/* LP CHECKBOXES */
+.lp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:8px}
+.lp-check{display:flex;align-items:flex-start;gap:7px;padding:6px 8px;background:#0a1628;border-radius:6px;font-size:.78rem;cursor:pointer;border:1px solid transparent;transition:border .15s}
+.lp-check:hover{border-color:var(--border)}
+.lp-check.checked{border-color:var(--accent);background:#1a1040}
+.lp-check input{width:14px;height:14px;flex-shrink:0;margin-top:1px;accent-color:var(--accent)}
+.lp-name{font-weight:600;color:var(--text)}
+.lp-desc{color:var(--sub);font-size:.7rem;margin-top:1px}
+
+/* TIMING */
+.timing-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.timing-chip{background:#0a1628;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.78rem;text-align:center;flex:1;min-width:80px}
+.timing-chip .tc-label{color:var(--sub);margin-bottom:2px}
+.timing-chip .tc-val{font-weight:700;color:var(--accent2)}
+
+/* QUESTION BANK */
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;transition:border-color .15s}
+.q-card:hover{border-color:var(--accent)}
+.q-num{font-size:.7rem;font-weight:700;color:var(--sub);margin-bottom:4px}
+.q-text{font-size:.9rem;font-weight:600;line-height:1.5;margin-bottom:8px}
+.q-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.q-actions{display:flex;gap:7px;flex-wrap:wrap}
+.q-written{border-color:#16a34a!important;background:#0a1f0a!important}
+.q-written .q-num::after{content:" ✓ Written";color:var(--green)}
+
+/* FILTERS */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filter-btn{padding:6px 14px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--sub);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;min-height:34px}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* PROGRESS */
+.progress-wrap{background:#0f172a;border-radius:99px;height:8px;margin:6px 0}
+.progress-fill{height:8px;border-radius:99px;background:var(--accent);transition:width .4s}
+
+/* LP PANEL */
+.lp-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.lp-panel-hdr{padding:12px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.88rem;font-weight:700;user-select:none}
+.lp-panel-hdr:hover{background:#0f1e35}
+.lp-panel-body{display:none;padding:14px 16px;border-top:1px solid var(--border)}
+.lp-panel-body.open{display:block}
+.lp-ref-item{padding:5px 0;border-bottom:1px solid #1e293b;font-size:.82rem}
+.lp-ref-item:last-child{border:none}
+.lp-ref-name{font-weight:700;color:var(--accent2)}
+.lp-ref-desc{color:var(--sub)}
+
+/* PREP SHEET */
+.story-card-full{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:10px}
+.story-card-hdr{padding:13px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.story-card-hdr:hover{background:#0f1e35}
+.story-card-body{display:none;padding:14px 16px;border-top:1px solid var(--border)}
+.story-card-body.open{display:block}
+.star-section{margin-bottom:12px}
+.star-section-label{font-size:.72rem;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.star-section-text{font-size:.85rem;line-height:1.6;color:var(--text);white-space:pre-wrap}
+
+/* GAP ANALYSIS */
+.gap-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.84rem}
+.gap-row:last-child{border:none}
+.company-readiness{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
+.cr-card{background:#0a1628;border:1px solid var(--border);border-radius:8px;padding:12px}
+.cr-name{font-size:.82rem;font-weight:700;margin-bottom:4px}
+.cr-score{font-size:1.2rem;font-weight:800;color:var(--accent2)}
+.cr-total{font-size:.75rem;color:var(--sub)}
+
+/* MOCK INTERVIEW */
+.mock-wrap{text-align:center;padding:24px 0}
+.mock-q{font-size:1.1rem;font-weight:700;line-height:1.5;margin-bottom:20px;color:var(--text)}
+.mock-timer{font-size:2rem;font-weight:800;color:var(--accent2);margin:16px 0;font-variant-numeric:tabular-nums}
+.mock-rating{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.mock-story-preview{background:#0a1628;border:1px solid var(--border);border-radius:10px;padding:14px;margin:12px 0;text-align:left;font-size:.82rem;line-height:1.6;max-height:200px;overflow-y:auto}
+
+/* EXPORT */
+#export-preview{background:#0a1628;border:1px solid var(--border);border-radius:8px;padding:14px;font-family:monospace;font-size:.78rem;line-height:1.6;white-space:pre;overflow-x:auto;max-height:400px;overflow-y:auto;color:var(--sub)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--accent);color:var(--text);padding:10px 16px;border-radius:8px;font-size:.82rem;opacity:0;transition:opacity .25s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+
+@media(max-width:760px){
+  .builder-layout{grid-template-columns:1fr}
+  .story-sidebar{position:static}
+  .grid2{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="num">Agent #110 · 100 AI Agents Challenge</div>
-  <h1>FAANG Behavioral Story Bank</h1>
-  <p>STAR story builder for 50 behavioral questions with company-specific FAANG customization.</p>
-  <div class="badge">🚧 Coming Soon</div><br>
-  <a href="/" class="back">← Back to Portfolio</a>
+
+<div class="topbar">
+  <div>
+    <div class="agent-tag">Agent #110 · 100 AI Agents</div>
+    <h1>💼 FAANG Behavioral Story Bank</h1>
+  </div>
+  <a href="/" class="back">← Portfolio</a>
 </div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('builder')">✍️ Story Builder</button>
+  <button class="tab-btn" onclick="switchTab('bank')">🗂 Question Bank</button>
+  <button class="tab-btn" onclick="switchTab('prep')">📋 Prep Sheet</button>
+</div>
+
+<!-- ======================== STORY BUILDER ======================== -->
+<div id="tab-builder" class="tab-pane active">
+  <div class="builder-layout">
+    <div>
+      <!-- Question Selector -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">📌 Question <span class="sub">Pick from 50 or type custom</span></div>
+        <div class="fld">
+          <label>Select Question</label>
+          <select id="q-sel" onchange="loadQuestionFromSel()">
+            <option value="">— Custom Question —</option>
+          </select>
+        </div>
+        <div class="fld" id="custom-q-wrap">
+          <label>Custom Question</label>
+          <input id="custom-q" type="text" placeholder="Type your custom behavioral question...">
+        </div>
+        <div id="q-meta" style="display:none;margin-top:6px;display:flex;flex-wrap:wrap;gap:4px"></div>
+      </div>
+
+      <!-- STAR Form -->
+      <div class="star-field">
+        <div class="star-label">
+          <span><span class="letter">S</span> &nbsp;Situation — <span style="color:var(--sub);font-weight:500">Set the scene (target: 30–45 sec)</span></span>
+          <span id="wc-S" style="font-size:.72rem;color:var(--sub)">0 words</span>
+        </div>
+        <div class="star-hints">
+          <span>What team/company were you at?</span>
+          <span>What was the timeline?</span>
+          <span>What made this challenging?</span>
+        </div>
+        <textarea id="ta-S" rows="4" placeholder="Describe the context and background..." oninput="updateWC('S')"></textarea>
+        <div class="wc-bar-wrap"><div class="wc-bar" id="bar-S"></div></div>
+        <div class="wc-info"><span id="wc-hint-S">Target: 65–97 words (30–45s)</span><span id="wc-time-S"></span></div>
+      </div>
+
+      <div class="star-field">
+        <div class="star-label">
+          <span><span class="letter">T</span> &nbsp;Task — <span style="color:var(--sub);font-weight:500">Your responsibility (target: 15–20 sec)</span></span>
+          <span id="wc-T" style="font-size:.72rem;color:var(--sub)">0 words</span>
+        </div>
+        <div class="star-hints">
+          <span>What was your specific role?</span>
+          <span>What were the stakes?</span>
+          <span>Who else was involved?</span>
+        </div>
+        <textarea id="ta-T" rows="3" placeholder="What were you responsible for?" oninput="updateWC('T')"></textarea>
+        <div class="wc-bar-wrap"><div class="wc-bar" id="bar-T"></div></div>
+        <div class="wc-info"><span id="wc-hint-T">Target: 32–43 words (15–20s)</span><span id="wc-time-T"></span></div>
+      </div>
+
+      <div class="star-field">
+        <div class="star-label">
+          <span><span class="letter">A</span> &nbsp;Action — <span style="color:var(--sub);font-weight:500">What YOU did (target: 60–90 sec)</span></span>
+          <span id="wc-A" style="font-size:.72rem;color:var(--sub)">0 words</span>
+        </div>
+        <div class="star-hints">
+          <span>Use "I" not "we"</span>
+          <span>List 3–5 concrete steps you took</span>
+          <span>What decisions did you make?</span>
+        </div>
+        <textarea id="ta-A" rows="6" placeholder="• Step 1: I first...\n• Step 2: Then I...\n• Step 3: I also..." oninput="updateWC('A')"></textarea>
+        <div class="wc-bar-wrap"><div class="wc-bar" id="bar-A"></div></div>
+        <div class="wc-info"><span id="wc-hint-A">Target: 130–195 words (60–90s)</span><span id="wc-time-A"></span></div>
+      </div>
+
+      <div class="star-field">
+        <div class="star-label">
+          <span><span class="letter">R</span> &nbsp;Result — <span style="color:var(--sub);font-weight:500">Outcome with numbers (target: 30–45 sec)</span></span>
+          <span id="wc-R" style="font-size:.72rem;color:var(--sub)">0 words</span>
+        </div>
+        <div class="star-hints">
+          <span>Include numbers (%, $, time saved)</span>
+          <span>What did teammates/manager say?</span>
+          <span>What did you learn?</span>
+        </div>
+        <textarea id="ta-R" rows="4" placeholder="The outcome was... [include metrics]" oninput="updateWC('R')"></textarea>
+        <div class="wc-bar-wrap"><div class="wc-bar" id="bar-R"></div></div>
+        <div class="wc-info"><span id="wc-hint-R">Target: 65–97 words (30–45s)</span><span id="wc-time-R"></span></div>
+      </div>
+
+      <!-- Timing summary -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">⏱ Estimated Speaking Time</div>
+        <div class="timing-row">
+          <div class="timing-chip"><div class="tc-label">Situation</div><div class="tc-val" id="t-S">0s</div></div>
+          <div class="timing-chip"><div class="tc-label">Task</div><div class="tc-val" id="t-T">0s</div></div>
+          <div class="timing-chip"><div class="tc-label">Action</div><div class="tc-val" id="t-A">0s</div></div>
+          <div class="timing-chip"><div class="tc-label">Result</div><div class="tc-val" id="t-R">0s</div></div>
+          <div class="timing-chip" style="border-color:var(--accent)"><div class="tc-label">Total</div><div class="tc-val" id="t-total">0s</div></div>
+        </div>
+      </div>
+
+      <!-- Tags & Company Customizer -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">🏷 Story Tags</div>
+        <div class="grid2" style="margin-bottom:10px">
+          <div class="fld">
+            <label>Theme</label>
+            <select id="tag-theme">
+              <option value="Leadership">Leadership</option>
+              <option value="Conflict">Conflict & Collaboration</option>
+              <option value="Problem Solving">Problem Solving</option>
+              <option value="Growth">Growth & Ambiguity</option>
+              <option value="Achievement">Achievement & Impact</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label>Difficulty</label>
+            <select id="tag-diff">
+              <option value="Medium">Medium</option>
+              <option value="Easy">Easy</option>
+              <option value="Hard">Hard</option>
+            </select>
+          </div>
+        </div>
+        <div class="fld">
+          <label>Target Companies (hold Ctrl/Cmd to multi-select)</label>
+          <select id="tag-companies" multiple style="height:110px">
+            <option value="Google">Google</option>
+            <option value="Meta">Meta</option>
+            <option value="Amazon">Amazon</option>
+            <option value="Apple">Apple</option>
+            <option value="Netflix">Netflix</option>
+            <option value="Microsoft">Microsoft</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Company Customizer -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">🎯 Company Customizer <span class="sub">Reframe your story</span></div>
+        <div class="fld">
+          <label>Customize for</label>
+          <select id="company-sel" onchange="showCompanyTips()">
+            <option value="">— Select company —</option>
+            <option value="Google">Google</option>
+            <option value="Meta">Meta</option>
+            <option value="Amazon">Amazon</option>
+            <option value="Apple">Apple</option>
+            <option value="Netflix">Netflix</option>
+            <option value="Microsoft">Microsoft</option>
+          </select>
+        </div>
+        <div class="company-tips" id="company-tips-box"></div>
+
+        <!-- Amazon LP Mapper (shown when Amazon selected) -->
+        <div id="lp-mapper" style="display:none;margin-top:12px">
+          <label style="margin-bottom:8px">Amazon Leadership Principles — check which this story demonstrates:</label>
+          <div class="lp-grid" id="lp-checkboxes"></div>
+        </div>
+      </div>
+
+      <!-- Save -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+        <button class="btn btn-primary" onclick="saveStory()">💾 Save Story</button>
+        <button class="btn btn-ghost" onclick="clearForm()">✕ Clear</button>
+        <button class="btn btn-danger" id="delete-btn" onclick="deleteCurrentStory()" style="display:none">🗑 Delete</button>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="story-sidebar">
+      <div style="font-size:.82rem;font-weight:700;margin-bottom:10px;color:var(--text)">
+        📚 Saved Stories <span id="saved-count" style="color:var(--sub);font-weight:500"></span>
+      </div>
+      <div id="stories-sidebar-list">
+        <div style="color:var(--sub);font-size:.8rem">No stories yet.<br>Fill the form and save!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== QUESTION BANK ======================== -->
+<div id="tab-bank" class="tab-pane">
+
+  <!-- Progress -->
+  <div class="card" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px">
+      <span style="font-weight:700">📊 Progress: <span id="bank-progress-text">0 / 50 questions with stories</span></span>
+      <span class="badge b-purple" id="bank-pct">0%</span>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="bank-progress-bar" style="width:0%"></div></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('theme','all',this)">All Themes</button>
+    <button class="filter-btn" onclick="setFilter('theme','Leadership',this)">Leadership</button>
+    <button class="filter-btn" onclick="setFilter('theme','Conflict',this)">Conflict</button>
+    <button class="filter-btn" onclick="setFilter('theme','Problem Solving',this)">Problem Solving</button>
+    <button class="filter-btn" onclick="setFilter('theme','Growth',this)">Growth</button>
+    <button class="filter-btn" onclick="setFilter('theme','Achievement',this)">Achievement</button>
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('written','all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('written','yes',this)">✓ Written</button>
+    <button class="filter-btn" onclick="setFilter('written','no',this)">○ Not Written</button>
+    <select id="company-filter" onchange="applyFilters()" style="padding:6px 10px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--sub);font-size:.78rem;font-weight:600;height:34px">
+      <option value="">All Companies</option>
+      <option>Google</option><option>Meta</option><option>Amazon</option>
+      <option>Apple</option><option>Netflix</option><option>Microsoft</option>
+    </select>
+  </div>
+
+  <!-- LP Reference -->
+  <div class="lp-panel">
+    <div class="lp-panel-hdr" onclick="toggleLPPanel()">
+      📚 Amazon Leadership Principles Reference <span id="lp-arrow">▾</span>
+    </div>
+    <div class="lp-panel-body" id="lp-panel-body"></div>
+  </div>
+
+  <!-- Questions -->
+  <div id="q-bank-list"></div>
+</div>
+
+<!-- ======================== PREP SHEET ======================== -->
+<div id="tab-prep" class="tab-pane">
+
+  <!-- Mock Interview -->
+  <div class="card" style="margin-bottom:14px" id="mock-setup-panel">
+    <div class="card-title">🎭 Mock Interview Mode</div>
+    <div class="row" style="margin-bottom:12px">
+      <div class="fld">
+        <label>Target Company</label>
+        <select id="mock-company">
+          <option value="">Any Company</option>
+          <option>Google</option><option>Meta</option><option>Amazon</option>
+          <option>Apple</option><option>Netflix</option><option>Microsoft</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label>Questions</label>
+        <select id="mock-count">
+          <option value="5">5 questions</option>
+          <option value="10">10 questions</option>
+          <option value="all">All written stories</option>
+        </select>
+      </div>
+      <div style="flex:0;padding-bottom:1px">
+        <button class="btn btn-primary" onclick="startMock()">▶ Start</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mock Active -->
+  <div class="card" style="margin-bottom:14px;display:none" id="mock-active-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div class="card-title" style="margin:0">🎭 Mock Interview <span class="sub" id="mock-progress-label"></span></div>
+      <button class="btn btn-ghost btn-sm" onclick="endMock()">End Session</button>
+    </div>
+    <div class="progress-wrap" style="margin-bottom:16px"><div class="progress-fill" id="mock-progress-bar" style="width:0%"></div></div>
+    <div class="mock-wrap">
+      <div class="mock-q" id="mock-q-text"></div>
+      <div class="mock-timer" id="mock-timer">0:00</div>
+      <div style="font-size:.78rem;color:var(--sub);margin-bottom:10px">Speak your answer aloud — then check your notes below</div>
+      <button class="btn btn-ghost btn-sm" onclick="toggleStoryPreview()" id="preview-toggle-btn">👁 Show My Story</button>
+      <div class="mock-story-preview" id="mock-story-preview" style="display:none"></div>
+      <div class="mock-rating">
+        <button class="btn btn-green" onclick="rateMock('Easy')">😊 Easy</button>
+        <button class="btn btn-ghost" onclick="rateMock('Medium')">😐 Medium</button>
+        <button class="btn btn-danger" onclick="rateMock('Hard')">😓 Hard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mock Summary -->
+  <div class="card" style="margin-bottom:14px;display:none" id="mock-summary-panel">
+    <div class="card-title">✅ Session Complete!</div>
+    <div id="mock-summary-body"></div>
+    <button class="btn btn-ghost" style="margin-top:12px" onclick="resetMock()">← Back to Setup</button>
+  </div>
+
+  <!-- Company Readiness -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🏢 Company Readiness</div>
+    <div class="company-readiness" id="company-readiness"></div>
+  </div>
+
+  <!-- Story Gaps -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">⚠️ Story Gaps — What to Write Next</div>
+    <div id="story-gaps"></div>
+  </div>
+
+  <!-- Story Library -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📚 Story Library <span class="sub" id="lib-count"></span></div>
+    <div id="story-library"></div>
+  </div>
+
+  <!-- Export -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📤 Export Prep Sheet</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="generateExport()">🔄 Generate</button>
+      <button class="btn btn-ghost" onclick="copyExport()">📋 Copy to Clipboard</button>
+      <button class="btn btn-ghost" onclick="downloadExport()">⬇️ Download .txt</button>
+    </div>
+    <div id="export-preview" style="display:none"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ======================== STATIC DATA ========================
+
+const QUESTIONS = [
+  // LEADERSHIP
+  {id:1,q:"Tell me about a time you led a project from start to finish.",theme:"Leadership",companies:["Google","Meta","Amazon","Apple","Netflix","Microsoft"],lps:["Ownership","Deliver Results"]},
+  {id:2,q:"Describe a time you influenced people without having authority over them.",theme:"Leadership",companies:["Google","Meta","Amazon","Microsoft"],lps:["Earn Trust","Have Backbone Disagree and Commit"]},
+  {id:3,q:"Tell me about a time you had to make a decision with incomplete information.",theme:"Leadership",companies:["Amazon","Netflix","Apple"],lps:["Bias for Action","Are Right A Lot"]},
+  {id:4,q:"Describe a time you set a vision and got others to follow it.",theme:"Leadership",companies:["Google","Meta","Microsoft"],lps:["Think Big","Ownership"]},
+  {id:5,q:"Tell me about a time you took ownership of something outside your job description.",theme:"Leadership",companies:["Amazon","Netflix"],lps:["Ownership","Bias for Action"]},
+  {id:6,q:"Describe a time you had to prioritize ruthlessly under pressure.",theme:"Leadership",companies:["Google","Meta","Amazon","Apple"],lps:["Deliver Results","Frugality"]},
+  {id:7,q:"Tell me about a time you mentored or coached someone to success.",theme:"Leadership",companies:["Google","Microsoft","Amazon"],lps:["Hire and Develop the Best"]},
+  {id:8,q:"Describe a time you drove a cross-team initiative.",theme:"Leadership",companies:["Google","Meta","Microsoft"],lps:["Earn Trust","Deliver Results"]},
+  {id:9,q:"Tell me about a time you had to deliver bad news to stakeholders.",theme:"Leadership",companies:["Amazon","Apple","Microsoft"],lps:["Earn Trust","Have Backbone Disagree and Commit"]},
+  {id:10,q:"Describe a time you changed the direction of a project mid-way.",theme:"Leadership",companies:["Google","Meta","Amazon","Netflix"],lps:["Bias for Action","Are Right A Lot"]},
+  // CONFLICT
+  {id:11,q:"Tell me about a time you disagreed with your manager and what happened.",theme:"Conflict",companies:["Amazon","Netflix","Apple","Google"],lps:["Have Backbone Disagree and Commit","Earn Trust"]},
+  {id:12,q:"Describe a conflict with a teammate and how you resolved it.",theme:"Conflict",companies:["Google","Meta","Microsoft","Amazon"],lps:["Earn Trust"]},
+  {id:13,q:"Tell me about a time you had to give difficult feedback to someone.",theme:"Conflict",companies:["Google","Meta","Microsoft","Amazon"],lps:["Earn Trust","Hire and Develop the Best"]},
+  {id:14,q:"Describe a time a stakeholder pushed back on your work.",theme:"Conflict",companies:["Amazon","Apple","Google"],lps:["Have Backbone Disagree and Commit","Earn Trust"]},
+  {id:15,q:"Tell me about a time you had to say no to a request.",theme:"Conflict",companies:["Amazon","Apple","Netflix"],lps:["Have Backbone Disagree and Commit","Customer Obsession"]},
+  {id:16,q:"Describe a time you worked with someone very different from you.",theme:"Conflict",companies:["Google","Microsoft","Meta"],lps:["Earn Trust"]},
+  {id:17,q:"Tell me about a time you had to align teams with competing priorities.",theme:"Conflict",companies:["Google","Meta","Amazon","Microsoft"],lps:["Earn Trust","Deliver Results"]},
+  {id:18,q:"Describe a time you failed to meet a commitment.",theme:"Conflict",companies:["Amazon","Microsoft","Apple"],lps:["Deliver Results","Ownership"]},
+  {id:19,q:"Tell me about a time you had to navigate office politics.",theme:"Conflict",companies:["Google","Microsoft","Meta"],lps:["Earn Trust"]},
+  {id:20,q:"Describe a time you built trust with a skeptical stakeholder.",theme:"Conflict",companies:["Amazon","Apple","Google"],lps:["Earn Trust","Customer Obsession"]},
+  // PROBLEM SOLVING
+  {id:21,q:"Tell me about the hardest technical problem you have ever solved.",theme:"Problem Solving",companies:["Google","Meta","Amazon","Apple"],lps:["Dive Deep","Invent and Simplify"]},
+  {id:22,q:"Describe a time you had to debug a critical production issue.",theme:"Problem Solving",companies:["Google","Meta","Amazon","Netflix"],lps:["Dive Deep","Ownership"]},
+  {id:23,q:"Tell me about a time you improved a process or system significantly.",theme:"Problem Solving",companies:["Amazon","Google","Microsoft"],lps:["Invent and Simplify","Deliver Results"]},
+  {id:24,q:"Describe a time you used data to make a counterintuitive decision.",theme:"Problem Solving",companies:["Google","Meta","Amazon"],lps:["Are Right A Lot","Dive Deep"]},
+  {id:25,q:"Tell me about a time you prevented a major failure before it happened.",theme:"Problem Solving",companies:["Amazon","Apple","Netflix"],lps:["Ownership","Dive Deep"]},
+  {id:26,q:"Describe a time you had to solve a problem with very limited resources.",theme:"Problem Solving",companies:["Amazon","Netflix"],lps:["Frugality","Invent and Simplify"]},
+  {id:27,q:"Tell me about a time you simplified something unnecessarily complex.",theme:"Problem Solving",companies:["Google","Apple","Amazon"],lps:["Invent and Simplify"]},
+  {id:28,q:"Describe a time you found a creative solution no one else had thought of.",theme:"Problem Solving",companies:["Google","Meta","Amazon"],lps:["Invent and Simplify","Think Big"]},
+  {id:29,q:"Tell me about a time you had to learn a new technology fast.",theme:"Problem Solving",companies:["Google","Meta","Amazon","Microsoft"],lps:["Learn and Be Curious","Bias for Action"]},
+  {id:30,q:"Describe your biggest technical failure and what you learned.",theme:"Problem Solving",companies:["Google","Meta","Amazon","Netflix","Microsoft"],lps:["Learn and Be Curious","Ownership"]},
+  // GROWTH
+  {id:31,q:"Tell me about a time you stepped outside your comfort zone.",theme:"Growth",companies:["Google","Meta","Microsoft","Amazon"],lps:["Learn and Be Curious","Bias for Action"]},
+  {id:32,q:"Describe a time you had to adapt to a major unexpected change.",theme:"Growth",companies:["Amazon","Netflix","Microsoft"],lps:["Bias for Action","Learn and Be Curious"]},
+  {id:33,q:"Tell me about a time you received critical feedback and how you responded.",theme:"Growth",companies:["Google","Meta","Microsoft","Amazon"],lps:["Learn and Be Curious","Earn Trust"]},
+  {id:34,q:"Describe a time you worked in a highly ambiguous situation.",theme:"Growth",companies:["Amazon","Netflix","Apple","Google"],lps:["Bias for Action","Are Right A Lot"]},
+  {id:35,q:"Tell me about a time you went above and beyond what was expected.",theme:"Growth",companies:["Amazon","Apple","Google"],lps:["Customer Obsession","Ownership"]},
+  {id:36,q:"Describe how you stay current with technology and new developments.",theme:"Growth",companies:["Google","Meta","Microsoft"],lps:["Learn and Be Curious"]},
+  {id:37,q:"Tell me about a time you changed your mind after strong initial conviction.",theme:"Growth",companies:["Amazon","Netflix","Google"],lps:["Are Right A Lot","Have Backbone Disagree and Commit"]},
+  {id:38,q:"Describe a time you failed and what you did differently next time.",theme:"Growth",companies:["Google","Meta","Amazon","Microsoft"],lps:["Learn and Be Curious","Ownership"]},
+  {id:39,q:"Tell me about your biggest weakness and how you are actively improving it.",theme:"Growth",companies:["Google","Meta","Amazon","Microsoft"],lps:["Learn and Be Curious"]},
+  {id:40,q:"Describe a time you had to start something from scratch with no guidance.",theme:"Growth",companies:["Amazon","Netflix","Meta"],lps:["Ownership","Bias for Action","Think Big"]},
+  // ACHIEVEMENT
+  {id:41,q:"Tell me about a project you are most proud of.",theme:"Achievement",companies:["Google","Meta","Amazon","Apple","Netflix","Microsoft"],lps:["Deliver Results","Think Big"]},
+  {id:42,q:"Describe the most impactful thing you have shipped or delivered.",theme:"Achievement",companies:["Meta","Amazon","Apple","Google"],lps:["Deliver Results","Customer Obsession"]},
+  {id:43,q:"Tell me about a time you exceeded expectations significantly.",theme:"Achievement",companies:["Google","Meta","Amazon","Apple"],lps:["Deliver Results","Insist on the Highest Standards"]},
+  {id:44,q:"Describe a time your work directly impacted the business bottom line.",theme:"Achievement",companies:["Meta","Amazon","Microsoft"],lps:["Deliver Results","Customer Obsession"]},
+  {id:45,q:"Tell me about a time you took a calculated risk that paid off.",theme:"Achievement",companies:["Amazon","Netflix","Meta","Google"],lps:["Bias for Action","Think Big"]},
+  {id:46,q:"Describe your most significant contribution at your current/last job.",theme:"Achievement",companies:["Google","Meta","Amazon","Apple","Netflix","Microsoft"],lps:["Deliver Results","Ownership"]},
+  {id:47,q:"Tell me about a time you launched something used by many people.",theme:"Achievement",companies:["Google","Meta","Amazon"],lps:["Customer Obsession","Think Big","Deliver Results"]},
+  {id:48,q:"Describe a time you turned a failing project around.",theme:"Achievement",companies:["Amazon","Google","Microsoft"],lps:["Ownership","Deliver Results","Bias for Action"]},
+  {id:49,q:"Tell me about a time you identified an opportunity no one else saw.",theme:"Achievement",companies:["Amazon","Netflix","Google","Meta"],lps:["Think Big","Invent and Simplify"]},
+  {id:50,q:"Describe the problem you are most proud of solving in your career.",theme:"Achievement",companies:["Google","Meta","Amazon","Apple","Netflix","Microsoft"],lps:["Deliver Results","Dive Deep"]}
+];
+
+const LPS = [
+  {name:"Customer Obsession",desc:"Leaders start with the customer and work backwards."},
+  {name:"Ownership",desc:"Leaders are owners; they act on behalf of the entire company."},
+  {name:"Invent and Simplify",desc:"Leaders expect and require innovation and invention from their teams."},
+  {name:"Are Right A Lot",desc:"Leaders are right a lot; they have strong judgment and good instincts."},
+  {name:"Learn and Be Curious",desc:"Leaders are never done learning and always seek to improve themselves."},
+  {name:"Hire and Develop the Best",desc:"Leaders raise the performance bar with every hire and promotion."},
+  {name:"Insist on the Highest Standards",desc:"Leaders have relentlessly high standards — many may seem unreasonably high."},
+  {name:"Think Big",desc:"Thinking small is a self-fulfilling prophecy. Leaders create and communicate a bold direction."},
+  {name:"Bias for Action",desc:"Speed matters in business. Many decisions and actions are reversible."},
+  {name:"Frugality",desc:"Accomplish more with less. Constraints breed resourcefulness."},
+  {name:"Earn Trust",desc:"Leaders listen attentively, speak candidly, and treat others respectfully."},
+  {name:"Dive Deep",desc:"Leaders operate at all levels, stay connected to details, and audit frequently."},
+  {name:"Have Backbone Disagree and Commit",desc:"Leaders obligate themselves to respectfully challenge decisions they disagree with."},
+  {name:"Deliver Results",desc:"Leaders focus on the key inputs for their business and deliver with the right quality."},
+  {name:"Strive to be Earth's Best Employer",desc:"Leaders work every day to create a safer, more productive, higher performing work environment."},
+  {name:"Success and Scale Bring Broad Responsibility",desc:"We must be humble and thoughtful about even secondary effects of our actions."}
+];
+
+const COMPANY_TIPS = {
+  Google:{
+    label:"🔵 Google — Googleyness",
+    color:"var(--google)",
+    tips:[
+      "Emphasize collaboration — how you worked cross-functionally",
+      "Highlight user focus — how did your work benefit users?",
+      "Add data: what signals or metrics did you use to decide?",
+      "Show innovation: what was novel about your approach?",
+      "Scale: did this solution work at Google-scale or could it?"
+    ]
+  },
+  Meta:{
+    label:"🔷 Meta — Move Fast + Be Bold",
+    color:"var(--meta)",
+    tips:[
+      "Lead with what you SHIPPED — concrete output",
+      "Quantify user impact: how many users affected?",
+      "Show willingness to take risks: what was the bold move?",
+      "Emphasize speed: how fast did you ship?",
+      "How did you measure success? (metrics, experiments)"
+    ]
+  },
+  Amazon:{
+    label:"🟠 Amazon — Leadership Principles",
+    color:"var(--amazon)",
+    tips:[
+      "Map every sentence to a specific LP — interviewers score by LP",
+      "Use keywords: 'customer obsession', 'bias for action', 'dive deep'",
+      "Include hard numbers: %, $, time saved, customers impacted",
+      "Show ownership: 'I decided...' not 'we decided...'",
+      "End with what you'd do differently (shows 'Learn and Be Curious')"
+    ]
+  },
+  Apple:{
+    label:"⬛ Apple — Craft + Quality",
+    color:"var(--apple)",
+    tips:[
+      "Highlight attention to detail — what tiny thing did you get right?",
+      "Show your quality bar: what tradeoff did you make for quality?",
+      "Describe how you pushed back to make something better",
+      "Focus on the refinement process — iteration matters",
+      "Emphasize how the end user experience was improved"
+    ]
+  },
+  Netflix:{
+    label:"🔴 Netflix — Judgment + Ownership",
+    color:"var(--netflix)",
+    tips:[
+      "Show you acted without being told — autonomous decision-making",
+      "Explain the context you used to make your decision",
+      "Demonstrate how you influenced without authority",
+      "Show 'Highly Aligned, Loosely Coupled' — you set direction, others executed",
+      "Emphasize judgment over process: what did YOU decide and why?"
+    ]
+  },
+  Microsoft:{
+    label:"🩵 Microsoft — Growth Mindset",
+    color:"var(--ms)",
+    tips:[
+      "Lead with learning: what did you learn from this experience?",
+      "Show empathy: how did you consider others' perspectives?",
+      "Highlight collaboration and helping others succeed",
+      "Include failure: what went wrong and how did you grow?",
+      "Connect to mission: how did this create broader impact?"
+    ]
+  }
+};
+
+const COMPANY_COVERAGE = {
+  Google:15, Meta:12, Amazon:16, Apple:10, Netflix:10, Microsoft:12
+};
+
+// WC targets per section [min, max] in words
+const WC_TARGETS = {S:[65,97], T:[32,43], A:[130,195], R:[65,97]};
+
+// ======================== STATE ========================
+const STORE = 'sb110_v1';
+let state, currentQId = null, mockSession = null, mockTimerInterval = null;
+
+function loadState() {
+  try { state = JSON.parse(localStorage.getItem(STORE)) || {}; } catch(e){state={};}
+  if(!state.stories) state.stories = {};
+}
+function save() { localStorage.setItem(STORE, JSON.stringify(state)); }
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+
+// ======================== TABS ========================
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['builder','bank','prep'][i]===name);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='bank') renderBank();
+  if(name==='prep') renderPrep();
+  if(name==='builder') renderSidebar();
+}
+
+// ======================== TOAST ========================
+function toast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ======================== WORD COUNT & TIMING ========================
+function countWords(text) {
+  return text.trim().split(/\s+/).filter(w=>w).length;
+}
+
+function updateWC(sec) {
+  const ta = document.getElementById('ta-'+sec);
+  const words = countWords(ta.value);
+  const [min, max] = WC_TARGETS[sec];
+  const secs = Math.round(words / 130 * 60);
+
+  document.getElementById('wc-'+sec).textContent = words + ' words';
+  document.getElementById('t-'+sec).textContent = formatSecs(secs);
+
+  // Color bar
+  const bar = document.getElementById('bar-'+sec);
+  const pct = Math.min(words / max * 100, 100);
+  bar.style.width = pct + '%';
+  bar.style.background = words < min ? 'var(--red)' : words <= max ? 'var(--green)' : 'var(--orange)';
+
+  updateTotalTime();
+}
+
+function updateTotalTime() {
+  let total = 0;
+  ['S','T','A','R'].forEach(s=>{
+    const ta=document.getElementById('ta-'+s);
+    total += Math.round(countWords(ta.value)/130*60);
+  });
+  document.getElementById('t-total').textContent = formatSecs(total);
+}
+
+function formatSecs(s) {
+  if(s < 60) return s+'s';
+  return Math.floor(s/60)+'m '+  (s%60)+'s';
+}
+
+// ======================== QUESTION SELECTOR ========================
+function populateQSel() {
+  const sel = document.getElementById('q-sel');
+  const themes = ['Leadership','Conflict','Problem Solving','Growth','Achievement'];
+  let html = '<option value="">— Custom Question —</option>';
+  themes.forEach(theme => {
+    html += `<optgroup label="${theme}">`;
+    QUESTIONS.filter(q=>q.theme===theme).forEach(q=>{
+      html += `<option value="${q.id}">${q.id}. ${q.q}</option>`;
+    });
+    html += '</optgroup>';
+  });
+  sel.innerHTML = html;
+}
+
+function loadQuestionFromSel() {
+  const val = document.getElementById('q-sel').value;
+  if(!val) {
+    currentQId = null;
+    document.getElementById('custom-q-wrap').style.display = 'block';
+    document.getElementById('q-meta').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    clearForm(true);
+    return;
+  }
+  loadQuestion(parseInt(val));
+}
+
+function loadQuestion(qId) {
+  currentQId = qId;
+  const q = QUESTIONS.find(x=>x.id===qId);
+  document.getElementById('q-sel').value = qId;
+  document.getElementById('custom-q-wrap').style.display = 'none';
+
+  // Show meta badges
+  const meta = document.getElementById('q-meta');
+  meta.style.display = 'flex';
+  meta.innerHTML = [
+    `<span class="badge b-purple">${q.theme}</span>`,
+    ...q.companies.map(c=>`<span class="badge ${companyBadgeClass(c)}">${c}</span>`),
+    ...q.lps.slice(0,3).map(lp=>`<span class="badge b-orange">${lp}</span>`)
+  ].join('');
+
+  // Pre-fill tag theme
+  document.getElementById('tag-theme').value = q.theme;
+
+  // Load saved story if any
+  if(state.stories[qId]) {
+    const s = state.stories[qId];
+    document.getElementById('ta-S').value = s.situation || '';
+    document.getElementById('ta-T').value = s.task || '';
+    document.getElementById('ta-A').value = s.action || '';
+    document.getElementById('ta-R').value = s.result || '';
+    document.getElementById('tag-theme').value = s.theme || q.theme;
+    document.getElementById('tag-diff').value = s.difficulty || 'Medium';
+    // companies multi-select
+    Array.from(document.getElementById('tag-companies').options).forEach(o=>{
+      o.selected = (s.companies||[]).includes(o.value);
+    });
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    // LP checkboxes for Amazon
+    if(document.getElementById('company-sel').value === 'Amazon') {
+      renderLPCheckboxes(s.lpTags || []);
+    }
+  } else {
+    clearForm(true);
+    document.getElementById('delete-btn').style.display = 'none';
+  }
+  ['S','T','A','R'].forEach(sec=>updateWC(sec));
+}
+
+function clearForm(keepQ) {
+  ['ta-S','ta-T','ta-A','ta-R'].forEach(id=>document.getElementById(id).value='');
+  ['S','T','A','R'].forEach(sec=>updateWC(sec));
+  if(!keepQ) {
+    document.getElementById('q-sel').value='';
+    document.getElementById('custom-q').value='';
+    document.getElementById('custom-q-wrap').style.display='block';
+    document.getElementById('q-meta').style.display='none';
+    currentQId = null;
+  }
+  document.getElementById('delete-btn').style.display = 'none';
+}
+
+// ======================== SAVE / DELETE ========================
+function saveStory() {
+  const situation = document.getElementById('ta-S').value.trim();
+  const task = document.getElementById('ta-T').value.trim();
+  const action = document.getElementById('ta-A').value.trim();
+  const result = document.getElementById('ta-R').value.trim();
+  if(!situation && !task && !action && !result) { toast('Fill in at least one STAR field'); return; }
+
+  const qId = currentQId || ('custom_' + uid());
+  const question = currentQId
+    ? QUESTIONS.find(q=>q.id===currentQId).q
+    : (document.getElementById('custom-q').value.trim() || 'Custom question');
+
+  const companies = Array.from(document.getElementById('tag-companies').selectedOptions).map(o=>o.value);
+  const lpEls = document.querySelectorAll('.lp-check input:checked');
+  const lpTags = Array.from(lpEls).map(el=>el.value);
+
+  state.stories[qId] = {
+    qId, question, situation, task, action, result,
+    companies, lpTags,
+    theme: document.getElementById('tag-theme').value,
+    difficulty: document.getElementById('tag-diff').value,
+    timestamp: Date.now()
+  };
+  save();
+  renderSidebar();
+  document.getElementById('delete-btn').style.display = 'inline-flex';
+  toast('Story saved! 💾');
+}
+
+function deleteCurrentStory() {
+  if(!currentQId || !confirm('Delete this story?')) return;
+  delete state.stories[currentQId];
+  save();
+  clearForm();
+  renderSidebar();
+  toast('Story deleted.');
+}
+
+// ======================== SIDEBAR ========================
+function renderSidebar() {
+  const el = document.getElementById('stories-sidebar-list');
+  const keys = Object.keys(state.stories);
+  document.getElementById('saved-count').textContent = `(${keys.length})`;
+  if(!keys.length) {
+    el.innerHTML = '<div style="color:var(--sub);font-size:.8rem">No stories yet.<br>Fill the form and save!</div>';
+    return;
+  }
+  el.innerHTML = keys.map(k=>{
+    const s = state.stories[k];
+    const active = (k == currentQId || k === 'custom_'+currentQId) ? ' active':'';
+    const wc = countWords(s.situation+' '+s.task+' '+s.action+' '+s.result);
+    return `<div class="story-item${active}" onclick="loadStoryFromSidebar('${k}')">
+      <div class="story-q">${esc(s.question)}</div>
+      <div class="story-meta"><span class="badge b-gray" style="font-size:.68rem">${s.theme}</span> · ${wc} words</div>
+    </div>`;
+  }).join('');
+}
+
+function loadStoryFromSidebar(key) {
+  const s = state.stories[key];
+  if(!s) return;
+  if(typeof s.qId === 'number') {
+    loadQuestion(s.qId);
+  } else {
+    currentQId = key;
+    document.getElementById('q-sel').value = '';
+    document.getElementById('custom-q-wrap').style.display = 'block';
+    document.getElementById('custom-q').value = s.question;
+    document.getElementById('ta-S').value = s.situation||'';
+    document.getElementById('ta-T').value = s.task||'';
+    document.getElementById('ta-A').value = s.action||'';
+    document.getElementById('ta-R').value = s.result||'';
+    document.getElementById('tag-theme').value = s.theme||'Leadership';
+    document.getElementById('tag-diff').value = s.difficulty||'Medium';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    ['S','T','A','R'].forEach(sec=>updateWC(sec));
+  }
+  renderSidebar();
+}
+
+// ======================== COMPANY CUSTOMIZER ========================
+function showCompanyTips() {
+  const company = document.getElementById('company-sel').value;
+  const box = document.getElementById('company-tips-box');
+  const lpMapper = document.getElementById('lp-mapper');
+
+  if(!company) { box.classList.remove('open'); lpMapper.style.display='none'; return; }
+
+  const ct = COMPANY_TIPS[company];
+  box.classList.add('open');
+  box.innerHTML = `<div style="font-size:.82rem;font-weight:700;color:${ct.color};margin-bottom:8px">${ct.label}</div>`
+    + ct.tips.map(t=>`<div class="tip-bullet">${esc(t)}</div>`).join('');
+
+  if(company === 'Amazon') {
+    lpMapper.style.display = 'block';
+    const saved = currentQId && state.stories[currentQId] ? (state.stories[currentQId].lpTags||[]) : [];
+    renderLPCheckboxes(saved);
+  } else {
+    lpMapper.style.display = 'none';
+  }
+}
+
+function renderLPCheckboxes(checked=[]) {
+  const el = document.getElementById('lp-checkboxes');
+  el.innerHTML = LPS.map(lp=>{
+    const isChecked = checked.includes(lp.name);
+    return `<label class="lp-check ${isChecked?'checked':''}" onclick="this.classList.toggle('checked')">
+      <input type="checkbox" value="${esc(lp.name)}" ${isChecked?'checked':''}>
+      <div><div class="lp-name">${lp.name}</div><div class="lp-desc">${lp.desc}</div></div>
+    </label>`;
+  }).join('');
+}
+
+// ======================== QUESTION BANK ========================
+let bankFilters = {theme:'all', written:'all'};
+
+function setFilter(key, val, btn) {
+  bankFilters[key] = val;
+  const group = btn.parentElement.querySelectorAll('.filter-btn');
+  group.forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const companyF = document.getElementById('company-filter').value;
+  let qs = QUESTIONS;
+  if(bankFilters.theme !== 'all') qs = qs.filter(q=>q.theme===bankFilters.theme);
+  if(companyF) qs = qs.filter(q=>q.companies.includes(companyF));
+  if(bankFilters.written === 'yes') qs = qs.filter(q=>!!state.stories[q.id]);
+  if(bankFilters.written === 'no') qs = qs.filter(q=>!state.stories[q.id]);
+  renderQCards(qs);
+  updateBankProgress();
+}
+
+function renderQCards(qs) {
+  const el = document.getElementById('q-bank-list');
+  if(!qs.length) { el.innerHTML='<div style="color:var(--sub);text-align:center;padding:30px">No questions match filters.</div>'; return; }
+  const themeColors = {Leadership:'b-blue',Conflict:'b-red','Problem Solving':'b-orange',Growth:'b-teal',Achievement:'b-green'};
+  el.innerHTML = qs.map(q=>{
+    const written = !!state.stories[q.id];
+    return `<div class="q-card ${written?'q-written':''}">
+      <div class="q-num">Q${q.id} · ${q.theme}${written?' ✓':''}</div>
+      <div class="q-text">${esc(q.q)}</div>
+      <div class="q-tags">
+        <span class="badge ${themeColors[q.theme]||'b-gray'}">${q.theme}</span>
+        ${q.companies.map(c=>`<span class="badge ${companyBadgeClass(c)}">${c}</span>`).join('')}
+        ${q.lps.slice(0,2).map(lp=>`<span class="badge b-orange" style="font-size:.64rem">${lp}</span>`).join('')}
+      </div>
+      <div class="q-actions">
+        <button class="btn btn-primary btn-sm" onclick="goWriteStory(${q.id})">✍️ Write Story</button>
+        ${written ? `<button class="btn btn-green btn-sm" onclick="goViewStory(${q.id})">👁 View Story</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateBankProgress() {
+  const written = QUESTIONS.filter(q=>!!state.stories[q.id]).length;
+  const pct = Math.round(written/50*100);
+  document.getElementById('bank-progress-text').textContent = `${written} / 50 questions with stories`;
+  document.getElementById('bank-pct').textContent = pct+'%';
+  document.getElementById('bank-progress-bar').style.width = pct+'%';
+}
+
+function goWriteStory(qId) {
+  switchTab('builder');
+  loadQuestion(qId);
+}
+
+function goViewStory(qId) {
+  switchTab('builder');
+  loadQuestion(qId);
+}
+
+function renderBank() {
+  applyFilters();
+  renderLPPanel();
+}
+
+function toggleLPPanel() {
+  const body = document.getElementById('lp-panel-body');
+  const arrow = document.getElementById('lp-arrow');
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open') ? '▴' : '▾';
+}
+
+function renderLPPanel() {
+  document.getElementById('lp-panel-body').innerHTML = LPS.map(lp=>`
+    <div class="lp-ref-item">
+      <span class="lp-ref-name">${lp.name}</span>
+      <span class="lp-ref-desc"> — ${lp.desc}</span>
+    </div>`).join('');
+}
+
+function companyBadgeClass(c) {
+  return {Google:'cg',Meta:'cm',Amazon:'ca',Apple:'cap',Netflix:'cn',Microsoft:'cms'}[c]||'b-gray';
+}
+
+// ======================== PREP SHEET ========================
+function renderPrep() {
+  renderCompanyReadiness();
+  renderStoryGaps();
+  renderStoryLibrary();
+}
+
+function renderCompanyReadiness() {
+  const el = document.getElementById('company-readiness');
+  const companies = ['Google','Meta','Amazon','Apple','Netflix','Microsoft'];
+  el.innerHTML = companies.map(c=>{
+    const total = COMPANY_COVERAGE[c];
+    const covered = QUESTIONS.filter(q=>q.companies.includes(c) && !!state.stories[q.id]).length;
+    const pct = Math.round(covered/total*100);
+    const color = pct>=80?'var(--green)':pct>=50?'var(--yellow)':'var(--red)';
+    return `<div class="cr-card">
+      <div class="cr-name"><span class="badge ${companyBadgeClass(c)}">${c}</span></div>
+      <div class="cr-score" style="color:${color}">${covered}</div>
+      <div class="cr-total">of ${total} key questions</div>
+      <div class="progress-wrap" style="margin-top:6px"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderStoryGaps() {
+  const el = document.getElementById('story-gaps');
+  const themes = ['Leadership','Conflict','Problem Solving','Growth','Achievement'];
+  const counts = {};
+  themes.forEach(t=>{ counts[t] = QUESTIONS.filter(q=>q.theme===t && !!state.stories[q.id]).length; });
+  const total = QUESTIONS.filter(q=>!!state.stories[q.id]).length;
+
+  const themeTotal = {Leadership:10,Conflict:10,'Problem Solving':10,Growth:10,Achievement:10};
+  const sortedGaps = themes.sort((a,b)=>counts[a]-counts[b]);
+
+  const top5 = QUESTIONS.filter(q=>!state.stories[q.id])
+    .sort((a,b)=>{
+      const ga=counts[a.theme]||0, gb=counts[b.theme]||0;
+      return ga-gb;
+    }).slice(0,5);
+
+  el.innerHTML = `
+    <div style="margin-bottom:12px">
+      ${sortedGaps.map(t=>{
+        const cnt=counts[t], tot=themeTotal[t];
+        const pct=Math.round(cnt/tot*100);
+        const color=cnt===0?'var(--red)':cnt<tot/2?'var(--yellow)':'var(--green)';
+        return `<div class="gap-row">
+          <span style="width:160px;font-size:.82rem;font-weight:600">${t}</span>
+          <div style="flex:1"><div class="progress-wrap" style="margin:0"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div></div>
+          <span style="font-size:.8rem;color:${color};font-weight:700;width:60px;text-align:right">${cnt}/${tot}</span>
+          ${cnt===0?'<span class="badge b-red">⚠️ None</span>':''}
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="font-size:.82rem;font-weight:700;margin-bottom:8px;color:var(--accent2)">🎯 Top 5 questions to write next:</div>
+    ${top5.map((q,i)=>`<div style="padding:5px 0;font-size:.82rem;border-bottom:1px solid var(--border)">
+      <span style="color:var(--sub);margin-right:6px">${i+1}.</span>
+      <span style="cursor:pointer;color:var(--accent2)" onclick="goWriteStory(${q.id})">${esc(q.q)}</span>
+      <span class="badge b-gray" style="margin-left:4px">${q.theme}</span>
+    </div>`).join('')}`;
+}
+
+function renderStoryLibrary() {
+  const el = document.getElementById('story-library');
+  const keys = Object.keys(state.stories);
+  document.getElementById('lib-count').textContent = `(${keys.length} stories)`;
+  if(!keys.length) { el.innerHTML='<div style="color:var(--sub);font-size:.82rem">No stories saved yet.</div>'; return; }
+
+  el.innerHTML = keys.map(k=>{
+    const s = state.stories[k];
+    const wc = countWords((s.situation||'')+(s.task||'')+(s.action||'')+(s.result||''));
+    const secs = Math.round(wc/130*60);
+    return `<div class="story-card-full">
+      <div class="story-card-hdr" onclick="toggleStoryCard('${k}')">
+        <div style="flex:1">
+          <div style="font-size:.88rem;font-weight:600;margin-bottom:4px">${esc(s.question)}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            <span class="badge b-purple">${s.theme||''}</span>
+            ${(s.companies||[]).map(c=>`<span class="badge ${companyBadgeClass(c)}">${c}</span>`).join('')}
+            <span class="badge b-gray">${wc} words · ~${formatSecs(secs)}</span>
+          </div>
+        </div>
+        <span style="color:var(--sub);flex-shrink:0;margin-left:8px">▾</span>
+      </div>
+      <div class="story-card-body" id="scb-${k}">
+        ${starSection('Situation',s.situation)}
+        ${starSection('Task',s.task)}
+        ${starSection('Action',s.action)}
+        ${starSection('Result',s.result)}
+        ${s.lpTags&&s.lpTags.length ? `<div style="margin-top:8px;font-size:.75rem;color:var(--sub)">LPs: ${s.lpTags.join(', ')}</div>` : ''}
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-ghost btn-sm" onclick="goWriteStory(${typeof s.qId==='number'?s.qId:0})">✏️ Edit</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function starSection(label, text) {
+  if(!text) return '';
+  return `<div class="star-section">
+    <div class="star-section-label">${label}</div>
+    <div class="star-section-text">${esc(text)}</div>
+  </div>`;
+}
+
+function toggleStoryCard(key) {
+  const body = document.getElementById('scb-'+key);
+  body.classList.toggle('open');
+}
+
+// ======================== EXPORT ========================
+let exportText = '';
+
+function generateExport() {
+  const keys = Object.keys(state.stories);
+  if(!keys.length) { toast('No stories to export!'); return; }
+  const lines = [`=== MY FAANG BEHAVIORAL PREP SHEET ===`,`Generated: ${new Date().toLocaleDateString()}`,`Total stories: ${keys.length} / 50`,``,`${'─'.repeat(60)}`];
+  const themes = ['Leadership','Conflict','Problem Solving','Growth','Achievement'];
+  themes.forEach(theme => {
+    const themed = keys.filter(k=>(state.stories[k].theme||'') === theme);
+    if(!themed.length) return;
+    lines.push(``,`[THEME: ${theme.toUpperCase()}]`,`${'─'.repeat(60)}`);
+    themed.forEach(k=>{
+      const s = state.stories[k];
+      lines.push(`Q: ${s.question}`,``,
+        `SITUATION:`,s.situation||'(not filled)',``,
+        `TASK:`,s.task||'(not filled)',``,
+        `ACTION:`,s.action||'(not filled)',``,
+        `RESULT:`,s.result||'(not filled)',``);
+      if(s.companies&&s.companies.length) lines.push(`Companies: ${s.companies.join(', ')}`);
+      if(s.lpTags&&s.lpTags.length) lines.push(`Amazon LPs: ${s.lpTags.join(', ')}`);
+      lines.push(`${'─'.repeat(40)}`);
+    });
+  });
+  exportText = lines.join('\n');
+  const preview = document.getElementById('export-preview');
+  preview.style.display = 'block';
+  preview.textContent = exportText;
+  toast('Export generated!');
+}
+
+function copyExport() {
+  if(!exportText) { generateExport(); }
+  navigator.clipboard.writeText(exportText).then(()=>toast('Copied to clipboard! 📋')).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=exportText;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); toast('Copied!');
+  });
+}
+
+function downloadExport() {
+  if(!exportText) generateExport();
+  const a=document.createElement('a');
+  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(exportText);
+  a.download='behavioral-prep-sheet.txt'; a.click();
+}
+
+// ======================== MOCK INTERVIEW ========================
+function startMock() {
+  const company = document.getElementById('mock-company').value;
+  const countSel = document.getElementById('mock-count').value;
+  let qs = QUESTIONS.filter(q=>!!state.stories[q.id]);
+  if(company) qs = qs.filter(q=>q.companies.includes(company));
+  if(!qs.length) { toast('No stories written yet for '+( company||'any company')+'!'); return; }
+
+  qs = qs.sort(()=>Math.random()-0.5);
+  const count = countSel==='all' ? qs.length : Math.min(parseInt(countSel),qs.length);
+  qs = qs.slice(0,count);
+
+  mockSession = { company, questions:qs, current:0, ratings:{}, timerSecs:0 };
+
+  document.getElementById('mock-setup-panel').style.display = 'none';
+  document.getElementById('mock-active-panel').style.display = 'block';
+  document.getElementById('mock-summary-panel').style.display = 'none';
+  showMockQuestion();
+}
+
+function showMockQuestion() {
+  const q = mockSession.questions[mockSession.current];
+  const total = mockSession.questions.length;
+  document.getElementById('mock-progress-label').textContent = `Q${mockSession.current+1} of ${total}`;
+  document.getElementById('mock-progress-bar').style.width = (mockSession.current/total*100)+'%';
+  document.getElementById('mock-q-text').textContent = q.q;
+  document.getElementById('mock-story-preview').style.display = 'none';
+  document.getElementById('preview-toggle-btn').textContent = '👁 Show My Story';
+
+  // Reset timer
+  mockSession.timerSecs = 0;
+  clearInterval(mockTimerInterval);
+  updateMockTimer();
+  mockTimerInterval = setInterval(()=>{ mockSession.timerSecs++; updateMockTimer(); }, 1000);
+}
+
+function updateMockTimer() {
+  const s = mockSession.timerSecs;
+  document.getElementById('mock-timer').textContent = Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;
+}
+
+function toggleStoryPreview() {
+  const q = mockSession.questions[mockSession.current];
+  const s = state.stories[q.id];
+  const preview = document.getElementById('mock-story-preview');
+  const btn = document.getElementById('preview-toggle-btn');
+  if(preview.style.display === 'none') {
+    preview.style.display = 'block';
+    btn.textContent = '🙈 Hide Story';
+    preview.innerHTML = s ? [
+      s.situation && `<b>S:</b> ${esc(s.situation)}`,
+      s.task && `<b>T:</b> ${esc(s.task)}`,
+      s.action && `<b>A:</b> ${esc(s.action)}`,
+      s.result && `<b>R:</b> ${esc(s.result)}`
+    ].filter(Boolean).join('<br><br>') : 'No story saved.';
+  } else {
+    preview.style.display = 'none';
+    btn.textContent = '👁 Show My Story';
+  }
+}
+
+function rateMock(rating) {
+  const q = mockSession.questions[mockSession.current];
+  mockSession.ratings[q.id] = rating;
+  clearInterval(mockTimerInterval);
+  mockSession.current++;
+  if(mockSession.current >= mockSession.questions.length) {
+    showMockSummary();
+  } else {
+    showMockQuestion();
+  }
+}
+
+function showMockSummary() {
+  document.getElementById('mock-active-panel').style.display = 'none';
+  document.getElementById('mock-summary-panel').style.display = 'block';
+  const ratings = mockSession.ratings;
+  const hard = Object.entries(ratings).filter(([,r])=>r==='Hard').map(([id])=>QUESTIONS.find(q=>q.id==id));
+  const med = Object.entries(ratings).filter(([,r])=>r==='Medium').map(([id])=>QUESTIONS.find(q=>q.id==id));
+  const easy = Object.entries(ratings).filter(([,r])=>r==='Easy').map(([id])=>QUESTIONS.find(q=>q.id==id));
+
+  let html = `<div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">
+    <div style="text-align:center"><div style="font-size:1.6rem;font-weight:800;color:var(--green)">${easy.length}</div><div style="font-size:.78rem;color:var(--sub)">Easy 😊</div></div>
+    <div style="text-align:center"><div style="font-size:1.6rem;font-weight:800;color:var(--yellow)">${med.length}</div><div style="font-size:.78rem;color:var(--sub)">Medium 😐</div></div>
+    <div style="text-align:center"><div style="font-size:1.6rem;font-weight:800;color:var(--red)">${hard.length}</div><div style="font-size:.78rem;color:var(--sub)">Hard 😓</div></div>
+  </div>`;
+  if(hard.length) {
+    html += `<div style="font-size:.84rem;font-weight:700;color:var(--red);margin-bottom:6px">⚠️ Needs work — revise these stories:</div>`;
+    html += hard.map(q=>q?`<div style="padding:6px 0;font-size:.82rem;border-bottom:1px solid var(--border)">
+      <span style="cursor:pointer;color:var(--accent2)" onclick="goWriteStory(${q.id})">${esc(q.q)}</span>
+    </div>`:'').join('');
+  }
+  document.getElementById('mock-summary-body').innerHTML = html;
+}
+
+function endMock() { if(!confirm('End session?')) return; clearInterval(mockTimerInterval); showMockSummary(); }
+
+function resetMock() {
+  clearInterval(mockTimerInterval); mockSession = null;
+  document.getElementById('mock-setup-panel').style.display = 'block';
+  document.getElementById('mock-active-panel').style.display = 'none';
+  document.getElementById('mock-summary-panel').style.display = 'none';
+}
+
+// ======================== UTILS ========================
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ======================== INIT ========================
+loadState();
+populateQSel();
+renderSidebar();
+['S','T','A','R'].forEach(sec=>updateWC(sec));
+</script>
 </body>
 </html>
