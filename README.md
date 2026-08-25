@@ -9,6 +9,14 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 
 ---
 
+## 📸 Live Demo
+
+![100 AI Agents — live site preview](assets/demo.png)
+
+**🔴 Live:** [hhanng.github.io](https://hhanng.github.io) — browse all 120 agents by category, filter, and launch any one with a click.
+
+---
+
 ## 🤖 100 ai agents challenge
 
 > *building one AI agent a day until i hit 100. wish me luck lol*
