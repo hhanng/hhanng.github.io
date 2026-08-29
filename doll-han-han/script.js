@@ -8,7 +8,7 @@
   var coarse = window.matchMedia('(pointer: coarse)').matches;
 
   /* ---------- elements ---------- */
-  var doll    = document.getElementById('doll');
+  var doll    = document.getElementById('dollFig') || document.getElementById('doll');
   var dollImg = document.getElementById('dollImg');
   var pupilL  = document.getElementById('pupilL');
   var pupilR  = document.getElementById('pupilR');
@@ -33,9 +33,9 @@
     tgt.ry = clamp(ox * SENS, -8, 8);
     tgt.rx = clamp(-oy * SENS, -6, 6);
 
-    var maxR = clamp(r.height * 0.005, 1.5, 4);
-    var elx = eyePx('l-x', 'x', r), ely = eyePx('l-y', 'y', r);
-    var erx = eyePx('r-x', 'x', r), ery = eyePx('r-y', 'y', r);
+    var maxR = clamp(r.height * 0.011, 4, 9);   /* .eye clip stops any escape */
+    var elx = eyePx('l-cx', 'x', r), ely = eyePx('l-cy', 'y', r);
+    var erx = eyePx('r-cx', 'x', r), ery = eyePx('r-cy', 'y', r);
     var al = Math.atan2(cy - ely, cx - elx);
     var ar = Math.atan2(cy - ery, cx - erx);
     tgt.px = { l: Math.cos(al) * maxR, r: Math.cos(ar) * maxR };
@@ -45,7 +45,7 @@
   function setTargetsIdle(dt) {
     idleT += dt;
     var r = doll.getBoundingClientRect();
-    var maxR = clamp(r.height * 0.005, 1.5, 4);
+    var maxR = clamp(r.height * 0.011, 4, 9);
     tgt.ry = Math.sin(idleT * 0.7) * 4.5;
     tgt.rx = Math.sin(idleT * 1.4) * 2.6;          // sin(2t) -> figure-8
     var a = idleT * 0.8;
