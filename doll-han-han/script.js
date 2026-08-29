@@ -33,7 +33,7 @@
     tgt.ry = clamp(ox * SENS, -8, 8);
     tgt.rx = clamp(-oy * SENS, -6, 6);
 
-    var maxR = clamp(r.height * 0.011, 4, 9);   /* .eye clip stops any escape */
+    var maxR = clamp(r.height * 0.011, 4, 9);
     var elx = eyePx('l-cx', 'x', r), ely = eyePx('l-cy', 'y', r);
     var erx = eyePx('r-cx', 'x', r), ery = eyePx('r-cy', 'y', r);
     var al = Math.atan2(cy - ely, cx - elx);

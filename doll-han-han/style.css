@@ -15,18 +15,18 @@
   --sans:    'Poppins', system-ui, -apple-system, sans-serif;
   --display: 'Poppins', system-ui, sans-serif;
 
-  /* Eye calibration for assets/doll.webp (transparent cut-out).
+  /* Eye calibration for assets/doll.jpg (1:1 crop, grey backdrop).
      --eye-*-c{x,y} = centre of each eye-WHITE, % of the .doll__fig box.
      --eye-w/h      = eye-white box size (the clip window).
      The render already gazes to the viewer's right, so the pupil RESTS
      off-centre (--pupil-rest-*) and the cursor nudges it from there;
      the .eye clip guarantees it never leaves the white. */
-  --eye-l-cx: 37.6%;   --eye-l-cy: 36.2%;
-  --eye-r-cx: 61.4%;   --eye-r-cy: 35.7%;
-  --eye-w: 14%;        --eye-h: 9.5%;
+  --eye-l-cx: 40.5%;   --eye-l-cy: 40.5%;
+  --eye-r-cx: 59%;     --eye-r-cy: 40%;
+  --eye-w: 13%;        --eye-h: 8.5%;
 
-  --iris-size: clamp(15px, 4.7vh, 45px);
-  --pupil-rest-x: 61%;   --pupil-rest-y: 50%;
+  --iris-size: clamp(13px, 4.2vh, 40px);
+  --pupil-rest-x: 60%;   --pupil-rest-y: 50%;
 }
 
 * { box-sizing: border-box; }
@@ -55,40 +55,34 @@ body {
 /* ---------- one-screen stage ---------- */
 .stage { position: fixed; inset: 0; overflow: hidden; }
 
-/* ---------- centre: the avatar, standing at the bottom ---------- */
+/* ---------- centre: the avatar (square card) ---------- */
 .doll {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: min(94vh, 1060px);
+  inset: 0;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  padding-left: min(13vw, 190px);          /* nudge clear of the bottom-left headline */
-  z-index: 1;
-  pointer-events: none;
 }
 .doll__fig {
   position: relative;
-  width: clamp(320px, 42vw, 720px);       /* width-driven so no letterbox */
-  aspect-ratio: 820 / 837;              /* matches assets/doll.webp */
-  max-height: 100%;
+  width: clamp(260px, 78vmin, 900px);
+  height: clamp(260px, 78vmin, 900px);
+  aspect-ratio: 1 / 1;
   will-change: transform;
 }
 .doll__img {
   display: block;
   height: 100%;
   width: 100%;
-  object-fit: contain;
-  object-position: bottom center;
-  transform: perspective(1000px);         /* JS updates rotateX/rotateY */
-  transition: transform 70ms linear;
-  filter: drop-shadow(0 24px 34px rgba(23, 24, 27, 0.18));
+  object-fit: cover;
+  object-position: center 42%;
+  border-radius: clamp(22px, 3vw, 44px);
+  transform: perspective(900px);          /* JS updates rotateX/rotateY */
+  transition: transform 60ms linear;
+  box-shadow: 0 34px 60px -24px rgba(23, 24, 27, 0.32);
   -webkit-user-drag: none;
   user-select: none;
 }
-
 /* pupil overlay: a small brown iris-dot that moves WITHIN a clip shaped
    like the eye-white, so it can never escape the eye. */
 .eye {
@@ -132,7 +126,7 @@ body {
   left: clamp(18px, 4.5vw, 72px);
   bottom: clamp(18px, 6vh, 68px);
   max-width: min(40vw, 520px);
-  z-index: 4;
+  z-index: 2;
 }
 .intro__eyebrow {
   margin: 0 0 10px;
@@ -150,7 +144,7 @@ body {
   line-height: 0.92;
   letter-spacing: -0.045em;
   color: var(--ink);
-  text-shadow: 0 0 14px var(--bg-0), 0 0 5px var(--bg-0), 0 2px 3px rgba(238, 240, 242, 0.9);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .intro__text {
   margin: 16px 0 0;
@@ -163,7 +157,6 @@ body {
 
 /* ---------- bottom-right: dock ---------- */
 .dock {
-  z-index: 4;
   position: absolute;
   right: clamp(16px, 4vw, 60px);
   bottom: clamp(16px, 4vh, 56px);
@@ -218,7 +211,6 @@ body {
 
 /* ---------- top-left teaser ---------- */
 .view-all {
-  z-index: 4;
   position: absolute;
   left: clamp(16px, 4vw, 60px);
   top: clamp(16px, 4vh, 44px);
@@ -237,7 +229,6 @@ body {
 
 /* ---------- top-right: other versions ---------- */
 .versions {
-  z-index: 4;
   position: absolute;
   right: clamp(16px, 4vw, 60px);
   top: clamp(16px, 4vh, 44px);
@@ -428,8 +419,8 @@ body {
   }
   .view-all, .versions { position: static; align-self: center; }
   .versions { order: 5; }
-  .doll { position: static; transform: none; height: auto; display: block; order: 1; padding-left: 0; pointer-events: auto; }
-  .doll__fig { width: min(84vw, 330px); height: auto; margin: 0 auto; }
+  .doll { position: static; height: auto; display: block; order: 1; }
+  .doll__fig { width: min(84vw, 340px); height: auto; margin: 0 auto; }
   .doll__img { transform: none !important; }
   .eye { display: none; }   /* no cursor on touch — leave the render's own eyes */
   .intro { position: static; max-width: 520px; width: 100%; text-align: center; order: 2; backdrop-filter: none; }
