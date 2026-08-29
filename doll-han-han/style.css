@@ -15,15 +15,15 @@
   --sans:    'Poppins', system-ui, -apple-system, sans-serif;
   --display: 'Poppins', system-ui, sans-serif;
 
-  /* Eye-centre positions as a % of the doll image box.
-     Defaults match assets/doll-placeholder.svg (the 3D-cartoon
-     placeholder) — RE-TUNE after dropping in the real avatar
-     at assets/doll.png. */
-  --eye-l-x: 40%;   --eye-l-y: 49%;
-  --eye-r-x: 60%;   --eye-r-y: 49%;
+  /* Pupil-overlay REST positions as a % of the doll image box
+     (assets/doll.jpg, a 1:1 crop). Tuned to sit on the pupils in the
+     render — which already gaze to the viewer's right — so "no cursor"
+     == that gaze. The cursor offset (script.js) is added on top. */
+  --eye-l-x: 40%;   --eye-l-y: 45%;
+  --eye-r-x: 59%;   --eye-r-y: 44.5%;
 
-  --pupil-size: clamp(6px, 1.7vh, 15px);
-  --pupil-travel: clamp(2px, 0.7vh, 6px);
+  --pupil-size: clamp(6px, 1.6vh, 15px);
+  --pupil-travel: clamp(1px, 0.32vh, 3px);
 }
 
 * { box-sizing: border-box; }
@@ -52,70 +52,77 @@ body {
 /* ---------- one-screen stage ---------- */
 .stage { position: fixed; inset: 0; overflow: hidden; }
 
-/* ---------- centre: the avatar ---------- */
+/* ---------- centre: the avatar (square, landscape-friendly) ---------- */
 .doll {
   position: absolute;
   left: 50%;
-  top: 48%;
+  top: 50%;
   transform: translate(-50%, -50%);
-  height: clamp(300px, 82dvh, 940px);
-  aspect-ratio: 5 / 6;
+  height: clamp(260px, 78vmin, 900px);
+  width: clamp(260px, 78vmin, 900px);
+  aspect-ratio: 1 / 1;
   will-change: transform;
 }
 .doll__img {
   display: block;
   height: 100%;
   width: 100%;
-  object-fit: contain;
-  transform: perspective(800px);          /* JS updates rotateX/rotateY */
+  object-fit: cover;
+  object-position: center 42%;
+  border-radius: clamp(22px, 3vw, 44px);
+  transform: perspective(900px);          /* JS updates rotateX/rotateY */
   transition: transform 60ms linear;
-  filter: drop-shadow(0 26px 46px rgba(23, 24, 27, 0.22));
+  box-shadow: 0 34px 60px -24px rgba(23, 24, 27, 0.32);
   -webkit-user-drag: none;
   user-select: none;
 }
+/* The render already has painted eyes; this overlay is a small dark
+   disc sitting dead-on the painted pupil. At rest it just deepens it
+   (invisible); the cursor nudges it 1-3px for a micro-glance. */
 .pupil {
   position: absolute;
   width: var(--pupil-size);
   height: var(--pupil-size);
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 30%, #55585d, #17181b 72%);
+  background: radial-gradient(circle at 42% 38%, #2a1d12, #0d0904 70%);
   transform: translate(-50%, -50%);       /* JS adds tracking offset */
   pointer-events: none;
 }
 .pupil--l { left: var(--eye-l-x); top: var(--eye-l-y); }
 .pupil--r { left: var(--eye-r-x); top: var(--eye-r-y); }
 
-/* ---------- bottom-left: hero headline (reel-style, no card) ---------- */
+/* ---------- left column: hero headline (reel-style, no card) ---------- */
 .intro {
   position: absolute;
-  left: clamp(16px, 4.5vw, 64px);
-  bottom: clamp(16px, 5vh, 60px);
-  max-width: min(48vw, 560px);
+  left: clamp(18px, 4.5vw, 72px);
+  bottom: clamp(18px, 6vh, 68px);
+  max-width: min(40vw, 520px);
+  z-index: 2;
 }
 .intro__eyebrow {
-  margin: 0 0 8px;
-  font-size: clamp(0.62rem, 0.9vw, 0.74rem);
+  margin: 0 0 10px;
+  font-size: clamp(0.6rem, 0.85vw, 0.76rem);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   color: var(--muted);
 }
 .intro__name {
   margin: 0;
   font-family: var(--display);
   font-weight: 800;
-  font-size: clamp(2.1rem, 5.4vw, 4.4rem);
-  line-height: 0.95;
-  letter-spacing: -0.04em;
+  font-size: clamp(2.3rem, 6vw, 5.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
   color: var(--ink);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .intro__text {
-  margin: 14px 0 0;
-  max-width: 30ch;
-  font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+  margin: 16px 0 0;
+  max-width: 32ch;
+  font-size: clamp(0.8rem, 1.05vw, 0.95rem);
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--muted);
 }
 

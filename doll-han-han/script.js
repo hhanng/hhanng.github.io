@@ -33,7 +33,7 @@
     tgt.ry = clamp(ox * SENS, -8, 8);
     tgt.rx = clamp(-oy * SENS, -6, 6);
 
-    var maxR = clamp(r.height * 0.008, 3, 6);
+    var maxR = clamp(r.height * 0.005, 1.5, 4);
     var elx = eyePx('l-x', 'x', r), ely = eyePx('l-y', 'y', r);
     var erx = eyePx('r-x', 'x', r), ery = eyePx('r-y', 'y', r);
     var al = Math.atan2(cy - ely, cx - elx);
@@ -45,7 +45,7 @@
   function setTargetsIdle(dt) {
     idleT += dt;
     var r = doll.getBoundingClientRect();
-    var maxR = clamp(r.height * 0.008, 3, 6);
+    var maxR = clamp(r.height * 0.005, 1.5, 4);
     tgt.ry = Math.sin(idleT * 0.7) * 4.5;
     tgt.rx = Math.sin(idleT * 1.4) * 2.6;          // sin(2t) -> figure-8
     var a = idleT * 0.8;

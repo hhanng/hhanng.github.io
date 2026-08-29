@@ -244,4 +244,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-08-28 · 120 agents built · latest: #120 System Design Deep Dive Library: ./100-ai-agents/study-cs-tools/agent-120-system-design-library/</sub>
+<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-08-29 · 120 agents built · latest: #120 System Design Deep Dive Library: ./100-ai-agents/study-cs-tools/agent-120-system-design-library/</sub>
