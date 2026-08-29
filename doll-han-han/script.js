@@ -10,21 +10,13 @@
   /* ---------- elements ---------- */
   var doll    = document.getElementById('dollFig') || document.getElementById('doll');
   var dollImg = document.getElementById('dollImg');
-  var pupilL  = document.getElementById('pupilL');
-  var pupilR  = document.getElementById('pupilR');
-  var rootCS  = getComputedStyle(document.documentElement);
 
-  /* ---------- cursor-reactive doll ---------- */
+  /* ---------- cursor-reactive head tilt ---------- */
   var SENS = 0.022;                 // px offset -> deg
-  var cur  = { rx: 0, ry: 0, px: 0, py: 0 };
-  var tgt  = { rx: 0, ry: 0, px: 0, py: 0 };
+  var cur  = { rx: 0, ry: 0 };
+  var tgt  = { rx: 0, ry: 0 };
   var lastMove = 0;
   var idleT = 0;
-
-  function eyePx(varName, axis, rect) {
-    var pct = parseFloat(rootCS.getPropertyValue('--eye-' + varName)) / 100;
-    return axis === 'x' ? rect.left + rect.width * pct : rect.top + rect.height * pct;
-  }
 
   function setTargetsFromCursor(cx, cy) {
     var r = doll.getBoundingClientRect();
@@ -32,25 +24,12 @@
     var oy = cy - (r.top + r.height / 2);
     tgt.ry = clamp(ox * SENS, -8, 8);
     tgt.rx = clamp(-oy * SENS, -6, 6);
-
-    var maxR = clamp(r.height * 0.011, 4, 9);
-    var elx = eyePx('l-cx', 'x', r), ely = eyePx('l-cy', 'y', r);
-    var erx = eyePx('r-cx', 'x', r), ery = eyePx('r-cy', 'y', r);
-    var al = Math.atan2(cy - ely, cx - elx);
-    var ar = Math.atan2(cy - ery, cx - erx);
-    tgt.px = { l: Math.cos(al) * maxR, r: Math.cos(ar) * maxR };
-    tgt.py = { l: Math.sin(al) * maxR, r: Math.sin(ar) * maxR };
   }
 
   function setTargetsIdle(dt) {
     idleT += dt;
-    var r = doll.getBoundingClientRect();
-    var maxR = clamp(r.height * 0.011, 4, 9);
     tgt.ry = Math.sin(idleT * 0.7) * 4.5;
     tgt.rx = Math.sin(idleT * 1.4) * 2.6;          // sin(2t) -> figure-8
-    var a = idleT * 0.8;
-    tgt.px = { l: Math.cos(a) * maxR * 0.7, r: Math.cos(a) * maxR * 0.7 };
-    tgt.py = { l: Math.sin(a * 2) * maxR * 0.7, r: Math.sin(a * 2) * maxR * 0.7 };
   }
 
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
@@ -68,30 +47,14 @@
     var k = 0.12;
     cur.rx = lerp(cur.rx, tgt.rx, k);
     cur.ry = lerp(cur.ry, tgt.ry, k);
-    cur.px = {
-      l: lerp(cur.px.l || 0, (tgt.px.l || 0), k),
-      r: lerp(cur.px.r || 0, (tgt.px.r || 0), k)
-    };
-    cur.py = {
-      l: lerp(cur.py.l || 0, (tgt.py.l || 0), k),
-      r: lerp(cur.py.r || 0, (tgt.py.r || 0), k)
-    };
 
     dollImg.style.transform =
       'perspective(800px) rotateX(' + cur.rx.toFixed(2) + 'deg) rotateY(' + cur.ry.toFixed(2) + 'deg)';
-    pupilL.style.transform =
-      'translate(calc(-50% + ' + cur.px.l.toFixed(2) + 'px), calc(-50% + ' + cur.py.l.toFixed(2) + 'px))';
-    pupilR.style.transform =
-      'translate(calc(-50% + ' + cur.px.r.toFixed(2) + 'px), calc(-50% + ' + cur.py.r.toFixed(2) + 'px))';
 
     requestAnimationFrame(frame);
   }
 
   if (!reduce) {
-    cur.px = { l: 0, r: 0 };
-    cur.py = { l: 0, r: 0 };
-    tgt.px = { l: 0, r: 0 };
-    tgt.py = { l: 0, r: 0 };
     window.addEventListener('mousemove', function (e) {
       lastMove = performance.now();
       setTargetsFromCursor(e.clientX, e.clientY);

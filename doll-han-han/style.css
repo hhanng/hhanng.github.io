@@ -14,19 +14,6 @@
 
   --sans:    'Poppins', system-ui, -apple-system, sans-serif;
   --display: 'Poppins', system-ui, sans-serif;
-
-  /* Eye calibration for assets/doll.jpg (1:1 crop, grey backdrop).
-     --eye-*-c{x,y} = centre of each eye-WHITE, % of the .doll__fig box.
-     --eye-w/h      = eye-white box size (the clip window).
-     The render already gazes to the viewer's right, so the pupil RESTS
-     off-centre (--pupil-rest-*) and the cursor nudges it from there;
-     the .eye clip guarantees it never leaves the white. */
-  --eye-l-cx: 40.5%;   --eye-l-cy: 40.5%;
-  --eye-r-cx: 59%;     --eye-r-cy: 40%;
-  --eye-w: 13%;        --eye-h: 8.5%;
-
-  --iris-size: clamp(13px, 4.2vh, 40px);
-  --pupil-rest-x: 60%;   --pupil-rest-y: 50%;
 }
 
 * { box-sizing: border-box; }
@@ -83,43 +70,6 @@ body {
   -webkit-user-drag: none;
   user-select: none;
 }
-/* pupil overlay: a small brown iris-dot that moves WITHIN a clip shaped
-   like the eye-white, so it can never escape the eye. */
-.eye {
-  position: absolute;
-  width: var(--eye-w);
-  height: var(--eye-h);
-  transform: translate(-50%, -50%);
-  clip-path: ellipse(50% 46% at 50% 50%);
-  overflow: hidden;
-  pointer-events: none;
-}
-.eye--l { left: var(--eye-l-cx); top: var(--eye-l-cy); }
-.eye--r { left: var(--eye-r-cx); top: var(--eye-r-cy); }
-.pupil {
-  position: absolute;
-  left: var(--pupil-rest-x);
-  top: var(--pupil-rest-y);
-  width: var(--iris-size);
-  height: var(--iris-size);
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 36%, #614736 0%, #40291a 46%, #1f1109 82%);
-  mix-blend-mode: multiply;
-  opacity: 0.7;
-  transform: translate(-50%, -50%);       /* JS adds the tracking offset */
-}
-.pupil::after {                            /* soft catch-light, upper-left */
-  content: "";
-  position: absolute;
-  top: 18%;
-  left: 22%;
-  width: 22%;
-  height: 22%;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
-  filter: blur(0.5px);
-}
-
 /* ---------- left column: hero headline (reel-style, no card) ---------- */
 .intro {
   position: absolute;
@@ -422,7 +372,6 @@ body {
   .doll { position: static; height: auto; display: block; order: 1; }
   .doll__fig { width: min(84vw, 340px); height: auto; margin: 0 auto; }
   .doll__img { transform: none !important; }
-  .eye { display: none; }   /* no cursor on touch — leave the render's own eyes */
   .intro { position: static; max-width: 520px; width: 100%; text-align: center; order: 2; backdrop-filter: none; }
   .dock { position: static; width: 100%; max-width: 420px; order: 3; }
   .dock__btn { justify-content: center; }
