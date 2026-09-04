@@ -1,5 +1,7 @@
 # hi, i'm han han! ✨
 
+[![CI](https://github.com/hhanng/hhanng.github.io/actions/workflows/ci.yml/badge.svg)](https://github.com/hhanng/hhanng.github.io/actions/workflows/ci.yml)
+
 > cs student · ai builder · making things that are actually useful (and cute) 🌸
 
 I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no frameworks, just HTML + CSS + Vanilla JS + Gemini API and a lot of caffeine ☕. I also build study tools for my little sister, English apps for my mom, and websites for local businesses.
