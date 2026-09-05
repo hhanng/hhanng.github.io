@@ -7,7 +7,7 @@
 I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no frameworks, just HTML + CSS + Vanilla JS + Gemini API and a lot of caffeine ☕. I also build study tools for my little sister, English apps for my mom, and websites for local businesses.
 
 📍 Dallas, TX &nbsp;|&nbsp; 🎓 CS Student &nbsp;|&nbsp; 💌 [ngvuhhan07@gmail.com](mailto:ngvuhhan07@gmail.com)
-🌐 [hhanng.github.io](https://hhanng.github.io) &nbsp;|&nbsp; 💼 [LinkedIn](https://www.linkedin.com/in/hanhanhazel) &nbsp;|&nbsp; 🐙 [GitHub](https://github.com/hhanng)
+🌐 [vuhanhan.com](https://vuhanhan.com) &nbsp;|&nbsp; 💼 [LinkedIn](https://www.linkedin.com/in/hanhanhazel) &nbsp;|&nbsp; 🐙 [GitHub](https://github.com/hhanng)
 
 ---
 
@@ -15,7 +15,7 @@ I'm on a mission to build **100 AI-powered mini web-apps** — one at a time, no
 
 ![100 AI Agents — live site preview](assets/demo.png)
 
-**🔴 Live:** [hhanng.github.io](https://hhanng.github.io) — browse all 120 agents by category, filter, and launch any one with a click.
+**🔴 Live:** [vuhanhan.com](https://vuhanhan.com) — browse all 120 agents by category, filter, and launch any one with a click. ([hhanng.github.io](https://hhanng.github.io) still works too — it redirects here.)
 
 ---
 
@@ -235,6 +235,15 @@ for founders, indie hackers, and anyone shipping something
 
 ---
 
+## ⚙️ how it's built & deployed
+
+- **stack:** plain HTML + CSS + vanilla JS — no framework, no build step. every agent/project is just its own folder, opened directly
+- **hosting:** GitHub Pages, deployed straight from the `main` branch (classic branch-based Pages, not an Actions build) — every push to `main` goes live automatically at [vuhanhan.com](https://vuhanhan.com) (custom domain, HTTPS enforced; [hhanng.github.io](https://hhanng.github.io) redirects here)
+- **CI:** a [GitHub Actions workflow](.github/workflows/ci.yml) runs on every push and PR to `main` — checks out the repo and, once a `package.json` shows up, installs deps/builds/tests automatically; for now it's a lightweight no-op since this repo has no build step yet
+- **run it locally:** clone the repo and open `index.html` in a browser, or serve it with `npx serve .` (or `python3 -m http.server 8000`) for a proper local server
+
+---
+
 ## ✨ a note from me
 
 thanks for stopping by! 🌸 i build all of this because i genuinely love making things that help people — whether that's my mom learning English, my sister acing her quizzes, or CS students like me trying to land their first internship.
@@ -246,4 +255,4 @@ everything here is open source and free to use. if something helps you, that gen
 &nbsp;
 
 ---
-<sub>📍 live site: <a href="https://hhanng.github.io">hhanng.github.io</a> · last updated: 2026-09-01 · 120 agents built · latest: #120 System Design Deep Dive Library: ./100-ai-agents/study-cs-tools/agent-120-system-design-library/</sub>
+<sub>📍 live site: <a href="https://vuhanhan.com">vuhanhan.com</a> · last updated: 2026-09-01 · 120 agents built · latest: #120 System Design Deep Dive Library: ./100-ai-agents/study-cs-tools/agent-120-system-design-library/</sub>
