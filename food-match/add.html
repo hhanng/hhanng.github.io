@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A friend invited you to Supp · Supp</title>
+<meta name="description" content="Tap below to open Supp and add them. Your friend code is:">
+<meta property="og:title" content="A friend invited you to Supp">
+<meta property="og:description" content="Tap below to open Supp and add them. Your friend code is:">
+<link rel="stylesheet" href="_link.css">
+</head>
+<body>
+<main>
+  <p class="word">su<b>p</b>p</p>
+  <h1 id="head">A friend invited you to Supp</h1>
+  <p id="sub">Tap below to open Supp and add them. Your friend code is:</p>
+  <code class="code" id="code">······</code>
+  <a class="btn" id="open" href="#">Open Supp and add them</a>
+  <a class="btn ghost" id="get" href="https://hhanng.github.io/food-match/">Don't have Supp yet?</a>
+  <p class="fine">
+    Already in the app? Open Supp and enter the code above by hand.<br>
+    <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a>
+  </p>
+</main>
+<script>
+(function () {
+  // The code travels as ?c=ABC123. Keep it strict: only the characters a room or
+  // friend code can contain, so a junk query string can never reach the app.
+  var raw = new URLSearchParams(location.search).get('c') || '';
+  var code = raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+  var open = document.getElementById('open');
+  if (!code) {
+    document.getElementById('head').textContent = 'This link is incomplete';
+    document.getElementById('sub').textContent = 'Ask your friend to send it again.';
+    document.getElementById('code').remove();
+    open.remove();
+    return;
+  }
+  document.getElementById('code').textContent = code;
+  var deep = 'supp://add/' + code;
+  open.setAttribute('href', deep);
+  // Hand off to the app straight away when it is installed. If nothing takes the
+  // link the page simply stays put, which is the "get the app" case.
+  setTimeout(function () { location.href = deep; }, 350);
+})();
+</script>
+</body>
+</html>
